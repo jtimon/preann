@@ -46,7 +46,7 @@ Layer::~Layer()
 	if (inputs) delete[] inputs;
 	if (weighs) free(weighs);
 	//TODO averiguar por qué cojones peta aquí
-	//if (thresholds) delete[] thresholds;
+	if (thresholds) delete[] thresholds;
 	if (output) delete (output);
 }
 
@@ -153,23 +153,29 @@ Vector* Layer::getOutput()
 	return output;
 }
 
-void Layer::setSizes(unsigned totalWeighsPerOutput, unsigned ouputSize)
+void Layer::setSizes(unsigned totalWeighsPerOutput, unsigned outputSize)
 {
-	if (output != NULL){
+	if (output == NULL){
+		output = newVector(outputSize, outputType);
+		thresholds = new float[outputSize];
+	} else if (output->getSize() != outputSize) {
+
+		cout<<"Warning: a layer is changing the location of its output."<<endl;
 		delete (output);
 		delete[] thresholds;
+		output = newVector(outputSize, outputType);
+		thresholds = new float[outputSize];
 	}
-	output = newVector(ouputSize, outputType);
-	thresholds = new float[ouputSize];
 	if (totalWeighsPerOutput > 0){
 		if (inputType == FLOAT){
-			weighs = new float[ouputSize * totalWeighsPerOutput];
-			for (unsigned i=0; i < ouputSize * totalWeighsPerOutput; i++){
+
+			weighs = new float[outputSize * totalWeighsPerOutput];
+			for (unsigned i=0; i < outputSize * totalWeighsPerOutput; i++){
 				((float*)weighs)[i] = 0;
 			}
 		} else {
-			weighs = new unsigned char[ouputSize * totalWeighsPerOutput];
-			for (unsigned i=0; i < ouputSize * totalWeighsPerOutput; i++){
+			weighs = new unsigned char[outputSize * totalWeighsPerOutput];
+			for (unsigned i=0; i < outputSize * totalWeighsPerOutput; i++){
 				((unsigned char*)weighs)[i] = 128;
 			}
 		}
@@ -186,13 +192,15 @@ void Layer::resetSize()
 
 void Layer::setSize(unsigned size)
 {
-	if (inputs == NULL){
-
-		cout<<"Warning: cannot set the weighs of a Layer without inputs."<<endl;
-	}
 	unsigned auxTotalSize = 0;
-	for (unsigned i=0; i < numberInputs; i++){
-		auxTotalSize += inputs[i]->getWeighsSize();
+
+	if (inputs != NULL){
+/*
+		cout<<"Warning: cannot set the weighs of a Layer without inputs."<<endl;
+	} else {*/
+		for (unsigned i=0; i < numberInputs; i++){
+			auxTotalSize += (inputs[i])->getWeighsSize();
+		}
 	}
 	setSizes(auxTotalSize, size);
 }

@@ -116,6 +116,7 @@ extern "C" void FreeInputs(void** dev_inputs, unsigned numberInputs)
 	for (unsigned i=0; i < numberInputs; i++){
 		cudaFree(dev_inputs[i]);
 	}
+	delete[] dev_inputs;
 	checkCUDAError("Free Inputs");
 }
 

@@ -29,7 +29,6 @@ void Chronometer::stop()
 	} else {
 		end_time = clock();
 		timeInSeconds = (end_time-start_time)/(double)CLOCKS_PER_SEC;
-		cout<<"start: "<<start_time<<" end: "<<end_time<<endl;
 		start_time = -1;
 		end_time = -1;
 	}

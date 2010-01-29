@@ -284,6 +284,8 @@ void NeuralNet::addLayersConnection(unsigned  sourceLayerPos, unsigned  destinat
 	}
 	else if (destinationLayerPos > numberLayers){
 		cout<<"Error: cannot connect layer "<<destinationLayerPos<<": there are just "<<numberLayers<<" layers"<<endl;
+	} else if (sourceLayerPos == destinationLayerPos){
+		cout<<"Error: cannot connect layer "<<destinationLayerPos<<" with itself."<<endl;
 	} else {
 		layerConnectionsGraph[getPosInGraph(sourceLayerPos, destinationLayerPos)] =
 				layers[destinationLayerPos]->addInput(layers[sourceLayerPos]->getOutput());
@@ -316,7 +318,6 @@ void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, Ve
 
 void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype, unsigned floatOutputSize, unsigned bitOutputSize)
 {
-	cout<<"Creating feed-forward neural net."<<endl;
 	if (numberInputs == 0){
 		cout<<"Error: you have to specify the inputs before creating the network."<<endl;
 	} else {
@@ -414,10 +415,9 @@ void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, Ve
 			layer->setSize(bitOutputSize);
 			setLayerAsOutput(i+offset);
 		} else if (floatOutputSize == 0){
-			cout<<"The last hidden layer will be the output."<<endl;
+			//cout<<"The last hidden layer will be the output."<<endl;
 			setLayerAsOutput(i-1);
 		}
-		cout<<"Feed-forward neural net created."<<endl;
 	}
 }
 
@@ -427,7 +427,6 @@ void NeuralNet::createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers,
 }
 void NeuralNet::createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype)
 {
-	cout<<"Creating fully connected neural net."<<endl;
 	if (numberInputs == 0){
 		cout<<"Error: you have to specify the inputs before creating the network."<<endl;
 	} else {
@@ -441,7 +440,9 @@ void NeuralNet::createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers,
 				addInputConnection(j, i);
 			}
 			for(unsigned j=0; j<numLayers; j++){
-				addLayersConnection(j, i);
+				if (i != j) {
+					addLayersConnection(j, i);
+				}
 			}
 		}
 		for (unsigned i=0; i<numLayers; i++){
@@ -449,7 +450,6 @@ void NeuralNet::createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers,
 		}
 		setLayerAsOutput(numLayers-1);
 	}
-	cout<<"Fully connected neural net created."<<endl;
 }
 
 void NeuralNet::save(FILE* stream)

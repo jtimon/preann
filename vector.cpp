@@ -9,10 +9,13 @@
 
 Vector::Vector()
 {
+	cout<<"se llama al constructor no parametrizado de vector."<<endl;
+	size = 0;
+	data = NULL;
 }
 
-Vector::Vector(unsigned size, VectorType vectorType) {
-
+Vector::Vector(unsigned size, VectorType vectorType)
+{
 	this->size = size;
 	this->vectorType = vectorType;
 
@@ -35,7 +38,10 @@ Vector::Vector(unsigned size, VectorType vectorType) {
 
 Vector::~Vector()
 {
-	//if (data) free (data);
+	if (data) {
+		free (data);
+		data = NULL;
+	}
 }
 
 void* Vector::getDataPointer()
@@ -57,7 +63,6 @@ unsigned Vector::getByteSize()
 unsigned Vector::getWeighsSize()
 {
 	if (vectorType == FLOAT){
-
 		return (((size-1)/FLOATS_PER_BLOCK)+1) * FLOATS_PER_BLOCK;
 	}
 	else {

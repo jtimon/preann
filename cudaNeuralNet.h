@@ -16,6 +16,8 @@ protected:
 	void** host_inputs;
 	unsigned* host_inputSizes;
 	VectorType* host_types;
+
+	char inDevice;
 public:
 	CudaNeuralNet();
 	CudaNeuralNet(unsigned maxInputs, unsigned maxLayers, unsigned maxOutputs);

@@ -6,6 +6,7 @@ CudaNeuralNet::CudaNeuralNet():NeuralNet()
 	host_inputs = NULL;
 	host_types = NULL;
 	dev_inputs = NULL;
+	inDevice = 0;
 }
 
 CudaNeuralNet::CudaNeuralNet(unsigned  maxInputs, unsigned  maxLayers, unsigned  maxOutputs):NeuralNet(maxInputs, maxLayers, maxOutputs)
@@ -14,11 +15,15 @@ CudaNeuralNet::CudaNeuralNet(unsigned  maxInputs, unsigned  maxLayers, unsigned 
 	host_inputs = NULL;
 	host_types = NULL;
 	dev_inputs = NULL;
+	inDevice = 0;
 }
 
 CudaNeuralNet::~CudaNeuralNet()
 {
 	freeDevice();
+	delete[] host_inputs;
+	delete[] host_inputSizes;
+	delete[] host_types;
 }
 
 Layer* CudaNeuralNet::newLayer()
@@ -79,6 +84,7 @@ void CudaNeuralNet::hostToDevice(){
 		((CudaLayer*)layers[i])->setInputsInDevice(d_inputs);
 		delete[] d_inputs;
 	}
+	inDevice = 1;
 }
 
 void CudaNeuralNet::freeDevice()
@@ -90,10 +96,14 @@ void CudaNeuralNet::freeDevice()
 	for (unsigned i=0; i<numberLayers; i++){
 		((CudaLayer*)layers[i])->freeDevice();
 	}
+
+	inDevice = 0;
 }
 
 void CudaNeuralNet::calculateOutput()
 {
+	if(!inDevice) hostToDevice();
+
 	RefreshDeviceInputs(dev_inputs, host_inputs, host_inputSizes, host_types, numberInputs);
 
 	for (unsigned i=0; i < numberLayers; i++){

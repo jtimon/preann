@@ -12,10 +12,7 @@ CudaLayer::CudaLayer(VectorType inputType, VectorType outputType, FunctionType f
 
 CudaLayer::~CudaLayer()
 {
-	if (deviceLayer != NULL){
-		FreeDevice(deviceLayer);
-		delete(deviceLayer);
-	}
+	freeDevice();
 }
 
 void CudaLayer::toDevice(){
@@ -67,8 +64,9 @@ void CudaLayer::freeDevice()
 {
 	if (deviceLayer != NULL){
 		FreeDevice(deviceLayer);
+		delete(deviceLayer);
+		deviceLayer = NULL;
 	}
-	deviceLayer = NULL;
 }
 
 void CudaLayer::outputToHost()
