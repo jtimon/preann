@@ -41,7 +41,7 @@ public:
 	Layer(VectorType inputType, VectorType outputType, FunctionType functionType);
 	virtual ~Layer();
 	
-	
+	virtual void freeLayer();
 };
 
 #endif /*ABSTRACTLAYER_H_*/

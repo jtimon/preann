@@ -20,6 +20,7 @@ float testNeuralNet(NeuralNet* nn, Vector* input, unsigned times){
 		nn->calculateOutput();
 	}
 	chrono.stop();
+	nn->freeNeuralNet();
 	delete(nn);
 	delete(input);
 
@@ -56,6 +57,7 @@ try{
 
 		switch(type){
 		case 0:
+			cout<<"version float"<<endl;
 			inputType = FLOAT;
 			functionType = IDENTITY;
 			maxSize = 2048;
@@ -64,6 +66,7 @@ try{
 		    cudaTime.open ("cudaFeedForwardFloatTime.dat");
 			break;
 		case 1:
+			cout<<"version bit"<<endl;
 			inputType = BIT;
 			functionType = BINARY_STEP;
 			maxSize = 4096;
@@ -72,6 +75,7 @@ try{
 		    cudaTime.open ("cudaFeedForwardBitTime.dat");
 			break;
 		case 2:
+			cout<<"version sign"<<endl;
 			inputType = SIGN;
 			functionType = BIPOLAR_STEP;
 			maxSize = 4096;
@@ -82,8 +86,9 @@ try{
 		}
 
 		numlayers = 3;
-		times = 50;
+		times = 1;
 		for(size=32; size <= maxSize; size += 32){
+			cout<<"size: "<<size<<endl;
 			nn = new NeuralNet();
 			input = nn->newVector(size, inputType);
 			nn->addInput(input);
@@ -95,25 +100,29 @@ try{
 			delete(nn);
 			delete(input);
 			//C++
+			/*
+			cout<<"version C++"<<endl;
 			nn = new NeuralNet();
 			input = nn->newVector(size, inputType);
 			seconds = testNeuralNet(nn, input, times);
-			cTime<<size<<"  "<<seconds<<endl;
+			cTime<<size<<"  "<<seconds<<endl;*/
 			//XMM
+			cout<<"version XMM"<<endl;
 			nn = new XmmNeuralNet();
 			input = nn->newVector(size, inputType);
 			seconds = testNeuralNet(nn, input, times);
 			xmmTime<<size<<"  "<<seconds<<endl;
 			//CUDA
+			/*cout<<"version CUDA"<<endl;
 			nn = new CudaNeuralNet();
 			input = nn->newVector(size, inputType);
 			seconds = testNeuralNet(nn, input, times);
-			cudaTime<<size<<"  "<<seconds<<endl;
+			cudaTime<<size<<"  "<<seconds<<endl;*/
 		}
 		cTime.close();
 		xmmTime.close();
 		cudaTime.close();
-
+/*
 		switch(type){
 		case 0:
 			inputType = FLOAT;
@@ -173,7 +182,7 @@ try{
 		}
 		cTime.close();
 		xmmTime.close();
-		cudaTime.close();
+		cudaTime.close();*/
 	}
 
 	total.stop();

@@ -55,6 +55,7 @@ public:
 	virtual Layer* newLayer();
 	virtual Layer* newLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
 	virtual Vector* newVector(unsigned size, VectorType vectorType);
+	virtual void freeNeuralNet();
 };
 
 #endif /*NEURALNET_H_*/

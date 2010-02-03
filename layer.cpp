@@ -43,11 +43,25 @@ Layer::Layer(VectorType inputType, VectorType outputType, FunctionType functionT
 
 Layer::~Layer()
 {
-	if (inputs) delete[] inputs;
-	if (weighs) free(weighs);
-	//TODO averiguar por qué cojones peta aquí
-	if (thresholds) delete[] thresholds;
-	if (output) delete (output);
+	//TODO poner aqui lo que hay en freeLayer() y evitar que pete
+}
+
+void Layer::freeLayer()
+{
+	if (inputs) {
+		free(inputs);
+	}
+	if (weighs) {
+		free(weighs);
+	}
+	/* TODO descomentar y evitar que pete
+	if (thresholds) {
+		free(thresholds);
+	}*/
+	if (output) {
+		output->freeVector();
+		delete (output);
+	}
 }
 
 Vector* Layer::newVector(unsigned size, VectorType vectorType)
@@ -92,24 +106,19 @@ unsigned char Layer::addInput(Vector* input)
 {
 	if (input->getVectorType() == inputType) {
 
-		if (numberInputs == 0){
-			inputs = new Vector*[2];
+		Vector** newInputs = (Vector**) malloc(sizeof(Vector*) * (numberInputs + 1));
+		memcpy(newInputs, inputs, numberInputs * sizeof(Vector*));
+		newInputs[numberInputs] = input;
+		if (inputs) {
+			free(inputs);
 		}
-		if (numberInputs <= 1){
-			inputs[numberInputs] = input;
-		}
-		else {
-			Vector** newInputs = new Vector*[numberInputs + 1];
-			memcpy(newInputs, inputs, numberInputs * sizeof(Vector*));
-			newInputs[numberInputs] = input;
-			delete [] inputs;
-			inputs = newInputs;
-		}
+		inputs = newInputs;
 		numberInputs++;
 		return 1;
+	} else {
+		cout<<"Error: unexpected input type."<<endl;
+		return 0;
 	}
-	cout<<"Error: unexpected input type."<<endl;
-	return 0;
 }
 
 unsigned Layer::getNumberInputs()
@@ -155,16 +164,18 @@ Vector* Layer::getOutput()
 
 void Layer::setSizes(unsigned totalWeighsPerOutput, unsigned outputSize)
 {
-	if (output == NULL){
+	if (!output) {
 		output = newVector(outputSize, outputType);
-		thresholds = new float[outputSize];
+		thresholds = (float*) malloc(sizeof(float) * outputSize);
 	} else if (output->getSize() != outputSize) {
 
 		cout<<"Warning: a layer is changing the location of its output."<<endl;
 		delete (output);
-		delete[] thresholds;
+		if (thresholds) {
+			free(thresholds);
+		}
 		output = newVector(outputSize, outputType);
-		thresholds = new float[outputSize];
+		thresholds = (float*)malloc(sizeof(float) * outputSize);
 	}
 	if (totalWeighsPerOutput > 0){
 		if (inputType == FLOAT){

@@ -9,7 +9,6 @@
 
 Vector::Vector()
 {
-	cout<<"se llama al constructor no parametrizado de vector."<<endl;
 	size = 0;
 	data = NULL;
 }
@@ -22,14 +21,14 @@ Vector::Vector(unsigned size, VectorType vectorType)
 	if (vectorType == FLOAT){
 
 		unsigned floatSize = (((size-1)/FLOATS_PER_BLOCK)+1)*FLOATS_PER_BLOCK;
-		data = (void*)new float[floatSize];
+		data = malloc(floatSize * sizeof(float));
 		for (unsigned i=0; i< floatSize; i++){
 			((float*)data)[i] = 0;
 		}
 	}
 	else {
 		unsigned vectorSize = ((size-1)/BITS_PER_UNSIGNED)+1;
-		data = (void*)new unsigned[vectorSize];
+		data = malloc(vectorSize * sizeof(unsigned));
 		for (unsigned i=0; i < vectorSize; i++){
 			((unsigned*)data)[i] = 0;
 		}
@@ -38,10 +37,15 @@ Vector::Vector(unsigned size, VectorType vectorType)
 
 Vector::~Vector()
 {
+	//TODO poner aqui lo que hay en freeVector y evitar que pete
+}
+
+void Vector::freeVector()
+{
+	/* TODO descomentar y evitar que pete
 	if (data) {
-		free (data);
-		data = NULL;
-	}
+		free(data);
+	}*/
 }
 
 void* Vector::getDataPointer()

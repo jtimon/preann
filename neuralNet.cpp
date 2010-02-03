@@ -20,18 +20,18 @@ NeuralNet::NeuralNet()
 
 NeuralNet::NeuralNet(unsigned maxInputs, unsigned maxLayers, unsigned maxOutputs)
 {
-	layers = new Layer*[maxLayers];
-	layerConnectionsGraph = new unsigned char[maxLayers*maxLayers];
+	layers = (Layer**) malloc(sizeof(Layer*) * maxLayers);
+	layerConnectionsGraph = (unsigned char*) malloc(sizeof(unsigned char) * maxLayers * maxLayers);
 	numberLayers = 0;
 	this->maxLayers = maxLayers;
 
-	inputs = new Vector*[maxInputs];
-	inputsToLayersGraph = new unsigned char[maxInputs*maxLayers];
+	inputs = (Vector**) malloc(sizeof(Vector*) * maxInputs);
+	inputsToLayersGraph = (unsigned char*) malloc(sizeof(unsigned char) * maxInputs * maxLayers);
 	numberInputs = 0;
 	this->maxInputs = maxInputs;
 
-	outputs = new Vector*[maxOutputs];
-	outputLayers = new int[maxOutputs];
+	outputs = (Vector**) malloc(sizeof(Vector*) * maxOutputs);
+	outputLayers = (int*) malloc(sizeof(int) * maxOutputs);
 	numberOutputs = 0;
 	this->maxOutputs = maxOutputs;
 
@@ -54,10 +54,12 @@ NeuralNet::NeuralNet(unsigned maxInputs, unsigned maxLayers, unsigned maxOutputs
 }
 
 NeuralNet::~NeuralNet()
-{
+{/*
 	if (layers != NULL) {
 		for (unsigned i=0; i < numberLayers; i++){
-			delete (layers[i]);
+			layers[i]->freeLayer();
+			//TODO descomentar y evitar que pete
+			//delete (layers[i]);
 		}
 		delete[] layers;
 	}
@@ -66,14 +68,42 @@ NeuralNet::~NeuralNet()
 
 	if (inputs != NULL)
 		delete[] inputs;
-	if (inputsToLayersGraph != NULL)
-		delete[] inputsToLayersGraph;
+	//TODO descomentar y evitar que pete
+//	if (inputsToLayersGraph != NULL)
+//		delete[] inputsToLayersGraph;
 
 	if (outputs != NULL)
 		delete[] outputs;
 	if (outputLayers != NULL)
-		delete[] outputLayers;
+		delete[] outputLayers;*/
 
+}
+
+void NeuralNet::freeNeuralNet()
+{
+	if (layers) {
+		for (unsigned i=0; i < numberLayers; i++) {
+			layers[i]->freeLayer();
+			//TODO descomentar y evitar que pete
+			delete (layers[i]);
+		}
+		free(layers);
+	}
+	if (layerConnectionsGraph) {
+		free(layerConnectionsGraph);
+	}
+	if (inputs) {
+		free(inputs);
+	}
+	if (inputsToLayersGraph){
+		free(inputsToLayersGraph);
+	}
+	if (outputs) {
+		free(outputs);
+	}
+	if (outputLayers) {
+		free(outputLayers);
+	}
 }
 
 Layer* NeuralNet::newLayer(){
@@ -92,13 +122,17 @@ Vector* NeuralNet::newVector(unsigned size, VectorType vectorType)
 void NeuralNet::calculateOutput()
 {
 	for (unsigned i=0; i < numberLayers; i++){
+		cout<<"calculando capa "<<i<<endl;
+		layers[i]->randomWeighs(20);
+		Vector* aa = layers[i]->newVector(10, BIT); //TODO quitar
 		layers[i]->calculateOutput();
+		delete(aa);
 	}
 }
 
 void NeuralNet::changeMaxInputs(unsigned newMaxInputs)
 {
-	Vector** newInputs = new Vector*[newMaxInputs];
+	Vector** newInputs = (Vector**) malloc(sizeof(Vector*) * newMaxInputs);
 	unsigned char* newInputsToLayersGraph = new unsigned char[newMaxInputs * maxLayers];
 
 	unsigned minInputs;
@@ -124,10 +158,9 @@ void NeuralNet::changeMaxInputs(unsigned newMaxInputs)
 
 	if (minInputs > 0) {
 		memcpy(newInputs, inputs, minInputs * sizeof(Vector*));
-		delete[] inputs;
-		delete[] inputsToLayersGraph;
+		free(inputs);
+		free(inputsToLayersGraph);
 	}
-
 	inputs = newInputs;
 	inputsToLayersGraph = newInputsToLayersGraph;
 	maxInputs = newMaxInputs;
@@ -135,8 +168,8 @@ void NeuralNet::changeMaxInputs(unsigned newMaxInputs)
 
 void NeuralNet::changeMaxLayers(unsigned newMaxLayers)
 {
-	Layer** newLayers = new Layer*[newMaxLayers];
-	unsigned char* newLayerConnectionsGraph = new unsigned char[newMaxLayers*newMaxLayers];
+	Layer** newLayers = (Layer**) malloc(sizeof(Layer*) * newMaxLayers);
+	unsigned char* newLayerConnectionsGraph = (unsigned char*) malloc(sizeof(unsigned char) * newMaxLayers*newMaxLayers);
 	unsigned char* newInputsToLayersGraph = new unsigned char[maxInputs * newMaxLayers];
 
 	unsigned minLayers;
@@ -172,9 +205,9 @@ void NeuralNet::changeMaxLayers(unsigned newMaxLayers)
 	}
 	if (minLayers > 0) {
 		memcpy(newLayers, layers, minLayers * sizeof(Layer*));
-		delete[] layers;
-		delete[] layerConnectionsGraph;
-		delete[] inputsToLayersGraph;
+		free(layers);
+		free(layerConnectionsGraph);
+		free(inputsToLayersGraph);
 	}
 	layers = newLayers;
 	layerConnectionsGraph = newLayerConnectionsGraph;
@@ -184,8 +217,8 @@ void NeuralNet::changeMaxLayers(unsigned newMaxLayers)
 
 void NeuralNet::changeMaxOuputs(unsigned newMaxOutputs)
 {
-	Vector** newOutputs = new Vector*[newMaxOutputs];
-	int* newOutputLayers = new int[newMaxOutputs];
+	Vector** newOutputs = (Vector**) malloc(sizeof(Vector*) * newMaxOutputs);
+	int* newOutputLayers = (int*) malloc(sizeof(int) * newMaxOutputs);
 
 	unsigned minOutputs;
 	if (newMaxOutputs > numberOutputs){
@@ -196,8 +229,8 @@ void NeuralNet::changeMaxOuputs(unsigned newMaxOutputs)
 	if (minOutputs > 0){
 		memcpy(newOutputs, outputs, minOutputs * sizeof(Vector*));
 		memcpy(newOutputLayers, outputLayers, minOutputs * sizeof(int));
-		delete[] outputs;
-		delete[] outputLayers;
+		free(outputs);
+		free(outputLayers);
 	}
 	for(unsigned i=minOutputs; i < newMaxOutputs; i++) {
 		newOutputs[i] = NULL;
@@ -499,13 +532,13 @@ void NeuralNet::load(FILE* stream)
 		maxLayers = numberLayers;
 		maxOutputs = numberOutputs;
 
-		inputsToLayersGraph = new unsigned char[numberInputs * numberLayers];
+		inputsToLayersGraph = (unsigned char*) malloc(sizeof(unsigned char) * numberInputs * numberLayers);
 		fread(inputsToLayersGraph, sizeof(unsigned char) * numberInputs * numberLayers, 1, stream);
 
-		layerConnectionsGraph = new unsigned char[numberLayers * numberLayers];
+		layerConnectionsGraph = (unsigned char*) malloc(sizeof(unsigned char) * numberLayers * numberLayers);
 		fread(layerConnectionsGraph, sizeof(unsigned char) * numberLayers * numberLayers, 1, stream);
 
-		outputLayers = new int[numberOutputs];
+		outputLayers = (int*) malloc(sizeof(int) * numberOutputs);
 		fread(outputLayers, sizeof(int) * numberOutputs, 1, stream);
 
 		layers = new Layer*[numberLayers];
@@ -530,7 +563,7 @@ void NeuralNet::load(FILE* stream)
 			}
 		}
 
-		outputs = new Vector*[numberOutputs];
+		outputs = (Vector**) malloc(sizeof(Vector*) * numberOutputs);
 		for (unsigned i=0; i<numberOutputs; i++){
 			outputs[i] = layers[outputLayers[i]]->getOutput();
 		}

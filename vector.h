@@ -32,6 +32,7 @@ public:
 	virtual float getElement(unsigned pos);
 	virtual void setElement(unsigned pos, float value);
 	unsigned getWeighsSize();
+	virtual void freeVector();
 
 	void showVector();
 };

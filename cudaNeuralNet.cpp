@@ -20,10 +20,38 @@ CudaNeuralNet::CudaNeuralNet(unsigned  maxInputs, unsigned  maxLayers, unsigned 
 
 CudaNeuralNet::~CudaNeuralNet()
 {
+}
+
+void CudaNeuralNet::freeNeuralNet()
+{
 	freeDevice();
 	delete[] host_inputs;
 	delete[] host_inputSizes;
 	delete[] host_types;
+
+	if (layers) {
+		for (unsigned i=0; i < numberLayers; i++) {
+			layers[i]->freeLayer();
+			//TODO descomentar y evitar que pete
+			delete (layers[i]);
+		}
+		free(layers);
+	}
+	if (layerConnectionsGraph) {
+		free(layerConnectionsGraph);
+	}
+	if (inputs) {
+		free(inputs);
+	}
+	if (inputsToLayersGraph){
+		free(inputsToLayersGraph);
+	}
+	if (outputs) {
+		free(outputs);
+	}
+	if (outputLayers) {
+		free(outputLayers);
+	}
 }
 
 Layer* CudaNeuralNet::newLayer()

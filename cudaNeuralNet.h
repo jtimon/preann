@@ -30,6 +30,7 @@ public:
 
 	virtual Layer* newLayer();
 	virtual Layer* newLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
+	virtual void freeNeuralNet();
 };
 
 #endif /* CUDANEURALNET_H_ */
