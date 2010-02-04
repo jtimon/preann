@@ -54,10 +54,9 @@ void Layer::freeLayer()
 	if (weighs) {
 		free(weighs);
 	}
-	/* TODO descomentar y evitar que pete
 	if (thresholds) {
 		free(thresholds);
-	}*/
+	}
 	if (output) {
 		output->freeVector();
 		delete (output);
@@ -72,53 +71,71 @@ Vector* Layer::newVector(unsigned size, VectorType vectorType)
 void Layer::randomWeighs(float range)
 {
 	if (output == NULL){
-		cout<<"Error: There's no output for this layer."<<endl;
-	} else if (numberInputs == 0){
-		cout<<"Error: This layer has no input."<<endl;
-	} else {
-		if (inputType != FLOAT && range >= 128){
-			range = 127;
-		}
-		for (unsigned i=0; i < output->getSize(); i++){
+		string error = "Cannot set random weighs to a layer with no output.";
+		throw error;
+	}
+	if (numberInputs == 0){
+		string error = "Cannot set random weighs to a layer with no inputs.";
+		throw error;
+	}
+	if (inputType != FLOAT && range >= 128){
+		range = 127;
+	}
+	for (unsigned i=0; i < output->getSize(); i++){
 
-			thresholds[i] = randomFloat(range);
-			unsigned inputOffset = 0;
-			for (unsigned j=0; j < numberInputs; j++){
+		thresholds[i] = randomFloat(range);
+		unsigned inputOffset = 0;
+		for (unsigned j=0; j < numberInputs; j++){
 
-				unsigned inputSize = inputs[j]->getSize();
-				for (unsigned k=0; k < inputSize; k++){
+			unsigned inputSize = getInput(j)->getSize();
+			for (unsigned k=0; k < inputSize; k++){
 
-					unsigned weighPos = i*totalWeighsPerOutput + inputOffset + k;
-					if (inputType == FLOAT) {
-						((float*)weighs)[weighPos] = randomFloat(range);
-					} else {
-						//TODO revisar el xmm a ver si se pueden usar char normales para los pesos (y no hacer el truco del 128)
-						((unsigned char*)weighs)[weighPos] = 128 + (unsigned char)randomInt(range);
-					}
+				unsigned weighPos = i*totalWeighsPerOutput + inputOffset + k;
+				if (inputType == FLOAT) {
+					((float*)weighs)[weighPos] = randomFloat(range);
+				} else {
+					//TODO revisar el xmm a ver si se pueden usar char normales para los pesos (y no hacer el truco del 128)
+					((unsigned char*)weighs)[weighPos] = 128 + (unsigned char)randomInt(range);
 				}
-				inputOffset += inputs[j]->getWeighsSize();
 			}
+			inputOffset += getInput(j)->getWeighsSize();
 		}
 	}
 }
 
-unsigned char Layer::addInput(Vector* input)
+void Layer::addInput(Vector* input)
 {
-	if (input->getVectorType() == inputType) {
-
-		Vector** newInputs = (Vector**) malloc(sizeof(Vector*) * (numberInputs + 1));
-		memcpy(newInputs, inputs, numberInputs * sizeof(Vector*));
-		newInputs[numberInputs] = input;
-		if (inputs) {
-			free(inputs);
+	if (input->getVectorType() != inputType) {
+		string error = "Trying to add an incorrect type input.";
+		error += " Layer inputs type: ";
+		switch (inputType) {
+			case FLOAT: error += "FLOAT";
+				break;
+			case BIT: error += "BIT";
+				break;
+			case SIGN: error += "SIGN";
+				break;
 		}
-		inputs = newInputs;
-		numberInputs++;
-		return 1;
-	} else {
-		cout<<"Error: unexpected input type."<<endl;
-		return 0;
+		error += " Input type: ";
+		switch (input->getVectorType()) {
+			case FLOAT: error += "FLOAT";
+				break;
+			case BIT: error += "BIT";
+				break;
+			case SIGN: error += "SIGN";
+				break;
+		}
+		throw error;
 	}
+
+	Vector** newInputs = (Vector**) malloc(sizeof(Vector*) * (numberInputs + 1));
+	memcpy(newInputs, inputs, numberInputs * sizeof(Vector*));
+	newInputs[numberInputs] = input;
+	if (inputs) {
+		free(inputs);
+	}
+	inputs = newInputs;
+	numberInputs++;
 }
 
 unsigned Layer::getNumberInputs()
@@ -128,30 +145,41 @@ unsigned Layer::getNumberInputs()
 
 Vector* Layer::getInput(unsigned pos)
 {
-	if (pos > numberInputs){
-		cout<<"Error: cannot access input "<<pos<<": there are just "<<numberInputs<<" inputs"<<endl;
-		return NULL;
-	} else {
-		return inputs[pos];
+	if (numberInputs == 0) {
+		string error = "Trying to access an input of a Layer without inputs.";
+		throw error;
 	}
+	if (pos > numberInputs){
+		char buffer[100];
+		sprintf(buffer, "Cannot access input %d: there are just %d inputs.", pos, numberInputs);
+		string error = buffer;
+		throw error;
+	}
+
+	return inputs[pos];
 }
 
 void Layer::calculateOutput()
 {
+	if (!output) {
+		string error = "Cannot calculate the output of a Layer without output.";
+		throw error;
+	}
+
 	float result;
 	for (unsigned i=0; i < output->getSize(); i++){
 		result = 0;
 		unsigned inputOffset = 0;
 		for (unsigned j=0; j < numberInputs; j++){
-			for (unsigned k=0; k < inputs[j]->getSize(); k++){
+			for (unsigned k=0; k < getInput(j)->getSize(); k++){
 				unsigned weighPos = i*totalWeighsPerOutput + inputOffset + k;
 				if (inputType == FLOAT) {
-					result += inputs[j]->getElement(k) * ((float*)weighs)[weighPos];
+					result += getInput(j)->getElement(k) * ((float*)weighs)[weighPos];
 				} else {
-					result += inputs[j]->getElement(k) * (((unsigned char*)weighs)[weighPos] - 128);
+					result += getInput(j)->getElement(k) * (((unsigned char*)weighs)[weighPos] - 128);
 				}
 			}
-			inputOffset += inputs[j]->getWeighsSize();
+			inputOffset += getInput(j)->getWeighsSize();
 		}
 		output->setElement(i, Function(result - thresholds[i], functionType));
 	}
@@ -196,6 +224,11 @@ void Layer::setSizes(unsigned totalWeighsPerOutput, unsigned outputSize)
 
 void Layer::resetSize()
 {
+	if (!output) {
+		string error = "Cannot reset the size of a Layer without output.";
+		throw error;
+	}
+
 	if (output != NULL){
 		setSize(output->getSize());
 	}
@@ -206,11 +239,8 @@ void Layer::setSize(unsigned size)
 	unsigned auxTotalSize = 0;
 
 	if (inputs != NULL){
-/*
-		cout<<"Warning: cannot set the weighs of a Layer without inputs."<<endl;
-	} else {*/
 		for (unsigned i=0; i < numberInputs; i++){
-			auxTotalSize += (inputs[i])->getWeighsSize();
+			auxTotalSize += getInput(i)->getWeighsSize();
 		}
 	}
 	setSizes(auxTotalSize, size);

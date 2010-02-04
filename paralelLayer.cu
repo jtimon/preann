@@ -33,7 +33,7 @@ void checkCUDAError(const char *msg)
     cudaError_t err = cudaGetLastError();
     if( cudaSuccess != err) 
     {
-        fprintf(stderr, "Cuda error: %s : %s.\n", msg, 
+        printf("Cuda error: %s : %s.\n", msg,
                                   cudaGetErrorString( err) );
 	//printf("Cuda error: %s ( %d ): %s.\n", msg, __LINE__, cudaGetErrorString( err) );
         exit(EXIT_FAILURE);

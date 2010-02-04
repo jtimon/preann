@@ -27,6 +27,25 @@ float testNeuralNet(NeuralNet* nn, Vector* input, unsigned times){
 	return chrono.getSeconds();
 }
 
+float testLayer(Layer* layer, Vector* input, unsigned times){
+
+	Chronometer chrono;
+	FILE* stream = fopen("test.lay", "r+b");
+	layer->load(stream);
+	fclose(stream);
+	layer->addInput(input);
+	chrono.start();
+	for (unsigned i=0; i < times; i++){
+		layer->calculateOutput();
+	}
+	chrono.stop();
+	layer->freeLayer();
+	delete(layer);
+	delete(input);
+
+	return chrono.getSeconds();
+}
+
 unsigned numlayers;
 unsigned type;
 unsigned size;
@@ -45,6 +64,7 @@ try{
 	Vector* input;
 	Vector* output;
 	NeuralNet* nn;
+	Layer* layer;
 	FILE* stream;
 	VectorType inputType;
 	FunctionType functionType;
@@ -89,7 +109,7 @@ try{
 		times = 1;
 		for(size=32; size <= maxSize; size += 32){
 			cout<<"size: "<<size<<endl;
-			nn = new NeuralNet();
+			/*nn = new NeuralNet();
 			input = nn->newVector(size, inputType);
 			nn->addInput(input);
 			nn->createFeedForwardNet(numlayers, size, inputType, functionType);
@@ -98,14 +118,44 @@ try{
 			nn->save(stream);
 			fclose(stream);
 			delete(nn);
+			delete(input);*/
+			layer = new Layer(inputType, inputType, functionType);
+			input = layer->newVector(size, inputType);
+			layer->addInput(input);
+			layer->setSize(size);
+			layer->randomWeighs(rangeWeighs);
+			stream = fopen("test.lay", "w+b");
+			layer->save(stream);
+			fclose(stream);
+			layer->freeLayer();
+			delete(layer);
 			delete(input);
 			//C++
+			cout<<"version C++"<<endl;
+			layer = new Layer();
+			input = layer->newVector(size, inputType);
+			seconds = testLayer(layer, input, times);
+			cTime<<size<<"  "<<seconds<<endl;
+			//XMM
+			cout<<"version XMM"<<endl;
+			layer = new XmmLayer();
+			input = layer->newVector(size, inputType);
+			seconds = testLayer(layer, input, times);
+			xmmTime<<size<<"  "<<seconds<<endl;
+			//CUDA
 			/*
+			cout<<"version CUDA"<<endl;
+			layer = new CudaLayer();
+			input = layer->newVector(size, inputType);
+			seconds = testLayer(layer, input, times);
+			cudaTime<<size<<"  "<<seconds<<endl;*/
+			/*
+			//C++
 			cout<<"version C++"<<endl;
 			nn = new NeuralNet();
 			input = nn->newVector(size, inputType);
 			seconds = testNeuralNet(nn, input, times);
-			cTime<<size<<"  "<<seconds<<endl;*/
+			cTime<<size<<"  "<<seconds<<endl;
 			//XMM
 			cout<<"version XMM"<<endl;
 			nn = new XmmNeuralNet();
@@ -113,7 +163,7 @@ try{
 			seconds = testNeuralNet(nn, input, times);
 			xmmTime<<size<<"  "<<seconds<<endl;
 			//CUDA
-			/*cout<<"version CUDA"<<endl;
+			cout<<"version CUDA"<<endl;
 			nn = new CudaNeuralNet();
 			input = nn->newVector(size, inputType);
 			seconds = testNeuralNet(nn, input, times);
@@ -189,10 +239,10 @@ try{
 	cout<<"Total time spent: "<<chrono.getSeconds()<<endl;
 	cout<<"Exit success"<<endl;
 
-} catch (unsigned number){
-	cout<<"An error ocurred related with this unsigned: "<<number<<endl;
+} catch(string error){
+	cout<<"Error: "<<error<<endl;
 } catch (...){
-	cout<<"An error ocurred."<<endl;
+	cout<<"An error was thrown."<<endl;
 }
 	return EXIT_SUCCESS;
 }

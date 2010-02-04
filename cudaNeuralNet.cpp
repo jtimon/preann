@@ -9,17 +9,14 @@ CudaNeuralNet::CudaNeuralNet():NeuralNet()
 	inDevice = 0;
 }
 
-CudaNeuralNet::CudaNeuralNet(unsigned  maxInputs, unsigned  maxLayers, unsigned  maxOutputs):NeuralNet(maxInputs, maxLayers, maxOutputs)
-{
-	host_inputSizes = NULL;
-	host_inputs = NULL;
-	host_types = NULL;
-	dev_inputs = NULL;
-	inDevice = 0;
-}
-
 CudaNeuralNet::~CudaNeuralNet()
 {
+	//TODO descomentar cuando ya no exista freeNeuralNet()
+	/*
+	freeDevice();
+	delete[] host_inputs;
+	delete[] host_inputSizes;
+	delete[] host_types;*/
 }
 
 void CudaNeuralNet::freeNeuralNet()
@@ -32,7 +29,6 @@ void CudaNeuralNet::freeNeuralNet()
 	if (layers) {
 		for (unsigned i=0; i < numberLayers; i++) {
 			layers[i]->freeLayer();
-			//TODO descomentar y evitar que pete
 			delete (layers[i]);
 		}
 		free(layers);

@@ -20,7 +20,6 @@ protected:
 	char inDevice;
 public:
 	CudaNeuralNet();
-	CudaNeuralNet(unsigned maxInputs, unsigned maxLayers, unsigned maxOutputs);
 	virtual ~CudaNeuralNet();
 
 	virtual void calculateOutput();

@@ -18,7 +18,7 @@ protected:
 	void* data;
 	VectorType vectorType;
 
-	virtual unsigned posToUnsignedPos(unsigned pos);
+	unsigned posToUnsignedPos(unsigned pos);
 	virtual unsigned posToBitPos(unsigned pos);
 public:
 	Vector();

@@ -4,10 +4,6 @@ XmmNeuralNet::XmmNeuralNet():NeuralNet()
 {
 }
 
-XmmNeuralNet::XmmNeuralNet(unsigned  maxInputs, unsigned  maxLayers, unsigned  maxOutputs):NeuralNet(maxInputs, maxLayers, maxOutputs)
-{
-}
-
 Layer* XmmNeuralNet::newLayer()
 {
 	return new XmmLayer();

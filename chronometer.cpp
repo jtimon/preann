@@ -25,7 +25,8 @@ void Chronometer::start()
 void Chronometer::stop()
 {
 	if (start_time == -1) {
-		cout<<"Error: you have to start the chronometer before stop it."<<endl;
+		string error = "The chronometer must be started before stop it.";
+		throw error;
 	} else {
 		end_time = clock();
 		timeInSeconds = (end_time-start_time)/(double)CLOCKS_PER_SEC;

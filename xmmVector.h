@@ -13,7 +13,7 @@
 
 class XmmVector: public Vector {
 protected:
-	virtual unsigned posToBytePos(unsigned pos);
+	unsigned posToBytePos(unsigned pos);
 	virtual unsigned posToBitPos(unsigned pos);
 public:
 	XmmVector(unsigned size, VectorType vectorType);
@@ -22,7 +22,7 @@ public:
 	virtual float getElement(unsigned pos);
 	virtual void setElement(unsigned pos, float value);
 
-	virtual unsigned getNumLoops();
+	unsigned getNumLoops();
 };
 
 #endif /* XMMVECTOR_H_ */

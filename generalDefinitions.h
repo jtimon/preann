@@ -14,6 +14,7 @@ using namespace std;
 #include <iostream>
 #include <cstdlib>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define BITS_PER_BYTE 8

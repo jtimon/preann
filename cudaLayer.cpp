@@ -38,8 +38,8 @@ void CudaLayer::toDevice(){
 
 	for(unsigned i=0; i < this->numberInputs; i++){
 
-		inputLayerSize[i] = this->inputs[i]->getSize();
-		inputNeurons[i] = this->inputs[i]->getDataPointer();
+		inputLayerSize[i] = this->getInput(i)->getSize();
+		inputNeurons[i] = this->getInput(i)->getDataPointer();
 	}
 
 	layerAux->inputLayerSize = inputLayerSize;
@@ -57,12 +57,16 @@ void CudaLayer::setInputsInDevice(void **inputs)
 
 float* CudaLayer::getDeviceOutput()
 {
+	if (!deviceLayer) {
+		string error = "Cannot get the device output pointer of a CudaLayer that is not in device memory.";
+		throw error;
+	}
 	return (float*)deviceLayer->outputNeurons;
 }
 
 void CudaLayer::freeDevice()
 {
-	if (deviceLayer != NULL){
+	if (!deviceLayer){
 		FreeDevice(deviceLayer);
 		delete(deviceLayer);
 		deviceLayer = NULL;
@@ -71,14 +75,20 @@ void CudaLayer::freeDevice()
 
 void CudaLayer::outputToHost()
 {
+	if (!output) {
+		string error = "Cannot calculate bring the output from the device memory of a Layer without output.";
+		throw error;
+	}
 	OutputToHost(output->getDataPointer(), deviceLayer, outputType);
 }
 
 void CudaLayer::calculateOutput(){
 	
-	if (deviceLayer != NULL) {
-		LayerCalculation(deviceLayer, THREADS_PER_BLOCK, inputType, outputType);
+	if (!deviceLayer) {
+		string error = "Cannot calculate the output of a CudaLayer that is not in device memory.";
+		throw error;
 	}
+	LayerCalculation(deviceLayer, THREADS_PER_BLOCK, inputType, outputType);
 }
 
 

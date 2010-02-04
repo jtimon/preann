@@ -27,7 +27,7 @@ public:
 	Vector* getInput(unsigned pos);
 	void setSize(unsigned size);
 	void resetSize();
-	unsigned char addInput(Vector* input);
+	void addInput(Vector* input);
 	unsigned getNumberInputs();
 
 	void randomWeighs(float range);

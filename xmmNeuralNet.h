@@ -9,7 +9,6 @@ protected:
 	//using NeuralNet::addLayer;
 public:
 	XmmNeuralNet();
-	XmmNeuralNet(unsigned maxInputs, unsigned maxLayers, unsigned maxOutputs);
 	virtual ~XmmNeuralNet();
 
 	virtual Layer* newLayer();

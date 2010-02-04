@@ -11,35 +11,37 @@ protected:
 	Layer** layers;
 	unsigned char* layerConnectionsGraph;
 	unsigned numberLayers;
-	unsigned maxLayers;
 
 	Vector** inputs;
 	unsigned char* inputsToLayersGraph;
 	unsigned numberInputs;
-	unsigned maxInputs;
 
 	Vector** outputs;
 	int* outputLayers;
 	unsigned numberOutputs;
-	unsigned maxOutputs;
 
 	void addLayer(Layer* layer);
-	void changeMaxInputs(unsigned newMaxInputs);
-	void changeMaxLayers(unsigned newMaxLayers);
-	void changeMaxOuputs(unsigned newMaxOutputs);
+	void increaseMaxInputs();
+	void increaseMaxLayers();
+	void increaseMaxOuputs();
 	unsigned getPosInGraph(unsigned source, unsigned destination);
 public:
 	NeuralNet();
-	NeuralNet(unsigned maxInputs, unsigned maxLayers, unsigned maxOutputs);
 	virtual ~NeuralNet();
+
 	void addInput(Vector* input);
+	void addOutput(unsigned layerPos);
+	void addLayer(unsigned  size, VectorType sourceType, VectorType destinationType);
+	void addLayer(unsigned  size, VectorType sourceType, VectorType destinationType, FunctionType functiontype);
+	void addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos);
+	void addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos);
+
 	Vector* getOutput(unsigned outputPos);
 	unsigned getNumOutputs();
 	void randomWeighs(float range);
-	void addLayer(unsigned  size, VectorType sourceType, VectorType destinationType);
-	void addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos);
-	void addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos);
-	void setLayerAsOutput(unsigned layerPos);
+	void save(FILE* stream);
+	void load(FILE* stream);
+
 	void createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType);
 	void createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype);
 	void createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype, unsigned floatOutputSize, unsigned bitOutputSize);
@@ -47,10 +49,6 @@ public:
 	void createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype);
 
 	virtual void calculateOutput();
-	void addLayer(unsigned  size, VectorType sourceType, VectorType destinationType, FunctionType functiontype);
-
-	void save(FILE* stream);
-	void load(FILE* stream);
 
 	virtual Layer* newLayer();
 	virtual Layer* newLayer(VectorType inputType, VectorType outputType, FunctionType functionType);

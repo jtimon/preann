@@ -37,15 +37,14 @@ Vector::Vector(unsigned size, VectorType vectorType)
 
 Vector::~Vector()
 {
-	//TODO poner aqui lo que hay en freeVector y evitar que pete
+	//TODO poner aqui lo que hay en freeVector() y evitar que pete
 }
 
 void Vector::freeVector()
 {
-	/* TODO descomentar y evitar que pete
 	if (data) {
 		free(data);
-	}*/
+	}
 }
 
 void* Vector::getDataPointer()
@@ -97,22 +96,24 @@ unsigned Vector::posToUnsignedPos(unsigned  pos)
 void Vector::setElement(unsigned  pos, float value)
 {
 	if (pos >= size){
-		cout<<"Error: trying to access a position greater than the vector size."<<endl;
+		char buffer[100];
+		sprintf(buffer, "Cannot set the element in position %d: the size of the vector is %d.", pos, size);
+		string error = buffer;
+		throw error;
 	}
-	else {
-		if (vectorType == FLOAT){
 
-			((float*)data)[pos] = value;
+	if (vectorType == FLOAT){
 
-		} else {
-			unsigned unsignedPos = posToUnsignedPos(pos);
-			unsigned bitPos = posToBitPos(pos);
-			unsigned mask = (unsigned)(0x80000000>>(bitPos % BITS_PER_UNSIGNED));
-			if (value > 0){
-				((unsigned*)data)[unsignedPos] = ((unsigned*)data)[unsignedPos] | mask;
-			} else if (value == 0 || value == -1) {
-				((unsigned*)data)[unsignedPos] = ((unsigned*)data)[unsignedPos] & ~mask;
-			}
+		((float*)data)[pos] = value;
+
+	} else {
+		unsigned unsignedPos = posToUnsignedPos(pos);
+		unsigned bitPos = posToBitPos(pos);
+		unsigned mask = (unsigned)(0x80000000>>(bitPos % BITS_PER_UNSIGNED));
+		if (value > 0){
+			((unsigned*)data)[unsignedPos] = ((unsigned*)data)[unsignedPos] | mask;
+		} else if (value == 0 || value == -1) {
+			((unsigned*)data)[unsignedPos] = ((unsigned*)data)[unsignedPos] & ~mask;
 		}
 	}
 }
@@ -120,28 +121,30 @@ void Vector::setElement(unsigned  pos, float value)
 float Vector::getElement(unsigned  pos)
 {
 	if (pos >= size){
-		cout<<"Error: trying to access a position greater than the vector size."<<endl;
-		return 0;
-	} else {
-		if (vectorType == FLOAT){
+		char buffer[100];
+		sprintf(buffer, "Cannot get the element in position %d: the size of the vector is %d.", pos, size);
+		string error = buffer;
+		throw error;
+	}
 
-			return ((float*)data)[pos];
+
+	if (vectorType == FLOAT){
+		return ((float*)data)[pos];
+	}
+	else {
+		unsigned unsignedPos = posToUnsignedPos(pos);
+		unsigned bitPos = posToBitPos(pos);
+
+		unsigned mask = (unsigned)(0x80000000>>(bitPos % BITS_PER_UNSIGNED));
+		if (((unsigned*)data)[unsignedPos] & mask){
+			return 1;
 		}
 		else {
-			unsigned unsignedPos = posToUnsignedPos(pos);
-			unsigned bitPos = posToBitPos(pos);
-
-			unsigned mask = (unsigned)(0x80000000>>(bitPos % BITS_PER_UNSIGNED));
-			if (((unsigned*)data)[unsignedPos] & mask){
-				return 1;
+			if (vectorType == BIT) {
+				return 0;
 			}
-			else {
-				if (vectorType == BIT) {
-					return 0;
-				}
-				else{
-					return -1;
-				}
+			else{
+				return -1;
 			}
 		}
 	}
