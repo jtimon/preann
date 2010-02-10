@@ -17,32 +17,26 @@ NeuralNet::NeuralNet()
 
 NeuralNet::~NeuralNet()
 {
-	//TODO poner el freeNeuralNet() aqui y evitar que pete
-}
-
-void NeuralNet::freeNeuralNet()
-{
 	if (layers) {
 		for (unsigned i=0; i < numberLayers; i++) {
-			layers[i]->freeLayer();
 			delete (layers[i]);
 		}
-		free(layers);
+		mi_free(layers);
 	}
 	if (layerConnectionsGraph) {
-		free(layerConnectionsGraph);
+		mi_free(layerConnectionsGraph);
 	}
 	if (inputs) {
-		free(inputs);
+		mi_free(inputs);
 	}
 	if (inputsToLayersGraph){
-		free(inputsToLayersGraph);
+		mi_free(inputsToLayersGraph);
 	}
 	if (outputs) {
-		free(outputs);
+		mi_free(outputs);
 	}
 	if (outputLayers) {
-		free(outputLayers);
+		mi_free(outputLayers);
 	}
 }
 
@@ -62,7 +56,7 @@ Vector* NeuralNet::newVector(unsigned size, VectorType vectorType)
 void NeuralNet::calculateOutput()
 {
 	for (unsigned i=0; i < numberLayers; i++){
-		cout<<"calculando capa "<<i<<endl;//TODO quitar
+		//cout<<"calculando capa "<<i<<endl;//TODO quitar
 		layers[i]->calculateOutput();
 	}
 }
@@ -71,28 +65,35 @@ void NeuralNet::addInput(Vector* input)
 {
 	unsigned newNumberInputs = numberInputs+1;
 
-	Vector** newInputs = (Vector**) malloc(sizeof(Vector*) * newNumberInputs);
+	Vector** newInputs = (Vector**) mi_malloc(sizeof(Vector*) * newNumberInputs);
 	if (inputs) {
 		memcpy(newInputs, inputs, numberInputs * sizeof(Vector*));
-		free(inputs);
+		mi_free(inputs);
 	}
 	inputs = newInputs;
+	inputs[numberInputs] = input;
 
-	unsigned char* newInputsToLayersGraph = (unsigned char*) malloc(sizeof(unsigned char) * newNumberInputs * numberLayers);
-	for (unsigned i=0; i < numberInputs; i++){
-		for (unsigned j=0; j < numberLayers; j++){
-			newInputsToLayersGraph[(i*numberLayers) + j] = inputsToLayersGraph[(i*numberLayers) + j];
+	if (numberLayers > 0){
+		if (inputsToLayersGraph) {
+			unsigned char* newInputsToLayersGraph = (unsigned char*) mi_malloc(sizeof(unsigned char) * newNumberInputs * numberLayers);
+			for (unsigned i=0; i < numberInputs; i++){
+				for (unsigned j=0; j < numberLayers; j++){
+					newInputsToLayersGraph[(i*numberLayers) + j] = inputsToLayersGraph[(i*numberLayers) + j];
+				}
+			}
+			for (unsigned j=0; j < numberLayers; j++){
+				newInputsToLayersGraph[(numberInputs*numberLayers) + j] = 0;
+			}
+			mi_free(inputsToLayersGraph);
+			inputsToLayersGraph = newInputsToLayersGraph;
+		} else {
+			inputsToLayersGraph = (unsigned char*) mi_malloc(sizeof(unsigned char) * newNumberInputs * numberLayers);
+			for (unsigned i=0; i < newNumberInputs * numberLayers; i++) {
+				inputsToLayersGraph[i] = 0;
+			}
 		}
 	}
-	for (unsigned j=0; j < numberLayers; j++){
-		newInputsToLayersGraph[(numberInputs*numberLayers) + j] = 0;
-	}
-	if (inputsToLayersGraph) {
-		free(inputsToLayersGraph);
-	}
-	inputsToLayersGraph = newInputsToLayersGraph;
-
-	inputs[numberInputs++] = input;
+	++numberInputs;
 }
 
 
@@ -100,26 +101,34 @@ void NeuralNet::addLayer(Layer* layer)
 {
 	unsigned newNumberLayers = numberLayers + 1;
 
-	Layer** newLayers = (Layer**) malloc(sizeof(Layer*) * newNumberLayers);
+	Layer** newLayers = (Layer**) mi_malloc(sizeof(Layer*) * newNumberLayers);
 	if (layers) {
 		memcpy(newLayers, layers, numberLayers * sizeof(Layer*));
-		free(layers);
+		mi_free(layers);
 	}
 	layers = newLayers;
 
-	if (inputsToLayersGraph) {
-		unsigned char* newInputsToLayersGraph = new unsigned char[numberInputs * newNumberLayers];
-		for (unsigned i=0; i < numberInputs; i++){
-			for (unsigned j=0; j < numberLayers; j++){
-				newInputsToLayersGraph[(i*numberLayers) + j] = inputsToLayersGraph[(i*numberLayers) + j];
+	if (numberInputs > 0) {
+		if (inputsToLayersGraph) {
+			unsigned char* newInputsToLayersGraph = (unsigned char*) mi_malloc(sizeof(unsigned char) * numberInputs * newNumberLayers);
+			for (unsigned i=0; i < numberInputs; i++){
+				for (unsigned j=0; j < numberLayers; j++){
+					newInputsToLayersGraph[(i*numberLayers) + j] = inputsToLayersGraph[(i*numberLayers) + j];
+				}
+				newInputsToLayersGraph[(i*numberLayers) + numberLayers] = 0;
 			}
-			newInputsToLayersGraph[(i*numberLayers) + numberLayers] = 0;
+			mi_free(inputsToLayersGraph);
+			inputsToLayersGraph = newInputsToLayersGraph;
 		}
-		free(inputsToLayersGraph);
-		inputsToLayersGraph = newInputsToLayersGraph;
+		else {
+			inputsToLayersGraph = (unsigned char*) mi_malloc(sizeof(unsigned char) * numberInputs * newNumberLayers);
+			for (unsigned i=0; i < numberInputs * newNumberLayers; i++) {
+				inputsToLayersGraph[i] = 0;
+			}
+		}
 	}
 
-	unsigned char* newLayerConnectionsGraph = (unsigned char*) malloc(sizeof(unsigned char) * newNumberLayers * newNumberLayers);
+	unsigned char* newLayerConnectionsGraph = (unsigned char*) mi_malloc(sizeof(unsigned char) * newNumberLayers * newNumberLayers);
 	for (unsigned i=0; i < newNumberLayers; i++){
 		for (unsigned j=0; j < newNumberLayers; j++){
 			if (i == numberLayers || j == numberLayers){
@@ -130,7 +139,7 @@ void NeuralNet::addLayer(Layer* layer)
 		}
 	}
 	if (layerConnectionsGraph) {
-		free(layerConnectionsGraph);
+		mi_free(layerConnectionsGraph);
 	}
 	layerConnectionsGraph = newLayerConnectionsGraph;
 
@@ -158,15 +167,17 @@ void NeuralNet::addOutput(unsigned layerPos)
 		throw error;
 	}
 
-	Vector** newOutputs = (Vector**) malloc(sizeof(Vector*) * (numberOutputs+1));
-	memcpy(newOutputs, outputs, numberOutputs * sizeof(Vector*));
-	free(outputs);
+	Vector** newOutputs = (Vector**) mi_malloc(sizeof(Vector*) * (numberOutputs+1));
+	if (outputs) {
+		memcpy(newOutputs, outputs, numberOutputs * sizeof(Vector*));
+		mi_free(outputs);
+	}
 	outputs = newOutputs;
 
-	int* newOutputLayers = (int*) malloc(sizeof(int) * (numberOutputs+1));
+	int* newOutputLayers = (int*) mi_malloc(sizeof(int) * (numberOutputs+1));
 	if (outputLayers) {
 		memcpy(newOutputLayers, outputLayers, numberOutputs * sizeof(int));
-		free(outputLayers);
+		mi_free(outputLayers);
 	}
 	outputLayers = newOutputLayers;
 
@@ -202,6 +213,10 @@ void NeuralNet::randomWeighs(float range)
 
 void NeuralNet::addInputConnection(unsigned  sourceInputPos, unsigned  destinationLayerPos)
 {
+	if (!inputsToLayersGraph){
+		string error = "The inputs To Layers Graph is not set yet.";
+		throw error;
+	}
 	if (sourceInputPos >= numberInputs){
 		char buffer[100];
 		sprintf(buffer, "Cannot connect input in position %d: there are just %d inputs.", sourceInputPos, numberInputs);
@@ -415,18 +430,18 @@ void NeuralNet::load(FILE* stream)
 	fread(&numberOutputs, sizeof(unsigned), 1, stream);
 
 	size_t size = sizeof(unsigned char) * numberInputs * numberLayers;
-	inputsToLayersGraph = (unsigned char*) malloc(size);
+	inputsToLayersGraph = (unsigned char*) mi_malloc(size);
 	fread(inputsToLayersGraph, size, 1, stream);
 
 	size = sizeof(unsigned char) * numberLayers * numberLayers;
-	layerConnectionsGraph = (unsigned char*) malloc(size);
+	layerConnectionsGraph = (unsigned char*) mi_malloc(size);
 	fread(layerConnectionsGraph, size, 1, stream);
 
 	size = sizeof(int) * numberOutputs;
-	outputLayers = (int*) malloc(size);
+	outputLayers = (int*) mi_malloc(size);
 	fread(outputLayers, size, 1, stream);
 
-	layers = new Layer*[numberLayers];
+	layers = (Layer**) mi_malloc(sizeof(Layer*) * numberLayers);
 	for (unsigned i=0; i<numberLayers; i++){
 		layers[i] = newLayer();
 		layers[i]->load(stream);
@@ -448,7 +463,7 @@ void NeuralNet::load(FILE* stream)
 		}
 	}
 
-	outputs = (Vector**) malloc(sizeof(Vector*) * numberOutputs);
+	outputs = (Vector**) mi_malloc(sizeof(Vector*) * numberOutputs);
 	for (unsigned i=0; i<numberOutputs; i++){
 		outputs[i] = layers[outputLayers[i]]->getOutput();
 	}

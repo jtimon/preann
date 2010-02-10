@@ -43,22 +43,16 @@ Layer::Layer(VectorType inputType, VectorType outputType, FunctionType functionT
 
 Layer::~Layer()
 {
-	//TODO poner aqui lo que hay en freeLayer() y evitar que pete
-}
-
-void Layer::freeLayer()
-{
 	if (inputs) {
-		free(inputs);
-	}
-	if (weighs) {
-		free(weighs);
+		mi_free(inputs);
 	}
 	if (thresholds) {
-		free(thresholds);
+		mi_free(thresholds);
+	}
+	if (weighs) {
+		mi_free(weighs);
 	}
 	if (output) {
-		output->freeVector();
 		delete (output);
 	}
 }
@@ -128,14 +122,13 @@ void Layer::addInput(Vector* input)
 		throw error;
 	}
 
-	Vector** newInputs = (Vector**) malloc(sizeof(Vector*) * (numberInputs + 1));
-	memcpy(newInputs, inputs, numberInputs * sizeof(Vector*));
-	newInputs[numberInputs] = input;
+	Vector** newInputs = (Vector**) mi_malloc(sizeof(Vector*) * (numberInputs + 1));
 	if (inputs) {
+		memcpy(newInputs, inputs, numberInputs * sizeof(Vector*));
 		free(inputs);
 	}
 	inputs = newInputs;
-	numberInputs++;
+	inputs[numberInputs++] = input;
 }
 
 unsigned Layer::getNumberInputs()
@@ -194,26 +187,26 @@ void Layer::setSizes(unsigned totalWeighsPerOutput, unsigned outputSize)
 {
 	if (!output) {
 		output = newVector(outputSize, outputType);
-		thresholds = (float*) malloc(sizeof(float) * outputSize);
+		thresholds = (float*) mi_malloc(sizeof(float) * outputSize);
 	} else if (output->getSize() != outputSize) {
 
 		cout<<"Warning: a layer is changing the location of its output."<<endl;
 		delete (output);
 		if (thresholds) {
-			free(thresholds);
+			mi_free(thresholds);
 		}
 		output = newVector(outputSize, outputType);
-		thresholds = (float*)malloc(sizeof(float) * outputSize);
+		thresholds = (float*)mi_malloc(sizeof(float) * outputSize);
 	}
 	if (totalWeighsPerOutput > 0){
 		if (inputType == FLOAT){
 
-			weighs = new float[outputSize * totalWeighsPerOutput];
+			weighs = mi_malloc(sizeof(float) * outputSize * totalWeighsPerOutput);
 			for (unsigned i=0; i < outputSize * totalWeighsPerOutput; i++){
 				((float*)weighs)[i] = 0;
 			}
 		} else {
-			weighs = new unsigned char[outputSize * totalWeighsPerOutput];
+			weighs = mi_malloc(sizeof(unsigned char) * outputSize * totalWeighsPerOutput);
 			for (unsigned i=0; i < outputSize * totalWeighsPerOutput; i++){
 				((unsigned char*)weighs)[i] = 128;
 			}

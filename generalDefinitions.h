@@ -29,4 +29,9 @@ float randomFloat(float rango);
 unsigned randomPositiveInt(unsigned rango);
 float randomPositiveFloat(float rango);
 
+void* mi_malloc(unsigned size);
+void mi_free(void* ptr);
+void printTotalAllocated();
+void printTotalPointers();
+
 #endif /* GENERALDEFINITIONS_H_ */

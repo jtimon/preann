@@ -17,6 +17,7 @@ protected:
 	unsigned* host_inputSizes;
 	VectorType* host_types;
 
+	//TODO hay que pensar como se va a gestionar la memoria del device con los experimentos
 	char inDevice;
 public:
 	CudaNeuralNet();
@@ -29,7 +30,6 @@ public:
 
 	virtual Layer* newLayer();
 	virtual Layer* newLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
-	virtual void freeNeuralNet();
 };
 
 #endif /* CUDANEURALNET_H_ */

@@ -21,7 +21,7 @@ void CudaLayer::toDevice(){
 		FreeDevice(deviceLayer);
 	}
 
-	struct_Layer* layerAux = new struct_Layer;
+	struct_Layer* layerAux = (struct_Layer*) mi_malloc(sizeof(struct_Layer));
 
 	layerAux->functionType = this->functionType;
 	layerAux->numberInputLayers = this->numberInputs;
@@ -33,8 +33,8 @@ void CudaLayer::toDevice(){
 	layerAux->outputSize = this->output->getSize();
 	layerAux->outputNeurons = this->output->getDataPointer();
 
-	unsigned* inputLayerSize = new unsigned[this->numberInputs];
-	void** inputNeurons = new void*[this->numberInputs];
+	unsigned* inputLayerSize = (unsigned*) mi_malloc(sizeof(unsigned) * this->numberInputs);
+	void** inputNeurons = (void**) mi_malloc(sizeof(void*) * this->numberInputs);
 
 	for(unsigned i=0; i < this->numberInputs; i++){
 
@@ -47,7 +47,9 @@ void CudaLayer::toDevice(){
 
 	deviceLayer = LayerHostToDevice(layerAux, inputType, outputType);
 
-	delete layerAux;
+	mi_free(layerAux);
+	mi_free(inputLayerSize);
+	mi_free(inputNeurons);
 }
 
 void CudaLayer::setInputsInDevice(void **inputs)
@@ -66,9 +68,8 @@ float* CudaLayer::getDeviceOutput()
 
 void CudaLayer::freeDevice()
 {
-	if (!deviceLayer){
+	if (deviceLayer){
 		FreeDevice(deviceLayer);
-		delete(deviceLayer);
 		deviceLayer = NULL;
 	}
 }

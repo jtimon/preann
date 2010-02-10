@@ -43,7 +43,7 @@ void checkCUDAError(const char *msg)
 extern "C" struct_Layer* LayerHostToDevice(struct_Layer* h_layer, VectorType inputType, VectorType outputType){
 
 	size_t size;
-	struct_Layer* d_layer = new struct_Layer;
+	struct_Layer* d_layer = (struct_Layer*) mi_malloc(sizeof(struct_Layer));
 
 	d_layer->numberInputLayers = h_layer->numberInputLayers;
 	d_layer->totalWeighsPerOutput = h_layer->totalWeighsPerOutput;
@@ -81,6 +81,19 @@ extern "C" struct_Layer* LayerHostToDevice(struct_Layer* h_layer, VectorType inp
 	return d_layer;
 }
 
+extern "C" void FreeDevice(struct_Layer* d_layer){
+
+	cudaFree(d_layer->inputLayerSize);
+	cudaFree(d_layer->inputNeurons);
+	cudaFree(d_layer->outputNeurons);
+	cudaFree(d_layer->weighs);
+	cudaFree(d_layer->thresholds);
+
+	mi_free(d_layer);
+
+	checkCUDAError("Free Device");
+}
+
 extern "C" void SetInputsInDevice(struct_Layer* d_layer, void** inputs){
 
 	size_t size = sizeof(void*) * d_layer->numberInputLayers;
@@ -93,7 +106,7 @@ extern "C" void** InputsToDevice(void** host_inputs, unsigned* host_inputSizes, 
 {
 	size_t size = numberInputs * sizeof(void*);
 	void** dev_inputs;
-	dev_inputs = new void*[numberInputs];
+	dev_inputs = (void**) mi_malloc(sizeof(void*) * numberInputs);
 	
 	for (unsigned i=0; i < numberInputs; i++){
 		
@@ -116,7 +129,7 @@ extern "C" void FreeInputs(void** dev_inputs, unsigned numberInputs)
 	for (unsigned i=0; i < numberInputs; i++){
 		cudaFree(dev_inputs[i]);
 	}
-	delete[] dev_inputs;
+	mi_free(dev_inputs);
 	checkCUDAError("Free Inputs");
 }
 
@@ -146,17 +159,6 @@ extern "C" void OutputToHost(void* output, struct_Layer* d_layer, VectorType out
 		size = sizeof(unsigned) * (((d_layer->outputSize - 1)/ BITS_PER_UNSIGNED) + 1);
 	}	cudaMemcpy(output, d_layer->outputNeurons, size, cudaMemcpyDeviceToHost);
 	checkCUDAError("Output To Host");
-}
-
-extern "C" void FreeDevice(struct_Layer* d_layer){
-
-	cudaFree(d_layer->inputLayerSize);
-	cudaFree(d_layer->inputNeurons);
-	cudaFree(d_layer->outputNeurons);
-	cudaFree(d_layer->weighs);
-	cudaFree(d_layer->thresholds);
-	
-	checkCUDAError("Free Device");
 }
 
 template <unsigned int blockSize, VectorType inputType, VectorType outputType>

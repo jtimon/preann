@@ -36,17 +36,21 @@ void XmmLayer::calculateOutput()
 					result += auxResult;
 					w += getInput(j)->getWeighsSize();
 				}
-				output->setElement(i, Function(result - thresholds[i], functionType));
+				result -= thresholds[i];
+				output->setElement(i, Function(result, functionType));
 			}
 			break;
 		case BIT:
 			for (unsigned i=0; i < output->getSize(); i++){
 				result = 0;
 				for (unsigned j=0; j < numberInputs; j++){
-					result += XMMbinario(getInput(j)->getDataPointer(), ((XmmVector*)getInput(j))->getNumLoops(), ((unsigned char*)weighs + w));
+					int auxResult = 0;
+					XMMbinario(getInput(j)->getDataPointer(), ((XmmVector*)getInput(j))->getNumLoops(), ((unsigned char*)weighs + w), auxResult);
+					result += auxResult;
 					w += getInput(j)->getWeighsSize();
 				}
-				output->setElement(i, Function(result - thresholds[i], functionType));
+				result -= thresholds[i];
+				output->setElement(i, Function(result, functionType));
 			}
 			break;
 		case SIGN:
@@ -56,7 +60,8 @@ void XmmLayer::calculateOutput()
 					result += XMMbipolar(getInput(j)->getDataPointer(), ((XmmVector*)getInput(j))->getNumLoops(), ((unsigned char*)weighs + w));
 					w += getInput(j)->getWeighsSize();
 				}
-				output->setElement(i, Function(result - thresholds[i], functionType));
+				result -= thresholds[i];
+				output->setElement(i, Function(result, functionType));
 			}
 			break;
 	}

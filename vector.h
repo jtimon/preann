@@ -24,17 +24,16 @@ public:
 	Vector();
 	Vector(unsigned size, VectorType vectorType);
 	virtual ~Vector();
+
 	void* getDataPointer();
-	virtual unsigned getByteSize();
 	unsigned getSize();
 	VectorType getVectorType();
+	unsigned getWeighsSize();
+	void showVector();
 
+	virtual unsigned getByteSize();
 	virtual float getElement(unsigned pos);
 	virtual void setElement(unsigned pos, float value);
-	unsigned getWeighsSize();
-	virtual void freeVector();
-
-	void showVector();
 };
 
 #endif /* VECTOR_H_ */

@@ -19,6 +19,7 @@ public:
 	XmmVector(unsigned size, VectorType vectorType);
 	virtual ~XmmVector();
 
+	virtual unsigned getByteSize();
 	virtual float getElement(unsigned pos);
 	virtual void setElement(unsigned pos, float value);
 

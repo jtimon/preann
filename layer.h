@@ -12,6 +12,7 @@ protected:
 	unsigned totalWeighsPerOutput;
 
 	void* weighs;
+
 	float* thresholds;
 
 	Vector* output;
@@ -40,8 +41,7 @@ public:
 	Layer();
 	Layer(VectorType inputType, VectorType outputType, FunctionType functionType);
 	virtual ~Layer();
-	
-	virtual void freeLayer();
+
 };
 
 #endif /*ABSTRACTLAYER_H_*/

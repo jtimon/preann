@@ -182,6 +182,7 @@ noIniciarMascara2:
 
 	RET
 
+;extern "C" int XMMbinario (void* vectorEntrada, unsigned numeroBloques, unsigned char* pesos);
 global XMMbinario
 XMMbinario: 
 
@@ -236,11 +237,13 @@ noIniciarMascara3:
 	DEC ECX
 	JNZ bucle3
 
-	MOVD EAX, XMM3        ;copiamos la mitad baja del resultado
+	MOVD EBX, XMM3        ;copiamos la mitad baja del resultado
 	PSRLDQ XMM3, 8        ;desplazamos el registro 8 bytes a la derecha
 	MOVD ECX, XMM3        ;copiamos la mitad alta del resultado
-	ADD EAX, ECX          ;sumamos ambas mitades (en EAX esta el resultado a devolver)
+	ADD EBX, ECX          ;sumamos ambas mitades (en EAX esta el resultado a devolver)
 
+	MOV EDI, [ESP + 32]
+	MOV [EDI], EBX        ;las colocamos en el parámetro resultado
 
 	;restauramos los registros
 	POP EDI
@@ -362,10 +365,10 @@ bucleReal:
 	MOVAPS XMM4, XMM3
 	SHUFPS XMM4, XMM4, 11101110b  ;ponemos los dos floats altos en la parte baja
 	ADDPS XMM4, XMM3  ;sumamos los dos floats mas altos con los mas bajos
-	MOVAPS XMM5, XMM4
+	MOVAPS XMM3, XMM4
 	PSRLDQ XMM4, 4    ;desplazamos el registro 4 bytes a la derecha
-	ADDPS XMM5, XMM4  ;sumamos la parte mas baja
-	MOVD EAX, XMM5    ;copiamos el resultado   
+	ADDPS XMM3, XMM4  ;sumamos la parte mas baja
+	MOVD EAX, XMM3    ;copiamos el resultado
 
 	MOV EDI, [ESP + 28]
 	MOV [EDI], EAX        ;las colocamos en el parámetro resultado  

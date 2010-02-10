@@ -11,43 +11,10 @@ CudaNeuralNet::CudaNeuralNet():NeuralNet()
 
 CudaNeuralNet::~CudaNeuralNet()
 {
-	//TODO descomentar cuando ya no exista freeNeuralNet()
-	/*
 	freeDevice();
-	delete[] host_inputs;
-	delete[] host_inputSizes;
-	delete[] host_types;*/
-}
-
-void CudaNeuralNet::freeNeuralNet()
-{
-	freeDevice();
-	delete[] host_inputs;
-	delete[] host_inputSizes;
-	delete[] host_types;
-
-	if (layers) {
-		for (unsigned i=0; i < numberLayers; i++) {
-			layers[i]->freeLayer();
-			delete (layers[i]);
-		}
-		free(layers);
-	}
-	if (layerConnectionsGraph) {
-		free(layerConnectionsGraph);
-	}
-	if (inputs) {
-		free(inputs);
-	}
-	if (inputsToLayersGraph){
-		free(inputsToLayersGraph);
-	}
-	if (outputs) {
-		free(outputs);
-	}
-	if (outputLayers) {
-		free(outputLayers);
-	}
+	mi_free(host_inputs);
+	mi_free(host_inputSizes);
+	mi_free(host_types);
 }
 
 Layer* CudaNeuralNet::newLayer()
@@ -62,9 +29,9 @@ Layer* CudaNeuralNet::newLayer(VectorType inputType, VectorType outputType, Func
 
 void CudaNeuralNet::hostToDevice(){
 
-	host_inputs = new void*[numberInputs];
-	host_inputSizes = new unsigned[numberInputs];
-	host_types = new VectorType[numberInputs];
+	host_inputs = (void**) mi_malloc(sizeof(void*) * numberInputs);
+	host_inputSizes = (unsigned*) mi_malloc(sizeof(unsigned) * numberInputs);
+	host_types = (VectorType*) mi_malloc(sizeof(VectorType) * numberInputs);
 
 	for (unsigned i=0; i<numberInputs; i++){
 
@@ -83,7 +50,7 @@ void CudaNeuralNet::hostToDevice(){
 	for (unsigned i=0; i<numberLayers; i++){
 
 		unsigned numInputsCurrentLayer = layers[i]->getNumberInputs();
-		d_inputs = new void*[numInputsCurrentLayer];
+		d_inputs = (void**) mi_malloc(sizeof(void*) * numInputsCurrentLayer);
 
 		for (unsigned j=0; j < numInputsCurrentLayer; j++) {
 
@@ -106,21 +73,16 @@ void CudaNeuralNet::hostToDevice(){
 			}
 		}
 		((CudaLayer*)layers[i])->setInputsInDevice(d_inputs);
-		delete[] d_inputs;
+		mi_free(d_inputs);
 	}
 	inDevice = 1;
 }
 
 void CudaNeuralNet::freeDevice()
 {
-	if (dev_inputs != NULL){
+	if (dev_inputs){
 		FreeInputs(dev_inputs, numberInputs);
-		dev_inputs = NULL;
 	}
-	for (unsigned i=0; i<numberLayers; i++){
-		((CudaLayer*)layers[i])->freeDevice();
-	}
-
 	inDevice = 0;
 }
 
