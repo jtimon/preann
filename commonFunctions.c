@@ -39,7 +39,7 @@ void mi_free(void* ptr) {
 	unsigned i = 0;
 	while (!found && i < ptr_counter) {
 		if (ptr == ptrs[i]) {
-			//cout<<"se va a vaciar: "<<(unsigned)ptrs[i]<<" de "<<ptr_sizes[i]<<" bytes."<<endl;
+			//cout<<"se vacia: "<<(unsigned)ptrs[i]<<" de "<<ptr_sizes[i]<<" bytes."<<endl;
 			found = 1;
 			totalAllocated -= ptr_sizes[i];
 			ptr_counter--;
@@ -116,8 +116,8 @@ float randomFloat(float rango) {
 	return ((rand() / (float) RAND_MAX) * (2 * rango)) - rango;
 }
 
-unsigned randomPositiveInt(unsigned rango) {
-	return rand() % (rango + 1);
+unsigned randomUnsigned(unsigned rango) {
+	return rand() % rango;
 }
 
 float randomPositiveFloat(float rango) {

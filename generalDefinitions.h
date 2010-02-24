@@ -26,7 +26,7 @@ typedef enum {BINARY_STEP, BIPOLAR_STEP, REAL, IDENTITY, SIGMOID, BIPOLAR_SIGMOI
 float Function(float number, FunctionType functionType);
 int randomInt(unsigned rango);
 float randomFloat(float rango);
-unsigned randomPositiveInt(unsigned rango);
+unsigned randomUnsigned(unsigned rango);
 float randomPositiveFloat(float rango);
 
 void* mi_malloc(unsigned size);

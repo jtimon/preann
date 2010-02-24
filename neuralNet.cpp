@@ -48,6 +48,18 @@ Layer* NeuralNet::newLayer(VectorType inputType, VectorType outputType, Function
 	return new Layer(inputType, outputType, functionType);
 }
 
+void NeuralNet::setInput(Vector *input)
+{
+	if (inputs){
+		inputs[0] = input;
+	}
+}
+
+void NeuralNet::resetConnections()
+{
+	//TODO resetConnections
+}
+
 Vector* NeuralNet::newVector(unsigned size, VectorType vectorType)
 {
 	return new Vector(size, vectorType);
@@ -174,9 +186,9 @@ void NeuralNet::addOutput(unsigned layerPos)
 	}
 	outputs = newOutputs;
 
-	int* newOutputLayers = (int*) mi_malloc(sizeof(int) * (numberOutputs+1));
+	unsigned* newOutputLayers = (unsigned*) mi_malloc(sizeof(unsigned) * (numberOutputs+1));
 	if (outputLayers) {
-		memcpy(newOutputLayers, outputLayers, numberOutputs * sizeof(int));
+		memcpy(newOutputLayers, outputLayers, numberOutputs * sizeof(unsigned));
 		mi_free(outputLayers);
 	}
 	outputLayers = newOutputLayers;
@@ -437,8 +449,8 @@ void NeuralNet::load(FILE* stream)
 	layerConnectionsGraph = (unsigned char*) mi_malloc(size);
 	fread(layerConnectionsGraph, size, 1, stream);
 
-	size = sizeof(int) * numberOutputs;
-	outputLayers = (int*) mi_malloc(size);
+	size = sizeof(unsigned) * numberOutputs;
+	outputLayers = (unsigned*) mi_malloc(size);
 	fread(outputLayers, size, 1, stream);
 
 	layers = (Layer**) mi_malloc(sizeof(Layer*) * numberLayers);

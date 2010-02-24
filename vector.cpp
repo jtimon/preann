@@ -89,6 +89,14 @@ unsigned Vector::posToUnsignedPos(unsigned  pos)
 	return pos/BITS_PER_UNSIGNED;
 }
 
+float Vector::compareTo(Vector *other)
+{
+	float accumulator = 0;
+	for (unsigned i=0; i < this->size; i++) {
+		accumulator += this->getElement(i) - other->getElement(i);
+	}
+}
+
 void Vector::setElement(unsigned  pos, float value)
 {
 	if (pos >= size){
@@ -135,14 +143,10 @@ float Vector::getElement(unsigned  pos)
 		if (((unsigned*)data)[unsignedPos] & mask){
 			return 1;
 		}
-		else {
-			if (vectorType == BIT) {
-				return 0;
-			}
-			else{
-				return -1;
-			}
+		if (vectorType == BIT) {
+			return 0;
 		}
+		return -1;
 	}
 }
 

@@ -82,7 +82,7 @@ try{
 	float seconds;
 
 	for (type=0; type < 2; type++){
-
+/*
 		switch(type){
 		case 0:
 			cout<<"version float"<<endl;
@@ -106,7 +106,7 @@ try{
 			cout<<"version sign"<<endl;
 			inputType = SIGN;
 			functionType = BIPOLAR_STEP;
-			maxSize = 4096;
+			maxSize = 4096;http://ubunthttp://ubuntuguide.org/wiki/Ubuntu:Karmic#gftphttp://ubuntuguide.org/wiki/Ubuntu:Karmic#gftpihuguide.org/wiki/Ubuntu:Karmic#gftp
 		    cTime.open ("cFeedForwardSignTime.dat");
 		    xmmTime.open ("xmmFeedForwardSignTime.dat");
 		    cudaTime.open ("cudaFeedForwardSignTime.dat");
@@ -130,40 +130,7 @@ try{
 			delete(nn);
 			delete(input);
 			printTotalAllocated();
-			printTotalPointers();/*
-			layer = new Layer(inputType, inputType, functionType);
-			input = layer->newVector(size, inputType);
-			layer->addInput(input);
-			layer->setSize(size);
-			layer->randomWeighs(rangeWeighs);
-			stream = fopen("test.lay", "w+b");
-			layer->save(stream);
-			fclose(stream);
-			delete(layer);
-			delete(input);
-			//C++
-			cout<<"version C++"<<endl;
-			layer = new Layer();
-			input = layer->newVector(size, inputType);
-			seconds = testLayer(layer, input, times);
-			cTime<<size<<"  "<<seconds<<endl;
-			printTotalAllocated();
 			printTotalPointers();
-			//XMM
-			cout<<"version XMM"<<endl;
-			layer = new XmmLayer();
-			input = layer->newVector(size, inputType);
-			seconds = testLayer(layer, input, times);
-			xmmTime<<size<<"  "<<seconds<<endl;
-			printTotalAllocated();
-			printTotalPointers();*/
-			//CUDA
-			/*
-			cout<<"version CUDA"<<endl;
-			layer = new CudaLayer();
-			input = layer->newVector(size, inputType);
-			seconds = testLayer(layer, input, times);
-			cudaTime<<size<<"  "<<seconds<<endl;*/
 
 			//C++
 			cout<<"version C++"<<endl;
@@ -192,8 +159,8 @@ try{
 		}
 		cTime.close();
 		xmmTime.close();
-		cudaTime.close();
-/*
+		cudaTime.close();*/
+
 		switch(type){
 		case 0:
 			inputType = FLOAT;
@@ -220,40 +187,52 @@ try{
 		    cudaTime.open ("cudaFullyConnectedSignTime.dat");
 			break;
 		}
-		times = 10;
+		times = 1;
 		for(numlayers=2; numlayers < 100; numlayers++){
 			for(unsigned size=32; size <= maxSize; size += 32){
-				//cout<<endl<<"type: "<<inputType<<" layers: "<<numlayers<<" size: "<<size<<endl<<endl;
 				nn = new NeuralNet();
 				input = nn->newVector(size, inputType);
 				nn->addInput(input);
 				nn->createFullyConnectedNet(numlayers, size, inputType, functionType);
 				nn->randomWeighs(rangeWeighs);
-				stream = fopen("test.nn", "w+b");
+				stream = fopen(PATH, "w+b");
 				nn->save(stream);
 				fclose(stream);
+				printTotalAllocated();
+				printTotalPointers();
 				delete(nn);
 				delete(input);
+				printTotalAllocated();
+				printTotalPointers();
 				//C++
+				cout<<"version C++"<<endl;
 				nn = new NeuralNet();
 				input = nn->newVector(size, inputType);
 				seconds = testNeuralNet(nn, input, times);
 				cTime<<numlayers<<"  "<<size<<"  "<<seconds<<endl;
+				printTotalAllocated();
+				printTotalPointers();
 				//XMM
+				cout<<"version XMM"<<endl;
 				nn = new XmmNeuralNet();
 				input = nn->newVector(size, inputType);
 				seconds = testNeuralNet(nn, input, times);
 				xmmTime<<numlayers<<"  "<<size<<"  "<<seconds<<endl;
+				printTotalAllocated();
+				printTotalPointers();
 				//CUDA
+				cout<<"version CUDA"<<endl;
 				nn = new CudaNeuralNet();
 				input = nn->newVector(size, inputType);
 				seconds = testNeuralNet(nn, input, times);
 				cudaTime<<numlayers<<"  "<<size<<"  "<<seconds<<endl;
+				printTotalAllocated();
+				printTotalPointers();
 			}
 		}
 		cTime.close();
 		xmmTime.close();
-		cudaTime.close();*/
+		cudaTime.close();
 	}
 
 	total.stop();

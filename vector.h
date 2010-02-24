@@ -30,6 +30,7 @@ public:
 	VectorType getVectorType();
 	unsigned getWeighsSize();
 	void showVector();
+	float compareTo(Vector* other);
 
 	virtual unsigned getByteSize();
 	virtual float getElement(unsigned pos);

@@ -17,7 +17,7 @@ protected:
 	unsigned numberInputs;
 
 	Vector** outputs;
-	int* outputLayers;
+	unsigned* outputLayers;
 	unsigned numberOutputs;
 
 	void addLayer(Layer* layer);
@@ -30,6 +30,7 @@ public:
 	virtual ~NeuralNet();
 
 	void addInput(Vector* input);
+	void setInput(Vector* input);
 	void addOutput(unsigned layerPos);
 	void addLayer(unsigned  size, VectorType sourceType, VectorType destinationType);
 	void addLayer(unsigned  size, VectorType sourceType, VectorType destinationType, FunctionType functiontype);
@@ -41,6 +42,7 @@ public:
 	void randomWeighs(float range);
 	void save(FILE* stream);
 	void load(FILE* stream);
+	void resetConnections();
 
 	void createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType);
 	void createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype);
