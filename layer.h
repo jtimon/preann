@@ -22,7 +22,15 @@ protected:
 	FunctionType functionType;
 
 	virtual void setSizes(unsigned totalWeighsPerOutput, unsigned ouputSize);
-	unsigned weighToPos(unsigned neuronPos, unsigned inputVector, unsigned inputPos);
+// To allow GA trainer work:
+	float getFloatWeigh(unsigned pos);
+	void setFloatWeigh(float value, unsigned pos);
+	unsigned char getByteWeigh(unsigned pos);
+	void setByteWeigh(unsigned char value, unsigned pos);
+	float getThreshold(unsigned neuronPos);
+	void setThreshold(float value, unsigned  neuronPos);
+	void* getThresholdsPtr();
+	void* getWeighsPtr();
 public:
 	Vector* getOutput();
 
@@ -35,8 +43,6 @@ public:
 	void randomWeighs(float range);
 	void save(FILE* stream);
 	void load(FILE* stream);
-	Layer* newCopy();
-	void copyWeighs(Layer* other);
 
 	virtual void calculateOutput();
 	virtual Vector* newVector(unsigned size, VectorType vectorType);
@@ -45,21 +51,20 @@ public:
 	Layer(VectorType inputType, VectorType outputType, FunctionType functionType);
 	virtual ~Layer();
 
+// To allow GA trainer work:
+	Layer* newCopy();
+	void copyWeighs(Layer* other);
+
 	void mutateWeigh(float mutationRange);
 	void mutateWeighs(float probability, float mutationRange);
 
 	Layer* uniformCrossoverWeighs(Layer* other, float probability);
 	Layer* uniformCrossoverNeurons(Layer* other, float probability);
+	Layer* crossoverNeurons(Layer* other, Vector* bitVector);
+	Layer* crossoverWeighs(Layer* other, Vector* bitVector);
 
-	float getFloatWeigh(unsigned pos);
-	void setFloatWeigh(float value, unsigned pos);
-	unsigned char getByteWeigh(unsigned pos);
-	void setByteWeigh(unsigned char value, unsigned pos);
-	float getThreshold(unsigned neuronPos);
-	void setThreshold(float value, unsigned  neuronPos);
-
-	void* getThresholdsPtr();
-	void* getWeighsPtr();
+	unsigned getNumberNeurons();
+	unsigned getNumberWeighs();
 };
 
 #endif /*ABSTRACTLAYER_H_*/

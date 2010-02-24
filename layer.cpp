@@ -1,3 +1,4 @@
+
 #include "layer.h"
 
 Layer::Layer()
@@ -441,34 +442,88 @@ Layer* Layer::uniformCrossoverNeurons(Layer* other, float probability)
 	return offSpring;
 }
 
-unsigned Layer::weighToPos(unsigned neuronPos, unsigned inputVector, unsigned inputPos)
+Layer *Layer::crossoverWeighs(Layer *other, Vector *bitVector)
 {
+	if (bitVector->getSize() != this->getNumberWeighs()){
+		string error = "The number of weighs must be equal to the size of the bitVector.";
+		throw error;
+	}
 	if (!weighs) {
-		string error = "Cannot get the weigh of a Layer without weighs.";
+		string error = "Cannot crossover a Layer without weighs.";
 		throw error;
 	}
-	if (inputType == FLOAT) {
-		string error = "This Layer has no Byte weighs.";
+	Layer* offSpring = other->newCopy();
+
+	unsigned vectorPos = 0;
+	for (unsigned i=0; i < output->getSize(); i++){
+		unsigned inputOffset = 0;
+
+		if (bitVector->getElement(vectorPos++)) {
+			offSpring->setThreshold(this->getThreshold(i), i);
+		} else {
+			offSpring->setThreshold(other->getThreshold(i), i);
+		}
+
+		for (unsigned j=0; j < numberInputs; j++){
+			for (unsigned k=0; k < getInput(j)->getSize(); k++){
+				unsigned weighPos = i*totalWeighsPerOutput + inputOffset + k;
+				if (bitVector->getElement(vectorPos++)) {
+					if (inputType == FLOAT) {
+						offSpring->setFloatWeigh(this->getFloatWeigh(weighPos), weighPos);
+					} else {
+						offSpring->setByteWeigh(this->getByteWeigh(weighPos), weighPos);
+					}
+				} else {
+					if (inputType == FLOAT) {
+						offSpring->setFloatWeigh(other->getFloatWeigh(weighPos), weighPos);
+					} else {
+						offSpring->setByteWeigh(other->getByteWeigh(weighPos), weighPos);
+					}
+				}
+			}
+			inputOffset += getInput(j)->getWeighsSize();
+		}
+	}
+	return offSpring;
+}
+
+Layer *Layer::crossoverNeurons(Layer *other, Vector *bitVector)
+{
+	if (bitVector->getSize() != output->getSize()){
+		string error = "The number of neurons must be equal to the size of the bitVector.";
 		throw error;
 	}
-	if (neuronPos >= output->getSize()) {
-		string error = "The Layer doesn't have too many neurons.";
+	if (!weighs) {
+		string error = "Cannot crossover a Layer without weighs.";
 		throw error;
 	}
-	if (inputVector >= numberInputs) {
-		string error = "The Layer doesn't have too many input Vectors.";
-		throw error;
+	Layer* offSpring = other->newCopy();
+
+	size_t size;
+	if (inputType == FLOAT){
+		size = totalWeighsPerOutput * sizeof(float);
+	} else {
+		size = totalWeighsPerOutput * sizeof(unsigned char);
 	}
-	if (inputPos >= inputs[inputVector]->getSize()) {
-		string error = "The Input Vector doesn't have too many elements.";
-		throw error;
+
+	void* destinationPtr = offSpring->getWeighsPtr();
+	void* thisPtr = this->getWeighsPtr();
+	void* otherPtr = other->getWeighsPtr();
+
+	for (unsigned i=0; i < output->getSize(); i++){
+
+		if (bitVector->getElement(i)) {
+			memcpy(destinationPtr, thisPtr, size);
+			offSpring->setThreshold(this->getThreshold(i), i);
+		} else {
+			memcpy(destinationPtr, otherPtr, size);
+			offSpring->setThreshold(other->getThreshold(i), i);
+		}
+		destinationPtr = (void*) ((char*)destinationPtr + size);
+		thisPtr = (void*) ((char*)thisPtr + size);
+		otherPtr = (void*) ((char*)otherPtr + size);
 	}
-	unsigned chosenOutputOffset = neuronPos * this->totalWeighsPerOutput;
-	unsigned chosenInputOffset = 0;
-	for (unsigned i=0; i < inputVector; i++) {
-		chosenInputOffset += this->inputs[i]->getSize();
-	}
-	return chosenOutputOffset + chosenInputOffset + inputPos;
+	return offSpring;
 }
 
 float Layer::getThreshold(unsigned  neuronPos)
@@ -510,6 +565,22 @@ void *Layer::getWeighsPtr()
 {
 	return this->weighs;
 }
+
+unsigned Layer::getNumberNeurons()
+{
+	return this->output->getSize();
+}
+
+unsigned Layer::getNumberWeighs()
+{
+	unsigned numWeighs = 0;
+	for (unsigned i=0; i < numberInputs; i++) {
+		numWeighs += inputs[i]->getSize();
+	}
+	return this->output->getSize() * (numWeighs + 1);
+}
+
+
 
 
 

@@ -12,6 +12,9 @@
 
 class Individual: public NeuralNet {
 
+private:
+	Layer* getLayer(unsigned layerPos);
+	void setLayer(Layer* layer, unsigned layerPos);
 public:
 	Individual();
 	virtual ~Individual();
@@ -22,12 +25,12 @@ public:
 	Individual* uniformCrossoverWeighs(Individual* other, float probability);
 	Individual* uniformCrossoverNeurons(Individual* other, float probability);
 	Individual* uniformCrossoverLayers(Individual* other, float probability);
-	Individual* multipointCrossoverWeighs(Individual* other);
-	Individual* multipointCrossoverNeurons(Individual* other);
-	Individual* multipointCrossoverLayers(Individual* other);
+	Individual* multipointCrossoverWeighs(Individual* other, unsigned numPoints);
+	Individual* multipointCrossoverNeurons(Individual* other, unsigned numPoints);
+	Individual* multipointCrossoverLayers(Individual* other, unsigned numPoints);
+	Individual* crossoverLayers(Individual *other, Vector* bitVector);
 
-	Layer* getLayer(unsigned layerPos);
-	void setLayer(Layer* layer, unsigned layerPos);
+
 };
 
 #endif /* INDIVIDUAL_H_ */
