@@ -22,6 +22,7 @@ using namespace std;
 
 typedef enum {FLOAT, BIT, SIGN} VectorType;
 typedef enum {BINARY_STEP, BIPOLAR_STEP, REAL, IDENTITY, SIGMOID, BIPOLAR_SIGMOID, ANOTHER_FUNCTION} FunctionType;
+typedef enum {ROULETTE_WHEEL, RANKING, TOURNAMENT, TRUNCATION} SelectionType;
 
 float Function(float number, FunctionType functionType);
 int randomInt(unsigned rango);

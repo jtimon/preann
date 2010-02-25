@@ -19,7 +19,7 @@ public:
 	ClassificationTask();
 	ClassificationTask(Vector** inputs, Vector** desiredOutputs, unsigned inputsDim);
 	virtual ~ClassificationTask();
-	virtual float test(NeuralNet* net);
+	virtual void test(Individual* individual);
 };
 
 #endif /* CLASSIFICATIONTASK_H_ */

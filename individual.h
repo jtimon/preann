@@ -12,6 +12,7 @@
 
 class Individual: public NeuralNet {
 
+	float fitness;
 private:
 	Layer* getLayer(unsigned layerPos);
 	void setLayer(Layer* layer, unsigned layerPos);
@@ -30,7 +31,8 @@ public:
 	Individual* multipointCrossoverLayers(Individual* other, unsigned numPoints);
 	Individual* crossoverLayers(Individual *other, Vector* bitVector);
 
-
+	float getFitness();
+	void setFitness(float fitness);
 };
 
 #endif /* INDIVIDUAL_H_ */

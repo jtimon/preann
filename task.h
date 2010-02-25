@@ -8,7 +8,7 @@
 #ifndef TASK_H_
 #define TASK_H_
 
-#include "neuralNet.h"
+#include "individual.h"
 
 class Task {
 
@@ -18,7 +18,7 @@ public:
 	Task();
 	virtual ~Task();
 
-	virtual float test(NeuralNet* net) = 0;
+	virtual void test(Individual* individual) = 0;
 	//virtual float test(neuralNet* net, unsigned episodes);
 
 };

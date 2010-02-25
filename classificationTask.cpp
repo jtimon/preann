@@ -28,13 +28,13 @@ ClassificationTask::~ClassificationTask()
 
 }
 
-float ClassificationTask::test(NeuralNet *net)
+void ClassificationTask::test(Individual* individual)
 {
 	float accumulation = 0;
 	for (unsigned i=0; i < inputsDim; i++){
-		net->setInput(inputs[i]);
-		net->calculateOutput();
-		accumulation += net->getOutput(0)->compareTo(desiredOutputs[i]);
+		individual->setInput(inputs[i]);
+		individual->calculateOutput();
+		accumulation += individual->getOutput(0)->compareTo(desiredOutputs[i]);
 	}
-	return accumulation;
+	individual->setFitness(-accumulation);
 }

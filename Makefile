@@ -2,22 +2,26 @@
 # usar tabulador (no espacios) en la línea de comando 
 # Project: Paralel Reinforcement Evolutionary Artificial Neural Network
 
+OBJECTS = xmm32.o paralelLayer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer.o xmmLayer.o neuralNet.o cudaNeuralNet.o xmmNeuralNet.o task.o classificationTask.o individual.o chronometer.o main.o
+
 CX = gcc-4.3
 CXX = g++-4.3 -ggdb
 NVCC = /usr/local/cuda/bin/nvcc
 
 all: preann
 
-preann: xmm32.o paralelLayer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer.o xmmLayer.o neuralNet.o cudaNeuralNet.o xmmNeuralNet.o task.o classificationTask.o individual.o chronometer.o main.o
-	$(NVCC) -o preann xmm32.o paralelLayer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer.o xmmLayer.o neuralNet.o cudaNeuralNet.o xmmNeuralNet.o task.o classificationTask.o individual.o chronometer.o main.o -L/usr/local/cuda/lib -lcudart
-main.o : main.cpp cudaNeuralNet.o xmmNeuralNet.o chronometer.o
+preann: $(OBJECTS)
+	$(NVCC) -o $(OBJECTS) -L/usr/local/cuda/lib -lcudart
+main.o : main.cpp cudaNeuralNet.o xmmNeuralNet.o population.o chronometer.o
 	$(CXX) -c main.cpp
-individual.o : individual.cpp individual.h neuralNet.o
-	$(CXX) -c individual.cpp
+population.o : population.cpp population.h cudaNeuralNet.o task.o
+	$(CXX) -c population.cpp
 classificationTask.o : classificationTask.cpp classificationTask.h task.o
 	$(CXX) -c classificationTask.cpp 
-task.o : task.cpp task.h neuralNet.o
+task.o : task.cpp task.h individual.o
 	$(CXX) -c task.cpp
+individual.o : individual.cpp individual.h neuralNet.o
+	$(CXX) -c individual.cpp
 cudaNeuralNet.o : cudaNeuralNet.cpp cudaNeuralNet.h neuralNet.o cudaLayer.o
 	$(CXX) -c cudaNeuralNet.cpp
 xmmNeuralNet.o : xmmNeuralNet.cpp xmmNeuralNet.h neuralNet.o xmmLayer.o
@@ -46,4 +50,4 @@ xmm32.o : xmm32.asm
 	nasm -f elf xmm32.asm
 
 clean: 
-	rm preann xmm32.o paralelLayer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer.o xmmLayer.o neuralNet.o cudaNeuralNet.o xmmNeuralNet.o task.o classificationTask.o individual.o chronometer.o main.o
+	rm preann $(OBJECTS)

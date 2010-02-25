@@ -232,3 +232,15 @@ Individual* Individual::crossoverLayers(Individual *other, Vector* bitVector)
 	delete (bitVector);
 	return offSpring;
 }
+
+void Individual::setFitness(float fitness)
+{
+	this->fitness = fitness;
+}
+
+float Individual::getFitness()
+{
+	return fitness;
+}
+
+
