@@ -6,6 +6,7 @@ using namespace std;
 
 #include "xmmNeuralNet.h"
 #include "cudaNeuralNet.h"
+#include "population.h"
 #include "chronometer.h"
 
 #define PATH "/home/timon/test.nn"
@@ -21,6 +22,7 @@ float testNeuralNet(NeuralNet* nn, Vector* input, unsigned times){
 	for (unsigned i=0; i < times; i++){
 		nn->calculateOutput();
 	}
+
 	chrono.stop();
 	printTotalAllocated();
 	printTotalPointers();

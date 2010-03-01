@@ -29,10 +29,18 @@ class Population {
 	unsigned tourSize;
 	unsigned numTruncation;
 
+	unsigned numWeighUniform;
+	unsigned numNeuronUniform;
+	unsigned numLayerUniform;
+	unsigned numWeighMultipoint;
+	unsigned numNeuronMultipoint;
+	unsigned numLayerMultipoint;
+
 	unsigned mutationsPerIndividual;
 	float mutationProbability;
 	float mutationRange;
 
+	void setDefaults();
 	void selectRouletteWheel();
 	void selectRanking();
 	void selectTournament();
@@ -52,8 +60,11 @@ public:
 	void setMutationRange(float range);
 
 	void addSelectionAlgorithm(SelectionType selectionType, unsigned number);
-	void setTournamentSize(unsigned tourSize);
-	void setRankingParams(float base, float step);
+	void addSelectionAlgorithm(SelectionType selectionType, unsigned number, unsigned tourSize);
+	void addSelectionAlgorithm(SelectionType selectionType, unsigned number, float base, float step);
+
+	void addCrossoverScheme(CrossoverType crossoverType, unsigned number, float probability);
+	void addCrossoverScheme(CrossoverType crossoverType, unsigned number, unsigned numPoints);
 
 	void nextGeneration();
 

@@ -15,21 +15,7 @@ Population::Population(Task* task)
 	size = 0;
 	maxSize = 0;
 
-	parents = NULL;
-	parentSize = 0;
-	maxParents = 0;
-
-	numRouletteWheel = 0;
-	numRanking = 0;
-	rankingBase = 5;
-	rankingStep = 1;
-	numTournament = 0;
-	tourSize = 2;
-	numTruncation = 0;
-
-	mutationsPerIndividual = 0;
-	mutationProbability = 0;
-	mutationRange = 0;
+	setDefaults();
 }
 
 Population::Population(Task *task, Individual *example, unsigned size, float range)
@@ -47,6 +33,11 @@ Population::Population(Task *task, Individual *example, unsigned size, float ran
 	}
 	delete(example);
 
+	setDefaults();
+}
+
+void Population::setDefaults()
+{
 	parents = NULL;
 	parentSize = 0;
 	maxParents = 0;
@@ -58,6 +49,13 @@ Population::Population(Task *task, Individual *example, unsigned size, float ran
 	numTournament = 0;
 	tourSize = 2;
 	numTruncation = 0;
+
+	numWeighUniform = 0;
+	numNeuronUniform = 0;
+	numLayerUniform = 0;
+	numWeighMultipoint = 0;
+	numNeuronMultipoint = 0;
+	numLayerMultipoint = 0;
 
 	mutationsPerIndividual = 0;
 	mutationProbability = 0;
@@ -179,18 +177,17 @@ void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned  nu
 		previousParents = numRouletteWheel;
 		numRouletteWheel = number;
 		break;
-	case RANKING:
-		previousParents = numRanking;
-		numRanking = number;
-			break;
-	case TOURNAMENT:
-		previousParents = numTournament;
-		numTournament = number;
-			break;
 	case TRUNCATION:
 		previousParents = numTruncation;
 		numTruncation = number;
 			break;
+	case RANKING:
+	case TOURNAMENT:
+		string = "Wrong parameters for this selection algorithm.";
+		throw error;
+	default:
+		string = "Unknown selection algorithm.";
+		throw error;
 	}
 
 	this->maxParents += number - previousParents;
@@ -200,15 +197,55 @@ void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned  nu
 	parents = (Individual**) mi_malloc(this->maxParents);
 }
 
-void Population::setRankingParams(float base, float step)
+void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned number, unsigned tourSize)
 {
+	if (selectionType != TOURNAMENT) {
+		string = "Wrong parameters for this selection algorithm.";
+		throw error;
+	}
+
+	if (parents) {
+		mi_free(parents);
+	}
+	this->maxParents += number - numTournament;
+	parents = (Individual**) mi_malloc(this->maxParents);
+
+	numTournament = number;
+	this->tourSize = tourSize;
+}
+
+void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned number, float base, float step)
+{
+	if (selectionType != TOURNAMENT) {
+		string = "Wrong parameters for this selection algorithm.";
+		throw error;
+	}
+
+	if (parents) {
+		mi_free(parents);
+	}
+	this->maxParents += number - numRanking;
+	parents = (Individual**) mi_malloc(this->maxParents);
+
+	numRanking = number;
 	this->rankingBase = base;
 	this->rankingStep = step;
 }
 
-void Population::setTournamentSize(unsigned tourSize)
+void Population::addCrossoverScheme(CrossoverType crossoverType, unsigned  number, unsigned  numPoints)
 {
-	this->tourSize = tourSize;
+	unsigned numWeighUniform;
+		unsigned numNeuronUniform;
+		unsigned numLayerUniform;
+		unsigned numWeighMultipoint;
+		unsigned numNeuronMultipoint;
+		unsigned numLayerMultipoint;
+
+	WEIGH_UNIFORM, NEURON_UNIFORM, LAYER_UNIFORM, WEIGH_MULTIPOiNT, NEURON_MULTIPOiNT, LAYER_MULTIPOiNT
+}
+
+void Population::addCrossoverScheme(CrossoverType crossoverType, unsigned  number, float probability)
+{
 }
 
 void Population::nextGeneration()
