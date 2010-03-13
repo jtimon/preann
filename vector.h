@@ -20,8 +20,8 @@ protected:
 
 	unsigned posToUnsignedPos(unsigned pos);
 	virtual unsigned posToBitPos(unsigned pos);
+	Vector() {};
 public:
-	Vector();
 	Vector(unsigned size, VectorType vectorType);
 	virtual ~Vector();
 

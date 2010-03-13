@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <fstream>
 
@@ -18,12 +17,13 @@ float testNeuralNet(NeuralNet* nn, Vector* input, unsigned times){
 	FILE* stream = fopen(PATH, "r+b");
 	nn->load(stream);
 	fclose(stream);
+
 	chrono.start();
 	for (unsigned i=0; i < times; i++){
 		nn->calculateOutput();
 	}
-
 	chrono.stop();
+
 	printTotalAllocated();
 	printTotalPointers();
 	delete(nn);

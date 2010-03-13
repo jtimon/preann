@@ -23,10 +23,10 @@ public:
 	Individual* newCopy();
 	void mutate(unsigned numMutations, float mutationRange);
 	void mutate(float probability, float mutationRange);
-	Individual* uniformCrossoverWeighs(Individual* other, float probability);
+	Individual** uniformCrossoverWeighs(Individual* other, float probability);
 	Individual* uniformCrossoverNeurons(Individual* other, float probability);
 	Individual* uniformCrossoverLayers(Individual* other, float probability);
-	Individual* multipointCrossoverWeighs(Individual* other, unsigned numPoints);
+	Individual** multipointCrossoverWeighs(Individual* other, unsigned numPoints);
 	Individual* multipointCrossoverNeurons(Individual* other, unsigned numPoints);
 	Individual* multipointCrossoverLayers(Individual* other, unsigned numPoints);
 	Individual* crossoverLayers(Individual *other, Vector* bitVector);

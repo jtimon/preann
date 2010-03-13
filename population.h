@@ -21,6 +21,10 @@ class Population {
 	unsigned parentSize;
 	unsigned maxParents;
 
+	Individual** offSpring;
+	unsigned offSpringSize;
+	unsigned maxOffSpring;
+
 	unsigned numRouletteWheel;
 	unsigned numRanking;
 	float rankingBase;
@@ -36,15 +40,34 @@ class Population {
 	unsigned numNeuronMultipoint;
 	unsigned numLayerMultipoint;
 
+	float probabilityWeighUniform;
+	float probabilityNeuronUniform;
+	float probabilityLayerUniform;
+	unsigned numPointsWeighMultipoint;
+	unsigned numPointsNeuronMultipoint;
+	unsigned numPointsLayerMultipoint;
+
 	unsigned mutationsPerIndividual;
 	float mutationProbability;
 	float mutationRange;
 
+	float total_score;
+
 	void setDefaults();
+
 	void selectRouletteWheel();
 	void selectRanking();
 	void selectTournament();
 	void selectTruncation();
+
+	void choseParents(Vector* bitVector, unsigned &parentA, unsigned &parentB);
+
+	void crossoverWeighUniform();
+	void crossoverNeuronUniform();
+	void crossoverLayerUniform();
+	void crossoverWeighMultipoint();
+	void crossoverNeuronMultipoint();
+	void crossoverLayerMultipoint();
 public:
 	Population(Task* task);
 	Population(Task* task, Individual* example, unsigned size, float range);
@@ -52,8 +75,6 @@ public:
 
 	void save(FILE* stream);
 	void load(FILE* stream);
-
-	void insertIndividual(Individual* individual);
 
 	void setMutationsPerIndividual(unsigned numMutations);
 	void setMutationProbability(float probability);
@@ -66,6 +87,7 @@ public:
 	void addCrossoverScheme(CrossoverType crossoverType, unsigned number, float probability);
 	void addCrossoverScheme(CrossoverType crossoverType, unsigned number, unsigned numPoints);
 
+	void insertIndividual(Individual* individual);
 	void nextGeneration();
 
 	Individual* getBestIndividual();

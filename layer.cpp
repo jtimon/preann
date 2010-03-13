@@ -442,7 +442,7 @@ Layer* Layer::uniformCrossoverNeurons(Layer* other, float probability)
 	return offSpring;
 }
 
-Layer *Layer::crossoverWeighs(Layer *other, Vector *bitVector)
+Layer** Layer::crossoverWeighs(Layer *other, Vector *bitVector)
 {
 	if (bitVector->getSize() != this->getNumberWeighs()){
 		string error = "The number of weighs must be equal to the size of the bitVector.";
@@ -452,6 +452,9 @@ Layer *Layer::crossoverWeighs(Layer *other, Vector *bitVector)
 		string error = "Cannot crossover a Layer without weighs.";
 		throw error;
 	}
+	Layer** twoLayers = (Layer**) mi_malloc(2 * sizeof(Layer*));
+	twoLayers[0] = this->newCopy();
+	twoLayers[1] = other->newCopy();
 	Layer* offSpring = other->newCopy();
 
 	unsigned vectorPos = 0;
@@ -459,9 +462,11 @@ Layer *Layer::crossoverWeighs(Layer *other, Vector *bitVector)
 		unsigned inputOffset = 0;
 
 		if (bitVector->getElement(vectorPos++)) {
-			offSpring->setThreshold(this->getThreshold(i), i);
+			twoLayers[0]->setThreshold(this->getThreshold(i), i);
+			twoLayers[1]->setThreshold(other->getThreshold(i), i);
 		} else {
-			offSpring->setThreshold(other->getThreshold(i), i);
+			twoLayers[0]->setThreshold(other->getThreshold(i), i);
+			twoLayers[1]->setThreshold(this->getThreshold(i), i);
 		}
 
 		for (unsigned j=0; j < numberInputs; j++){
@@ -469,22 +474,26 @@ Layer *Layer::crossoverWeighs(Layer *other, Vector *bitVector)
 				unsigned weighPos = i*totalWeighsPerOutput + inputOffset + k;
 				if (bitVector->getElement(vectorPos++)) {
 					if (inputType == FLOAT) {
-						offSpring->setFloatWeigh(this->getFloatWeigh(weighPos), weighPos);
+						twoLayers[0]->setFloatWeigh(this->getFloatWeigh(weighPos), weighPos);
+						twoLayers[1]->setFloatWeigh(other->getFloatWeigh(weighPos), weighPos);
 					} else {
-						offSpring->setByteWeigh(this->getByteWeigh(weighPos), weighPos);
+						twoLayers[0]->setByteWeigh(this->getByteWeigh(weighPos), weighPos);
+						twoLayers[1]->setByteWeigh(other->getByteWeigh(weighPos), weighPos);
 					}
 				} else {
 					if (inputType == FLOAT) {
-						offSpring->setFloatWeigh(other->getFloatWeigh(weighPos), weighPos);
+						twoLayers[0]->setFloatWeigh(other->getFloatWeigh(weighPos), weighPos);
+						twoLayers[1]->setFloatWeigh(this->getFloatWeigh(weighPos), weighPos);
 					} else {
-						offSpring->setByteWeigh(other->getByteWeigh(weighPos), weighPos);
+						twoLayers[0]->setByteWeigh(other->getByteWeigh(weighPos), weighPos);
+						twoLayers[1]->setByteWeigh(this->getByteWeigh(weighPos), weighPos);
 					}
 				}
 			}
 			inputOffset += getInput(j)->getWeighsSize();
 		}
 	}
-	return offSpring;
+	return twoLayers;
 }
 
 Layer *Layer::crossoverNeurons(Layer *other, Vector *bitVector)

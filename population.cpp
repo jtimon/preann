@@ -57,9 +57,19 @@ void Population::setDefaults()
 	numNeuronMultipoint = 0;
 	numLayerMultipoint = 0;
 
+	probabilityWeighUniform = 0;
+	probabilityNeuronUniform = 0;
+	probabilityLayerUniform = 0;
+	numPointsWeighMultipoint = 0;
+	numPointsNeuronMultipoint = 0;
+	numPointsLayerMultipoint = 0;
+
+
 	mutationsPerIndividual = 0;
 	mutationProbability = 0;
 	mutationRange = 1;
+
+	total_score = 0;
 }
 
 Population::~Population()
@@ -84,6 +94,20 @@ void Population::load(FILE *stream)
 	fread(&tourSize, sizeof(unsigned), 1, stream);
 	fread(&numTruncation, sizeof(unsigned), 1, stream);
 
+	fread(&numWeighUniform, sizeof(unsigned), 1, stream);
+	fread(&numNeuronUniform, sizeof(unsigned), 1, stream);
+	fread(&numLayerUniform, sizeof(unsigned), 1, stream);
+	fread(&numWeighMultipoint, sizeof(unsigned), 1, stream);
+	fread(&numNeuronMultipoint, sizeof(unsigned), 1, stream);
+	fread(&numLayerMultipoint, sizeof(unsigned), 1, stream);
+
+	fread(&probabilityWeighUniform, sizeof(float), 1, stream);
+	fread(&probabilityNeuronUniform, sizeof(float), 1, stream);
+	fread(&probabilityLayerUniform, sizeof(float), 1, stream);
+	fread(&numPointsWeighMultipoint, sizeof(unsigned), 1, stream);
+	fread(&numPointsNeuronMultipoint, sizeof(unsigned), 1, stream);
+	fread(&numPointsLayerMultipoint, sizeof(unsigned), 1, stream);
+
 	fread(&mutationsPerIndividual, sizeof(unsigned), 1, stream);
 	fread(&mutationProbability, sizeof(float), 1, stream);
 	fread(&mutationRange, sizeof(float), 1, stream);
@@ -106,6 +130,20 @@ void Population::save(FILE *stream)
 	fwrite(&numTournament, sizeof(unsigned), 1, stream);
 	fwrite(&tourSize, sizeof(unsigned), 1, stream);
 	fwrite(&numTruncation, sizeof(unsigned), 1, stream);
+
+	fwrite(&numWeighUniform, sizeof(unsigned), 1, stream);
+	fwrite(&numNeuronUniform, sizeof(unsigned), 1, stream);
+	fwrite(&numLayerUniform, sizeof(unsigned), 1, stream);
+	fwrite(&numWeighMultipoint, sizeof(unsigned), 1, stream);
+	fwrite(&numNeuronMultipoint, sizeof(unsigned), 1, stream);
+	fwrite(&numLayerMultipoint, sizeof(unsigned), 1, stream);
+
+	fwrite(&probabilityWeighUniform, sizeof(float), 1, stream);
+	fwrite(&probabilityNeuronUniform, sizeof(float), 1, stream);
+	fwrite(&probabilityLayerUniform, sizeof(float), 1, stream);
+	fwrite(&numPointsWeighMultipoint, sizeof(unsigned), 1, stream);
+	fwrite(&numPointsNeuronMultipoint, sizeof(unsigned), 1, stream);
+	fwrite(&numPointsLayerMultipoint, sizeof(unsigned), 1, stream);
 
 	fwrite(&mutationsPerIndividual, sizeof(unsigned), 1, stream);
 	fwrite(&mutationProbability, sizeof(float), 1, stream);
@@ -183,10 +221,8 @@ void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned  nu
 			break;
 	case RANKING:
 	case TOURNAMENT:
-		string = "Wrong parameters for this selection algorithm.";
-		throw error;
 	default:
-		string = "Unknown selection algorithm.";
+		string error = "Wrong parameters for this selection algorithm.";
 		throw error;
 	}
 
@@ -194,13 +230,13 @@ void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned  nu
 	if (parents) {
 		mi_free(parents);
 	}
-	parents = (Individual**) mi_malloc(this->maxParents);
+	parents = (Individual**) mi_malloc(this->maxParents * sizeof(Individual*));
 }
 
 void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned number, unsigned tourSize)
 {
 	if (selectionType != TOURNAMENT) {
-		string = "Wrong parameters for this selection algorithm.";
+		string error = "Wrong parameters for this selection algorithm.";
 		throw error;
 	}
 
@@ -208,7 +244,7 @@ void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned num
 		mi_free(parents);
 	}
 	this->maxParents += number - numTournament;
-	parents = (Individual**) mi_malloc(this->maxParents);
+	parents = (Individual**) mi_malloc(this->maxParents * sizeof(Individual*));
 
 	numTournament = number;
 	this->tourSize = tourSize;
@@ -217,7 +253,7 @@ void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned num
 void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned number, float base, float step)
 {
 	if (selectionType != TOURNAMENT) {
-		string = "Wrong parameters for this selection algorithm.";
+		string error = "Wrong parameters for this selection algorithm.";
 		throw error;
 	}
 
@@ -225,7 +261,7 @@ void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned num
 		mi_free(parents);
 	}
 	this->maxParents += number - numRanking;
-	parents = (Individual**) mi_malloc(this->maxParents);
+	parents = (Individual**) mi_malloc(this->maxParents * sizeof(Individual*));
 
 	numRanking = number;
 	this->rankingBase = base;
@@ -234,18 +270,62 @@ void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned num
 
 void Population::addCrossoverScheme(CrossoverType crossoverType, unsigned  number, unsigned  numPoints)
 {
-	unsigned numWeighUniform;
-		unsigned numNeuronUniform;
-		unsigned numLayerUniform;
-		unsigned numWeighMultipoint;
-		unsigned numNeuronMultipoint;
-		unsigned numLayerMultipoint;
+	unsigned previousChilds;
+	switch (crossoverType) {
+	case WEIGH_MULTIPOiNT:
+		previousChilds = numWeighMultipoint;
+		numWeighMultipoint = number;
+		numPointsWeighMultipoint = numPoints;
+		break;
+	case NEURON_MULTIPOiNT:
+		previousChilds = numNeuronMultipoint;
+		numNeuronMultipoint = number;
+		numPointsNeuronMultipoint = numPoints;
+			break;
+	case LAYER_MULTIPOiNT:
+		previousChilds = numLayerMultipoint;
+		numLayerMultipoint = number;
+		numPointsLayerMultipoint = numPoints;
+	default:
+		string error = "Wrong parameters for this crossover scheme.";
+		throw error;
+	}
 
-	WEIGH_UNIFORM, NEURON_UNIFORM, LAYER_UNIFORM, WEIGH_MULTIPOiNT, NEURON_MULTIPOiNT, LAYER_MULTIPOiNT
+	maxOffSpring += number - previousChilds;
+	if (offSpring) {
+		mi_free(offSpring);
+	}
+	offSpring = (Individual**) mi_malloc(maxOffSpring * sizeof(Individual*));
 }
 
 void Population::addCrossoverScheme(CrossoverType crossoverType, unsigned  number, float probability)
 {
+	unsigned previousChilds;
+	switch (crossoverType) {
+	case WEIGH_UNIFORM:
+		previousChilds = numWeighUniform;
+		numWeighUniform = number;
+		probabilityWeighUniform = probability;
+		break;
+	case NEURON_UNIFORM:
+		previousChilds = numNeuronUniform;
+		numNeuronUniform = number;
+		probabilityNeuronUniform = probability;
+			break;
+	case LAYER_UNIFORM:
+		previousChilds = numLayerUniform;
+		numLayerUniform = number;
+		probabilityLayerUniform = probability;
+	default:
+		string error = "Wrong parameters for this crossover scheme.";
+		throw error;
+	}
+
+	maxOffSpring += number - previousChilds;
+	if (offSpring) {
+		mi_free(offSpring);
+	}
+	offSpring = (Individual**) mi_malloc(maxOffSpring * sizeof(Individual*));
 }
 
 void Population::nextGeneration()
@@ -255,21 +335,27 @@ void Population::nextGeneration()
 	if (numTournament) selectTournament();
 	if (numTruncation) selectTruncation();
 
+	if (numWeighUniform) crossoverWeighUniform();
+	if (numNeuronUniform) crossoverNeuronUniform();
+	if (numLayerUniform) crossoverLayerUniform();
+
+	if (numWeighMultipoint) crossoverWeighMultipoint();
+	if (numNeuronMultipoint) crossoverNeuronMultipoint();
+	if (numLayerMultipoint) crossoverLayerMultipoint();
+
+
+
 	if (mutationsPerIndividual) {
 		for (unsigned i=0; i < parentSize; i++) {
-			parents[i]->mutate(mutationsPerIndividual, mutationRange);
+			offSpring[i]->mutate(mutationsPerIndividual, mutationRange);
 		}
 	}
 	if (mutationProbability) {
 		for (unsigned i=0; i < parentSize; i++) {
-			parents[i]->mutate(mutationProbability, mutationRange);
+			offSpring[i]->mutate(mutationProbability, mutationRange);
 		}
 	}
-
-	//TODO crossover
-	Individual** parents;
-	unsigned parentSize;
-	unsigned maxParents;
+	//TODO
 }
 
 float Population::getBestIndividualScore()
@@ -296,7 +382,7 @@ float Population::getAverageScore()
 		string error = "The population is empty.";
 		throw error;
 	}
-	//TODO
+	return total_score/size;
 }
 
 float Population::getWorstIndividualScore()
@@ -306,4 +392,160 @@ float Population::getWorstIndividualScore()
 		throw error;
 	}
 	return individualList[size - 1]->getFitness();
+}
+
+void Population::choseParents(Vector* bitVector, unsigned &parentA, unsigned &parentB)
+{
+	unsigned numChosenParents = 0;
+	while (numChosenParents < 2) {
+		unsigned chosenPoint = randomUnsigned(parentSize);
+		if (!bitVector->getElement(chosenPoint)) {
+			bitVector->setElement(chosenPoint, 1);
+
+			if (numChosenParents == 0) {
+				parentA = chosenPoint;
+			} else {
+				parentB = chosenPoint;
+			}
+			++numChosenParents;
+		}
+	}
+}
+
+void Population::crossoverWeighUniform()
+{
+	if (numWeighUniform > parentSize) {
+		string error = "The number of individuals generated by uniform crossover of weighs cannot be greater than the number of parents.";
+		throw error;
+	}
+
+	Vector* bitVector = new Vector(parentSize, BIT);
+	unsigned parentA, parentB;
+
+	Individual** twoChilds;
+	unsigned numGenerated = 0;
+
+	if (numWeighUniform & 1){
+		choseParents(bitVector, parentA, parentB);
+		twoChilds = parents[parentA]->uniformCrossoverWeighs(parents[parentB], probabilityWeighUniform);
+		offSpring[offSpringSize++] = twoChilds[0];
+		delete (twoChilds[1]);
+		++numGenerated;
+		mi_free(twoChilds);
+	}
+	while (numGenerated < numWeighUniform) {
+
+		choseParents(bitVector, parentA, parentB);
+		twoChilds = parents[parentA]->uniformCrossoverWeighs(parents[parentB], probabilityWeighUniform);
+		offSpring[offSpringSize++] = twoChilds[0];
+		offSpring[offSpringSize++] = twoChilds[1];
+		numGenerated += 2;
+		mi_free(twoChilds);
+	}
+}
+
+void Population::crossoverNeuronUniform()
+{
+}
+
+void Population::crossoverLayerUniform()
+{
+}
+
+void Population::crossoverWeighMultipoint()
+{
+}
+
+void Population::crossoverNeuronMultipoint()
+{
+}
+
+void Population::crossoverLayerMultipoint()
+{
+}
+
+void Population::selectRouletteWheel()
+{
+	for (unsigned i=0; i < numRouletteWheel; i++){
+		unsigned j = 0;
+		float chosen_point = randomPositiveFloat(total_score);
+		while (chosen_point) {
+			if (individualList[j]->getFitness() > chosen_point) {
+				parents[parentSize++] = individualList[j];
+				chosen_point = 0;
+			} else {
+				chosen_point -= individualList[j]->getFitness();
+				j++;
+			}
+		}
+	}
+}
+
+void Population::selectRanking()
+{
+	float total_base = rankingBase * size;
+	for (unsigned i=0; i < size; i++){
+		total_base += i * rankingStep;
+	}
+
+	for (unsigned i=0; i < numRanking; i++){
+		unsigned j = 0;
+		float chosen_point = randomPositiveFloat(total_base);
+		while (chosen_point) {
+
+			float individual_ranking_score = rankingBase + (rankingStep * (size - j - 1));
+			if (individual_ranking_score > chosen_point) {
+				parents[parentSize++] = individualList[j];
+				chosen_point = 0;
+			} else {
+				chosen_point -= individual_ranking_score;
+				j++;
+			}
+		}
+	}
+}
+
+void Population::selectTournament()
+{
+	if (tourSize > size){
+		string error = "The tournament size cannot be grater than the population size.";
+		throw error;
+	}
+
+	unsigned* alreadyChosen = (unsigned*) mi_malloc(sizeof(unsigned) * tourSize);
+	for (unsigned i=0; i < numTournament; i++){
+		unsigned selected = maxSize;
+		for (unsigned j=0; j < tourSize; j++){
+			unsigned chosen;
+			char newChosen = 0;
+			while (!newChosen) {
+				newChosen = 1;
+				chosen = randomUnsigned(size);
+				for (unsigned k=0; k < j; k++) {
+					if (chosen == alreadyChosen[k]){
+						newChosen = 0;
+						break;
+					}
+				}
+			}
+			alreadyChosen[j] = chosen;
+
+			if (chosen < selected) {
+				selected = chosen;
+			}
+		}
+		parents[parentSize++] = individualList[selected];
+	}
+}
+
+void Population::selectTruncation()
+{
+	if (numTruncation > size){
+		string error = "The number of selected individuals by truncation cannot be grater than the population size.";
+		throw error;
+	}
+
+	for (unsigned i=0; i < numTruncation; i++){
+		parents[parentSize++] = individualList[i];
+	}
 }

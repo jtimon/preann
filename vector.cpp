@@ -7,12 +7,6 @@
 
 #include "vector.h"
 
-Vector::Vector()
-{
-	size = 0;
-	data = NULL;
-}
-
 Vector::Vector(unsigned size, VectorType vectorType)
 {
 	this->size = size;
