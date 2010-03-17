@@ -21,6 +21,9 @@ class Population {
 	unsigned parentSize;
 	unsigned maxParents;
 
+	Vector* vectorUsedParents;
+	unsigned usedParents;
+
 	Individual** offSpring;
 	unsigned offSpringSize;
 	unsigned maxOffSpring;
@@ -55,19 +58,17 @@ class Population {
 
 	void setDefaults();
 
+	void selection();
 	void selectRouletteWheel();
 	void selectRanking();
 	void selectTournament();
 	void selectTruncation();
 
-	void choseParents(Vector* bitVector, unsigned &parentA, unsigned &parentB);
+	void crossover();
+	void choseParents(unsigned &parentA, unsigned &parentB);
+	Individual** crossover(Individual* parentA, Individual* parentB, CrossoverType crossoverType);
 
-	void crossoverWeighUniform();
-	void crossoverNeuronUniform();
-	void crossoverLayerUniform();
-	void crossoverWeighMultipoint();
-	void crossoverNeuronMultipoint();
-	void crossoverLayerMultipoint();
+	void mutation();
 public:
 	Population(Task* task);
 	Population(Task* task, Individual* example, unsigned size, float range);

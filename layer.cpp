@@ -369,79 +369,6 @@ void Layer::mutateWeighs(float probability, float mutationRange)
 	}
 }
 
-Layer* Layer::uniformCrossoverWeighs(Layer *other, float probability)
-{
-	if (!weighs) {
-		string error = "Cannot crossover a Layer without weighs.";
-		throw error;
-	}
-	Layer* offSpring = other->newCopy();
-
-	for (unsigned i=0; i < output->getSize(); i++){
-		unsigned inputOffset = 0;
-		for (unsigned j=0; j < numberInputs; j++){
-			for (unsigned k=0; k < getInput(j)->getSize(); k++){
-				unsigned weighPos = i*totalWeighsPerOutput + inputOffset + k;
-				if (randomPositiveFloat(1) < probability) {
-					if (inputType == FLOAT) {
-						offSpring->setFloatWeigh(this->getFloatWeigh(weighPos), weighPos);
-					} else {
-						offSpring->setByteWeigh(this->getByteWeigh(weighPos), weighPos);
-					}
-				} else {
-					if (inputType == FLOAT) {
-						offSpring->setFloatWeigh(other->getFloatWeigh(weighPos), weighPos);
-					} else {
-						offSpring->setByteWeigh(other->getByteWeigh(weighPos), weighPos);
-					}
-				}
-			}
-			inputOffset += getInput(j)->getWeighsSize();
-		}
-		if (randomPositiveFloat(1) < probability) {
-			offSpring->setThreshold(this->getThreshold(i), i);
-		} else {
-			offSpring->setThreshold(other->getThreshold(i), i);
-		}
-	}
-	return offSpring;
-}
-
-Layer* Layer::uniformCrossoverNeurons(Layer* other, float probability)
-{
-	if (!weighs) {
-		string error = "Cannot crossover a Layer without weighs.";
-		throw error;
-	}
-	Layer* offSpring = other->newCopy();
-
-	size_t size;
-	if (inputType == FLOAT){
-		size = totalWeighsPerOutput * sizeof(float);
-	} else {
-		size = totalWeighsPerOutput * sizeof(unsigned char);
-	}
-
-	void* destinationPtr = offSpring->getWeighsPtr();
-	void* thisPtr = this->getWeighsPtr();
-	void* otherPtr = other->getWeighsPtr();
-
-	for (unsigned i=0; i < output->getSize(); i++){
-
-		if (randomPositiveFloat(1) < probability) {
-			memcpy(destinationPtr, thisPtr, size);
-			offSpring->setThreshold(this->getThreshold(i), i);
-		} else {
-			memcpy(destinationPtr, otherPtr, size);
-			offSpring->setThreshold(other->getThreshold(i), i);
-		}
-		destinationPtr = (void*) ((char*)destinationPtr + size);
-		thisPtr = (void*) ((char*)thisPtr + size);
-		otherPtr = (void*) ((char*)otherPtr + size);
-	}
-	return offSpring;
-}
-
 Layer** Layer::crossoverWeighs(Layer *other, Vector *bitVector)
 {
 	if (bitVector->getSize() != this->getNumberWeighs()){
@@ -455,7 +382,6 @@ Layer** Layer::crossoverWeighs(Layer *other, Vector *bitVector)
 	Layer** twoLayers = (Layer**) mi_malloc(2 * sizeof(Layer*));
 	twoLayers[0] = this->newCopy();
 	twoLayers[1] = other->newCopy();
-	Layer* offSpring = other->newCopy();
 
 	unsigned vectorPos = 0;
 	for (unsigned i=0; i < output->getSize(); i++){
@@ -496,7 +422,7 @@ Layer** Layer::crossoverWeighs(Layer *other, Vector *bitVector)
 	return twoLayers;
 }
 
-Layer *Layer::crossoverNeurons(Layer *other, Vector *bitVector)
+Layer** Layer::crossoverNeurons(Layer *other, Vector *bitVector)
 {
 	if (bitVector->getSize() != output->getSize()){
 		string error = "The number of neurons must be equal to the size of the bitVector.";
@@ -507,6 +433,9 @@ Layer *Layer::crossoverNeurons(Layer *other, Vector *bitVector)
 		throw error;
 	}
 	Layer* offSpring = other->newCopy();
+	Layer** twoLayers = (Layer**) mi_malloc(2 * sizeof(Layer*));
+	twoLayers[0] = this->newCopy();
+	twoLayers[1] = other->newCopy();
 
 	size_t size;
 	if (inputType == FLOAT){
@@ -515,24 +444,32 @@ Layer *Layer::crossoverNeurons(Layer *other, Vector *bitVector)
 		size = totalWeighsPerOutput * sizeof(unsigned char);
 	}
 
-	void* destinationPtr = offSpring->getWeighsPtr();
+	void* destination_a_ptr = twoLayers[0]->getWeighsPtr();
+	void* destination_b_ptr = twoLayers[1]->getWeighsPtr();
 	void* thisPtr = this->getWeighsPtr();
 	void* otherPtr = other->getWeighsPtr();
 
 	for (unsigned i=0; i < output->getSize(); i++){
 
 		if (bitVector->getElement(i)) {
-			memcpy(destinationPtr, thisPtr, size);
-			offSpring->setThreshold(this->getThreshold(i), i);
+			memcpy(destination_a_ptr, thisPtr, size);
+			twoLayers[0]->setThreshold(this->getThreshold(i), i);
+
+			memcpy(destination_b_ptr, otherPtr, size);
+			twoLayers[1]->setThreshold(other->getThreshold(i), i);
 		} else {
-			memcpy(destinationPtr, otherPtr, size);
-			offSpring->setThreshold(other->getThreshold(i), i);
+			memcpy(destination_a_ptr, otherPtr, size);
+			twoLayers[0]->setThreshold(other->getThreshold(i), i);
+
+			memcpy(destination_b_ptr, thisPtr, size);
+			twoLayers[1]->setThreshold(this->getThreshold(i), i);
 		}
-		destinationPtr = (void*) ((char*)destinationPtr + size);
+		destination_a_ptr = (void*) ((char*)destination_a_ptr + size);
+		destination_b_ptr = (void*) ((char*)destination_b_ptr + size);
 		thisPtr = (void*) ((char*)thisPtr + size);
 		otherPtr = (void*) ((char*)otherPtr + size);
 	}
-	return offSpring;
+	return twoLayers;
 }
 
 float Layer::getThreshold(unsigned  neuronPos)

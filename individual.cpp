@@ -75,16 +75,39 @@ Individual** Individual::uniformCrossoverWeighs(Individual *other, float probabi
 	return twoChilds;
 }
 
-Individual *Individual::uniformCrossoverNeurons(Individual *other, float probability)
+Individual** Individual::crossoverLayers(Individual *other, Vector* bitVector)
 {
-	Individual* offSpring = this->newCopy();
-	for (unsigned i=0; i < this->numberLayers; i++) {
-		offSpring->setLayer(this->layers[i]->uniformCrossoverNeurons(other->getLayer(i), probability), i);
+	if (bitVector->getSize() != this->numberLayers){
+		string error = "The number of layers must be equal to the size of the bitVector.";
+		throw error;
 	}
-	offSpring->resetConnections();
-	return offSpring;
-	////////////////// TODO decidir si merece la pena tener la función uniformCrossoverNeurons en Layer
-/*
+	Individual** twoChilds = (Individual**) mi_malloc(2 * sizeof(Individual*));
+	twoChilds[0] = this->newCopy();
+	twoChilds[1] = other->newCopy();
+
+	for (unsigned i=0; i < this->numberLayers; i++) {
+
+		Layer* layerA = this->layers[i]->newCopy();
+		layerA->copyWeighs(this->layers[i]);
+		Layer* layerB = other->layers[i]->newCopy();
+		layerB->copyWeighs(other->layers[i]);
+
+		if (bitVector->getElement(i)) {
+			twoChilds[0]->setLayer(layerA, i);
+			twoChilds[1]->setLayer(layerB, i);
+		} else {
+			twoChilds[0]->setLayer(layerB, i);
+			twoChilds[1]->setLayer(layerA, i);
+		}
+	}
+	twoChilds[0]->resetConnections();
+	twoChilds[1]->resetConnections();
+	delete (bitVector);
+	return twoChilds;
+}
+
+Individual** Individual::uniformCrossoverNeurons(Individual *other, float probability)
+{
 	Vector** bitVectors = (Vector**) mi_malloc(sizeof(Vector*) * this->numberLayers);
 	for (unsigned i=0; i < this->numberLayers; i++){
 		bitVectors[i] = new Vector(this->layers[i]->getOutput()->getSize(), BIT);
@@ -98,16 +121,21 @@ Individual *Individual::uniformCrossoverNeurons(Individual *other, float probabi
 			}
 		}
 	}
-	Individual* offSpring = this->newCopy();
+	Individual** twoChilds = (Individual**) mi_malloc(2 * sizeof(Individual*));
+	twoChilds[0] = this->newCopy();
+	twoChilds[1] = other->newCopy();
 	for (unsigned i=0; i < this->numberLayers; i++) {
-		offSpring->setLayer(this->layers[i]->crossoverNeurons(other->getLayer(i), bitVectors[i]), i);
+		Layer** twoLayers = this->layers[i]->crossoverNeurons(other->getLayer(i), bitVectors[i]);
+		twoChilds[0]->setLayer(twoLayers[0], i);
+		twoChilds[1]->setLayer(twoLayers[1], i);
+		mi_free(twoLayers);
 	}
-	offSpring->resetConnections();
-	return offSpring;*/
-
+	twoChilds[0]->resetConnections();
+	twoChilds[1]->resetConnections();
+	return twoChilds;
 }
 
-Individual *Individual::uniformCrossoverLayers(Individual *other, float probability)
+Individual** Individual::uniformCrossoverLayers(Individual *other, float probability)
 {
 	Vector* bitVector = new Vector(this->numberLayers, BIT);
 	for (unsigned i=0; i < this->numberLayers; i++){
@@ -158,7 +186,7 @@ Individual** Individual::multipointCrossoverWeighs(Individual *other, unsigned n
 	return twoChilds;
 }
 
-Individual *Individual::multipointCrossoverNeurons(Individual *other, unsigned numPoints)
+Individual** Individual::multipointCrossoverNeurons(Individual *other, unsigned numPoints)
 {
 	Vector** bitVectors = (Vector**) mi_malloc(sizeof(Vector*) * this->numberLayers);
 	for (unsigned i=0; i < this->numberLayers; i++){
@@ -182,15 +210,21 @@ Individual *Individual::multipointCrossoverNeurons(Individual *other, unsigned n
 			bitVectors[i]->setElement(j, progenitor);
 		}
 	}
-	Individual* offSpring = this->newCopy();
+	Individual** twoChilds = (Individual**) mi_malloc(2 * sizeof(Individual*));
+	twoChilds[0] = this->newCopy();
+	twoChilds[1] = other->newCopy();
 	for (unsigned i=0; i < this->numberLayers; i++) {
-		offSpring->setLayer(this->layers[i]->crossoverNeurons(other->getLayer(i), bitVectors[i]), i);
+		Layer** twoLayers = this->layers[i]->crossoverNeurons(other->getLayer(i), bitVectors[i]);
+		twoChilds[0]->setLayer(twoLayers[0], i);
+		twoChilds[1]->setLayer(twoLayers[1], i);
+		mi_free(twoLayers);
 	}
-	offSpring->resetConnections();
-	return offSpring;
+	twoChilds[0]->resetConnections();
+	twoChilds[1]->resetConnections();
+	return twoChilds;
 }
 
-Individual *Individual::multipointCrossoverLayers(Individual *other, unsigned numPoints)
+Individual** Individual::multipointCrossoverLayers(Individual *other, unsigned numPoints)
 {
 	if (numPoints > this->numberLayers){
 		string error = "In multipointCrossoverLayers: there have to be more layers than points.";
@@ -213,29 +247,6 @@ Individual *Individual::multipointCrossoverLayers(Individual *other, unsigned nu
 		bitVector->setElement(i, progenitor);
 	}
 	return crossoverLayers(other, bitVector);
-}
-
-Individual* Individual::crossoverLayers(Individual *other, Vector* bitVector)
-{
-	if (bitVector->getSize() != this->numberLayers){
-		string error = "The number of layers must be equal to the size of the bitVector.";
-		throw error;
-	}
-	Individual* offSpring = this->newCopy();
-	Layer* layer;
-	for (unsigned i=0; i < this->numberLayers; i++) {
-		if (bitVector->getElement(i)) {
-			layer = this->layers[i]->newCopy();
-			layer->copyWeighs(this->layers[i]);
-		} else {
-			layer = other->layers[i]->newCopy();
-			layer->copyWeighs(other->layers[i]);
-		}
-		offSpring->setLayer(layer, i);
-	}
-	offSpring->resetConnections();
-	delete (bitVector);
-	return offSpring;
 }
 
 void Individual::setFitness(float fitness)
