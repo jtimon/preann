@@ -159,7 +159,7 @@ void Layer::calculateOutput()
 		string error = "Cannot calculate the output of a Layer without output.";
 		throw error;
 	}
-
+	//printf("\n ", 1);
 	float result;
 	for (unsigned i=0; i < output->getSize(); i++){
 		result = 0;
@@ -171,12 +171,19 @@ void Layer::calculateOutput()
 					result += getInput(j)->getElement(k) * ((float*)weighs)[weighPos];
 				} else {
 					result += getInput(j)->getElement(k) * (((unsigned char*)weighs)[weighPos] - 128);
+					//printf(" %d", (((unsigned char*)weighs)[weighPos] - 128));
+					if (getInput(j)->getElement(k)) {
+						//printf("X", 1);
+					}
+					//printf(" ", 1);
 				}
 			}
 			inputOffset += getInput(j)->getWeighsSize();
 		}
+		printf(" %f ", result - thresholds[i]);
 		output->setElement(i, Function(result - thresholds[i], functionType));
 	}
+	printf("\n ", 1);
 }
 
 Vector* Layer::getOutput()

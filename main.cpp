@@ -24,8 +24,9 @@ float testNeuralNet(NeuralNet* nn, Vector* input, unsigned times){
 	}
 	chrono.stop();
 
-	printTotalAllocated();
-	printTotalPointers();
+	//nn->getOutput(0)->showVector();
+	//printTotalAllocated();
+	//printTotalPointers();
 	delete(nn);
 	delete(input);
 
@@ -82,9 +83,10 @@ try{
 	unsigned maxSize;
 	unsigned times;
 	float seconds;
+	FILE* ftimes = fopen("/home/timon/times.log", "w");
 
-	for (type=0; type < 2; type++){
-/*
+	for (type=2; type < 3; type++){
+
 		switch(type){
 		case 0:
 			cout<<"version float"<<endl;
@@ -108,7 +110,7 @@ try{
 			cout<<"version sign"<<endl;
 			inputType = SIGN;
 			functionType = BIPOLAR_STEP;
-			maxSize = 4096;http://ubunthttp://ubuntuguide.org/wiki/Ubuntu:Karmic#gftphttp://ubuntuguide.org/wiki/Ubuntu:Karmic#gftpihuguide.org/wiki/Ubuntu:Karmic#gftp
+			maxSize = 4096;
 		    cTime.open ("cFeedForwardSignTime.dat");
 		    xmmTime.open ("xmmFeedForwardSignTime.dat");
 		    cudaTime.open ("cudaFeedForwardSignTime.dat");
@@ -123,46 +125,48 @@ try{
 			input = nn->newVector(size, inputType);
 			nn->addInput(input);
 			nn->createFeedForwardNet(numlayers, size, inputType, functionType);
-			printTotalAllocated();
-			printTotalPointers();
+			//printTotalAllocated();
+			//printTotalPointers();
 			nn->randomWeighs(rangeWeighs);
 			stream = fopen(PATH, "w+b");
 			nn->save(stream);
 			fclose(stream);
 			delete(nn);
 			delete(input);
-			printTotalAllocated();
-			printTotalPointers();
+			//printTotalAllocated();
+			//printTotalPointers();
 
 			//C++
-			cout<<"version C++"<<endl;
+			//cout<<"version C++"<<endl;
 			nn = new NeuralNet();
 			input = nn->newVector(size, inputType);
-			seconds = testNeuralNet(nn, input, times);
-			cTime<<size<<"  "<<seconds<<endl;
-			printTotalAllocated();
-			printTotalPointers();
+			float c_seconds = testNeuralNet(nn, input, times);
+			//cTime<<size<<"  "<<seconds<<endl;
+			//printTotalAllocated();
+			//printTotalPointers();
 			//XMM
-			cout<<"version XMM"<<endl;
+			//cout<<"version XMM"<<endl;
 			nn = new XmmNeuralNet();
 			input = nn->newVector(size, inputType);
-			seconds = testNeuralNet(nn, input, times);
-			xmmTime<<size<<"  "<<seconds<<endl;
-			printTotalAllocated();
-			printTotalPointers();
+			float xmm_seconds = testNeuralNet(nn, input, times);
+			//xmmTime<<size<<"  "<<seconds<<endl;
+			//printTotalAllocated();
+			//printTotalPointers();
 			//CUDA
-			cout<<"version CUDA"<<endl;
+			//cout<<"version CUDA"<<endl;
 			nn = new CudaNeuralNet();
 			input = nn->newVector(size, inputType);
-			seconds = testNeuralNet(nn, input, times);
-			cudaTime<<size<<"  "<<seconds<<endl;
-			printTotalAllocated();
-			printTotalPointers();
+			float cuda_seconds = testNeuralNet(nn, input, times);
+			//cudaTime<<size<<"  "<<seconds<<endl;
+			//printTotalAllocated();
+			//printTotalPointers();
+			printf("times(%d):  %f  %f  %f \n", size, c_seconds, xmm_seconds, cuda_seconds);
+			fprintf(ftimes, "%d  %f  %f  %f \n", size, c_seconds, xmm_seconds, cuda_seconds);
 		}
 		cTime.close();
 		xmmTime.close();
-		cudaTime.close();*/
-
+		cudaTime.close();
+/*
 		switch(type){
 		case 0:
 			inputType = FLOAT;
@@ -234,9 +238,10 @@ try{
 		}
 		cTime.close();
 		xmmTime.close();
-		cudaTime.close();
+		cudaTime.close();*/
 	}
 
+	fclose(ftimes);
 	total.stop();
 	cout<<"Total time spent: "<<chrono.getSeconds()<<endl;
 	cout<<"Exit success"<<endl;

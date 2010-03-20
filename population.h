@@ -65,8 +65,7 @@ class Population {
 	void selectTruncation();
 
 	void crossover();
-	void choseParents(unsigned &parentA, unsigned &parentB);
-	Individual** crossover(Individual* parentA, Individual* parentB, CrossoverType crossoverType);
+	Individual** crossover(CrossoverType crossoverType);
 
 	void mutation();
 public:
@@ -77,16 +76,16 @@ public:
 	void save(FILE* stream);
 	void load(FILE* stream);
 
-	void setMutationsPerIndividual(unsigned numMutations);
-	void setMutationProbability(float probability);
-	void setMutationRange(float range);
-
 	void addSelectionAlgorithm(SelectionType selectionType, unsigned number);
 	void addSelectionAlgorithm(SelectionType selectionType, unsigned number, unsigned tourSize);
 	void addSelectionAlgorithm(SelectionType selectionType, unsigned number, float base, float step);
 
 	void addCrossoverScheme(CrossoverType crossoverType, unsigned number, float probability);
 	void addCrossoverScheme(CrossoverType crossoverType, unsigned number, unsigned numPoints);
+
+	void setMutationsPerIndividual(unsigned numMutations);
+	void setMutationProbability(float probability);
+	void setMutationRange(float range);
 
 	void insertIndividual(Individual* individual);
 	void nextGeneration();

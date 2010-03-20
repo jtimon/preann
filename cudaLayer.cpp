@@ -23,14 +23,14 @@ void CudaLayer::toDevice(){
 
 	struct_Layer* layerAux = (struct_Layer*) mi_malloc(sizeof(struct_Layer));
 
-	layerAux->functionType = this->functionType;
-	layerAux->numberInputLayers = this->numberInputs;
-	layerAux->totalWeighsPerOutput = this->totalWeighsPerOutput;
+	layerAux->h_functionType = this->functionType;
+	layerAux->h_numberInputLayers = this->numberInputs;
+	layerAux->h_totalWeighsPerOutput = this->totalWeighsPerOutput;
 
 	layerAux->weighs = this->weighs;
 	layerAux->thresholds = this->thresholds;
 
-	layerAux->outputSize = this->output->getSize();
+	layerAux->h_outputSize = this->output->getSize();
 	layerAux->outputNeurons = this->output->getDataPointer();
 
 	unsigned* inputLayerSize = (unsigned*) mi_malloc(sizeof(unsigned) * this->numberInputs);
@@ -89,7 +89,24 @@ void CudaLayer::calculateOutput(){
 		string error = "Cannot calculate the output of a CudaLayer that is not in device memory.";
 		throw error;
 	}
-	LayerCalculation(deviceLayer, THREADS_PER_BLOCK, inputType, outputType);
+	//LayerCalculation(deviceLayer, THREADS_PER_BLOCK, inputType, outputType);
+	LayerCalculation2(deviceLayer, THREADS_PER_BLOCK, inputType, outputType);
 }
+/*
+void CudaLayer::calculateOutput(){
+
+	if (!deviceLayer) {
+		string error = "Cannot calculate the output of a CudaLayer that is not in device memory.";
+		throw error;
+	}
+	float* results = (float*) mi_malloc(deviceLayer->outputSize);
+	for (unsigned i=0; i < deviceLayer->outputSize; i++){
+		results[0] = 0;
+	}
+	for (unsigned i=0; i < deviceLayer->numberInputLayers; i++){
+		InputCalculation(deviceLayer->inputNeurons[i], deviceLayer->weighs, results, unsigned inputOffset, THREADS_PER_BLOCK);
+	}
+	LayerCalculation(deviceLayer, THREADS_PER_BLOCK, inputType, outputType);
+}*/
 
 

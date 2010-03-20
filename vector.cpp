@@ -7,7 +7,7 @@
 
 #include "vector.h"
 
-Vector::Vector(unsigned size, VectorType vectorType)
+Vector::Vector(unsigned size, VectorType vectorType = FLOAT)
 {
 	this->size = size;
 	this->vectorType = vectorType;
@@ -107,11 +107,11 @@ void Vector::setElement(unsigned  pos, float value)
 	} else {
 		unsigned unsignedPos = posToUnsignedPos(pos);
 		unsigned bitPos = posToBitPos(pos);
-		unsigned mask = (unsigned)(0x80000000>>(bitPos % BITS_PER_UNSIGNED));
+		unsigned mask = (unsigned)(0x80000000>>bitPos);
 		if (value > 0){
-			((unsigned*)data)[unsignedPos] = ((unsigned*)data)[unsignedPos] | mask;
+			((unsigned*)data)[unsignedPos] |= mask;
 		} else if (value == 0 || value == -1) {
-			((unsigned*)data)[unsignedPos] = ((unsigned*)data)[unsignedPos] & ~mask;
+			((unsigned*)data)[unsignedPos] &= ~mask;
 		}
 	}
 }
@@ -133,7 +133,7 @@ float Vector::getElement(unsigned  pos)
 		unsigned unsignedPos = posToUnsignedPos(pos);
 		unsigned bitPos = posToBitPos(pos);
 
-		unsigned mask = (unsigned)(0x80000000>>(bitPos % BITS_PER_UNSIGNED));
+		unsigned mask = (unsigned)(0x80000000>>bitPos);
 		if (((unsigned*)data)[unsignedPos] & mask){
 			return 1;
 		}

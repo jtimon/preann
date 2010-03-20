@@ -5,6 +5,7 @@
 #include "cudaDefinitions.h"
 
 extern "C" void LayerCalculation(struct_Layer* d_layer, unsigned threads, VectorType inputType, VectorType outputType);
+extern "C" void LayerCalculation2(struct_Layer* d_layer, unsigned block_size, VectorType inputType, VectorType outputType);
 
 extern "C" struct_Layer* LayerHostToDevice(struct_Layer* h_layer, VectorType inputType, VectorType outputType);
 extern "C" void SetInputsInDevice(struct_Layer* d_layer, void** inputs);
