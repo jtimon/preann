@@ -24,8 +24,8 @@ Vector::Vector(unsigned size, VectorType vectorType = FLOAT)
 	}
 	else {
 
-		for (unsigned i=0; i < byteSize; i++){
-			((unsigned char*)data)[i] = 0;
+		for (unsigned i=0; i < byteSize/sizeof(unsigned); i++){
+			((unsigned*)data)[i] = 1;
 		}
 	}
 }
@@ -148,7 +148,9 @@ void Vector::showVector()
 {
 	for (unsigned i=0; i < size; i++){
 		cout<<getElement(i)<<" ";
+		//printf("%f ", getElement(i))
+		//if (i % BITS_PER_UNSIGNED == BITS_PER_UNSIGNED - 1) cout<<endl;
 	}
-	cout<<endl;
+	cout<<endl<<"----------------"<<endl;
 }
 

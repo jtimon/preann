@@ -27,7 +27,7 @@ XmmVector::XmmVector(unsigned size, VectorType vectorType)
 	else {
 
 		for (unsigned i=0; i < byteSize; i++){
-			((unsigned char*)data)[i] = 0;
+			((unsigned char*)data)[i] = 255;
 		}
 	}
 }

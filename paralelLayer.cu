@@ -171,6 +171,8 @@ extern "C" void OutputToHost(void* output, struct_Layer* d_layer, VectorType out
 template <unsigned int blockSize, VectorType inputType>
 __global__ void SumConnectionsKernel(struct_Layer layer, unsigned input_id, unsigned input_size, unsigned inputOffset, float* results)
 {
+	//printf("bloque %d hilo %d \n", blockIdx.x, threadIdx.x);
+
 	extern __shared__ float sdata[];
 
 	unsigned tid = threadIdx.x;
@@ -189,31 +191,40 @@ __global__ void SumConnectionsKernel(struct_Layer layer, unsigned input_id, unsi
 			}
 		}
 	} else {
-		weighsOffset += inputOffset * BITS_PER_UNSIGNED;
+		//TODO Se leen mal los pesos (a partir de mas de un bloque de entrada)
+		// La primera capa mal si mas de un bloque de entrada
+		// La segunda capa mal si mas de un bloque de entrada
+
+		weighsOffset += (inputOffset + tid) * BITS_PER_UNSIGNED;
 		unsigned elementsToRead = ((input_size - 1) / BITS_PER_UNSIGNED) + 1;
 		while (i < elementsToRead){
 
 			unsigned mask = 0x80000000;
 			unsigned currentInput = ((unsigned**)(layer.inputNeurons))[input_id][i];
 			for (unsigned j=0; j < BITS_PER_UNSIGNED; j++) {
-				//printf(" %d", ((unsigned char*)layer.weighs)[weighsOffset + j] - 128);
+				//printf("input_block %d mask %d \n", currentInput, mask);
+//				if (currentInput & mask) {
+//					printf(" %dX ", ((unsigned char*)layer.weighs)[weighsOffset + j] - 128);
+//				} else {
+//					printf(" %d ", ((unsigned char*)layer.weighs)[weighsOffset + j] - 128);
+//				}
 				if (currentInput & mask) {
-					//printf("X", 1);
 					result += ((unsigned char*)layer.weighs)[weighsOffset + j] - 128;
-				} else if (inputType == SIGN) {
-					//printf(" b ", 1);
-					result += 128 - ((unsigned char*)layer.weighs)[weighsOffset + j];
+				} else {
+					if (inputType == SIGN) {
+						result += 128 - ((unsigned char*)layer.weighs)[weighsOffset + j];
+					}
 				}
-				//printf(" ", 1);
-				//printf(" mask %d ", mask);
 				mask >>= 1;
 			}
 			i += blockSize;
 			weighsOffset += blockSize * BITS_PER_UNSIGNED;
 		}
 	}
+
 	sdata[tid] = result;
 	__syncthreads();
+	//if (tid == 0) printf("\n", 1);
 
 	if (blockSize >= 512) { if (tid < 256) { sdata[tid] += sdata[tid + 256]; } __syncthreads(); }
 	if (blockSize >= 256) { if (tid < 128) { sdata[tid] += sdata[tid + 128]; } __syncthreads(); }
@@ -243,84 +254,221 @@ __global__ void SumConnectionsKernel(struct_Layer layer, unsigned input_id, unsi
 
 void SumLayerConnections(struct_Layer* layer, float* d_results, unsigned block_size, VectorType inputType){
 
-	dim3 dimBlock(block_size, 1, 1);
-	dim3 dimGrid(layer->h_outputSize, 1, 1);
-	int smemSize = block_size * sizeof(float);
+	unsigned grid_size = layer->h_outputSize;
+	unsigned shared_mem_size = block_size * sizeof(float);
 
-
+	//printf("block_size %d grid_size %d shared_mem_size %d \n", block_size, grid_size, shared_mem_size);
 	unsigned inputOffset = 0;
 	for (unsigned i=0; i < layer->h_numberInputLayers; i++){
 		if (inputType == FLOAT){
 			switch (block_size)
 			{
 				case 512:
-					SumConnectionsKernel<512, FLOAT><<<dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<512, FLOAT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 256:
-					SumConnectionsKernel<256, FLOAT><<<dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<256, FLOAT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 128:
-					SumConnectionsKernel<128, FLOAT><<<dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<128, FLOAT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 64:
-					SumConnectionsKernel< 64, FLOAT><<<dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel< 64, FLOAT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 32:
-					SumConnectionsKernel< 32, FLOAT><<<dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel< 32, FLOAT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 16:
-					SumConnectionsKernel< 16, FLOAT><<<dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel< 16, FLOAT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  8:
-					SumConnectionsKernel<  8, FLOAT><<<dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  8, FLOAT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  4:
-					SumConnectionsKernel<  4, FLOAT><<<dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  4, FLOAT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  2:
-					SumConnectionsKernel<  2, FLOAT><<<dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  2, FLOAT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  1:
-					SumConnectionsKernel<  1, FLOAT><<<dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  1, FLOAT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 			}
 		} else if (inputType == BIT) {
 			switch (block_size)
 			{
 				case 512:
-					SumConnectionsKernel<512, BIT><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<512, BIT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 256:
-					SumConnectionsKernel<256, BIT><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<256, BIT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 128:
-					SumConnectionsKernel<128, BIT><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<128, BIT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 64:
-					SumConnectionsKernel< 64, BIT><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel< 64, BIT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 32:
-					SumConnectionsKernel< 32, BIT><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel< 32, BIT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 16:
-					SumConnectionsKernel< 16, BIT><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel< 16, BIT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  8:
-					SumConnectionsKernel<  8, BIT><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  8, BIT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  4:
-					SumConnectionsKernel<  4, BIT><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  4, BIT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  2:
-					SumConnectionsKernel<  2, BIT><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  2, BIT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  1:
-					SumConnectionsKernel<  1, BIT><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  1, BIT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 			}
 		} else {
 			switch (block_size)
 			{
 				case 512:
-					SumConnectionsKernel<512, SIGN><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<512, SIGN><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 256:
-					SumConnectionsKernel<256, SIGN><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<256, SIGN><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 128:
-					SumConnectionsKernel<128, SIGN><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<128, SIGN><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 64:
-					SumConnectionsKernel< 64, SIGN><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel< 64, SIGN><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 32:
-					SumConnectionsKernel< 32, SIGN><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel< 32, SIGN><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case 16:
-					SumConnectionsKernel< 16, SIGN><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel< 16, SIGN><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  8:
-					SumConnectionsKernel<  8, SIGN><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  8, SIGN><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  4:
-					SumConnectionsKernel<  4, SIGN><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  4, SIGN><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  2:
-					SumConnectionsKernel<  2, SIGN><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  2, SIGN><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
 				case  1:
-					SumConnectionsKernel<  1, SIGN><<< dimGrid, dimBlock, smemSize >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+					SumConnectionsKernel<  1, SIGN><<< grid_size, block_size, shared_mem_size >>>(*layer, i, layer->h_inputLayerSize[i], inputOffset, d_results); break;
+			}
+		}
+		inputOffset += layer->h_inputLayerSize[i];
+	}
+	checkCUDAError("SumLayerConnections");
+}
+
+__global__ void SumFloatsConnectionsKernel2(struct_Layer layer, unsigned input_id, unsigned input_size, unsigned inputOffset, unsigned output_size, float* results)
+{
+	extern __shared__ float sdata[];
+
+	float* inputs = ((float**)layer.inputNeurons)[input_id];
+	unsigned tid = threadIdx.x;
+	unsigned readingLoops = (input_size - 1 / blockDim.x) + 1;
+
+	unsigned pos = tid;
+	for (unsigned i=0; i < readingLoops; i++){
+		if (pos < input_size){
+			sdata[pos] = inputs[pos];
+		}
+		pos += blockDim.x;
+	}
+	__syncthreads();
+
+	unsigned outputNeuron = blockIdx.x*blockDim.x + threadIdx.x;
+	if (outputNeuron < output_size){
+
+		unsigned weighsOffset = (outputNeuron * layer.h_totalWeighsPerOutput) + inputOffset;
+		float result = 0;
+		for (unsigned i=0; i < input_size; i++){
+			result += sdata[i] * ((float*)layer.weighs)[weighsOffset + i];
+		}
+		results[outputNeuron] += result;
+	}
+}
+
+template <VectorType inputType>
+__global__ void SumBitsConnectionsKernel2(struct_Layer layer, unsigned input_id, unsigned input_size, unsigned inputOffset, unsigned output_size, float* results)
+{
+	//printf("bloque %d hilo %d \n", blockIdx.x, threadIdx.x);
+	extern __shared__ unsigned shared_inputs[];
+
+	unsigned* inputs = ((unsigned**)layer.inputNeurons)[input_id];
+	unsigned tid = threadIdx.x;
+	unsigned input_blocks_to_read = ((input_size - 1) / BITS_PER_UNSIGNED) + 1;
+	unsigned readingLoops = ((input_blocks_to_read - 1) / blockDim.x) + 1;
+	//printf("input_blocks_to_read %d readingLoops %d \n", input_blocks_to_read, readingLoops);
+
+	unsigned pos = tid;
+
+	for (unsigned i=0; i < readingLoops; i++){
+		if (pos < input_blocks_to_read){
+			shared_inputs[pos] = inputs[pos];
+			//printf("hilo %d pos %d data %d \n", threadIdx.x, pos, inputs[pos]);
+		}
+		pos += blockDim.x;
+	}
+	__syncthreads();
+
+	unsigned outputNeuron = blockIdx.x*blockDim.x + threadIdx.x;
+	if (outputNeuron < output_size){
+
+		float result = 0;
+		unsigned weighsOffset = (outputNeuron * layer.h_totalWeighsPerOutput) + inputOffset;
+
+		for (unsigned i=0; i < input_blocks_to_read; i++){
+
+			unsigned input_block = shared_inputs[i];
+			unsigned mask = 0x80000000;
+			for (unsigned j=0; j < BITS_PER_UNSIGNED; j++){
+				//printf("input_block %d mask %d \n", input_block, mask);
+				//printf("mask %d weigh %d \n", mask, ((unsigned char*)layer.weighs)[weighsOffset] - 128);
+				if (input_block & mask){
+					//printf(" %dX ", ((unsigned char*)layer.weighs)[weighsOffset] - 128);
+					result += ((unsigned char*)layer.weighs)[weighsOffset] - 128;
+				} else {
+					//printf(" %d ", ((unsigned char*)layer.weighs)[weighsOffset] - 128);
+					if (inputType == SIGN) {
+						result += 128 - ((unsigned char*)layer.weighs)[weighsOffset];
+					}
+				}
+				++weighsOffset;
+				mask >>= 1;
+			}
+		}
+		/*
+		unsigned input_block;
+		unsigned mask;
+		unsigned input_index = 0;
+
+		for (unsigned i=0; i < input_size; i++){
+
+			if (i % BITS_PER_UNSIGNED == 0){
+				input_block = shared_inputs[input_index++];
+				mask = 0x80000000;
+			}
+
+			//printf("input_block %d mask %d \n", input_block, mask);
+			//printf("mask %d weigh %d \n", mask, ((unsigned char*)layer.weighs)[weighsOffset] - 128);
+			if (input_block & mask){
+				//printf(" %dX ", ((unsigned char*)layer.weighs)[weighsOffset] - 128);
+				result += ((unsigned char*)layer.weighs)[weighsOffset] - 128;
+			} else {
+				//printf(" %d ", ((unsigned char*)layer.weighs)[weighsOffset] - 128);
+				if (inputType == SIGN) {
+					result += 128 - ((unsigned char*)layer.weighs)[weighsOffset];
+				}
+			}
+			++weighsOffset;
+			mask >>= 1;
+		}*/
+		//printf("\n ", 1);
+		results[outputNeuron] += result;
+	}
+}
+
+void SumLayerConnections2(struct_Layer* layer, float* d_results, unsigned block_size, VectorType inputType){
+
+	unsigned grid_size = ((layer->h_outputSize - 1)/block_size) + 1;
+	unsigned shared_mem_size;
+
+	unsigned inputOffset = 0;
+	for (unsigned i=0; i < layer->h_numberInputLayers; i++){
+
+		unsigned inputSize = layer->h_inputLayerSize[i];
+
+		if (inputType == FLOAT){
+
+			shared_mem_size = inputSize * sizeof(float);
+			SumFloatsConnectionsKernel2<<< grid_size, block_size, shared_mem_size >>>(*layer, i, inputSize, inputOffset, layer->h_outputSize, d_results);
+		} else {
+			shared_mem_size =(((inputSize - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
+
+			//printf("block_size %d grid_size %d shared_mem_size %d \n", block_size, grid_size, shared_mem_size);
+			if (inputType == BIT) {
+				SumBitsConnectionsKernel2<BIT><<< grid_size, block_size, shared_mem_size >>>(*layer, i, inputSize, inputOffset, layer->h_outputSize, d_results);
+			} else {
+				SumBitsConnectionsKernel2<SIGN><<< grid_size, block_size, shared_mem_size >>>(*layer, i, inputSize, inputOffset, layer->h_outputSize, d_results);
 			}
 		}
 		inputOffset += layer->h_inputLayerSize[i];
@@ -350,30 +498,30 @@ __global__ void activation_float_kernel(float* results, float* output, unsigned 
 __global__ void activation_bit_kernel(float* results, unsigned* output, unsigned output_sz)
 {
 	int idx = blockIdx.x*blockDim.x + threadIdx.x;
-
 	unsigned offset = idx * BITS_PER_UNSIGNED;
-	unsigned toRead;
-	if (output_sz > offset) {
-		toRead = output_sz - offset;
-		if (toRead > BITS_PER_UNSIGNED) {
-			toRead = BITS_PER_UNSIGNED;
-		}
-	} else {
-		toRead = 0;
-	}
 
-	if (toRead > 0){
+	if (output_sz > offset){
 
+		unsigned toRead = min(BITS_PER_UNSIGNED, output_sz - offset);
 		unsigned threadOutput = 0;
 		unsigned mask = 0x80000000;
+
+		//printf(" hilo %d / salida %d / resultados: ", threadIdx.x, idx);
 		for (unsigned i=0; i < toRead; i++){
+			//printf(" ( %d , %d ) ", (int)results[offset + i], mask);
 			if (results[offset + i] > 0){
+				//printf(" 1 ", 1);
 				threadOutput |= mask;
 			} else {
+				//printf(" 0 ", 1);
 				threadOutput &= ~mask;
 			}
 			mask >>= 1;
 		}
+		//printf("\n ", 1);
+		//unsigned base = idx / 4;
+		//unsigned offset = 3 - (idx % 4);
+		//output[base + offset] = threadOutput;
 		output[idx] = threadOutput;
 	}
 }
@@ -389,11 +537,12 @@ extern "C" void LayerCalculation2(struct_Layer* d_layer, unsigned block_size, Ve
 	negative_thresholds_kernel<<< grid_size, block_size >>>(results, d_layer->thresholds, d_layer->h_outputSize);
 
 	SumLayerConnections(d_layer, results, block_size, inputType);
+	//SumLayerConnections2(d_layer, results, block_size, inputType);
 
-	for (unsigned i=0; i < d_layer->h_outputSize; i++){
-		printf(" %f ", results[i]);
-	}
-	printf("\n ", 1);
+//	for (unsigned i=0; i < d_layer->h_outputSize; i++){
+//		printf(" %f ", results[i]);
+//	}
+//	printf("\n ", 1);
 
 	if (outputType == FLOAT) {
 		activation_float_kernel<<< grid_size, block_size >>>(results, (float*)d_layer->outputNeurons, d_layer->h_outputSize, d_layer->h_functionType);

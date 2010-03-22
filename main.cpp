@@ -117,7 +117,7 @@ try{
 			break;
 		}
 
-		numlayers = 3;
+		numlayers = 2;
 		times = 1;
 		for(size=32; size <= maxSize; size += 32){
 			cout<<"size: "<<size<<endl;

@@ -78,6 +78,7 @@ void Layer::randomWeighs(float range)
 	}
 	for (unsigned i=0; i < output->getSize(); i++){
 
+		//thresholds[i] = 0;
 		thresholds[i] = randomFloat(range);
 		unsigned inputOffset = 0;
 		for (unsigned j=0; j < numberInputs; j++){
@@ -171,19 +172,23 @@ void Layer::calculateOutput()
 					result += getInput(j)->getElement(k) * ((float*)weighs)[weighPos];
 				} else {
 					result += getInput(j)->getElement(k) * (((unsigned char*)weighs)[weighPos] - 128);
-					//printf(" %d", (((unsigned char*)weighs)[weighPos] - 128));
-					if (getInput(j)->getElement(k)) {
-						//printf("X", 1);
-					}
-					//printf(" ", 1);
+
+					//printf("mask %d weigh %d \n", 0, (((unsigned char*)weighs)[weighPos] - 128));
+
+//					if (getInput(j)->getElement(k)) {
+//						printf(" %dX ", (((unsigned char*)weighs)[weighPos] - 128));
+//					} else {
+//						printf(" %d ", (((unsigned char*)weighs)[weighPos] - 128));
+//					}
 				}
 			}
 			inputOffset += getInput(j)->getWeighsSize();
 		}
-		printf(" %f ", result - thresholds[i]);
+//		printf("\n ", 1);
+//		printf(" %f ", result - thresholds[i]);
 		output->setElement(i, Function(result - thresholds[i], functionType));
 	}
-	printf("\n ", 1);
+//	printf("\n ", 1);
 }
 
 Vector* Layer::getOutput()
