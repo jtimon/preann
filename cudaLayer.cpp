@@ -1,5 +1,8 @@
 #include "cudaLayer.h"
 
+unsigned CudaLayer::block_size = 128;
+unsigned CudaLayer::version = 0;
+
 CudaLayer::CudaLayer()
 {
 	deviceLayer = NULL;
@@ -14,6 +17,8 @@ CudaLayer::~CudaLayer()
 {
 	freeDevice();
 }
+
+
 
 void CudaLayer::toDevice(){
 
@@ -89,24 +94,17 @@ void CudaLayer::calculateOutput(){
 		string error = "Cannot calculate the output of a CudaLayer that is not in device memory.";
 		throw error;
 	}
-	//LayerCalculation(deviceLayer, THREADS_PER_BLOCK, inputType, outputType);
-	LayerCalculation2(deviceLayer, THREADS_PER_BLOCK, inputType, outputType);
+	switch(CudaLayer::version){
+		case 0:
+			LayerCalculation(deviceLayer, CudaLayer::block_size, inputType, outputType);
+			break;
+		case 1:
+			LayerCalculation2(deviceLayer, CudaLayer::block_size, inputType, outputType);
+			break;
+		case 2:
+			LayerCalculation3(deviceLayer, CudaLayer::block_size, inputType, outputType);
+			break;
+	}
 }
-/*
-void CudaLayer::calculateOutput(){
-
-	if (!deviceLayer) {
-		string error = "Cannot calculate the output of a CudaLayer that is not in device memory.";
-		throw error;
-	}
-	float* results = (float*) mi_malloc(deviceLayer->outputSize);
-	for (unsigned i=0; i < deviceLayer->outputSize; i++){
-		results[0] = 0;
-	}
-	for (unsigned i=0; i < deviceLayer->numberInputLayers; i++){
-		InputCalculation(deviceLayer->inputNeurons[i], deviceLayer->weighs, results, unsigned inputOffset, THREADS_PER_BLOCK);
-	}
-	LayerCalculation(deviceLayer, THREADS_PER_BLOCK, inputType, outputType);
-}*/
 
 

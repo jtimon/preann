@@ -93,6 +93,8 @@ extern "C" void FreeDevice(struct_Layer* d_layer){
 	cudaFree(d_layer->weighs);
 	cudaFree(d_layer->thresholds);
 
+	mi_free(d_layer->h_inputLayerSize);
+
 	mi_free(d_layer);
 
 	checkCUDAError("Free Device");
@@ -473,7 +475,7 @@ void SumLayerConnections2(struct_Layer* layer, float* d_results, unsigned block_
 		}
 		inputOffset += layer->h_inputLayerSize[i];
 	}
-	checkCUDAError("SumLayerConnections");
+	checkCUDAError("SumLayerConnections2");
 }
 
 /*
@@ -552,7 +554,39 @@ extern "C" void LayerCalculation2(struct_Layer* d_layer, unsigned block_size, Ve
 		//printf("bloques %d / block_size %d / outputSize %d \n", grid_size, block_size, d_layer->h_outputSize);
 		activation_bit_kernel<<< grid_size, block_size >>>(results, (unsigned*)d_layer->outputNeurons, d_layer->h_outputSize);
 	}
+	cudaFree(results);
 	checkCUDAError("LayerCalculation2");
+}
+
+extern "C" void LayerCalculation3(struct_Layer* d_layer, unsigned block_size, VectorType inputType, VectorType outputType){
+
+	//TODO Cuda error: SumLayerConnections2 : invalid argument. si size >= 4077
+
+	unsigned grid_size = ((d_layer->h_outputSize - 1)/block_size) + 1;
+
+	float* results;
+	size_t size = sizeof(float) * d_layer->h_outputSize;
+	cudaMalloc((void**)&(results), size);
+
+	negative_thresholds_kernel<<< grid_size, block_size >>>(results, d_layer->thresholds, d_layer->h_outputSize);
+
+	SumLayerConnections2(d_layer, results, block_size, inputType);
+
+//	for (unsigned i=0; i < d_layer->h_outputSize; i++){
+//		printf(" %f ", results[i]);
+//	}
+//	printf("\n ", 1);
+
+	if (outputType == FLOAT) {
+		activation_float_kernel<<< grid_size, block_size >>>(results, (float*)d_layer->outputNeurons, d_layer->h_outputSize, d_layer->h_functionType);
+	} else {
+
+		grid_size = ((d_layer->h_outputSize - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
+		//printf("bloques %d / block_size %d / outputSize %d \n", grid_size, block_size, d_layer->h_outputSize);
+		activation_bit_kernel<<< grid_size, block_size >>>(results, (unsigned*)d_layer->outputNeurons, d_layer->h_outputSize);
+	}
+	cudaFree(results);
+	checkCUDAError("LayerCalculation3");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -6,6 +6,7 @@
 
 extern "C" void LayerCalculation(struct_Layer* d_layer, unsigned threads, VectorType inputType, VectorType outputType);
 extern "C" void LayerCalculation2(struct_Layer* d_layer, unsigned block_size, VectorType inputType, VectorType outputType);
+extern "C" void LayerCalculation3(struct_Layer* d_layer, unsigned block_size, VectorType inputType, VectorType outputType);
 
 extern "C" struct_Layer* LayerHostToDevice(struct_Layer* h_layer, VectorType inputType, VectorType outputType);
 extern "C" void SetInputsInDevice(struct_Layer* d_layer, void** inputs);
@@ -19,6 +20,8 @@ protected:
 	struct_Layer* deviceLayer;
 
 public:
+	static unsigned block_size;
+	static unsigned version;
 	CudaLayer();
 	CudaLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
 	virtual ~CudaLayer();
