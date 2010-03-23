@@ -3,6 +3,7 @@
 
 Layer::Layer()
 {
+	printf("se construye layer C\n");
 	inputs = NULL;
 	numberInputs = 0;
 	totalWeighsPerOutput = 0;
@@ -19,6 +20,7 @@ Layer::Layer()
 
 Layer::Layer(VectorType inputType, VectorType outputType, FunctionType functionType)
 {
+	printf("se construye layer C parametrizada\n");
 	inputs = NULL;
 	numberInputs = 0;
 	totalWeighsPerOutput = 0;

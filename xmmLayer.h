@@ -14,6 +14,7 @@ public:
 	virtual void calculateOutput();
 
 	virtual Vector* newVector(unsigned size, VectorType vectorType);
+	virtual Layer* newCopy();
 };
 
 #endif /*XMMLAYER_H_*/

@@ -1,8 +1,7 @@
 #ifndef NEURALNET_H_
 #define NEURALNET_H_
 
-#include "cudaLayer.h"
-#include "xmmLayer.h"
+#include "factory.h"
 
 class NeuralNet
 {
@@ -26,7 +25,9 @@ protected:
 	void increaseMaxOuputs();
 	unsigned getPosInGraph(unsigned source, unsigned destination);
 public:
+	ImplementationType implementationType;
 	NeuralNet();
+	NeuralNet(ImplementationType implementationType);
 	virtual ~NeuralNet();
 
 	void addInput(Vector* input);

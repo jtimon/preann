@@ -9,6 +9,7 @@
 
 Vector::Vector(unsigned size, VectorType vectorType = FLOAT)
 {
+	printf("se construye vector C\n");
 	this->size = size;
 	this->vectorType = vectorType;
 

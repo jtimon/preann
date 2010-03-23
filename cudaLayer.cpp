@@ -5,11 +5,13 @@ unsigned CudaLayer::version = 0;
 
 CudaLayer::CudaLayer()
 {
+	printf("se construye layer CUDA\n");
 	deviceLayer = NULL;
 }
 
 CudaLayer::CudaLayer(VectorType inputType, VectorType outputType, FunctionType functionType): Layer(inputType, outputType, functionType)
 {
+	printf("se construye layer CUDA parametrizada\n");
 	deviceLayer = NULL;
 }
 
@@ -18,7 +20,14 @@ CudaLayer::~CudaLayer()
 	freeDevice();
 }
 
+Layer* CudaLayer::newCopy()
+{
+	Layer* copy = new CudaLayer(inputType, outputType, functionType);
 
+	copy->setSizes(totalWeighsPerOutput, output->getSize());
+
+	return copy;
+}
 
 void CudaLayer::toDevice(){
 

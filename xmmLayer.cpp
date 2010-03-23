@@ -2,14 +2,25 @@
 
 XmmLayer::XmmLayer()
 {
+	printf("se construye layer XMM\n");
 }
 
 XmmLayer::XmmLayer(VectorType inputType, VectorType outputType, FunctionType functionType): Layer(inputType, outputType, functionType)
 {
+	printf("se construye layer XMM parametrizada\n");
 }
 
 XmmLayer::~XmmLayer()
 {
+}
+
+Layer* XmmLayer::newCopy()
+{
+	Layer* copy = new XmmLayer(inputType, outputType, functionType);
+
+	copy->setSizes(totalWeighsPerOutput, output->getSize());
+
+	return copy;
 }
 
 Vector* XmmLayer::newVector(unsigned size, VectorType vectorType)

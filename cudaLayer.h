@@ -35,6 +35,7 @@ public:
 
 	//redefined methods
 	virtual void calculateOutput();
+	virtual Layer* newCopy();
 
 	
 };

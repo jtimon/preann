@@ -3,7 +3,6 @@
 
 using namespace std;
 
-#include "xmmNeuralNet.h"
 #include "cudaNeuralNet.h"
 #include "population.h"
 #include "chronometer.h"
@@ -80,8 +79,9 @@ try{
 	float seconds;
 	FILE* ftimes = fopen("/home/timon/times.log", "w");
 
-	for (type=0; type < 1; type++){
+	//for (type=1; type < 2; type++){
 
+		type = 1;
 		switch(type){
 		case 0:
 			cout<<"version float"<<endl;
@@ -128,20 +128,20 @@ try{
 
 			//C++
 			//cout<<"version C++"<<endl;
-			/*nn = new NeuralNet();
+			nn = new NeuralNet();
 			input = nn->newVector(size, inputType);
 			float c_seconds = testNeuralNet(nn, input, times);
 			printf("c %f \n", c_seconds);
 			printTotalAllocated();
-			printTotalPointers();*/
+			printTotalPointers();
 			//XMM
 			//cout<<"version XMM"<<endl;
-			/*nn = new XmmNeuralNet();
+			nn = new NeuralNet(SSE2);
 			input = nn->newVector(size, inputType);
 			float xmm_seconds = testNeuralNet(nn, input, times);
 			printf("xmm %f \n", xmm_seconds);
 			printTotalAllocated();
-			printTotalPointers();*/
+			printTotalPointers();
 			//CUDA
 			//cout<<"version CUDA"<<endl;
 			for (unsigned version = 2; version < 3; version++){
@@ -159,7 +159,7 @@ try{
 			printTotalAllocated();
 			printTotalPointers();
 		}
-	}
+	//}
 
 	fclose(ftimes);
 	cout<<"Exit success"<<endl;

@@ -1,6 +1,7 @@
 #include "cudaDefinitions.h"
 
-__device__ float Func(float number, FunctionType functionType) {
+__device__
+float Func(float number, FunctionType functionType) {
 
 	//printf("number: %f ", number);
 	switch (functionType) {
@@ -40,7 +41,8 @@ void checkCUDAError(const char *msg)
     }                         
 }
 
-extern "C" struct_Layer* LayerHostToDevice(struct_Layer* h_layer, VectorType inputType, VectorType outputType){
+extern "C"
+struct_Layer* LayerHostToDevice(struct_Layer* h_layer, VectorType inputType, VectorType outputType){
 
 	size_t size;
 	struct_Layer* d_layer = (struct_Layer*) mi_malloc(sizeof(struct_Layer));
@@ -85,7 +87,8 @@ extern "C" struct_Layer* LayerHostToDevice(struct_Layer* h_layer, VectorType inp
 	return d_layer;
 }
 
-extern "C" void FreeDevice(struct_Layer* d_layer){
+extern "C"
+void FreeDevice(struct_Layer* d_layer){
 
 	cudaFree(d_layer->inputLayerSize);
 	cudaFree(d_layer->inputNeurons);
@@ -100,7 +103,8 @@ extern "C" void FreeDevice(struct_Layer* d_layer){
 	checkCUDAError("Free Device");
 }
 
-extern "C" void SetInputsInDevice(struct_Layer* d_layer, void** inputs){
+extern "C"
+void SetInputsInDevice(struct_Layer* d_layer, void** inputs){
 
 	size_t size = sizeof(void*) * d_layer->h_numberInputLayers;
 	cudaMemcpy(d_layer->inputNeurons, inputs, size, cudaMemcpyHostToDevice);
@@ -108,7 +112,8 @@ extern "C" void SetInputsInDevice(struct_Layer* d_layer, void** inputs){
 	checkCUDAError("Set Inputs In Device");
 }
 
-extern "C" void** InputsToDevice(void** host_inputs, unsigned* host_inputSizes, VectorType* host_types, unsigned numberInputs)
+extern "C"
+void** InputsToDevice(void** host_inputs, unsigned* host_inputSizes, VectorType* host_types, unsigned numberInputs)
 {
 	size_t size = numberInputs * sizeof(void*);
 	void** dev_inputs;
@@ -130,7 +135,8 @@ extern "C" void** InputsToDevice(void** host_inputs, unsigned* host_inputSizes, 
 }
 
 
-extern "C" void FreeInputs(void** dev_inputs, unsigned numberInputs)
+extern "C"
+void FreeInputs(void** dev_inputs, unsigned numberInputs)
 {
 	for (unsigned i=0; i < numberInputs; i++){
 		cudaFree(dev_inputs[i]);
@@ -139,7 +145,8 @@ extern "C" void FreeInputs(void** dev_inputs, unsigned numberInputs)
 	checkCUDAError("Free Inputs");
 }
 
-extern "C" void RefreshDeviceInputs(void** dev_inputs, void** host_inputs, unsigned* host_inputSizes, VectorType* host_types, unsigned numberInputs)
+extern "C"
+void RefreshDeviceInputs(void** dev_inputs, void** host_inputs, unsigned* host_inputSizes, VectorType* host_types, unsigned numberInputs)
 {
 	size_t size;
 	for (unsigned i=0; i < numberInputs; i++){
@@ -155,7 +162,8 @@ extern "C" void RefreshDeviceInputs(void** dev_inputs, void** host_inputs, unsig
 	checkCUDAError("Refresh Device Inputs");
 }
 
-extern "C" void OutputToHost(void* output, struct_Layer* d_layer, VectorType outputType){
+extern "C"
+void OutputToHost(void* output, struct_Layer* d_layer, VectorType outputType){
 
 	size_t size;
 
@@ -171,7 +179,8 @@ extern "C" void OutputToHost(void* output, struct_Layer* d_layer, VectorType out
 //NEW VERSION
 
 template <unsigned int blockSize, VectorType inputType>
-__global__ void SumConnectionsKernel(struct_Layer layer, unsigned input_id, unsigned input_size, unsigned inputOffset, float* results)
+__global__
+void SumConnectionsKernel(struct_Layer layer, unsigned input_id, unsigned input_size, unsigned inputOffset, float* results)
 {
 	//printf("bloque %d hilo %d \n", blockIdx.x, threadIdx.x);
 
@@ -340,7 +349,8 @@ void SumLayerConnections(struct_Layer* layer, float* d_results, unsigned block_s
 	checkCUDAError("SumLayerConnections");
 }
 
-__global__ void SumFloatsConnectionsKernel2(struct_Layer layer, unsigned input_id, unsigned input_size, unsigned inputOffset, unsigned output_size, float* results)
+__global__
+void SumFloatsConnectionsKernel2(struct_Layer layer, unsigned input_id, unsigned input_size, unsigned inputOffset, unsigned output_size, float* results)
 {
 	extern __shared__ float sdata[];
 
@@ -370,7 +380,8 @@ __global__ void SumFloatsConnectionsKernel2(struct_Layer layer, unsigned input_i
 }
 
 template <VectorType inputType>
-__global__ void SumBitsConnectionsKernel2(struct_Layer layer, unsigned input_id, unsigned input_size, unsigned inputOffset, unsigned output_size, float* results)
+__global__
+void SumBitsConnectionsKernel2(struct_Layer layer, unsigned input_id, unsigned input_size, unsigned inputOffset, unsigned output_size, float* results)
 {
 	//printf("bloque %d hilo %d \n", blockIdx.x, threadIdx.x);
 	extern __shared__ unsigned shared_inputs[];
@@ -461,10 +472,22 @@ void SumLayerConnections2(struct_Layer* layer, float* d_results, unsigned block_
 
 		if (inputType == FLOAT){
 
+			//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
+			if (inputSize > 4064){
+				string error = "The maximum float input size is 4064.";
+				throw error;
+			}
 			shared_mem_size = inputSize * sizeof(float);
+
 			SumFloatsConnectionsKernel2<<< grid_size, block_size, shared_mem_size >>>(*layer, i, inputSize, inputOffset, layer->h_outputSize, d_results);
 		} else {
 			shared_mem_size =(((inputSize - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
+			//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
+			if (shared_mem_size / sizeof(unsigned) > 4064){
+				//4064 * BITS_PER_UNSIGNED
+				string error = "The maximum bit/sign input size is 130048.";
+				throw error;
+			}
 
 			//printf("block_size %d grid_size %d shared_mem_size %d \n", block_size, grid_size, shared_mem_size);
 			if (inputType == BIT) {
@@ -485,19 +508,22 @@ __global__ void set_float_array(float* array, float value, unsigned array_sz)
 	if (idx < array_sz) array[idx] = value;
 }*/
 
-__global__ void negative_thresholds_kernel(float* results, float* thresholds, unsigned results_sz)
+__global__
+void negative_thresholds_kernel(float* results, float* thresholds, unsigned results_sz)
 {
 	int idx = blockIdx.x*blockDim.x + threadIdx.x;
 	if (idx < results_sz) results[idx] = - thresholds[idx];
 }
 
-__global__ void activation_float_kernel(float* results, float* output, unsigned output_sz, FunctionType functionType)
+__global__
+void activation_float_kernel(float* results, float* output, unsigned output_sz, FunctionType functionType)
 {
 	int idx = blockIdx.x*blockDim.x + threadIdx.x;
 	if (idx < output_sz) output[idx] = Func(results[idx], functionType);
 }
 
-__global__ void activation_bit_kernel(float* results, unsigned* output, unsigned output_sz)
+__global__
+void activation_bit_kernel(float* results, unsigned* output, unsigned output_sz)
 {
 	int idx = blockIdx.x*blockDim.x + threadIdx.x;
 	unsigned offset = idx * BITS_PER_UNSIGNED;
@@ -528,7 +554,8 @@ __global__ void activation_bit_kernel(float* results, unsigned* output, unsigned
 	}
 }
 
-extern "C" void LayerCalculation2(struct_Layer* d_layer, unsigned block_size, VectorType inputType, VectorType outputType){
+extern "C"
+void LayerCalculation2(struct_Layer* d_layer, unsigned block_size, VectorType inputType, VectorType outputType){
 
 	unsigned grid_size = ((d_layer->h_outputSize - 1)/block_size) + 1;
 
@@ -539,7 +566,6 @@ extern "C" void LayerCalculation2(struct_Layer* d_layer, unsigned block_size, Ve
 	negative_thresholds_kernel<<< grid_size, block_size >>>(results, d_layer->thresholds, d_layer->h_outputSize);
 
 	SumLayerConnections(d_layer, results, block_size, inputType);
-	//SumLayerConnections2(d_layer, results, block_size, inputType);
 
 //	for (unsigned i=0; i < d_layer->h_outputSize; i++){
 //		printf(" %f ", results[i]);
@@ -558,7 +584,8 @@ extern "C" void LayerCalculation2(struct_Layer* d_layer, unsigned block_size, Ve
 	checkCUDAError("LayerCalculation2");
 }
 
-extern "C" void LayerCalculation3(struct_Layer* d_layer, unsigned block_size, VectorType inputType, VectorType outputType){
+extern "C"
+void LayerCalculation3(struct_Layer* d_layer, unsigned block_size, VectorType inputType, VectorType outputType){
 
 	//TODO Cuda error: SumLayerConnections2 : invalid argument. si size >= 4077
 
@@ -593,7 +620,8 @@ extern "C" void LayerCalculation3(struct_Layer* d_layer, unsigned block_size, Ve
 //OLD VERSION
 
 template <unsigned int blockSize, VectorType inputType, VectorType outputType>
-__global__ void LayerCalculationKernel(struct_Layer layer)
+__global__
+void LayerCalculationKernel(struct_Layer layer)
 {
 	extern __shared__ float sdata[];
 
@@ -690,7 +718,8 @@ __global__ void LayerCalculationKernel(struct_Layer layer)
 	}
 }
 
-extern "C" void LayerCalculation(struct_Layer* d_layer, unsigned threads, VectorType inputType, VectorType outputType){
+extern "C"
+void LayerCalculation(struct_Layer* d_layer, unsigned threads, VectorType inputType, VectorType outputType){
 
 	dim3 dimBlock(threads, 1, 1);
 	dim3 dimGrid(d_layer->h_outputSize, 1, 1);

@@ -21,7 +21,6 @@ protected:
 	VectorType outputType;
 	FunctionType functionType;
 
-	virtual void setSizes(unsigned totalWeighsPerOutput, unsigned ouputSize);
 // To allow GA trainer work:
 	float getFloatWeigh(unsigned pos);
 	void setFloatWeigh(float value, unsigned pos);
@@ -32,6 +31,8 @@ protected:
 	void* getThresholdsPtr();
 	void* getWeighsPtr();
 public:
+	//TODO debería ser protected
+	virtual void setSizes(unsigned totalWeighsPerOutput, unsigned ouputSize);
 	Vector* getOutput();
 
 	Vector* getInput(unsigned pos);
@@ -52,7 +53,7 @@ public:
 	virtual ~Layer();
 
 // To allow GA trainer work:
-	Layer* newCopy();
+	virtual Layer* newCopy();
 	void copyWeighs(Layer* other);
 
 	void mutateWeigh(float mutationRange);

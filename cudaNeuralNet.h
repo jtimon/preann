@@ -28,8 +28,8 @@ public:
 	void hostToDevice();
 	void freeDevice();
 
-	virtual Layer* newLayer();
-	virtual Layer* newLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
+	//virtual Layer* newLayer();
+	//virtual Layer* newLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
 };
 
 #endif /* CUDANEURALNET_H_ */

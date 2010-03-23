@@ -2,6 +2,8 @@
 
 NeuralNet::NeuralNet()
 {
+	this->implementationType = C;
+
 	layers = NULL;
 	layerConnectionsGraph = NULL;
 	numberLayers = 0;
@@ -14,6 +16,24 @@ NeuralNet::NeuralNet()
 	outputLayers = NULL;
 	numberOutputs = 0;
 }
+
+NeuralNet::NeuralNet(ImplementationType implementationType)
+{
+	this->implementationType = implementationType;
+
+	layers = NULL;
+	layerConnectionsGraph = NULL;
+	numberLayers = 0;
+
+	inputs = NULL;
+	inputsToLayersGraph = NULL;
+	numberInputs = 0;
+
+	outputs = NULL;
+	outputLayers = NULL;
+	numberOutputs = 0;
+}
+
 
 NeuralNet::~NeuralNet()
 {
@@ -40,12 +60,17 @@ NeuralNet::~NeuralNet()
 	}
 }
 
+Vector* NeuralNet::newVector(unsigned size, VectorType vectorType)
+{
+	return Factory::newVector(implementationType, size, vectorType);
+}
+
 Layer* NeuralNet::newLayer(){
-	return new Layer();
+	return Factory::newLayer(implementationType);
 }
 
 Layer* NeuralNet::newLayer(VectorType inputType, VectorType outputType, FunctionType functionType){
-	return new Layer(inputType, outputType, functionType);
+	return Factory::newLayer(implementationType, inputType, outputType, functionType);
 }
 
 void NeuralNet::setInput(Vector *input)
@@ -58,11 +83,6 @@ void NeuralNet::setInput(Vector *input)
 void NeuralNet::resetConnections()
 {
 	//TODO resetConnections
-}
-
-Vector* NeuralNet::newVector(unsigned size, VectorType vectorType)
-{
-	return new Vector(size, vectorType);
 }
 
 void NeuralNet::calculateOutput()
