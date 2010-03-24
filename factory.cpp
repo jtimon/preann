@@ -17,8 +17,10 @@ Vector* Factory::newVector(ImplementationType implementationType, unsigned size,
 	switch(implementationType){
 		case C:
 		case CUDA:
+			printf("se construye vector C\n");
 			return new Vector(size, vectorType);
 		case SSE2:
+			printf("se construye vector XMM\n");
 			return new XmmVector(size, vectorType);
 	}
 }

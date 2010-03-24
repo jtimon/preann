@@ -30,16 +30,24 @@ public:
 	NeuralNet(ImplementationType implementationType);
 	virtual ~NeuralNet();
 
+	void* createInput(unsigned size, VectorType vectorType);
+	void* getInput(unsigned pos);
+	VectorType getInputType(unsigned pos);
+	unsigned getNumInputs();
+
+	void addOutput(unsigned layerPos);
+	void* getOutput(unsigned outputPos);
+	VectorType getOutputType(unsigned outputPos);
+	unsigned getNumOutputs();
+
 	void addInput(Vector* input);
 	void setInput(Vector* input);
-	void addOutput(unsigned layerPos);
-	void addLayer(unsigned  size, VectorType sourceType, VectorType destinationType);
-	void addLayer(unsigned  size, VectorType sourceType, VectorType destinationType, FunctionType functiontype);
+	void addLayer(unsigned size, VectorType sourceType, VectorType destinationType);
+	void addLayer(unsigned size, VectorType sourceType, VectorType destinationType, FunctionType functiontype);
 	void addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos);
 	void addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos);
 
-	Vector* getOutput(unsigned outputPos);
-	unsigned getNumOutputs();
+	//Vector* getOutput(unsigned outputPos);
 	void randomWeighs(float range);
 	void save(FILE* stream);
 	void load(FILE* stream);
@@ -53,9 +61,6 @@ public:
 
 	virtual void calculateOutput();
 
-	virtual Layer* newLayer();
-	virtual Layer* newLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
-	virtual Vector* newVector(unsigned size, VectorType vectorType);
 };
 
 #endif /*NEURALNET_H_*/

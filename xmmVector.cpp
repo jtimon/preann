@@ -11,7 +11,6 @@
 
 XmmVector::XmmVector(unsigned size, VectorType vectorType)
 {
-	printf("se construye vector XMM\n");
 	this->size = size;
 	this->vectorType = vectorType;
 

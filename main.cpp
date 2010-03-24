@@ -108,7 +108,7 @@ try{
 		for(size=maxSize; size <= maxSize; size += 32){
 			cout<<"size: "<<size<<endl;
 			nn = new NeuralNet();
-			input = nn->newVector(size, inputType);
+			input = Factory::newVector(C, size, inputType);
 			nn->addInput(input);
 
 			nn->createFeedForwardNet(numlayers, size, inputType, functionType);
@@ -128,8 +128,8 @@ try{
 
 			//C++
 			//cout<<"version C++"<<endl;
-			nn = new NeuralNet();
-			input = nn->newVector(size, inputType);
+			nn = new NeuralNet(C);
+			input = Factory::newVector(C, size, inputType);
 			float c_seconds = testNeuralNet(nn, input, times);
 			printf("c %f \n", c_seconds);
 			printTotalAllocated();
@@ -137,7 +137,7 @@ try{
 			//XMM
 			//cout<<"version XMM"<<endl;
 			nn = new NeuralNet(SSE2);
-			input = nn->newVector(size, inputType);
+			input = Factory::newVector(SSE2, size, inputType);
 			float xmm_seconds = testNeuralNet(nn, input, times);
 			printf("xmm %f \n", xmm_seconds);
 			printTotalAllocated();
@@ -150,7 +150,7 @@ try{
 				for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
 					CudaLayer::block_size = blockSize;
 					nn = new CudaNeuralNet();
-					input = nn->newVector(size, inputType);
+					input = Factory::newVector(CUDA, size, inputType);
 					float cuda_seconds = testNeuralNet(nn, input, times);
 					printf("(%d) %f ", blockSize, cuda_seconds);
 				}

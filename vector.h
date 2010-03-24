@@ -8,8 +8,8 @@
 #ifndef VECTOR_H_
 #define VECTOR_H_
 
-#include "generalDefinitions.h"
 #include "xmmDefinitions.h"
+#include "interface.h"
 
 class Vector {
 protected:

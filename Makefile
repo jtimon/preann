@@ -2,7 +2,7 @@
 # usar tabulador (no espacios) en la línea de comando 
 # Project: Paralel Reinforcement Evolutionary Artificial Neural Network
  
-OBJECTS = xmm32.o paralelLayer.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer.o xmmLayer.o neuralNet.o cudaNeuralNet.o task.o classificationTask.o individual.o main.o factory.o
+OBJECTS = xmm32.o paralelLayer.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer.o xmmLayer.o neuralNet.o cudaNeuralNet.o task.o classificationTask.o individual.o main.o factory.o interface.o
 
 CX = gcc-4.3
 CXX = g++-4.3 -ggdb
@@ -24,8 +24,6 @@ individual.o : individual.cpp individual.h neuralNet.o
 	$(CXX) -c individual.cpp
 cudaNeuralNet.o : cudaNeuralNet.cpp cudaNeuralNet.h neuralNet.o cudaLayer.o
 	$(CXX) -c cudaNeuralNet.cpp
-#xmmNeuralNet.o : xmmNeuralNet.cpp xmmNeuralNet.h neuralNet.o xmmLayer.o
-#	$(CXX) -c xmmNeuralNet.cpp
 neuralNet.o : neuralNet.cpp neuralNet.h layer.o factory.o
 	$(CXX) -c neuralNet.cpp
 factory.o : factory.cpp factory.h xmmLayer.o cudaLayer.o
@@ -38,8 +36,10 @@ layer.o : layer.h layer.cpp vector.o
 	$(CXX) -c layer.cpp
 xmmVector.o : xmmVector.h xmmVector.cpp vector.o xmmDefinitions.h
 	$(CXX) -c xmmVector.cpp
-vector.o : vector.h vector.cpp commonFunctions.o
+vector.o : vector.h vector.cpp interface.o
 	$(CXX) -c vector.cpp
+interface.o : interface.h interface.cpp commonFunctions.o
+	$(CXX) -c interface.cpp
 commonFunctions.o : commonFunctions.c generalDefinitions.h
 	$(CXX) -c commonFunctions.c
 	

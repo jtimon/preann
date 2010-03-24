@@ -9,7 +9,6 @@
 
 Vector::Vector(unsigned size, VectorType vectorType = FLOAT)
 {
-	printf("se construye vector C\n");
 	this->size = size;
 	this->vectorType = vectorType;
 
@@ -90,6 +89,7 @@ float Vector::compareTo(Vector *other)
 	for (unsigned i=0; i < this->size; i++) {
 		accumulator += this->getElement(i) - other->getElement(i);
 	}
+	return accumulator;
 }
 
 void Vector::setElement(unsigned  pos, float value)

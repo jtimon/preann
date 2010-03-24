@@ -60,19 +60,6 @@ NeuralNet::~NeuralNet()
 	}
 }
 
-Vector* NeuralNet::newVector(unsigned size, VectorType vectorType)
-{
-	return Factory::newVector(implementationType, size, vectorType);
-}
-
-Layer* NeuralNet::newLayer(){
-	return Factory::newLayer(implementationType);
-}
-
-Layer* NeuralNet::newLayer(VectorType inputType, VectorType outputType, FunctionType functionType){
-	return Factory::newLayer(implementationType, inputType, outputType, functionType);
-}
-
 void NeuralNet::setInput(Vector *input)
 {
 	if (inputs){
@@ -180,7 +167,7 @@ void NeuralNet::addLayer(Layer* layer)
 
 void NeuralNet::addLayer(unsigned  size, VectorType sourceType, VectorType destinationType, FunctionType functiontype)
 {
-	Layer* layer = newLayer(sourceType, destinationType, functiontype);
+	Layer* layer = Factory::newLayer(implementationType, sourceType, destinationType, functiontype);
 	addLayer(layer);
 	layer->setSize(size);
 }
@@ -188,6 +175,26 @@ void NeuralNet::addLayer(unsigned  size, VectorType sourceType, VectorType desti
 void NeuralNet::addLayer(unsigned  size, VectorType sourceType, VectorType destinationType)
 {
 	addLayer(size, sourceType, destinationType, IDENTITY);
+}
+
+void* NeuralNet::createInput(unsigned size, VectorType vectorType)
+{
+
+}
+
+void* NeuralNet::getInput(unsigned pos)
+{
+
+}
+
+VectorType NeuralNet::getInputType(unsigned pos)
+{
+
+}
+
+unsigned NeuralNet::getNumInputs()
+{
+
 }
 
 void NeuralNet::addOutput(unsigned layerPos)
@@ -219,7 +226,7 @@ void NeuralNet::addOutput(unsigned layerPos)
 
 }
 
-Vector* NeuralNet::getOutput(unsigned outputPos)
+void* NeuralNet::getOutput(unsigned outputPos)
 {
 	if (outputPos >= numberLayers){
 		char buffer[100];
@@ -228,7 +235,18 @@ Vector* NeuralNet::getOutput(unsigned outputPos)
 		throw error;
 	}
 
-	return outputs[outputPos];
+	return outputs[outputPos]->getDataPointer();
+}
+
+VectorType NeuralNet::getOutputType(unsigned outputPos)
+{
+	if (outputPos >= numberLayers){
+		char buffer[100];
+		sprintf(buffer, "Cannot access the output in position %d: there are just %d outputs.", outputPos, numberLayers);
+		string error = buffer;
+		throw error;
+	}
+	return outputs[outputPos]->getVectorType();
 }
 
 unsigned NeuralNet::getNumOutputs()
@@ -314,7 +332,7 @@ void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, Ve
 		default:
 		case FLOAT:
 			if (firstFloatLayer == NULL){
-				firstFloatLayer = newLayer(FLOAT, hiddenLayersType, functiontype);
+				firstFloatLayer = Factory::newLayer(implementationType, FLOAT, hiddenLayersType, functiontype);
 				addLayer(firstFloatLayer);
 				firstFloatIndex = currentLayerIndex++;
 			}
@@ -322,7 +340,7 @@ void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, Ve
 			break;
 		case BIT:
 			if (firstBitLayer == NULL){
-				firstBitLayer = newLayer(BIT, hiddenLayersType, functiontype);
+				firstBitLayer = Factory::newLayer(implementationType, BIT, hiddenLayersType, functiontype);
 				addLayer(firstBitLayer);
 				firstBitIndex = currentLayerIndex++;
 			}
@@ -330,7 +348,7 @@ void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, Ve
 			break;
 		case SIGN:
 			if (firstSignLayer == NULL){
-				firstSignLayer = newLayer(SIGN, hiddenLayersType, functiontype);
+				firstSignLayer = Factory::newLayer(implementationType, SIGN, hiddenLayersType, functiontype);
 				addLayer(firstSignLayer);
 				firstSignIndex = currentLayerIndex++;
 			}
@@ -340,7 +358,8 @@ void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, Ve
 	}
 	Layer* unificationLayer;
 	if (currentLayerIndex > 1){
-		unificationLayer = newLayer(hiddenLayersType, hiddenLayersType, functiontype);
+		unificationLayer = Factory::newLayer(implementationType, hiddenLayersType, hiddenLayersType, functiontype);
+
 		addLayer(unificationLayer);
 	}
 	if (firstFloatLayer != NULL){
@@ -372,7 +391,7 @@ void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, Ve
 
 	unsigned i;
 	for (i=currentLayerIndex; i<numLayers; i++){
-		Layer* layer = newLayer(hiddenLayersType, hiddenLayersType, functiontype);
+		Layer* layer = Factory::newLayer(implementationType, hiddenLayersType, hiddenLayersType, functiontype);
 		addLayer(layer);
 		addLayersConnection(i-1, i);
 		layer->setSize(sizeLayers);
@@ -380,8 +399,7 @@ void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, Ve
 
 	unsigned char offset = 0;
 	if (floatOutputSize > 0){
-
-		Layer* layer = newLayer(hiddenLayersType, FLOAT, functiontype);
+		Layer* layer = Factory::newLayer(implementationType, hiddenLayersType, FLOAT, functiontype);
 		addLayer(layer);
 		addLayersConnection(i-1, i);
 		layer->setSize(floatOutputSize);
@@ -389,7 +407,7 @@ void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, Ve
 		++offset;
 	}
 	if (bitOutputSize > 0){
-		Layer* layer = newLayer(hiddenLayersType, BIT, functiontype);
+		Layer* layer = Factory::newLayer(implementationType, hiddenLayersType, BIT, functiontype);
 		addLayer(layer);
 		addLayersConnection(i-1, i+offset);
 		layer->setSize(bitOutputSize);
@@ -411,7 +429,7 @@ void NeuralNet::createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers,
 		throw error;
 	}
 	for (unsigned i=0; i<numLayers; i++){
-		Layer* layer = newLayer(hiddenLayersType, hiddenLayersType, functiontype);
+		Layer* layer = Factory::newLayer(implementationType, hiddenLayersType, hiddenLayersType, functiontype);
 		addLayer(layer);
 		layer->setSize(sizeLayers);
 	}
@@ -475,7 +493,7 @@ void NeuralNet::load(FILE* stream)
 
 	layers = (Layer**) mi_malloc(sizeof(Layer*) * numberLayers);
 	for (unsigned i=0; i<numberLayers; i++){
-		layers[i] = newLayer();
+		layers[i] = Factory::newLayer(this->implementationType);
 		layers[i]->load(stream);
 	}
 

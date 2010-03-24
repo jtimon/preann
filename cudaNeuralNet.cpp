@@ -16,16 +16,6 @@ CudaNeuralNet::~CudaNeuralNet()
 	mi_free(host_inputSizes);
 	mi_free(host_types);
 }
-/*
-Layer* CudaNeuralNet::newLayer()
-{
-	return new CudaLayer();
-}
-
-Layer* CudaNeuralNet::newLayer(VectorType inputType, VectorType outputType, FunctionType functionType)
-{
-	return new CudaLayer(inputType, outputType, functionType);
-}*/
 
 void CudaNeuralNet::hostToDevice(){
 
