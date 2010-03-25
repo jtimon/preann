@@ -7,7 +7,7 @@
 
 #include "vector.h"
 
-Vector::Vector(unsigned size, VectorType vectorType = FLOAT)
+Vector::Vector(unsigned size, VectorType vectorType)
 {
 	this->size = size;
 	this->vectorType = vectorType;
@@ -24,13 +24,18 @@ Vector::Vector(unsigned size, VectorType vectorType = FLOAT)
 	}
 	else {
 
-		for (unsigned i=0; i < byteSize/sizeof(unsigned); i++){
-			((unsigned*)data)[i] = 1;
+		for (unsigned i=0; i < byteSize; i++){
+			((unsigned char*)data)[i] = 0;
 		}
 	}
 }
 
 Vector::~Vector()
+{
+	free();
+}
+
+void Vector::free()
 {
 	if (data) {
 		mi_free(data);
@@ -73,85 +78,63 @@ VectorType Vector::getVectorType()
 	return vectorType;
 }
 
-unsigned Vector::posToBitPos(unsigned  pos)
+void Vector::copyFrom(Interface* interface)
 {
-	return pos%BITS_PER_UNSIGNED;
-}
-
-unsigned Vector::posToUnsignedPos(unsigned  pos)
-{
-	return pos/BITS_PER_UNSIGNED;
-}
-
-float Vector::compareTo(Vector *other)
-{
-	float accumulator = 0;
-	for (unsigned i=0; i < this->size; i++) {
-		accumulator += this->getElement(i) - other->getElement(i);
-	}
-	return accumulator;
-}
-
-void Vector::setElement(unsigned  pos, float value)
-{
-	if (pos >= size){
-		char buffer[100];
-		sprintf(buffer, "Cannot set the element in position %d: the size of the vector is %d.", pos, size);
-		string error = buffer;
+	if (size < interface->getSize()){
+		string error = "The Interface is greater than the Vector.";
 		throw error;
 	}
+	if (vectorType != interface->getVectorType()){
+		string error = "The Type of the Interface is different than the Vector Type.";
+		throw error;
+	}
+	memcpy(data, interface->getDataPointer(), interface->getByteSize());
+}
 
+void Vector::copyTo(Interface* interface)
+{
+	if (interface->getSize() < size){
+		string error = "The Vector is greater than the Interface.";
+		throw error;
+	}
+	if (vectorType != interface->getVectorType()){
+		string error = "The Type of the Interface is different than the Vector Type.";
+		throw error;
+	}
+	memcpy(interface->getDataPointer(), data, this->getByteSize());
+}
+
+void Vector::activation(float* results, FunctionType functionType)
+{
 	if (vectorType == FLOAT){
-
-		((float*)data)[pos] = value;
-
+		for (unsigned i=0; i < size; i++){
+			((float*)data)[i] = Function(results[i], functionType);
+		}
 	} else {
-		unsigned unsignedPos = posToUnsignedPos(pos);
-		unsigned bitPos = posToBitPos(pos);
-		unsigned mask = (unsigned)(0x80000000>>bitPos);
-		if (value > 0){
-			((unsigned*)data)[unsignedPos] |= mask;
-		} else if (value == 0 || value == -1) {
-			((unsigned*)data)[unsignedPos] &= ~mask;
+		unsigned* vectorData = (unsigned*)data;
+		unsigned mask;
+		for (unsigned i=0; i < size; i++){
+
+			if (i % BITS_PER_UNSIGNED == 0){
+				mask = 0x80000000;
+			} else {
+				mask >>= 1;
+			}
+
+			if (results[i] > 0){
+				vectorData[i/BITS_PER_UNSIGNED] |= mask;
+			} else {
+				vectorData[i/BITS_PER_UNSIGNED] &= ~mask;
+			}
 		}
 	}
 }
 
-float Vector::getElement(unsigned  pos)
+void Vector::print()
 {
-	if (pos >= size){
-		char buffer[100];
-		sprintf(buffer, "Cannot get the element in position %d: the size of the vector is %d.", pos, size);
-		string error = buffer;
-		throw error;
-	}
-
-
-	if (vectorType == FLOAT){
-		return ((float*)data)[pos];
-	}
-	else {
-		unsigned unsignedPos = posToUnsignedPos(pos);
-		unsigned bitPos = posToBitPos(pos);
-
-		unsigned mask = (unsigned)(0x80000000>>bitPos);
-		if (((unsigned*)data)[unsignedPos] & mask){
-			return 1;
-		}
-		if (vectorType == BIT) {
-			return 0;
-		}
-		return -1;
-	}
-}
-
-void Vector::showVector()
-{
-	for (unsigned i=0; i < size; i++){
-		cout<<getElement(i)<<" ";
-		//printf("%f ", getElement(i))
-		//if (i % BITS_PER_UNSIGNED == BITS_PER_UNSIGNED - 1) cout<<endl;
-	}
-	cout<<endl<<"----------------"<<endl;
+	Interface* interface = new Interface(size, vectorType);
+	copyTo(interface);
+	interface->print();
+	delete(interface);
 }
 

@@ -10,7 +10,7 @@
 
 #include "generalDefinitions.h"
 
-#define BITS_PER_BLOCK 128
+#define BITS_PER_BLOCK (128)
 #define BYTES_PER_BLOCK (BITS_PER_BLOCK/8)
 #define FLOATS_PER_BLOCK (BYTES_PER_BLOCK/sizeof(float))
 

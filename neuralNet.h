@@ -12,13 +12,15 @@ protected:
 	unsigned numberLayers;
 
 	Vector** inputs;
+	Interface** inputInterfaces;
 	unsigned char* inputsToLayersGraph;
 	unsigned numberInputs;
 
-	Vector** outputs;
+	Interface** outputs;
 	unsigned* outputLayers;
 	unsigned numberOutputs;
 
+	void setDefaults();
 	void addLayer(Layer* layer);
 	void increaseMaxInputs();
 	void increaseMaxLayers();
@@ -30,24 +32,19 @@ public:
 	NeuralNet(ImplementationType implementationType);
 	virtual ~NeuralNet();
 
-	void* createInput(unsigned size, VectorType vectorType);
-	void* getInput(unsigned pos);
-	VectorType getInputType(unsigned pos);
+	Interface* createInput(unsigned size, VectorType vectorType);
+	Interface* getInput(unsigned pos);
 	unsigned getNumInputs();
 
-	void addOutput(unsigned layerPos);
-	void* getOutput(unsigned outputPos);
-	VectorType getOutputType(unsigned outputPos);
+	Interface* createOutput(unsigned layerPos);
+	Interface* getOutput(unsigned outputPos);
 	unsigned getNumOutputs();
 
-	void addInput(Vector* input);
-	void setInput(Vector* input);
-	void addLayer(unsigned size, VectorType sourceType, VectorType destinationType);
 	void addLayer(unsigned size, VectorType sourceType, VectorType destinationType, FunctionType functiontype);
+
 	void addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos);
 	void addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos);
 
-	//Vector* getOutput(unsigned outputPos);
 	void randomWeighs(float range);
 	void save(FILE* stream);
 	void load(FILE* stream);
@@ -60,7 +57,6 @@ public:
 	void createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype);
 
 	virtual void calculateOutput();
-
 };
 
 #endif /*NEURALNET_H_*/

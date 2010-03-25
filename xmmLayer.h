@@ -7,7 +7,7 @@
 class XmmLayer: public Layer
 {
 public:
-	XmmLayer();
+	//XmmLayer();
 	XmmLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
 	virtual ~XmmLayer();
 	

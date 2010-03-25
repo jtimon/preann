@@ -12,16 +12,14 @@
 #include "xmmDefinitions.h"
 
 class XmmVector: public Vector {
-protected:
-	unsigned posToBytePos(unsigned pos);
-	virtual unsigned posToBitPos(unsigned pos);
+	virtual unsigned getByteSize();
 public:
 	XmmVector(unsigned size, VectorType vectorType);
 	virtual ~XmmVector();
 
-	virtual unsigned getByteSize();
-	virtual float getElement(unsigned pos);
-	virtual void setElement(unsigned pos, float value);
+	virtual void copyFrom(Interface* interface);
+	virtual void copyTo(Interface* interface);
+	virtual void activation(float* results, FunctionType functionType);
 
 	unsigned getNumLoops();
 };

@@ -80,6 +80,10 @@ void CudaNeuralNet::calculateOutput()
 {
 	if(!inDevice) hostToDevice();
 
+	for (unsigned i=0; i < numberInputs; i++){
+		inputs[i]->copyFrom(inputInterfaces[i]);
+	}
+
 	RefreshDeviceInputs(dev_inputs, host_inputs, host_inputSizes, host_types, numberInputs);
 
 	for (unsigned i=0; i < numberLayers; i++){
@@ -88,6 +92,9 @@ void CudaNeuralNet::calculateOutput()
 
 	for (unsigned i=0; i < numberOutputs; i++){
 		((CudaLayer*)layers[outputLayers[i]])->outputToHost();
+	}
+	for (unsigned i=0; i < numberOutputs; i++){
+		layers[outputLayers[i]]->getOutput()->copyTo(outputs[i]);
 	}
 }
 

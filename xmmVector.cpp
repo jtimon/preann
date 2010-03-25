@@ -1,12 +1,3 @@
-
-
-/*
- * xmmVector.cpp
- *
- *  Created on: Nov 17, 2009
- *      Author: timon
- */
-
 #include "xmmVector.h"
 
 XmmVector::XmmVector(unsigned size, VectorType vectorType)
@@ -27,7 +18,7 @@ XmmVector::XmmVector(unsigned size, VectorType vectorType)
 	else {
 
 		for (unsigned i=0; i < byteSize; i++){
-			((unsigned char*)data)[i] = 255;
+			((unsigned char*)data)[i] = 0;
 		}
 	}
 }
@@ -36,80 +27,133 @@ XmmVector::~XmmVector()
 {
 }
 
+void XmmVector::copyFrom(Interface* interface)
+{
+	if (size < interface->getSize()){
+		string error = "The Interface is greater than the Vector.";
+		throw error;
+	}
+	if (vectorType != interface->getVectorType()){
+		string error = "The Type of the Interface is different than the Vector Type.";
+		throw error;
+	}
+
+	if (vectorType == FLOAT){
+		memcpy(data, interface->getDataPointer(), interface->getByteSize());
+	} else {
+		unsigned char* vectorData = (unsigned char*)data;
+		unsigned blockOffset = 0;
+		unsigned bytePos = 0;
+		unsigned char vectorMask = 128;
+
+		for (unsigned i=0; i < size; i++){
+
+			if (interface->getElement(i) > 0){
+				vectorData[blockOffset + bytePos] |= vectorMask;
+			} else {
+				vectorData[blockOffset + bytePos] &= ~vectorMask;
+			}
+
+			if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK-1)){
+				bytePos = 0;
+				if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK-1)){
+					blockOffset += BYTES_PER_BLOCK;
+					vectorMask = 128;
+				} else {
+					vectorMask >>= 1;
+				}
+			} else {
+				++bytePos;
+			}
+		}
+	}
+}
+
+void XmmVector::copyTo(Interface* interface)
+{
+	if (interface->getSize() < size){
+		string error = "The Vector is greater than the Interface.";
+		throw error;
+	}
+	if (vectorType != interface->getVectorType()){
+		string error = "The Type of the Interface is different than the Vector Type.";
+		throw error;
+	}
+
+	if (vectorType == FLOAT){
+		memcpy(interface->getDataPointer(), data, this->getByteSize());
+	} else {
+		unsigned char* vectorData = (unsigned char*)data;
+		unsigned blockOffset = 0;
+		unsigned bytePos = 0;
+		unsigned char vectorMask = 128;
+
+		for (unsigned i=0; i < size; i++){
+
+			if (vectorData[blockOffset + bytePos] & vectorMask){
+				interface->setElement(i, 1);
+			} else {
+				interface->setElement(i, 0);
+			}
+
+			if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK-1)){
+				bytePos = 0;
+				if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK-1)){
+					blockOffset += BYTES_PER_BLOCK;
+					vectorMask = 128;
+				} else {
+					vectorMask >>= 1;
+				}
+			} else {
+				++bytePos;
+			}
+		}
+	}
+}
+
+void XmmVector::activation(float* results, FunctionType functionType)
+{
+	if (vectorType == FLOAT){
+		for (unsigned i=0; i < size; i++){
+			((float*)data)[i] = Function(results[i], functionType);
+		}
+	} else {
+		unsigned char* vectorData = (unsigned char*)data;
+
+		unsigned blockOffset = 0;
+		unsigned bytePos = 0;
+		unsigned char vectorMask = 128;
+
+		for (unsigned i=0; i < size; i++){
+
+			if (results[i] > 0){
+				vectorData[blockOffset + bytePos] |= vectorMask;
+			} else {
+				vectorData[blockOffset + bytePos] &= ~vectorMask;
+			}
+
+			if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK-1)){
+				bytePos = 0;
+				if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK-1)){
+					blockOffset += BYTES_PER_BLOCK;
+					vectorMask = 128;
+				} else {
+					vectorMask >>= 1;
+				}
+			} else {
+				++bytePos;
+			}
+		}
+	}
+}
+
 unsigned XmmVector::getByteSize()
 {
 	if (vectorType == FLOAT){
-
-		return (((size-1)/FLOATS_PER_BLOCK)+1) * FLOATS_PER_BLOCK * sizeof(float);
+		return (((size-1)/FLOATS_PER_BLOCK)+1) * BYTES_PER_BLOCK;
 	}
 	else {
 		return (((size-1)/BITS_PER_BLOCK)+1) * BYTES_PER_BLOCK;
-	}
-}
-
-unsigned XmmVector::posToBytePos(unsigned  pos)
-{
-	return pos%BYTES_PER_BLOCK + ((pos/BITS_PER_BLOCK)*BYTES_PER_BLOCK);
-}
-
-unsigned XmmVector::posToBitPos(unsigned  pos)
-{
-	return (pos/BYTES_PER_BLOCK)%BITS_PER_BYTE;
-}
-
-void XmmVector::setElement(unsigned  pos, float value)
-{
-	if (pos >= size){
-		cout<<"Error: trying to access a position greater than the vector size."<<endl;
-	}
-	else {
-		if (vectorType == FLOAT){
-
-			((float*)data)[pos] = value;
-		} else {
-			unsigned bytePos = posToBytePos(pos);
-			unsigned bitPos = posToBitPos(pos);
-
-			unsigned char mask = (unsigned char)(0x80>>bitPos);
-			if (value == 1){
-				((unsigned char*)data)[bytePos] = ((unsigned char*)data)[bytePos] | mask;
-			} else if (value == 0 || value == -1) {
-				((unsigned char*)data)[bytePos] = ((unsigned char*)data)[bytePos] & ~mask;
-			}
-			else {
-				cout<<"Error: A float value cannot be assigned to a bit nor a sign element."<<endl;
-			}
-		}
-	}
-}
-
-float XmmVector::getElement(unsigned  pos)
-{
-	if (pos >= size){
-		cout<<"Error: trying to access a position greater than the vector size."<<endl;
-		return 0;
-	} else {
-		if (vectorType == FLOAT){
-
-			return ((float*)data)[pos];
-		}
-		else {
-			unsigned bytePos = posToBytePos(pos);
-			unsigned bitPos = posToBitPos(pos);
-
-			unsigned char mask = (unsigned char)(0x80>>bitPos);
-			if (((unsigned char*)data)[bytePos] & mask){
-				return 1;
-			}
-			else {
-				if (vectorType == BIT) {
-					return 0;
-				}
-				else{
-					return -1;
-				}
-			}
-		}
 	}
 }
 
@@ -124,4 +168,3 @@ unsigned XmmVector::getNumLoops()
 	}
 	return toReturn;
 }
-

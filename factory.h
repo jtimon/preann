@@ -12,15 +12,12 @@
 //#include "xmmLayer.h"
 #include "layer.h"
 
-typedef enum {C, SSE2, CUDA} ImplementationType;
+typedef enum {C, SSE2, CUDA, CUDA2} ImplementationType;
 
 class Factory {
 public:
-	Factory();
-	virtual ~Factory();
 	static Vector* newVector(ImplementationType implementationType, unsigned size, VectorType vectorType);
-	static Layer* newLayer(ImplementationType implementationType);
-	static Layer* newLayer(ImplementationType implementationType, VectorType inputType, VectorType outputType, FunctionType functionType);
+	static Layer* newLayer(ImplementationType implementationType, FunctionType functionType = IDENTITY, VectorType inputType = FLOAT, VectorType outputType = FLOAT);
 };
 
 #endif /* FACTORY_H_ */

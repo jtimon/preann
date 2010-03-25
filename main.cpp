@@ -9,10 +9,10 @@ using namespace std;
 
 #define PATH "/home/timon/test.nn"
 
-float testNeuralNet(NeuralNet* nn, Vector* input, unsigned times){
+float testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType, unsigned times){
 
 	Chronometer chrono;
-	nn->addInput(input);
+	nn->createInput(inputSize, vectorType);
 	FILE* stream = fopen(PATH, "r+b");
 	nn->load(stream);
 	fclose(stream);
@@ -23,11 +23,10 @@ float testNeuralNet(NeuralNet* nn, Vector* input, unsigned times){
 	}
 	chrono.stop();
 
-	//nn->getOutput(0)->showVector();
+	nn->getOutput(0)->print();
 	//printTotalAllocated();
 	//printTotalPointers();
 	delete(nn);
-	delete(input);
 
 	return chrono.getSeconds();
 }
@@ -45,7 +44,7 @@ float testLayer(Layer* layer, Vector* input, unsigned times){
 	for (unsigned i=0; i < times; i++){
 		layer->calculateOutput();
 	}
-	layer->getOutput()->showVector();
+	//layer->getOutput()->showVector();
 	chrono.stop();
 	delete(layer);
 	delete(input);
@@ -66,8 +65,6 @@ int main ( int argc, char *argv[] )
 	total.start();
 try{
 	Chronometer chrono;
-	Vector* input;
-	Vector* output;
 	NeuralNet* nn;
 	Layer* layer;
 	FILE* stream;
@@ -79,7 +76,7 @@ try{
 	float seconds;
 	FILE* ftimes = fopen("/home/timon/times.log", "w");
 
-	//for (type=1; type < 2; type++){
+	//for (type=1; type < 3; type++){
 
 		type = 1;
 		switch(type){
@@ -87,13 +84,13 @@ try{
 			cout<<"version float"<<endl;
 			inputType = FLOAT;
 			functionType = IDENTITY;
-			maxSize = 4096;
+			maxSize = 512;
 			break;
 		case 1:
 			cout<<"version bit"<<endl;
 			inputType = BIT;
 			functionType = BINARY_STEP;
-			maxSize = 4096;
+			maxSize = 512;
 			break;
 		case 2:
 			cout<<"version sign"<<endl;
@@ -103,17 +100,16 @@ try{
 			break;
 		}
 
-		numlayers = 2;
+		numlayers = 3;
 		times = 1;
 		for(size=maxSize; size <= maxSize; size += 32){
 			cout<<"size: "<<size<<endl;
 			nn = new NeuralNet();
-			input = Factory::newVector(C, size, inputType);
-			nn->addInput(input);
 
-			nn->createFeedForwardNet(numlayers, size, inputType, functionType);
-			//TODO peta con 16 < numlayers <=30 y size 512
-			//nn->createFullyConnectedNet(numlayers, size, inputType, functionType);
+			nn->createInput(size, inputType);
+			//nn->createFeedForwardNet(numlayers, size, inputType, functionType);
+			//TODO petaba con 16 < numlayers <=30 y size 512 (en Desktop)
+			nn->createFullyConnectedNet(numlayers, size, inputType, functionType);
 
 			//printTotalAllocated();
 			//printTotalPointers();
@@ -122,26 +118,19 @@ try{
 			nn->save(stream);
 			fclose(stream);
 			delete(nn);
-			delete(input);
 			printTotalAllocated();
 			printTotalPointers();
 
 			//C++
 			//cout<<"version C++"<<endl;
 			nn = new NeuralNet(C);
-			input = Factory::newVector(C, size, inputType);
-			float c_seconds = testNeuralNet(nn, input, times);
+			float c_seconds = testNeuralNet(nn, size, inputType, times);
 			printf("c %f \n", c_seconds);
-			printTotalAllocated();
-			printTotalPointers();
 			//XMM
 			//cout<<"version XMM"<<endl;
 			nn = new NeuralNet(SSE2);
-			input = Factory::newVector(SSE2, size, inputType);
-			float xmm_seconds = testNeuralNet(nn, input, times);
+			float xmm_seconds = testNeuralNet(nn, size, inputType, times);
 			printf("xmm %f \n", xmm_seconds);
-			printTotalAllocated();
-			printTotalPointers();
 			//CUDA
 			//cout<<"version CUDA"<<endl;
 			for (unsigned version = 2; version < 3; version++){
@@ -150,14 +139,11 @@ try{
 				for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
 					CudaLayer::block_size = blockSize;
 					nn = new CudaNeuralNet();
-					input = Factory::newVector(CUDA, size, inputType);
-					float cuda_seconds = testNeuralNet(nn, input, times);
+					float cuda_seconds = testNeuralNet(nn, size, inputType, times);
 					printf("(%d) %f ", blockSize, cuda_seconds);
 				}
 				printf("\n", 1);
 			}
-			printTotalAllocated();
-			printTotalPointers();
 		}
 	//}
 

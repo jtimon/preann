@@ -18,23 +18,24 @@ protected:
 	void* data;
 	VectorType vectorType;
 
-	unsigned posToUnsignedPos(unsigned pos);
-	virtual unsigned posToBitPos(unsigned pos);
 	Vector() {};
+	virtual unsigned getByteSize();
+	virtual void free();
 public:
 	Vector(unsigned size, VectorType vectorType);
 	virtual ~Vector();
 
+	virtual void copyFrom(Interface* interface);
+	virtual void copyTo(Interface* interface);
+	virtual void activation(float* results, FunctionType functionType);
+
 	void* getDataPointer();
 	unsigned getSize();
 	VectorType getVectorType();
-	unsigned getWeighsSize();
-	void showVector();
-	float compareTo(Vector* other);
 
-	virtual unsigned getByteSize();
-	virtual float getElement(unsigned pos);
-	virtual void setElement(unsigned pos, float value);
+	void print();
+	//TODO eliminar o cambiar por weighsOffset (para poder aceptar varios tipos de entrada)
+	unsigned getWeighsSize();
 };
 
 #endif /* VECTOR_H_ */

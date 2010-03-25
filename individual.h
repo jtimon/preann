@@ -29,7 +29,7 @@ public:
 	Individual** multipointCrossoverWeighs(Individual* other, unsigned numPoints);
 	Individual** multipointCrossoverNeurons(Individual* other, unsigned numPoints);
 	Individual** multipointCrossoverLayers(Individual* other, unsigned numPoints);
-	Individual** crossoverLayers(Individual *other, Vector* bitVector);
+	Individual** crossoverLayers(Individual *other, Interface* bitVector);
 
 	float getFitness();
 	void setFitness(float fitness);

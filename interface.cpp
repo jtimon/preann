@@ -15,8 +15,8 @@ Interface::Interface(unsigned  size, VectorType vectorType=FLOAT)
 			((float*)data)[i] = 0;
 		}
 	} else {
-		for (unsigned i=0; i < byteSize; i++){
-			((unsigned char*)data)[i] = 1;
+		for (unsigned i=0; i < byteSize/sizeof(unsigned); i++){
+			((unsigned*)data)[i] = 0;
 		}
 	}
 }
@@ -36,7 +36,7 @@ unsigned Interface::getByteSize()
 	if (vectorType == FLOAT){
 		return size * sizeof(float);
 	}
-	return ((size - 1)/BITS_PER_BYTE) + 1;
+	return (((size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
 }
 
 VectorType Interface::getVectorType()
@@ -63,9 +63,9 @@ float Interface::getElement(unsigned  pos)
 	}
 	else {
 
-		unsigned char mask = (unsigned char)( 128>>(pos % BITS_PER_BYTE) );
+		unsigned  mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
 
-		if ( ((unsigned char*)data)[pos / BITS_PER_BYTE] & mask){
+		if ( ((unsigned*)data)[pos / BITS_PER_UNSIGNED] & mask){
 			return 1;
 		}
 		if (vectorType == BIT) {
@@ -89,13 +89,14 @@ void Interface::setElement(unsigned  pos, float value)
 		((float*)data)[pos] = value;
 
 	} else {
-		unsigned char mask = (unsigned char)( 128>>(pos % BITS_PER_BYTE) );
+		unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
 
 		if (value > 0){
-			((unsigned char*)data)[pos / BITS_PER_BYTE] |= mask;
+			((unsigned*)data)[pos / BITS_PER_UNSIGNED] |= mask;
 		} else {
-			((unsigned char*)data)[pos / BITS_PER_BYTE] &= ~mask;
+			((unsigned*)data)[pos / BITS_PER_UNSIGNED] &= ~mask;
 		}
+		//printf("pos %d vectorPos %d bitPos %d valor %d data %d mask %d almacenado %d \n", pos, pos / BITS_PER_BYTE, pos % BITS_PER_BYTE, (int)value, ((unsigned*)data)[pos / BITS_PER_BYTE], mask, ((unsigned*)data)[pos / BITS_PER_BYTE] & mask);
 	}
 }
 
@@ -110,11 +111,15 @@ float Interface::compareTo(Interface *other)
 
 void Interface::print()
 {
-	cout<<"----------------"<<endl;
+	printf("----------------\n", 1);
 	for (unsigned i=0; i < size; i++){
-		cout<<getElement(i)<<" ";
+		if (vectorType == FLOAT){
+			printf("%f ", getElement(i));
+		} else {
+			printf("%d ", (int)getElement(i));
+		}
 	}
-	cout<<endl<<"----------------"<<endl;
+	printf("\n----------------\n", 1);
 }
 
 

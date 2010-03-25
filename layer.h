@@ -59,8 +59,8 @@ public:
 	void mutateWeigh(float mutationRange);
 	void mutateWeighs(float probability, float mutationRange);
 
-	Layer** crossoverNeurons(Layer* other, Vector* bitVector);
-	Layer** crossoverWeighs(Layer* other, Vector* bitVector);
+	Layer** crossoverNeurons(Layer* other, Interface* bitVector);
+	Layer** crossoverWeighs(Layer* other, Interface* bitVector);
 
 	unsigned getNumberNeurons();
 	unsigned getNumberWeighs();

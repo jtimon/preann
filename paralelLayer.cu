@@ -1,9 +1,46 @@
 #include "cudaDefinitions.h"
 
+void checkCUDAError(const char *msg)
+{
+    cudaError_t err = cudaGetLastError();
+    if( cudaSuccess != err)
+    {
+        printf("Cuda error: %s : %s.\n", msg,
+                                  cudaGetErrorString( err) );
+	//printf("Cuda error: %s ( %d ): %s.\n", msg, __LINE__, cudaGetErrorString( err) );
+        exit(EXIT_FAILURE);
+    }
+}
+
+extern "C" void* cuda_malloc(unsigned byteSize)
+{
+	void* ptr;
+	cudaMalloc((void**)&(ptr), byteSize);
+
+	checkCUDAError("malloc");
+	return ptr;
+}
+extern "C" void cuda_free(void* d_ptr)
+{
+	cudaFree(d_ptr);
+	checkCUDAError("free");
+}
+
+extern "C" void cuda_copyToDevice(void* d_dest, void* h_src, unsigned count)
+{
+	cudaMemcpy(d_dest, h_src, count, cudaMemcpyHostToDevice);
+	checkCUDAError("copyToDevice");
+}
+
+extern "C" void cuda_copyToHost(void* h_dest, void* d_src, unsigned count)
+{
+	cudaMemcpy(h_dest, d_src, count, cudaMemcpyDeviceToHost);
+	checkCUDAError("copyToHost");
+}
+
 __device__
 float Func(float number, FunctionType functionType) {
 
-	//printf("number: %f ", number);
 	switch (functionType) {
 
 		//TODO añadir diferentes funciones
@@ -29,17 +66,53 @@ float Func(float number, FunctionType functionType) {
 	}
 }
 
-void checkCUDAError(const char *msg)
+__global__
+void activation_float_kernel(float* results, float* output, unsigned output_sz, FunctionType functionType)
 {
-    cudaError_t err = cudaGetLastError();
-    if( cudaSuccess != err) 
-    {
-        printf("Cuda error: %s : %s.\n", msg,
-                                  cudaGetErrorString( err) );
-	//printf("Cuda error: %s ( %d ): %s.\n", msg, __LINE__, cudaGetErrorString( err) );
-        exit(EXIT_FAILURE);
-    }                         
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (idx < output_sz) output[idx] = Func(results[idx], functionType);
 }
+
+__global__
+void activation_bit_kernel(float* results, unsigned* output, unsigned output_sz)
+{
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	unsigned offset = idx * BITS_PER_UNSIGNED;
+
+	if (output_sz > offset){
+
+		unsigned toRead = min(BITS_PER_UNSIGNED, output_sz - offset);
+		unsigned threadOutput = 0;
+		unsigned mask = 0x80000000;
+
+		for (unsigned i=0; i < toRead; i++){
+			if (results[offset + i] > 0){
+				threadOutput |= mask;
+			} else {
+				threadOutput &= ~mask;
+			}
+			mask >>= 1;
+		}
+		output[idx] = threadOutput;
+	}
+}
+
+extern "C" void cuda_activation(void* data, unsigned size, VectorType vectorType, float* results, FunctionType functionType, unsigned block_size){
+
+	unsigned grid_size;
+
+	if (vectorType == FLOAT) {
+		grid_size = ((size - 1)/block_size) + 1;
+		activation_float_kernel<<< grid_size, block_size >>>(results, (float*)data, size, functionType);
+	} else {
+		grid_size = ((size - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
+		activation_bit_kernel<<< grid_size, block_size >>>(results, (unsigned*)data, size);
+	}
+	cudaFree(results);
+	checkCUDAError("activation");
+}
+
+//VERY OLD
 
 extern "C"
 struct_Layer* LayerHostToDevice(struct_Layer* h_layer, VectorType inputType, VectorType outputType){
@@ -513,45 +586,6 @@ void negative_thresholds_kernel(float* results, float* thresholds, unsigned resu
 {
 	int idx = blockIdx.x*blockDim.x + threadIdx.x;
 	if (idx < results_sz) results[idx] = - thresholds[idx];
-}
-
-__global__
-void activation_float_kernel(float* results, float* output, unsigned output_sz, FunctionType functionType)
-{
-	int idx = blockIdx.x*blockDim.x + threadIdx.x;
-	if (idx < output_sz) output[idx] = Func(results[idx], functionType);
-}
-
-__global__
-void activation_bit_kernel(float* results, unsigned* output, unsigned output_sz)
-{
-	int idx = blockIdx.x*blockDim.x + threadIdx.x;
-	unsigned offset = idx * BITS_PER_UNSIGNED;
-
-	if (output_sz > offset){
-
-		unsigned toRead = min(BITS_PER_UNSIGNED, output_sz - offset);
-		unsigned threadOutput = 0;
-		unsigned mask = 0x80000000;
-
-		//printf(" hilo %d / salida %d / resultados: ", threadIdx.x, idx);
-		for (unsigned i=0; i < toRead; i++){
-			//printf(" ( %d , %d ) ", (int)results[offset + i], mask);
-			if (results[offset + i] > 0){
-				//printf(" 1 ", 1);
-				threadOutput |= mask;
-			} else {
-				//printf(" 0 ", 1);
-				threadOutput &= ~mask;
-			}
-			mask >>= 1;
-		}
-		//printf("\n ", 1);
-		//unsigned base = idx / 4;
-		//unsigned offset = 3 - (idx % 4);
-		//output[base + offset] = threadOutput;
-		output[idx] = threadOutput;
-	}
 }
 
 extern "C"

@@ -1,9 +1,8 @@
 
 #include "layer.h"
-
+/*
 Layer::Layer()
 {
-	printf("se construye layer C\n");
 	inputs = NULL;
 	numberInputs = 0;
 	totalWeighsPerOutput = 0;
@@ -16,11 +15,10 @@ Layer::Layer()
 	inputType = FLOAT;
 	outputType = FLOAT;
 	functionType = IDENTITY;
-}
+}*/
 
 Layer::Layer(VectorType inputType, VectorType outputType, FunctionType functionType)
 {
-	printf("se construye layer C parametrizada\n");
 	inputs = NULL;
 	numberInputs = 0;
 	totalWeighsPerOutput = 0;
@@ -162,35 +160,44 @@ void Layer::calculateOutput()
 		string error = "Cannot calculate the output of a Layer without output.";
 		throw error;
 	}
-	//printf("\n ", 1);
-	float result;
-	for (unsigned i=0; i < output->getSize(); i++){
-		result = 0;
-		unsigned inputOffset = 0;
-		for (unsigned j=0; j < numberInputs; j++){
-			for (unsigned k=0; k < getInput(j)->getSize(); k++){
-				unsigned weighPos = i*totalWeighsPerOutput + inputOffset + k;
+
+	float* results = (float*) mi_malloc(output->getSize() * sizeof(float));
+	for (unsigned j=0; j < output->getSize(); j++) {
+		results[j] = -thresholds[j];
+	}
+
+	unsigned inputOffset = 0;
+	for (unsigned i=0; i < numberInputs; i++){
+
+		void* input = getInput(i)->getDataPointer();
+
+		for (unsigned j=0; j < output->getSize(); j++){
+
+			for (unsigned k=0; k < getInput(i)->getSize(); k++){
+				unsigned weighPos = j*totalWeighsPerOutput + inputOffset + k;
 				if (inputType == FLOAT) {
-					result += getInput(j)->getElement(k) * ((float*)weighs)[weighPos];
+					results[j] += ((float*)input)[k] * ((float*)weighs)[weighPos];
 				} else {
-					result += getInput(j)->getElement(k) * (((unsigned char*)weighs)[weighPos] - 128);
-
-					//printf("mask %d weigh %d \n", 0, (((unsigned char*)weighs)[weighPos] - 128));
-
-//					if (getInput(j)->getElement(k)) {
-//						printf(" %dX ", (((unsigned char*)weighs)[weighPos] - 128));
-//					} else {
-//						printf(" %d ", (((unsigned char*)weighs)[weighPos] - 128));
-//					}
+					if ( ((unsigned*)input)[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
+						results[j] += (((unsigned char*)weighs)[weighPos] - 128);
+					} else if (inputType == SIGN) {
+						results[j] -= (((unsigned char*)weighs)[weighPos] - 128);
+					}
 				}
 			}
-			inputOffset += getInput(j)->getWeighsSize();
 		}
-//		printf("\n ", 1);
-//		printf(" %f ", result - thresholds[i]);
-		output->setElement(i, Function(result - thresholds[i], functionType));
+		inputOffset += getInput(i)->getWeighsSize();
 	}
-//	printf("\n ", 1);
+
+
+	printf("----------------\n", 1);
+	for (unsigned i=0; i < output->getSize(); i++){
+		printf("%f ", results[i]);
+	}
+	printf("\n----------------\n", 1);
+
+	output->activation(results, functionType);
+	mi_free(results);
 }
 
 Vector* Layer::getOutput()
@@ -383,7 +390,7 @@ void Layer::mutateWeighs(float probability, float mutationRange)
 	}
 }
 
-Layer** Layer::crossoverWeighs(Layer *other, Vector *bitVector)
+Layer** Layer::crossoverWeighs(Layer *other, Interface *bitVector)
 {
 	if (bitVector->getSize() != this->getNumberWeighs()){
 		string error = "The number of weighs must be equal to the size of the bitVector.";
@@ -436,7 +443,7 @@ Layer** Layer::crossoverWeighs(Layer *other, Vector *bitVector)
 	return twoLayers;
 }
 
-Layer** Layer::crossoverNeurons(Layer *other, Vector *bitVector)
+Layer** Layer::crossoverNeurons(Layer *other, Interface* bitVector)
 {
 	if (bitVector->getSize() != output->getSize()){
 		string error = "The number of neurons must be equal to the size of the bitVector.";

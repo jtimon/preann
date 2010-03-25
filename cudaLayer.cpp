@@ -2,16 +2,14 @@
 
 unsigned CudaLayer::block_size = 128;
 unsigned CudaLayer::version = 0;
-
+/*
 CudaLayer::CudaLayer()
 {
-	printf("se construye layer CUDA\n");
 	deviceLayer = NULL;
-}
+}*/
 
 CudaLayer::CudaLayer(VectorType inputType, VectorType outputType, FunctionType functionType): Layer(inputType, outputType, functionType)
 {
-	printf("se construye layer CUDA parametrizada\n");
 	deviceLayer = NULL;
 }
 

@@ -408,7 +408,7 @@ void Population::crossover()
 			throw error;
 		}
 	} else {
-		vectorUsedParents = new Vector(parentSize, BIT);
+		vectorUsedParents = new Interface(parentSize, BIT);
 		usedParents = 0;
 		unsigned numCurrentScheme;
 
@@ -465,7 +465,7 @@ Individual** Population::crossover(CrossoverType crossoverType)
 		vectorUsedParents = NULL;
 	}
 	if (vectorUsedParents == NULL) {
-		vectorUsedParents = new Vector(parentSize, BIT);
+		vectorUsedParents = new Interface(parentSize, BIT);
 		usedParents = 0;
 	}
 

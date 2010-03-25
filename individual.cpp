@@ -48,9 +48,9 @@ void Individual::mutate(float probability, float mutationRange)
 
 Individual** Individual::uniformCrossoverWeighs(Individual *other, float probability)
 {
-	Vector** bitVectors = (Vector**) mi_malloc(sizeof(Vector*) * this->numberLayers);
+	Interface** bitVectors = (Interface**) mi_malloc(sizeof(Interface*) * this->numberLayers);
 	for (unsigned i=0; i < this->numberLayers; i++){
-		bitVectors[i] = new Vector(this->layers[i]->getNumberWeighs(), BIT);
+		bitVectors[i] = new Interface(this->layers[i]->getNumberWeighs(), BIT);
 	}
 	for (unsigned i=0; i < this->numberLayers; i++){
 		for(unsigned j=0; j < bitVectors[i]->getSize(); j++) {
@@ -75,7 +75,7 @@ Individual** Individual::uniformCrossoverWeighs(Individual *other, float probabi
 	return twoChilds;
 }
 
-Individual** Individual::crossoverLayers(Individual *other, Vector* bitVector)
+Individual** Individual::crossoverLayers(Individual *other, Interface* bitVector)
 {
 	if (bitVector->getSize() != this->numberLayers){
 		string error = "The number of layers must be equal to the size of the bitVector.";
@@ -108,9 +108,9 @@ Individual** Individual::crossoverLayers(Individual *other, Vector* bitVector)
 
 Individual** Individual::uniformCrossoverNeurons(Individual *other, float probability)
 {
-	Vector** bitVectors = (Vector**) mi_malloc(sizeof(Vector*) * this->numberLayers);
+	Interface** bitVectors = (Interface**) mi_malloc(sizeof(Interface*) * this->numberLayers);
 	for (unsigned i=0; i < this->numberLayers; i++){
-		bitVectors[i] = new Vector(this->layers[i]->getOutput()->getSize(), BIT);
+		bitVectors[i] = new Interface(this->layers[i]->getOutput()->getSize(), BIT);
 	}
 	for (unsigned i=0; i < this->numberLayers; i++){
 		for(unsigned j=0; j < bitVectors[i]->getSize(); j++) {
@@ -137,7 +137,7 @@ Individual** Individual::uniformCrossoverNeurons(Individual *other, float probab
 
 Individual** Individual::uniformCrossoverLayers(Individual *other, float probability)
 {
-	Vector* bitVector = new Vector(this->numberLayers, BIT);
+	Interface* bitVector = new Interface(this->numberLayers, BIT);
 	for (unsigned i=0; i < this->numberLayers; i++){
 		if (randomPositiveFloat(1) < probability) {
 			bitVector->setElement(i, 1);
@@ -150,9 +150,9 @@ Individual** Individual::uniformCrossoverLayers(Individual *other, float probabi
 
 Individual** Individual::multipointCrossoverWeighs(Individual *other, unsigned numPoints)
 {
-	Vector** bitVectors = (Vector**) mi_malloc(sizeof(Vector*) * this->numberLayers);
+	Interface** bitVectors = (Interface**) mi_malloc(sizeof(Interface*) * this->numberLayers);
 	for (unsigned i=0; i < this->numberLayers; i++){
-		bitVectors[i] = new Vector(this->layers[i]->getNumberWeighs(), BIT);
+		bitVectors[i] = new Interface(this->layers[i]->getNumberWeighs(), BIT);
 	}
 	while (numPoints >= 0) {
 		unsigned chosenLayer = randomUnsigned(this->numberLayers);
@@ -188,9 +188,9 @@ Individual** Individual::multipointCrossoverWeighs(Individual *other, unsigned n
 
 Individual** Individual::multipointCrossoverNeurons(Individual *other, unsigned numPoints)
 {
-	Vector** bitVectors = (Vector**) mi_malloc(sizeof(Vector*) * this->numberLayers);
+	Interface** bitVectors = (Interface**) mi_malloc(sizeof(Interface*) * this->numberLayers);
 	for (unsigned i=0; i < this->numberLayers; i++){
-		bitVectors[i] = new Vector(this->layers[i]->getNumberNeurons(), BIT);
+		bitVectors[i] = new Interface(this->layers[i]->getNumberNeurons(), BIT);
 	}
 	while (numPoints >= 0) {
 		unsigned chosenLayer = randomUnsigned(this->numberLayers);
@@ -230,7 +230,7 @@ Individual** Individual::multipointCrossoverLayers(Individual *other, unsigned n
 		string error = "In multipointCrossoverLayers: there have to be more layers than points.";
 		throw error;
 	}
-	Vector* bitVector = new Vector(this->numberLayers, BIT);
+	Interface* bitVector = new Interface(this->numberLayers, BIT);
 	while (numPoints >= 0) {
 		unsigned chosenPoint = randomUnsigned(this->numberLayers);
 		if (!bitVector->getElement(chosenPoint)) {

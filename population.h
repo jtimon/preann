@@ -21,7 +21,7 @@ class Population {
 	unsigned parentSize;
 	unsigned maxParents;
 
-	Vector* vectorUsedParents;
+	Interface* vectorUsedParents;
 	unsigned usedParents;
 
 	Individual** offSpring;
