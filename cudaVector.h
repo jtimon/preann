@@ -9,7 +9,7 @@
 #define CUDAVECTOR_H_
 
 #include "vector.h"
-#include "cudaDefinitions.h"
+#include "cuda_code.h"
 
 class CudaVector: public Vector {
 protected:

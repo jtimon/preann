@@ -41,9 +41,9 @@ public:
 	void addInput(Vector* input);
 	unsigned getNumberInputs();
 
-	void randomWeighs(float range);
-	void save(FILE* stream);
-	void load(FILE* stream);
+	virtual void randomWeighs(float range);
+	virtual void save(FILE* stream);
+	virtual void load(FILE* stream);
 
 	virtual void calculateOutput();
 	virtual Vector* newVector(unsigned size, VectorType vectorType);

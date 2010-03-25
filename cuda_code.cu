@@ -1,4 +1,4 @@
-#include "cudaDefinitions.h"
+#include "cuda_code.h"
 
 void checkCUDAError(const char *msg)
 {
@@ -36,6 +36,100 @@ extern "C" void cuda_copyToHost(void* h_dest, void* d_src, unsigned count)
 {
 	cudaMemcpy(h_dest, d_src, count, cudaMemcpyDeviceToHost);
 	checkCUDAError("copyToHost");
+}
+
+__global__
+void negative_thresholds_kernel(float* results, float* thresholds, unsigned results_sz)
+{
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (idx < results_sz) results[idx] = - thresholds[idx];
+}
+
+extern "C" float* cuda_getNegativeThresholds(float* thresholds, unsigned size, unsigned block_size)
+{
+	unsigned grid_size = ((size - 1)/block_size) + 1;
+
+	float* results;
+	cudaMalloc((void**)&(results), size * sizeof(float));
+
+	negative_thresholds_kernel<<< grid_size, block_size >>>(results, thresholds, size);
+	return results;
+}
+
+__global__
+void SumFloatsConnectionsKernel2(float* inputs, unsigned input_size, unsigned inputOffset, unsigned output_size, float* weighs, unsigned totalWeighsPerOutput, float* results)
+{
+	extern __shared__ float sdata[];
+
+	unsigned tid = threadIdx.x;
+	unsigned readingLoops = (input_size - 1 / blockDim.x) + 1;
+
+	unsigned pos = tid;
+	for (unsigned i=0; i < readingLoops; i++){
+		if (pos < input_size){
+			sdata[pos] = inputs[pos];
+		}
+		pos += blockDim.x;
+	}
+	__syncthreads();
+
+	unsigned outputNeuron = blockIdx.x*blockDim.x + threadIdx.x;
+	if (outputNeuron < output_size){
+
+		unsigned weighsOffset = (outputNeuron * totalWeighsPerOutput) + inputOffset;
+		float result = 0;
+		for (unsigned i=0; i < input_size; i++){
+			result += sdata[i] * weighs[weighsOffset + i];
+		}
+		results[outputNeuron] += result;
+	}
+}
+
+template <VectorType inputType>
+__global__
+void SumBitsConnectionsKernel2(unsigned* inputs, unsigned input_size, unsigned inputOffset, unsigned output_size, unsigned char* weighs, unsigned totalWeighsPerOutput, float* results)
+{
+	extern __shared__ unsigned shared_inputs[];
+
+	unsigned tid = threadIdx.x;
+	unsigned input_blocks_to_read = ((input_size - 1) / BITS_PER_UNSIGNED) + 1;
+	unsigned readingLoops = ((input_blocks_to_read - 1) / blockDim.x) + 1;
+
+	unsigned pos = tid;
+
+	for (unsigned i=0; i < readingLoops; i++){
+		if (pos < input_blocks_to_read){
+			shared_inputs[pos] = inputs[pos];
+		}
+		pos += blockDim.x;
+	}
+	__syncthreads();
+
+	unsigned outputNeuron = blockIdx.x*blockDim.x + threadIdx.x;
+	if (outputNeuron < output_size){
+
+		float result = 0;
+		unsigned weighsOffset = (outputNeuron * totalWeighsPerOutput) + inputOffset;
+
+		for (unsigned i=0; i < input_blocks_to_read; i++){
+
+			unsigned input_block = shared_inputs[i];
+			unsigned mask = 0x80000000;
+			for (unsigned j=0; j < BITS_PER_UNSIGNED; j++){
+
+				if (input_block & mask){
+					result += weighs[weighsOffset] - 128;
+				} else {
+					if (inputType == SIGN) {
+						result += 128 - weighs[weighsOffset];
+					}
+				}
+				++weighsOffset;
+				mask >>= 1;
+			}
+		}
+		results[outputNeuron] += result;
+	}
 }
 
 __device__
@@ -580,13 +674,6 @@ __global__ void set_float_array(float* array, float value, unsigned array_sz)
 	int idx = blockIdx.x*blockDim.x + threadIdx.x;
 	if (idx < array_sz) array[idx] = value;
 }*/
-
-__global__
-void negative_thresholds_kernel(float* results, float* thresholds, unsigned results_sz)
-{
-	int idx = blockIdx.x*blockDim.x + threadIdx.x;
-	if (idx < results_sz) results[idx] = - thresholds[idx];
-}
 
 extern "C"
 void LayerCalculation2(struct_Layer* d_layer, unsigned block_size, VectorType inputType, VectorType outputType){

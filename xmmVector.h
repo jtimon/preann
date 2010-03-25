@@ -9,7 +9,7 @@
 #define XMMVECTOR_H_
 
 #include "vector.h"
-#include "xmmDefinitions.h"
+#include "sse2_code.h"
 
 class XmmVector: public Vector {
 	virtual unsigned getByteSize();

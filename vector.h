@@ -8,7 +8,7 @@
 #ifndef VECTOR_H_
 #define VECTOR_H_
 
-#include "xmmDefinitions.h"
+#include "sse2_code.h"
 #include "interface.h"
 
 class Vector {
