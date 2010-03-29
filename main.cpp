@@ -78,7 +78,7 @@ try{
 
 	//for (type=1; type < 3; type++){
 
-		type = 0;
+		type = 2;
 		switch(type){
 		case 0:
 			cout<<"version float"<<endl;
@@ -93,7 +93,6 @@ try{
 			maxSize = 512;
 			break;
 		case 2:
-			//TODO no funciona en CUDA2
 			cout<<"version sign"<<endl;
 			inputType = SIGN;
 			functionType = BIPOLAR_STEP;
@@ -108,9 +107,9 @@ try{
 			nn = new NeuralNet();
 
 			nn->createInput(size, inputType);
-			//nn->createFeedForwardNet(numlayers, size, inputType, functionType);
+			nn->createFeedForwardNet(numlayers, size, inputType, functionType);
 			//TODO petaba con 16 < numlayers <=30 y size 512 (en Desktop)
-			nn->createFullyConnectedNet(numlayers, size, inputType, functionType);
+			//nn->createFullyConnectedNet(numlayers, size, inputType, functionType);
 
 			//printTotalAllocated();
 			//printTotalPointers();

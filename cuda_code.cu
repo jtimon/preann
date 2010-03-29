@@ -180,9 +180,8 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Vecto
 		if (inputType == BIT) {
 			SumBitsConnectionsKernel2<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, inputOffset, output_size, (unsigned char*)weighs, totalWeighsPerOutput, results);
 		} else {
-			SumBitsConnectionsKernel2<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, inputOffset, output_size, (unsigned char*)weighs, totalWeighsPerOutput, results);
+			SumBitsConnectionsKernel2<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, inputOffset, output_size, (unsigned char*)weighs, totalWeighsPerOutput, results);
 		}
-
 	}
 }
 
