@@ -6,14 +6,14 @@
 
 class XmmLayer: public Layer
 {
+	virtual void saveWeighs(FILE* stream);
+	virtual void loadWeighs(FILE* stream);
 public:
-	//XmmLayer();
 	XmmLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
 	virtual ~XmmLayer();
 	
+	virtual void setSizes(unsigned totalWeighsPerOutput, unsigned outputSize);
 	virtual void calculateOutput();
-
-	virtual Vector* newVector(unsigned size, VectorType vectorType);
 	virtual Layer* newCopy();
 };
 

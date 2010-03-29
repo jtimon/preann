@@ -39,7 +39,13 @@ void XmmVector::copyFrom(Interface* interface)
 	}
 
 	if (vectorType == FLOAT){
-		memcpy(data, interface->getDataPointer(), interface->getByteSize());
+		//memcpy(data, interface->getDataPointer(), interface->getByteSize());
+		for (unsigned i=0; i < size; i++){
+			if (interface->getElement(i) != 0){
+				printf("no se debería tener un elemento no nulo en una interfaz\n");
+			}
+			((float*)data)[i] = interface->getElement(i);
+		}
 	} else {
 		unsigned char* vectorData = (unsigned char*)data;
 		unsigned blockOffset = 0;
@@ -81,7 +87,10 @@ void XmmVector::copyTo(Interface* interface)
 	}
 
 	if (vectorType == FLOAT){
-		memcpy(interface->getDataPointer(), data, this->getByteSize());
+		//memcpy(interface->getDataPointer(), data, this->getByteSize());
+		for (unsigned i=0; i < size; i++){
+			interface->setElement(i, ((float*)data)[i]);
+		}
 	} else {
 		unsigned char* vectorData = (unsigned char*)data;
 		unsigned blockOffset = 0;

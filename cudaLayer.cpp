@@ -16,6 +16,75 @@ CudaLayer::CudaLayer(VectorType inputType, VectorType outputType, FunctionType f
 CudaLayer::~CudaLayer()
 {
 	freeDevice();
+
+	if (inputs) {
+		mi_free(inputs);
+	}
+	if (thresholds) {
+		mi_free(thresholds);
+	}
+	if (weighs) {
+		mi_free(weighs);
+	}
+	if (output) {
+		delete (output);
+	}
+}
+
+void CudaLayer::saveWeighs(FILE *stream)
+{
+	fwrite(thresholds, output->getSize() * sizeof(float), 1, stream);
+	unsigned size;
+	if (inputType == FLOAT){
+		size = output->getSize() * totalWeighsPerOutput * sizeof(float);
+	} else {
+		size = output->getSize() * totalWeighsPerOutput * sizeof(unsigned char);
+	}
+	fwrite(weighs, size, 1, stream);
+}
+
+void CudaLayer::loadWeighs(FILE *stream)
+{
+	fread(thresholds, output->getSize() * sizeof(float), 1, stream);
+	unsigned size;
+	if (inputType == FLOAT){
+		size = output->getSize() * totalWeighsPerOutput * sizeof(float);
+	} else {
+		size = output->getSize() * totalWeighsPerOutput * sizeof(unsigned char);
+	}
+	fread(weighs, size, 1, stream);
+}
+
+void CudaLayer::setSizes(unsigned  totalWeighsPerOutput, unsigned  outputSize)
+{
+	if (!output) {
+		output = new Vector(outputSize, outputType);
+		thresholds = (float*) mi_malloc(sizeof(float) * outputSize);
+	} else if (output->getSize() != outputSize) {
+
+		cout<<"Warning: a layer is changing the location of its output."<<endl;
+		delete (output);
+		if (thresholds) {
+			mi_free(thresholds);
+		}
+		output = new Vector(outputSize, outputType);
+		thresholds = (float*)mi_malloc(sizeof(float) * outputSize);
+	}
+	if (totalWeighsPerOutput > 0){
+		if (inputType == FLOAT){
+
+			weighs = mi_malloc(sizeof(float) * outputSize * totalWeighsPerOutput);
+			for (unsigned i=0; i < outputSize * totalWeighsPerOutput; i++){
+				((float*)weighs)[i] = 0;
+			}
+		} else {
+			weighs = mi_malloc(sizeof(unsigned char) * outputSize * totalWeighsPerOutput);
+			for (unsigned i=0; i < outputSize * totalWeighsPerOutput; i++){
+				((unsigned char*)weighs)[i] = 128;
+			}
+		}
+	}
+	this->totalWeighsPerOutput = totalWeighsPerOutput;
 }
 
 Layer* CudaLayer::newCopy()

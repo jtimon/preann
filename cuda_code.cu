@@ -32,10 +32,30 @@ extern "C" void cuda_copyToDevice(void* d_dest, void* h_src, unsigned count)
 	checkCUDAError("copyToDevice");
 }
 
-extern "C" void cuda_copyToHost(void* h_dest, void* d_src, unsigned count)
+extern "C"
+void cuda_copyToHost(void* h_dest, void* d_src, unsigned count)
 {
 	cudaMemcpy(h_dest, d_src, count, cudaMemcpyDeviceToHost);
 	checkCUDAError("copyToHost");
+}
+
+__global__
+void setZeroKernel(float* data, unsigned size)
+{
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (idx < size) data[idx] = 0;
+}
+
+extern "C"
+void cuda_setZero(void* data, unsigned byteSize, VectorType vectorType, unsigned block_size)
+{
+	if (vectorType == FLOAT){
+		unsigned size = byteSize/sizeof(float);
+		unsigned grid_size = ((size - 1)/block_size) + 1;
+		setZeroKernel<<< grid_size, block_size >>>((float*)data, size);
+	} else {
+		cudaMemset(data, 0, byteSize);
+	}
 }
 
 __global__
@@ -45,7 +65,8 @@ void negative_thresholds_kernel(float* results, float* thresholds, unsigned resu
 	if (idx < results_sz) results[idx] = - thresholds[idx];
 }
 
-extern "C" float* cuda_getNegativeThresholds(float* thresholds, unsigned size, unsigned block_size)
+extern "C"
+float* cuda_getNegativeThresholds(float* thresholds, unsigned size, unsigned block_size)
 {
 	unsigned grid_size = ((size - 1)/block_size) + 1;
 
@@ -57,7 +78,7 @@ extern "C" float* cuda_getNegativeThresholds(float* thresholds, unsigned size, u
 }
 
 __global__
-void SumFloatsConnectionsKernel2(float* inputs, unsigned input_size, unsigned inputOffset, unsigned output_size, float* weighs, unsigned totalWeighsPerOutput, float* results)
+void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned inputOffset, unsigned output_size, float* weighs, unsigned totalWeighsPerOutput, float* results)
 {
 	extern __shared__ float sdata[];
 
@@ -79,6 +100,7 @@ void SumFloatsConnectionsKernel2(float* inputs, unsigned input_size, unsigned in
 		unsigned weighsOffset = (outputNeuron * totalWeighsPerOutput) + inputOffset;
 		float result = 0;
 		for (unsigned i=0; i < input_size; i++){
+			//printf("i % d input %f weigh %f \n", i, sdata[i], weighs[weighsOffset + i]);
 			result += sdata[i] * weighs[weighsOffset + i];
 		}
 		results[outputNeuron] += result;
@@ -129,6 +151,38 @@ void SumBitsConnectionsKernel2(unsigned* inputs, unsigned input_size, unsigned i
 			}
 		}
 		results[outputNeuron] += result;
+	}
+}
+
+extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, VectorType inputType, unsigned inputOffset, unsigned output_size, void* weighs, unsigned totalWeighsPerOutput, float* results, unsigned block_size)
+{
+	unsigned grid_size = ((output_size - 1)/block_size) + 1;
+	unsigned shared_mem_size;
+
+	if (inputType == FLOAT) {
+		//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
+		if (input_size > 4064){
+			string error = "The maximum float input size is 4064.";
+			throw error;
+		}
+		shared_mem_size = input_size * sizeof(float);
+
+		SumFloatsConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, inputOffset, output_size, (float*)weighs, totalWeighsPerOutput, results);
+	} else {
+
+		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
+		//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
+		if (shared_mem_size / sizeof(unsigned) > 4064){
+			//4064 * BITS_PER_UNSIGNED
+			string error = "The maximum bit/sign input size is 130048.";
+			throw error;
+		}
+		if (inputType == BIT) {
+			SumBitsConnectionsKernel2<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, inputOffset, output_size, (unsigned char*)weighs, totalWeighsPerOutput, results);
+		} else {
+			SumBitsConnectionsKernel2<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, inputOffset, output_size, (unsigned char*)weighs, totalWeighsPerOutput, results);
+		}
+
 	}
 }
 

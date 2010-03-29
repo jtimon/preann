@@ -21,6 +21,9 @@ protected:
 	VectorType outputType;
 	FunctionType functionType;
 
+	virtual void saveWeighs(FILE* stream) = 0;
+	virtual void loadWeighs(FILE* stream) = 0;
+
 // To allow GA trainer work:
 	float getFloatWeigh(unsigned pos);
 	void setFloatWeigh(float value, unsigned pos);
@@ -31,29 +34,28 @@ protected:
 	void* getThresholdsPtr();
 	void* getWeighsPtr();
 public:
-	//TODO debería ser protected
-	virtual void setSizes(unsigned totalWeighsPerOutput, unsigned ouputSize);
-	Vector* getOutput();
+	virtual void setSizes(unsigned totalWeighsPerOutput, unsigned ouputSize) = 0;
+	virtual void calculateOutput() = 0;
+	virtual void randomWeighs(float range);
 
+	Vector* getOutput();
 	Vector* getInput(unsigned pos);
 	void setSize(unsigned size);
 	void resetSize();
 	void addInput(Vector* input);
 	unsigned getNumberInputs();
 
-	virtual void randomWeighs(float range);
-	virtual void save(FILE* stream);
-	virtual void load(FILE* stream);
+	void save(FILE* stream);
+	void load(FILE* stream);
 
-	virtual void calculateOutput();
-	virtual Vector* newVector(unsigned size, VectorType vectorType);
+
 
 	Layer();
 	Layer(VectorType inputType, VectorType outputType, FunctionType functionType);
 	virtual ~Layer();
 
 // To allow GA trainer work:
-	virtual Layer* newCopy();
+	virtual Layer* newCopy() = 0;
 	void copyWeighs(Layer* other);
 
 	void mutateWeigh(float mutationRange);

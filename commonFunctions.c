@@ -52,6 +52,7 @@ void mi_free(void* ptr) {
 		cout<<"Unable to free "<<(unsigned)ptr<<endl;
 		string error = "The pointer to free wasn't found";
 		throw error;
+		//free(ptr);
 	}
 
 	while (i < ptr_counter) {

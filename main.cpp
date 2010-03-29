@@ -78,7 +78,7 @@ try{
 
 	//for (type=1; type < 3; type++){
 
-		type = 1;
+		type = 0;
 		switch(type){
 		case 0:
 			cout<<"version float"<<endl;
@@ -93,10 +93,11 @@ try{
 			maxSize = 512;
 			break;
 		case 2:
+			//TODO no funciona en CUDA2
 			cout<<"version sign"<<endl;
 			inputType = SIGN;
 			functionType = BIPOLAR_STEP;
-			maxSize = 4096;
+			maxSize = 512;
 			break;
 		}
 
@@ -121,16 +122,17 @@ try{
 			printTotalAllocated();
 			printTotalPointers();
 
+			float secods;
 			//C++
 			//cout<<"version C++"<<endl;
 			nn = new NeuralNet(C);
-			float c_seconds = testNeuralNet(nn, size, inputType, times);
-			printf("c %f \n", c_seconds);
+			secods = testNeuralNet(nn, size, inputType, times);
+			printf("c %f \n", secods);
 			//XMM
 			//cout<<"version XMM"<<endl;
 			nn = new NeuralNet(SSE2);
-			float xmm_seconds = testNeuralNet(nn, size, inputType, times);
-			printf("xmm %f \n", xmm_seconds);
+			secods = testNeuralNet(nn, size, inputType, times);
+			printf("xmm %f \n", secods);
 			//CUDA
 			//cout<<"version CUDA"<<endl;
 			for (unsigned version = 2; version < 3; version++){
@@ -139,11 +141,14 @@ try{
 				for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
 					CudaLayer::block_size = blockSize;
 					nn = new CudaNeuralNet();
-					float cuda_seconds = testNeuralNet(nn, size, inputType, times);
-					printf("(%d) %f ", blockSize, cuda_seconds);
+					secods = testNeuralNet(nn, size, inputType, times);
+					printf("(%d) %f ", blockSize, secods);
 				}
 				printf("\n", 1);
 			}
+			nn = new NeuralNet(CUDA2);
+			float xmm_seconds = testNeuralNet(nn, size, inputType, times);
+			printf("cuda2 %f \n", xmm_seconds);
 		}
 	//}
 

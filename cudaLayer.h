@@ -19,6 +19,8 @@ protected:
 
 	struct_Layer* deviceLayer;
 
+	virtual void saveWeighs(FILE* stream);
+	virtual void loadWeighs(FILE* stream);
 public:
 	static unsigned block_size;
 	static unsigned version;
@@ -36,6 +38,7 @@ public:
 	//redefined methods
 	virtual void calculateOutput();
 	virtual Layer* newCopy();
+	virtual void setSizes(unsigned totalWeighsPerOutput, unsigned ouputSize);
 
 	
 };

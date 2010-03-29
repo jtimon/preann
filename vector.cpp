@@ -23,7 +23,6 @@ Vector::Vector(unsigned size, VectorType vectorType)
 		}
 	}
 	else {
-
 		for (unsigned i=0; i < byteSize; i++){
 			((unsigned char*)data)[i] = 0;
 		}
@@ -32,7 +31,10 @@ Vector::Vector(unsigned size, VectorType vectorType)
 
 Vector::~Vector()
 {
-	free();
+	//TODO arreglar esto!!!
+	//opción A, hacer vector clase abstracta
+	//opción B, quitar las clases vector (primero acabar con CudaNeuralNet)
+	//free();
 }
 
 void Vector::free()

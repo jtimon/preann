@@ -1,5 +1,7 @@
 #include "factory.h"
 
+//TODO implementar diferentes veces para decidir en el makefile
+#include "cppLayer.h"
 #include "xmmLayer.h"
 #include "cudaLayer.h"
 #include "cudaLayer2.h"
@@ -42,7 +44,7 @@ Layer* Factory::newLayer(ImplementationType implementationType, FunctionType fun
 	switch(implementationType){
 		case C:
 			printf("se construye layer C\n");
-			return new Layer(inputType, outputType, functionType);
+			return new CppLayer(inputType, outputType, functionType);
 		case SSE2:
 			printf("se construye layer XMM\n");
 			return new XmmLayer(inputType, outputType, functionType);
@@ -50,7 +52,7 @@ Layer* Factory::newLayer(ImplementationType implementationType, FunctionType fun
 			printf("se construye layer CUDA\n");
 			return new CudaLayer(inputType, outputType, functionType);
 		case CUDA2:
-			printf("se construye layer CUDA\n");
+			printf("se construye layer CUDA2\n");
 			return new CudaLayer2(inputType, outputType, functionType);
 	}
 }

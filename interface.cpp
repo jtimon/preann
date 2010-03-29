@@ -11,7 +11,7 @@ Interface::Interface(unsigned  size, VectorType vectorType=FLOAT)
 
 	if (vectorType == FLOAT){
 
-		for (unsigned i=0; i< size/sizeof(float); i++){
+		for (unsigned i=0; i< size; i++){
 			((float*)data)[i] = 0;
 		}
 	} else {

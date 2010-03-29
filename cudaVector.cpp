@@ -11,7 +11,10 @@ CudaVector::CudaVector(unsigned size, VectorType vectorType)
 {
 	this->size = size;
 	this->vectorType = vectorType;
-	data = cuda_malloc(getByteSize());
+	unsigned byte_sz = getByteSize();
+	data = cuda_malloc(byte_sz);
+
+	cuda_setZero(data, byte_sz, vectorType, THREADS_PER_BLOCK);
 }
 
 CudaVector::~CudaVector()
