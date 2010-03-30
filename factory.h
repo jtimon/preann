@@ -8,9 +8,10 @@
 #ifndef FACTORY_H_
 #define FACTORY_H_
 
-//#include "cudaLayer.h"
-//#include "xmmLayer.h"
 #include "layer.h"
+
+//TODO se requiere para el atributo static
+#include "cudaLayer2.h"
 
 typedef enum {C, SSE2, CUDA, CUDA2} ImplementationType;
 

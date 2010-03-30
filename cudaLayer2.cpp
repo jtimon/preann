@@ -7,6 +7,9 @@
 
 #include "cudaLayer2.h"
 
+unsigned CudaLayer2::algorithm = 0;
+unsigned CudaLayer2::blockSize = 128;
+
 CudaLayer2::CudaLayer2(VectorType inputType, VectorType outputType, FunctionType functionType): Layer(inputType, outputType, functionType)
 {
 	// TODO Auto-generated constructor stub
@@ -121,21 +124,18 @@ void CudaLayer2::calculateOutput()
 	unsigned inputOffset = 0;
 	for(unsigned i=0; i < numberInputs; i++){
 		Vector* input = inputs[i];
-		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), inputOffset, output->getSize(), weighs, totalWeighsPerOutput, results, THREADS_PER_BLOCK);
+		if (CudaLayer2::algorithm == 0){
+			cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), inputOffset, output->getSize(), weighs, totalWeighsPerOutput, results, CudaLayer2::blockSize);
+		} else {
+			cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), inputOffset, output->getSize(), weighs, totalWeighsPerOutput, results, CudaLayer2::blockSize);
+		}
 		inputOffset += input->getSize();
-//		printf("parciales ", 1);
-//		for (unsigned i=0; i < output->getSize(); i++){
-//			printf("%f ", results[i]);
-//		}
-//		printf("\n", 1);
 	}
-
-	printf("----------------\n", 1);
-	for (unsigned i=0; i < output->getSize(); i++){
-		printf("%f ", results[i]);
-	}
-	printf("\n----------------\n", 1);
-
+//	printf("----------------\n", 1);
+//	for (unsigned i=0; i < output->getSize(); i++){
+//		printf("%f ", results[i]);
+//	}
+//	printf("\n----------------\n", 1);
 	output->activation(results, functionType);
 }
 

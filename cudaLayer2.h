@@ -16,6 +16,8 @@ protected:
 	virtual void saveWeighs(FILE* stream);
 	virtual void loadWeighs(FILE* stream);
 public:
+	static unsigned algorithm;
+	static unsigned blockSize;
 	CudaLayer2(VectorType inputType, VectorType outputType, FunctionType functionType);
 	virtual ~CudaLayer2();
 

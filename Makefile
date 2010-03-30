@@ -9,7 +9,9 @@ CXX = g++-4.3 -ggdb
 NVCC = /usr/local/cuda/bin/nvcc
 NASM = nasm -f elf
 
-all: $(OBJECTS)
+all: preann
+
+preann: $(OBJECTS)
 	$(NVCC) -o preann $(OBJECTS) -L/usr/local/cuda/lib -lcudart
 main.o : main.cpp cudaNeuralNet.o population.o chronometer.o
 	$(CXX) -c main.cpp

@@ -85,6 +85,10 @@ void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned inp
 	unsigned tid = threadIdx.x;
 	unsigned readingLoops = (input_size - 1 / blockDim.x) + 1;
 
+	unsigned outputNeuron = blockIdx.x*blockDim.x + threadIdx.x;
+	unsigned weighsOffset = (outputNeuron * totalWeighsPerOutput) + inputOffset;
+	float result = 0;
+
 	unsigned pos = tid;
 	for (unsigned i=0; i < readingLoops; i++){
 		if (pos < input_size){
@@ -94,15 +98,38 @@ void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned inp
 	}
 	__syncthreads();
 
-	unsigned outputNeuron = blockIdx.x*blockDim.x + threadIdx.x;
 	if (outputNeuron < output_size){
 
-		unsigned weighsOffset = (outputNeuron * totalWeighsPerOutput) + inputOffset;
-		float result = 0;
-		for (unsigned i=0; i < input_size; i++){
-			//printf("i % d input %f weigh %f \n", i, sdata[i], weighs[weighsOffset + i]);
+		//////////////////////////
+/*		for (unsigned i=0; i < input_size; i++){
 			result += sdata[i] * weighs[weighsOffset + i];
+		}*/
+		/////TODO OTRA OPCION
+		if (blockDim.x <= input_size){
+			unsigned pos = tid;
+			while (pos < input_size){
+				result += sdata[pos] * weighs[weighsOffset + pos];
+				++pos;
+			}
+			pos = 0;
+			while (pos < tid){
+				result += sdata[pos] * weighs[weighsOffset + pos];
+				++pos;
+			}
+		} else {
+			unsigned pos = tid;
+			while (pos < input_size){
+				result += sdata[pos] * weighs[weighsOffset + pos];
+				++pos;
+			}
+			unsigned newMax = min(tid, input_size);
+			pos = 0;
+			while (pos < newMax){
+				result += sdata[pos] * weighs[weighsOffset + pos];
+				++pos;
+			}
 		}
+		/////////////
 		results[outputNeuron] += result;
 	}
 }
@@ -161,8 +188,8 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Vecto
 
 	if (inputType == FLOAT) {
 		//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
-		if (input_size > 4064){
-			string error = "The maximum float input size is 4064.";
+		if (input_size > 4032){
+			string error = "The maximum float input size is 4032.";
 			throw error;
 		}
 		shared_mem_size = input_size * sizeof(float);
@@ -172,9 +199,9 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Vecto
 
 		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
 		//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
-		if (shared_mem_size / sizeof(unsigned) > 4064){
-			//4064 * BITS_PER_UNSIGNED
-			string error = "The maximum bit/sign input size is 130048.";
+		if (shared_mem_size > 16128){
+			//16128 * 8
+			string error = "The maximum bit/sign input size is 129024.";
 			throw error;
 		}
 		if (inputType == BIT) {
@@ -184,6 +211,164 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Vecto
 		}
 	}
 }
+
+template <unsigned int blockSize, VectorType inputType>
+__global__
+void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned inputOffset, unsigned output_size, void* weighs, unsigned totalWeighsPerOutput, float* results)
+{
+	extern __shared__ float sdata[];
+
+	unsigned tid = threadIdx.x;
+	unsigned outputNeuron = blockIdx.x;
+	unsigned weighsOffset = (outputNeuron * totalWeighsPerOutput);
+
+	float result = 0;
+	unsigned i = tid;
+
+	if (inputType == FLOAT) {
+		weighsOffset += inputOffset;
+		while (i < input_size){
+			if (inputType == FLOAT){
+				result += ((float*)inputPtr)[i] * ((float*)weighs)[weighsOffset + i];
+				i += blockSize;
+			}
+		}
+	} else {
+		weighsOffset += inputOffset + (tid * BITS_PER_UNSIGNED);
+
+		unsigned input_blocks_to_read = ((input_size - 1) / BITS_PER_UNSIGNED) + 1;
+		while (i < input_blocks_to_read){
+
+			unsigned mask = 0x80000000;
+			unsigned currentInput = ((unsigned*)inputPtr)[i];
+			for (unsigned j=0; j < BITS_PER_UNSIGNED; j++) {
+
+				if (currentInput & mask) {
+					result += ((unsigned char*)weighs)[weighsOffset + j] - 128;
+				} else {
+					if (inputType == SIGN) {
+						result += 128 - ((unsigned char*)weighs)[weighsOffset + j];
+					}
+				}
+				mask >>= 1;
+			}
+			i += blockSize;
+			weighsOffset += blockSize * BITS_PER_UNSIGNED;
+		}
+	}
+
+	sdata[tid] = result;
+	__syncthreads();
+
+	if (blockSize >= 512) { if (tid < 256) { sdata[tid] += sdata[tid + 256]; } __syncthreads(); }
+	if (blockSize >= 256) { if (tid < 128) { sdata[tid] += sdata[tid + 128]; } __syncthreads(); }
+	if (blockSize >= 128) { if (tid < 64) {  sdata[tid] += sdata[tid + 64]; } __syncthreads(); }
+
+#if __DEVICE_EMULATION__
+	if (blockSize >= 64) { if (tid < 32) { sdata[tid] += sdata[tid + 32]; } __syncthreads(); }
+	if (blockSize >= 32) { if (tid < 16) { sdata[tid] += sdata[tid + 16]; } __syncthreads(); }
+	if (blockSize >= 16) { if (tid < 8) {  sdata[tid] += sdata[tid + 8]; }  __syncthreads(); }
+	if (blockSize >= 8) {  if (tid < 4) {  sdata[tid] += sdata[tid + 4]; }  __syncthreads(); }
+	if (blockSize >= 4) {  if (tid < 2) {  sdata[tid] += sdata[tid + 2]; }  __syncthreads(); }
+	if (blockSize >= 2) {  if (tid < 1) {  sdata[tid] += sdata[tid + 1]; }  __syncthreads(); }
+#else
+	if (tid < 32) {
+		if (blockSize >= 64) sdata[tid] += sdata[tid + 32];
+		if (blockSize >= 32) sdata[tid] += sdata[tid + 16];
+		if (blockSize >= 16) sdata[tid] += sdata[tid + 8];
+		if (blockSize >= 8)  sdata[tid] += sdata[tid + 4];
+		if (blockSize >= 4)  sdata[tid] += sdata[tid + 2];
+		if (blockSize >= 2)  sdata[tid] += sdata[tid + 1];
+	}
+#endif
+	if (tid == 0) {
+		results[outputNeuron] += sdata[0];
+	}
+}
+
+//void SumLayerConnections(struct_Layer* layer, float* d_results, unsigned block_size, VectorType inputType){
+extern "C" void cuda_inputCalculation2(void* inputPtr, unsigned input_size, VectorType inputType, unsigned inputOffset, unsigned output_size, void* weighs, unsigned totalWeighsPerOutput, float* results, unsigned block_size)
+{
+	unsigned grid_size = output_size;
+	unsigned shared_mem_size = block_size * sizeof(float);
+
+	if (inputType == FLOAT){
+		switch (block_size)
+		{
+			case 512:
+				SumConnectionsKernel<512, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 256:
+				SumConnectionsKernel<256, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 128:
+				SumConnectionsKernel<128, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 64:
+				SumConnectionsKernel< 64, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 32:
+				SumConnectionsKernel< 32, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 16:
+				SumConnectionsKernel< 16, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  8:
+				SumConnectionsKernel<  8, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  4:
+				SumConnectionsKernel<  4, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  2:
+				SumConnectionsKernel<  2, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  1:
+				SumConnectionsKernel<  1, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+		}
+	} else if (inputType == BIT) {
+		switch (block_size)
+		{
+			case 512:
+				SumConnectionsKernel<512, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 256:
+				SumConnectionsKernel<256, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 128:
+				SumConnectionsKernel<128, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 64:
+				SumConnectionsKernel< 64, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 32:
+				SumConnectionsKernel< 32, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 16:
+				SumConnectionsKernel< 16, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  8:
+				SumConnectionsKernel<  8, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  4:
+				SumConnectionsKernel<  4, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  2:
+				SumConnectionsKernel<  2, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  1:
+				SumConnectionsKernel<  1, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+		}
+	} else {
+		switch (block_size)
+		{
+			case 512:
+				SumConnectionsKernel<512, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 256:
+				SumConnectionsKernel<256, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 128:
+				SumConnectionsKernel<128, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 64:
+				SumConnectionsKernel< 64, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 32:
+				SumConnectionsKernel< 32, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case 16:
+				SumConnectionsKernel< 16, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  8:
+				SumConnectionsKernel<  8, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  4:
+				SumConnectionsKernel<  4, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  2:
+				SumConnectionsKernel<  2, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+			case  1:
+				SumConnectionsKernel<  1, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+		}
+	}
+	checkCUDAError("SumLayerConnections");
+}
+
+
 
 __device__
 float Func(float number, FunctionType functionType) {
@@ -391,7 +576,9 @@ void OutputToHost(void* output, struct_Layer* d_layer, VectorType outputType){
 		size = sizeof(float) * d_layer->h_outputSize;
 	} else {
 		size = sizeof(unsigned) * (((d_layer->h_outputSize - 1)/ BITS_PER_UNSIGNED) + 1);
-	}	cudaMemcpy(output, d_layer->outputNeurons, size, cudaMemcpyDeviceToHost);
+	}
+	cudaMemcpy(output, d_layer->outputNeurons, size, cudaMemcpyDeviceToHost);
+
 	checkCUDAError("Output To Host");
 }
 

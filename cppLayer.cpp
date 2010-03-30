@@ -164,19 +164,13 @@ void CppLayer::calculateOutput()
 			}
 		}
 		inputOffset += getInput(i)->getWeighsSize();
-//		printf("parciales ", 1);
-//		for (unsigned i=0; i < output->getSize(); i++){
-//			printf("%f ", results[i]);
-//		}
-//		printf("\n", 1);
 	}
 
-
-	printf("----------------\n", 1);
-	for (unsigned i=0; i < output->getSize(); i++){
-		printf("%f ", results[i]);
-	}
-	printf("\n----------------\n", 1);
+//	printf("----------------\n", 1);
+//	for (unsigned i=0; i < output->getSize(); i++){
+//		printf("%f ", results[i]);
+//	}
+//	printf("\n----------------\n", 1);
 
 	output->activation(results, functionType);
 	mi_free(results);
