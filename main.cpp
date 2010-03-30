@@ -3,7 +3,6 @@
 
 using namespace std;
 
-#include "cudaNeuralNet.h"
 #include "population.h"
 #include "chronometer.h"
 
@@ -110,23 +109,12 @@ try{
 			printf("XMM %f \n", secods);
 			//CUDA
 			//cout<<"version CUDA"<<endl;
-			for (unsigned version = 0; version < 3; version++){
-				printf("cuda OLD [version %d]  ", version);
-				CudaLayer::version = version;
-				for (unsigned blockSize = 8; blockSize <=512; blockSize *= 2){
-					CudaLayer::block_size = blockSize;
-					nn = new CudaNeuralNet();
-					secods = testNeuralNet(nn, size, inputType, times);
-					printf("(%d) %f ", blockSize, secods);
-				}
-				printf("\n", 1);
-			}
 			for (unsigned algorithm = 0; algorithm < 2; algorithm++){
 				printf("CUDA [algorithm %d]  ", algorithm);
 				CudaLayer2::algorithm = algorithm;
 				for (unsigned blockSize = 8; blockSize <=512; blockSize *= 2){
 					CudaLayer2::blockSize = blockSize;
-					nn = new NeuralNet(CUDA2);
+					nn = new NeuralNet(CUDA);
 					secods = testNeuralNet(nn, size, inputType, times);
 					printf("(%d) %f ", blockSize, secods);
 				}

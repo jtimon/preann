@@ -2,7 +2,7 @@
 # usar tabulador (no espacios) en la línea de comando 
 # Project: Paralel Reinforcement Evolutionary Artificial Neural Network
  
-OBJECTS = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o cudaNeuralNet.o task.o classificationTask.o individual.o main.o factory.o interface.o cudaVector.o cudaLayer2.o
+OBJECTS = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer2.o xmmLayer.o cppLayer.o neuralNet.o task.o classificationTask.o individual.o main.o factory.o interface.o cudaVector.o
 
 CX = gcc-4.3
 CXX = g++-4.3 -ggdb
@@ -13,9 +13,9 @@ all: preann
 
 preann: $(OBJECTS)
 	$(NVCC) -o preann $(OBJECTS) -L/usr/local/cuda/lib -lcudart
-main.o : main.cpp cudaNeuralNet.o population.o chronometer.o
+main.o : main.cpp population.o chronometer.o
 	$(CXX) -c main.cpp
-population.o : population.cpp population.h cudaNeuralNet.o task.o
+population.o : population.cpp population.h task.o
 	$(CXX) -c population.cpp
 classificationTask.o : classificationTask.cpp classificationTask.h task.o
 	$(CXX) -c classificationTask.cpp 
@@ -23,16 +23,12 @@ task.o : task.cpp task.h individual.o
 	$(CXX) -c task.cpp
 individual.o : individual.cpp individual.h neuralNet.o
 	$(CXX) -c individual.cpp
-cudaNeuralNet.o : cudaNeuralNet.cpp cudaNeuralNet.h neuralNet.o cudaLayer.o
-	$(CXX) -c cudaNeuralNet.cpp
 neuralNet.o : neuralNet.cpp neuralNet.h layer.o factory.o
 	$(CXX) -c neuralNet.cpp
 factory.o : factory.cpp factory.h cppLayer.o xmmLayer.o cudaLayer.o cudaLayer2.o
 	$(CXX) -c factory.cpp
 cudaLayer2.o : cudaLayer2.cpp cudaLayer2.h layer.o cuda_code.o
 	$(CXX) -c cudaLayer2.cpp
-cudaLayer.o : cudaLayer.cpp cudaLayer.h layer.o cuda_code.o
-	$(CXX) -c cudaLayer.cpp
 cppLayer.o : cppLayer.cpp cppLayer.h layer.o
 	$(CXX) -c cppLayer.cpp
 xmmLayer.o : xmmLayer.cpp xmmLayer.h layer.o xmmVector.o

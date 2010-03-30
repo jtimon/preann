@@ -13,7 +13,7 @@
 //TODO se requiere para el atributo static
 #include "cudaLayer2.h"
 
-typedef enum {C, SSE2, CUDA, CUDA2} ImplementationType;
+typedef enum {C, SSE2, CUDA} ImplementationType;
 
 class Factory {
 public:

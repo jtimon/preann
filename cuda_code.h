@@ -15,19 +15,5 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Vecto
 extern "C" void cuda_inputCalculation2(void* inputPtr, unsigned input_size, VectorType inputType, unsigned inputOffset, unsigned output_size, void* weighs, unsigned totalWeighsPerOutput, float* results, unsigned block_size);
 extern "C" void cuda_activation(void* data, unsigned size, VectorType vectorType, float* results, FunctionType functionType, unsigned block_size);
 
-typedef struct {
-	unsigned h_numberInputLayers;
-	unsigned* inputLayerSize;
-	unsigned* h_inputLayerSize;
-	unsigned h_totalWeighsPerOutput;
-	void** inputNeurons;
-
-	unsigned h_outputSize;
-	void* outputNeurons;
-	float* thresholds;
-
-	void* weighs;
-	FunctionType h_functionType;
-} struct_Layer;
 
 #endif /*CUDA_DEFINITIONS_H_*/
