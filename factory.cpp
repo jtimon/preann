@@ -3,7 +3,7 @@
 //TODO implementar diferentes veces para decidir en el makefile
 #include "cppLayer.h"
 #include "xmmLayer.h"
-#include "cudaLayer2.h"
+#include "cudaLayer.h"
 
 Vector* Factory::newVector(ImplementationType implementationType, unsigned size, VectorType vectorType = FLOAT)
 {
@@ -25,6 +25,6 @@ Layer* Factory::newLayer(ImplementationType implementationType, FunctionType fun
 		case SSE2:
 			return new XmmLayer(inputType, outputType, functionType);
 		case CUDA:
-			return new CudaLayer2(inputType, outputType, functionType);
+			return new CudaLayer(inputType, outputType, functionType);
 	}
 }

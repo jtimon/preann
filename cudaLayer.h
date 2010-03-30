@@ -11,15 +11,15 @@
 #include "layer.h"
 #include "cudaVector.h"
 
-class CudaLayer2: public Layer {
+class CudaLayer: public Layer {
 protected:
 	virtual void saveWeighs(FILE* stream);
 	virtual void loadWeighs(FILE* stream);
 public:
 	static unsigned algorithm;
 	static unsigned blockSize;
-	CudaLayer2(VectorType inputType, VectorType outputType, FunctionType functionType);
-	virtual ~CudaLayer2();
+	CudaLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
+	virtual ~CudaLayer();
 
 	virtual void calculateOutput();
 	void setSizes(unsigned  totalWeighsPerOutput, unsigned  outputSize);

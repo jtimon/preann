@@ -30,10 +30,6 @@ float testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType, un
 	return chrono.getSeconds();
 }
 
-unsigned numlayers;
-unsigned type;
-unsigned size;
-
 int main ( int argc, char *argv[] )
 {
 	Chronometer total;
@@ -41,15 +37,17 @@ int main ( int argc, char *argv[] )
 try{
 	Chronometer chrono;
 	NeuralNet* nn;
-	Layer* layer;
+
 	FILE* stream;
 	VectorType inputType;
 	FunctionType functionType;
 	unsigned rangeWeighs = 20;
+	unsigned numlayers;
 	unsigned maxSize;
 	unsigned times;
+	unsigned size;
 	float seconds;
-	FILE* ftimes = fopen("/home/timon/times.log", "w");
+	unsigned type;
 
 	for (type=0; type < 2; type++){
 
@@ -96,44 +94,37 @@ try{
 			printTotalAllocated();
 			printTotalPointers();
 
-			float secods;
-			//C++
-			//cout<<"version C++"<<endl;
 			nn = new NeuralNet(C);
-			secods = testNeuralNet(nn, size, inputType, times);
-			printf("C++ %f \n", secods);
-			//XMM
-			//cout<<"version XMM"<<endl;
+			seconds = testNeuralNet(nn, size, inputType, times);
+			printf("C++ %f \n", seconds);
+
 			nn = new NeuralNet(SSE2);
-			secods = testNeuralNet(nn, size, inputType, times);
-			printf("XMM %f \n", secods);
-			//CUDA
-			//cout<<"version CUDA"<<endl;
+			seconds = testNeuralNet(nn, size, inputType, times);
+			printf("XMM %f \n", seconds);
+
 			for (unsigned algorithm = 0; algorithm < 2; algorithm++){
 				printf("CUDA [algorithm %d]  ", algorithm);
-				CudaLayer2::algorithm = algorithm;
+				CudaLayer::algorithm = algorithm;
 				for (unsigned blockSize = 8; blockSize <=512; blockSize *= 2){
-					CudaLayer2::blockSize = blockSize;
+					CudaLayer::blockSize = blockSize;
 					nn = new NeuralNet(CUDA);
-					secods = testNeuralNet(nn, size, inputType, times);
-					printf("(%d) %f ", blockSize, secods);
+					seconds = testNeuralNet(nn, size, inputType, times);
+					printf("(%d) %f ", blockSize, seconds);
 				}
 				printf("\n", 1);
 			}
 		}
 	}
 
-	fclose(ftimes);
-	cout<<"Exit success"<<endl;
-
+	printf("Exit success.\n", 1);
+	printTotalAllocated();
+	printTotalPointers();
 } catch(string error){
 	cout<<"Error: "<<error<<endl;
 } catch (...){
-	cout<<"An error was thrown."<<endl;
+	printf("An error was thrown.\n", 1);
 }
 	total.stop();
-	cout<<"Total time spent: "<<total.getSeconds()<<endl;
-	printTotalAllocated();
-	printTotalPointers();
+	printf("Total time spent: %f \n", total.getSeconds());
 	return EXIT_SUCCESS;
 }

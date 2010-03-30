@@ -2,7 +2,7 @@
 # usar tabulador (no espacios) en la línea de comando 
 # Project: Paralel Reinforcement Evolutionary Artificial Neural Network
  
-OBJECTS = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer2.o xmmLayer.o cppLayer.o neuralNet.o task.o classificationTask.o individual.o main.o factory.o interface.o cudaVector.o
+OBJECTS = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o task.o classificationTask.o individual.o main.o factory.o interface.o cudaVector.o
 
 CX = gcc-4.3
 CXX = g++-4.3 -ggdb
@@ -25,10 +25,10 @@ individual.o : individual.cpp individual.h neuralNet.o
 	$(CXX) -c individual.cpp
 neuralNet.o : neuralNet.cpp neuralNet.h layer.o factory.o
 	$(CXX) -c neuralNet.cpp
-factory.o : factory.cpp factory.h cppLayer.o xmmLayer.o cudaLayer.o cudaLayer2.o
+factory.o : factory.cpp factory.h cppLayer.o xmmLayer.o cudaLayer.o
 	$(CXX) -c factory.cpp
-cudaLayer2.o : cudaLayer2.cpp cudaLayer2.h layer.o cuda_code.o
-	$(CXX) -c cudaLayer2.cpp
+cudaLayer.o : cudaLayer.cpp cudaLayer.h layer.o cuda_code.o
+	$(CXX) -c cudaLayer.cpp
 cppLayer.o : cppLayer.cpp cppLayer.h layer.o
 	$(CXX) -c cppLayer.cpp
 xmmLayer.o : xmmLayer.cpp xmmLayer.h layer.o xmmVector.o

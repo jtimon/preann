@@ -5,17 +5,17 @@
  *      Author: timon
  */
 
-#include "cudaLayer2.h"
+#include "cudaLayer.h"
 
-unsigned CudaLayer2::algorithm = 0;
-unsigned CudaLayer2::blockSize = 128;
+unsigned CudaLayer::algorithm = 0;
+unsigned CudaLayer::blockSize = 128;
 
-CudaLayer2::CudaLayer2(VectorType inputType, VectorType outputType, FunctionType functionType): Layer(inputType, outputType, functionType)
+CudaLayer::CudaLayer(VectorType inputType, VectorType outputType, FunctionType functionType): Layer(inputType, outputType, functionType)
 {
 	// TODO Auto-generated constructor stub
 }
 
-CudaLayer2::~CudaLayer2()
+CudaLayer::~CudaLayer()
 {
 	if (inputs) {
 		mi_free(inputs);
@@ -32,7 +32,7 @@ CudaLayer2::~CudaLayer2()
 	}
 }
 
-void CudaLayer2::setSizes(unsigned  totalWeighsPerOutput, unsigned  outputSize)
+void CudaLayer::setSizes(unsigned  totalWeighsPerOutput, unsigned  outputSize)
 {
 	if (!output) {
 		output = new CudaVector(outputSize, outputType);
@@ -58,13 +58,13 @@ void CudaLayer2::setSizes(unsigned  totalWeighsPerOutput, unsigned  outputSize)
 	this->totalWeighsPerOutput = totalWeighsPerOutput;
 }
 
-Layer* CudaLayer2::newCopy()
+Layer* CudaLayer::newCopy()
 {
 	std::string error = "save is not implemented for newCopy.";
 	throw error;
 }
 
-void CudaLayer2::saveWeighs(FILE *stream)
+void CudaLayer::saveWeighs(FILE *stream)
 {
 	unsigned size;
 
@@ -85,7 +85,7 @@ void CudaLayer2::saveWeighs(FILE *stream)
 	mi_free(aux_weighs);
 }
 
-void CudaLayer2::loadWeighs(FILE *stream)
+void CudaLayer::loadWeighs(FILE *stream)
 {
 	unsigned size;
 
@@ -106,28 +106,28 @@ void CudaLayer2::loadWeighs(FILE *stream)
 	mi_free(aux_weighs);
 }
 
-void CudaLayer2::randomWeighs(float range)
+void CudaLayer::randomWeighs(float range)
 {
 	std::string error = "randomWeighs is not implemented for CudaLayer2.";
 	throw error;
 }
 
-Vector* CudaLayer2::newVector(unsigned  size, VectorType vectorType)
+Vector* CudaLayer::newVector(unsigned  size, VectorType vectorType)
 {
 	return new CudaVector(size, vectorType);
 }
 
-void CudaLayer2::calculateOutput()
+void CudaLayer::calculateOutput()
 {
 	float* results = cuda_getNegativeThresholds(thresholds, output->getSize(), THREADS_PER_BLOCK);
 
 	unsigned inputOffset = 0;
 	for(unsigned i=0; i < numberInputs; i++){
 		Vector* input = inputs[i];
-		if (CudaLayer2::algorithm == 0){
-			cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), inputOffset, output->getSize(), weighs, totalWeighsPerOutput, results, CudaLayer2::blockSize);
+		if (CudaLayer::algorithm == 0){
+			cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), inputOffset, output->getSize(), weighs, totalWeighsPerOutput, results, CudaLayer::blockSize);
 		} else {
-			cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), inputOffset, output->getSize(), weighs, totalWeighsPerOutput, results, CudaLayer2::blockSize);
+			cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), inputOffset, output->getSize(), weighs, totalWeighsPerOutput, results, CudaLayer::blockSize);
 		}
 		inputOffset += input->getSize();
 	}

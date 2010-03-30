@@ -11,7 +11,7 @@
 #include "layer.h"
 
 //TODO se requiere para el atributo static
-#include "cudaLayer2.h"
+#include "cudaLayer.h"
 
 typedef enum {C, SSE2, CUDA} ImplementationType;
 
