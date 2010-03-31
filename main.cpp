@@ -22,11 +22,11 @@ float testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType, un
 	}
 	chrono.stop();
 
-	//nn->getOutput(0)->print();
-	//printTotalAllocated();
-	//printTotalPointers();
-	delete(nn);
+	nn->getOutput(0)->print();
 
+	delete(nn);
+	printTotalAllocated();
+	printTotalPointers();
 	return chrono.getSeconds();
 }
 
@@ -49,27 +49,27 @@ try{
 	float seconds;
 	unsigned type;
 
-	for (type=0; type < 2; type++){
+	for (type=0; type < 1; type++){
 
-		//type = 1;
+		type = 2;
 		switch(type){
 		case 0:
 			cout<<"version float"<<endl;
 			inputType = FLOAT;
 			functionType = IDENTITY;
-			maxSize = 2048;
+			maxSize = 1024;
 			break;
 		case 1:
 			cout<<"version bit"<<endl;
 			inputType = BIT;
 			functionType = BINARY_STEP;
-			maxSize = 4096;
+			maxSize = 1024;
 			break;
 		case 2:
 			cout<<"version sign"<<endl;
 			inputType = SIGN;
 			functionType = BIPOLAR_STEP;
-			maxSize = 4096;
+			maxSize = 1024;
 			break;
 		}
 
@@ -80,12 +80,12 @@ try{
 			nn = new NeuralNet();
 
 			nn->createInput(size, inputType);
+			printTotalAllocated();
+			printTotalPointers();
 			//nn->createFeedForwardNet(numlayers, size, inputType, functionType);
 			//TODO petaba con 16 < numlayers <=30 y size 512 (en Desktop)
 			nn->createFullyConnectedNet(numlayers, size, inputType, functionType);
 
-			//printTotalAllocated();
-			//printTotalPointers();
 			nn->randomWeighs(rangeWeighs);
 			stream = fopen(PATH, "w+b");
 			nn->save(stream);
@@ -102,10 +102,10 @@ try{
 			seconds = testNeuralNet(nn, size, inputType, times);
 			printf("XMM %f \n", seconds);
 
-			for (unsigned algorithm = 0; algorithm < 2; algorithm++){
+			for (unsigned algorithm = 0; algorithm < 1; algorithm++){
 				printf("CUDA [algorithm %d]  ", algorithm);
 				CudaLayer::algorithm = algorithm;
-				for (unsigned blockSize = 8; blockSize <=512; blockSize *= 2){
+				for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
 					CudaLayer::blockSize = blockSize;
 					nn = new NeuralNet(CUDA);
 					seconds = testNeuralNet(nn, size, inputType, times);

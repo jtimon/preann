@@ -19,6 +19,10 @@ CudaVector::CudaVector(unsigned size, VectorType vectorType)
 
 CudaVector::~CudaVector()
 {
+	if (data) {
+		cuda_free(data);
+		data = NULL;
+	}
 }
 
 void CudaVector::free()

@@ -1,19 +1,20 @@
 #ifndef XMMLAYER_H_
 #define XMMLAYER_H_
 
-#include "layer.h"
+#include "cppLayer.h"
 #include "xmmVector.h"
 
-class XmmLayer: public Layer
+class XmmLayer: public CppLayer
 {
-	virtual void saveWeighs(FILE* stream);
-	virtual void loadWeighs(FILE* stream);
+protected:
+	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results);
+	virtual void* newWeighs(unsigned inputSize, VectorType inputType);
 public:
-	XmmLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
+	XmmLayer(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~XmmLayer();
 	
-	virtual void setSizes(unsigned totalWeighsPerOutput, unsigned outputSize);
-	virtual void calculateOutput();
+	//virtual void calculateOutput();
+
 	virtual Layer* newCopy();
 };
 

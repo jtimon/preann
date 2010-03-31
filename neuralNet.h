@@ -5,8 +5,8 @@
 
 class NeuralNet
 {
+	ImplementationType implementationType;
 protected:
-
 	Layer** layers;
 	unsigned char* layerConnectionsGraph;
 	unsigned numberLayers;
@@ -20,16 +20,14 @@ protected:
 	unsigned* outputLayers;
 	unsigned numberOutputs;
 
-	void setDefaults();
 	void addLayer(Layer* layer);
 	void increaseMaxInputs();
 	void increaseMaxLayers();
 	void increaseMaxOuputs();
 	unsigned getPosInGraph(unsigned source, unsigned destination);
 public:
-	ImplementationType implementationType;
-	NeuralNet();
-	NeuralNet(ImplementationType implementationType);
+
+	NeuralNet(ImplementationType implementationType = C);
 	virtual ~NeuralNet();
 
 	Interface* createInput(unsigned size, VectorType vectorType);
@@ -40,7 +38,7 @@ public:
 	Interface* getOutput(unsigned outputPos);
 	unsigned getNumOutputs();
 
-	void addLayer(unsigned size, VectorType sourceType, VectorType destinationType, FunctionType functiontype);
+	void addLayer(unsigned size, VectorType destinationType = FLOAT, FunctionType functiontype = IDENTITY);
 
 	void addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos);
 	void addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos);
@@ -50,11 +48,8 @@ public:
 	void load(FILE* stream);
 	void resetConnections();
 
-	void createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType);
-	void createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype);
-	void createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype, unsigned floatOutputSize, unsigned bitOutputSize);
-	void createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType);
-	void createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype);
+	void createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype = IDENTITY);
+	void createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype = IDENTITY);
 
 	virtual void calculateOutput();
 };

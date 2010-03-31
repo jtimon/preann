@@ -237,13 +237,10 @@ noIniciarMascara3:
 	DEC ECX
 	JNZ bucle3
 
-	MOVD EBX, XMM3        ;copiamos la mitad baja del resultado
+	MOVD EAX, XMM3        ;copiamos la mitad baja del resultado
 	PSRLDQ XMM3, 8        ;desplazamos el registro 8 bytes a la derecha
 	MOVD ECX, XMM3        ;copiamos la mitad alta del resultado
-	ADD EBX, ECX          ;sumamos ambas mitades (en EAX esta el resultado a devolver)
-
-	MOV EDI, [ESP + 32]
-	MOV [EDI], EBX        ;las colocamos en el parámetro resultado
+	ADD EAX, ECX          ;sumamos ambas mitades (en EAX esta el resultado a devolver)
 
 	;restauramos los registros
 	POP EDI

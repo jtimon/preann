@@ -20,7 +20,6 @@ protected:
 
 	Vector() {};
 	virtual unsigned getByteSize();
-	virtual void free();
 public:
 	Vector(unsigned size, VectorType vectorType);
 	virtual ~Vector();

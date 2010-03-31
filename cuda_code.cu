@@ -158,7 +158,7 @@ float* cuda_getNegativeThresholds(float* thresholds, unsigned size, unsigned blo
 // LAYER CALCULATION
 
 __global__
-void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned inputOffset, unsigned output_size, float* weighs, unsigned totalWeighsPerOutput, float* results)
+void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned output_size, float* weighs, float* results)
 {
 	extern __shared__ float sdata[];
 
@@ -166,7 +166,7 @@ void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned inp
 	unsigned readingLoops = (input_size - 1 / blockDim.x) + 1;
 
 	unsigned outputNeuron = blockIdx.x*blockDim.x + threadIdx.x;
-	unsigned weighsOffset = (outputNeuron * totalWeighsPerOutput) + inputOffset;
+	unsigned weighsOffset = outputNeuron * input_size;
 	float result = 0;
 
 	unsigned pos = tid;
@@ -181,11 +181,12 @@ void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned inp
 	if (outputNeuron < output_size){
 
 		//////////////////////////
-/*		for (unsigned i=0; i < input_size; i++){
+		for (unsigned i=0; i < input_size; i++){
 			result += sdata[i] * weighs[weighsOffset + i];
-		}*/
+			//printf(" peso %f ", weighs[weighsOffset + i]);
+		}
 		/////TODO OTRA OPCION
-		if (blockDim.x <= input_size){
+	/*	if (blockDim.x <= input_size){
 			unsigned pos = tid;
 			while (pos < input_size){
 				result += sdata[pos] * weighs[weighsOffset + pos];
@@ -208,7 +209,7 @@ void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned inp
 				result += sdata[pos] * weighs[weighsOffset + pos];
 				++pos;
 			}
-		}
+		}*/
 		/////////////
 		results[outputNeuron] += result;
 	}
@@ -216,7 +217,7 @@ void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned inp
 
 template <VectorType inputType>
 __global__
-void SumBitsConnectionsKernel2(unsigned* inputs, unsigned input_size, unsigned inputOffset, unsigned output_size, unsigned char* weighs, unsigned totalWeighsPerOutput, float* results)
+void SumBitsConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned output_size, unsigned char* weighs, float* results)
 {
 	extern __shared__ unsigned shared_inputs[];
 
@@ -238,7 +239,7 @@ void SumBitsConnectionsKernel2(unsigned* inputs, unsigned input_size, unsigned i
 	if (outputNeuron < output_size){
 
 		float result = 0;
-		unsigned weighsOffset = (outputNeuron * totalWeighsPerOutput) + inputOffset;
+		unsigned weighsOffset = (outputNeuron * input_size);
 
 		for (unsigned i=0; i < input_blocks_to_read; i++){
 
@@ -261,7 +262,7 @@ void SumBitsConnectionsKernel2(unsigned* inputs, unsigned input_size, unsigned i
 	}
 }
 
-extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, VectorType inputType, unsigned inputOffset, unsigned output_size, void* weighs, unsigned totalWeighsPerOutput, float* results, unsigned block_size)
+extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, VectorType inputType, unsigned output_size, void* weighs, float* results, unsigned block_size)
 {
 	unsigned grid_size = ((output_size - 1)/block_size) + 1;
 	unsigned shared_mem_size;
@@ -274,7 +275,7 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Vecto
 		}
 		shared_mem_size = input_size * sizeof(float);
 
-		SumFloatsConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, inputOffset, output_size, (float*)weighs, totalWeighsPerOutput, results);
+		SumFloatsConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, output_size, (float*)weighs, results);
 	} else {
 
 		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
@@ -285,28 +286,27 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Vecto
 			throw error;
 		}
 		if (inputType == BIT) {
-			SumBitsConnectionsKernel2<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, inputOffset, output_size, (unsigned char*)weighs, totalWeighsPerOutput, results);
+			SumBitsConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
 		} else {
-			SumBitsConnectionsKernel2<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, inputOffset, output_size, (unsigned char*)weighs, totalWeighsPerOutput, results);
+			SumBitsConnectionsKernel<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
 		}
 	}
 }
 
 template <unsigned int blockSize, VectorType inputType>
 __global__
-void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned inputOffset, unsigned output_size, void* weighs, unsigned totalWeighsPerOutput, float* results)
+void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned output_size, void* weighs, float* results)
 {
 	extern __shared__ float sdata[];
 
 	unsigned tid = threadIdx.x;
 	unsigned outputNeuron = blockIdx.x;
-	unsigned weighsOffset = (outputNeuron * totalWeighsPerOutput);
+	unsigned weighsOffset = (outputNeuron * input_size);
 
 	float result = 0;
 	unsigned i = tid;
 
 	if (inputType == FLOAT) {
-		weighsOffset += inputOffset;
 		while (i < input_size){
 			if (inputType == FLOAT){
 				result += ((float*)inputPtr)[i] * ((float*)weighs)[weighsOffset + i];
@@ -314,7 +314,7 @@ void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned inputOff
 			}
 		}
 	} else {
-		weighsOffset += inputOffset + (tid * BITS_PER_UNSIGNED);
+		weighsOffset += tid * BITS_PER_UNSIGNED;
 
 		unsigned input_blocks_to_read = ((input_size - 1) / BITS_PER_UNSIGNED) + 1;
 		while (i < input_blocks_to_read){
@@ -367,7 +367,7 @@ void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned inputOff
 }
 
 //void SumLayerConnections(struct_Layer* layer, float* d_results, unsigned block_size, VectorType inputType){
-extern "C" void cuda_inputCalculation2(void* inputPtr, unsigned input_size, VectorType inputType, unsigned inputOffset, unsigned output_size, void* weighs, unsigned totalWeighsPerOutput, float* results, unsigned block_size)
+extern "C" void cuda_inputCalculation2(void* inputPtr, unsigned input_size, VectorType inputType, unsigned output_size, void* weighs, float* results, unsigned block_size)
 {
 	unsigned grid_size = output_size;
 	unsigned shared_mem_size = block_size * sizeof(float);
@@ -376,75 +376,75 @@ extern "C" void cuda_inputCalculation2(void* inputPtr, unsigned input_size, Vect
 		switch (block_size)
 		{
 			case 512:
-				SumConnectionsKernel<512, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<512, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 256:
-				SumConnectionsKernel<256, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<256, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 128:
-				SumConnectionsKernel<128, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<128, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 64:
-				SumConnectionsKernel< 64, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel< 64, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 32:
-				SumConnectionsKernel< 32, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel< 32, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 16:
-				SumConnectionsKernel< 16, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel< 16, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  8:
-				SumConnectionsKernel<  8, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  8, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  4:
-				SumConnectionsKernel<  4, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  4, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  2:
-				SumConnectionsKernel<  2, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  2, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  1:
-				SumConnectionsKernel<  1, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  1, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		}
 	} else if (inputType == BIT) {
 		switch (block_size)
 		{
 			case 512:
-				SumConnectionsKernel<512, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<512, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 256:
-				SumConnectionsKernel<256, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<256, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 128:
-				SumConnectionsKernel<128, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<128, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 64:
-				SumConnectionsKernel< 64, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel< 64, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 32:
-				SumConnectionsKernel< 32, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel< 32, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 16:
-				SumConnectionsKernel< 16, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel< 16, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  8:
-				SumConnectionsKernel<  8, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  8, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  4:
-				SumConnectionsKernel<  4, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  4, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  2:
-				SumConnectionsKernel<  2, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  2, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  1:
-				SumConnectionsKernel<  1, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  1, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		}
 	} else {
 		switch (block_size)
 		{
 			case 512:
-				SumConnectionsKernel<512, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<512, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 256:
-				SumConnectionsKernel<256, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<256, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 128:
-				SumConnectionsKernel<128, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<128, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 64:
-				SumConnectionsKernel< 64, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel< 64, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 32:
-				SumConnectionsKernel< 32, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel< 32, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case 16:
-				SumConnectionsKernel< 16, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel< 16, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  8:
-				SumConnectionsKernel<  8, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  8, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  4:
-				SumConnectionsKernel<  4, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  4, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  2:
-				SumConnectionsKernel<  2, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  2, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 			case  1:
-				SumConnectionsKernel<  1, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, inputOffset, output_size, weighs, totalWeighsPerOutput, results); break;
+				SumConnectionsKernel<  1, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		}
 	}
-	checkCUDAError("SumLayerConnections");
+	checkCUDAError("cuda_inputCalculation2");
 }
 

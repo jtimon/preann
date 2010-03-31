@@ -15,18 +15,21 @@ class CudaLayer: public Layer {
 protected:
 	virtual void saveWeighs(FILE* stream);
 	virtual void loadWeighs(FILE* stream);
+	virtual float* negativeThresholds();
+	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results);
+	virtual void* newWeighs(unsigned inputSize, VectorType inputType);
 public:
 	static unsigned algorithm;
 	static unsigned blockSize;
-	CudaLayer(VectorType inputType, VectorType outputType, FunctionType functionType);
+	CudaLayer(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~CudaLayer();
 
-	virtual void calculateOutput();
-	void setSizes(unsigned  totalWeighsPerOutput, unsigned  outputSize);
-	virtual Vector* newVector(unsigned size, VectorType vectorType);
+	//virtual void calculateOutput();
+	//virtual void addInput(Vector* input);
+	virtual void randomWeighs(float range);
+
 	virtual Layer* newCopy();
 
-	virtual void randomWeighs(float range);
 
 };
 

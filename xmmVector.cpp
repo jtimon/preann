@@ -25,6 +25,10 @@ XmmVector::XmmVector(unsigned size, VectorType vectorType)
 
 XmmVector::~XmmVector()
 {
+	if (data) {
+		mi_free(data);
+		data = NULL;
+	}
 }
 
 void XmmVector::copyFrom(Interface* interface)
@@ -154,6 +158,7 @@ void XmmVector::activation(float* results, FunctionType functionType)
 			}
 		}
 	}
+	mi_free(results);
 }
 
 unsigned XmmVector::getByteSize()

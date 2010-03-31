@@ -1,67 +1,29 @@
-/*
- * cudaLayer2.cpp
- *
- *  Created on: Mar 25, 2010
- *      Author: timon
- */
-
 #include "cudaLayer.h"
 
 unsigned CudaLayer::algorithm = 0;
 unsigned CudaLayer::blockSize = 128;
 
-CudaLayer::CudaLayer(VectorType inputType, VectorType outputType, FunctionType functionType): Layer(inputType, outputType, functionType)
+CudaLayer::CudaLayer(unsigned size, VectorType outputType, FunctionType functionType): Layer(outputType, functionType)
 {
-	// TODO Auto-generated constructor stub
+	output = new CudaVector(size, outputType);
+	thresholds = (float*)cuda_malloc(sizeof(float) * size);
 }
 
 CudaLayer::~CudaLayer()
 {
 	if (inputs) {
+		for (unsigned i=0; i < numberInputs; i++){
+			cuda_free(weighs[i]);
+		}
 		mi_free(inputs);
+		mi_free(weighs);
 	}
 	if (output) {
 		delete (output);
 	}
-
 	if (thresholds) {
 		cuda_free(thresholds);
 	}
-	if (weighs) {
-		cuda_free(weighs);
-	}
-}
-
-void CudaLayer::setSizes(unsigned  totalWeighsPerOutput, unsigned  outputSize)
-{
-	if (!output) {
-		output = new CudaVector(outputSize, outputType);
-		thresholds = (float*) cuda_malloc(sizeof(float) * outputSize);
-	} else if (output->getSize() != outputSize) {
-
-		cout<<"Warning: a layer is changing the location of its output."<<endl;
-		delete (output);
-		if (thresholds) {
-			cuda_free(thresholds);
-		}
-		output = new CudaVector(outputSize, outputType);
-		thresholds = (float*)cuda_malloc(sizeof(float) * outputSize);
-	}
-	if (totalWeighsPerOutput > 0){
-		unsigned weighs_size = outputSize * totalWeighsPerOutput;
-		if (inputType == FLOAT){
-			weighs = cuda_malloc(sizeof(float) * weighs_size);
-		} else {
-			weighs = cuda_malloc(sizeof(unsigned char) * weighs_size);
-		}
-	}
-	this->totalWeighsPerOutput = totalWeighsPerOutput;
-}
-
-Layer* CudaLayer::newCopy()
-{
-	std::string error = "save is not implemented for newCopy.";
-	throw error;
 }
 
 void CudaLayer::saveWeighs(FILE *stream)
@@ -74,15 +36,17 @@ void CudaLayer::saveWeighs(FILE *stream)
 	fwrite(aux_thresholds, size, 1, stream);
 	mi_free(aux_thresholds);
 
-	if (inputType == FLOAT){
-		size = output->getSize() * totalWeighsPerOutput * sizeof(float);
-	} else {
-		size = output->getSize() * totalWeighsPerOutput * sizeof(unsigned char);
+	for (unsigned i=0; i < numberInputs; i++){
+		if (inputs[i]->getVectorType() == FLOAT){
+			size = inputs[i]->getSize() * output->getSize() * sizeof(float);
+		} else {
+			size = inputs[i]->getSize() * output->getSize() * sizeof(unsigned char);
+		}
+		void* aux_weighs = mi_malloc(size);
+		cuda_copyToHost(aux_weighs, weighs[i], size);
+		fwrite(aux_weighs, size, 1, stream);
+		mi_free(aux_weighs);
 	}
-	void* aux_weighs = mi_malloc(size);
-	cuda_copyToHost(aux_weighs, weighs, size);
-	fwrite(aux_weighs, size, 1, stream);
-	mi_free(aux_weighs);
 }
 
 void CudaLayer::loadWeighs(FILE *stream)
@@ -95,41 +59,62 @@ void CudaLayer::loadWeighs(FILE *stream)
 	cuda_copyToDevice(thresholds, aux_thresholds, size);
 	mi_free(aux_thresholds);
 
-	if (inputType == FLOAT){
-		size = output->getSize() * totalWeighsPerOutput * sizeof(float);
-	} else {
-		size = output->getSize() * totalWeighsPerOutput * sizeof(unsigned char);
+	for (unsigned i=0; i < numberInputs; i++){
+		if (inputs[i]->getVectorType() == FLOAT){
+			size = inputs[i]->getSize() * output->getSize() * sizeof(float);
+		} else {
+			size = inputs[i]->getSize() * output->getSize() * sizeof(unsigned char);
+		}
+
+		void* aux_weighs = mi_malloc(size);
+		fread(aux_weighs, size, 1, stream);
+		cuda_copyToDevice(weighs[i], aux_weighs, size);
+		mi_free(aux_weighs);
 	}
-	void* aux_weighs = mi_malloc(size);
-	fread(aux_weighs, size, 1, stream);
-	cuda_copyToDevice(weighs, aux_weighs, size);
-	mi_free(aux_weighs);
+}
+
+void* CudaLayer::newWeighs(unsigned  inputSize, VectorType inputType)
+{
+	unsigned size;
+	if (inputType == FLOAT) {
+		size = output->getSize() * inputSize * sizeof(float);
+	} else {
+		size = output->getSize() * inputSize * sizeof(unsigned char);
+	}
+	return cuda_malloc(size);
+}
+
+float* CudaLayer::negativeThresholds()
+{
+	return cuda_getNegativeThresholds(thresholds, output->getSize(), CudaLayer::blockSize);
+}
+
+void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
+{
+	if (CudaLayer::algorithm == 0){
+		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
+	} else {
+		cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
+	}
 }
 
 void CudaLayer::randomWeighs(float range)
 {
-	std::string error = "randomWeighs is not implemented for CudaLayer2.";
+	std::string error = "randomWeighs is not implemented for CudaLayer.";
 	throw error;
 }
-
-Vector* CudaLayer::newVector(unsigned  size, VectorType vectorType)
-{
-	return new CudaVector(size, vectorType);
-}
-
+/*
 void CudaLayer::calculateOutput()
 {
-	float* results = cuda_getNegativeThresholds(thresholds, output->getSize(), THREADS_PER_BLOCK);
+	float* results =
 
-	unsigned inputOffset = 0;
 	for(unsigned i=0; i < numberInputs; i++){
 		Vector* input = inputs[i];
 		if (CudaLayer::algorithm == 0){
-			cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), inputOffset, output->getSize(), weighs, totalWeighsPerOutput, results, CudaLayer::blockSize);
+			cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), weighs[i], results, CudaLayer::blockSize);
 		} else {
-			cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), inputOffset, output->getSize(), weighs, totalWeighsPerOutput, results, CudaLayer::blockSize);
+			cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), weighs[i], results, CudaLayer::blockSize);
 		}
-		inputOffset += input->getSize();
 	}
 //	printf("----------------\n", 1);
 //	for (unsigned i=0; i < output->getSize(); i++){
@@ -138,5 +123,10 @@ void CudaLayer::calculateOutput()
 //	printf("\n----------------\n", 1);
 	output->activation(results, functionType);
 }
-
+*/
+Layer* CudaLayer::newCopy()
+{
+	std::string error = "newCopy is not implemented for CudaLayer.";
+	throw error;
+}
 

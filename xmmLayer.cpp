@@ -1,133 +1,109 @@
 #include "xmmLayer.h"
 
-XmmLayer::XmmLayer(VectorType inputType, VectorType outputType, FunctionType functionType): Layer(inputType, outputType, functionType)
+XmmLayer::XmmLayer(unsigned size, VectorType outputType, FunctionType functionType): CppLayer(outputType, functionType)
 {
+	output = new XmmVector(size, outputType);
+	thresholds = (float*)mi_malloc(sizeof(float) * size);
 }
 
 XmmLayer::~XmmLayer()
 {
 	if (inputs) {
+		for (unsigned i=0; i < numberInputs; i++){
+			mi_free(weighs[i]);
+		}
 		mi_free(inputs);
+		mi_free(weighs);
+		inputs = NULL;
+		weighs = NULL;
 	}
 	if (thresholds) {
 		mi_free(thresholds);
-	}
-	if (weighs) {
-		mi_free(weighs);
+		thresholds = NULL;
 	}
 	if (output) {
 		delete (output);
+		output = NULL;
 	}
 }
 
-void XmmLayer::saveWeighs(FILE *stream)
+void XmmLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
 {
-	fwrite(thresholds, output->getSize() * sizeof(float), 1, stream);
-	unsigned size;
-	if (inputType == FLOAT){
-		size = output->getSize() * totalWeighsPerOutput * sizeof(float);
-	} else {
-		size = output->getSize() * totalWeighsPerOutput * sizeof(unsigned char);
-	}
-	fwrite(weighs, size, 1, stream);
-}
+	void* inputPtr = input->getDataPointer();
 
-void XmmLayer::loadWeighs(FILE *stream)
-{
-	fread(thresholds, output->getSize() * sizeof(float), 1, stream);
-	unsigned size;
-	if (inputType == FLOAT){
-		size = output->getSize() * totalWeighsPerOutput * sizeof(float);
-	} else {
-		size = output->getSize() * totalWeighsPerOutput * sizeof(unsigned char);
-	}
-	fread(weighs, size, 1, stream);
-}
+	if (input->getVectorType() == FLOAT) {
+		for (unsigned j=0; j < output->getSize(); j++){
 
-void XmmLayer::setSizes(unsigned  totalWeighsPerOutput, unsigned  outputSize)
-{
-	if (!output) {
-		output = new XmmVector(outputSize, outputType);
-		thresholds = (float*) mi_malloc(sizeof(float) * outputSize);
-	} else if (output->getSize() != outputSize) {
-
-		cout<<"Warning: a layer is changing the location of its output."<<endl;
-		delete (output);
-		if (thresholds) {
-			mi_free(thresholds);
-		}
-		output = new XmmVector(outputSize, outputType);
-		thresholds = (float*)mi_malloc(sizeof(float) * outputSize);
-	}
-	if (totalWeighsPerOutput > 0){
-		if (inputType == FLOAT){
-
-			weighs = mi_malloc(sizeof(float) * outputSize * totalWeighsPerOutput);
-			for (unsigned i=0; i < outputSize * totalWeighsPerOutput; i++){
-				((float*)weighs)[i] = 0;
-			}
-		} else {
-			weighs = mi_malloc(sizeof(unsigned char) * outputSize * totalWeighsPerOutput);
-			for (unsigned i=0; i < outputSize * totalWeighsPerOutput; i++){
-				((unsigned char*)weighs)[i] = 128;
-			}
+			unsigned weighPos = j * input->getWeighsSize();
+			float auxResult;
+			XMMreal(inputPtr, ((XmmVector*)input)->getNumLoops(),
+					(((float*)inputWeighs) + weighPos), auxResult);
+			results[j] += auxResult;
 		}
 	}
-	this->totalWeighsPerOutput = totalWeighsPerOutput;
+	else if (input->getVectorType() == BIT) {
+		for (unsigned j=0; j < output->getSize(); j++){
+
+			unsigned weighPos = j * input->getWeighsSize();
+			results[j] += XMMbinario(inputPtr, ((XmmVector*)input)->getNumLoops(),
+					(((unsigned char*)inputWeighs) + weighPos));
+		}
+	}
+	else if (input->getVectorType() == SIGN) {
+		for (unsigned j=0; j < output->getSize(); j++){
+
+			unsigned weighPos = j * input->getWeighsSize();
+			results[j] += XMMbipolar(inputPtr, ((XmmVector*)input)->getNumLoops(),
+								(((unsigned char*)inputWeighs) + weighPos));
+		}
+	}
+
+/*
+	for (unsigned j=0; j < output->getSize(); j++){
+		unsigned weighPos = j * input->getWeighsSize();
+
+		if (input->getVectorType() == FLOAT) {
+			float auxResult;
+			XMMreal(inputPtr, ((XmmVector*)input)->getNumLoops(),
+					(((float*)inputWeighs) + weighPos), auxResult);
+			results[j] += auxResult;
+		}
+		else if (input->getVectorType() == BIT) {
+			results[j] += XMMbinario(inputPtr, ((XmmVector*)input)->getNumLoops(),
+					(((unsigned char*)inputWeighs) + weighPos));
+		}
+		else if (input->getVectorType() == SIGN) {
+			results[j] += XMMbipolar(inputPtr, ((XmmVector*)input)->getNumLoops(),
+								(((unsigned char*)inputWeighs) + weighPos));
+		}
+	}*/
 }
+
+void* XmmLayer::newWeighs(unsigned inputSize, VectorType inputType)
+{
+	//TODO adaptar para tamaños no multiples de los bloques
+	unsigned size;
+	if (inputType == FLOAT) {
+		size = output->getSize() * inputSize * sizeof(float);
+	} else {
+		size = output->getSize() * inputSize * sizeof(unsigned char);
+	}
+	return mi_malloc(size);
+}
+
 
 Layer* XmmLayer::newCopy()
 {
-	Layer* copy = new XmmLayer(inputType, outputType, functionType);
-
-	copy->setSizes(totalWeighsPerOutput, output->getSize());
-
-	return copy;
+	std::string error = "newCopy is not implemented for XmmLayer.";
+	throw error;
 }
-
+/*
 void XmmLayer::calculateOutput()
 {
 	if (!output) {
 		string error = "Cannot calculate the output of a Layer without output.";
 		throw error;
-	}/*
-	float* results = (float*) mi_malloc(output->getSize() * sizeof(float));
-	unsigned w = 0;
-
-	switch (inputType) {
-		case FLOAT:
-			for (unsigned i=0; i < output->getSize(); i++){
-				results[i] = -thresholds[i];
-				for (unsigned j=0; j < numberInputs; j++){
-					float auxResult;
-					getInput(j)->print();
-					XMMreal(getInput(j)->getDataPointer(), ((XmmVector*)getInput(j))->getNumLoops(), ((float*)weighs + w), auxResult);
-					results[i] += auxResult;
-					w += getInput(j)->getWeighsSize();
-				}
-			}
-			break;
-		case BIT:
-			for (unsigned i=0; i < output->getSize(); i++){
-				results[i] = -thresholds[i];
-				for (unsigned j=0; j < numberInputs; j++){
-					int auxResult = 0;
-					XMMbinario(getInput(j)->getDataPointer(), ((XmmVector*)getInput(j))->getNumLoops(), ((unsigned char*)weighs + w), auxResult);
-					results[i] += auxResult;
-					w += getInput(j)->getWeighsSize();
-				}
-			}
-			break;
-		case SIGN:
-			for (unsigned i=0; i < output->getSize(); i++){
-				results[i] = -thresholds[i];
-				for (unsigned j=0; j < numberInputs; j++){
-					results[i] += XMMbipolar(getInput(j)->getDataPointer(), ((XmmVector*)getInput(j))->getNumLoops(), ((unsigned char*)weighs + w));
-					w += getInput(j)->getWeighsSize();
-				}
-			}
-			break;
-	}*/
+	}
 
 	 //TODO quitar getNumLoops (sacar el bucle de inputs del de salidas) y ¿permitir varios tipos de entrada?
 	float* results = (float*) mi_malloc(output->getSize() * sizeof(float));
@@ -138,35 +114,28 @@ void XmmLayer::calculateOutput()
 	unsigned inputOffset = 0;
 	for (unsigned i=0; i < numberInputs; i++){
 
-		void* inputPtr = getInput(i)->getDataPointer();
+		void* inputPtr = inputs[i]->getDataPointer();
 
 		for (unsigned j=0; j < output->getSize(); j++){
-			unsigned weighPos = j*totalWeighsPerOutput + inputOffset;
+			unsigned weighPos = j * inputs[i]->getWeighsSize();
 
 				if (inputType == FLOAT) {
 					float auxResult;
-					XMMreal(inputPtr, ((XmmVector*)getInput(i))->getNumLoops(), ((float*)weighs + weighPos), auxResult);
+					XMMreal(inputPtr, ((XmmVector*)inputs[i])->getNumLoops(),
+							(((float**)weighs)[i] + weighPos), auxResult);
 					results[j] += auxResult;
-					//results[j] += ((float*)input)[k] * ((float*)weighs)[weighPos];
 				}
 				if (inputType == BIT) {
 					int auxResult = 0;
-					XMMbinario(inputPtr, ((XmmVector*)getInput(i))->getNumLoops(), ((unsigned char*)weighs + weighPos), auxResult);
+					XMMbinario(inputPtr, ((XmmVector*)inputs[i])->getNumLoops(),
+							(((unsigned char**)weighs)[i] + weighPos), auxResult);
 					results[j] += auxResult;
-//					if ( ((unsigned*)input)[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
-//						results[j] += (((unsigned char*)weighs)[weighPos] - 128);
-//					}
 				}
 				if (inputType == SIGN) {
-					results[j] += XMMbipolar(inputPtr, ((XmmVector*)getInput(i))->getNumLoops(), ((unsigned char*)weighs + weighPos));
-//					if ( ((unsigned*)input)[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
-//						results[j] += (((unsigned char*)weighs)[weighPos] - 128);
-//					} else {
-//						results[j] -= (((unsigned char*)weighs)[weighPos] - 128);
-//					}
+					results[j] += XMMbipolar(inputPtr, ((XmmVector*)inputs[i])->getNumLoops(),
+										(((unsigned char**)weighs)[i] + weighPos));
 				}
 		}
-		inputOffset += getInput(i)->getWeighsSize();
 	}
 
 //	printf("----------------\n", 1);
@@ -177,5 +146,8 @@ void XmmLayer::calculateOutput()
 	output->activation(results, functionType);
 	mi_free(results);
 }
+
+*/
+
 
 

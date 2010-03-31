@@ -6,7 +6,7 @@
  */
 
 #include "individual.h"
-
+/*TODO descomentar y adaptar
 Individual::Individual() {
 	// TODO Auto-generated constructor stub
 
@@ -259,4 +259,4 @@ float Individual::getFitness()
 	return fitness;
 }
 
-
+*/

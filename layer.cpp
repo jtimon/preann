@@ -1,33 +1,14 @@
 #include "layer.h"
-/*
-Layer::Layer()
+
+Layer::Layer(VectorType outputType, FunctionType functionType)
 {
 	inputs = NULL;
-	numberInputs = 0;
-	totalWeighsPerOutput = 0;
-
 	weighs = NULL;
-	thresholds = NULL;
+	numberInputs = 0;
 
+	thresholds = NULL;
 	output = NULL;
 
-	inputType = FLOAT;
-	outputType = FLOAT;
-	functionType = IDENTITY;
-}*/
-
-Layer::Layer(VectorType inputType, VectorType outputType, FunctionType functionType)
-{
-	inputs = NULL;
-	numberInputs = 0;
-	totalWeighsPerOutput = 0;
-
-	weighs = NULL;
-	thresholds = NULL;
-
-	output = NULL;
-
-	this->inputType = inputType;
 	this->outputType = outputType;
 	switch (outputType){
 		case FLOAT:
@@ -46,71 +27,56 @@ Layer::~Layer()
 
 }
 
-void Layer::randomWeighs(float range)
+void Layer::calculateOutput()
 {
-	std::string error = "randomWeighs is not implemented.";
-	throw error;
+	if (!output) {
+		string error = "Cannot calculate the output of a Layer without output.";
+		throw error;
+	}
+
+	float* results = negativeThresholds();
+
+	for(unsigned i=0; i < numberInputs; i++){
+		inputCalculation(inputs[i], weighs[i], results);
+	}
+//	printf("----------------\n", 1);
+//	for (unsigned i=0; i < output->getSize(); i++){
+//		printf("%f ", results[i]);
+//	}
+//	printf("\n----------------\n", 1);
+	output->activation(results, functionType);
 }
 
 void Layer::addInput(Vector* input)
 {
-	if (input->getVectorType() != inputType) {
-		string error = "Trying to add an incorrect type input.";
-		error += " Layer inputs type: ";
-		switch (inputType) {
-			case FLOAT: error += "FLOAT";
-				break;
-			case BIT: error += "BIT";
-				break;
-			case SIGN: error += "SIGN";
-				break;
-		}
-		error += " Input type: ";
-		switch (input->getVectorType()) {
-			case FLOAT: error += "FLOAT";
-				break;
-			case BIT: error += "BIT";
-				break;
-			case SIGN: error += "SIGN";
-				break;
-		}
-		throw error;
-	}
-
+	//TODO probar que sucede con varios tipos de entrada
 	Vector** newInputs = (Vector**) mi_malloc(sizeof(Vector*) * (numberInputs + 1));
+	void** newWeighsPtr = (void**) mi_malloc(sizeof(void*) * (numberInputs + 1));
 	if (inputs) {
 		memcpy(newInputs, inputs, numberInputs * sizeof(Vector*));
+		memcpy(newWeighsPtr, weighs, numberInputs * sizeof(void*));
 		mi_free(inputs);
 	}
 	inputs = newInputs;
-	inputs[numberInputs++] = input;
+	weighs = newWeighsPtr;
+
+	inputs[numberInputs] = input;
+	newWeighsPtr[numberInputs] = newWeighs(input->getSize(), input->getVectorType());
+	++numberInputs;
 }
 
-unsigned Layer::getNumberInputs()
+void Layer::save(FILE* stream)
 {
-	return numberInputs;
+	fwrite(&functionType, sizeof(FunctionType), 1, stream);
+
+	saveWeighs(stream);
 }
 
-Vector* Layer::getInput(unsigned pos)
+void Layer::load(FILE* stream)
 {
-	if (numberInputs == 0) {
-		string error = "Trying to access an input of a Layer without inputs.";
-		throw error;
-	}
-	if (pos > numberInputs){
-		char buffer[100];
-		sprintf(buffer, "Cannot access input %d: there are just %d inputs.", pos, numberInputs);
-		string error = buffer;
-		throw error;
-	}
+	fread(&functionType, sizeof(FunctionType), 1, stream);
 
-	return inputs[pos];
-}
-
-void Layer::calculateOutput()
-{
-	std::string error = "calculateOutput is not implemented.";
-	throw error;
+	loadWeighs(stream);
 }
 
 Vector* Layer::getOutput()
@@ -118,82 +84,7 @@ Vector* Layer::getOutput()
 	return output;
 }
 
-void Layer::setSizes(unsigned totalWeighsPerOutput, unsigned outputSize)
-{
-	std::string error = "setSizes is not implemented.";
-	throw error;
-}
-
-void Layer::resetSize()
-{
-	if (!output) {
-		string error = "Cannot reset the size of a Layer without output.";
-		throw error;
-	}
-
-	if (output != NULL){
-		setSize(output->getSize());
-	}
-}
-
-void Layer::setSize(unsigned size)
-{
-	unsigned auxTotalSize = 0;
-
-	if (inputs != NULL){
-		for (unsigned i=0; i < numberInputs; i++){
-			auxTotalSize += getInput(i)->getWeighsSize();
-		}
-	}
-	setSizes(auxTotalSize, size);
-}
-
-void Layer::saveWeighs(FILE* stream)
-{
-	std::string error = "saveWeighs is not implemented.";
-	throw error;
-}
-
-
-void Layer::loadWeighs(FILE* stream)
-{
-	std::string error = "loadWeighs is not implemented.";
-	throw error;
-}
-
-void Layer::save(FILE* stream)
-{
-	unsigned outputSize = output->getSize();
-
-	fwrite(&inputType, sizeof(VectorType), 1, stream);
-	fwrite(&outputType, sizeof(VectorType), 1, stream);
-	fwrite(&functionType, sizeof(FunctionType), 1, stream);
-
-	fwrite(&totalWeighsPerOutput, sizeof(unsigned), 1, stream);
-	fwrite(&outputSize, sizeof(unsigned), 1, stream);
-
-	saveWeighs(stream);
-}
-
-void Layer::load(FILE* stream)
-{
-	unsigned outputSize;
-
-	fread(&inputType, sizeof(VectorType), 1, stream);
-	fread(&outputType, sizeof(VectorType), 1, stream);
-	fread(&functionType, sizeof(FunctionType), 1, stream);
-
-	fread(&totalWeighsPerOutput, sizeof(unsigned), 1, stream);
-
-	fread(&outputSize, sizeof(unsigned), 1, stream);
-	setSizes(totalWeighsPerOutput, outputSize);
-
-	loadWeighs(stream);
-
-	inputs = NULL;
-	numberInputs = 0;
-}
-
+/*
 void Layer::copyWeighs(Layer* other)
 {
 	memcpy(thresholds, other->getThresholdsPtr(), output->getSize() * sizeof(float));
@@ -204,8 +95,8 @@ void Layer::copyWeighs(Layer* other)
 		size = output->getSize() * totalWeighsPerOutput * sizeof(unsigned char);
 	}
 	memcpy(weighs, other->getWeighsPtr(), size);
-}
-
+}*/
+/*
 void Layer::mutateWeigh(float mutationRange)
 {
 	unsigned chosenOutputOffset = randomUnsigned(this->output->getSize()) * this->totalWeighsPerOutput;
@@ -230,8 +121,8 @@ void Layer::mutateWeigh(float mutationRange)
 		//TODO impedir que el unsigned char dé la vuelta?
 		((unsigned char*) this->weighs)[chosenWeigh] += randomInt(discreteRange);
 	}
-}
-
+}*/
+/*
 void Layer::mutateWeighs(float probability, float mutationRange)
 {
 	if (!weighs) {
@@ -424,7 +315,7 @@ unsigned Layer::getNumberWeighs()
 	return this->output->getSize() * (numWeighs + 1);
 }
 
-
+*/
 
 
 

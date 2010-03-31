@@ -31,16 +31,9 @@ Vector::Vector(unsigned size, VectorType vectorType)
 
 Vector::~Vector()
 {
-	//TODO arreglar esto!!!
-	//opción A, hacer vector clase abstracta
-	//opción B, quitar las clases vector (primero acabar con CudaNeuralNet)
-	//free();
-}
-
-void Vector::free()
-{
 	if (data) {
 		mi_free(data);
+		data = NULL;
 	}
 }
 
@@ -130,6 +123,7 @@ void Vector::activation(float* results, FunctionType functionType)
 			}
 		}
 	}
+	mi_free(results);
 }
 
 void Vector::print()

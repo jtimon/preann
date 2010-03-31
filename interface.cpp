@@ -1,7 +1,7 @@
 
 #include "interface.h"
 
-Interface::Interface(unsigned  size, VectorType vectorType=FLOAT)
+Interface::Interface(unsigned  size, VectorType vectorType)
 {
 	this->size = size;
 	this->vectorType = vectorType;

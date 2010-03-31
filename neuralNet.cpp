@@ -1,19 +1,9 @@
 #include "neuralNet.h"
 
-NeuralNet::NeuralNet()
-{
-	this->implementationType = C;
-	setDefaults();
-}
-
 NeuralNet::NeuralNet(ImplementationType implementationType)
 {
 	this->implementationType = implementationType;
-	setDefaults();
-}
 
-void NeuralNet::setDefaults()
-{
 	layers = NULL;
 	layerConnectionsGraph = NULL;
 	numberLayers = 0;
@@ -128,16 +118,15 @@ void NeuralNet::addLayer(Layer* layer)
 	layers[numberLayers++] = layer;
 }
 
-void NeuralNet::addLayer(unsigned  size, VectorType sourceType = FLOAT, VectorType destinationType = FLOAT, FunctionType functiontype = IDENTITY)
+void NeuralNet::addLayer(unsigned  size, VectorType destinationType, FunctionType functiontype)
 {
-	Layer* layer = Factory::newLayer(implementationType, functiontype, sourceType, destinationType);
+	Layer* layer = Factory::newLayer(size, destinationType, implementationType, functiontype);
 	addLayer(layer);
-	layer->setSize(size);
 }
 
 Interface* NeuralNet::createInput(unsigned size, VectorType vectorType)
 {
-	Vector* input = Factory::newVector(implementationType, size, vectorType);
+	Vector* input = Factory::newVector(size, vectorType, implementationType);
 	Interface* interface = new Interface(size, vectorType);
 	unsigned newNumberInputs = numberInputs+1;
 
@@ -282,125 +271,26 @@ void NeuralNet::addLayersConnection(unsigned  sourceLayerPos, unsigned  destinat
 	layerConnectionsGraph[(sourceLayerPos * numberLayers) + destinationLayerPos] = 1;
 }
 
-void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType)
-{
-	createFeedForwardNet(numLayers, sizeLayers, hiddenLayersType, IDENTITY, 0, 0);
-}
-
 void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype)
-{
-	createFeedForwardNet(numLayers, sizeLayers, hiddenLayersType, functiontype, 0, 0);
-}
-
-void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype, unsigned floatOutputSize, unsigned bitOutputSize)
 {
 	if (numberInputs == 0){
 		string error = "Cannot create a network with no inputs.";
 		throw error;
 	}
-	unsigned currentLayerIndex = 0;
-	unsigned firstFloatIndex;
-	unsigned firstBitIndex;
-	unsigned firstSignIndex;
-	Layer* firstFloatLayer = NULL;
-	Layer* firstBitLayer = NULL;
-	Layer* firstSignLayer = NULL;
 
+	addLayer(Factory::newLayer(sizeLayers, hiddenLayersType, implementationType, functiontype));
 	for (unsigned i=0; i<numberInputs; i++)	{
-		switch (inputs[i]->getVectorType()) {
-		default:
-		case FLOAT:
-			if (firstFloatLayer == NULL){
-				firstFloatLayer = Factory::newLayer(implementationType, functiontype, FLOAT, hiddenLayersType);
-				addLayer(firstFloatLayer);
-				firstFloatIndex = currentLayerIndex++;
-			}
-			addInputConnection(i, firstFloatIndex);
-			break;
-		case BIT:
-			if (firstBitLayer == NULL){
-				firstBitLayer = Factory::newLayer(implementationType, functiontype, BIT, hiddenLayersType);
-				addLayer(firstBitLayer);
-				firstBitIndex = currentLayerIndex++;
-			}
-			addInputConnection(i, firstBitIndex);
-			break;
-		case SIGN:
-			if (firstSignLayer == NULL){
-				firstSignLayer = Factory::newLayer(implementationType, functiontype, SIGN, hiddenLayersType);
-				addLayer(firstSignLayer);
-				firstSignIndex = currentLayerIndex++;
-			}
-			addInputConnection(i, firstSignIndex);
-			break;
-		}
-	}
-	Layer* unificationLayer;
-	if (currentLayerIndex > 1){
-		unificationLayer = Factory::newLayer(implementationType, functiontype, hiddenLayersType, hiddenLayersType);
-
-		addLayer(unificationLayer);
-	}
-	if (firstFloatLayer != NULL){
-		firstFloatLayer->setSize(sizeLayers);
-		if (currentLayerIndex > 1){
-			addLayersConnection(firstFloatIndex, currentLayerIndex);
-		}
-	}
-	if (firstBitLayer != NULL){
-		firstBitLayer->setSize(sizeLayers);
-		if (currentLayerIndex > 1){
-			addLayersConnection(firstBitIndex, currentLayerIndex);
-		}
-	}
-	if (firstSignLayer != NULL){
-		firstSignLayer->setSize(sizeLayers);
-		if (currentLayerIndex > 1){
-			addLayersConnection(firstSignIndex, currentLayerIndex);
-		}
-	}
-	if (currentLayerIndex > 1){
-		unificationLayer->setSize(sizeLayers);
-		++currentLayerIndex;
+		addInputConnection(i, 0);
 	}
 
-	if (sizeLayers < currentLayerIndex){
-		cout<<"Warning: there will be "<<currentLayerIndex<<" hidden layers instead of "<<sizeLayers<<"."<<endl;
-	}
-
-	unsigned i;
-	for (i=currentLayerIndex; i<numLayers; i++){
-		Layer* layer = Factory::newLayer(implementationType, functiontype, hiddenLayersType, hiddenLayersType);
-		addLayer(layer);
+	for (unsigned i=1; i<numLayers; i++)	{
+		addLayer(Factory::newLayer(sizeLayers, hiddenLayersType, implementationType, functiontype));
 		addLayersConnection(i-1, i);
-		layer->setSize(sizeLayers);
 	}
 
-	unsigned char offset = 0;
-	if (floatOutputSize > 0){
-		Layer* layer = Factory::newLayer(implementationType, functiontype, hiddenLayersType, FLOAT);
-		addLayer(layer);
-		addLayersConnection(i-1, i);
-		layer->setSize(floatOutputSize);
-		createOutput(i);
-		++offset;
-	}
-	if (bitOutputSize > 0){
-		Layer* layer = Factory::newLayer(implementationType, functiontype, hiddenLayersType, BIT);
-		addLayer(layer);
-		addLayersConnection(i-1, i+offset);
-		layer->setSize(bitOutputSize);
-		createOutput(i+offset);
-	} else if (floatOutputSize == 0){
-		//cout<<"The last hidden layer will be the output."<<endl;
-		createOutput(i-1);
-	}
+	createOutput(this->numberLayers-1);
 }
 
-void NeuralNet::createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType)
-{
-	createFullyConnectedNet(numLayers, sizeLayers, hiddenLayersType, IDENTITY);
-}
 void NeuralNet::createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype)
 {
 	if (numberInputs == 0){
@@ -408,9 +298,8 @@ void NeuralNet::createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers,
 		throw error;
 	}
 	for (unsigned i=0; i<numLayers; i++){
-		Layer* layer = Factory::newLayer(implementationType, functiontype, hiddenLayersType, hiddenLayersType);
+		Layer* layer = Factory::newLayer(sizeLayers, hiddenLayersType, implementationType, functiontype);
 		addLayer(layer);
-		layer->setSize(sizeLayers);
 	}
 	for (unsigned i=0; i<numLayers; i++){
 		for(unsigned j=0; j<numberInputs; j++){
@@ -421,9 +310,6 @@ void NeuralNet::createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers,
 				addLayersConnection(j, i);
 			}
 		}
-	}
-	for (unsigned i=0; i<numLayers; i++){
-		layers[i]->resetSize();
 	}
 	createOutput(numLayers-1);
 }
@@ -437,6 +323,22 @@ void NeuralNet::save(FILE* stream)
 	fwrite(inputsToLayersGraph, sizeof(unsigned char) * numberInputs * numberLayers, 1, stream);
 	fwrite(layerConnectionsGraph, sizeof(unsigned char) * numberLayers * numberLayers, 1, stream);
 	fwrite(outputLayers, sizeof(int) * numberOutputs, 1, stream);
+
+	unsigned size = sizeof(unsigned) * numberLayers;
+	unsigned* layerSizes = (unsigned*) mi_malloc(size);
+	for (unsigned i=0; i<numberLayers; i++){
+		layerSizes[i] = layers[i]->getOutput()->getSize();
+	}
+	fwrite(layerSizes, size, 1, stream);
+	mi_free(layerSizes);
+
+	size = sizeof(VectorType) * numberLayers;
+	VectorType* layerTypes = (VectorType*) mi_malloc(size);
+	for (unsigned i=0; i<numberLayers; i++){
+		layerTypes[i] = layers[i]->getOutput()->getVectorType();
+	}
+	fwrite(layerTypes, size, 1, stream);
+	mi_free(layerTypes);
 
 	for (unsigned i=0; i<numberLayers; i++){
 		layers[i]->save(stream);
@@ -470,11 +372,19 @@ void NeuralNet::load(FILE* stream)
 	outputLayers = (unsigned*) mi_malloc(size);
 	fread(outputLayers, size, 1, stream);
 
+	size = sizeof(unsigned) * numberLayers;
+	unsigned* layerSizes = (unsigned*) mi_malloc(size);
+	fread(layerSizes, size, 1, stream);
+
+	size = sizeof(VectorType) * numberLayers;
+	VectorType* layerTypes = (VectorType*) mi_malloc(size);
+	fread(layerTypes, size, 1, stream);
+
 	layers = (Layer**) mi_malloc(sizeof(Layer*) * numberLayers);
 	for (unsigned i=0; i<numberLayers; i++){
-		layers[i] = Factory::newLayer(this->implementationType);
-		layers[i]->load(stream);
+		layers[i] = Factory::newLayer(layerSizes[i], layerTypes[i], this->implementationType);
 	}
+	mi_free(layerSizes);
 
 	for (unsigned i=0; i<numberInputs; i++){
 		for (unsigned j=0; j<numberLayers; j++){
@@ -483,13 +393,15 @@ void NeuralNet::load(FILE* stream)
 			}
 		}
 	}
-
 	for (unsigned i=0; i<numberLayers; i++){
 		for (unsigned j=0; j<numberLayers; j++){
 			if (layerConnectionsGraph[(i*numberLayers) + j]){
 				addLayersConnection(i, j);
 			}
 		}
+	}
+	for (unsigned i=0; i<numberLayers; i++){
+		layers[i]->load(stream);
 	}
 
 	outputs = (Interface**) mi_malloc(sizeof(Interface*) * numberOutputs);

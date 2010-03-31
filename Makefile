@@ -29,10 +29,10 @@ factory.o : factory.cpp factory.h cppLayer.o xmmLayer.o cudaLayer.o
 	$(CXX) -c factory.cpp
 cudaLayer.o : cudaLayer.cpp cudaLayer.h layer.o cuda_code.o
 	$(CXX) -c cudaLayer.cpp
+xmmLayer.o : xmmLayer.cpp xmmLayer.h cppLayer.o xmmVector.o
+	$(CXX) -c xmmLayer.cpp
 cppLayer.o : cppLayer.cpp cppLayer.h layer.o
 	$(CXX) -c cppLayer.cpp
-xmmLayer.o : xmmLayer.cpp xmmLayer.h layer.o xmmVector.o
-	$(CXX) -c xmmLayer.cpp
 layer.o : layer.h layer.cpp vector.o
 	$(CXX) -c layer.cpp
 cudaVector.o : cudaVector.h cudaVector.cpp vector.o cuda_code.o

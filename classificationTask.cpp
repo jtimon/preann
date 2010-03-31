@@ -31,11 +31,11 @@ ClassificationTask::~ClassificationTask()
 void ClassificationTask::test(Individual* individual)
 {
 	float accumulation = 0;
-	/*TODO
+	/*TODO descomentar y adaptar
 	for (unsigned i=0; i < inputsDim; i++){
 		individual->setInput(inputs[i]);
 		individual->calculateOutput();
 		accumulation += CompareFloatArrays(individual->getOutput(0), desiredOutputs[i]->getDataPointer(), desiredOutputs[i]->getSize());
 	}*/
-	individual->setFitness(-accumulation);
+	//individual->setFitness(-accumulation);
 }
