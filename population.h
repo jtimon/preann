@@ -65,7 +65,7 @@ class Population {
 	void selectTruncation();
 
 	void crossover();
-	Individual** crossover(CrossoverType crossoverType);
+	void oneCrossover(CrossoverType crossoverType);
 
 	void mutation();
 public:

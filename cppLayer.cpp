@@ -32,34 +32,6 @@ CppLayer::~CppLayer()
 	}
 }
 
-void CppLayer::saveWeighs(FILE* stream)
-{
-	fwrite(thresholds, output->getSize() * sizeof(float), 1, stream);
-	for (unsigned i=0; i < numberInputs; i++){
-		unsigned size;
-		if (inputs[i]->getVectorType() == FLOAT){
-			size = output->getSize() * inputs[i]->getSize() * sizeof(float);
-		} else {
-			size = output->getSize() * inputs[i]->getSize() * sizeof(unsigned char);
-		}
-		fwrite(weighs[i], size, 1, stream);
-	}
-}
-
-void CppLayer::loadWeighs(FILE* stream)
-{
-	fread(thresholds, output->getSize() * sizeof(float), 1, stream);
-	for (unsigned i=0; i < numberInputs; i++){
-		unsigned size;
-		if (inputs[i]->getVectorType() == FLOAT){
-			size = output->getSize() * inputs[i]->getSize() * sizeof(float);
-		} else {
-			size = output->getSize() * inputs[i]->getSize() * sizeof(unsigned char);
-		}
-		fread(weighs[i], size, 1, stream);
-	}
-}
-
 float* CppLayer::negativeThresholds()
 {
 	float* results = (float*) mi_malloc(output->getSize() * sizeof(float));
@@ -91,6 +63,34 @@ void CppLayer::inputCalculation(Vector* input, void* inputWeighs, float* results
 	}
 }
 
+void CppLayer::saveWeighs(FILE* stream)
+{
+	fwrite(thresholds, output->getSize() * sizeof(float), 1, stream);
+	for (unsigned i=0; i < numberInputs; i++){
+		unsigned size;
+		if (inputs[i]->getVectorType() == FLOAT){
+			size = output->getSize() * inputs[i]->getSize() * sizeof(float);
+		} else {
+			size = output->getSize() * inputs[i]->getSize() * sizeof(unsigned char);
+		}
+		fwrite(weighs[i], size, 1, stream);
+	}
+}
+
+void CppLayer::loadWeighs(FILE* stream)
+{
+	fread(thresholds, output->getSize() * sizeof(float), 1, stream);
+	for (unsigned i=0; i < numberInputs; i++){
+		unsigned size;
+		if (inputs[i]->getVectorType() == FLOAT){
+			size = output->getSize() * inputs[i]->getSize() * sizeof(float);
+		} else {
+			size = output->getSize() * inputs[i]->getSize() * sizeof(unsigned char);
+		}
+		fread(weighs[i], size, 1, stream);
+	}
+}
+
 void* CppLayer::newWeighs(unsigned inputSize, VectorType inputType)
 {
 	unsigned size;
@@ -100,6 +100,15 @@ void* CppLayer::newWeighs(unsigned inputSize, VectorType inputType)
 		size = output->getSize() * inputSize * sizeof(unsigned char);
 	}
 	return mi_malloc(size);
+}
+
+void CppLayer::copyWeighs(Layer* sourceLayer)
+{
+	memcpy(thresholds, sourceLayer->getThresholdsPtr(), output->getSize() * sizeof(float));
+
+	for (unsigned i=0; i < numberInputs; i++){
+		//TODO implementar metodo
+	}
 }
 
 void CppLayer::randomWeighs(float range)
@@ -138,53 +147,52 @@ void CppLayer::randomWeighs(float range)
 	}
 }
 
-/*
-void CppLayer::calculateOutput()
+void CppLayer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation)
 {
-	if (!output) {
-		string error = "Cannot calculate the output of a Layer without output.";
+	if (outputPos > output->getSize()) {
+		string error = "Cannot mutate that output: the Layer hasn't so many neurons.";
+		throw error;
+	}
+	if (inputLayer > output->getSize()) {
+		string error = "Cannot mutate that input: the Layer hasn't so many inputs.";
+		throw error;
+	}
+	if (inputPos > inputs[inputLayer]->getSize()) {
+		string error = "Cannot mutate that input: the input hasn't so many neurons.";
 		throw error;
 	}
 
-	float* results = (float*) mi_malloc(output->getSize() * sizeof(float));
-	for (unsigned j=0; j < output->getSize(); j++) {
-		results[j] = -thresholds[j];
-	}
+	unsigned weighPos = (outputPos * inputs[inputLayer]->getSize()) + inputPos;
 
-	for (unsigned i=0; i < numberInputs; i++){
+	if (inputs[inputLayer]->getVectorType() == FLOAT){
+		((float**)weighs)[inputLayer][weighPos] += mutation;
+	} else {
 
-		void* input = inputs[i]->getDataPointer();
-
-		for (unsigned j=0; j < output->getSize(); j++){
-
-			for (unsigned k=0; k < inputs[i]->getSize(); k++){
-				unsigned weighPos = (j * inputs[i]->getSize()) + k;
-				if (inputType == FLOAT) {
-					//printf("i % d input %f weigh %f \n", k, ((float*)input)[k], ((float*)weighs)[weighPos]);
-					results[j] += ((float*)input)[k] * ((float**)weighs)[i][weighPos];
-				} else {
-					if ( ((unsigned*)input)[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
-						results[j] += (((unsigned char**)weighs)[i][weighPos] - 128);
-					} else if (inputType == SIGN) {
-						results[j] -= (((unsigned char**)weighs)[i][weighPos] - 128);
-					}
-				}
-			}
+		int result = (int)mutation + ((unsigned char**)weighs)[inputLayer][weighPos];
+		if (result <= 0){
+			((unsigned char**)weighs)[inputLayer][weighPos] = 0;
+		}
+		else if (result >= 255) {
+			((unsigned char**)weighs)[inputLayer][weighPos] = 255;
+		}
+		else {
+			((unsigned char**)weighs)[inputLayer][weighPos] = result;
 		}
 	}
-
-//	printf("----------------\n", 1);
-//	for (unsigned i=0; i < output->getSize(); i++){
-//		printf("%f ", results[i]);
-//	}
-//	printf("\n----------------\n", 1);
-
-	output->activation(results, functionType);
-	mi_free(results);
-}*/
-
-Layer* CppLayer::newCopy()
-{
-	std::string error = "newCopy is not implemented for CppLayer.";
-	throw error;
 }
+
+void CppLayer::mutateThreshold(unsigned outputPos, float mutation)
+{
+	if (outputPos > output->getSize()) {
+		string error = "Cannot mutate that Threshold: the Layer hasn't so many neurons.";
+		throw error;
+	}
+	thresholds[outputPos] += mutation;
+}
+
+void CppLayer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
+{
+	//TODO implement method
+}
+
+

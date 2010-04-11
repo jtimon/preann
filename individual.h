@@ -11,11 +11,8 @@
 #include "neuralNet.h"
 
 class Individual: public NeuralNet {
-
+protected:
 	float fitness;
-private:
-	Layer* getLayer(unsigned layerPos);
-	void setLayer(Layer* layer, unsigned layerPos);
 public:
 	Individual();
 	virtual ~Individual();
@@ -23,13 +20,13 @@ public:
 	Individual* newCopy();
 	void mutate(unsigned numMutations, float mutationRange);
 	void mutate(float probability, float mutationRange);
-	Individual** uniformCrossoverWeighs(Individual* other, float probability);
-	Individual** uniformCrossoverNeurons(Individual* other, float probability);
-	Individual** uniformCrossoverLayers(Individual* other, float probability);
-	Individual** multipointCrossoverWeighs(Individual* other, unsigned numPoints);
-	Individual** multipointCrossoverNeurons(Individual* other, unsigned numPoints);
-	Individual** multipointCrossoverLayers(Individual* other, unsigned numPoints);
-	Individual** crossoverLayers(Individual *other, Interface* bitVector);
+	void uniformCrossoverWeighs(Individual* other, float probability);
+	void uniformCrossoverNeurons(Individual* other, float probability);
+	void uniformCrossoverLayers(Individual* other, float probability);
+	void multipointCrossoverWeighs(Individual* other, unsigned numPoints);
+	void multipointCrossoverNeurons(Individual* other, unsigned numPoints);
+	void multipointCrossoverLayers(Individual* other, unsigned numPoints);
+	void crossoverLayers(Individual *other, Interface* bitVector);
 
 	float getFitness();
 	void setFitness(float fitness);

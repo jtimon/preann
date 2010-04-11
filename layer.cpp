@@ -9,7 +9,6 @@ Layer::Layer(VectorType outputType, FunctionType functionType)
 	thresholds = NULL;
 	output = NULL;
 
-	this->outputType = outputType;
 	switch (outputType){
 		case FLOAT:
 			this->functionType = functionType;
@@ -24,6 +23,37 @@ Layer::Layer(VectorType outputType, FunctionType functionType)
 
 Layer::~Layer()
 {
+
+}
+
+void Layer::checkCompatibility(Layer* layer)
+{
+	if (this->getImplementationType() != layer->getImplementationType()){
+		string error = "The layers are incompatible: the implementation is different.";
+		throw error;
+	}
+	if (this->getOutput()->getSize() != layer->getOutput()->getSize()){
+		string error = "The layers are incompatible: the output size is different.";
+		throw error;
+	}
+	if (this->getOutput()->getVectorType() != layer->getOutput()->getVectorType()){
+		string error = "The layers are incompatible: the output type is different.";
+		throw error;
+	}
+	if (this->getNumberInputs() != layer->getNumberInputs()){
+		string error = "The layers are incompatible: the number of inputs is different.";
+		throw error;
+	}
+	for (unsigned i=0; i < numberInputs; i++){
+		if (this->getInput(i)->getSize() != layer->getInput(i)->getSize()){
+			string error = "The layers are incompatible: the size of an input is different.";
+			throw error;
+		}
+		if (this->getInput(i)->getVectorType() != layer->getInput(i)->getVectorType()){
+			string error = "The layers are incompatible: the type of an input is different.";
+			throw error;
+		}
+	}
 
 }
 
@@ -79,9 +109,40 @@ void Layer::load(FILE* stream)
 	loadWeighs(stream);
 }
 
+void Layer::swapWeighs(Layer* layer)
+{
+	checkCompatibility(layer);
+
+	unsigned size = numberInputs * sizeof(void*);
+	void** temp = (void**) mi_malloc(size);
+	memcpy(temp, weighs, size);
+	memcpy(weighs, layer->weighs, size);
+	memcpy(layer->weighs, temp, size);
+}
+
+unsigned Layer::getNumberInputs()
+{
+	return numberInputs;
+}
+
+Vector* Layer::getInput(unsigned pos)
+{
+	return inputs[pos];
+}
+
 Vector* Layer::getOutput()
 {
 	return output;
+}
+
+float* Layer::getThresholdsPtr()
+{
+	return thresholds;
+}
+
+void *Layer::getWeighsPtr()
+{
+	return weighs;
 }
 
 /*
@@ -96,231 +157,70 @@ void Layer::copyWeighs(Layer* other)
 	}
 	memcpy(weighs, other->getWeighsPtr(), size);
 }*/
-/*
+
 void Layer::mutateWeigh(float mutationRange)
 {
-	unsigned chosenOutputOffset = randomUnsigned(this->output->getSize()) * this->totalWeighsPerOutput;
 	unsigned chosenInput = randomUnsigned(this->numberInputs);
-	unsigned chosenInputOffset = 0;
-	for (unsigned i=0; i < chosenInput; i++) {
-		chosenInputOffset += this->inputs[i]->getSize();
-	}
+	unsigned chosenOutput = randomUnsigned(output->getSize());
+	unsigned chosenInputPos = randomUnsigned(inputs[chosenInput]->getSize());
 
-	unsigned chosenWeigh = chosenOutputOffset + chosenInputOffset +
-			randomUnsigned(this->inputs[chosenInput]->getSize());
+	mutateWeigh(chosenOutput, chosenInput, chosenInputPos, randomFloat(mutationRange));
+}
 
-	if (inputType == FLOAT){
-		((float*) this->weighs)[chosenWeigh] += randomFloat(mutationRange);
-	} else {
-		unsigned discreteRange;
-		if (mutationRange >= 128){
-			discreteRange = 127;
-		} else {
-			discreteRange = (unsigned) mutationRange;
-		}
-		//TODO impedir que el unsigned char dé la vuelta?
-		((unsigned char*) this->weighs)[chosenWeigh] += randomInt(discreteRange);
-	}
-}*/
-/*
 void Layer::mutateWeighs(float probability, float mutationRange)
 {
-	if (!weighs) {
-		string error = "Cannot mutate a Layer without weighs.";
-		throw error;
-	}
-	unsigned discreteRange;
-	if (inputType != FLOAT) {
-		if (mutationRange >= 128){
-			discreteRange = 127;
-		} else {
-			discreteRange = (unsigned) mutationRange;
-		}
-	}
 	for (unsigned i=0; i < output->getSize(); i++){
-		unsigned inputOffset = 0;
 		for (unsigned j=0; j < numberInputs; j++){
-			for (unsigned k=0; k < getInput(j)->getSize(); k++){
-				unsigned weighPos = i*totalWeighsPerOutput + inputOffset + k;
+			for (unsigned k=0; k < inputs[j]->getSize(); k++){
 				if (randomPositiveFloat(1) < probability) {
-					if (inputType == FLOAT) {
-						((float*)weighs)[weighPos] += randomFloat(mutationRange);
-					} else {
-						((unsigned char*)weighs)[weighPos] += randomInt(discreteRange);
-					}
+					mutateWeigh(i, j, k, randomFloat(mutationRange));
 				}
 			}
-			inputOffset += getInput(j)->getWeighsSize();
 		}
 		if (randomPositiveFloat(1) < probability) {
-			thresholds[i] += randomFloat(mutationRange);
+			mutateThreshold(i, randomFloat(mutationRange));
 		}
 	}
 }
 
-Layer** Layer::crossoverWeighs(Layer *other, Interface *bitVector)
+void Layer::crossoverInput(Layer *other, unsigned  inputLayer, Interface *bitVector)
 {
-	if (bitVector->getSize() != this->getNumberWeighs()){
-		string error = "The number of weighs must be equal to the size of the bitVector.";
-		throw error;
-	}
-	if (!weighs) {
-		string error = "Cannot crossover a Layer without weighs.";
-		throw error;
-	}
-	Layer** twoLayers = (Layer**) mi_malloc(2 * sizeof(Layer*));
-	twoLayers[0] = this->newCopy();
-	twoLayers[1] = other->newCopy();
+	checkCompatibility(other);
 
-	unsigned vectorPos = 0;
-	for (unsigned i=0; i < output->getSize(); i++){
-		unsigned inputOffset = 0;
+	unsigned inputSize = inputs[inputLayer]->getSize();
+	Interface* inputBitVector = new Interface(inputSize, BIT);
 
-		if (bitVector->getElement(vectorPos++)) {
-			twoLayers[0]->setThreshold(this->getThreshold(i), i);
-			twoLayers[1]->setThreshold(other->getThreshold(i), i);
-		} else {
-			twoLayers[0]->setThreshold(other->getThreshold(i), i);
-			twoLayers[1]->setThreshold(this->getThreshold(i), i);
+	for (unsigned i=0; i < inputSize; i++){
+		if (bitVector->getElement(i)){
+			for (unsigned j=0; j < output->getSize(); j++){
+				unsigned offset = j * inputSize;
+				inputBitVector->setElement(offset + i, 1);
+			}
 		}
+	}
+	crossoverWeighs(other, inputLayer, inputBitVector);
+	delete bitVector;
+}
 
-		for (unsigned j=0; j < numberInputs; j++){
-			for (unsigned k=0; k < getInput(j)->getSize(); k++){
-				unsigned weighPos = i*totalWeighsPerOutput + inputOffset + k;
-				if (bitVector->getElement(vectorPos++)) {
-					if (inputType == FLOAT) {
-						twoLayers[0]->setFloatWeigh(this->getFloatWeigh(weighPos), weighPos);
-						twoLayers[1]->setFloatWeigh(other->getFloatWeigh(weighPos), weighPos);
-					} else {
-						twoLayers[0]->setByteWeigh(this->getByteWeigh(weighPos), weighPos);
-						twoLayers[1]->setByteWeigh(other->getByteWeigh(weighPos), weighPos);
-					}
-				} else {
-					if (inputType == FLOAT) {
-						twoLayers[0]->setFloatWeigh(other->getFloatWeigh(weighPos), weighPos);
-						twoLayers[1]->setFloatWeigh(this->getFloatWeigh(weighPos), weighPos);
-					} else {
-						twoLayers[0]->setByteWeigh(other->getByteWeigh(weighPos), weighPos);
-						twoLayers[1]->setByteWeigh(this->getByteWeigh(weighPos), weighPos);
-					}
+void Layer::crossoverNeurons(Layer *other, Interface *bitVector)
+{
+	//TODO comprobar todo esto en un nivel superior (o no comprobarlo) (o comprobarlo optionalmente)
+	checkCompatibility(other);
+
+	for (unsigned i=0; i < numberInputs; i++){
+
+		unsigned inputSize = inputs[i]->getSize();
+		Interface* inputBitVector = new Interface(inputSize, BIT);
+
+		for (unsigned j=0; j < output->getSize(); j++){
+			if (bitVector->getElement(j)){
+				unsigned offset = j * inputSize;
+				for (unsigned k=0; k < inputSize; k++){
+					inputBitVector->setElement(offset + k, 1);
 				}
 			}
-			inputOffset += getInput(j)->getWeighsSize();
 		}
+		crossoverWeighs(other, i, inputBitVector);
 	}
-	return twoLayers;
+	delete bitVector;
 }
-
-Layer** Layer::crossoverNeurons(Layer *other, Interface* bitVector)
-{
-	if (bitVector->getSize() != output->getSize()){
-		string error = "The number of neurons must be equal to the size of the bitVector.";
-		throw error;
-	}
-	if (!weighs) {
-		string error = "Cannot crossover a Layer without weighs.";
-		throw error;
-	}
-	Layer* offSpring = other->newCopy();
-	Layer** twoLayers = (Layer**) mi_malloc(2 * sizeof(Layer*));
-	twoLayers[0] = this->newCopy();
-	twoLayers[1] = other->newCopy();
-
-	size_t size;
-	if (inputType == FLOAT){
-		size = totalWeighsPerOutput * sizeof(float);
-	} else {
-		size = totalWeighsPerOutput * sizeof(unsigned char);
-	}
-
-	void* destination_a_ptr = twoLayers[0]->getWeighsPtr();
-	void* destination_b_ptr = twoLayers[1]->getWeighsPtr();
-	void* thisPtr = this->getWeighsPtr();
-	void* otherPtr = other->getWeighsPtr();
-
-	for (unsigned i=0; i < output->getSize(); i++){
-
-		if (bitVector->getElement(i)) {
-			memcpy(destination_a_ptr, thisPtr, size);
-			twoLayers[0]->setThreshold(this->getThreshold(i), i);
-
-			memcpy(destination_b_ptr, otherPtr, size);
-			twoLayers[1]->setThreshold(other->getThreshold(i), i);
-		} else {
-			memcpy(destination_a_ptr, otherPtr, size);
-			twoLayers[0]->setThreshold(other->getThreshold(i), i);
-
-			memcpy(destination_b_ptr, thisPtr, size);
-			twoLayers[1]->setThreshold(this->getThreshold(i), i);
-		}
-		destination_a_ptr = (void*) ((char*)destination_a_ptr + size);
-		destination_b_ptr = (void*) ((char*)destination_b_ptr + size);
-		thisPtr = (void*) ((char*)thisPtr + size);
-		otherPtr = (void*) ((char*)otherPtr + size);
-	}
-	return twoLayers;
-}
-
-float Layer::getThreshold(unsigned  neuronPos)
-{
-	return thresholds[neuronPos];
-}
-
-void Layer::setThreshold(float value, unsigned  neuronPos)
-{
-	thresholds[neuronPos] = value;
-}
-
-unsigned char Layer::getByteWeigh(unsigned pos)
-{
-	return ((unsigned char*) this->weighs)[pos];
-}
-
-void Layer::setByteWeigh(unsigned char value, unsigned pos)
-{
-	((unsigned char*) this->weighs)[pos] = value;
-}
-
-float Layer::getFloatWeigh(unsigned pos)
-{
-	return ((float*) this->weighs)[pos];
-}
-
-void Layer::setFloatWeigh(float value, unsigned pos)
-{
-	((float*) this->weighs)[pos] = value;
-}
-
-void *Layer::getThresholdsPtr()
-{
-	return (void*)this->thresholds;
-}
-
-void *Layer::getWeighsPtr()
-{
-	return this->weighs;
-}
-
-unsigned Layer::getNumberNeurons()
-{
-	return this->output->getSize();
-}
-
-unsigned Layer::getNumberWeighs()
-{
-	unsigned numWeighs = 0;
-	for (unsigned i=0; i < numberInputs; i++) {
-		numWeighs += inputs[i]->getSize();
-	}
-	return this->output->getSize() * (numWeighs + 1);
-}
-
-*/
-
-
-
-
-
-
-
-

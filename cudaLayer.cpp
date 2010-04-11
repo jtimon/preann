@@ -26,6 +26,24 @@ CudaLayer::~CudaLayer()
 	}
 }
 
+void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
+{
+	if (CudaLayer::algorithm == 0) {
+		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
+	}
+	else if (CudaLayer::algorithm == 1) {
+		cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
+	}
+	else if (CudaLayer::algorithm == 2) {
+		cuda_inputCalculation3(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
+	}
+}
+
+float* CudaLayer::negativeThresholds()
+{
+	return cuda_getNegativeThresholds(thresholds, output->getSize(), CudaLayer::blockSize);
+}
+
 void CudaLayer::saveWeighs(FILE *stream)
 {
 	unsigned size;
@@ -84,49 +102,71 @@ void* CudaLayer::newWeighs(unsigned  inputSize, VectorType inputType)
 	return cuda_malloc(size);
 }
 
-float* CudaLayer::negativeThresholds()
+void CudaLayer::copyWeighs(Layer* sourceLayer)
 {
-	return cuda_getNegativeThresholds(thresholds, output->getSize(), CudaLayer::blockSize);
-}
-
-void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
-{
-	if (CudaLayer::algorithm == 0){
-		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
-	} else {
-		cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
-	}
+	//TODO implementar metodo
+	std::string error = "newCopy is not implemented for CudaLayer.";
+	throw error;
 }
 
 void CudaLayer::randomWeighs(float range)
 {
+	//TODO implementar metodo
 	std::string error = "randomWeighs is not implemented for CudaLayer.";
 	throw error;
 }
-/*
-void CudaLayer::calculateOutput()
-{
-	float* results =
 
-	for(unsigned i=0; i < numberInputs; i++){
-		Vector* input = inputs[i];
-		if (CudaLayer::algorithm == 0){
-			cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), weighs[i], results, CudaLayer::blockSize);
-		} else {
-			cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), weighs[i], results, CudaLayer::blockSize);
+void CudaLayer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation)
+{
+	//TODO implement method
+	if (outputPos > output->getSize()) {
+		string error = "Cannot mutate that output: the Layer hasn't so many neurons.";
+		throw error;
+	}
+	if (inputLayer > output->getSize()) {
+		string error = "Cannot mutate that input: the Layer hasn't so many inputs.";
+		throw error;
+	}
+	if (inputPos > inputs[inputLayer]->getSize()) {
+		string error = "Cannot mutate that input: the input hasn't so many neurons.";
+		throw error;
+	}
+
+	unsigned weighPos = (outputPos * inputs[inputLayer]->getSize()) + inputPos;
+
+	if (inputs[inputLayer]->getVectorType() == FLOAT){
+		((float**)weighs)[inputLayer][weighPos] += mutation;
+	} else {
+
+		int result = (int)mutation + ((unsigned char**)weighs)[inputLayer][weighPos];
+		if (result <= 0){
+			((unsigned char**)weighs)[inputLayer][weighPos] = 0;
+		}
+		else if (result >= 255) {
+			((unsigned char**)weighs)[inputLayer][weighPos] = 255;
+		}
+		else {
+			((unsigned char**)weighs)[inputLayer][weighPos] = result;
 		}
 	}
-//	printf("----------------\n", 1);
-//	for (unsigned i=0; i < output->getSize(); i++){
-//		printf("%f ", results[i]);
-//	}
-//	printf("\n----------------\n", 1);
-	output->activation(results, functionType);
 }
-*/
-Layer* CudaLayer::newCopy()
+
+void CudaLayer::mutateThreshold(unsigned outputPos, float mutation)
 {
-	std::string error = "newCopy is not implemented for CudaLayer.";
-	throw error;
+	//TODO implement method (copiado de cpp)
+	if (outputPos > output->getSize()) {
+		string error = "Cannot mutate that Threshold: the Layer hasn't so many neurons.";
+		throw error;
+	}
+	thresholds[outputPos] += mutation;
 }
+
+void CudaLayer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
+{
+	//TODO implement method CudaLayer::crossoverWeighs
+}
+
+
+
+
 

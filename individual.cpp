@@ -6,113 +6,126 @@
  */
 
 #include "individual.h"
-/*TODO descomentar y adaptar
-Individual::Individual() {
-	// TODO Auto-generated constructor stub
 
-}
-
-Individual::~Individual() {
-	// TODO Auto-generated destructor stub
-}
-
-Layer *Individual::getLayer(unsigned  layerPos)
+Individual::Individual()
 {
-	return this->layers[layerPos];
 }
 
-void Individual::setLayer(Layer *layer, unsigned  layerPos)
+Individual::~Individual()
 {
-	this->layers[layerPos] = layer;
 }
 
-Individual *Individual::newCopy()
+Individual* Individual::newCopy()
 {
-	//TODO
+	//TODO implementar
 }
 
 void Individual::mutate(unsigned numMutations, float mutationRange)
 {
 	for (unsigned i=0; i < numMutations; i++) {
-		unsigned chosenLayer = randomUnsigned(this->numberLayers);
-		this->layers[chosenLayer]->mutateWeigh(mutationRange);
+		unsigned chosenLayer = randomUnsigned(numberLayers);
+		layers[chosenLayer]->mutateWeigh(mutationRange);
 	}
 }
 
 void Individual::mutate(float probability, float mutationRange)
 {
-	for (unsigned i=0; i < this->numberLayers; i++) {
-		this->layers[i]->mutateWeighs(probability, mutationRange);
+	for (unsigned i=0; i < numberLayers; i++) {
+		layers[i]->mutateWeighs(probability, mutationRange);
 	}
 }
 
-Individual** Individual::uniformCrossoverWeighs(Individual *other, float probability)
+void Individual::uniformCrossoverWeighs(Individual* other, float probability)
 {
-	Interface** bitVectors = (Interface**) mi_malloc(sizeof(Interface*) * this->numberLayers);
-	for (unsigned i=0; i < this->numberLayers; i++){
-		bitVectors[i] = new Interface(this->layers[i]->getNumberWeighs(), BIT);
+	Interface*** bitVectors = (Interface***) mi_malloc(sizeof(Interface**) * numberLayers);
+	for (unsigned i=0; i < numberLayers; i++){
+
+		bitVectors[i] = (Interface**) mi_malloc(sizeof(Interface*) * layers[i]->getNumberInputs());
+		for (unsigned j=0; j < layers[i]->getNumberInputs(); j++){
+			bitVectors[i][j] = new Interface(layers[i]->getInput(j)->getSize(), BIT);
+		}
 	}
-	for (unsigned i=0; i < this->numberLayers; i++){
-		for(unsigned j=0; j < bitVectors[i]->getSize(); j++) {
-			if (randomPositiveFloat(1) < probability){
-				bitVectors[i]->setElement(j, 1);
-			} else {
-				bitVectors[i]->setElement(j, 0);
+
+	for (unsigned i=0; i < numberLayers; i++){
+		for (unsigned j=0; j < layers[i]->getNumberInputs(); j++){
+			for(unsigned k=0; k < layers[i]->getInput(j)->getSize(); k++) {
+				if (randomPositiveFloat(1) < probability){
+					bitVectors[i][j]->setElement(k, 1);
+				}
 			}
 		}
 	}
-	Individual** twoChilds = (Individual**) mi_malloc(2 * sizeof(Individual*));
-	twoChilds[0] = this->newCopy();
-	twoChilds[1] = other->newCopy();
-	for (unsigned i=0; i < this->numberLayers; i++) {
-		Layer** twoLayers = layers[i]->crossoverWeighs(other->getLayer(i), bitVectors[i]);
-		twoChilds[0]->setLayer(twoLayers[0], i);
-		twoChilds[1]->setLayer(twoLayers[1], i);
-		mi_free(twoLayers);
+
+	for (unsigned i=0; i < numberLayers; i++) {
+		for (unsigned j=0; j < layers[i]->getNumberInputs(); j++){
+			layers[i]->crossoverWeighs(other->layers[i], j, bitVectors[i][j]);
+		}
 	}
-	twoChilds[0]->resetConnections();
-	twoChilds[1]->resetConnections();
-	return twoChilds;
 }
 
-Individual** Individual::crossoverLayers(Individual *other, Interface* bitVector)
+void Individual::multipointCrossoverWeighs(Individual *other, unsigned numPoints)
 {
-	if (bitVector->getSize() != this->numberLayers){
+	Interface*** bitVectors = (Interface***) mi_malloc(sizeof(Interface**) * numberLayers);
+	for (unsigned i=0; i < numberLayers; i++){
+
+		bitVectors[i] = (Interface**) mi_malloc(sizeof(Interface*) * layers[i]->getNumberInputs());
+		for (unsigned j=0; j < layers[i]->getNumberInputs(); j++){
+			bitVectors[i][j] = new Interface(layers[i]->getInput(j)->getSize(), BIT);
+		}
+	}
+	while (numPoints >= 0) {
+		unsigned chosenLayer = randomUnsigned(numberLayers);
+		unsigned chosenInput = randomUnsigned(layers[chosenLayer]->getNumberInputs());
+		unsigned chosenPoint = randomUnsigned(layers[chosenLayer]->getInput(chosenInput)->getSize());
+
+		if (!bitVectors[chosenLayer][chosenInput]->getElement(chosenPoint)) {
+			bitVectors[chosenLayer][chosenInput]->setElement(chosenPoint, 1);
+			--numPoints;
+		}
+	}
+
+	unsigned progenitor = 1;
+	for (unsigned i=0; i < numberLayers; i++){
+		for (unsigned j=0; j < layers[i]->getNumberInputs(); j++){
+			for(unsigned k=0; k < layers[i]->getInput(j)->getSize(); k++) {
+				if (bitVectors[i][j]->getElement(k)){
+					if (progenitor == 1) progenitor = 0;
+					else progenitor = 1;
+				}
+				bitVectors[i][j]->setElement(k, progenitor);
+			}
+		}
+	}
+	for (unsigned i=0; i < numberLayers; i++) {
+		for (unsigned j=0; j < layers[i]->getNumberInputs(); j++){
+			layers[i]->crossoverWeighs(other->layers[i], j, bitVectors[i][j]);
+		}
+	}
+}
+
+void Individual::crossoverLayers(Individual *other, Interface* bitVector)
+{
+	if (bitVector->getSize() != numberLayers){
 		string error = "The number of layers must be equal to the size of the bitVector.";
 		throw error;
 	}
-	Individual** twoChilds = (Individual**) mi_malloc(2 * sizeof(Individual*));
-	twoChilds[0] = this->newCopy();
-	twoChilds[1] = other->newCopy();
 
-	for (unsigned i=0; i < this->numberLayers; i++) {
+	for (unsigned i=0; i < numberLayers; i++) {
 
-		Layer* layerA = this->layers[i]->newCopy();
-		layerA->copyWeighs(this->layers[i]);
-		Layer* layerB = other->layers[i]->newCopy();
-		layerB->copyWeighs(other->layers[i]);
-
-		if (bitVector->getElement(i)) {
-			twoChilds[0]->setLayer(layerA, i);
-			twoChilds[1]->setLayer(layerB, i);
-		} else {
-			twoChilds[0]->setLayer(layerB, i);
-			twoChilds[1]->setLayer(layerA, i);
+		if (!bitVector->getElement(i)) {
+			layers[i]->swapWeighs(other->layers[i]);
 		}
 	}
-	twoChilds[0]->resetConnections();
-	twoChilds[1]->resetConnections();
 	delete (bitVector);
-	return twoChilds;
 }
 
-Individual** Individual::uniformCrossoverNeurons(Individual *other, float probability)
+void Individual::uniformCrossoverNeurons(Individual *other, float probability)
 {
-	Interface** bitVectors = (Interface**) mi_malloc(sizeof(Interface*) * this->numberLayers);
-	for (unsigned i=0; i < this->numberLayers; i++){
-		bitVectors[i] = new Interface(this->layers[i]->getOutput()->getSize(), BIT);
+	Interface** bitVectors = (Interface**) mi_malloc(sizeof(Interface*) * numberLayers);
+	for (unsigned i=0; i < numberLayers; i++){
+		bitVectors[i] = new Interface(layers[i]->getOutput()->getSize(), BIT);
 	}
-	for (unsigned i=0; i < this->numberLayers; i++){
+	for (unsigned i=0; i < numberLayers; i++){
 		for(unsigned j=0; j < bitVectors[i]->getSize(); j++) {
 			if (randomPositiveFloat(1) < probability){
 				bitVectors[i]->setElement(j, 1);
@@ -121,24 +134,16 @@ Individual** Individual::uniformCrossoverNeurons(Individual *other, float probab
 			}
 		}
 	}
-	Individual** twoChilds = (Individual**) mi_malloc(2 * sizeof(Individual*));
-	twoChilds[0] = this->newCopy();
-	twoChilds[1] = other->newCopy();
-	for (unsigned i=0; i < this->numberLayers; i++) {
-		Layer** twoLayers = this->layers[i]->crossoverNeurons(other->getLayer(i), bitVectors[i]);
-		twoChilds[0]->setLayer(twoLayers[0], i);
-		twoChilds[1]->setLayer(twoLayers[1], i);
-		mi_free(twoLayers);
+
+	for (unsigned i=0; i < numberLayers; i++) {
+		layers[i]->crossoverNeurons(other->layers[i], bitVectors[i]);
 	}
-	twoChilds[0]->resetConnections();
-	twoChilds[1]->resetConnections();
-	return twoChilds;
 }
 
-Individual** Individual::uniformCrossoverLayers(Individual *other, float probability)
+void Individual::uniformCrossoverLayers(Individual *other, float probability)
 {
-	Interface* bitVector = new Interface(this->numberLayers, BIT);
-	for (unsigned i=0; i < this->numberLayers; i++){
+	Interface* bitVector = new Interface(numberLayers, BIT);
+	for (unsigned i=0; i < numberLayers; i++){
 		if (randomPositiveFloat(1) < probability) {
 			bitVector->setElement(i, 1);
 		} else {
@@ -148,14 +153,14 @@ Individual** Individual::uniformCrossoverLayers(Individual *other, float probabi
 	return crossoverLayers(other, bitVector);
 }
 
-Individual** Individual::multipointCrossoverWeighs(Individual *other, unsigned numPoints)
+void Individual::multipointCrossoverNeurons(Individual *other, unsigned numPoints)
 {
-	Interface** bitVectors = (Interface**) mi_malloc(sizeof(Interface*) * this->numberLayers);
-	for (unsigned i=0; i < this->numberLayers; i++){
-		bitVectors[i] = new Interface(this->layers[i]->getNumberWeighs(), BIT);
+	Interface** bitVectors = (Interface**) mi_malloc(sizeof(Interface*) * numberLayers);
+	for (unsigned i=0; i < numberLayers; i++){
+		bitVectors[i] = new Interface(layers[i]->getOutput()->getSize(), BIT);
 	}
 	while (numPoints >= 0) {
-		unsigned chosenLayer = randomUnsigned(this->numberLayers);
+		unsigned chosenLayer = randomUnsigned(numberLayers);
 		unsigned chosenPoint = randomUnsigned(bitVectors[chosenLayer]->getSize());
 		if (!bitVectors[chosenLayer]->getElement(chosenPoint)) {
 			bitVectors[chosenLayer]->setElement(chosenPoint, 1);
@@ -163,7 +168,7 @@ Individual** Individual::multipointCrossoverWeighs(Individual *other, unsigned n
 		}
 	}
 	unsigned progenitor = 1;
-	for (unsigned i=0; i < this->numberLayers; i++){
+	for (unsigned i=0; i < numberLayers; i++){
 		for(unsigned j=0; j < bitVectors[i]->getSize(); j++) {
 			if (bitVectors[i]->getElement(j)){
 				if (progenitor == 1) progenitor = 0;
@@ -172,74 +177,27 @@ Individual** Individual::multipointCrossoverWeighs(Individual *other, unsigned n
 			bitVectors[i]->setElement(j, progenitor);
 		}
 	}
-	Individual** twoChilds = (Individual**) mi_malloc(2 * sizeof(Individual*));
-	twoChilds[0] = this->newCopy();
-	twoChilds[1] = other->newCopy();
-	for (unsigned i=0; i < this->numberLayers; i++) {
-		Layer** twoLayers = layers[i]->crossoverWeighs(other->getLayer(i), bitVectors[i]);
-		twoChilds[0]->setLayer(twoLayers[0], i);
-		twoChilds[1]->setLayer(twoLayers[1], i);
-		mi_free(twoLayers);
+	for (unsigned i=0; i < numberLayers; i++) {
+		layers[i]->crossoverNeurons(other->layers[i], bitVectors[i]);
 	}
-	twoChilds[0]->resetConnections();
-	twoChilds[1]->resetConnections();
-	return twoChilds;
 }
 
-Individual** Individual::multipointCrossoverNeurons(Individual *other, unsigned numPoints)
+void Individual::multipointCrossoverLayers(Individual *other, unsigned numPoints)
 {
-	Interface** bitVectors = (Interface**) mi_malloc(sizeof(Interface*) * this->numberLayers);
-	for (unsigned i=0; i < this->numberLayers; i++){
-		bitVectors[i] = new Interface(this->layers[i]->getNumberNeurons(), BIT);
-	}
-	while (numPoints >= 0) {
-		unsigned chosenLayer = randomUnsigned(this->numberLayers);
-		unsigned chosenPoint = randomUnsigned(bitVectors[chosenLayer]->getSize());
-		if (!bitVectors[chosenLayer]->getElement(chosenPoint)) {
-			bitVectors[chosenLayer]->setElement(chosenPoint, 1);
-			--numPoints;
-		}
-	}
-	unsigned progenitor = 1;
-	for (unsigned i=0; i < this->numberLayers; i++){
-		for(unsigned j=0; j < bitVectors[i]->getSize(); j++) {
-			if (bitVectors[i]->getElement(j)){
-				if (progenitor == 1) progenitor = 0;
-				else progenitor = 1;
-			}
-			bitVectors[i]->setElement(j, progenitor);
-		}
-	}
-	Individual** twoChilds = (Individual**) mi_malloc(2 * sizeof(Individual*));
-	twoChilds[0] = this->newCopy();
-	twoChilds[1] = other->newCopy();
-	for (unsigned i=0; i < this->numberLayers; i++) {
-		Layer** twoLayers = this->layers[i]->crossoverNeurons(other->getLayer(i), bitVectors[i]);
-		twoChilds[0]->setLayer(twoLayers[0], i);
-		twoChilds[1]->setLayer(twoLayers[1], i);
-		mi_free(twoLayers);
-	}
-	twoChilds[0]->resetConnections();
-	twoChilds[1]->resetConnections();
-	return twoChilds;
-}
-
-Individual** Individual::multipointCrossoverLayers(Individual *other, unsigned numPoints)
-{
-	if (numPoints > this->numberLayers){
+	if (numPoints > numberLayers){
 		string error = "In multipointCrossoverLayers: there have to be more layers than points.";
 		throw error;
 	}
-	Interface* bitVector = new Interface(this->numberLayers, BIT);
+	Interface* bitVector = new Interface(numberLayers, BIT);
 	while (numPoints >= 0) {
-		unsigned chosenPoint = randomUnsigned(this->numberLayers);
+		unsigned chosenPoint = randomUnsigned(numberLayers);
 		if (!bitVector->getElement(chosenPoint)) {
 			bitVector->setElement(chosenPoint, 1);
 			--numPoints;
 		}
 	}
 	unsigned progenitor = 1;
-	for (unsigned i=0; i < this->numberLayers; i++){
+	for (unsigned i=0; i < numberLayers; i++){
 		if (bitVector->getElement(i)){
 			if (progenitor == 1) progenitor = 0;
 			else progenitor = 1;
@@ -259,4 +217,3 @@ float Individual::getFitness()
 	return fitness;
 }
 
-*/

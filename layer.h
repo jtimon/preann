@@ -3,6 +3,8 @@
 
 #include "vector.h"
 
+typedef enum {C, SSE2, CUDA} ImplementationType;
+
 class Layer
 {
 protected:
@@ -14,49 +16,43 @@ protected:
 	float* thresholds;
 	Vector* output;
 
-	VectorType outputType;
 	FunctionType functionType;
 
-	virtual void saveWeighs(FILE* stream) = 0;
-	virtual void loadWeighs(FILE* stream) = 0;
 	virtual float* negativeThresholds() = 0;
 	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results) = 0;
-	virtual void* newWeighs(unsigned inputSize, VectorType inputType) = 0;
 
-// To allow GA trainer work:
-	/*float getFloatWeigh(unsigned pos);
-	void setFloatWeigh(float value, unsigned pos);
-	unsigned char getByteWeigh(unsigned pos);
-	void setByteWeigh(unsigned char value, unsigned pos);
-	float getThreshold(unsigned neuronPos);
-	void setThreshold(float value, unsigned  neuronPos);
-	void* getThresholdsPtr();
-	void* getWeighsPtr();*/
+	virtual void* newWeighs(unsigned inputSize, VectorType inputType) = 0;
+	virtual void saveWeighs(FILE* stream) = 0;
+	virtual void loadWeighs(FILE* stream) = 0;
+
+	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation) = 0;
+	virtual void mutateThreshold(unsigned outputPos, float mutation) = 0;
 public:
 	Layer(VectorType outputType, FunctionType functionType);
 	virtual ~Layer();
+	virtual ImplementationType getImplementationType() = 0;
 
+	virtual void copyWeighs(Layer* sourceLayer) = 0;
 	virtual void randomWeighs(float range) = 0;
+	virtual void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector) = 0;
 
+	void checkCompatibility(Layer* layer);
 	void calculateOutput();
 	void addInput(Vector* input);
 	void save(FILE* stream);
 	void load(FILE* stream);
 
+	void swapWeighs(Layer* layer);
+	unsigned getNumberInputs();
+	Vector* getInput(unsigned pos);
 	Vector* getOutput();
-
-// To allow GA trainer work:
-	virtual Layer* newCopy() = 0;
-	/*void copyWeighs(Layer* other);
+	float* getThresholdsPtr();
+	void* getWeighsPtr();
 
 	void mutateWeigh(float mutationRange);
 	void mutateWeighs(float probability, float mutationRange);
-
-	Layer** crossoverNeurons(Layer* other, Interface* bitVector);
-	Layer** crossoverWeighs(Layer* other, Interface* bitVector);
-
-	unsigned getNumberNeurons();
-	unsigned getNumberWeighs();*/
+	void crossoverNeurons(Layer* other, Interface* bitVector);
+	void crossoverInput(Layer* other, unsigned inputLayer, Interface* bitVector);
 };
 
 #endif /*ABSTRACTLAYER_H_*/

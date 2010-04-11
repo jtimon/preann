@@ -433,31 +433,25 @@ void Population::crossover()
 				numCurrentScheme = numLayerMultipoint;
 			}
 
-			unsigned parentA, parentB;
-			Individual** twoChilds;
 			unsigned numGenerated = 0;
 
 			if (numCurrentScheme & 1){
 
-				twoChilds = crossover((CrossoverType) crossoverType);
-				offSpring[offSpringSize++] = twoChilds[0];
-				delete (twoChilds[1]);
+				oneCrossover((CrossoverType) crossoverType);
+				delete (offSpring[offSpringSize - 1]);
+				--offSpringSize;
 				++numGenerated;
-				mi_free(twoChilds);
 			}
 			while (numGenerated < numCurrentScheme) {
 
-				twoChilds = crossover((CrossoverType) crossoverType);
-				offSpring[offSpringSize++] = twoChilds[0];
-				offSpring[offSpringSize++] = twoChilds[1];
+				oneCrossover((CrossoverType) crossoverType);
 				numGenerated += 2;
-				mi_free(twoChilds);
 			}
 		}
 	}
 }
 
-Individual** Population::crossover(CrossoverType crossoverType)
+void Population::oneCrossover(CrossoverType crossoverType)
 {
 	if (usedParents + 2 > parentSize) {
 		cout<<"Warning: there's not enough unused parents too do crossover. Some of them will be used again."<<endl;
@@ -485,20 +479,28 @@ Individual** Population::crossover(CrossoverType crossoverType)
 		}
 	}
 	usedParents += 2;
+	offSpring[offSpringSize++] = parents[parentA];
+	offSpring[offSpringSize++] = parents[parentB];
 
 	switch (crossoverType){
 		case WEIGH_UNIFORM:
-			return parents[parentA]->uniformCrossoverWeighs(parents[parentB], probabilityWeighUniform);
+			offSpring[offSpringSize - 2]->uniformCrossoverWeighs(offSpring[offSpringSize - 1], probabilityWeighUniform);
+			break;
 		case NEURON_UNIFORM:
-			return parents[parentA]->uniformCrossoverNeurons(parents[parentB], probabilityNeuronUniform);
+			offSpring[offSpringSize - 2]->uniformCrossoverNeurons(offSpring[offSpringSize - 1], probabilityNeuronUniform);
+			break;
 		case LAYER_UNIFORM:
-			return parents[parentA]->uniformCrossoverLayers(parents[parentB], probabilityLayerUniform);
+			offSpring[offSpringSize - 2]->uniformCrossoverLayers(offSpring[offSpringSize - 1], probabilityLayerUniform);
+			break;
 		case WEIGH_MULTIPOiNT:
-			return parents[parentA]->multipointCrossoverWeighs(parents[parentB], numPointsWeighMultipoint);
+			offSpring[offSpringSize - 2]->multipointCrossoverWeighs(offSpring[offSpringSize - 1], numPointsWeighMultipoint);
+			break;
 		case NEURON_MULTIPOiNT:
-			return parents[parentA]->multipointCrossoverNeurons(parents[parentB], numPointsNeuronMultipoint);
+			offSpring[offSpringSize - 2]->multipointCrossoverNeurons(offSpring[offSpringSize - 1], numPointsNeuronMultipoint);
+			break;
 		case LAYER_MULTIPOiNT:
-			return parents[parentA]->multipointCrossoverLayers(parents[parentB], numPointsLayerMultipoint);
+			offSpring[offSpringSize - 2]->multipointCrossoverLayers(offSpring[offSpringSize - 1], numPointsLayerMultipoint);
+			break;
 	}
 
 }

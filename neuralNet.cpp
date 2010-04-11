@@ -51,11 +51,6 @@ NeuralNet::~NeuralNet()
 	}
 }
 
-void NeuralNet::resetConnections()
-{
-	//TODO resetConnections
-}
-
 void NeuralNet::calculateOutput()
 {
 	for (unsigned i=0; i < numberInputs; i++){

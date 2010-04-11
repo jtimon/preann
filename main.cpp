@@ -25,8 +25,8 @@ float testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType, un
 	nn->getOutput(0)->print();
 
 	delete(nn);
-	printTotalAllocated();
-	printTotalPointers();
+	//printTotalAllocated();
+	//printTotalPointers();
 	return chrono.getSeconds();
 }
 
@@ -49,27 +49,27 @@ try{
 	float seconds;
 	unsigned type;
 
-	for (type=0; type < 1; type++){
+	for (type=0; type < 3; type++){
 
-		type = 2;
+		//type = 0;
 		switch(type){
 		case 0:
 			cout<<"version float"<<endl;
 			inputType = FLOAT;
 			functionType = IDENTITY;
-			maxSize = 1024;
+			maxSize = 512;
 			break;
 		case 1:
 			cout<<"version bit"<<endl;
 			inputType = BIT;
 			functionType = BINARY_STEP;
-			maxSize = 1024;
+			maxSize = 512;
 			break;
 		case 2:
 			cout<<"version sign"<<endl;
 			inputType = SIGN;
 			functionType = BIPOLAR_STEP;
-			maxSize = 1024;
+			maxSize = 512;
 			break;
 		}
 
@@ -102,7 +102,8 @@ try{
 			seconds = testNeuralNet(nn, size, inputType, times);
 			printf("XMM %f \n", seconds);
 
-			for (unsigned algorithm = 0; algorithm < 1; algorithm++){
+			for (unsigned algorithm = 0; algorithm < 3; algorithm++){
+				//algorithm = 2;
 				printf("CUDA [algorithm %d]  ", algorithm);
 				CudaLayer::algorithm = algorithm;
 				for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){

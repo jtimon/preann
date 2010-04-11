@@ -1,3 +1,4 @@
+
 #include "cuda_code.h"
 
 void checkCUDAError(const char *msg)
@@ -162,18 +163,14 @@ void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned out
 {
 	extern __shared__ float sdata[];
 
-	unsigned tid = threadIdx.x;
-	unsigned readingLoops = (input_size - 1 / blockDim.x) + 1;
-
 	unsigned outputNeuron = blockIdx.x*blockDim.x + threadIdx.x;
 	unsigned weighsOffset = outputNeuron * input_size;
 	float result = 0;
 
-	unsigned pos = tid;
-	for (unsigned i=0; i < readingLoops; i++){
-		if (pos < input_size){
-			sdata[pos] = inputs[pos];
-		}
+	unsigned pos = threadIdx.x;
+	while (pos < input_size){
+
+		sdata[pos] = inputs[pos];
 		pos += blockDim.x;
 	}
 	__syncthreads();
@@ -276,6 +273,48 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Vecto
 		shared_mem_size = input_size * sizeof(float);
 
 		SumFloatsConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, output_size, (float*)weighs, results);
+	} else {
+
+		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
+		//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
+		if (shared_mem_size > 16128){
+			//16128 * 8
+			string error = "The maximum bit/sign input size is 129024.";
+			throw error;
+		}
+		if (inputType == BIT) {
+			SumBitsConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+		} else {
+			SumBitsConnectionsKernel<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+		}
+	}
+}
+
+__global__
+void SumFloatsConnectionsKernel3(float* inputs, unsigned input_size, unsigned input_id, unsigned output_size, float* weighs, float* results)
+{
+	extern __shared__ float sdata[];
+
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+	if (idx == 0) sdata[0] = inputs[input_id];
+	__syncthreads();
+
+	if (idx < output_size) results[idx] += sdata[0] * weighs[(idx * input_size) + input_id];
+}
+
+extern "C" void cuda_inputCalculation3(void* inputPtr, unsigned input_size, VectorType inputType, unsigned output_size, void* weighs, float* results, unsigned block_size)
+{
+	unsigned grid_size = ((output_size - 1)/block_size) + 1;
+	unsigned shared_mem_size;
+
+	if (inputType == FLOAT) {
+
+		shared_mem_size = sizeof(float);
+		for (unsigned i=0; i < input_size; i++) {
+
+			SumFloatsConnectionsKernel3<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, i, output_size, (float*)weighs, results);
+		}
 	} else {
 
 		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);

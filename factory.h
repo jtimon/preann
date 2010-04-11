@@ -11,8 +11,6 @@
 //TODO se requiere para el atributo static
 #include "cudaLayer.h"
 
-typedef enum {C, SSE2, CUDA} ImplementationType;
-
 class Factory {
 public:
 	static Vector* newVector(unsigned size, VectorType vectorType, ImplementationType implementationType = SSE2);

@@ -13,23 +13,27 @@
 
 class CudaLayer: public Layer {
 protected:
+	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results);
+	virtual float* negativeThresholds();
+
+	virtual void* newWeighs(unsigned inputSize, VectorType inputType);
 	virtual void saveWeighs(FILE* stream);
 	virtual void loadWeighs(FILE* stream);
-	virtual float* negativeThresholds();
-	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results);
-	virtual void* newWeighs(unsigned inputSize, VectorType inputType);
+
+	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
+	virtual void mutateThreshold(unsigned outputPos, float mutation);
 public:
 	static unsigned algorithm;
 	static unsigned blockSize;
 	CudaLayer(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~CudaLayer();
+	virtual ImplementationType getImplementationType() {
+		return CUDA;
+	};
 
-	//virtual void calculateOutput();
-	//virtual void addInput(Vector* input);
+	virtual void copyWeighs(Layer* sourceLayer);
 	virtual void randomWeighs(float range);
-
-	virtual Layer* newCopy();
-
+	virtual void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector);
 
 };
 

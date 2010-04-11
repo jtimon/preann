@@ -6,13 +6,14 @@ OBJECTS = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVe
 
 CX = gcc-4.3
 CXX = g++-4.3 -ggdb
-NVCC = /usr/local/cuda/bin/nvcc
+NVCC_LINK = /usr/local/cuda/bin/nvcc -o preann -L/usr/local/cuda/lib -lcudart
+NVCC_COMPILE = /usr/local/cuda/bin/nvcc -g -G -c -arch sm_11 --device-emulation
 NASM = nasm -f elf
 
 all: preann
 
 preann: $(OBJECTS)
-	$(NVCC) -o preann $(OBJECTS) -L/usr/local/cuda/lib -lcudart
+	$(NVCC_LINK) $(OBJECTS) 
 main.o : main.cpp population.o chronometer.o
 	$(CXX) -c main.cpp
 population.o : population.cpp population.h task.o
@@ -36,7 +37,7 @@ cppLayer.o : cppLayer.cpp cppLayer.h layer.o
 layer.o : layer.h layer.cpp vector.o
 	$(CXX) -c layer.cpp
 cudaVector.o : cudaVector.h cudaVector.cpp vector.o cuda_code.o
-	$(CXX) -c cudaVector.cpp
+	$(NVCC_COMPILE) -c cudaVector.cpp
 xmmVector.o : xmmVector.h xmmVector.cpp vector.o sse2_code.o
 	$(CXX) -c xmmVector.cpp
 vector.o : vector.h vector.cpp interface.o
@@ -50,7 +51,7 @@ chronometer.o : chronometer.cpp chronometer.h
 	$(CXX) -c chronometer.cpp
 
 cuda_code.o : cuda_code.h cuda_code.cu generalDefinitions.h
-	$(NVCC) -g -G -c -arch sm_11 --device-emulation cuda_code.cu
+	$(NVCC_COMPILE) cuda_code.cu
 sse2_code.o : sse2_code.asm sse2_code.h
 	$(NASM) sse2_code.asm
 

@@ -13,19 +13,27 @@
 class CppLayer : public Layer
 {
 protected:
-	virtual void saveWeighs(FILE* stream);
-	virtual void loadWeighs(FILE* stream);
 	virtual float* negativeThresholds();
 	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results);
+
+	virtual void saveWeighs(FILE* stream);
+	virtual void loadWeighs(FILE* stream);
 	virtual void* newWeighs(unsigned inputSize, VectorType inputType);
+
+	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
+	virtual void mutateThreshold(unsigned outputPos, float mutation);
 public:
 	CppLayer(VectorType outputType, FunctionType functionType);
 	CppLayer(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~CppLayer();
+	virtual ImplementationType getImplementationType() {
+		return C;
+	};
 
+	virtual void copyWeighs(Layer* sourceLayer);
 	virtual void randomWeighs(float range);
+	virtual void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector);
 
-	virtual Layer* newCopy();
 };
 
 #endif /* CPPLAYER_H_ */
