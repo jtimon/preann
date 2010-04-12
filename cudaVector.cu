@@ -12,7 +12,9 @@ CudaVector::CudaVector(unsigned size, VectorType vectorType)
 	this->size = size;
 	this->vectorType = vectorType;
 	unsigned byte_sz = getByteSize();
-	data = cuda_malloc(byte_sz);
+
+	cudaMalloc((void**)&(data), byte_sz);
+	checkCUDAError("CudaVector::CudaVector");
 
 	cuda_setZero(data, byte_sz, vectorType, THREADS_PER_BLOCK);
 }
@@ -20,15 +22,9 @@ CudaVector::CudaVector(unsigned size, VectorType vectorType)
 CudaVector::~CudaVector()
 {
 	if (data) {
-		cuda_free(data);
+		cudaFree(data);
+		checkCUDAError("CudaVector::~CudaVector()");
 		data = NULL;
-	}
-}
-
-void CudaVector::free()
-{
-	if (data) {
-		cuda_free(data);
 	}
 }
 
@@ -42,7 +38,8 @@ void CudaVector::copyFrom(Interface *interface)
 		string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
-	cuda_copyToDevice(data, interface->getDataPointer(), interface->getByteSize());
+	cudaMemcpy(data, interface->getDataPointer(), interface->getByteSize(), cudaMemcpyHostToDevice);
+	checkCUDAError("CudaVector::copyFrom");
 }
 
 void CudaVector::copyTo(Interface *interface)
@@ -55,7 +52,8 @@ void CudaVector::copyTo(Interface *interface)
 		string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
-	cuda_copyToHost(interface->getDataPointer(), data, this->getByteSize());
+	cudaMemcpy(interface->getDataPointer(), data, this->getByteSize(), cudaMemcpyDeviceToHost);
+	checkCUDAError("CudaVector::copyTo");
 }
 
 void CudaVector::activation(float* results, FunctionType functionType)

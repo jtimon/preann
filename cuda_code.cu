@@ -87,35 +87,6 @@ extern "C" void cuda_activation(void* data, unsigned size, VectorType vectorType
 	checkCUDAError("activation");
 }
 
-// MEMORY MANAGEMENT
-
-extern "C" void* cuda_malloc(unsigned byteSize)
-{
-	void* ptr;
-	cudaMalloc((void**)&(ptr), byteSize);
-
-	checkCUDAError("malloc");
-	return ptr;
-}
-extern "C" void cuda_free(void* d_ptr)
-{
-	cudaFree(d_ptr);
-	checkCUDAError("free");
-}
-
-extern "C" void cuda_copyToDevice(void* d_dest, void* h_src, unsigned count)
-{
-	cudaMemcpy(d_dest, h_src, count, cudaMemcpyHostToDevice);
-	checkCUDAError("copyToDevice");
-}
-
-extern "C"
-void cuda_copyToHost(void* h_dest, void* d_src, unsigned count)
-{
-	cudaMemcpy(h_dest, d_src, count, cudaMemcpyDeviceToHost);
-	checkCUDAError("copyToHost");
-}
-
 // INITIALIZATION
 
 __global__

@@ -4,8 +4,7 @@
  
 OBJECTS = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o task.o classificationTask.o individual.o main.o factory.o interface.o cudaVector.o
 
-CX = gcc-4.3
-CXX = g++-4.3 -ggdb
+CXX = g++-4.3 -ggdb -c
 NVCC_LINK = /usr/local/cuda/bin/nvcc -o preann -L/usr/local/cuda/lib -lcudart
 NVCC_COMPILE = /usr/local/cuda/bin/nvcc -g -G -c -arch sm_11 --device-emulation
 NASM = nasm -f elf
@@ -15,40 +14,40 @@ all: preann
 preann: $(OBJECTS)
 	$(NVCC_LINK) $(OBJECTS) 
 main.o : main.cpp population.o chronometer.o
-	$(CXX) -c main.cpp
+	$(CXX) main.cpp
 population.o : population.cpp population.h task.o
-	$(CXX) -c population.cpp
+	$(CXX) population.cpp
 classificationTask.o : classificationTask.cpp classificationTask.h task.o
-	$(CXX) -c classificationTask.cpp 
+	$(CXX) classificationTask.cpp 
 task.o : task.cpp task.h individual.o
-	$(CXX) -c task.cpp
+	$(CXX) task.cpp
 individual.o : individual.cpp individual.h neuralNet.o
-	$(CXX) -c individual.cpp
+	$(CXX) individual.cpp
 neuralNet.o : neuralNet.cpp neuralNet.h layer.o factory.o
-	$(CXX) -c neuralNet.cpp
+	$(CXX) neuralNet.cpp
 factory.o : factory.cpp factory.h cppLayer.o xmmLayer.o cudaLayer.o
-	$(CXX) -c factory.cpp
-cudaLayer.o : cudaLayer.cpp cudaLayer.h layer.o cuda_code.o
-	$(CXX) -c cudaLayer.cpp
+	$(CXX) factory.cpp
+cudaLayer.o : cudaLayer.cu cudaLayer.h layer.o cudaVector.o
+	$(NVCC_COMPILE) cudaLayer.cu
 xmmLayer.o : xmmLayer.cpp xmmLayer.h cppLayer.o xmmVector.o
-	$(CXX) -c xmmLayer.cpp
+	$(CXX) xmmLayer.cpp
 cppLayer.o : cppLayer.cpp cppLayer.h layer.o
-	$(CXX) -c cppLayer.cpp
+	$(CXX) cppLayer.cpp
 layer.o : layer.h layer.cpp vector.o
-	$(CXX) -c layer.cpp
-cudaVector.o : cudaVector.h cudaVector.cpp vector.o cuda_code.o
-	$(NVCC_COMPILE) -c cudaVector.cpp
+	$(CXX) layer.cpp
+cudaVector.o : cudaVector.h cudaVector.cu vector.o cuda_code.o
+	$(NVCC_COMPILE) cudaVector.cu
 xmmVector.o : xmmVector.h xmmVector.cpp vector.o sse2_code.o
-	$(CXX) -c xmmVector.cpp
+	$(CXX) xmmVector.cpp
 vector.o : vector.h vector.cpp interface.o
-	$(CXX) -c vector.cpp
+	$(CXX) vector.cpp
 interface.o : interface.h interface.cpp commonFunctions.o
-	$(CXX) -c interface.cpp
+	$(CXX) interface.cpp
 commonFunctions.o : commonFunctions.c generalDefinitions.h
-	$(CXX) -c commonFunctions.c
+	$(CXX) commonFunctions.c
 	
 chronometer.o : chronometer.cpp chronometer.h
-	$(CXX) -c chronometer.cpp
+	$(CXX) chronometer.cpp
 
 cuda_code.o : cuda_code.h cuda_code.cu generalDefinitions.h
 	$(NVCC_COMPILE) cuda_code.cu
