@@ -7,6 +7,12 @@
 
 #include "cudaVector.h"
 
+__global__ void setZeroKernel(float* data, unsigned size)
+{
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (idx < size) data[idx] = 0;
+}
+
 CudaVector::CudaVector(unsigned size, VectorType vectorType)
 {
 	this->size = size;
@@ -16,7 +22,14 @@ CudaVector::CudaVector(unsigned size, VectorType vectorType)
 	cudaMalloc((void**)&(data), byte_sz);
 	checkCUDAError("CudaVector::CudaVector");
 
-	cuda_setZero(data, byte_sz, vectorType, THREADS_PER_BLOCK);
+	//cuda_setZero(data, byte_sz, vectorType, THREADS_PER_BLOCK);
+	if (vectorType == FLOAT){
+		unsigned size = byte_sz/sizeof(float);
+		unsigned grid_size = ((size - 1)/THREADS_PER_BLOCK) + 1;
+		setZeroKernel<<< grid_size, THREADS_PER_BLOCK >>>((float*)data, size);
+	} else {
+		cudaMemset(data, 0, byte_sz);
+	}
 }
 
 CudaVector::~CudaVector()

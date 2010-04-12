@@ -90,25 +90,6 @@ extern "C" void cuda_activation(void* data, unsigned size, VectorType vectorType
 // INITIALIZATION
 
 __global__
-void setZeroKernel(float* data, unsigned size)
-{
-	int idx = blockIdx.x*blockDim.x + threadIdx.x;
-	if (idx < size) data[idx] = 0;
-}
-
-extern "C"
-void cuda_setZero(void* data, unsigned byteSize, VectorType vectorType, unsigned block_size)
-{
-	if (vectorType == FLOAT){
-		unsigned size = byteSize/sizeof(float);
-		unsigned grid_size = ((size - 1)/block_size) + 1;
-		setZeroKernel<<< grid_size, block_size >>>((float*)data, size);
-	} else {
-		cudaMemset(data, 0, byteSize);
-	}
-}
-
-__global__
 void negative_thresholds_kernel(float* results, float* thresholds, unsigned results_sz)
 {
 	int idx = blockIdx.x*blockDim.x + threadIdx.x;
