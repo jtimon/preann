@@ -5,14 +5,14 @@
 OBJECTS = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o task.o classificationTask.o individual.o main.o factory.o interface.o cudaVector.o
 
 CXX = g++-4.3 -ggdb -c
-NVCC_LINK = /usr/local/cuda/bin/nvcc -o preann -L/usr/local/cuda/lib -lcudart
+NVCC_LINK = /usr/local/cuda/bin/nvcc -L/usr/local/cuda/lib -lcudart
 NVCC_COMPILE = /usr/local/cuda/bin/nvcc -g -G -c -arch sm_11 --device-emulation
 NASM = nasm -f elf
 
 all: preann
 
 preann: $(OBJECTS)
-	$(NVCC_LINK) $(OBJECTS) 
+	$(NVCC_LINK) -o preann $(OBJECTS) 
 main.o : main.cpp population.o chronometer.o
 	$(CXX) main.cpp
 population.o : population.cpp population.h task.o

@@ -42,9 +42,24 @@ void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* result
 	}
 }
 
+__global__
+void negative_thresholds_kernel(float* results, float* thresholds, unsigned results_sz)
+{
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (idx < results_sz) results[idx] = - thresholds[idx];
+}
+
 float* CudaLayer::negativeThresholds()
 {
-	return cuda_getNegativeThresholds(thresholds, output->getSize(), CudaLayer::blockSize);
+	unsigned grid_size = ((output->getSize() - 1)/CudaLayer::blockSize) + 1;
+
+	float* results;
+	cudaMalloc((void**)&(results), output->getSize() * sizeof(float));
+
+	negative_thresholds_kernel<<< grid_size, CudaLayer::blockSize >>>(results, thresholds, output->getSize());
+
+	checkCUDAError("CudaLayer::negativeThresholds");
+	return results;
 }
 
 void CudaLayer::saveWeighs(FILE *stream)
