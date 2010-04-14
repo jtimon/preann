@@ -57,7 +57,6 @@ float* CudaLayer::negativeThresholds()
 	cudaMalloc((void**)&(results), output->getSize() * sizeof(float));
 
 	negative_thresholds_kernel<<< grid_size, CudaLayer::blockSize >>>(results, thresholds, output->getSize());
-
 	checkCUDAError("CudaLayer::negativeThresholds");
 	return results;
 }
