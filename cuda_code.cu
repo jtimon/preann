@@ -11,30 +11,149 @@ void checkCUDAError(const char *msg)
     }
 }
 
-//TODO usar y probar
+/// ACTIVATION
+
+__device__
+float Func(float number, FunctionType functionType) {
+
+	switch (functionType) {
+
+		//TODO añadir diferentes funciones
+
+		case BINARY_STEP:
+			if (number > 0){
+				return 1;
+			} else {
+				return 0;
+			}
+		case BIPOLAR_STEP:
+			if (number > 0){
+				return 1;
+			} else {
+				return -1;
+			}
+		//case ANOTHER_FUNCTION:
+		//	return anotherFunction(number);
+
+		case IDENTITY:
+		default:
+			return number;
+	}
+}
+
 __global__
-void SumFloatsInvertedConnectionsKernel(float* inputs, unsigned input_size, float* weighs, float* results, unsigned output_size)
+void activation_float_kernel(float* results, float* output, unsigned output_sz, FunctionType functionType)
 {
-	extern __shared__ float sdata[];
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (idx < output_sz) output[idx] = Func(results[idx], functionType);
+}
 
-	unsigned v1_pos = threadIdx.x;
-	while (v1_pos < input_size){
+__global__
+void activation_bit_kernel(float* results, unsigned* output, unsigned output_sz)
+{
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	unsigned offset = idx * BITS_PER_UNSIGNED;
 
-		sdata[v1_pos] = inputs[v1_pos];
-		v1_pos += blockDim.x;
-	}
-	__syncthreads();
+	if (output_sz > offset){
 
-	unsigned v2_pos = blockIdx.x*blockDim.x + threadIdx.x;
-	float result = 0;
+		unsigned toRead = min(BITS_PER_UNSIGNED, output_sz - offset);
+		unsigned threadOutput = 0;
+		unsigned mask = 0x80000000;
 
-	if (v2_pos < output_size){
-
-		for (unsigned i=0; i < input_size; i++){
-			result += sdata[i] * weighs[v2_pos + i];
+		for (unsigned i=0; i < toRead; i++){
+			if (results[offset + i] > 0){
+				threadOutput |= mask;
+			} else {
+				threadOutput &= ~mask;
+			}
+			mask >>= 1;
 		}
-		results[v2_pos] += result;
+		output[idx] = threadOutput;
 	}
+}
+
+extern "C" void cuda_activation(void* data, unsigned size, VectorType vectorType, float* results, FunctionType functionType, unsigned block_size){
+
+	unsigned grid_size;
+
+	if (vectorType == FLOAT) {
+		grid_size = ((size - 1)/block_size) + 1;
+		activation_float_kernel<<< grid_size, block_size >>>(results, (float*)data, size, functionType);
+	} else {
+		grid_size = ((size - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
+		activation_bit_kernel<<< grid_size, block_size >>>(results, (unsigned*)data, size);
+	}
+	cudaFree(results);
+	checkCUDAError("activation");
+}
+
+// MEMORY MANAGEMENT
+
+extern "C" void* cuda_malloc(unsigned byteSize)
+{
+	void* ptr;
+	cudaMalloc((void**)&(ptr), byteSize);
+
+	checkCUDAError("malloc");
+	return ptr;
+}
+extern "C" void cuda_free(void* d_ptr)
+{
+	cudaFree(d_ptr);
+	checkCUDAError("free");
+}
+
+extern "C" void cuda_copyToDevice(void* d_dest, void* h_src, unsigned count)
+{
+	cudaMemcpy(d_dest, h_src, count, cudaMemcpyHostToDevice);
+	checkCUDAError("copyToDevice");
+}
+
+extern "C"
+void cuda_copyToHost(void* h_dest, void* d_src, unsigned count)
+{
+	cudaMemcpy(h_dest, d_src, count, cudaMemcpyDeviceToHost);
+	checkCUDAError("copyToHost");
+}
+
+// INITIALIZATION
+
+__global__
+void setZeroKernel(float* data, unsigned size)
+{
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (idx < size) data[idx] = 0;
+}
+
+extern "C"
+void cuda_setZero(void* data, unsigned byteSize, VectorType vectorType, unsigned block_size)
+{
+	if (vectorType == FLOAT){
+		unsigned size = byteSize/sizeof(float);
+		unsigned grid_size = ((size - 1)/block_size) + 1;
+		setZeroKernel<<< grid_size, block_size >>>((float*)data, size);
+	} else {
+		cudaMemset(data, 0, byteSize);
+	}
+}
+
+__global__
+void negative_thresholds_kernel(float* results, float* thresholds, unsigned results_sz)
+{
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (idx < results_sz) results[idx] = - thresholds[idx];
+}
+
+extern "C"
+float* cuda_getNegativeThresholds(float* thresholds, unsigned size, unsigned block_size)
+{
+	unsigned grid_size = ((size - 1)/block_size) + 1;
+
+	float* results;
+	cudaMalloc((void**)&(results), size * sizeof(float));
+
+	negative_thresholds_kernel<<< grid_size, block_size >>>(results, thresholds, size);
+	return results;
 }
 
 // LAYER CALCULATION
@@ -168,6 +287,32 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Vecto
 		} else {
 			SumBitsConnectionsKernel<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
 		}
+	}
+}
+
+//TODO usar y probar
+__global__
+void SumFloatsInvertedConnectionsKernel(float* inputs, unsigned input_size, float* weighs, float* results, unsigned output_size)
+{
+	extern __shared__ float sdata[];
+
+	unsigned v1_pos = threadIdx.x;
+	while (v1_pos < input_size){
+
+		sdata[v1_pos] = inputs[v1_pos];
+		v1_pos += blockDim.x;
+	}
+	__syncthreads();
+
+	unsigned v2_pos = blockIdx.x*blockDim.x + threadIdx.x;
+	float result = 0;
+
+	if (v2_pos < output_size){
+
+		for (unsigned i=0; i < input_size; i++){
+			result += sdata[i] * weighs[v2_pos + i];
+		}
+		results[v2_pos] += result;
 	}
 }
 
