@@ -49,9 +49,8 @@ try{
 	float seconds;
 	unsigned type;
 
-	for (type=0; type < 3; type++){
+	for (type=0; type < 1; type++){
 
-		//type = 0;
 		switch(type){
 		case 0:
 			cout<<"version float"<<endl;
@@ -114,6 +113,16 @@ try{
 				}
 				printf("\n", 1);
 			}
+
+			printf("CUDA2 ", 1);
+			for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
+				CudaLayer::blockSize = blockSize;
+				nn = new NeuralNet(CUDA2);
+				seconds = testNeuralNet(nn, size, inputType, times);
+				printf("(%d) %f ", blockSize, seconds);
+			}
+			printf("\n", 1);
+
 		}
 	}
 
