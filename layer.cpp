@@ -75,7 +75,6 @@ void Layer::calculateOutput()
 //	}
 //	printf("\n----------------\n", 1);
 	output->activation(results, functionType);
-	output->print();
 }
 
 void Layer::addInput(Vector* input)
