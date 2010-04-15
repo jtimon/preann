@@ -6,15 +6,14 @@ unsigned CudaLayer::blockSize = 128;
 CudaLayer::CudaLayer(unsigned size, VectorType outputType, FunctionType functionType): Layer(outputType, functionType)
 {
 	output = new CudaVector(size, outputType);
-	cudaMalloc((void**)&(thresholds), sizeof(float) * size);
-	checkCUDAError("CudaLayer::CudaLayer");
+	thresholds = (float*)cuda_malloc(sizeof(float) * size);
 }
 
 CudaLayer::~CudaLayer()
 {
 	if (inputs) {
 		for (unsigned i=0; i < numberInputs; i++){
-			cudaFree(weighs[i]);
+			cuda_free(weighs[i]);
 		}
 		mi_free(inputs);
 		mi_free(weighs);
@@ -23,9 +22,8 @@ CudaLayer::~CudaLayer()
 		delete (output);
 	}
 	if (thresholds) {
-		cudaFree(thresholds);
+		cuda_free(thresholds);
 	}
-	checkCUDAError("CudaLayer::~CudaLayer()");
 }
 
 void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
@@ -42,23 +40,9 @@ void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* result
 	}
 }
 
-__global__
-void negative_thresholds_kernel(float* results, float* thresholds, unsigned results_sz)
-{
-	int idx = blockIdx.x*blockDim.x + threadIdx.x;
-	if (idx < results_sz) results[idx] = - thresholds[idx];
-}
-
 float* CudaLayer::negativeThresholds()
 {
-	unsigned grid_size = ((output->getSize() - 1)/CudaLayer::blockSize) + 1;
-
-	float* results;
-	cudaMalloc((void**)&(results), output->getSize() * sizeof(float));
-
-	negative_thresholds_kernel<<< grid_size, CudaLayer::blockSize >>>(results, thresholds, output->getSize());
-	checkCUDAError("CudaLayer::negativeThresholds");
-	return results;
+	return cuda_getNegativeThresholds(thresholds, output->getSize(), CudaLayer::blockSize);
 }
 
 void CudaLayer::saveWeighs(FILE *stream)
@@ -67,7 +51,7 @@ void CudaLayer::saveWeighs(FILE *stream)
 
 	size = output->getSize() * sizeof(float);
 	float* aux_thresholds = (float*) mi_malloc(size);
-	cudaMemcpy(aux_thresholds, thresholds, size, cudaMemcpyDeviceToHost);
+	cuda_copyToHost(aux_thresholds, thresholds, size);
 	fwrite(aux_thresholds, size, 1, stream);
 	mi_free(aux_thresholds);
 
@@ -78,11 +62,10 @@ void CudaLayer::saveWeighs(FILE *stream)
 			size = inputs[i]->getSize() * output->getSize() * sizeof(unsigned char);
 		}
 		void* aux_weighs = mi_malloc(size);
-		cudaMemcpy(aux_weighs, weighs[i], size, cudaMemcpyDeviceToHost);
+		cuda_copyToHost(aux_weighs, weighs[i], size);
 		fwrite(aux_weighs, size, 1, stream);
 		mi_free(aux_weighs);
 	}
-	checkCUDAError("CudaLayer::saveWeighs");
 }
 
 void CudaLayer::loadWeighs(FILE *stream)
@@ -92,7 +75,7 @@ void CudaLayer::loadWeighs(FILE *stream)
 	size = output->getSize() * sizeof(float);
 	float* aux_thresholds = (float*) mi_malloc(size);
 	fread(aux_thresholds, size, 1, stream);
-	cudaMemcpy(thresholds, thresholds, size, cudaMemcpyHostToDevice);
+	cuda_copyToDevice(thresholds, aux_thresholds, size);
 	mi_free(aux_thresholds);
 
 	for (unsigned i=0; i < numberInputs; i++){
@@ -104,10 +87,9 @@ void CudaLayer::loadWeighs(FILE *stream)
 
 		void* aux_weighs = mi_malloc(size);
 		fread(aux_weighs, size, 1, stream);
-		cudaMemcpy(weighs[i], aux_weighs, size, cudaMemcpyHostToDevice);
+		cuda_copyToDevice(weighs[i], aux_weighs, size);
 		mi_free(aux_weighs);
 	}
-	checkCUDAError("CudaLayer::loadWeighs");
 }
 
 void* CudaLayer::newWeighs(unsigned  inputSize, VectorType inputType)
@@ -118,10 +100,7 @@ void* CudaLayer::newWeighs(unsigned  inputSize, VectorType inputType)
 	} else {
 		size = output->getSize() * inputSize * sizeof(unsigned char);
 	}
-	void* ptr;
-	cudaMalloc((void**)&(ptr), size);
-	checkCUDAError("CudaLayer::newWeighs");
-	return ptr;
+	return cuda_malloc(size);
 }
 
 void CudaLayer::copyWeighs(Layer* sourceLayer)
