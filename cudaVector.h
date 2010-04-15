@@ -13,6 +13,7 @@
 
 class CudaVector: public Vector {
 protected:
+	virtual void free();
 public:
 	CudaVector(unsigned size, VectorType vectorType);
 	virtual ~CudaVector();
