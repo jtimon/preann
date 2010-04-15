@@ -2,7 +2,7 @@
 # usar tabulador (no espacios) en la línea de comando 
 # Project: Paralel Reinforcement Evolutionary Artificial Neural Network
  
-OBJECTS = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o task.o classificationTask.o individual.o main.o factory.o interface.o cudaVector.o
+OBJECTS = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o task.o classificationTask.o individual.o main.o factory.o interface.o cudaVector.o
 
 CXX = g++-4.3 -ggdb -c
 NVCC_LINK = /usr/local/cuda/bin/nvcc -L/usr/local/cuda/lib -lcudart
@@ -25,15 +25,17 @@ individual.o : individual.cpp individual.h neuralNet.o
 	$(CXX) individual.cpp
 neuralNet.o : neuralNet.cpp neuralNet.h layer.o factory.o
 	$(CXX) neuralNet.cpp
-factory.o : factory.cpp factory.h cppLayer.o xmmLayer.o cudaLayer.o
+factory.o : factory.cpp factory.h cppLayer.o xmmLayer.o cudaLayer.o cudaLayer2.o
 	$(CXX) factory.cpp
+cudaLayer2.o : cudaLayer2.cu cudaLayer2.h cudaLayer.o
+	$(NVCC_COMPILE) cudaLayer2.cu
 cudaLayer.o : cudaLayer.cu cudaLayer.h layer.o cudaVector.o
 	$(NVCC_COMPILE) cudaLayer.cu
 xmmLayer.o : xmmLayer.cpp xmmLayer.h cppLayer.o xmmVector.o
 	$(CXX) xmmLayer.cpp
 cppLayer.o : cppLayer.cpp cppLayer.h layer.o
 	$(CXX) cppLayer.cpp
-layer.o : layer.h layer.cpp vector.o
+layer.o : layer.h layer.cpp vector.o 
 	$(CXX) layer.cpp
 cudaVector.o : cudaVector.h cudaVector.cu vector.o cuda_code.o
 	$(NVCC_COMPILE) cudaVector.cu

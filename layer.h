@@ -3,7 +3,7 @@
 
 #include "vector.h"
 
-typedef enum {C, SSE2, CUDA} ImplementationType;
+typedef enum {C, SSE2, CUDA, CUDA2} ImplementationType;
 
 class Layer
 {

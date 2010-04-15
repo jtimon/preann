@@ -11,6 +11,32 @@ void checkCUDAError(const char *msg)
     }
 }
 
+//TODO usar y probar
+__global__
+void SumFloatsInvertedConnectionsKernel(float* inputs, unsigned input_size, float* weighs, float* results, unsigned output_size)
+{
+	extern __shared__ float sdata[];
+
+	unsigned v1_pos = threadIdx.x;
+	while (v1_pos < input_size){
+
+		sdata[v1_pos] = inputs[v1_pos];
+		v1_pos += blockDim.x;
+	}
+	__syncthreads();
+
+	unsigned v2_pos = blockIdx.x*blockDim.x + threadIdx.x;
+	float result = 0;
+
+	if (v2_pos < output_size){
+
+		for (unsigned i=0; i < input_size; i++){
+			result += sdata[i] * weighs[v2_pos + i];
+		}
+		results[v2_pos] += result;
+	}
+}
+
 // LAYER CALCULATION
 
 __global__
@@ -132,6 +158,38 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Vecto
 
 		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
 		//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
+		if (shared_mem_size > 16128){
+			//16128 * 8
+			string error = "The maximum bit/sign input size is 129024.";
+			throw error;
+		}
+		if (inputType == BIT) {
+			SumBitsConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+		} else {
+			SumBitsConnectionsKernel<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+		}
+	}
+}
+
+extern "C" void cuda_inputCalculation4(void* inputPtr, unsigned input_size, VectorType inputType, unsigned output_size, void* weighs, float* results, unsigned block_size)
+{
+	unsigned grid_size = ((output_size - 1)/block_size) + 1;
+	unsigned shared_mem_size;
+
+	if (inputType == FLOAT) {
+		//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
+		if (input_size > 4032){
+			string error = "The maximum float input size is 4032.";
+			throw error;
+		}
+		shared_mem_size = input_size * sizeof(float);
+
+		SumFloatsInvertedConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, (float*)weighs, results, output_size);
+	} else {
+
+		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
+		//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
+		//TODO esta version solo acepta FLOAT
 		if (shared_mem_size > 16128){
 			//16128 * 8
 			string error = "The maximum bit/sign input size is 129024.";

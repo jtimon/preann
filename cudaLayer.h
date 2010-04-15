@@ -5,8 +5,8 @@
  *      Author: timon
  */
 
-#ifndef CUDALAYER2_H_
-#define CUDALAYER2_H_
+#ifndef CUDALAYER_H_
+#define CUDALAYER_H_
 
 #include "layer.h"
 #include "cudaVector.h"
@@ -37,4 +37,4 @@ public:
 
 };
 
-#endif /* CUDALAYER2_H_ */
+#endif /* CUDALAYER_H_ */
