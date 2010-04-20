@@ -19,8 +19,7 @@ protected:
 
 	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 
-	void* weighsToCudaPosition(void* sourceWeighs, unsigned numInput);
-	void* weighsToNormalPosition(void* sourceWeighs, unsigned numInput);
+	void transposeMatrix(void* matrix, unsigned width, unsigned height, VectorType inputType);
 public:
 	CudaLayer2(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~CudaLayer2();

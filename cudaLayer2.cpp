@@ -15,64 +15,35 @@ CudaLayer2::~CudaLayer2()
 {
 }
 
-void* CudaLayer2::weighsToNormalPosition(void *sourceWeighs, unsigned numInput)
+void CudaLayer2::transposeMatrix(void* matrix, unsigned width, unsigned height, VectorType inputType)
 {
-	Vector* input = inputs[numInput];
-
 	unsigned size;
-	if (input->getVectorType() == FLOAT){
-		size = input->getSize() * output->getSize() * sizeof(float);
+	void* auxMatrix;
+
+	if (inputType == FLOAT){
+		size = width * height * sizeof(float);
+
+		auxMatrix = mi_malloc(size);
+
+		for (unsigned i=0; i < width; i++){
+			for (unsigned j=0; j < height; j++){
+				((float*)auxMatrix)[(i * height) + j] = ((float*)matrix)[i + (j * width)];
+			}
+		}
 	} else {
-		size = input->getSize() * output->getSize() * sizeof(unsigned char);
-	}
-	void* destinationWeighs = mi_malloc(size);
+		size = width * height * sizeof(unsigned char);
 
-	for (unsigned j=0; j < output->getSize(); j++){
-		for (unsigned k=0; k < input->getSize(); k++){
+		auxMatrix = mi_malloc(size);
 
-			unsigned weighSourcePos = j + (k * output->getSize());
-			unsigned weighDestinationPos = (j * input->getSize()) + k;
-
-			if (input->getVectorType() == FLOAT) {
-				((float*)sourceWeighs)[weighSourcePos] = ((float*)destinationWeighs)[weighDestinationPos];
-			} else {
-				((unsigned char*)sourceWeighs)[weighSourcePos] = ((unsigned char*)destinationWeighs)[weighDestinationPos];
+		for (unsigned i=0; i < width; i++){
+			for (unsigned j=0; j < height; j++){
+				((unsigned char*)auxMatrix)[(i * height) + j] = ((unsigned char*)matrix)[i + (j * width)];
 			}
 		}
 	}
 
-	mi_free(sourceWeighs);
-	return destinationWeighs;
-}
-
-void* CudaLayer2::weighsToCudaPosition(void *sourceWeighs, unsigned numInput)
-{
-	Vector* input = inputs[numInput];
-
-	unsigned size;
-	if (input->getVectorType() == FLOAT){
-		size = input->getSize() * output->getSize() * sizeof(float);
-	} else {
-		size = input->getSize() * output->getSize() * sizeof(unsigned char);
-	}
-	void* destinationWeighs = mi_malloc(size);
-
-	for (unsigned j=0; j < output->getSize(); j++){
-		for (unsigned k=0; k < input->getSize(); k++){
-
-			unsigned weighSourcePos = (j * input->getSize()) + k;
-			unsigned weighDestinationPos = j + (k * output->getSize());
-
-			if (input->getVectorType() == FLOAT) {
-				((float*)sourceWeighs)[weighSourcePos] = ((float*)destinationWeighs)[weighDestinationPos];
-			} else {
-				((unsigned char*)sourceWeighs)[weighSourcePos] = ((unsigned char*)destinationWeighs)[weighDestinationPos];
-			}
-		}
-	}
-
-	mi_free(sourceWeighs);
-	return destinationWeighs;
+	memcpy(matrix, auxMatrix, size);
+	mi_free(auxMatrix);
 }
 
 void CudaLayer2::crossoverWeighs(Layer *other, unsigned  inputLayer, Interface *bitVector)
@@ -87,7 +58,31 @@ void CudaLayer2::mutateWeigh(unsigned  outputPos, unsigned  inputLayer, unsigned
 
 void CudaLayer2::inputCalculation(Vector *input, void *inputWeighs, float *results)
 {
-	cuda_inputCalculation4(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
+	cuda_inputCalculation3(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
+}
+
+void CudaLayer2::saveWeighs(FILE *stream)
+{
+	unsigned size;
+
+	size = output->getSize() * sizeof(float);
+	float* aux_thresholds = (float*) mi_malloc(size);
+	cuda_copyToHost(aux_thresholds, thresholds, size);
+	fwrite(aux_thresholds, size, 1, stream);
+	mi_free(aux_thresholds);
+
+	for (unsigned i=0; i < numberInputs; i++){
+		if (inputs[i]->getVectorType() == FLOAT){
+			size = inputs[i]->getSize() * output->getSize() * sizeof(float);
+		} else {
+			size = inputs[i]->getSize() * output->getSize() * sizeof(unsigned char);
+		}
+		void* aux_weighs = mi_malloc(size);
+		cuda_copyToHost(aux_weighs, weighs[i], size);
+		transposeMatrix(aux_weighs, output->getSize(), inputs[i]->getSize(), inputs[i]->getVectorType());
+		fwrite(aux_weighs, size, 1, stream);
+		mi_free(aux_weighs);
+	}
 }
 
 void CudaLayer2::loadWeighs(FILE *stream)
@@ -97,7 +92,7 @@ void CudaLayer2::loadWeighs(FILE *stream)
 	size = output->getSize() * sizeof(float);
 	float* aux_thresholds = (float*) mi_malloc(size);
 	fread(aux_thresholds, size, 1, stream);
-	cudaMemcpy(thresholds, thresholds, size, cudaMemcpyHostToDevice);
+	cuda_copyToDevice(thresholds, aux_thresholds, size);
 	mi_free(aux_thresholds);
 
 	for (unsigned i=0; i < numberInputs; i++){
@@ -109,34 +104,9 @@ void CudaLayer2::loadWeighs(FILE *stream)
 
 		void* aux_weighs = mi_malloc(size);
 		fread(aux_weighs, size, 1, stream);
-		aux_weighs = weighsToCudaPosition(aux_weighs, i);
-		cudaMemcpy(weighs[i], aux_weighs, size, cudaMemcpyHostToDevice);
+		transposeMatrix(aux_weighs, inputs[i]->getSize(), output->getSize(), inputs[i]->getVectorType());
+		cuda_copyToDevice(weighs[i], aux_weighs, size);
 		mi_free(aux_weighs);
 	}
-	checkCUDAError("CudaLayer2::loadWeighs");
 }
 
-void CudaLayer2::saveWeighs(FILE *stream)
-{
-	unsigned size;
-
-	size = output->getSize() * sizeof(float);
-	float* aux_thresholds = (float*) mi_malloc(size);
-	cudaMemcpy(aux_thresholds, thresholds, size, cudaMemcpyDeviceToHost);
-	fwrite(aux_thresholds, size, 1, stream);
-	mi_free(aux_thresholds);
-
-	for (unsigned i=0; i < numberInputs; i++){
-		if (inputs[i]->getVectorType() == FLOAT){
-			size = inputs[i]->getSize() * output->getSize() * sizeof(float);
-		} else {
-			size = inputs[i]->getSize() * output->getSize() * sizeof(unsigned char);
-		}
-		void* aux_weighs = mi_malloc(size);
-		cudaMemcpy(aux_weighs, weighs[i], size, cudaMemcpyDeviceToHost);
-		aux_weighs = weighsToNormalPosition(aux_weighs, i);
-		fwrite(aux_weighs, size, 1, stream);
-		mi_free(aux_weighs);
-	}
-	checkCUDAError("CudaLayer2::saveWeighs");
-}

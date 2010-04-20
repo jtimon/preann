@@ -34,10 +34,6 @@ void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* result
 	else if (CudaLayer::algorithm == 1) {
 		cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
 	}
-	//TODO no funciona bien
-	else if (CudaLayer::algorithm == 2) {
-		cuda_inputCalculation3(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
-	}
 }
 
 float* CudaLayer::negativeThresholds()

@@ -56,7 +56,7 @@ try{
 			cout<<"version float"<<endl;
 			inputType = FLOAT;
 			functionType = IDENTITY;
-			maxSize = 512;
+			maxSize = 4096;
 			break;
 		case 1:
 			cout<<"version bit"<<endl;
@@ -101,18 +101,18 @@ try{
 			seconds = testNeuralNet(nn, size, inputType, times);
 			printf("XMM %f \n", seconds);
 
-			for (unsigned algorithm = 0; algorithm < 3; algorithm++){
-				//algorithm = 2;
-				printf("CUDA [algorithm %d]  ", algorithm);
-				CudaLayer::algorithm = algorithm;
-				for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
-					CudaLayer::blockSize = blockSize;
-					nn = new NeuralNet(CUDA);
-					seconds = testNeuralNet(nn, size, inputType, times);
-					printf("(%d) %f ", blockSize, seconds);
-				}
-				printf("\n", 1);
-			}
+//			for (unsigned algorithm = 0; algorithm < 1; algorithm++){
+//				//algorithm = 2;
+//				printf("CUDA [algorithm %d]  ", algorithm);
+//				CudaLayer::algorithm = algorithm;
+//				for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
+//					CudaLayer::blockSize = blockSize;
+//					nn = new NeuralNet(CUDA);
+//					seconds = testNeuralNet(nn, size, inputType, times);
+//					printf("(%d) %f ", blockSize, seconds);
+//				}
+//				printf("\n", 1);
+//			}
 
 			printf("CUDA2 ", 1);
 			for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
