@@ -17,7 +17,7 @@ using namespace std;
 #include <stdlib.h>
 #include <string.h>
 
-#define BITS_PER_BYTE 8
+#define BITS_PER_BYTE (8)
 #define BITS_PER_UNSIGNED (sizeof(unsigned) * BITS_PER_BYTE)
 
 typedef enum {FLOAT, BIT, SIGN} VectorType;

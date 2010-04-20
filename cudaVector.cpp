@@ -14,7 +14,7 @@ CudaVector::CudaVector(unsigned size, VectorType vectorType)
 	unsigned byte_sz = getByteSize();
 	data = cuda_malloc(byte_sz);
 
-	cuda_setZero(data, byte_sz, vectorType, THREADS_PER_BLOCK);
+	cuda_setZero(data, byte_sz, vectorType, CUDA_THREADS_PER_BLOCK);
 }
 
 CudaVector::~CudaVector()
@@ -60,6 +60,6 @@ void CudaVector::copyTo(Interface *interface)
 
 void CudaVector::activation(float* results, FunctionType functionType)
 {
-	cuda_activation(data, size, vectorType, results, functionType, THREADS_PER_BLOCK);
+	cuda_activation(data, size, vectorType, results, functionType, CUDA_THREADS_PER_BLOCK);
 }
 

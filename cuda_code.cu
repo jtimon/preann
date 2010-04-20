@@ -78,8 +78,6 @@ extern "C" void cuda_activation(void* data, unsigned size, VectorType vectorType
 
 	if (vectorType == FLOAT) {
 		grid_size = ((size - 1)/block_size) + 1;
-		//TODO hacer funcionar con size = 5120
-		//printf(" grid_size %d  block_size %d ", grid_size, block_size);
 		activation_float_kernel<<< grid_size, block_size >>>(results, (float*)data, size, functionType);
 	} else {
 		grid_size = ((size - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
@@ -222,32 +220,6 @@ void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned out
 	}
 }
 
-//TODO usar y probar
-__global__
-void SumFloatsInvertedConnectionsKernel(float* inputs, unsigned input_size, float* weighs, float* results, unsigned output_size)
-{
-	extern __shared__ float sdata[];
-
-	unsigned v1_pos = threadIdx.x;
-	while (v1_pos < input_size){
-
-		sdata[v1_pos] = inputs[v1_pos];
-		v1_pos += blockDim.x;
-	}
-	__syncthreads();
-
-	unsigned v2_pos = blockIdx.x*blockDim.x + threadIdx.x;
-	float result = 0;
-
-	if (v2_pos < output_size){
-
-		for (unsigned i=0; i < input_size; i++){
-			result += sdata[i] * weighs[v2_pos + (i * output_size)];
-		}
-		results[v2_pos] += result;
-	}
-}
-
 template <VectorType inputType>
 __global__
 void SumBitsConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned output_size, unsigned char* weighs, float* results)
@@ -295,6 +267,77 @@ void SumBitsConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned ou
 	}
 }
 
+__global__
+void SumFloatsInvertedConnectionsKernel(float* inputs, unsigned input_size, float* weighs, float* results, unsigned output_size)
+{
+	extern __shared__ float sdata[];
+
+	unsigned v1_pos = threadIdx.x;
+	while (v1_pos < input_size){
+
+		sdata[v1_pos] = inputs[v1_pos];
+		v1_pos += blockDim.x;
+	}
+	__syncthreads();
+
+	unsigned v2_pos = blockIdx.x*blockDim.x + threadIdx.x;
+	float result = 0;
+
+	if (v2_pos < output_size){
+
+		for (unsigned i=0; i < input_size; i++){
+			result += sdata[i] * weighs[v2_pos + (i * output_size)];
+		}
+		results[v2_pos] += result;
+	}
+}
+
+template <VectorType inputType>
+__global__
+void SumBitsInvertedConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned output_size, unsigned char* weighs, float* results)
+{
+	extern __shared__ unsigned shared_inputs[];
+
+	unsigned tid = threadIdx.x;
+	unsigned input_blocks_to_read = ((input_size - 1) / BITS_PER_UNSIGNED) + 1;
+	unsigned readingLoops = ((input_blocks_to_read - 1) / blockDim.x) + 1;
+
+	unsigned pos = tid;
+
+	for (unsigned i=0; i < readingLoops; i++){
+		if (pos < input_blocks_to_read){
+			shared_inputs[pos] = inputs[pos];
+		}
+		pos += blockDim.x;
+	}
+	__syncthreads();
+
+	unsigned outputNeuron = blockIdx.x*blockDim.x + threadIdx.x;
+	if (outputNeuron < output_size){
+
+		float result = 0;
+
+		for (unsigned i=0; i < input_blocks_to_read; i++){
+
+			unsigned input_block = shared_inputs[i];
+			unsigned mask = 0x80000000;
+			for (unsigned j=0; j < BITS_PER_UNSIGNED; j++){
+
+				unsigned weighsPos = (((i * BITS_PER_UNSIGNED) + j) * output_size);
+				if (input_block & mask){
+					result += weighs[weighsPos] - 128;
+				} else {
+					if (inputType == SIGN) {
+						result += 128 - weighs[weighsPos];
+					}
+				}
+				mask >>= 1;
+			}
+		}
+		results[outputNeuron] += result;
+	}
+}
+
 extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, VectorType inputType, unsigned output_size, void* weighs, float* results, unsigned block_size)
 {
 	unsigned grid_size = ((output_size - 1)/block_size) + 1;
@@ -332,30 +375,37 @@ extern "C" void cuda_inputCalculation3(void* inputPtr, unsigned input_size, Vect
 	unsigned shared_mem_size;
 
 	if (inputType == FLOAT) {
-		while (input_size > 4032){
+		while (input_size > CUDA_MAX_SHARED_FLOATS){
 
-			shared_mem_size = 4032 * sizeof(float);
-			SumFloatsInvertedConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, 4032, (float*)weighs, results, output_size);
-			inputPtr = (void*)((float*)inputPtr + 4032);
-			weighs = (void*)((float*)weighs + (4032 * output_size));
-			input_size -= 4032;
+			shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(float);
+			SumFloatsInvertedConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, CUDA_MAX_SHARED_FLOATS, (float*)weighs, results, output_size);
+			inputPtr = (void*)((float*)inputPtr + CUDA_MAX_SHARED_FLOATS);
+			weighs = (void*)((float*)weighs + (CUDA_MAX_SHARED_FLOATS * output_size));
+			input_size -= CUDA_MAX_SHARED_FLOATS;
 		}
 		shared_mem_size = input_size * sizeof(float);
 		SumFloatsInvertedConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, (float*)weighs, results, output_size);
 	} else {
+		//TODO esta parte no funciona bien
+		while (input_size > CUDA_MAX_SHARED_BITS){
 
-		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
-		//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
-		//TODO esta version solo acepta FLOAT
-		if (shared_mem_size > 16128){
-			//16128 * 8
-			string error = "The maximum bit/sign input size is 129024.";
-			throw error;
+			shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(unsigned);
+			printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
+			if (inputType == BIT) {
+				SumBitsInvertedConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
+			} else {
+				SumBitsInvertedConnectionsKernel<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
+			}
+			inputPtr = (void*)((float*)inputPtr + CUDA_MAX_SHARED_FLOATS);
+			weighs = (void*)((float*)weighs + (CUDA_MAX_SHARED_BITS * output_size));
+			input_size -= CUDA_MAX_SHARED_BITS;
 		}
+		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
+		printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
 		if (inputType == BIT) {
-			SumBitsConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+			SumBitsInvertedConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
 		} else {
-			SumBitsConnectionsKernel<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+			SumBitsInvertedConnectionsKernel<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
 		}
 	}
 }

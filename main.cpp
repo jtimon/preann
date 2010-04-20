@@ -49,14 +49,14 @@ try{
 	float seconds;
 	unsigned type;
 
-	for (type=0; type < 1; type++){
+	for (type=1; type < 2; type++){
 
 		switch(type){
 		case 0:
 			cout<<"version float"<<endl;
 			inputType = FLOAT;
 			functionType = IDENTITY;
-			maxSize = 4096;
+			maxSize = 7500;
 			break;
 		case 1:
 			cout<<"version bit"<<endl;
