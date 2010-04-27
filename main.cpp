@@ -62,7 +62,7 @@ try{
 			cout<<"version bit"<<endl;
 			inputType = BIT;
 			functionType = BINARY_STEP;
-			maxSize = 512;
+			maxSize = 1025;
 			break;
 		case 2:
 			cout<<"version sign"<<endl;

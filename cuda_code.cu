@@ -319,18 +319,19 @@ void SumBitsInvertedConnectionsKernel(unsigned* inputs, unsigned input_size, uns
 
 		for (unsigned i=0; i < input_blocks_to_read; i++){
 
+			unsigned weighsOffset = (i * BITS_PER_UNSIGNED * output_size) + outputNeuron;
 			unsigned input_block = shared_inputs[i];
 			unsigned mask = 0x80000000;
 			for (unsigned j=0; j < BITS_PER_UNSIGNED; j++){
 
-				unsigned weighsPos = (((i * BITS_PER_UNSIGNED) + j) * output_size);
 				if (input_block & mask){
-					result += weighs[weighsPos] - 128;
+					result += weighs[weighsOffset] - 128;
 				} else {
 					if (inputType == SIGN) {
-						result += 128 - weighs[weighsPos];
+						result += 128 - weighs[weighsOffset];
 					}
 				}
+				weighsOffset += output_size;
 				mask >>= 1;
 			}
 		}

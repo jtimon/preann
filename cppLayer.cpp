@@ -129,6 +129,7 @@ void CppLayer::randomWeighs(float range)
 	}
 	for (unsigned i=0; i < output->getSize(); i++){
 
+		//TODO esto peta con BIT inputType = BIT maxSize = 163840
 		//thresholds[i] = 0;
 		thresholds[i] = randomFloat(range);
 		for (unsigned j=0; j < numberInputs; j++){

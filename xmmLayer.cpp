@@ -42,6 +42,7 @@ void XmmLayer::inputCalculation(Vector* input, void* inputWeighs, float* results
 		}
 	}
 	else if (input->getVectorType() == BIT) {
+		//TODO peta con maxSize = 4097 pero no con 4096 (en noIniciarMascara3)
 		for (unsigned j=0; j < output->getSize(); j++){
 
 			unsigned weighPos = j * input->getWeighsSize();
