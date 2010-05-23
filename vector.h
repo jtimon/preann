@@ -33,8 +33,6 @@ public:
 	VectorType getVectorType();
 
 	void print();
-	//TODO eliminar o cambiar por weighsOffset (para poder aceptar varios tipos de entrada)
-	unsigned getWeighsSize();
 };
 
 #endif /* VECTOR_H_ */

@@ -31,31 +31,45 @@ void XmmLayer::inputCalculation(Vector* input, void* inputWeighs, float* results
 {
 	void* inputPtr = input->getDataPointer();
 
+	unsigned weighsOffsetPerOutput;
+	unsigned numLoops;
+	unsigned weighPos = 0;
+
 	if (input->getVectorType() == FLOAT) {
+
+		numLoops = ((input->getSize()-1)/FLOATS_PER_BLOCK)+1;
+		weighsOffsetPerOutput = numLoops * FLOATS_PER_BLOCK;
+
 		for (unsigned j=0; j < output->getSize(); j++){
 
-			unsigned weighPos = j * input->getWeighsSize();
 			float auxResult;
-			XMMreal(inputPtr, ((XmmVector*)input)->getNumLoops(),
+			XMMreal(inputPtr, numLoops,
 					(((float*)inputWeighs) + weighPos), auxResult);
 			results[j] += auxResult;
+			weighPos += weighsOffsetPerOutput;
 		}
 	}
-	else if (input->getVectorType() == BIT) {
-		//TODO peta con maxSize = 4097 pero no con 4096 (en noIniciarMascara3)
-		for (unsigned j=0; j < output->getSize(); j++){
+	else {
+		numLoops = ((input->getSize()-1)/BYTES_PER_BLOCK)+1;
+		weighsOffsetPerOutput = numLoops * BYTES_PER_BLOCK;
 
-			unsigned weighPos = j * input->getWeighsSize();
-			results[j] += XMMbinario(inputPtr, ((XmmVector*)input)->getNumLoops(),
-					(((unsigned char*)inputWeighs) + weighPos));
+		if (input->getVectorType() == BIT) {
+			//TODO funciona bien con 1024 y 4096 pero no con 1025 ni 4097
+			for (unsigned j=0; j < output->getSize(); j++){
+
+				//printf("weighsOffsetPerOutput %d inputSize %d outputSize %d loops %d weighPos %d \n", weighsOffsetPerOutput, input->getSize(), output->getSize(), numLoops, weighPos);
+				results[j] += XMMbinario(inputPtr, numLoops,
+						(((unsigned char*)inputWeighs) + weighPos));
+				weighPos += weighsOffsetPerOutput;
+			}
 		}
-	}
-	else if (input->getVectorType() == SIGN) {
-		for (unsigned j=0; j < output->getSize(); j++){
+		else if (input->getVectorType() == SIGN) {
+			for (unsigned j=0; j < output->getSize(); j++){
 
-			unsigned weighPos = j * input->getWeighsSize();
-			results[j] += XMMbipolar(inputPtr, ((XmmVector*)input)->getNumLoops(),
-								(((unsigned char*)inputWeighs) + weighPos));
+				results[j] += XMMbipolar(inputPtr, numLoops,
+									(((unsigned char*)inputWeighs) + weighPos));
+				weighPos += weighsOffsetPerOutput;
+			}
 		}
 	}
 
@@ -82,14 +96,35 @@ void XmmLayer::inputCalculation(Vector* input, void* inputWeighs, float* results
 
 void* XmmLayer::newWeighs(unsigned inputSize, VectorType inputType)
 {
-	//TODO adaptar para tamaños no multiplos de los bloques
-	unsigned size;
+	unsigned byteSize;
+
 	if (inputType == FLOAT) {
-		size = output->getSize() * inputSize * sizeof(float);
+		unsigned numBlocks = ((inputSize -1)/FLOATS_PER_BLOCK) + 1;
+		byteSize = numBlocks * FLOATS_PER_BLOCK * sizeof(float);
 	} else {
-		size = output->getSize() * inputSize * sizeof(unsigned char);
+		unsigned numBlocks = ((inputSize -1)/BYTES_PER_BLOCK) + 1;
+		byteSize = numBlocks * BYTES_PER_BLOCK * sizeof(unsigned char);
 	}
-	return mi_malloc(size);
+	byteSize *= output->getSize();
+	void* data = mi_malloc(byteSize);
+
+	//TODO esto no deberia ser necesario porque se supone que los bits no usados del input vienen anulados
+	if (inputType == FLOAT){
+
+		unsigned floatSize = byteSize/sizeof(float);
+		for (unsigned i=0; i< floatSize; i++){
+			((float*)data)[i] = 0;
+		}
+	}
+	else {
+
+		for (unsigned i=0; i < byteSize; i++){
+			((unsigned char*)data)[i] = 128;
+		}
+	}
+	//
+
+	return data;
 }
 
 

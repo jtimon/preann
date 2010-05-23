@@ -69,17 +69,17 @@ void Layer::calculateOutput()
 	for(unsigned i=0; i < numberInputs; i++){
 		inputCalculation(inputs[i], weighs[i], results);
 	}
-//	printf("----------------\n", 1);
-//	for (unsigned i=0; i < output->getSize(); i++){
-//		printf("%f ", results[i]);
-//	}
-//	printf("\n----------------\n", 1);
+	printf("----------------\n", 1);
+	for (unsigned i=0; i < output->getSize(); i++){
+		printf("%f ", results[i]);
+	}
+	printf("\n----------------\n", 1);
 	output->activation(results, functionType);
 }
 
 void Layer::addInput(Vector* input)
 {
-	//TODO probar que sucede con varios tipos de entrada
+	//TODO probar qué sucede con varios tipos de entrada
 	Vector** newInputs = (Vector**) mi_malloc(sizeof(Vector*) * (numberInputs + 1));
 	void** newWeighsPtr = (void**) mi_malloc(sizeof(void*) * (numberInputs + 1));
 	if (inputs) {

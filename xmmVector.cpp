@@ -51,6 +51,7 @@ void XmmVector::copyFrom(Interface* interface)
 			((float*)data)[i] = interface->getElement(i);
 		}
 	} else {
+		//TODO revisar hasta que funcione con 1025
 		unsigned char* vectorData = (unsigned char*)data;
 		unsigned blockOffset = 0;
 		unsigned bytePos = 0;
@@ -169,16 +170,4 @@ unsigned XmmVector::getByteSize()
 	else {
 		return (((size-1)/BITS_PER_BLOCK)+1) * BYTES_PER_BLOCK;
 	}
-}
-
-unsigned XmmVector::getNumLoops()
-{
-	unsigned toReturn;
-
-	if (vectorType == FLOAT){
-		toReturn = ((size-1)/FLOATS_PER_BLOCK)+1;
-	} else {
-		toReturn = ((size-1)/BYTES_PER_BLOCK)+1;
-	}
-	return toReturn;
 }

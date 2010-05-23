@@ -44,11 +44,13 @@ float* CppLayer::negativeThresholds()
 void CppLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
 {
 	void* inputPtr = input->getDataPointer();
+	unsigned inputSize = input->getSize();
 
 	for (unsigned j=0; j < output->getSize(); j++){
 
-		for (unsigned k=0; k < input->getSize(); k++){
-			unsigned weighPos = (j * input->getSize()) + k;
+		for (unsigned k=0; k < inputSize; k++){
+
+			unsigned weighPos = (j * inputSize) + k;
 			if (input->getVectorType() == FLOAT) {
 				//printf("i % d input %f weigh %f \n", k, ((float*)input)[k], ((float*)weighs)[weighPos]);
 				results[j] += ((float*)inputPtr)[k] * ((float*)inputWeighs)[weighPos];
@@ -193,7 +195,7 @@ void CppLayer::mutateThreshold(unsigned outputPos, float mutation)
 
 void CppLayer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
 {
-	//TODO implement method
+	//TODO CppLayer::crossoverWeighs
 }
 
 

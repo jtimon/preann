@@ -115,7 +115,7 @@ void CudaLayer::randomWeighs(float range)
 
 void CudaLayer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation)
 {
-	//TODO implement method
+	//TODO implement method (pasar a cuda)
 	if (outputPos > output->getSize()) {
 		string error = "Cannot mutate that output: the Layer hasn't so many neurons.";
 		throw error;
@@ -150,7 +150,7 @@ void CudaLayer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned in
 
 void CudaLayer::mutateThreshold(unsigned outputPos, float mutation)
 {
-	//TODO implement method (copiado de cpp)
+	//TODO implement method (copiado de cpp) (pasar a cuda)
 	if (outputPos > output->getSize()) {
 		string error = "Cannot mutate that Threshold: the Layer hasn't so many neurons.";
 		throw error;

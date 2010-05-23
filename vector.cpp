@@ -53,16 +53,6 @@ unsigned Vector::getByteSize()
 	}
 }
 
-unsigned Vector::getWeighsSize()
-{
-	if (vectorType == FLOAT){
-		return (((size-1)/FLOATS_PER_BLOCK)+1) * FLOATS_PER_BLOCK;
-	}
-	else {
-		return (((size-1)/BITS_PER_UNSIGNED)+1) * BITS_PER_UNSIGNED;
-	}
-}
-
 unsigned Vector::getSize()
 {
 	return size;

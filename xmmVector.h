@@ -20,8 +20,6 @@ public:
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
 	virtual void activation(float* results, FunctionType functionType);
-
-	unsigned getNumLoops();
 };
 
 #endif /* XMMVECTOR_H_ */
