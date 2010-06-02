@@ -31,14 +31,12 @@ void XmmLayer::inputCalculation(Vector* input, void* inputWeighs, float* results
 {
 	void* inputPtr = input->getDataPointer();
 
-	unsigned weighsOffsetPerOutput;
 	unsigned numLoops;
 	unsigned weighPos = 0;
 
 	if (input->getVectorType() == FLOAT) {
 
 		numLoops = ((input->getSize()-1)/FLOATS_PER_BLOCK)+1;
-		weighsOffsetPerOutput = numLoops * FLOATS_PER_BLOCK;
 
 		for (unsigned j=0; j < output->getSize(); j++){
 
@@ -46,21 +44,19 @@ void XmmLayer::inputCalculation(Vector* input, void* inputWeighs, float* results
 			XMMreal(inputPtr, numLoops,
 					(((float*)inputWeighs) + weighPos), auxResult);
 			results[j] += auxResult;
-			weighPos += weighsOffsetPerOutput;
+			weighPos += input->getSize();
 		}
 	}
 	else {
 		numLoops = ((input->getSize()-1)/BYTES_PER_BLOCK)+1;
-		weighsOffsetPerOutput = numLoops * BYTES_PER_BLOCK;
 
 		if (input->getVectorType() == BIT) {
-			//TODO funciona bien con 1024 y 4096 pero no con 1025 ni 4097
 			for (unsigned j=0; j < output->getSize(); j++){
 
 				//printf("weighsOffsetPerOutput %d inputSize %d outputSize %d loops %d weighPos %d \n", weighsOffsetPerOutput, input->getSize(), output->getSize(), numLoops, weighPos);
 				results[j] += XMMbinario(inputPtr, numLoops,
 						(((unsigned char*)inputWeighs) + weighPos));
-				weighPos += weighsOffsetPerOutput;
+				weighPos += input->getSize();
 			}
 		}
 		else if (input->getVectorType() == SIGN) {
@@ -68,7 +64,7 @@ void XmmLayer::inputCalculation(Vector* input, void* inputWeighs, float* results
 
 				results[j] += XMMbipolar(inputPtr, numLoops,
 									(((unsigned char*)inputWeighs) + weighPos));
-				weighPos += weighsOffsetPerOutput;
+				weighPos += input->getSize();
 			}
 		}
 	}
@@ -94,37 +90,56 @@ void XmmLayer::inputCalculation(Vector* input, void* inputWeighs, float* results
 	}*/
 }
 
+//void XmmLayer::saveWeighs(FILE* stream)
+//{
+//	if (inputType == FLOAT) {
+//
+//	} else {
+//
+//	}
+//	byteSize *= output->getSize();
+//	void* data = mi_malloc(byteSize);
+//
+//	fwrite(thresholds, output->getSize() * sizeof(float), 1, stream);
+//	for (unsigned i=0; i < numberInputs; i++){
+//		unsigned size;
+//		if (inputs[i]->getVectorType() == FLOAT){
+//			unsigned numBlocks = ((inputs[i]->getSize() -1)/FLOATS_PER_BLOCK) + 1;
+//			size = output->getSize() * numBlocks * FLOATS_PER_BLOCK * sizeof(float);
+//		} else {
+//			unsigned numBlocks = ((inputs[i]->getSize() -1)/BYTES_PER_BLOCK) + 1;
+//			size = output->getSize() * inputs[i]->getSize() * sizeof(unsigned char);
+//		}
+//		fwrite(weighs[i], size, 1, stream);
+//	}
+//}
+//
+//void XmmLayer::loadWeighs(FILE* stream)
+//{
+//	fread(thresholds, output->getSize() * sizeof(float), 1, stream);
+//	for (unsigned i=0; i < numberInputs; i++){
+//		unsigned size;
+//		if (inputs[i]->getVectorType() == FLOAT){
+//			size = output->getSize() * inputs[i]->getSize() * sizeof(float);
+//		} else {
+//			size = output->getSize() * inputs[i]->getSize() * sizeof(unsigned char);
+//		}
+//		fread(weighs[i], size, 1, stream);
+//	}
+//}
+
 void* XmmLayer::newWeighs(unsigned inputSize, VectorType inputType)
 {
-	unsigned byteSize;
-
+	unsigned size;
 	if (inputType == FLOAT) {
-		unsigned numBlocks = ((inputSize -1)/FLOATS_PER_BLOCK) + 1;
-		byteSize = numBlocks * FLOATS_PER_BLOCK * sizeof(float);
+		size = output->getSize() * inputSize * sizeof(float);
 	} else {
-		unsigned numBlocks = ((inputSize -1)/BYTES_PER_BLOCK) + 1;
-		byteSize = numBlocks * BYTES_PER_BLOCK * sizeof(unsigned char);
+		size = output->getSize() * inputSize * sizeof(unsigned char);
 	}
-	byteSize *= output->getSize();
-	void* data = mi_malloc(byteSize);
+	//make sure that the xmm code has enough memory to read in the last loop
+	size = (((size -1)/BYTES_PER_BLOCK) + 1) * BYTES_PER_BLOCK;
 
-	//TODO esto no deberia ser necesario porque se supone que los bits no usados del input vienen anulados
-	if (inputType == FLOAT){
-
-		unsigned floatSize = byteSize/sizeof(float);
-		for (unsigned i=0; i< floatSize; i++){
-			((float*)data)[i] = 0;
-		}
-	}
-	else {
-
-		for (unsigned i=0; i < byteSize; i++){
-			((unsigned char*)data)[i] = 128;
-		}
-	}
-	//
-
-	return data;
+	return mi_malloc(size);
 }
 
 

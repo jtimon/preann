@@ -9,6 +9,9 @@ class XmmLayer: public CppLayer
 protected:
 	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results);
 
+
+//	virtual void saveWeighs(FILE* stream);
+//	virtual void loadWeighs(FILE* stream);
 	virtual void* newWeighs(unsigned inputSize, VectorType inputType);
 public:
 	XmmLayer(unsigned size, VectorType outputType, FunctionType functionType);

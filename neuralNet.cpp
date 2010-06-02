@@ -123,6 +123,7 @@ Interface* NeuralNet::createInput(unsigned size, VectorType vectorType)
 {
 	Vector* input = Factory::newVector(size, vectorType, implementationType);
 	Interface* interface = new Interface(size, vectorType);
+
 	unsigned newNumberInputs = numberInputs+1;
 
 	Vector** newInputs = (Vector**) mi_malloc(sizeof(Vector*) * newNumberInputs);
@@ -164,12 +165,12 @@ Interface* NeuralNet::createInput(unsigned size, VectorType vectorType)
 
 Interface* NeuralNet::getInput(unsigned pos)
 {
-
+	return inputInterfaces[pos];
 }
 
 unsigned NeuralNet::getNumInputs()
 {
-
+	return numberInputs;
 }
 
 Interface* NeuralNet::createOutput(unsigned layerPos)

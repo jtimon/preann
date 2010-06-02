@@ -25,11 +25,12 @@ public:
 
 	unsigned getSize();
 	VectorType getVectorType();
-	virtual float getElement(unsigned pos);
-	virtual void setElement(unsigned pos, float value);
+	float getElement(unsigned pos);
+	void setElement(unsigned pos, float value);
 
 	void print();
 	float compareTo(Interface* other);
+	void setRandomBits(unsigned num);
 };
 
 #endif /* INTERFACE_H_ */

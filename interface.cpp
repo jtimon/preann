@@ -109,6 +109,13 @@ float Interface::compareTo(Interface *other)
 	return accumulator;
 }
 
+void Interface::setRandomBits(unsigned num)
+{
+	for (unsigned i=0; i < num; i++){
+		setElement(randomUnsigned(size), 1);
+	}
+}
+
 void Interface::print()
 {
 	printf("----------------\n", 1);

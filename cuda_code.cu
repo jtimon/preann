@@ -18,8 +18,7 @@ float Func(float number, FunctionType functionType) {
 
 	switch (functionType) {
 
-		//TODO añadir diferentes funciones
-
+		//TODO add different activation functions
 		case BINARY_STEP:
 			if (number > 0){
 				return 1;

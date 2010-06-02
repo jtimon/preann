@@ -12,6 +12,7 @@ float testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType, un
 
 	Chronometer chrono;
 	nn->createInput(inputSize, vectorType);
+
 	FILE* stream = fopen(PATH, "r+b");
 	nn->load(stream);
 	fclose(stream);
@@ -35,6 +36,11 @@ int main ( int argc, char *argv[] )
 	Chronometer total;
 	total.start();
 try{
+
+	if (0){
+		Interface* vect = new Interface(129, BIT);
+	} else {
+
 	Chronometer chrono;
 	NeuralNet* nn;
 
@@ -62,7 +68,7 @@ try{
 			cout<<"version bit"<<endl;
 			inputType = BIT;
 			functionType = BINARY_STEP;
-			maxSize = 1024;
+			maxSize = 4097;
 			break;
 		case 2:
 			cout<<"version sign"<<endl;
@@ -72,7 +78,7 @@ try{
 			break;
 		}
 
-		numlayers = 2;
+		numlayers = 3;
 		times = 1;
 		for(size=maxSize; size <= maxSize; size += 32){
 			cout<<"size: "<<size<<endl;
@@ -129,6 +135,7 @@ try{
 	printf("Exit success.\n", 1);
 	printTotalAllocated();
 	printTotalPointers();
+	}
 } catch(string error){
 	cout<<"Error: "<<error<<endl;
 } catch (...){

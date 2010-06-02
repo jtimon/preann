@@ -51,7 +51,6 @@ void XmmVector::copyFrom(Interface* interface)
 			((float*)data)[i] = interface->getElement(i);
 		}
 	} else {
-		//TODO revisar hasta que funcione con 1025
 		unsigned char* vectorData = (unsigned char*)data;
 		unsigned blockOffset = 0;
 		unsigned bytePos = 0;
