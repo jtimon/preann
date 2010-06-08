@@ -37,10 +37,6 @@ int main ( int argc, char *argv[] )
 	total.start();
 try{
 
-	if (0){
-		Interface* vect = new Interface(129, BIT);
-	} else {
-
 	Chronometer chrono;
 	NeuralNet* nn;
 
@@ -68,7 +64,7 @@ try{
 			cout<<"version bit"<<endl;
 			inputType = BIT;
 			functionType = BINARY_STEP;
-			maxSize = 4097;
+			maxSize = 163840;
 			break;
 		case 2:
 			cout<<"version sign"<<endl;
@@ -78,7 +74,7 @@ try{
 			break;
 		}
 
-		numlayers = 3;
+		numlayers = 2;
 		times = 1;
 		for(size=maxSize; size <= maxSize; size += 32){
 			cout<<"size: "<<size<<endl;
@@ -135,7 +131,6 @@ try{
 	printf("Exit success.\n", 1);
 	printTotalAllocated();
 	printTotalPointers();
-	}
 } catch(string error){
 	cout<<"Error: "<<error<<endl;
 } catch (...){

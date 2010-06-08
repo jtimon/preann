@@ -14,7 +14,7 @@ class Individual: public NeuralNet {
 protected:
 	float fitness;
 public:
-	Individual();
+	Individual(ImplementationType implementationType = C);
 	virtual ~Individual();
 
 	Individual* newCopy();

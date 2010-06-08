@@ -17,22 +17,25 @@ protected:
 	unsigned size;
 	void* data;
 	VectorType vectorType;
+	FunctionType functionType;
 
 	Vector() {};
 	virtual unsigned getByteSize();
 public:
-	Vector(unsigned size, VectorType vectorType);
+	Vector(unsigned size, VectorType vectorType, FunctionType functionType);
 	virtual ~Vector();
 
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
-	virtual void activation(float* results, FunctionType functionType);
+	virtual void activation(float* results);
 
 	void* getDataPointer();
 	unsigned getSize();
 	VectorType getVectorType();
 
 	void print();
+    FunctionType getFunctionType();
+
 };
 
 #endif /* VECTOR_H_ */

@@ -1,9 +1,10 @@
 #include "xmmVector.h"
 
-XmmVector::XmmVector(unsigned size, VectorType vectorType)
+XmmVector::XmmVector(unsigned size, VectorType vectorType, FunctionType functionType)
 {
 	this->size = size;
 	this->vectorType = vectorType;
+	this->functionType = functionType;
 
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);

@@ -7,10 +7,11 @@
 
 #include "vector.h"
 
-Vector::Vector(unsigned size, VectorType vectorType)
+Vector::Vector(unsigned size, VectorType vectorType, FunctionType functionType)
 {
 	this->size = size;
 	this->vectorType = vectorType;
+	this->functionType = functionType;
 
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
@@ -89,7 +90,7 @@ void Vector::copyTo(Interface* interface)
 	memcpy(interface->getDataPointer(), data, this->getByteSize());
 }
 
-void Vector::activation(float* results, FunctionType functionType)
+void Vector::activation(float* results)
 {
 	if (vectorType == FLOAT){
 		for (unsigned i=0; i < size; i++){
@@ -122,5 +123,10 @@ void Vector::print()
 	copyTo(interface);
 	interface->print();
 	delete(interface);
+}
+
+FunctionType Vector::getFunctionType()
+{
+   return functionType;
 }
 

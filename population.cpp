@@ -479,8 +479,8 @@ void Population::oneCrossover(CrossoverType crossoverType)
 		}
 	}
 	usedParents += 2;
-	offSpring[offSpringSize++] = parents[parentA];
-	offSpring[offSpringSize++] = parents[parentB];
+	offSpring[offSpringSize++] = parents[parentA]->newCopy();
+	offSpring[offSpringSize++] = parents[parentB]->newCopy();
 
 	switch (crossoverType){
 		case WEIGH_UNIFORM:

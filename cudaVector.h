@@ -15,7 +15,7 @@ class CudaVector: public Vector {
 protected:
 	virtual void free();
 public:
-	CudaVector(unsigned size, VectorType vectorType);
+	CudaVector(unsigned size, VectorType vectorType, FunctionType functionType);
 	virtual ~CudaVector();
 
 	virtual void copyFrom(Interface* interface);

@@ -51,6 +51,11 @@ NeuralNet::~NeuralNet()
 	}
 }
 
+Layer* NeuralNet::getLayer(unsigned  pos)
+{
+	return layers[pos];
+}
+
 void NeuralNet::calculateOutput()
 {
 	for (unsigned i=0; i < numberInputs; i++){
@@ -115,7 +120,7 @@ void NeuralNet::addLayer(Layer* layer)
 
 void NeuralNet::addLayer(unsigned  size, VectorType destinationType, FunctionType functiontype)
 {
-	Layer* layer = Factory::newLayer(size, destinationType, implementationType, functiontype);
+	Layer* layer = Factory::newLayer(size, destinationType, functiontype, implementationType);
 	addLayer(layer);
 }
 
@@ -274,13 +279,13 @@ void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, Ve
 		throw error;
 	}
 
-	addLayer(Factory::newLayer(sizeLayers, hiddenLayersType, implementationType, functiontype));
+	addLayer(sizeLayers, hiddenLayersType, functiontype);
 	for (unsigned i=0; i<numberInputs; i++)	{
 		addInputConnection(i, 0);
 	}
 
 	for (unsigned i=1; i<numLayers; i++)	{
-		addLayer(Factory::newLayer(sizeLayers, hiddenLayersType, implementationType, functiontype));
+		addLayer(sizeLayers, hiddenLayersType, functiontype);
 		addLayersConnection(i-1, i);
 	}
 
@@ -294,8 +299,7 @@ void NeuralNet::createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers,
 		throw error;
 	}
 	for (unsigned i=0; i<numLayers; i++){
-		Layer* layer = Factory::newLayer(sizeLayers, hiddenLayersType, implementationType, functiontype);
-		addLayer(layer);
+		addLayer(sizeLayers, hiddenLayersType, functiontype);
 	}
 	for (unsigned i=0; i<numLayers; i++){
 		for(unsigned j=0; j<numberInputs; j++){
@@ -335,6 +339,15 @@ void NeuralNet::save(FILE* stream)
 	}
 	fwrite(layerTypes, size, 1, stream);
 	mi_free(layerTypes);
+
+	size = sizeof(FunctionType) * numberLayers;
+	FunctionType* layerFunctionTypes = (FunctionType*) mi_malloc(size);
+	for (unsigned i=0; i<numberLayers; i++){
+		layerFunctionTypes[i] = layers[i]->getOutput()->getFunctionType();
+	}
+	fwrite(layerFunctionTypes, size, 1, stream);
+	mi_free(layerFunctionTypes);
+
 
 	for (unsigned i=0; i<numberLayers; i++){
 		layers[i]->save(stream);
@@ -376,9 +389,13 @@ void NeuralNet::load(FILE* stream)
 	VectorType* layerTypes = (VectorType*) mi_malloc(size);
 	fread(layerTypes, size, 1, stream);
 
+	size = sizeof(FunctionType) * numberLayers;
+	FunctionType* layerFunctionTypes = (FunctionType*) mi_malloc(size);
+	fread(layerFunctionTypes, size, 1, stream);
+
 	layers = (Layer**) mi_malloc(sizeof(Layer*) * numberLayers);
 	for (unsigned i=0; i<numberLayers; i++){
-		layers[i] = Factory::newLayer(layerSizes[i], layerTypes[i], this->implementationType);
+		layers[i] = Factory::newLayer(layerSizes[i], layerTypes[i], layerFunctionTypes[i], this->implementationType);
 	}
 	mi_free(layerSizes);
 

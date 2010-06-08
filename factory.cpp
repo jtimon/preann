@@ -5,21 +5,21 @@
 #include "xmmLayer.h"
 #include "cudaLayer2.h"
 
-Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType)
+Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType, FunctionType functionType)
 {
 	switch(implementationType){
 		case C:
-			return new Vector(size, vectorType);
+			return new Vector(size, vectorType, functionType);
 		case SSE2:
-			return new XmmVector(size, vectorType);
+			return new XmmVector(size, vectorType, functionType);
 		case CUDA:
-			return new CudaVector(size, vectorType);
+			return new CudaVector(size, vectorType, functionType);
 		case CUDA2:
-			return new CudaVector(size, vectorType);
+			return new CudaVector(size, vectorType, functionType);
 	}
 }
 
-Layer* Factory::newLayer(unsigned size, VectorType outputType, ImplementationType implementationType, FunctionType functionType)
+Layer* Factory::newLayer(unsigned size, VectorType outputType, FunctionType functionType, ImplementationType implementationType)
 {
 	switch(implementationType){
 		case C:

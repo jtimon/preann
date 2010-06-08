@@ -27,8 +27,9 @@ protected:
 
 	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation) = 0;
 	virtual void mutateThreshold(unsigned outputPos, float mutation) = 0;
+
+	Layer();
 public:
-	Layer(VectorType outputType, FunctionType functionType);
 	virtual ~Layer();
 	virtual ImplementationType getImplementationType() = 0;
 
@@ -47,12 +48,13 @@ public:
 	Vector* getInput(unsigned pos);
 	Vector* getOutput();
 	float* getThresholdsPtr();
-	void* getWeighsPtr();
+	void* getWeighsPtr(unsigned inputPos);
 
 	void mutateWeigh(float mutationRange);
 	void mutateWeighs(float probability, float mutationRange);
 	void crossoverNeurons(Layer* other, Interface* bitVector);
 	void crossoverInput(Layer* other, unsigned inputLayer, Interface* bitVector);
+
 };
 
 #endif /*ABSTRACTLAYER_H_*/

@@ -1,24 +1,8 @@
 #include "layer.h"
 
-Layer::Layer(VectorType outputType, FunctionType functionType)
+Layer::Layer()
 {
-	inputs = NULL;
-	weighs = NULL;
-	numberInputs = 0;
 
-	thresholds = NULL;
-	output = NULL;
-
-	switch (outputType){
-		case FLOAT:
-			this->functionType = functionType;
-			break;
-		case BIT:
-			this->functionType = BINARY_STEP;
-			break;
-		case SIGN:
-			this->functionType = BIPOLAR_STEP;
-	}
 }
 
 Layer::~Layer()
@@ -74,7 +58,7 @@ void Layer::calculateOutput()
 //		printf("%f ", results[i]);
 //	}
 //	printf("\n----------------\n", 1);
-	output->activation(results, functionType);
+	output->activation(results);
 }
 
 void Layer::addInput(Vector* input)
@@ -97,15 +81,11 @@ void Layer::addInput(Vector* input)
 
 void Layer::save(FILE* stream)
 {
-	fwrite(&functionType, sizeof(FunctionType), 1, stream);
-
 	saveWeighs(stream);
 }
 
 void Layer::load(FILE* stream)
 {
-	fread(&functionType, sizeof(FunctionType), 1, stream);
-
 	loadWeighs(stream);
 }
 
@@ -140,7 +120,7 @@ float* Layer::getThresholdsPtr()
 	return thresholds;
 }
 
-void *Layer::getWeighsPtr()
+void *Layer::getWeighsPtr(unsigned inputPos)
 {
 	return weighs;
 }

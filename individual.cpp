@@ -7,7 +7,7 @@
 
 #include "individual.h"
 
-Individual::Individual()
+Individual::Individual(ImplementationType implementationType):NeuralNet(implementationType)
 {
 }
 
@@ -18,6 +18,39 @@ Individual::~Individual()
 Individual* Individual::newCopy()
 {
 	//TODO implementar
+	Individual* copy = new Individual(this->implementationType);
+
+	for (unsigned i=0; i < numberInputs; i++){
+		copy->createInput(inputInterfaces[i]->getSize(), inputInterfaces[i]->getVectorType());
+	}
+	for (unsigned i=0; i < numberLayers; i++){
+
+		Vector* output = layers[i]->getOutput();
+		copy->addLayer(output->getSize(), output->getVectorType(), output->getFunctionType());
+	}
+
+	for (unsigned i=0; i<numberInputs; i++){
+		for (unsigned j=0; j<numberLayers; j++){
+			if (inputsToLayersGraph[(i*numberLayers) + j]) {
+				copy->addInputConnection(i, j);
+			}
+		}
+	}
+	for (unsigned i=0; i<numberLayers; i++){
+		for (unsigned j=0; j<numberLayers; j++){
+			if (layerConnectionsGraph[(i*numberLayers) + j]){
+				copy->addLayersConnection(i, j);
+			}
+		}
+	}
+	for (unsigned i=0; i<numberLayers; i++){
+		copy->getLayer(i)->copyWeighs(layers[i]);
+	}
+
+
+	for (unsigned i=0; i < numberOutputs; i++){
+		copy->createOutput(outputLayers[i]);
+	}
 }
 
 void Individual::mutate(unsigned numMutations, float mutationRange)

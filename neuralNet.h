@@ -5,8 +5,9 @@
 
 class NeuralNet
 {
-	ImplementationType implementationType;
 protected:
+	ImplementationType implementationType;
+
 	Layer** layers;
 	unsigned char* layerConnectionsGraph;
 	unsigned numberLayers;
@@ -25,6 +26,7 @@ protected:
 	void increaseMaxLayers();
 	void increaseMaxOuputs();
 	unsigned getPosInGraph(unsigned source, unsigned destination);
+	Layer* getLayer(unsigned pos);
 public:
 
 	NeuralNet(ImplementationType implementationType = C);

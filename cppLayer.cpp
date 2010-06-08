@@ -1,13 +1,13 @@
 
 #include "cppLayer.h"
 
-CppLayer::CppLayer(VectorType outputType, FunctionType functionType): Layer(outputType, functionType)
+CppLayer::CppLayer()
 {
 }
 
-CppLayer::CppLayer(unsigned size, VectorType outputType, FunctionType functionType): Layer(outputType, functionType)
+CppLayer::CppLayer(unsigned size, VectorType outputType, FunctionType functionType)
 {
-	output = new Vector(size, outputType);
+	output = new Vector(size, outputType, functionType);
 	thresholds = (float*)mi_malloc(sizeof(float) * size);
 }
 
@@ -131,7 +131,7 @@ void CppLayer::randomWeighs(float range)
 	}
 	for (unsigned i=0; i < output->getSize(); i++){
 
-		//TODO esto peta con BIT inputType = BIT maxSize = 163840
+		//TODO esto peta con BIT inputType = BIT maxSize = 163840, 16258024
 		//thresholds[i] = 0;
 		thresholds[i] = randomFloat(range);
 		for (unsigned j=0; j < numberInputs; j++){
@@ -196,6 +196,38 @@ void CppLayer::mutateThreshold(unsigned outputPos, float mutation)
 void CppLayer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
 {
 	//TODO CppLayer::crossoverWeighs
+	void* otherWeighs = other->getWeighsPtr(inputLayer);
+	void* thisWeighs = this->getWeighsPtr(inputLayer);
+	unsigned weighsSize = bitVector->getSize();
+
+	if (inputs[inputLayer]->getVectorType() == FLOAT){
+
+		float* otherWeighs = (float*)(other->getWeighsPtr(inputLayer));
+		float* thisWeighs = (float*)(this->getWeighsPtr(inputLayer));
+		float auxWeigh;
+
+		for (unsigned i=0; i < weighsSize; i++){
+
+			if (bitVector->getElement(i)){
+				auxWeigh = thisWeighs[i];
+				thisWeighs[i] = otherWeighs[i];
+				otherWeighs[i] = auxWeigh;
+			}
+		}
+	} else {
+		unsigned char* otherWeighs = (unsigned char*)(other->getWeighsPtr(inputLayer));
+		unsigned char* thisWeighs = (unsigned char*)(this->getWeighsPtr(inputLayer));
+		unsigned char auxWeigh;
+
+		for (unsigned i=0; i < weighsSize; i++){
+
+			if (bitVector->getElement(i)){
+				auxWeigh = thisWeighs[i];
+				thisWeighs[i] = otherWeighs[i];
+				otherWeighs[i] = auxWeigh;
+			}
+		}
+	}
 }
 
 

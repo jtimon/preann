@@ -7,10 +7,11 @@
 
 #include "cudaVector.h"
 
-CudaVector::CudaVector(unsigned size, VectorType vectorType)
+CudaVector::CudaVector(unsigned size, VectorType vectorType, FunctionType functionType)
 {
 	this->size = size;
 	this->vectorType = vectorType;
+	this->functionType = functionType;
 	unsigned byte_sz = getByteSize();
 	data = cuda_malloc(byte_sz);
 

@@ -14,7 +14,7 @@
 class XmmVector: public Vector {
 	virtual unsigned getByteSize();
 public:
-	XmmVector(unsigned size, VectorType vectorType);
+	XmmVector(unsigned size, VectorType vectorType, FunctionType functionType);
 	virtual ~XmmVector();
 
 	virtual void copyFrom(Interface* interface);
