@@ -86,12 +86,25 @@ void Layer::addInput(Vector* input)
 
 void Layer::save(FILE* stream)
 {
-	saveWeighs(stream);
+	unsigned size = output->getSize();
+	VectorType outputType = output->getVectorType();
+	FunctionType functionType = output->getFunctionType();
+
+	fwrite(&size, sizeof(unsigned), 1, stream);
+	fwrite(&outputType, sizeof(VectorType), 1, stream);
+	fwrite(&functionType, sizeof(FunctionType), 1, stream);
 }
 
 void Layer::load(FILE* stream)
 {
-	loadWeighs(stream);
+	unsigned size;
+	VectorType outputType;
+	FunctionType functionType;
+
+	fread(&size, sizeof(unsigned), 1, stream);
+	fread(&outputType, sizeof(VectorType), 1, stream);
+	fread(&functionType, sizeof(FunctionType), 1, stream);
+	init(size, outputType, functionType);
 }
 
 void Layer::swapWeighs(Layer* layer)

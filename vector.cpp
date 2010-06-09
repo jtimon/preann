@@ -11,7 +11,16 @@ Vector::Vector(unsigned size, VectorType vectorType, FunctionType functionType)
 {
 	this->size = size;
 	this->vectorType = vectorType;
-	this->functionType = functionType;
+	switch (functionType){
+		case FLOAT:
+			this->functionType = functionType;
+			break;
+		case BIT:
+			this->functionType = BINARY_STEP;
+			break;
+		case SIGN:
+			this->functionType = BIPOLAR_STEP;
+	}
 
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
@@ -27,6 +36,17 @@ Vector::Vector(unsigned size, VectorType vectorType, FunctionType functionType)
 		for (unsigned i=0; i < byteSize; i++){
 			((unsigned char*)data)[i] = 0;
 		}
+	}
+
+	switch (functionType){
+		case FLOAT:
+			this->functionType = functionType;
+			break;
+		case BIT:
+			this->functionType = BINARY_STEP;
+			break;
+		case SIGN:
+			this->functionType = BIPOLAR_STEP;
 	}
 }
 

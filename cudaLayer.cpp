@@ -3,7 +3,16 @@
 unsigned CudaLayer::algorithm = 0;
 unsigned CudaLayer::blockSize = 128;
 
+CudaLayer::CudaLayer()
+{
+}
+
 CudaLayer::CudaLayer(unsigned size, VectorType outputType, FunctionType functionType)
+{
+	init(size, outputType, functionType);
+}
+
+void CudaLayer::init(unsigned size, VectorType outputType, FunctionType functionType)
 {
 	output = new CudaVector(size, outputType, functionType);
 	thresholds = (float*)cuda_malloc(sizeof(float) * size);

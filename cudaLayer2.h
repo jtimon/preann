@@ -13,14 +13,11 @@
 class CudaLayer2: public CudaLayer {
 protected:
 	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results);
-
-	virtual void saveWeighs(FILE* stream);
-	virtual void loadWeighs(FILE* stream);
-
 	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 
 	void transposeMatrix(void* matrix, unsigned width, unsigned height, VectorType inputType);
 public:
+	CudaLayer2();
 	CudaLayer2(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~CudaLayer2();
 	virtual ImplementationType getImplementationType() {
@@ -28,6 +25,8 @@ public:
 	};
 
 	virtual void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector);
+	virtual void saveWeighs(FILE* stream);
+	virtual void loadWeighs(FILE* stream);
 };
 
 #endif /* CUDALAYER2_H_ */

@@ -120,7 +120,8 @@ void NeuralNet::addLayer(Layer* layer)
 
 void NeuralNet::addLayer(unsigned  size, VectorType destinationType, FunctionType functiontype)
 {
-	Layer* layer = Factory::newLayer(size, destinationType, functiontype, implementationType);
+	Layer* layer = Factory::newLayer(implementationType);
+	layer->init(size, destinationType, functiontype);
 	addLayer(layer);
 }
 
@@ -320,37 +321,16 @@ void NeuralNet::save(FILE* stream)
 	fwrite(&numberLayers, sizeof(unsigned), 1, stream);
 	fwrite(&numberOutputs, sizeof(unsigned), 1, stream);
 
+	for (unsigned i=0; i<numberLayers; i++){
+		layers[i]->save(stream);
+	}
+
 	fwrite(inputsToLayersGraph, sizeof(unsigned char) * numberInputs * numberLayers, 1, stream);
 	fwrite(layerConnectionsGraph, sizeof(unsigned char) * numberLayers * numberLayers, 1, stream);
 	fwrite(outputLayers, sizeof(int) * numberOutputs, 1, stream);
 
-	unsigned size = sizeof(unsigned) * numberLayers;
-	unsigned* layerSizes = (unsigned*) mi_malloc(size);
 	for (unsigned i=0; i<numberLayers; i++){
-		layerSizes[i] = layers[i]->getOutput()->getSize();
-	}
-	fwrite(layerSizes, size, 1, stream);
-	mi_free(layerSizes);
-
-	size = sizeof(VectorType) * numberLayers;
-	VectorType* layerTypes = (VectorType*) mi_malloc(size);
-	for (unsigned i=0; i<numberLayers; i++){
-		layerTypes[i] = layers[i]->getOutput()->getVectorType();
-	}
-	fwrite(layerTypes, size, 1, stream);
-	mi_free(layerTypes);
-
-	size = sizeof(FunctionType) * numberLayers;
-	FunctionType* layerFunctionTypes = (FunctionType*) mi_malloc(size);
-	for (unsigned i=0; i<numberLayers; i++){
-		layerFunctionTypes[i] = layers[i]->getOutput()->getFunctionType();
-	}
-	fwrite(layerFunctionTypes, size, 1, stream);
-	mi_free(layerFunctionTypes);
-
-
-	for (unsigned i=0; i<numberLayers; i++){
-		layers[i]->save(stream);
+		layers[i]->saveWeighs(stream);
 	}
 }
 
@@ -369,59 +349,54 @@ void NeuralNet::load(FILE* stream)
 	fread(&numberLayers, sizeof(unsigned), 1, stream);
 	fread(&numberOutputs, sizeof(unsigned), 1, stream);
 
-	size_t size = sizeof(unsigned char) * numberInputs * numberLayers;
-	inputsToLayersGraph = (unsigned char*) mi_malloc(size);
-	fread(inputsToLayersGraph, size, 1, stream);
+    layers = (Layer**)((mi_malloc(sizeof (Layer*) * numberLayers)));
+    for(unsigned i = 0;i < numberLayers;i++){
+        layers[i] = Factory::newLayer(this->implementationType);
+        layers[i]->load(stream);
+    }
 
-	size = sizeof(unsigned char) * numberLayers * numberLayers;
-	layerConnectionsGraph = (unsigned char*) mi_malloc(size);
-	fread(layerConnectionsGraph, size, 1, stream);
+    loadGraphs(stream);
+    stablishConnections();
 
-	size = sizeof(unsigned) * numberOutputs;
-	outputLayers = (unsigned*) mi_malloc(size);
-	fread(outputLayers, size, 1, stream);
-
-	size = sizeof(unsigned) * numberLayers;
-	unsigned* layerSizes = (unsigned*) mi_malloc(size);
-	fread(layerSizes, size, 1, stream);
-
-	size = sizeof(VectorType) * numberLayers;
-	VectorType* layerTypes = (VectorType*) mi_malloc(size);
-	fread(layerTypes, size, 1, stream);
-
-	size = sizeof(FunctionType) * numberLayers;
-	FunctionType* layerFunctionTypes = (FunctionType*) mi_malloc(size);
-	fread(layerFunctionTypes, size, 1, stream);
-
-	layers = (Layer**) mi_malloc(sizeof(Layer*) * numberLayers);
-	for (unsigned i=0; i<numberLayers; i++){
-		layers[i] = Factory::newLayer(layerSizes[i], layerTypes[i], layerFunctionTypes[i], this->implementationType);
-	}
-	mi_free(layerSizes);
-
-	for (unsigned i=0; i<numberInputs; i++){
-		for (unsigned j=0; j<numberLayers; j++){
-			if (inputsToLayersGraph[(i*numberLayers) + j]) {
-				addInputConnection(i, j);
-			}
-		}
-	}
-	for (unsigned i=0; i<numberLayers; i++){
-		for (unsigned j=0; j<numberLayers; j++){
-			if (layerConnectionsGraph[(i*numberLayers) + j]){
-				addLayersConnection(i, j);
-			}
-		}
-	}
-	for (unsigned i=0; i<numberLayers; i++){
-		layers[i]->load(stream);
-	}
-
-	outputs = (Interface**) mi_malloc(sizeof(Interface*) * numberOutputs);
-	for (unsigned i=0; i<numberOutputs; i++){
-		Vector* outputVector = layers[outputLayers[i]]->getOutput();
-		outputs[i] = new Interface(outputVector->getSize(), outputVector->getVectorType());
+    for (unsigned i=0; i<numberLayers; i++){
+		layers[i]->loadWeighs(stream);
 	}
 }
 
+void NeuralNet::loadGraphs(FILE* stream)
+{
+    size_t size = sizeof (unsigned char) * numberInputs * numberLayers;
+    inputsToLayersGraph = (unsigned char*)((mi_malloc(size)));
+    fread(inputsToLayersGraph, size, 1, stream);
 
+    size = sizeof (unsigned char) * numberLayers * numberLayers;
+    layerConnectionsGraph = (unsigned char*)((mi_malloc(size)));
+    fread(layerConnectionsGraph, size, 1, stream);
+
+    size = sizeof (unsigned ) * numberOutputs;
+    outputLayers = (unsigned *)((mi_malloc(size)));
+    fread(outputLayers, size, 1, stream);
+}
+
+void NeuralNet::stablishConnections()
+{
+    for(unsigned i = 0;i < numberInputs;i++){
+        for(unsigned j = 0;j < numberLayers;j++){
+            if(inputsToLayersGraph[(i * numberLayers) + j]){
+                addInputConnection(i, j);
+            }
+        }
+    }
+    for(unsigned i = 0;i < numberLayers;i++){
+        for(unsigned j = 0;j < numberLayers;j++){
+            if(layerConnectionsGraph[(i * numberLayers) + j]){
+                addLayersConnection(i, j);
+            }
+        }
+    }
+    outputs = (Interface**)(mi_malloc(sizeof (Interface*) * numberOutputs));
+    for(unsigned i = 0;i < numberOutputs;i++){
+        Vector *outputVector = layers[outputLayers[i]]->getOutput();
+        outputs[i] = new Interface(outputVector->getSize(), outputVector->getVectorType());
+    }
+}

@@ -16,15 +16,17 @@ protected:
 	virtual float* negativeThresholds();
 	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results);
 
+	virtual void init(unsigned size, VectorType outputType, FunctionType functionType);
+	virtual void* newWeighs(unsigned inputSize, VectorType inputType);
 	virtual void saveWeighs(FILE* stream);
 	virtual void loadWeighs(FILE* stream);
-	virtual void* newWeighs(unsigned inputSize, VectorType inputType);
 
 	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 	virtual void mutateThreshold(unsigned outputPos, float mutation);
 
-	CppLayer();
+
 public:
+	CppLayer();
 	CppLayer(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~CppLayer();
 	virtual ImplementationType getImplementationType() {

@@ -32,10 +32,9 @@ public:
 	void* getDataPointer();
 	unsigned getSize();
 	VectorType getVectorType();
+	FunctionType getFunctionType();
 
 	void print();
-    FunctionType getFunctionType();
-
 };
 
 #endif /* VECTOR_H_ */

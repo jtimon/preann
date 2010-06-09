@@ -4,7 +4,16 @@ XmmVector::XmmVector(unsigned size, VectorType vectorType, FunctionType function
 {
 	this->size = size;
 	this->vectorType = vectorType;
-	this->functionType = functionType;
+	switch (functionType){
+		case FLOAT:
+			this->functionType = functionType;
+			break;
+		case BIT:
+			this->functionType = BINARY_STEP;
+			break;
+		case SIGN:
+			this->functionType = BIPOLAR_STEP;
+	}
 
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
@@ -125,7 +134,7 @@ void XmmVector::copyTo(Interface* interface)
 	}
 }
 
-void XmmVector::activation(float* results, FunctionType functionType)
+void XmmVector::activation(float* results)
 {
 	if (vectorType == FLOAT){
 		for (unsigned i=0; i < size; i++){

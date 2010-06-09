@@ -5,6 +5,8 @@
 
 class NeuralNet
 {
+	void loadGraphs(FILE* stream);
+	void stablishConnections();
 protected:
 	ImplementationType implementationType;
 

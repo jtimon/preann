@@ -16,6 +16,7 @@ protected:
 	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results);
 	virtual float* negativeThresholds();
 
+	virtual void init(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual void* newWeighs(unsigned inputSize, VectorType inputType);
 	virtual void saveWeighs(FILE* stream);
 	virtual void loadWeighs(FILE* stream);
@@ -25,6 +26,7 @@ protected:
 public:
 	static unsigned algorithm;
 	static unsigned blockSize;
+	CudaLayer();
 	CudaLayer(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~CudaLayer();
 	virtual ImplementationType getImplementationType() {

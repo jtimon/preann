@@ -19,16 +19,16 @@ Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationT
 	}
 }
 
-Layer* Factory::newLayer(unsigned size, VectorType outputType, FunctionType functionType, ImplementationType implementationType)
+Layer* Factory::newLayer(ImplementationType implementationType)
 {
 	switch(implementationType){
 		case C:
-			return new CppLayer(size, outputType, functionType);
+			return new CppLayer();
 		case SSE2:
-			return new XmmLayer(size, outputType, functionType);
+			return new XmmLayer();
 		case CUDA:
-			return new CudaLayer(size, outputType, functionType);
+			return new CudaLayer();
 		case CUDA2:
-			return new CudaLayer2(size, outputType, functionType);
+			return new CudaLayer2();
 	}
 }

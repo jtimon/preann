@@ -22,14 +22,13 @@ protected:
 	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results) = 0;
 
 	virtual void* newWeighs(unsigned inputSize, VectorType inputType) = 0;
-	virtual void saveWeighs(FILE* stream) = 0;
-	virtual void loadWeighs(FILE* stream) = 0;
 
 	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation) = 0;
 	virtual void mutateThreshold(unsigned outputPos, float mutation) = 0;
 
 	Layer();
 public:
+	virtual void init(unsigned size, VectorType outputType, FunctionType functionType) = 0;
 	virtual ~Layer();
 	virtual ImplementationType getImplementationType() = 0;
 
@@ -42,6 +41,8 @@ public:
 	void addInput(Vector* input);
 	void save(FILE* stream);
 	void load(FILE* stream);
+	virtual void saveWeighs(FILE* stream) = 0;
+	virtual void loadWeighs(FILE* stream) = 0;
 
 	void swapWeighs(Layer* layer);
 	unsigned getNumberInputs();

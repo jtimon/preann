@@ -11,7 +11,16 @@ CudaVector::CudaVector(unsigned size, VectorType vectorType, FunctionType functi
 {
 	this->size = size;
 	this->vectorType = vectorType;
-	this->functionType = functionType;
+	switch (functionType){
+		case FLOAT:
+			this->functionType = functionType;
+			break;
+		case BIT:
+			this->functionType = BINARY_STEP;
+			break;
+		case SIGN:
+			this->functionType = BIPOLAR_STEP;
+	}
 	unsigned byte_sz = getByteSize();
 	data = cuda_malloc(byte_sz);
 
@@ -23,13 +32,6 @@ CudaVector::~CudaVector()
 	if (data) {
 		cuda_free(data);
 		data = NULL;
-	}
-}
-
-void CudaVector::free()
-{
-	if (data) {
-		cuda_free(data);
 	}
 }
 
@@ -59,7 +61,7 @@ void CudaVector::copyTo(Interface *interface)
 	cuda_copyToHost(interface->getDataPointer(), data, this->getByteSize());
 }
 
-void CudaVector::activation(float* results, FunctionType functionType)
+void CudaVector::activation(float* results)
 {
 	cuda_activation(data, size, vectorType, results, functionType, CUDA_THREADS_PER_BLOCK);
 }

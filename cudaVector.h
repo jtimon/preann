@@ -12,15 +12,13 @@
 #include "cuda_code.h"
 
 class CudaVector: public Vector {
-protected:
-	virtual void free();
 public:
 	CudaVector(unsigned size, VectorType vectorType, FunctionType functionType);
 	virtual ~CudaVector();
 
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
-	virtual void activation(float* results, FunctionType functionType);
+	virtual void activation(float* results);
 };
 
 #endif /* CUDAVECTOR_H_ */

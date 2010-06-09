@@ -19,7 +19,7 @@ public:
 
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
-	virtual void activation(float* results, FunctionType functionType);
+	virtual void activation(float* results);
 };
 
 #endif /* XMMVECTOR_H_ */

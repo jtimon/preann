@@ -7,6 +7,10 @@
 
 #include "cudaLayer2.h"
 
+CudaLayer2::CudaLayer2()
+{
+}
+
 CudaLayer2::CudaLayer2(unsigned size, VectorType outputType, FunctionType functionType) : CudaLayer(size, outputType, functionType)
 {
 }

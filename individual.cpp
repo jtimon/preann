@@ -17,7 +17,7 @@ Individual::~Individual()
 
 Individual* Individual::newCopy()
 {
-	//TODO implementar
+	//TODO reconsiderar si neuralNet es un sitio más apropiado para este método
 	Individual* copy = new Individual(this->implementationType);
 
 	for (unsigned i=0; i < numberInputs; i++){
