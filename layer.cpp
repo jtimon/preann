@@ -2,7 +2,12 @@
 
 Layer::Layer()
 {
+	inputs = NULL;
+	weighs = NULL;
+	numberInputs = 0;
 
+	thresholds = NULL;
+	output = NULL;
 }
 
 Layer::~Layer()
