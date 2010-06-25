@@ -36,6 +36,7 @@ public:
 
 	Interface* createInput(unsigned size, VectorType vectorType);
 	Interface* getInput(unsigned pos);
+	void setInput(unsigned pos, Interface* input);
 	unsigned getNumInputs();
 
 	Interface* createOutput(unsigned layerPos);

@@ -12,12 +12,12 @@
 
 class ClassificationTask: public Task {
 
-	Vector** inputs;
-	Vector** desiredOutputs;
+	Interface** inputs;
+	Interface** desiredOutputs;
 	unsigned inputsDim;
 public:
 	ClassificationTask();
-	ClassificationTask(Vector** inputs, Vector** desiredOutputs, unsigned inputsDim);
+	ClassificationTask(Interface** inputs, Interface** desiredOutputs, unsigned inputsDim);
 	virtual ~ClassificationTask();
 	virtual void test(Individual* individual);
 };

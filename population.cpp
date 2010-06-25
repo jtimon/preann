@@ -176,7 +176,8 @@ void Population::insertIndividual(Individual *individual)
 		individualList[this->size++];
 	} else {
 		unsigned vectorPos = this->size - 1;
-		if (individual->getFitness() > individualList[vectorPos]->getFitness()) {
+		float fitness = individual->getFitness();
+		if (fitness > individualList[vectorPos]->getFitness()) {
 
 			if (this->size < this->maxSize) {
 				individualList[this->size++] = individualList[vectorPos];
@@ -184,7 +185,7 @@ void Population::insertIndividual(Individual *individual)
 				delete (individualList[vectorPos]);
 			}
 
-			while (individual->getFitness() > individualList[vectorPos - 1]->getFitness() && vectorPos > 1) {
+			while (fitness > individualList[vectorPos - 1]->getFitness() && vectorPos > 1) {
 				individualList[vectorPos] = individualList[vectorPos - 1];
 				--vectorPos;
 			}
@@ -360,7 +361,10 @@ void Population::nextGeneration()
 	selection();
 	crossover();
 	mutation();
-	//TODO
+	for (unsigned i=0; i < offSpringSize; i++) {
+		this->insertIndividual(offSpring[i]);
+	}
+	offSpringSize = 0;
 }
 
 float Population::getBestIndividualScore()

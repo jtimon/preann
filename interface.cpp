@@ -104,7 +104,13 @@ float Interface::compareTo(Interface *other)
 {
 	float accumulator = 0;
 	for (unsigned i=0; i < this->size; i++) {
-		accumulator += this->getElement(i) - other->getElement(i);
+		float difference = this->getElement(i) - other->getElement(i);
+		if (difference > 0){
+			accumulator += difference;
+		} else {
+			accumulator -= difference;
+		}
+
 	}
 	return accumulator;
 }

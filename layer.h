@@ -36,6 +36,7 @@ public:
 	virtual void randomWeighs(float range) = 0;
 	virtual void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector) = 0;
 
+
 	void checkCompatibility(Layer* layer);
 	void calculateOutput();
 	void addInput(Vector* input);

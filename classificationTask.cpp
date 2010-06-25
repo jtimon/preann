@@ -16,7 +16,7 @@ ClassificationTask::ClassificationTask()
 	this->inputsDim = 0;
 }
 
-ClassificationTask::ClassificationTask(Vector **inputs, Vector** desiredOutputs, unsigned  numExamples)
+ClassificationTask::ClassificationTask(Interface **inputs, Interface** desiredOutputs, unsigned  numExamples)
 {
 	this->inputs = inputs;
 	this->desiredOutputs = desiredOutputs;
@@ -31,11 +31,11 @@ ClassificationTask::~ClassificationTask()
 void ClassificationTask::test(Individual* individual)
 {
 	float accumulation = 0;
-	/*TODO descomentar y adaptar
+
 	for (unsigned i=0; i < inputsDim; i++){
-		individual->setInput(inputs[i]);
+		individual->setInput(0, inputs[i]);
 		individual->calculateOutput();
-		accumulation += CompareFloatArrays(individual->getOutput(0), desiredOutputs[i]->getDataPointer(), desiredOutputs[i]->getSize());
-	}*/
-	//individual->setFitness(-accumulation);
+		accumulation += individual->getOutput(0)->compareTo(desiredOutputs[i]);
+	}
+	individual->setFitness(-accumulation);
 }
