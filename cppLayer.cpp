@@ -200,9 +200,6 @@ void CppLayer::mutateThreshold(unsigned outputPos, float mutation)
 
 void CppLayer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
 {
-	//TODO CppLayer::crossoverWeighs
-	void* otherWeighs = other->getWeighsPtr(inputLayer);
-	void* thisWeighs = this->getWeighsPtr(inputLayer);
 	unsigned weighsSize = bitVector->getSize();
 
 	if (inputs[inputLayer]->getVectorType() == FLOAT){

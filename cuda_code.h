@@ -21,6 +21,9 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Vecto
 extern "C" void cuda_inputCalculation2(void* inputPtr, unsigned input_size, VectorType inputType, unsigned output_size, void* weighs, float* results, unsigned block_size);
 extern "C" void cuda_inputCalculation3(void* inputPtr, unsigned input_size, VectorType inputType, unsigned output_size, void* weighs, float* results, unsigned block_size);
 
+extern "C" void cuda_mutate(void* vector, unsigned pos, float mutation, VectorType vectorType);
+extern "C" void cuda_crossover(void* vector1, void* vector2, unsigned* bitVector, unsigned size, VectorType inputType,unsigned block_size);
+
 
 
 #endif /*CUDA_DEFINITIONS_H_*/

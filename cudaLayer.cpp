@@ -124,7 +124,6 @@ void CudaLayer::randomWeighs(float range)
 
 void CudaLayer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation)
 {
-	//TODO implement method (pasar a cuda)
 	if (outputPos > output->getSize()) {
 		string error = "Cannot mutate that output: the Layer hasn't so many neurons.";
 		throw error;
@@ -138,38 +137,31 @@ void CudaLayer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned in
 		throw error;
 	}
 
-	unsigned weighPos = (outputPos * inputs[inputLayer]->getSize()) + inputPos;
+	Vector* input = getInput(inputLayer);
+	unsigned weighPos = (outputPos * input->getSize()) + inputPos;
 
-	if (inputs[inputLayer]->getVectorType() == FLOAT){
-		((float**)weighs)[inputLayer][weighPos] += mutation;
-	} else {
-
-		int result = (int)mutation + ((unsigned char**)weighs)[inputLayer][weighPos];
-		if (result <= 0){
-			((unsigned char**)weighs)[inputLayer][weighPos] = 0;
-		}
-		else if (result >= 255) {
-			((unsigned char**)weighs)[inputLayer][weighPos] = 255;
-		}
-		else {
-			((unsigned char**)weighs)[inputLayer][weighPos] = result;
-		}
-	}
+	cuda_mutate(getWeighsPtr(inputLayer), weighPos, mutation, input->getVectorType());
 }
 
 void CudaLayer::mutateThreshold(unsigned outputPos, float mutation)
 {
-	//TODO implement method (copiado de cpp) (pasar a cuda)
 	if (outputPos > output->getSize()) {
 		string error = "Cannot mutate that Threshold: the Layer hasn't so many neurons.";
 		throw error;
 	}
-	thresholds[outputPos] += mutation;
+	cuda_mutate(thresholds, outputPos, mutation, FLOAT);
 }
 
 void CudaLayer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
 {
-	//TODO implement method CudaLayer::crossoverWeighs
+	unsigned weighsSize = bitVector->getSize();
+	CudaVector* cudaBitVector = new CudaVector(weighsSize, BIT, CudaLayer::blockSize);
+	cudaBitVector->copyFrom2(bitVector, CudaLayer::blockSize);
+	unsigned* cudaBitVectorPtr = (unsigned*)cudaBitVector->getDataPointer();
+
+	void* thisWeighs = this->getWeighsPtr(inputLayer);
+	void* otherWeighs = other->getWeighsPtr(inputLayer);
+	cuda_crossover(thisWeighs, otherWeighs, cudaBitVectorPtr, weighsSize, inputs[inputLayer]->getVectorType(), CudaLayer::blockSize);
 }
 
 

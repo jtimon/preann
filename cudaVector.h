@@ -13,9 +13,11 @@
 
 class CudaVector: public Vector {
 public:
+	CudaVector(unsigned size, VectorType vectorType, unsigned block_size);
 	CudaVector(unsigned size, VectorType vectorType, FunctionType functionType);
 	virtual ~CudaVector();
 
+	virtual void copyFrom2(Interface* interface, unsigned block_size);
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
 	virtual void activation(float* results);

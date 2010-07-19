@@ -186,11 +186,12 @@ void Layer::crossoverInput(Layer *other, unsigned  inputLayer, Interface *bitVec
 	checkCompatibility(other);
 
 	unsigned inputSize = inputs[inputLayer]->getSize();
-	Interface* inputBitVector = new Interface(inputSize, BIT);
+	unsigned outputSize = output->getSize();
+	Interface* inputBitVector = new Interface(inputSize * outputSize, BIT);
 
 	for (unsigned i=0; i < inputSize; i++){
 		if (bitVector->getElement(i)){
-			for (unsigned j=0; j < output->getSize(); j++){
+			for (unsigned j=0; j < outputSize; j++){
 				unsigned offset = j * inputSize;
 				inputBitVector->setElement(offset + i, 1);
 			}
@@ -202,15 +203,17 @@ void Layer::crossoverInput(Layer *other, unsigned  inputLayer, Interface *bitVec
 
 void Layer::crossoverNeurons(Layer *other, Interface *bitVector)
 {
-	//TODO comprobar todo esto en un nivel superior (o no comprobarlo) (o comprobarlo optionalmente)
+	//TODO comprobar todo esto en un nivel superior (o no comprobarlo) (o comprobarlo opcionalmente)
 	checkCompatibility(other);
+
+	unsigned outputSize = output->getSize();
 
 	for (unsigned i=0; i < numberInputs; i++){
 
 		unsigned inputSize = inputs[i]->getSize();
-		Interface* inputBitVector = new Interface(inputSize, BIT);
+		Interface* inputBitVector = new Interface(inputSize * outputSize, BIT);
 
-		for (unsigned j=0; j < output->getSize(); j++){
+		for (unsigned j=0; j < outputSize; j++){
 			if (bitVector->getElement(j)){
 				unsigned offset = j * inputSize;
 				for (unsigned k=0; k < inputSize; k++){
