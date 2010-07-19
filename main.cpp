@@ -5,6 +5,7 @@ using namespace std;
 
 #include "population.h"
 #include "chronometer.h"
+#include "cuda_code.h"
 
 #define PATH "/home/timon/test.nn"
 
@@ -110,7 +111,7 @@ int main(int argc, char *argv[]) {
 				//				printf("CUDA [algorithm %d]  ", algorithm);
 				//				CudaLayer::algorithm = algorithm;
 				//				for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
-				//					CudaLayer::blockSize = blockSize;
+				//					Cuda_Threads_Per_Block = blockSize;
 				//					nn = new NeuralNet(CUDA);
 				//					seconds = testNeuralNet(nn, size, inputType, times);
 				//					printf("(%d) %f ", blockSize, seconds);
@@ -120,7 +121,7 @@ int main(int argc, char *argv[]) {
 
 				printf("CUDA2 ", 1);
 				for (unsigned blockSize = 512; blockSize <= 512; blockSize *= 2) {
-					CudaLayer::blockSize = blockSize;
+					Cuda_Threads_Per_Block = blockSize;
 					nn = new NeuralNet(CUDA2);
 					seconds = testNeuralNet(nn, size, inputType, times);
 					printf("(%d) %f ", blockSize, seconds);

@@ -1,7 +1,6 @@
 #include "cudaLayer.h"
 
 unsigned CudaLayer::algorithm = 0;
-unsigned CudaLayer::blockSize = 128;
 
 CudaLayer::CudaLayer()
 {
@@ -38,16 +37,16 @@ CudaLayer::~CudaLayer()
 void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
 {
 	if (CudaLayer::algorithm == 0) {
-		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
+		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
 	}
 	else if (CudaLayer::algorithm == 1) {
-		cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
+		cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
 	}
 }
 
 float* CudaLayer::negativeThresholds()
 {
-	return cuda_getNegativeThresholds(thresholds, output->getSize(), CudaLayer::blockSize);
+	return cuda_getNegativeThresholds(thresholds, output->getSize(), Cuda_Threads_Per_Block);
 }
 
 void CudaLayer::saveWeighs(FILE *stream)
@@ -155,13 +154,13 @@ void CudaLayer::mutateThreshold(unsigned outputPos, float mutation)
 void CudaLayer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
 {
 	unsigned weighsSize = bitVector->getSize();
-	CudaVector* cudaBitVector = new CudaVector(weighsSize, BIT, CudaLayer::blockSize);
-	cudaBitVector->copyFrom2(bitVector, CudaLayer::blockSize);
+	CudaVector* cudaBitVector = new CudaVector(weighsSize, BIT, Cuda_Threads_Per_Block);
+	cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
 	unsigned* cudaBitVectorPtr = (unsigned*)cudaBitVector->getDataPointer();
 
 	void* thisWeighs = this->getWeighsPtr(inputLayer);
 	void* otherWeighs = other->getWeighsPtr(inputLayer);
-	cuda_crossover(thisWeighs, otherWeighs, cudaBitVectorPtr, weighsSize, inputs[inputLayer]->getVectorType(), CudaLayer::blockSize);
+	cuda_crossover(thisWeighs, otherWeighs, cudaBitVectorPtr, weighsSize, inputs[inputLayer]->getVectorType(), Cuda_Threads_Per_Block);
 }
 
 

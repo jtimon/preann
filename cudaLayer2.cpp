@@ -65,13 +65,13 @@ void CudaLayer2::crossoverWeighs(Layer *other, unsigned  inputLayer, Interface *
 		}
 	}
 
-	CudaVector cudaBitVector = CudaVector(weighsSize, BIT, CudaLayer::blockSize);
-	cudaBitVector.copyFrom2(bitVector, CudaLayer::blockSize);
+	CudaVector cudaBitVector = CudaVector(weighsSize, BIT, Cuda_Threads_Per_Block);
+	cudaBitVector.copyFrom2(bitVector, Cuda_Threads_Per_Block);
 	unsigned* cudaBitVectorPtr = (unsigned*)cudaBitVector.getDataPointer();
 
 	void* thisWeighs = this->getWeighsPtr(inputLayer);
 	void* otherWeighs = other->getWeighsPtr(inputLayer);
-	cuda_crossover(thisWeighs, otherWeighs, cudaBitVectorPtr, weighsSize, inputs[inputLayer]->getVectorType(), CudaLayer::blockSize);
+	cuda_crossover(thisWeighs, otherWeighs, cudaBitVectorPtr, weighsSize, inputs[inputLayer]->getVectorType(), Cuda_Threads_Per_Block);
 }
 
 void CudaLayer2::mutateWeigh(unsigned  outputPos, unsigned  inputLayer, unsigned  inputPos, float mutation)
@@ -97,7 +97,7 @@ void CudaLayer2::mutateWeigh(unsigned  outputPos, unsigned  inputLayer, unsigned
 
 void CudaLayer2::inputCalculation(Vector *input, void *inputWeighs, float *results)
 {
-	cuda_inputCalculation3(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, CudaLayer::blockSize);
+	cuda_inputCalculation3(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
 }
 
 void CudaLayer2::saveWeighs(FILE *stream)

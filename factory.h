@@ -8,8 +8,6 @@
 #define FACTORY_H_
 
 #include "layer.h"
-//TODO se requiere para el atributo static
-#include "cudaLayer.h"
 
 class Factory {
 public:

@@ -59,6 +59,8 @@ void XmmLayer::inputCalculation(Vector* input, void* inputWeighs, float* results
 	}
 	else {
 		numLoops = ((input->getSize()-1)/BYTES_PER_BLOCK)+1;
+		//TODO quitar mensaje
+		printf("calculando una layer que no es float");
 
 		if (input->getVectorType() == BIT) {
 			for (unsigned j=0; j < output->getSize(); j++){

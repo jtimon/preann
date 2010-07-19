@@ -8,6 +8,8 @@
 #define CUDA_MAX_SHARED_FLOATS (4032)
 #define CUDA_MAX_SHARED_BITS (CUDA_MAX_SHARED_FLOATS * CUDA_MAX_SHARED_FLOATS)
 
+static unsigned Cuda_Threads_Per_Block = 64;
+
 extern "C" void* cuda_malloc(unsigned byteSize);
 extern "C" void cuda_free(void* d_ptr);
 extern "C" void cuda_copyToDevice(void* d_dest, void* h_src, unsigned count);

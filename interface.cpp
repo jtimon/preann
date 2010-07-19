@@ -21,6 +21,19 @@ Interface::Interface(unsigned  size, VectorType vectorType)
 	}
 }
 
+Interface::Interface(Interface* toCopy)
+{
+	this->size = toCopy->getSize();
+	this->vectorType = toCopy->getVectorType();
+
+	size_t byteSize = getByteSize();
+	data = mi_malloc(byteSize);
+
+	for (unsigned i = 0; i < size; i++){
+		this->setElement(i, toCopy->getElement(i));
+	}
+}
+
 Interface::~Interface()
 {
 	mi_free(data);
@@ -63,6 +76,8 @@ float Interface::getElement(unsigned  pos)
 	}
 	else {
 
+		//TODO quitar mensaje
+		printf("obteniendo un elemento que no es float");
 		unsigned  mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
 
 		if ( ((unsigned*)data)[pos / BITS_PER_UNSIGNED] & mask){
@@ -89,6 +104,8 @@ void Interface::setElement(unsigned  pos, float value)
 		((float*)data)[pos] = value;
 
 	} else {
+		//TODO quitar mensaje
+		printf("informando un elemento que no es float");
 		unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
 
 		if (value > 0){

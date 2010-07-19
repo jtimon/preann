@@ -1,20 +1,27 @@
 
-# usar tabulador (no espacios) en la línea de comando 
 # Project: Paralel Reinforcement Evolutionary Artificial Neural Network
  
-OBJECTS = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o task.o classificationTask.o individual.o main.o factory.o interface.o cudaVector.o
+CLASSIFCATON_OBJ = classificationTask.o
+GA_OBJ = population.o task.o individual.o
+NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o factory.o interface.o cudaVector.o
 
 CXX = g++-4.3 -ggdb -c
 NVCC_LINK = /usr/local/cuda/bin/nvcc -L/usr/local/cuda/lib -lcudart
 NVCC_COMPILE = /usr/local/cuda/bin/nvcc -g -G -c -arch sm_11 --device-emulation
 NASM = nasm -f elf
 
-all: preann
+all: preann testNeuralNets
 
-preann: $(OBJECTS)
-	$(NVCC_LINK) -o preann $(OBJECTS) 
-main.o : main.cpp population.o chronometer.o
+testNeuralNets: $(NETS_OBJ) testNeuralNets.o
+	$(NVCC_LINK) -o testNeuralNets $(NETS_OBJ) testNeuralNets.o
+testNeuralNets.o : testNeuralNets.cpp $(NETS_OBJ)
+	$(CXX) testNeuralNets.cpp
+
+preann: $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ) main.o
+	$(NVCC_LINK) -o preann $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ) main.o
+main.o : main.cpp $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ)
 	$(CXX) main.cpp
+
 population.o : population.cpp population.h task.o
 	$(CXX) population.cpp
 classificationTask.o : classificationTask.cpp classificationTask.h task.o
@@ -57,4 +64,4 @@ sse2_code.o : sse2_code.asm sse2_code.h
 	$(NASM) sse2_code.asm
 
 clean: 
-	rm preann $(OBJECTS)
+	rm preann $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ)
