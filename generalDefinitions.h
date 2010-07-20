@@ -33,7 +33,10 @@ float randomPositiveFloat(float rango);
 
 void* mi_malloc(unsigned size);
 void mi_free(void* ptr);
-void printTotalAllocated();
-void printTotalPointers();
+void mem_printTotalAllocated();
+void mem_printTotalPointers();
+void mem_printListOfPointers();
+unsigned mem_getPtrCounter();
+unsigned mem_getTotalAllocated();
 
 #endif /* GENERALDEFINITIONS_H_ */

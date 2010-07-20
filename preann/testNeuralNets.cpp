@@ -9,21 +9,24 @@ using namespace std;
 #include "cudaLayer2.h"
 
 #define PATH "/home/timon/test.nn"
-#define ALLOWED_ERROR 15
+//TODO pensar una forma de poner un error razonable
+#define ALLOWED_ERROR (0.01)
 
 void assertEquals(Interface* expected, Interface* actual)
 {
+
 	if (expected->getVectorType() != actual->getVectorType()){
 		throw "The interfaces are not even of the same type!";
 	}
 	if (expected->getVectorType() == FLOAT){
-
+		float allowedError = ALLOWED_ERROR * expected->getSize();
+		printf("allowedError %f\n", allowedError);
 		for (unsigned i=0; i < expected->getSize(); i++) {
 
 			float difference = (expected->getElement(i) / 100) * (expected->getElement(i) - actual->getElement(i));
 
-			if ((difference > 0 && difference > ALLOWED_ERROR) ||
-					(difference < 0 && difference < - ALLOWED_ERROR)){
+			if ((difference > 0 && difference > allowedError) ||
+					(difference < 0 && difference < - allowedError)){
 				printf("expected:\n");
 				expected->print();
 				printf("actual:\n");
@@ -66,6 +69,8 @@ Interface* testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorTyp
 
 	Interface* result = new Interface(nn->getOutput(0));
 	delete (nn);
+//	mem_printTotalAllocated();
+//	mem_printTotalPointers();
 	return result;
 }
 
@@ -95,7 +100,7 @@ int main(int argc, char *argv[]) {
 				inputType = FLOAT;
 				functionType = IDENTITY;
 				minSize = 32;
-				maxSize = 7500;
+				maxSize = 2000;
 				sizeIncrease = 32;
 				break;
 			case 1:
@@ -135,11 +140,11 @@ int main(int argc, char *argv[]) {
 				Interface* cppResult = testNeuralNet(nn, size, inputType, times, chrono);
 				printf("C++ %f \n", chrono.getSeconds());
 
-//				nn = new NeuralNet(SSE2);
-//				Interface* xmmResult = testNeuralNet(nn, size, inputType, times, chrono);
-//				printf("XMM %f \n", chrono.getSeconds());
-//				assertEquals(cppResult, xmmResult);
-//				delete(xmmResult);
+				nn = new NeuralNet(SSE2);
+				Interface* xmmResult = testNeuralNet(nn, size, inputType, times, chrono);
+				printf("XMM %f \n", chrono.getSeconds());
+				assertEquals(cppResult, xmmResult);
+				delete(xmmResult);
 
 				for (unsigned algorithm = 0; algorithm < 1; algorithm++){
 					//algorithm = 2;
@@ -172,8 +177,8 @@ int main(int argc, char *argv[]) {
 
 
 		printf("Exit success.\n", 1);
-		printTotalAllocated();
-		printTotalPointers();
+		mem_printTotalAllocated();
+		mem_printTotalPointers();
 	} catch (string error) {
 		cout << "Error: " << error << endl;
 	} catch (...) {

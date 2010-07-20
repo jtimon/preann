@@ -10,7 +10,13 @@ NVCC_LINK = /usr/local/cuda/bin/nvcc -L/usr/local/cuda/lib -lcudart
 NVCC_COMPILE = /usr/local/cuda/bin/nvcc -g -G -c -arch sm_11 --device-emulation
 NASM = nasm -f elf
 
-all: preann testNeuralNets
+all: preann testNeuralNets testMemoryLosses
+
+
+testMemoryLosses: $(NETS_OBJ) testMemoryLosses.o
+	$(NVCC_LINK) -o testMemoryLosses $(NETS_OBJ) testMemoryLosses.o
+testMemoryLosses.o : testMemoryLosses.cpp $(NETS_OBJ)
+	$(CXX) testMemoryLosses.cpp
 
 testNeuralNets: $(NETS_OBJ) testNeuralNets.o
 	$(NVCC_LINK) -o testNeuralNets $(NETS_OBJ) testNeuralNets.o

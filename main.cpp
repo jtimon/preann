@@ -28,8 +28,8 @@ float testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType,
 	nn->getOutput(0)->print();
 
 	delete (nn);
-	//printTotalAllocated();
-	//printTotalPointers();
+	//mem_printTotalAllocated();
+	//mem_printTotalPointers();
 	return chrono.getSeconds();
 }
 
@@ -83,8 +83,8 @@ int main(int argc, char *argv[]) {
 				nn = new NeuralNet();
 
 				nn->createInput(size, inputType);
-				printTotalAllocated();
-				printTotalPointers();
+				mem_printTotalAllocated();
+				mem_printTotalPointers();
 				//nn->createFeedForwardNet(numlayers, size, inputType, functionType);
 				//TODO petaba con 16 < numlayers <=30 y size 512 (en Desktop)
 				nn->createFullyConnectedNet(numlayers, size, inputType,
@@ -95,8 +95,8 @@ int main(int argc, char *argv[]) {
 				nn->save(stream);
 				fclose(stream);
 				delete (nn);
-				printTotalAllocated();
-				printTotalPointers();
+				mem_printTotalAllocated();
+				mem_printTotalPointers();
 
 				nn = new NeuralNet(C);
 				seconds = testNeuralNet(nn, size, inputType, times);
@@ -132,8 +132,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		printf("Exit success.\n", 1);
-		printTotalAllocated();
-		printTotalPointers();
+		mem_printTotalAllocated();
+		mem_printTotalPointers();
 	} catch (string error) {
 		cout << "Error: " << error << endl;
 	} catch (...) {

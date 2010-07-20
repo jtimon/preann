@@ -25,7 +25,7 @@ void* mi_malloc(unsigned size) {
 
 	ptrs[ptr_counter] = toReturn;
 	ptr_sizes[ptr_counter] = size;
-	//cout<<"se reserva: "<<(unsigned)ptrs[ptr_counter]<<" con "<<ptr_sizes[ptr_counter]<<" bytes."<<endl;
+	//printf("Se reserva el puntero en pos %d con tamaño %d y dirección %d\n", ptr_counter, ptr_sizes[ptr_counter], ptrs[ptr_counter]);
 
 	totalAllocated += size;
 	++ptr_counter;
@@ -39,8 +39,8 @@ void mi_free(void* ptr) {
 	unsigned i = 0;
 	while (!found && i < ptr_counter) {
 		if (ptr == ptrs[i]) {
-			//cout<<"se vacia: "<<(unsigned)ptrs[i]<<" de "<<ptr_sizes[i]<<" bytes."<<endl;
 			found = 1;
+			//printf("Se libera el puntero en pos %d con tamaño %d y dirección %d\n", i, ptr_sizes[i], ptrs[i]);
 			totalAllocated -= ptr_sizes[i];
 			ptr_counter--;
 			free(ptr);
@@ -62,7 +62,7 @@ void mi_free(void* ptr) {
 	}
 }
 
-void printTotalAllocated() {
+void mem_printTotalAllocated() {
 	unsigned aux = totalAllocated;
 	unsigned mb, kb, b;
 	kb = aux / 1024;
@@ -77,8 +77,22 @@ void printTotalAllocated() {
 			<< " Bytes allocated. ( total " <<totalAllocated<<" Bytes )"<<endl;
 }
 
-void printTotalPointers() {
+void mem_printTotalPointers() {
 	cout << "There are " << ptr_counter << " pointers allocated." << endl;
+}
+
+void mem_printListOfPointers(){
+	for (unsigned i = 0; i < ptr_counter; i++){
+		printf(" %d mem_address %d  size = %d \n", i, (unsigned)ptrs[i], ptr_sizes[i]);
+	}
+}
+
+unsigned mem_getPtrCounter(){
+	return ptr_counter;
+}
+
+unsigned mem_getTotalAllocated(){
+	return totalAllocated;
 }
 
 float Function(float number, FunctionType functionType) {

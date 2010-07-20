@@ -75,6 +75,7 @@ void Layer::addInput(Vector* input)
 		memcpy(newInputs, inputs, numberInputs * sizeof(Vector*));
 		memcpy(newWeighsPtr, weighs, numberInputs * sizeof(void*));
 		mi_free(inputs);
+		mi_free(weighs);
 	}
 	inputs = newInputs;
 	weighs = newWeighsPtr;
