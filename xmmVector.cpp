@@ -106,8 +106,6 @@ void XmmVector::copyTo(Interface* interface)
 			interface->setElement(i, ((float*)data)[i]);
 		}
 	} else {
-		//TODO quitar mensaje
-		printf("copiando a de un vector que no es float");
 		unsigned char* vectorData = (unsigned char*)data;
 		unsigned blockOffset = 0;
 		unsigned bytePos = 0;

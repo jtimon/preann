@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
 				inputType = BIT;
 				functionType = BINARY_STEP;
 				minSize = 32;
-				maxSize = 1025;
+				maxSize = 2000;
 				sizeIncrease = 32;
 				break;
 			case 2:
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
 				inputType = SIGN;
 				functionType = BIPOLAR_STEP;
 				minSize = 32;
-				maxSize = 512;
+				maxSize = 2000;
 				sizeIncrease = 32;
 				break;
 			}

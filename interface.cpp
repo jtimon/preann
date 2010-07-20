@@ -75,9 +75,6 @@ float Interface::getElement(unsigned  pos)
 		return ((float*)data)[pos];
 	}
 	else {
-
-		//TODO quitar mensaje
-		printf("obteniendo un elemento que no es float");
 		unsigned  mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
 
 		if ( ((unsigned*)data)[pos / BITS_PER_UNSIGNED] & mask){
@@ -104,8 +101,6 @@ void Interface::setElement(unsigned  pos, float value)
 		((float*)data)[pos] = value;
 
 	} else {
-		//TODO quitar mensaje
-		printf("informando un elemento que no es float");
 		unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
 
 		if (value > 0){
