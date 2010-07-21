@@ -2,6 +2,7 @@
 #define XMMLAYER_H_
 
 #include "cppLayer.h"
+#include "sse2_code.h"
 
 class XmmLayer: public CppLayer
 {

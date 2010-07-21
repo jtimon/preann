@@ -1,6 +1,10 @@
 
 # Project: Paralel Reinforcement Evolutionary Artificial Neural Network
- 
+
+TEST_MEMORY_LOSSES = ./bin/testMemoryLosses
+TEST_NEURAL_NETS = ./bin/testNeuralNets
+PREANN = ./bin/preann
+
 CLASSIFCATON_OBJ = classificationTask.o
 GA_OBJ = population.o task.o individual.o
 NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o factory.o interface.o cudaVector.o
@@ -10,21 +14,21 @@ NVCC_LINK = /usr/local/cuda/bin/nvcc -L/usr/local/cuda/lib -lcudart
 NVCC_COMPILE = /usr/local/cuda/bin/nvcc -g -G -c -arch sm_11 --device-emulation
 NASM = nasm -f elf
 
-all: preann testNeuralNets testMemoryLosses
+all: $(PREANN) $(TEST_NEURAL_NETS) $(TEST_MEMORY_LOSSES)
 
 
-testMemoryLosses: $(NETS_OBJ) testMemoryLosses.o
-	$(NVCC_LINK) -o testMemoryLosses $(NETS_OBJ) testMemoryLosses.o
+$(TEST_MEMORY_LOSSES): $(NETS_OBJ) testMemoryLosses.o
+	$(NVCC_LINK) -o $(TEST_MEMORY_LOSSES) $(NETS_OBJ) testMemoryLosses.o
 testMemoryLosses.o : testMemoryLosses.cpp $(NETS_OBJ)
 	$(CXX) testMemoryLosses.cpp
 
-testNeuralNets: $(NETS_OBJ) testNeuralNets.o
-	$(NVCC_LINK) -o testNeuralNets $(NETS_OBJ) testNeuralNets.o
+$(TEST_NEURAL_NETS): $(NETS_OBJ) testNeuralNets.o
+	$(NVCC_LINK) -o $(TEST_NEURAL_NETS) $(NETS_OBJ) testNeuralNets.o
 testNeuralNets.o : testNeuralNets.cpp $(NETS_OBJ)
 	$(CXX) testNeuralNets.cpp
 
-preann: $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ) main.o
-	$(NVCC_LINK) -o preann $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ) main.o
+$(PREANN): $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ) main.o
+	$(NVCC_LINK) -o $(PREANN) $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ) main.o
 main.o : main.cpp $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ)
 	$(CXX) main.cpp
 
@@ -40,22 +44,31 @@ neuralNet.o : neuralNet.cpp neuralNet.h layer.o factory.o
 	$(CXX) neuralNet.cpp
 factory.o : factory.cpp factory.h cppLayer.o xmmLayer.o cudaLayer.o cudaLayer2.o
 	$(CXX) factory.cpp
+
 cudaLayer2.o : cudaLayer2.cpp cudaLayer2.h cudaLayer.o
 	$(CXX) cudaLayer2.cpp
-cudaLayer.o : cudaLayer.cpp cudaLayer.h layer.o cudaVector.o
+cudaLayer.o : cudaLayer.cpp cudaLayer.h cuda_code.o
 	$(CXX) cudaLayer.cpp
-xmmLayer.o : xmmLayer.cpp xmmLayer.h cppLayer.o xmmVector.o
+
+xmmLayer.o : xmmLayer.cpp xmmLayer.h cppLayer.o sse2_code.o
 	$(CXX) xmmLayer.cpp
-cppLayer.o : cppLayer.cpp cppLayer.h layer.o
+cppLayer.o : cppLayer.cpp cppLayer.h
 	$(CXX) cppLayer.cpp
+
+cppLayer.o cudaLayer.o : layer.o
+
 layer.o : layer.h layer.cpp vector.o
 	$(CXX) layer.cpp
-cudaVector.o : cudaVector.h cudaVector.cpp vector.o cuda_code.o
+
+cudaVector.o : cudaVector.h cudaVector.cpp cuda_code.o
 	$(NVCC_COMPILE) -c cudaVector.cpp
-xmmVector.o : xmmVector.h xmmVector.cpp cppVector.o sse2_code.o
+xmmVector.o : xmmVector.h xmmVector.cpp sse2_code.o
 	$(CXX) xmmVector.cpp
-cppVector.o : cppVector.h cppVector.cpp vector.o
+cppVector.o : cppVector.h cppVector.cpp
 	$(CXX) cppVector.cpp
+
+cppVector.o xmmVector.o cudaVector.o : vector.o
+  
 vector.o : vector.h vector.cpp interface.o
 	$(CXX) vector.cpp
 interface.o : interface.h interface.cpp commonFunctions.o

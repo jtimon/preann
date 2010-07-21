@@ -8,10 +8,10 @@
 #ifndef XMMVECTOR_H_
 #define XMMVECTOR_H_
 
-#include "cppVector.h"
+#include "vector.h"
 #include "sse2_code.h"
 
-class XmmVector: public CppVector {
+class XmmVector: public Vector {
 	virtual unsigned getByteSize();
 public:
 	XmmVector(unsigned size, VectorType vectorType);

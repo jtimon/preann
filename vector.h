@@ -8,7 +8,6 @@
 #ifndef VECTOR_H_
 #define VECTOR_H_
 
-#include "sse2_code.h"
 #include "interface.h"
 
 class Vector {
@@ -30,7 +29,6 @@ public:
 	unsigned getSize();
 	VectorType getVectorType();
 	FunctionType getFunctionType();
-
 	void print();
 };
 

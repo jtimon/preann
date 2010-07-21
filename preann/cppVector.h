@@ -11,9 +11,8 @@
 #include "vector.h"
 
 class CppVector: public Vector {
-protected:
-
 	virtual unsigned getByteSize();
+protected:
 	CppVector(){};
 public:
 	CppVector(unsigned size, VectorType vectorType);
