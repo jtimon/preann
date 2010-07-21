@@ -1,9 +1,9 @@
 #include "layer.h"
 #include "factory.h"
 
-Vector* Layer::newVector(unsigned size, VectorType vectorType, FunctionType functionType)
+Vector* Layer::newVector(unsigned size, VectorType vectorType)
 {
-	return Factory::newVector(size, vectorType, getImplementationType(), functionType);
+	return Factory::newVector(size, vectorType, getImplementationType());
 }
 
 Layer::Layer()
@@ -68,7 +68,7 @@ void Layer::calculateOutput()
 //		printf("%f ", results[i]);
 //	}
 //	printf("\n----------------\n", 1);
-	output->activation(results);
+	output->activation(results, functionType);
 }
 
 void Layer::addInput(Vector* input)
@@ -94,7 +94,6 @@ void Layer::save(FILE* stream)
 {
 	unsigned size = output->getSize();
 	VectorType outputType = output->getVectorType();
-	FunctionType functionType = output->getFunctionType();
 
 	fwrite(&size, sizeof(unsigned), 1, stream);
 	fwrite(&outputType, sizeof(VectorType), 1, stream);
@@ -144,9 +143,14 @@ float* Layer::getThresholdsPtr()
 	return thresholds;
 }
 
-void *Layer::getWeighsPtr(unsigned inputPos)
+void* Layer::getWeighsPtr(unsigned inputPos)
 {
 	return weighs;
+}
+
+FunctionType Layer::getFunctionType()
+{
+   return functionType;
 }
 
 /*

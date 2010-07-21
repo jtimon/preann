@@ -8,16 +8,16 @@
 #include "cudaVector.h"
 #include "cudaLayer2.h"
 
-Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType, FunctionType functionType)
+Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType)
 {
 	switch(implementationType){
 		case C:
-			return new CppVector(size, vectorType, functionType);
+			return new CppVector(size, vectorType);
 		case SSE2:
-			return new XmmVector(size, vectorType, functionType);
+			return new XmmVector(size, vectorType);
 		case CUDA:
 		case CUDA2:
-			return new CudaVector(size, vectorType, functionType);
+			return new CudaVector(size, vectorType);
 	}
 }
 

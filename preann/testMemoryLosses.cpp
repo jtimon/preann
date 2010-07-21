@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 					}
 
 					printf(" size = %d \n", size);
-					Vector* vector = Factory::newVector(size, vectorType, implementationType, IDENTITY);
+					Vector* vector = Factory::newVector(size, vectorType, implementationType);
 
 					mem_printTotalAllocated();
 					mem_printTotalPointers();

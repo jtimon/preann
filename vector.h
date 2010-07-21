@@ -17,7 +17,6 @@ protected:
 	unsigned size;
 	void* data;
 	VectorType vectorType;
-	FunctionType functionType;
 
 	Vector(){};
 public:
@@ -25,7 +24,7 @@ public:
 
 	virtual void copyFrom(Interface* interface) = 0;
 	virtual void copyTo(Interface* interface) = 0;
-	virtual void activation(float* results) = 0;
+	virtual void activation(float* results, FunctionType functionType) = 0;
 
 	void* getDataPointer();
 	unsigned getSize();

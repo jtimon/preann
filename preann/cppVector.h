@@ -16,12 +16,12 @@ protected:
 	virtual unsigned getByteSize();
 	CppVector(){};
 public:
-	CppVector(unsigned size, VectorType vectorType, FunctionType functionType);
+	CppVector(unsigned size, VectorType vectorType);
 	virtual ~CppVector();
 
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
-	virtual void activation(float* results);
+	virtual void activation(float* results, FunctionType functionType);
 
 };
 

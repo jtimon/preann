@@ -34,9 +34,4 @@ void Vector::print()
 	delete(interface);
 }
 
-//TODO llevar function type a layer
-FunctionType Vector::getFunctionType()
-{
-   return functionType;
-}
 

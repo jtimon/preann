@@ -11,7 +11,7 @@
 
 class Factory {
 public:
-	static Vector* newVector(unsigned size, VectorType vectorType, ImplementationType implementationType = SSE2, FunctionType functionType = IDENTITY);
+	static Vector* newVector(unsigned size, VectorType vectorType, ImplementationType implementationType = SSE2);
 	static Layer* newLayer(ImplementationType implementationType);
 };
 

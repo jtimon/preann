@@ -118,8 +118,7 @@ void NeuralNet::addLayer(Layer* layer) {
 	layers[numberLayers++] = layer;
 }
 
-void NeuralNet::addLayer(unsigned size, VectorType destinationType,
-		FunctionType functiontype) {
+void NeuralNet::addLayer(unsigned size, VectorType destinationType, FunctionType functiontype) {
 	Layer* layer = Factory::newLayer(implementationType);
 	layer->init(size, destinationType, functiontype);
 	addLayer(layer);

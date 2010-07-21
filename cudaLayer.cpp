@@ -8,7 +8,8 @@ CudaLayer::CudaLayer()
 
 void CudaLayer::init(unsigned size, VectorType outputType, FunctionType functionType)
 {
-	output = newVector(size, outputType, functionType);
+	this->functionType = functionType;
+	output = newVector(size, outputType);
 	thresholds = (float*)cuda_malloc(sizeof(float) * size);
 }
 
@@ -149,7 +150,7 @@ void CudaLayer::mutateThreshold(unsigned outputPos, float mutation)
 void CudaLayer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
 {
 	unsigned weighsSize = bitVector->getSize();
-	CudaVector* cudaBitVector = new CudaVector(weighsSize, Cuda_Threads_Per_Block);
+	CudaVector* cudaBitVector = new CudaVector(weighsSize, BIT, Cuda_Threads_Per_Block);
 	cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
 	unsigned* cudaBitVectorPtr = (unsigned*)cudaBitVector->getDataPointer();
 

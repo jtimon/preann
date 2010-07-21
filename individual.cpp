@@ -26,7 +26,7 @@ Individual* Individual::newCopy()
 	for (unsigned i=0; i < numberLayers; i++){
 
 		Vector* output = layers[i]->getOutput();
-		copy->addLayer(output->getSize(), output->getVectorType(), output->getFunctionType());
+		copy->addLayer(output->getSize(), output->getVectorType(), layers[i]->getFunctionType());
 	}
 
 	for (unsigned i=0; i<numberInputs; i++){

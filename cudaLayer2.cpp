@@ -61,7 +61,7 @@ void CudaLayer2::crossoverWeighs(Layer *other, unsigned  inputLayer, Interface *
 		}
 	}
 
-	CudaVector cudaBitVector = CudaVector(weighsSize, Cuda_Threads_Per_Block);
+	CudaVector cudaBitVector = CudaVector(weighsSize, BIT, Cuda_Threads_Per_Block);
 	cudaBitVector.copyFrom2(bitVector, Cuda_Threads_Per_Block);
 	unsigned* cudaBitVectorPtr = (unsigned*)cudaBitVector.getDataPointer();
 

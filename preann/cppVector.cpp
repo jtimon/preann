@@ -7,11 +7,10 @@
 
 #include "cppVector.h"
 
-CppVector::CppVector(unsigned size, VectorType vectorType, FunctionType functionType)
+CppVector::CppVector(unsigned size, VectorType vectorType)
 {
 	this->size = size;
 	this->vectorType = vectorType;
-	this->functionType = functionType;
 
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
@@ -64,7 +63,7 @@ void CppVector::copyTo(Interface* interface)
 	memcpy(interface->getDataPointer(), data, this->getByteSize());
 }
 
-void CppVector::activation(float* results)
+void CppVector::activation(float* results, FunctionType functionType)
 {
 	if (vectorType == FLOAT){
 		for (unsigned i=0; i < size; i++){

@@ -9,11 +9,11 @@
 
 //TODO no me gusta, no cuadra con la factory
 //special constructor for bit coalescing vectors
-CudaVector::CudaVector(unsigned size, unsigned block_size)
+CudaVector::CudaVector(unsigned size, VectorType vectorType, unsigned block_size)
 {
 	(((size-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
 	this->size = size;
-	this->vectorType = BIT;
+	this->vectorType = vectorType;
 
 	unsigned byte_sz = ((size-1)/(BITS_PER_UNSIGNED * block_size)+1) * (sizeof(unsigned) * block_size);
 	data = cuda_malloc(byte_sz);
@@ -21,11 +21,10 @@ CudaVector::CudaVector(unsigned size, unsigned block_size)
 	cuda_setZero(data, byte_sz, vectorType, CUDA_THREADS_PER_BLOCK);
 }
 
-CudaVector::CudaVector(unsigned size, VectorType vectorType, FunctionType functionType)
+CudaVector::CudaVector(unsigned size, VectorType vectorType)
 {
 	this->size = size;
 	this->vectorType = vectorType;
-	this->functionType = functionType;
 
 	unsigned byte_sz = getByteSize();
 	data = cuda_malloc(byte_sz);
@@ -109,7 +108,7 @@ void CudaVector::copyTo(Interface *interface)
 	cuda_copyToHost(interface->getDataPointer(), data, this->getByteSize());
 }
 
-void CudaVector::activation(float* results)
+void CudaVector::activation(float* results, FunctionType functionType)
 {
 	cuda_activation(data, size, vectorType, results, functionType, CUDA_THREADS_PER_BLOCK);
 }

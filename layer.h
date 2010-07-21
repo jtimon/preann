@@ -27,7 +27,7 @@ protected:
 	virtual void mutateThreshold(unsigned outputPos, float mutation) = 0;
 
 	Layer();
-	Vector* newVector(unsigned size, VectorType vectorType, FunctionType functionType);
+	Vector* newVector(unsigned size, VectorType vectorType);
 public:
 	virtual void init(unsigned size, VectorType outputType, FunctionType functionType) = 0;
 	virtual ~Layer();
@@ -52,6 +52,7 @@ public:
 	Vector* getOutput();
 	float* getThresholdsPtr();
 	void* getWeighsPtr(unsigned inputPos);
+	FunctionType getFunctionType();
 
 	void mutateWeigh(float mutationRange);
 	void mutateWeighs(float probability, float mutationRange);

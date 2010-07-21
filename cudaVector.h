@@ -15,14 +15,14 @@ class CudaVector: public Vector {
 
 	virtual unsigned getByteSize();
 public:
-	CudaVector(unsigned size, unsigned block_size);
-	CudaVector(unsigned size, VectorType vectorType, FunctionType functionType);
+	CudaVector(unsigned size, VectorType vectorType, unsigned block_size);
+	CudaVector(unsigned size, VectorType vectorType);
 	virtual ~CudaVector();
 
 	virtual void copyFrom2(Interface* interface, unsigned block_size);
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
-	virtual void activation(float* results);
+	virtual void activation(float* results, FunctionType functionType);
 };
 
 #endif /* CUDAVECTOR_H_ */

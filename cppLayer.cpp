@@ -7,7 +7,8 @@ CppLayer::CppLayer()
 
 void CppLayer::init(unsigned size, VectorType outputType, FunctionType functionType)
 {
-	output = newVector(size, outputType, functionType);
+	this->functionType = functionType;
+	output = newVector(size, outputType);
 	thresholds = (float*)mi_malloc(sizeof(float) * size);
 }
 

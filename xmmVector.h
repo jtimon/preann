@@ -14,12 +14,12 @@
 class XmmVector: public CppVector {
 	virtual unsigned getByteSize();
 public:
-	XmmVector(unsigned size, VectorType vectorType, FunctionType functionType);
+	XmmVector(unsigned size, VectorType vectorType);
 	virtual ~XmmVector();
 
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
-	virtual void activation(float* results);
+	virtual void activation(float* results, FunctionType functionType);
 };
 
 #endif /* XMMVECTOR_H_ */

@@ -1,10 +1,9 @@
 #include "xmmVector.h"
 
-XmmVector::XmmVector(unsigned size, VectorType vectorType, FunctionType functionType)
+XmmVector::XmmVector(unsigned size, VectorType vectorType)
 {
 	this->size = size;
 	this->vectorType = vectorType;
-	this->functionType = functionType;
 
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
@@ -125,7 +124,7 @@ void XmmVector::copyTo(Interface* interface)
 	}
 }
 
-void XmmVector::activation(float* results)
+void XmmVector::activation(float* results, FunctionType functionType)
 {
 	if (vectorType == FLOAT){
 		for (unsigned i=0; i < size; i++){
