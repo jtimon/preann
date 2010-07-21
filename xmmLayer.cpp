@@ -1,18 +1,12 @@
 #include "xmmLayer.h"
 
-
 XmmLayer::XmmLayer()
 {
 }
 
-XmmLayer::XmmLayer(unsigned size, VectorType outputType, FunctionType functionType)
-{
-	init(size, outputType, functionType);
-}
-
 void XmmLayer::init(unsigned size, VectorType outputType, FunctionType functionType)
 {
-	output = new XmmVector(size, outputType, functionType);
+	output = newVector(size, outputType, functionType);
 	thresholds = (float*)mi_malloc(sizeof(float) * size);
 }
 

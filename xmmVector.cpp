@@ -4,16 +4,7 @@ XmmVector::XmmVector(unsigned size, VectorType vectorType, FunctionType function
 {
 	this->size = size;
 	this->vectorType = vectorType;
-	switch (functionType){
-		case FLOAT:
-			this->functionType = functionType;
-			break;
-		case BIT:
-			this->functionType = BINARY_STEP;
-			break;
-		case SIGN:
-			this->functionType = BIPOLAR_STEP;
-	}
+	this->functionType = functionType;
 
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
@@ -173,10 +164,12 @@ void XmmVector::activation(float* results)
 
 unsigned XmmVector::getByteSize()
 {
+	unsigned numBlocks;
 	if (vectorType == FLOAT){
-		return (((size-1)/FLOATS_PER_BLOCK)+1) * BYTES_PER_BLOCK;
+		numBlocks = ((size-1)/FLOATS_PER_BLOCK)+1;
 	}
 	else {
-		return (((size-1)/BITS_PER_BLOCK)+1) * BYTES_PER_BLOCK;
+		numBlocks = ((size-1)/BITS_PER_BLOCK)+1;
 	}
+	return numBlocks * BYTES_PER_BLOCK;
 }

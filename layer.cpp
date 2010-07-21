@@ -1,11 +1,16 @@
 #include "layer.h"
+#include "factory.h"
+
+Vector* Layer::newVector(unsigned size, VectorType vectorType, FunctionType functionType)
+{
+	return Factory::newVector(size, vectorType, getImplementationType(), functionType);
+}
 
 Layer::Layer()
 {
 	inputs = NULL;
 	weighs = NULL;
 	numberInputs = 0;
-
 	thresholds = NULL;
 	output = NULL;
 }

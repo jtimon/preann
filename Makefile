@@ -3,7 +3,7 @@
  
 CLASSIFCATON_OBJ = classificationTask.o
 GA_OBJ = population.o task.o individual.o
-NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o factory.o interface.o cudaVector.o
+NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o factory.o interface.o cudaVector.o
 
 CXX = g++-4.3 -ggdb -c
 NVCC_LINK = /usr/local/cuda/bin/nvcc -L/usr/local/cuda/lib -lcudart
@@ -52,8 +52,10 @@ layer.o : layer.h layer.cpp vector.o
 	$(CXX) layer.cpp
 cudaVector.o : cudaVector.h cudaVector.cpp vector.o cuda_code.o
 	$(NVCC_COMPILE) -c cudaVector.cpp
-xmmVector.o : xmmVector.h xmmVector.cpp vector.o sse2_code.o
+xmmVector.o : xmmVector.h xmmVector.cpp cppVector.o sse2_code.o
 	$(CXX) xmmVector.cpp
+cppVector.o : cppVector.h cppVector.cpp vector.o
+	$(CXX) cppVector.cpp
 vector.o : vector.h vector.cpp interface.o
 	$(CXX) vector.cpp
 interface.o : interface.h interface.cpp commonFunctions.o

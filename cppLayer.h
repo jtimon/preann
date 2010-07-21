@@ -23,11 +23,8 @@ protected:
 
 	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 	virtual void mutateThreshold(unsigned outputPos, float mutation);
-
-
 public:
 	CppLayer();
-	CppLayer(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~CppLayer();
 	virtual ImplementationType getImplementationType() {
 		return C;

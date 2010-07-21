@@ -15,67 +15,62 @@ int main(int argc, char *argv[]) {
 	try {
 
 		//test Vectors
-//		for (unsigned vectType = 0; vectType < 3; vectType++) {
-//			for (unsigned implType = 0; implType < 4; implType++) {
-//				for (unsigned size = 1; size < 200; size++){
-//
-//					printf(" Vector ");
-//					VectorType vectorType;
-//					switch (vectType) {
-//					case 0:
-//						vectorType = FLOAT;
-//						printf(" FLOAT ");
-//						break;
-//					case 1:
-//						vectorType = BIT;
-//						printf(" BIT ");
-//						break;
-//					case 2:
-//						vectorType = SIGN;
-//						printf(" SIGN ");
-//						break;
-//					}
-//
-//					ImplementationType implementationType;
-//					switch (implType) {
-//					case 0:
-//						implementationType = C;
-//						printf(" C ");
-//						break;
-//					case 1:
-//						implementationType = SSE2;
-//						printf(" SSE2 ");
-//						break;
-//					case 2:
-//						implementationType = CUDA;
-//						printf(" CUDA ");
-//						break;
-//					case 3:
-//						implementationType = CUDA2;
-//						printf(" CUDA2 ");
-//						break;
-//					}
-//
-//					printf(" size = %d \n", size);
-//					Vector* vector = Factory::newVector(size, vectorType, implementationType, IDENTITY);
-//
-//					mem_printTotalAllocated();
-//					mem_printTotalPointers();
-//
-//					delete(vector);
-//
-//					printf("-- after deleting --\n");
-//					mem_printTotalAllocated();
-//					mem_printTotalPointers();
-//					printf("-- -------------- --\n");
-//
-//					if (getPtrCounter() > 0 || getTotalAllocated() > 0 ){
-//						string error = "Memory loss detected testing class Vector.\n";
-//						throw error;
-//					}
-//				}
-//			}
-//		}
+		for (unsigned vectType = 0; vectType < 3; vectType++) {
+			for (unsigned implType = 0; implType < 4; implType++) {
+				for (unsigned size = 1; size < 200; size++){
+
+					printf(" Vector ");
+					VectorType vectorType;
+					switch (vectType) {
+					case 0:
+						vectorType = FLOAT;
+						printf(" FLOAT ");
+						break;
+					case 1:
+						vectorType = BIT;
+						printf(" BIT ");
+						break;
+					case 2:
+						vectorType = SIGN;
+						printf(" SIGN ");
+						break;
+					}
+
+					ImplementationType implementationType;
+					switch (implType) {
+					case 0:
+						implementationType = C;
+						printf(" C ");
+						break;
+					case 1:
+						implementationType = SSE2;
+						printf(" SSE2 ");
+						break;
+					case 2:
+						implementationType = CUDA;
+						printf(" CUDA ");
+						break;
+					case 3:
+						implementationType = CUDA2;
+						printf(" CUDA2 ");
+						break;
+					}
+
+					printf(" size = %d \n", size);
+					Vector* vector = Factory::newVector(size, vectorType, implementationType, IDENTITY);
+
+					mem_printTotalAllocated();
+					mem_printTotalPointers();
+					printf("------------------\n");
+					delete(vector);
+
+					if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
+						string error = "Memory loss detected testing class Vector.\n";
+						throw error;
+					}
+				}
+			}
+		}
 
 		//test Layers
 		for (unsigned vectType = 0; vectType < 3; vectType++) {

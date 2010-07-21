@@ -2,7 +2,6 @@
 #define XMMLAYER_H_
 
 #include "cppLayer.h"
-#include "xmmVector.h"
 
 class XmmLayer: public CppLayer
 {
@@ -13,7 +12,6 @@ protected:
 	virtual void* newWeighs(unsigned inputSize, VectorType inputType);
 public:
 	XmmLayer();
-	XmmLayer(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~XmmLayer();
 	virtual ImplementationType getImplementationType() {
 		return SSE2;

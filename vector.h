@@ -19,15 +19,13 @@ protected:
 	VectorType vectorType;
 	FunctionType functionType;
 
-	Vector() {};
-	virtual unsigned getByteSize();
+	Vector(){};
 public:
-	Vector(unsigned size, VectorType vectorType, FunctionType functionType);
 	virtual ~Vector();
 
-	virtual void copyFrom(Interface* interface);
-	virtual void copyTo(Interface* interface);
-	virtual void activation(float* results);
+	virtual void copyFrom(Interface* interface) = 0;
+	virtual void copyTo(Interface* interface) = 0;
+	virtual void activation(float* results) = 0;
 
 	void* getDataPointer();
 	unsigned getSize();

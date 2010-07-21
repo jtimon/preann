@@ -12,8 +12,10 @@
 #include "cuda_code.h"
 
 class CudaVector: public Vector {
+
+	virtual unsigned getByteSize();
 public:
-	CudaVector(unsigned size, VectorType vectorType, unsigned block_size);
+	CudaVector(unsigned size, unsigned block_size);
 	CudaVector(unsigned size, VectorType vectorType, FunctionType functionType);
 	virtual ~CudaVector();
 

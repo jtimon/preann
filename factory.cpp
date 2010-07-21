@@ -1,19 +1,21 @@
 #include "factory.h"
 
 //TODO implementar diferentes veces para decidir en el makefile
+#include "cppVector.h"
 #include "cppLayer.h"
+#include "xmmVector.h"
 #include "xmmLayer.h"
+#include "cudaVector.h"
 #include "cudaLayer2.h"
 
 Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType, FunctionType functionType)
 {
 	switch(implementationType){
 		case C:
-			return new Vector(size, vectorType, functionType);
+			return new CppVector(size, vectorType, functionType);
 		case SSE2:
 			return new XmmVector(size, vectorType, functionType);
 		case CUDA:
-			return new CudaVector(size, vectorType, functionType);
 		case CUDA2:
 			return new CudaVector(size, vectorType, functionType);
 	}

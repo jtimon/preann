@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
 				functionType = IDENTITY;
 				minSize = 32;
 				maxSize = 2000;
-				sizeIncrease = 32;
+				sizeIncrease = 500;
 				break;
 			case 1:
 				cout << "version bit" << endl;
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 				functionType = BINARY_STEP;
 				minSize = 32;
 				maxSize = 2000;
-				sizeIncrease = 32;
+				sizeIncrease = 500;
 				break;
 			case 2:
 				cout << "version sign" << endl;
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
 				functionType = BIPOLAR_STEP;
 				minSize = 32;
 				maxSize = 2000;
-				sizeIncrease = 32;
+				sizeIncrease = 500;
 				break;
 			}
 

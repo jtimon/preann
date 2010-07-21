@@ -18,7 +18,6 @@ protected:
 	void transposeMatrix(void* matrix, unsigned width, unsigned height, VectorType inputType);
 public:
 	CudaLayer2();
-	CudaLayer2(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~CudaLayer2();
 	virtual ImplementationType getImplementationType() {
 		return CUDA2;

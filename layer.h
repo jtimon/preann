@@ -27,6 +27,7 @@ protected:
 	virtual void mutateThreshold(unsigned outputPos, float mutation) = 0;
 
 	Layer();
+	Vector* newVector(unsigned size, VectorType vectorType, FunctionType functionType);
 public:
 	virtual void init(unsigned size, VectorType outputType, FunctionType functionType) = 0;
 	virtual ~Layer();
