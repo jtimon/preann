@@ -139,6 +139,8 @@ void XmmVector::activation(float* results, FunctionType functionType)
 
 		for (unsigned i=0; i < size; i++){
 
+			//TODO quitar mensaje
+			printf(" %f ", results[i]);
 			if (results[i] > 0){
 				vectorData[blockOffset + bytePos] |= vectorMask;
 			} else {
@@ -157,6 +159,8 @@ void XmmVector::activation(float* results, FunctionType functionType)
 				++bytePos;
 			}
 		}
+		//TODO quitar mensaje
+		printf("\n");
 	}
 	mi_free(results);
 }

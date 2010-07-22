@@ -2,6 +2,7 @@
 # Project: Paralel Reinforcement Evolutionary Artificial Neural Network
 
 TEST_MEMORY_LOSSES = ./bin/testMemoryLosses
+TEST_LAYERS = ./bin/testLayers
 TEST_NEURAL_NETS = ./bin/testNeuralNets
 PREANN = ./bin/preann
 
@@ -14,8 +15,12 @@ NVCC_LINK = /usr/local/cuda/bin/nvcc -L/usr/local/cuda/lib -lcudart
 NVCC_COMPILE = /usr/local/cuda/bin/nvcc -g -G -c -arch sm_11 --device-emulation
 NASM = nasm -f elf
 
-all: $(PREANN) $(TEST_NEURAL_NETS) $(TEST_MEMORY_LOSSES)
+all: $(PREANN) $(TEST_NEURAL_NETS) $(TEST_MEMORY_LOSSES) $(TEST_LAYERS)
 
+$(TEST_LAYERS): $(NETS_OBJ) testLayers.o
+	$(NVCC_LINK) -o $(TEST_LAYERS) $(NETS_OBJ) testLayers.o
+testLayers.o : testLayers.cpp $(NETS_OBJ)
+	$(CXX) testLayers.cpp
 
 $(TEST_MEMORY_LOSSES): $(NETS_OBJ) testMemoryLosses.o
 	$(NVCC_LINK) -o $(TEST_MEMORY_LOSSES) $(NETS_OBJ) testMemoryLosses.o

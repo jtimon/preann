@@ -9,15 +9,19 @@ using namespace std;
 #include "cuda_code.h"
 #include "cudaLayer2.h"
 
+#define VECTOR_TYPE_DIM 3
+#define IMPLEMENTATION_TYPE_DIM 4
+#define MAX_SIZE 200
+
 int main(int argc, char *argv[]) {
 	Chronometer total;
 	total.start();
 	try {
 
 		//test Vectors
-		for (unsigned vectType = 0; vectType < 3; vectType++) {
-			for (unsigned implType = 0; implType < 4; implType++) {
-				for (unsigned size = 1; size < 200; size++){
+		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
+			for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
+				for (unsigned size = 1; size < MAX_SIZE; size++){
 
 					printf(" Vector ");
 					VectorType vectorType;
@@ -75,7 +79,7 @@ int main(int argc, char *argv[]) {
 		//test Layers
 		for (unsigned vectType = 0; vectType < 3; vectType++) {
 			for (unsigned implType = 0; implType < 4; implType++) {
-				for (unsigned size = 2; size < 200; size++){
+				for (unsigned size = 1; size < 200; size++){
 
 					printf(" Layer ");
 					VectorType vectorType;

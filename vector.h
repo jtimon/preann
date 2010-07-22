@@ -29,6 +29,7 @@ public:
 	unsigned getSize();
 	VectorType getVectorType();
 	FunctionType getFunctionType();
+	Interface* createInterface();
 	void print();
 };
 

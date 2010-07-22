@@ -14,7 +14,6 @@ using namespace std;
 
 void assertEquals(Interface* expected, Interface* actual)
 {
-
 	if (expected->getVectorType() != actual->getVectorType()){
 		throw "The interfaces are not even of the same type!";
 	}
@@ -92,7 +91,7 @@ int main(int argc, char *argv[]) {
 		unsigned numlayers = 2;
 		unsigned times = 1;
 
-		for (unsigned type = 0; type <= 2; type++) {
+		for (unsigned type = 0; type < 3; type++) {
 
 			switch (type) {
 			case 0:

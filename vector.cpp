@@ -26,6 +26,13 @@ VectorType Vector::getVectorType()
 	return vectorType;
 }
 
+Interface* Vector::createInterface()
+{
+	Interface* toReturn = new Interface(this->size, this->vectorType);
+	this->copyTo(toReturn);
+	return toReturn;
+}
+
 void Vector::print()
 {
 	Interface* interface = new Interface(size, vectorType);

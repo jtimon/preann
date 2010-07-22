@@ -144,6 +144,9 @@ void* XmmLayer::newWeighs(unsigned inputSize, VectorType inputType)
 	//make sure that the xmm code has enough memory to read in the last loop
 	size = (((size -1)/BYTES_PER_BLOCK) + 1) * BYTES_PER_BLOCK;
 
+	//TODO inicializar a 0 los pesos que sobran
+	void* toReturn = mi_malloc(size);
+
 	return mi_malloc(size);
 }
 
