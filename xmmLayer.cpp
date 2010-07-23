@@ -143,14 +143,18 @@ void* XmmLayer::newWeighs(unsigned inputSize, VectorType inputType)
 	}
 	//make sure that the xmm code has enough memory to read in the last loop
 	size = (((size -1)/BYTES_PER_BLOCK) + 1) * BYTES_PER_BLOCK;
-
-	//TODO inicializar a 0 los pesos que sobran
 	void* toReturn = mi_malloc(size);
+	//put to zero all the weighs reserved so they won't be counted when the sse2 algorithm reads them
+	if (inputType == FLOAT) {
+		for (unsigned i=0; i < size/sizeof(float); i++) {
+			((float*)toReturn)[i] = 0;
+		}
+	} else {
+		for (unsigned i=0; i < size; i++) {
+			((unsigned char*)toReturn)[i] = 128;
+		}
+	}
 
-	return mi_malloc(size);
+	return toReturn;
 }
-
-
-
-
 
