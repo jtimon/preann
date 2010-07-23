@@ -15,17 +15,18 @@ CppVector::CppVector(unsigned size, VectorType vectorType)
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
 
-	if (vectorType == FLOAT){
+	switch (vectorType){
 
-		unsigned floatSize = byteSize/sizeof(float);
-		for (unsigned i=0; i< floatSize; i++){
-			((float*)data)[i] = 0;
-		}
-	}
-	else {
-		for (unsigned i=0; i < byteSize; i++){
-			((unsigned char*)data)[i] = 0;
-		}
+	case BYTE:
+		SetValueToAnArray<unsigned char>(data, byteSize, 128);
+		break;
+	case FLOAT:
+		SetValueToAnArray<float>(data, byteSize/sizeof(float), 0);
+		break;
+	case BIT:
+	case SIGN:
+		SetValueToAnArray<unsigned char>(data, byteSize, 0);
+		break;
 	}
 }
 
@@ -100,11 +101,13 @@ void CppVector::activation(float* results, FunctionType functionType)
 
 unsigned CppVector::getByteSize()
 {
-	if (vectorType == FLOAT){
-
+	switch (vectorType){
+	case BYTE:
+		return size;
+	case FLOAT:
 		return size * sizeof(float);
-	}
-	else {
+	case BIT:
+	case SIGN:
 		return (((size-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
 	}
 }

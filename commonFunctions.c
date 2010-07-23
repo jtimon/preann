@@ -138,3 +138,4 @@ unsigned randomUnsigned(unsigned rango) {
 float randomPositiveFloat(float rango) {
 	return (rand() / (float) RAND_MAX) * (rango);
 }
+

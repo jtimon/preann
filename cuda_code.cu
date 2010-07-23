@@ -118,22 +118,35 @@ extern "C" void cuda_copyToHost(void* h_dest, void* d_src, unsigned count)
 
 // INITIALIZATION
 
+template <class vectorType>
 __global__
-void setZeroKernel(float* data, unsigned size)
+void SetValueToAnArrayKernel(vectorType* data, unsigned size, vectorType value)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	if (idx < size)
-		data[idx] = 0;
+		data[idx] = value;
 }
 
 extern "C" void cuda_setZero(void* data, unsigned byteSize, VectorType vectorType, unsigned block_size)
 {
-	if (vectorType == FLOAT) {
-		unsigned size = byteSize / sizeof(float);
-		unsigned grid_size = ((size - 1) / block_size) + 1;
-		setZeroKernel<<< grid_size, block_size >>>((float*)data, size);
-	} else {
+	unsigned grid_size;
+	unsigned size;
+
+	switch (vectorType){
+	case BYTE:
+		size = byteSize / sizeof(unsigned char);
+		grid_size = ((size - 1) / block_size) + 1;
+		SetValueToAnArrayKernel<unsigned char><<< grid_size, block_size >>>((unsigned char*)data, size, (unsigned char)0);
+		break;
+	case FLOAT:
+		size = byteSize / sizeof(float);
+		grid_size = ((size - 1) / block_size) + 1;
+		SetValueToAnArrayKernel<float><<< grid_size, block_size >>>((float*)data, size, 0);
+		break;
+	case BIT:
+	case SIGN:
 		cudaMemset(data, 0, byteSize);
+		break;
 	}
 }
 

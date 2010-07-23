@@ -12,7 +12,6 @@
 
 class Vector {
 protected:
-
 	unsigned size;
 	void* data;
 	VectorType vectorType;
@@ -31,6 +30,16 @@ public:
 	FunctionType getFunctionType();
 	Interface* createInterface();
 	void print();
+
+protected:
+	template <class vectorType>
+	void SetValueToAnArray(void* array, unsigned size, vectorType value)
+	{
+		vectorType* castedArray = (vectorType*)array;
+		for(unsigned i=0; i < size; i++){
+			castedArray[i] = value;
+		}
+	}
 };
 
 #endif /* VECTOR_H_ */

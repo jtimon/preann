@@ -110,16 +110,24 @@ void CudaVector::copyTo(Interface *interface)
 
 void CudaVector::activation(float* results, FunctionType functionType)
 {
+	//TODO quitar mensaje
+	for (unsigned i=0; i < size; i++){
+		printf(" %f ", results[i]);
+	}
+	printf(" \n ");
 	cuda_activation(data, size, vectorType, results, functionType, CUDA_THREADS_PER_BLOCK);
 }
 
 unsigned CudaVector::getByteSize()
 {
-	if (vectorType == FLOAT){
-
+	switch (vectorType){
+	case BYTE:
+		return size;
+		break;
+	case FLOAT:
 		return size * sizeof(float);
-	}
-	else {
+	case BIT:
+	case SIGN:
 		return (((size-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
 	}
 }

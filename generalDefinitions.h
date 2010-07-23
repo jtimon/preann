@@ -20,7 +20,7 @@ using namespace std;
 #define BITS_PER_BYTE (8)
 #define BITS_PER_UNSIGNED (sizeof(unsigned) * BITS_PER_BYTE)
 
-typedef enum {FLOAT, BIT, SIGN} VectorType;
+typedef enum {FLOAT, BYTE, BIT, SIGN} VectorType;
 typedef enum {BINARY_STEP, BIPOLAR_STEP, REAL, IDENTITY, SIGMOID, BIPOLAR_SIGMOID, ANOTHER_FUNCTION} FunctionType;
 typedef enum {ROULETTE_WHEEL, RANKING, TOURNAMENT, TRUNCATION} SelectionType;
 typedef enum {WEIGH_UNIFORM, NEURON_UNIFORM, LAYER_UNIFORM, WEIGH_MULTIPOiNT, NEURON_MULTIPOiNT, LAYER_MULTIPOiNT} CrossoverType;

@@ -8,18 +8,18 @@ XmmVector::XmmVector(unsigned size, VectorType vectorType)
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
 
-	if (vectorType == FLOAT){
+	switch (vectorType){
 
-		unsigned floatSize = byteSize/sizeof(float);
-		for (unsigned i=0; i< floatSize; i++){
-			((float*)data)[i] = 0;
-		}
-	}
-	else {
-
-		for (unsigned i=0; i < byteSize; i++){
-			((unsigned char*)data)[i] = 0;
-		}
+	case BYTE:
+		SetValueToAnArray<unsigned char>(data, byteSize, 128);
+		break;
+	case FLOAT:
+		SetValueToAnArray<float>(data, byteSize/sizeof(float), 0);
+		break;
+	case BIT:
+	case SIGN:
+		SetValueToAnArray<unsigned char>(data, byteSize, 0);
+		break;
 	}
 }
 
@@ -28,6 +28,33 @@ XmmVector::~XmmVector()
 	if (data) {
 		mi_free(data);
 		data = NULL;
+	}
+}
+
+void XmmVector::bitCopyFrom(Interface *interface, unsigned char *vectorData)
+{
+    unsigned blockOffset = 0;
+    unsigned bytePos = 0;
+    unsigned char vectorMask = 128;
+    for (unsigned i=0; i < size; i++){
+
+		if (interface->getElement(i) > 0){
+			vectorData[blockOffset + bytePos] |= vectorMask;
+		} else {
+			vectorData[blockOffset + bytePos] &= ~vectorMask;
+		}
+
+		if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK-1)){
+			bytePos = 0;
+			if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK-1)){
+				blockOffset += BYTES_PER_BLOCK;
+				vectorMask = 128;
+			} else {
+				vectorMask >>= 1;
+			}
+		} else {
+			++bytePos;
+		}
 	}
 }
 
@@ -41,40 +68,48 @@ void XmmVector::copyFrom(Interface* interface)
 		string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
-
-	if (vectorType == FLOAT){
-		//memcpy(data, interface->getDataPointer(), interface->getByteSize());
+	switch (vectorType){
+	case BYTE:
 		for (unsigned i=0; i < size; i++){
-			if (interface->getElement(i) != 0){
-				printf("no se debería tener un elemento no nulo en una interfaz\n");
-			}
-			((float*)data)[i] = interface->getElement(i);
+			((unsigned char*)(data))[i] = interface->getElement(i);
 		}
-	} else {
-		unsigned char* vectorData = (unsigned char*)data;
-		unsigned blockOffset = 0;
-		unsigned bytePos = 0;
-		unsigned char vectorMask = 128;
+		break;
+	case FLOAT:
+		for(unsigned i = 0;i < size;i++){
+			((float*)(data))[i] = interface->getElement(i);
+		}
+		break;
+	case BIT:
+	case SIGN:
+		unsigned char *vectorData = (unsigned char*)(data);
+		bitCopyFrom(interface, vectorData);
+		break;
+	}
+}
 
-		for (unsigned i=0; i < size; i++){
+void XmmVector::bitCopyTo(unsigned char *vectorData, Interface *interface)
+{
+    unsigned blockOffset = 0;
+    unsigned bytePos = 0;
+    unsigned char vectorMask = 128;
+    for (unsigned i=0; i < size; i++){
 
-			if (interface->getElement(i) > 0){
-				vectorData[blockOffset + bytePos] |= vectorMask;
+		if (vectorData[blockOffset + bytePos] & vectorMask){
+			interface->setElement(i, 1);
+		} else {
+			interface->setElement(i, 0);
+		}
+
+		if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK-1)){
+			bytePos = 0;
+			if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK-1)){
+				blockOffset += BYTES_PER_BLOCK;
+				vectorMask = 128;
 			} else {
-				vectorData[blockOffset + bytePos] &= ~vectorMask;
+				vectorMask >>= 1;
 			}
-
-			if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK-1)){
-				bytePos = 0;
-				if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK-1)){
-					blockOffset += BYTES_PER_BLOCK;
-					vectorMask = 128;
-				} else {
-					vectorMask >>= 1;
-				}
-			} else {
-				++bytePos;
-			}
+		} else {
+			++bytePos;
 		}
 	}
 }
@@ -89,38 +124,22 @@ void XmmVector::copyTo(Interface* interface)
 		string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
-
-	if (vectorType == FLOAT){
-		//memcpy(interface->getDataPointer(), data, this->getByteSize());
+	switch (vectorType){
+	case BYTE:
+		for (unsigned i=0; i < size; i++){
+			interface->setElement(i, ((unsigned char*)data)[i]);
+		}
+		break;
+	case FLOAT:
 		for (unsigned i=0; i < size; i++){
 			interface->setElement(i, ((float*)data)[i]);
 		}
-	} else {
-		unsigned char* vectorData = (unsigned char*)data;
-		unsigned blockOffset = 0;
-		unsigned bytePos = 0;
-		unsigned char vectorMask = 128;
-
-		for (unsigned i=0; i < size; i++){
-
-			if (vectorData[blockOffset + bytePos] & vectorMask){
-				interface->setElement(i, 1);
-			} else {
-				interface->setElement(i, 0);
-			}
-
-			if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK-1)){
-				bytePos = 0;
-				if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK-1)){
-					blockOffset += BYTES_PER_BLOCK;
-					vectorMask = 128;
-				} else {
-					vectorMask >>= 1;
-				}
-			} else {
-				++bytePos;
-			}
-		}
+		break;
+	case BIT:
+	case SIGN:
+		unsigned char* vectorData = (unsigned char*)(data);
+		bitCopyTo(vectorData, interface);
+		break;
 	}
 }
 
@@ -168,11 +187,17 @@ void XmmVector::activation(float* results, FunctionType functionType)
 unsigned XmmVector::getByteSize()
 {
 	unsigned numBlocks;
-	if (vectorType == FLOAT){
+	switch (vectorType){
+	case BYTE:
+		numBlocks = ((size-1)/BYTES_PER_BLOCK)+1;
+		break;
+	case FLOAT:
 		numBlocks = ((size-1)/FLOATS_PER_BLOCK)+1;
-	}
-	else {
+		break;
+	case BIT:
+	case SIGN:
 		numBlocks = ((size-1)/BITS_PER_BLOCK)+1;
+		break;
 	}
 	return numBlocks * BYTES_PER_BLOCK;
 }

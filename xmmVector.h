@@ -13,6 +13,8 @@
 
 class XmmVector: public Vector {
 	virtual unsigned getByteSize();
+    void bitCopyFrom(Interface *interface, unsigned char *vectorData);
+    void bitCopyTo(unsigned char *vectorData, Interface *interface);
 public:
 	XmmVector(unsigned size, VectorType vectorType);
 	virtual ~XmmVector();
