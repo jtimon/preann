@@ -12,7 +12,7 @@ using namespace std;
 #define VECTOR_TYPE_DIM 3
 #define IMPLEMENTATION_TYPE_DIM 4
 #define MAX_SIZE 200
-#define MAX_INPUTS 3
+#define NUM_INPUTS 1
 #define INITIAL_WEIGHS_RANGE 20
 #define NUM_LOOPS 3
 
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 				Layer* layer = Factory::newLayer(C);
 				layer->init(size, vectorType, IDENTITY);
 
-				for (unsigned numInputs = 1; numInputs < MAX_INPUTS; numInputs++){
+				for (unsigned numInputs = 0; numInputs < NUM_INPUTS; numInputs++){
 					layer->addInput(layer->getOutput());
 				}
 
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
 					Layer* layer = Factory::newLayer(implementationType);
 					layer->init(size, vectorType, IDENTITY);
 
-					for (unsigned numInputs = 1; numInputs < MAX_INPUTS; numInputs++){
+					for (unsigned numInputs = 0; numInputs < NUM_INPUTS; numInputs++){
 						layer->addInput(layer->getOutput());
 					}
 
