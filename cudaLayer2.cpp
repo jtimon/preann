@@ -93,7 +93,7 @@ void CudaLayer2::mutateWeigh(unsigned  outputPos, unsigned  inputLayer, unsigned
 
 void CudaLayer2::inputCalculation(Vector *input, void *inputWeighs, float *results)
 {
-	cuda_inputCalculation3(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
+	cuda_inputCalculationInvertedMatrix(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
 }
 
 void CudaLayer2::saveWeighs(FILE *stream)

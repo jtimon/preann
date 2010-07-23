@@ -441,7 +441,7 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size,
 	}
 }
 
-extern "C" void cuda_inputCalculation3(void* inputPtr, unsigned input_size,
+extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned input_size,
 		VectorType inputType, unsigned output_size, void* weighs,
 		float* results, unsigned block_size)
 {
@@ -555,7 +555,7 @@ void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned output_s
 	}
 }
 
-extern "C" void cuda_inputCalculation2(void* inputPtr, unsigned input_size, VectorType inputType, unsigned output_size, void* weighs,
+extern "C" void cuda_inputCalculationReduction(void* inputPtr, unsigned input_size, VectorType inputType, unsigned output_size, void* weighs,
 		float* results, unsigned block_size)
 {
 	unsigned grid_size = output_size;

@@ -33,10 +33,10 @@ CudaLayer::~CudaLayer()
 void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
 {
 	if (CudaLayer::algorithm == 0) {
-		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
+		cuda_inputCalculationReduction(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
 	}
 	else if (CudaLayer::algorithm == 1) {
-		cuda_inputCalculation2(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
+		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
 	}
 }
 
