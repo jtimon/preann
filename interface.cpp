@@ -9,6 +9,24 @@ Interface::Interface(unsigned  size, VectorType vectorType)
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
 
+	switch (vectorType){
+	case BYTE:
+		for (unsigned i=0; i < byteSize; i++){
+			((unsigned char*)data)[i] = 128;
+		}
+		break;
+	case FLOAT:
+		for (unsigned i=0; i< size; i++){
+			((float*)data)[i] = 0;
+		}
+		break;
+	case BIT:
+	case SIGN:
+		for (unsigned i=0; i < byteSize; i++){
+			((unsigned char*)data)[i] = 0;
+		}
+	}
+
 	if (vectorType == FLOAT){
 
 		for (unsigned i=0; i< size; i++){
@@ -28,10 +46,7 @@ Interface::Interface(Interface* toCopy)
 
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
-
-	for (unsigned i = 0; i < size; i++){
-		this->setElement(i, toCopy->getElement(i));
-	}
+	memcpy(data, toCopy->getDataPointer(), byteSize);
 }
 
 Interface::~Interface()
@@ -46,10 +61,15 @@ void* Interface::getDataPointer()
 
 unsigned Interface::getByteSize()
 {
-	if (vectorType == FLOAT){
+	switch (vectorType){
+	case BYTE:
+		return size;
+	case FLOAT:
 		return size * sizeof(float);
+	case BIT:
+	case SIGN:
+		return (((size-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
 	}
-	return (((size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
 }
 
 VectorType Interface::getVectorType()
@@ -70,11 +90,13 @@ float Interface::getElement(unsigned  pos)
 		string error = buffer;
 		throw error;
 	}
-
-	if (vectorType == FLOAT){
+	switch (vectorType){
+	case BYTE:
+		return ((unsigned char*)data)[pos];
+	case FLOAT:
 		return ((float*)data)[pos];
-	}
-	else {
+	case BIT:
+	case SIGN:
 		unsigned  mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
 
 		if ( ((unsigned*)data)[pos / BITS_PER_UNSIGNED] & mask){
@@ -95,12 +117,15 @@ void Interface::setElement(unsigned  pos, float value)
 		string error = buffer;
 		throw error;
 	}
-
-	if (vectorType == FLOAT){
-
+	switch (vectorType){
+	case BYTE:
+		((unsigned char*)data)[pos] = (unsigned char)value;
+		break;
+	case FLOAT:
 		((float*)data)[pos] = value;
-
-	} else {
+		break;
+	case BIT:
+	case SIGN:
 		unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
 
 		if (value > 0){
@@ -108,7 +133,6 @@ void Interface::setElement(unsigned  pos, float value)
 		} else {
 			((unsigned*)data)[pos / BITS_PER_UNSIGNED] &= ~mask;
 		}
-		//printf("pos %d vectorPos %d bitPos %d valor %d data %d mask %d almacenado %d \n", pos, pos / BITS_PER_BYTE, pos % BITS_PER_BYTE, (int)value, ((unsigned*)data)[pos / BITS_PER_BYTE], mask, ((unsigned*)data)[pos / BITS_PER_BYTE] & mask);
 	}
 }
 
@@ -122,7 +146,6 @@ float Interface::compareTo(Interface *other)
 		} else {
 			accumulator -= difference;
 		}
-
 	}
 	return accumulator;
 }
@@ -138,9 +161,15 @@ void Interface::print()
 {
 	printf("----------------\n", 1);
 	for (unsigned i=0; i < size; i++){
-		if (vectorType == FLOAT){
+		switch (vectorType){
+		case BYTE:
+			printf("%d ", (int)((unsigned char)getElement(i) - 128));
+			break;
+		case FLOAT:
 			printf("%f ", getElement(i));
-		} else {
+			break;
+		case BIT:
+		case SIGN:
 			printf("%d ", (int)getElement(i));
 		}
 	}
