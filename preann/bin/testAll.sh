@@ -1,3 +1,3 @@
-#./testMemoryLosses > /home/timon/Desktop/ResultadosEjecuciones/testMemoryLosses.log
-./testLayers > /home/timon/Desktop/ResultadosEjecuciones/testLayers.log
-#./testNeuralNets > /home/timon/Desktop/ResultadosEjecuciones/testNeuralNets.log
+#./testMemoryLosses > /home/timon/workspace/preann/testResults/testMemoryLosses.log
+./testLayers > /home/timon/workspace/preann/testResults/testLayers.log
+#./testNeuralNets > /home/timon/workspace/preann/testResults/testNeuralNets.log
