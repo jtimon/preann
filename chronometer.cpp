@@ -25,7 +25,7 @@ void Chronometer::start()
 void Chronometer::stop()
 {
 	if (start_time == -1) {
-		string error = "The chronometer must be started before stop it.";
+		std::string error = "The chronometer must be started before stop it.";
 		throw error;
 	} else {
 		end_time = clock();
