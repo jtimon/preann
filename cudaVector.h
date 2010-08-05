@@ -15,6 +15,7 @@ class CudaVector: public Vector {
 
 	virtual unsigned getByteSize();
 public:
+	CudaVector() {};
 	CudaVector(unsigned size, VectorType vectorType, unsigned block_size);
 	CudaVector(unsigned size, VectorType vectorType);
 	virtual ~CudaVector();
@@ -23,6 +24,7 @@ public:
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
 	virtual void activation(float* results, FunctionType functionType);
+	virtual void mutate(unsigned pos, float mutation);
 };
 
 #endif /* CUDAVECTOR_H_ */

@@ -6,32 +6,26 @@ CudaLayer::CudaLayer()
 {
 }
 
-void CudaLayer::init(unsigned size, VectorType outputType, FunctionType functionType)
-{
-	this->functionType = functionType;
-	output = newVector(size, outputType);
-	thresholds = (float*)cuda_malloc(sizeof(float) * size);
-}
-
 CudaLayer::~CudaLayer()
 {
 	if (inputs) {
 		for (unsigned i=0; i < numberInputs; i++){
-			cuda_free(weighs[i]);
+			delete(connections[i]);
 		}
 		mi_free(inputs);
-		mi_free(weighs);
+		mi_free(connections);
 	}
 	if (output) {
-		delete (output);
+		delete(output);
 	}
 	if (thresholds) {
-		cuda_free(thresholds);
+		delete(thresholds);
 	}
 }
 
 void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
 {
+	//FIXME este método no funciona correctamente para SIGN
 	if (CudaLayer::algorithm == 0) {
 		cuda_inputCalculationReduction(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
 	}
@@ -42,106 +36,48 @@ void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* result
 
 float* CudaLayer::negativeThresholds()
 {
-	return cuda_getNegativeThresholds(thresholds, output->getSize(), Cuda_Threads_Per_Block);
-}
-
-void CudaLayer::saveWeighs(FILE *stream)
-{
-	unsigned size;
-
-	size = output->getSize() * sizeof(float);
-	float* aux_thresholds = (float*) mi_malloc(size);
-	cuda_copyToHost(aux_thresholds, thresholds, size);
-	fwrite(aux_thresholds, size, 1, stream);
-	mi_free(aux_thresholds);
-
-	for (unsigned i=0; i < numberInputs; i++){
-		if (inputs[i]->getVectorType() == FLOAT){
-			size = inputs[i]->getSize() * output->getSize() * sizeof(float);
-		} else {
-			size = inputs[i]->getSize() * output->getSize() * sizeof(unsigned char);
-		}
-		void* aux_weighs = mi_malloc(size);
-		cuda_copyToHost(aux_weighs, weighs[i], size);
-		fwrite(aux_weighs, size, 1, stream);
-		mi_free(aux_weighs);
-	}
-}
-
-void CudaLayer::loadWeighs(FILE *stream)
-{
-	unsigned size;
-
-	size = output->getSize() * sizeof(float);
-	float* aux_thresholds = (float*) mi_malloc(size);
-	fread(aux_thresholds, size, 1, stream);
-	cuda_copyToDevice(thresholds, aux_thresholds, size);
-	mi_free(aux_thresholds);
-
-	for (unsigned i=0; i < numberInputs; i++){
-		if (inputs[i]->getVectorType() == FLOAT){
-			size = inputs[i]->getSize() * output->getSize() * sizeof(float);
-		} else {
-			size = inputs[i]->getSize() * output->getSize() * sizeof(unsigned char);
-		}
-
-		void* aux_weighs = mi_malloc(size);
-		fread(aux_weighs, size, 1, stream);
-		cuda_copyToDevice(weighs[i], aux_weighs, size);
-		mi_free(aux_weighs);
-	}
-}
-
-void* CudaLayer::newWeighs(unsigned  inputSize, VectorType inputType)
-{
-	unsigned size;
-	if (inputType == FLOAT) {
-		size = output->getSize() * inputSize * sizeof(float);
-	} else {
-		size = output->getSize() * inputSize * sizeof(unsigned char);
-	}
-	return cuda_malloc(size);
+	return cuda_getNegativeThresholds((float*)thresholds->getDataPointer(), output->getSize(), Cuda_Threads_Per_Block);
 }
 
 void CudaLayer::copyWeighs(Layer* sourceLayer)
 {
 	//TODO implementar metodo
-	std::string error = "newCopy is not implemented for CudaLayer.";
+	std::string error = "CudaLayer::copyWeighs is not implemented.";
 	throw error;
 }
 
 void CudaLayer::randomWeighs(float range)
 {
 	//TODO implementar metodo
-	std::string error = "randomWeighs is not implemented for CudaLayer.";
+	std::string error = "CudaLayer::randomWeighs is not implemented.";
 	throw error;
 }
 
 void CudaLayer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation)
 {
 	if (outputPos > output->getSize()) {
-		string error = "Cannot mutate that output: the Layer hasn't so many neurons.";
+		std::string error = "Cannot mutate that output: the Layer hasn't so many neurons.";
 		throw error;
 	}
 	if (inputLayer > output->getSize()) {
-		string error = "Cannot mutate that input: the Layer hasn't so many inputs.";
+		std::string error = "Cannot mutate that input: the Layer hasn't so many inputs.";
 		throw error;
 	}
 	if (inputPos > inputs[inputLayer]->getSize()) {
-		string error = "Cannot mutate that input: the input hasn't so many neurons.";
+		std::string error = "Cannot mutate that input: the input hasn't so many neurons.";
 		throw error;
 	}
 
 	Vector* input = getInput(inputLayer);
 	unsigned weighPos = (outputPos * input->getSize()) + inputPos;
 
-	cuda_mutate(getWeighsPtr(inputLayer), weighPos, mutation, input->getVectorType());
+	cuda_mutate(getConnection(inputLayer)->getDataPointer(), weighPos, mutation, input->getVectorType());
 }
 
 void CudaLayer::mutateThreshold(unsigned outputPos, float mutation)
 {
 	if (outputPos > output->getSize()) {
-		string error = "Cannot mutate that Threshold: the Layer hasn't so many neurons.";
+		std::string error = "Cannot mutate that Threshold: the Layer hasn't so many neurons.";
 		throw error;
 	}
 	cuda_mutate(thresholds, outputPos, mutation, FLOAT);
@@ -154,8 +90,8 @@ void CudaLayer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bi
 	cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
 	unsigned* cudaBitVectorPtr = (unsigned*)cudaBitVector->getDataPointer();
 
-	void* thisWeighs = this->getWeighsPtr(inputLayer);
-	void* otherWeighs = other->getWeighsPtr(inputLayer);
+	void* thisWeighs = this->getConnection(inputLayer)->getDataPointer();
+	void* otherWeighs = other->getConnection(inputLayer)->getDataPointer();
 	cuda_crossover(thisWeighs, otherWeighs, cudaBitVectorPtr, weighsSize, inputs[inputLayer]->getVectorType(), Cuda_Threads_Per_Block);
 }
 

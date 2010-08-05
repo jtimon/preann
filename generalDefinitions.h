@@ -20,16 +20,16 @@ using namespace std;
 #define BITS_PER_BYTE (8)
 #define BITS_PER_UNSIGNED (sizeof(unsigned) * BITS_PER_BYTE)
 
-typedef enum {FLOAT, BYTE, BIT, SIGN} VectorType;
+typedef enum {FLOAT, BIT, SIGN, BYTE} VectorType;
 typedef enum {BINARY_STEP, BIPOLAR_STEP, REAL, IDENTITY, SIGMOID, BIPOLAR_SIGMOID, ANOTHER_FUNCTION} FunctionType;
 typedef enum {ROULETTE_WHEEL, RANKING, TOURNAMENT, TRUNCATION} SelectionType;
 typedef enum {WEIGH_UNIFORM, NEURON_UNIFORM, LAYER_UNIFORM, WEIGH_MULTIPOiNT, NEURON_MULTIPOiNT, LAYER_MULTIPOiNT} CrossoverType;
 
 float Function(float number, FunctionType functionType);
-int randomInt(unsigned rango);
-float randomFloat(float rango);
-unsigned randomUnsigned(unsigned rango);
-float randomPositiveFloat(float rango);
+int randomInt(unsigned range);
+float randomFloat(float range);
+unsigned randomUnsigned(unsigned range);
+float randomPositiveFloat(float range);
 
 void* mi_malloc(unsigned size);
 void mi_free(void* ptr);

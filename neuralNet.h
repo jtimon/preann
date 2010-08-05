@@ -48,6 +48,7 @@ public:
 	void addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos);
 	void addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos);
 
+	virtual void calculateOutput();
 	void randomWeighs(float range);
 	void save(FILE* stream);
 	void load(FILE* stream);
@@ -56,7 +57,6 @@ public:
 	void createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype = IDENTITY);
 	void createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype = IDENTITY);
 
-	virtual void calculateOutput();
 };
 
 #endif /*NEURALNET_H_*/

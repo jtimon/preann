@@ -1,6 +1,12 @@
 
 #include "interface.h"
 
+Interface::Interface()
+{
+	this->size = 0;
+	data = NULL;
+}
+
 Interface::Interface(unsigned  size, VectorType vectorType)
 {
 	this->size = size;
@@ -24,17 +30,6 @@ Interface::Interface(unsigned  size, VectorType vectorType)
 	case SIGN:
 		for (unsigned i=0; i < byteSize; i++){
 			((unsigned char*)data)[i] = 0;
-		}
-	}
-
-	if (vectorType == FLOAT){
-
-		for (unsigned i=0; i< size; i++){
-			((float*)data)[i] = 0;
-		}
-	} else {
-		for (unsigned i=0; i < byteSize/sizeof(unsigned); i++){
-			((unsigned*)data)[i] = 0;
 		}
 	}
 }
@@ -87,7 +82,7 @@ float Interface::getElement(unsigned  pos)
 	if (pos >= size){
 		char buffer[100];
 		sprintf(buffer, "Cannot get the element in position %d: the size of the vector is %d.", pos, size);
-		string error = buffer;
+		std::string error = buffer;
 		throw error;
 	}
 	switch (vectorType){
@@ -114,7 +109,7 @@ void Interface::setElement(unsigned  pos, float value)
 	if (pos >= size){
 		char buffer[100];
 		sprintf(buffer, "Cannot set the element in position %d: the size of the vector is %d.", pos, size);
-		string error = buffer;
+		std::string error = buffer;
 		throw error;
 	}
 	switch (vectorType){
@@ -150,11 +145,47 @@ float Interface::compareTo(Interface *other)
 	return accumulator;
 }
 
-void Interface::setRandomBits(unsigned num)
+void Interface::random(float range)
 {
-	for (unsigned i=0; i < num; i++){
-		setElement(randomUnsigned(size), 1);
+	switch (vectorType){
+	case BYTE:
+		unsigned charRange;
+		if (range >= 128){
+			charRange = 127;
+		} else {
+			charRange = (unsigned)range;
+		}
+		for (unsigned i=0; i < size; i++){
+			setElement(i, 128 + (unsigned char)randomInt(charRange));
+		}
+		break;
+	case FLOAT:
+		for (unsigned i=0; i < size; i++){
+			setElement(i, randomFloat(range));
+		}
+		break;
+	case BIT:
+	case SIGN:
+		for (unsigned i=0; i < size; i++){
+			setElement(i, randomUnsigned(2));
+		}
+		break;
 	}
+}
+
+void Interface::save(FILE* stream)
+{
+	fwrite(&size, sizeof(unsigned), 1, stream);
+	fwrite(&vectorType, sizeof(VectorType), 1, stream);
+	fwrite(data, getByteSize(), 1, stream);
+}
+
+void Interface::load(FILE* stream)
+{
+	fread(&size, sizeof(unsigned), 1, stream);
+	fread(&vectorType, sizeof(VectorType), 1, stream);
+	data = mi_malloc(getByteSize());
+	fread(data, getByteSize(), 1, stream);
 }
 
 void Interface::print()
@@ -176,4 +207,21 @@ void Interface::print()
 	printf("\n----------------\n", 1);
 }
 
+void Interface::transposeMatrix(unsigned width)
+{
+	if (size % width != 0) {
+		char buffer[100];
+		sprintf(buffer, "The interface cannot be a matrix of witdth %d, it have size %d.", width, size);
+		std::string error = buffer;
+		throw error;
+	}
 
+	Interface aux(this);
+
+	unsigned height = size / width;
+	for (unsigned i=0; i < width; i++){
+		for (unsigned j=0; j < height; j++){
+			setElement((i * height) + j, aux.getElement(i + (j * width)));
+		}
+	}
+}

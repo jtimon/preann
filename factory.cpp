@@ -34,3 +34,24 @@ Layer* Factory::newLayer(ImplementationType implementationType)
 			return new CudaLayer2();
 	}
 }
+
+Layer* Factory::newLayer(unsigned size, VectorType outputType, ImplementationType implementationType, FunctionType functionType)
+{
+	Layer* toReturn;
+	switch(implementationType){
+		case C:
+			toReturn = new CppLayer();
+			break;
+		case SSE2:
+			toReturn = new XmmLayer();
+			break;
+		case CUDA:
+			toReturn = new CudaLayer();
+			break;
+		case CUDA2:
+			toReturn = new CudaLayer2();
+			break;
+	}
+	toReturn->init(size, outputType, functionType);
+	return toReturn;
+}

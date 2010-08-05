@@ -32,7 +32,7 @@ void assertEquals(Interface* expected, Interface* actual)
 				actual->print();
 				char buffer[100];
 				sprintf(buffer, "The interfaces are not equal at the position %d.", i);
-				string error = buffer;
+				std::string error = buffer;
 				throw error;
 			}
 		}
@@ -45,7 +45,7 @@ void assertEquals(Interface* expected, Interface* actual)
 				actual->print();
 				char buffer[100];
 				sprintf(buffer, "The interfaces are not equal at the position %d.", i);
-				string error = buffer;
+				std::string error = buffer;
 				throw error;
 			}
 		}
@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
 		printf("Exit success.\n", 1);
 		mem_printTotalAllocated();
 		mem_printTotalPointers();
-	} catch (string error) {
+	} catch (std::string error) {
 		cout << "Error: " << error << endl;
 	} catch (...) {
 		printf("An error was thrown.\n", 1);

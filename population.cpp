@@ -166,7 +166,7 @@ void Population::save(FILE *stream)
 void Population::insertIndividual(Individual *individual)
 {
 	if (individualList == NULL){
-		string error = "No population was load nor an example individual was given.";
+		std::string error = "No population was load nor an example individual was given.";
 		throw error;
 	}
 
@@ -228,7 +228,7 @@ void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned  nu
 	case RANKING:
 	case TOURNAMENT:
 	default:
-		string error = "Wrong parameters for this selection algorithm.";
+		std::string error = "Wrong parameters for this selection algorithm.";
 		throw error;
 	}
 
@@ -242,7 +242,7 @@ void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned  nu
 void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned number, unsigned tourSize)
 {
 	if (selectionType != TOURNAMENT) {
-		string error = "Wrong parameters for this selection algorithm.";
+		std::string error = "Wrong parameters for this selection algorithm.";
 		throw error;
 	}
 
@@ -259,7 +259,7 @@ void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned num
 void Population::addSelectionAlgorithm(SelectionType selectionType, unsigned number, float base, float step)
 {
 	if (selectionType != TOURNAMENT) {
-		string error = "Wrong parameters for this selection algorithm.";
+		std::string error = "Wrong parameters for this selection algorithm.";
 		throw error;
 	}
 
@@ -293,7 +293,7 @@ void Population::addCrossoverScheme(CrossoverType crossoverType, unsigned  numbe
 		numLayerMultipoint = number;
 		numPointsLayerMultipoint = numPoints;
 	default:
-		string error = "Wrong parameters for this crossover scheme.";
+		std::string error = "Wrong parameters for this crossover scheme.";
 		throw error;
 	}
 
@@ -323,7 +323,7 @@ void Population::addCrossoverScheme(CrossoverType crossoverType, unsigned  numbe
 		numLayerUniform = number;
 		probabilityLayerUniform = probability;
 	default:
-		string error = "Wrong parameters for this crossover scheme.";
+		std::string error = "Wrong parameters for this crossover scheme.";
 		throw error;
 	}
 
@@ -370,7 +370,7 @@ void Population::nextGeneration()
 float Population::getBestIndividualScore()
 {
 	if (size < 0){
-		string error = "The population is empty.";
+		std::string error = "The population is empty.";
 		throw error;
 	}
 	return individualList[0]->getFitness();
@@ -379,7 +379,7 @@ float Population::getBestIndividualScore()
 Individual *Population::getBestIndividual()
 {
 	if (size < 0){
-		string error = "The population is empty.";
+		std::string error = "The population is empty.";
 		throw error;
 	}
 	return individualList[0];
@@ -388,7 +388,7 @@ Individual *Population::getBestIndividual()
 float Population::getAverageScore()
 {
 	if (size < 0){
-		string error = "The population is empty.";
+		std::string error = "The population is empty.";
 		throw error;
 	}
 	return total_score/size;
@@ -397,7 +397,7 @@ float Population::getAverageScore()
 float Population::getWorstIndividualScore()
 {
 	if (size < 0){
-		string error = "The population is empty.";
+		std::string error = "The population is empty.";
 		throw error;
 	}
 	return individualList[size - 1]->getFitness();
@@ -408,7 +408,7 @@ void Population::crossover()
 	if (parentSize < 2) {
 		if (numWeighUniform || numNeuronUniform || numLayerUniform
 				|| numWeighMultipoint || numNeuronMultipoint || numLayerMultipoint) {
-			string error = "The number of parents must be grater than 2 to do crossover.";
+			std::string error = "The number of parents must be grater than 2 to do crossover.";
 			throw error;
 		}
 	} else {
@@ -553,7 +553,7 @@ void Population::selectRanking()
 void Population::selectTournament()
 {
 	if (tourSize > size){
-		string error = "The tournament size cannot be grater than the population size.";
+		std::string error = "The tournament size cannot be grater than the population size.";
 		throw error;
 	}
 
@@ -586,7 +586,7 @@ void Population::selectTournament()
 void Population::selectTruncation()
 {
 	if (numTruncation > size){
-		string error = "The number of selected individuals by truncation cannot be grater than the population size.";
+		std::string error = "The number of selected individuals by truncation cannot be grater than the population size.";
 		throw error;
 	}
 

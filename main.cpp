@@ -9,6 +9,9 @@ using namespace std;
 
 #define PATH "/home/timon/test.nn"
 
+//TODO esto peta con BIT inputType = BIT maxSize = 163840, 16258024
+//este to do estaba en CppLayer::randomweighs
+
 float testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType,
 		unsigned times) {
 
@@ -134,7 +137,7 @@ int main(int argc, char *argv[]) {
 		printf("Exit success.\n", 1);
 		mem_printTotalAllocated();
 		mem_printTotalPointers();
-	} catch (string error) {
+	} catch (std::string error) {
 		cout << "Error: " << error << endl;
 	} catch (...) {
 		printf("An error was thrown.\n", 1);

@@ -17,6 +17,7 @@ class Interface {
 	VectorType vectorType;
 
 public:
+	Interface();
 	Interface(unsigned size, VectorType vectorType);
 	Interface(Interface* toCopy);
 	virtual ~Interface();
@@ -31,7 +32,10 @@ public:
 
 	void print();
 	float compareTo(Interface* other);
-	void setRandomBits(unsigned num);
+	void random(float range);
+	void save(FILE* stream);
+	void load(FILE* stream);
+	void transposeMatrix(unsigned width);
 };
 
 #endif /* INTERFACE_H_ */

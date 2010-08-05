@@ -41,11 +41,11 @@ CppVector::~CppVector()
 void CppVector::copyFrom(Interface* interface)
 {
 	if (size < interface->getSize()){
-		string error = "The Interface is greater than the Vector.";
+		std::string error = "The Interface is greater than the Vector.";
 		throw error;
 	}
 	if (vectorType != interface->getVectorType()){
-		string error = "The Type of the Interface is different than the Vector Type.";
+		std::string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
 	memcpy(data, interface->getDataPointer(), interface->getByteSize());
@@ -54,11 +54,11 @@ void CppVector::copyFrom(Interface* interface)
 void CppVector::copyTo(Interface* interface)
 {
 	if (interface->getSize() < size){
-		string error = "The Vector is greater than the Interface.";
+		std::string error = "The Vector is greater than the Interface.";
 		throw error;
 	}
 	if (vectorType != interface->getVectorType()){
-		string error = "The Type of the Interface is different than the Vector Type.";
+		std::string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
 	memcpy(interface->getDataPointer(), data, this->getByteSize());
@@ -68,12 +68,8 @@ void CppVector::activation(float* results, FunctionType functionType)
 {
 	if (vectorType == FLOAT){
 		for (unsigned i=0; i < size; i++){
-			//TODO quitar mensaje
-			printf(" %f ", results[i]);
 			((float*)data)[i] = Function(results[i], functionType);
 		}
-		//TODO quitar mensaje
-		printf("\n");
 	} else {
 		unsigned* vectorData = (unsigned*)data;
 		unsigned mask;
@@ -85,18 +81,45 @@ void CppVector::activation(float* results, FunctionType functionType)
 				mask >>= 1;
 			}
 
-			//TODO quitar mensaje
-			printf(" %f ", results[i]);
 			if (results[i] > 0){
 				vectorData[i/BITS_PER_UNSIGNED] |= mask;
 			} else {
 				vectorData[i/BITS_PER_UNSIGNED] &= ~mask;
 			}
 		}
-		//TODO quitar mensaje
-		printf("\n");
 	}
 	mi_free(results);
+}
+
+void CppVector::mutate(unsigned pos, float mutation)
+{
+	if (pos > size){
+		std::string error = "The position being mutated is greater than the size of the vector.";
+	}
+	switch (vectorType){
+	case BYTE:{
+		unsigned char* weigh = &(((unsigned char*)data)[pos]);
+		int result = (int)mutation + *weigh;
+		if (result <= 0){
+			*weigh = 0;
+		}
+		else if (result >= 255) {
+			*weigh = 255;
+		}
+		else {
+			*weigh = result;
+		}
+		}break;
+	case FLOAT:
+		((float*)data)[pos] += mutation;
+		break;
+	case BIT:
+	case SIGN:
+		{
+		std::string error = "CppVector::mutate is not implemented for VectorType BIT nor SIGN.";
+		throw error;
+		}
+	}
 }
 
 unsigned CppVector::getByteSize()

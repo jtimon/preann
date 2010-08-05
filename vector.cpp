@@ -7,6 +7,12 @@
 
 #include "vector.h"
 
+Vector::Vector()
+{
+	this->size = 0;
+	data = NULL;
+}
+
 Vector::~Vector()
 {
 }
@@ -26,7 +32,7 @@ VectorType Vector::getVectorType()
 	return vectorType;
 }
 
-Interface* Vector::createInterface()
+Interface* Vector::toInterface()
 {
 	Interface* toReturn = new Interface(this->size, this->vectorType);
 	this->copyTo(toReturn);
@@ -35,10 +41,14 @@ Interface* Vector::createInterface()
 
 void Vector::print()
 {
-	Interface* interface = new Interface(size, vectorType);
-	copyTo(interface);
+	Interface* interface = toInterface();
 	interface->print();
 	delete(interface);
 }
 
-
+void Vector::save(FILE* stream)
+{
+	Interface* interface = toInterface();
+	interface->save(stream);
+	delete(interface);
+}

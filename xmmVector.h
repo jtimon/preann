@@ -16,12 +16,14 @@ class XmmVector: public Vector {
     void bitCopyFrom(Interface *interface, unsigned char *vectorData);
     void bitCopyTo(unsigned char *vectorData, Interface *interface);
 public:
+    XmmVector() {};
 	XmmVector(unsigned size, VectorType vectorType);
 	virtual ~XmmVector();
 
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
 	virtual void activation(float* results, FunctionType functionType);
+	virtual void mutate(unsigned pos, float mutation);
 };
 
 #endif /* XMMVECTOR_H_ */

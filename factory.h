@@ -9,10 +9,14 @@
 
 #include "layer.h"
 
+
+
 class Factory {
 public:
-	static Vector* newVector(unsigned size, VectorType vectorType, ImplementationType implementationType = SSE2);
+	static Vector* newVector(ImplementationType implementationType);
+	static Vector* newVector(unsigned size, VectorType vectorType, ImplementationType implementationType);
 	static Layer* newLayer(ImplementationType implementationType);
+	static Layer* newLayer(unsigned size, VectorType outputType, ImplementationType implementationType, FunctionType functionType);
 };
 
 #endif /* FACTORY_H_ */

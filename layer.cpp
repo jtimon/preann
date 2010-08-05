@@ -1,6 +1,18 @@
 #include "layer.h"
 #include "factory.h"
 
+Vector* Layer::newVector(FILE* stream)
+{
+	Interface* interface = new Interface();
+	interface->load(stream);
+
+	Vector* vector = Factory::newVector(interface->getSize(), interface->getVectorType(), getImplementationType());
+	vector->copyFrom(interface);
+
+	delete(interface);
+	return  vector;
+}
+
 Vector* Layer::newVector(unsigned size, VectorType vectorType)
 {
 	return Factory::newVector(size, vectorType, getImplementationType());
@@ -9,7 +21,7 @@ Vector* Layer::newVector(unsigned size, VectorType vectorType)
 Layer::Layer()
 {
 	inputs = NULL;
-	weighs = NULL;
+	connections = NULL;
 	numberInputs = 0;
 	thresholds = NULL;
 	output = NULL;
@@ -17,34 +29,40 @@ Layer::Layer()
 
 Layer::~Layer()
 {
+}
 
+void Layer::init(unsigned size, VectorType outputType, FunctionType functionType)
+{
+	this->functionType = functionType;
+	output = newVector(size, outputType);
+	thresholds = newVector(size, FLOAT);
 }
 
 void Layer::checkCompatibility(Layer* layer)
 {
 	if (this->getImplementationType() != layer->getImplementationType()){
-		string error = "The layers are incompatible: the implementation is different.";
+		std::string error = "The layers are incompatible: the implementation is different.";
 		throw error;
 	}
 	if (this->getOutput()->getSize() != layer->getOutput()->getSize()){
-		string error = "The layers are incompatible: the output size is different.";
+		std::string error = "The layers are incompatible: the output size is different.";
 		throw error;
 	}
 	if (this->getOutput()->getVectorType() != layer->getOutput()->getVectorType()){
-		string error = "The layers are incompatible: the output type is different.";
+		std::string error = "The layers are incompatible: the output type is different.";
 		throw error;
 	}
 	if (this->getNumberInputs() != layer->getNumberInputs()){
-		string error = "The layers are incompatible: the number of inputs is different.";
+		std::string error = "The layers are incompatible: the number of inputs is different.";
 		throw error;
 	}
 	for (unsigned i=0; i < numberInputs; i++){
 		if (this->getInput(i)->getSize() != layer->getInput(i)->getSize()){
-			string error = "The layers are incompatible: the size of an input is different.";
+			std::string error = "The layers are incompatible: the size of an input is different.";
 			throw error;
 		}
 		if (this->getInput(i)->getVectorType() != layer->getInput(i)->getVectorType()){
-			string error = "The layers are incompatible: the type of an input is different.";
+			std::string error = "The layers are incompatible: the type of an input is different.";
 			throw error;
 		}
 	}
@@ -54,73 +72,153 @@ void Layer::checkCompatibility(Layer* layer)
 void Layer::calculateOutput()
 {
 	if (!output) {
-		string error = "Cannot calculate the output of a Layer without output.";
+		std::string error = "Cannot calculate the output of a Layer without output.";
 		throw error;
 	}
 
 	float* results = negativeThresholds();
 
 	for(unsigned i=0; i < numberInputs; i++){
-		inputCalculation(inputs[i], weighs[i], results);
+		inputCalculation(inputs[i], connections[i]->getDataPointer(), results);
 	}
-//	printf("----------------\n", 1);
-//	for (unsigned i=0; i < output->getSize(); i++){
-//		printf("%f ", results[i]);
-//	}
-//	printf("\n----------------\n", 1);
 	output->activation(results, functionType);
 }
 
 void Layer::addInput(Vector* input)
 {
+	Vector* newWeighs;
+	switch (input->getVectorType()){
+	case BYTE:
+		{
+		std::string error = "Layer::addInput is not implemented for an input Vector of the VectorType BYTE";
+		throw error;
+		}
+	case FLOAT:
+		newWeighs = newVector(input->getSize() * output-> getSize(), FLOAT);
+		break;
+	case BIT:
+	case SIGN:
+		newWeighs = newVector(input->getSize() * output-> getSize(), BYTE);
+		break;
+	}
 	//TODO probar qué sucede con varios tipos de entrada
 	Vector** newInputs = (Vector**) mi_malloc(sizeof(Vector*) * (numberInputs + 1));
-	void** newWeighsPtr = (void**) mi_malloc(sizeof(void*) * (numberInputs + 1));
+	Vector** newConnections = (Vector**) mi_malloc(sizeof(Vector*) * (numberInputs + 1));
 	if (inputs) {
 		memcpy(newInputs, inputs, numberInputs * sizeof(Vector*));
-		memcpy(newWeighsPtr, weighs, numberInputs * sizeof(void*));
+		memcpy(newConnections, connections, numberInputs * sizeof(Vector*));
 		mi_free(inputs);
-		mi_free(weighs);
+		mi_free(connections);
 	}
 	inputs = newInputs;
-	weighs = newWeighsPtr;
+	connections = newConnections;
 
 	inputs[numberInputs] = input;
-	newWeighsPtr[numberInputs] = newWeighs(input->getSize(), input->getVectorType());
+	connections[numberInputs] = newWeighs;
 	++numberInputs;
+}
+
+void Layer::setInput(Vector* input, unsigned pos)
+{
+	switch (input->getVectorType()){
+	case BYTE:
+		{
+		std::string error = "Layer::setInput is not implemented for an input Vector of the VectorType BYTE";
+		throw error;
+		}
+	default:
+		break;
+	}
+	inputs[pos] = input;
 }
 
 void Layer::save(FILE* stream)
 {
-	unsigned size = output->getSize();
-	VectorType outputType = output->getVectorType();
-
-	fwrite(&size, sizeof(unsigned), 1, stream);
-	fwrite(&outputType, sizeof(VectorType), 1, stream);
 	fwrite(&functionType, sizeof(FunctionType), 1, stream);
+	thresholds->save(stream);
+	output->save(stream);
+
+	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
+	for(unsigned i=0; i < numberInputs; i++){
+		connections[i]->save(stream);
+	}
 }
 
 void Layer::load(FILE* stream)
 {
-	unsigned size;
-	VectorType outputType;
-	FunctionType functionType;
-
-	fread(&size, sizeof(unsigned), 1, stream);
-	fread(&outputType, sizeof(VectorType), 1, stream);
 	fread(&functionType, sizeof(FunctionType), 1, stream);
-	init(size, outputType, functionType);
+	thresholds = newVector(stream);
+	output = newVector(stream);
+
+	fread(&numberInputs, sizeof(unsigned), 1, stream);
+	inputs = (Vector**) mi_malloc(numberInputs * sizeof(Vector*));
+	connections = (Vector**) mi_malloc(numberInputs * sizeof(Vector*));
+	for(unsigned i=0; i < numberInputs; i++){
+		//TODO esto puede llevar al pete
+		inputs[i] = NULL;
+		connections[i] = newVector(stream);
+	}
+}
+
+void Layer::randomWeighs(float range)
+{
+	//TODO quitar esta comprobacion cuando deje de poder haber capas sin tamaño
+	if (output == NULL){
+		std::string error = "Cannot set random weighs to a layer with no output.";
+		throw error;
+	}
+
+	Interface* aux = new Interface(output->getSize(), FLOAT);
+	aux->random(range);
+	thresholds->copyFrom(aux);
+	delete(aux);
+
+
+	for (unsigned i=0; i < numberInputs; i++){
+		Vector* connection = connections[i];
+		aux = new Interface(connection->getSize(), connection->getVectorType());
+		aux->random(range);
+		connection->copyFrom(aux);
+		delete(aux);
+	}
+}
+
+void Layer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation)
+{
+	if (outputPos > output->getSize()) {
+		std::string error = "Cannot mutate that output: the Layer hasn't so many neurons.";
+		throw error;
+	}
+	if (inputLayer > numberInputs) {
+		std::string error = "Cannot mutate that input: the Layer hasn't so many inputs.";
+		throw error;
+	}
+	if (inputPos > inputs[inputLayer]->getSize()) {
+		std::string error = "Cannot mutate that input: the input hasn't so many neurons.";
+		throw error;
+	}
+	unsigned weighPos = (outputPos * inputs[inputLayer]->getSize()) + inputPos;
+	connections[inputLayer]->mutate(weighPos, mutation);
+}
+
+void Layer::mutateThreshold(unsigned outputPos, float mutation)
+{
+	if (outputPos > output->getSize()) {
+		std::string error = "Cannot mutate that Threshold: the Layer hasn't so many neurons.";
+		throw error;
+	}
+	thresholds->mutate(outputPos, mutation);
 }
 
 void Layer::swapWeighs(Layer* layer)
 {
 	checkCompatibility(layer);
 
-	unsigned size = numberInputs * sizeof(void*);
-	void** temp = (void**) mi_malloc(size);
-	memcpy(temp, weighs, size);
-	memcpy(weighs, layer->weighs, size);
-	memcpy(layer->weighs, temp, size);
+	unsigned size = numberInputs * sizeof(Vector*);
+	Vector** temp = (Vector**) mi_malloc(size);
+	memcpy(temp, connections, size);
+	memcpy(connections, layer->connections, size);
+	memcpy(layer->connections, temp, size);
 }
 
 unsigned Layer::getNumberInputs()
@@ -140,12 +238,12 @@ Vector* Layer::getOutput()
 
 float* Layer::getThresholdsPtr()
 {
-	return thresholds;
+	return (float*)thresholds->getDataPointer();
 }
 
-void* Layer::getWeighsPtr(unsigned inputPos)
+Vector* Layer::getConnection(unsigned inputPos)
 {
-	return weighs;
+	return connections[inputPos];
 }
 
 FunctionType Layer::getFunctionType()
@@ -213,7 +311,7 @@ void Layer::crossoverInput(Layer *other, unsigned  inputLayer, Interface *bitVec
 
 void Layer::crossoverNeurons(Layer *other, Interface *bitVector)
 {
-	//TODO comprobar todo esto en un nivel superior (o no comprobarlo) (o comprobarlo opcionalmente)
+	//TODO comprobar esto en un nivel superior (o no comprobarlo) (o comprobarlo opcionalmente)
 	checkCompatibility(other);
 
 	unsigned outputSize = output->getSize();

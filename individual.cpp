@@ -47,7 +47,6 @@ Individual* Individual::newCopy()
 		copy->getLayer(i)->copyWeighs(layers[i]);
 	}
 
-
 	for (unsigned i=0; i < numberOutputs; i++){
 		copy->createOutput(outputLayers[i]);
 	}
@@ -139,7 +138,7 @@ void Individual::multipointCrossoverWeighs(Individual *other, unsigned numPoints
 void Individual::crossoverLayers(Individual *other, Interface* bitVector)
 {
 	if (bitVector->getSize() != numberLayers){
-		string error = "The number of layers must be equal to the size of the bitVector.";
+		std::string error = "The number of layers must be equal to the size of the bitVector.";
 		throw error;
 	}
 
@@ -218,7 +217,7 @@ void Individual::multipointCrossoverNeurons(Individual *other, unsigned numPoint
 void Individual::multipointCrossoverLayers(Individual *other, unsigned numPoints)
 {
 	if (numPoints > numberLayers){
-		string error = "In multipointCrossoverLayers: there have to be more layers than points.";
+		std::string error = "In multipointCrossoverLayers: there have to be more layers than points.";
 		throw error;
 	}
 	Interface* bitVector = new Interface(numberLayers, BIT);

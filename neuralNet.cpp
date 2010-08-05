@@ -119,8 +119,7 @@ void NeuralNet::addLayer(Layer* layer) {
 }
 
 void NeuralNet::addLayer(unsigned size, VectorType destinationType, FunctionType functiontype) {
-	Layer* layer = Factory::newLayer(implementationType);
-	layer->init(size, destinationType, functiontype);
+	Layer* layer = Factory::newLayer(size, destinationType, implementationType, functiontype);
 	addLayer(layer);
 }
 
@@ -192,7 +191,7 @@ Interface* NeuralNet::createOutput(unsigned layerPos) {
 				buffer,
 				"Cannot set the Layer in position %d as an output: there are just %d Layers.",
 				layerPos, numberLayers);
-		string error = buffer;
+		std::string error = buffer;
 		throw error;
 	}
 
@@ -227,7 +226,7 @@ Interface* NeuralNet::getOutput(unsigned outputPos) {
 				buffer,
 				"Cannot access the output in position %d: there are just %d outputs.",
 				outputPos, numberLayers);
-		string error = buffer;
+		std::string error = buffer;
 		throw error;
 	}
 	return outputs[outputPos];
@@ -246,7 +245,7 @@ void NeuralNet::randomWeighs(float range) {
 void NeuralNet::addInputConnection(unsigned sourceInputPos,
 		unsigned destinationLayerPos) {
 	if (!inputsToLayersGraph) {
-		string error = "The inputs To Layers Graph is not set yet.";
+		std::string error = "The inputs To Layers Graph is not set yet.";
 		throw error;
 	}
 	if (sourceInputPos >= numberInputs) {
@@ -255,7 +254,7 @@ void NeuralNet::addInputConnection(unsigned sourceInputPos,
 				buffer,
 				"Cannot connect input in position %d: there are just %d inputs.",
 				sourceInputPos, numberInputs);
-		string error = buffer;
+		std::string error = buffer;
 		throw error;
 	}
 	if (destinationLayerPos >= numberLayers) {
@@ -264,7 +263,7 @@ void NeuralNet::addInputConnection(unsigned sourceInputPos,
 				buffer,
 				"Cannot connect an input with the Layer in position %d: there are just %d Layers.",
 				destinationLayerPos, numberLayers);
-		string error = buffer;
+		std::string error = buffer;
 		throw error;
 	}
 
@@ -281,14 +280,14 @@ void NeuralNet::addLayersConnection(unsigned sourceLayerPos,
 				buffer,
 				"Cannot connect Layer in position %d with Layer in position %d: there are just %d Layers.",
 				sourceLayerPos, destinationLayerPos, numberLayers);
-		string error = buffer;
+		std::string error = buffer;
 		throw error;
 	}
 	if (sourceLayerPos == destinationLayerPos) {
 		char buffer[100];
 		sprintf(buffer, "Cannot connect Layer in position %d with itself.",
 				sourceLayerPos);
-		string error = buffer;
+		std::string error = buffer;
 		throw error;
 	}
 
@@ -300,7 +299,7 @@ void NeuralNet::addLayersConnection(unsigned sourceLayerPos,
 void NeuralNet::createFeedForwardNet(unsigned numLayers, unsigned sizeLayers,
 		VectorType hiddenLayersType, FunctionType functiontype) {
 	if (numberInputs == 0) {
-		string error = "Cannot create a network with no inputs.";
+		std::string error = "Cannot create a network with no inputs.";
 		throw error;
 	}
 
@@ -321,7 +320,7 @@ void NeuralNet::createFullyConnectedNet(unsigned numLayers,
 		unsigned sizeLayers, VectorType hiddenLayersType,
 		FunctionType functiontype) {
 	if (numberInputs == 0) {
-		string error = "Cannot create a network with no inputs.";
+		std::string error = "Cannot create a network with no inputs.";
 		throw error;
 	}
 	for (unsigned i = 0; i < numLayers; i++) {
@@ -340,55 +339,56 @@ void NeuralNet::createFullyConnectedNet(unsigned numLayers,
 	createOutput(numLayers - 1);
 }
 
+//TODO rehacer save y load
 void NeuralNet::save(FILE* stream) {
-	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
-	fwrite(&numberLayers, sizeof(unsigned), 1, stream);
-	fwrite(&numberOutputs, sizeof(unsigned), 1, stream);
-
-	for (unsigned i = 0; i < numberLayers; i++) {
-		layers[i]->save(stream);
-	}
-
-	fwrite(inputsToLayersGraph, sizeof(unsigned char) * numberInputs
-			* numberLayers, 1, stream);
-	fwrite(layerConnectionsGraph, sizeof(unsigned char) * numberLayers
-			* numberLayers, 1, stream);
-	fwrite(outputLayers, sizeof(int) * numberOutputs, 1, stream);
-
-	for (unsigned i = 0; i < numberLayers; i++) {
-		layers[i]->saveWeighs(stream);
-	}
+//	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
+//	fwrite(&numberLayers, sizeof(unsigned), 1, stream);
+//	fwrite(&numberOutputs, sizeof(unsigned), 1, stream);
+//
+//	for (unsigned i = 0; i < numberLayers; i++) {
+//		layers[i]->save(stream);
+//	}
+//
+//	fwrite(inputsToLayersGraph, sizeof(unsigned char) * numberInputs
+//			* numberLayers, 1, stream);
+//	fwrite(layerConnectionsGraph, sizeof(unsigned char) * numberLayers
+//			* numberLayers, 1, stream);
+//	fwrite(outputLayers, sizeof(int) * numberOutputs, 1, stream);
+//
+//	for (unsigned i = 0; i < numberLayers; i++) {
+//		layers[i]->saveWeighs(stream);
+//	}
 }
 
 void NeuralNet::load(FILE* stream) {
-	unsigned auxNumberInputs;
-	fread(&auxNumberInputs, sizeof(unsigned), 1, stream);
-
-	if (auxNumberInputs != numberInputs) {
-		char buffer[100];
-		sprintf(
-				buffer,
-				"the number of inputs (%d) does not match with the number of inputs of the Neural Net to load (%d).",
-				numberInputs, auxNumberInputs);
-		string error = buffer;
-		throw error;
-	}
-
-	fread(&numberLayers, sizeof(unsigned), 1, stream);
-	fread(&numberOutputs, sizeof(unsigned), 1, stream);
-
-	layers = (Layer**) ((mi_malloc(sizeof(Layer*) * numberLayers)));
-	for (unsigned i = 0; i < numberLayers; i++) {
-		layers[i] = Factory::newLayer(this->implementationType);
-		layers[i]->load(stream);
-	}
-
-	loadGraphs(stream);
-	stablishConnections();
-
-	for (unsigned i = 0; i < numberLayers; i++) {
-		layers[i]->loadWeighs(stream);
-	}
+//	unsigned auxNumberInputs;
+//	fread(&auxNumberInputs, sizeof(unsigned), 1, stream);
+//
+//	if (auxNumberInputs != numberInputs) {
+//		char buffer[100];
+//		sprintf(
+//				buffer,
+//				"the number of inputs (%d) does not match with the number of inputs of the Neural Net to load (%d).",
+//				numberInputs, auxNumberInputs);
+//		std::string error = buffer;
+//		throw error;
+//	}
+//
+//	fread(&numberLayers, sizeof(unsigned), 1, stream);
+//	fread(&numberOutputs, sizeof(unsigned), 1, stream);
+//
+//	layers = (Layer**) ((mi_malloc(sizeof(Layer*) * numberLayers)));
+//	for (unsigned i = 0; i < numberLayers; i++) {
+//		layers[i] = Factory::newLayer(this->implementationType);
+//		layers[i]->load(stream);
+//	}
+//
+//	loadGraphs(stream);
+//	stablishConnections();
+//
+//	for (unsigned i = 0; i < numberLayers; i++) {
+//		layers[i]->loadWeighs(stream);
+//	}
 }
 
 void NeuralNet::loadGraphs(FILE* stream) {

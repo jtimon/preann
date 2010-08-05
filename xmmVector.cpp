@@ -61,11 +61,11 @@ void XmmVector::bitCopyFrom(Interface *interface, unsigned char *vectorData)
 void XmmVector::copyFrom(Interface* interface)
 {
 	if (size < interface->getSize()){
-		string error = "The Interface is greater than the Vector.";
+		std::string error = "The Interface is greater than the Vector.";
 		throw error;
 	}
 	if (vectorType != interface->getVectorType()){
-		string error = "The Type of the Interface is different than the Vector Type.";
+		std::string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
 	switch (vectorType){
@@ -117,11 +117,11 @@ void XmmVector::bitCopyTo(unsigned char *vectorData, Interface *interface)
 void XmmVector::copyTo(Interface* interface)
 {
 	if (interface->getSize() < size){
-		string error = "The Vector is greater than the Interface.";
+		std::string error = "The Vector is greater than the Interface.";
 		throw error;
 	}
 	if (vectorType != interface->getVectorType()){
-		string error = "The Type of the Interface is different than the Vector Type.";
+		std::string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
 	switch (vectorType){
@@ -158,8 +158,6 @@ void XmmVector::activation(float* results, FunctionType functionType)
 
 		for (unsigned i=0; i < size; i++){
 
-			//TODO quitar mensaje
-			printf(" %f ", results[i]);
 			if (results[i] > 0){
 				vectorData[blockOffset + bytePos] |= vectorMask;
 			} else {
@@ -178,10 +176,40 @@ void XmmVector::activation(float* results, FunctionType functionType)
 				++bytePos;
 			}
 		}
-		//TODO quitar mensaje
-		printf("\n");
 	}
 	mi_free(results);
+}
+
+//TODO esto es igual en CppVector
+void XmmVector::mutate(unsigned pos, float mutation)
+{
+	if (pos > size){
+		std::string error = "The position being mutated is greater than the size of the vector.";
+	}
+	switch (vectorType){
+	case BYTE:{
+		unsigned char* weigh = &(((unsigned char*)data)[pos]);
+		int result = (int)mutation + *weigh;
+		if (result <= 0){
+			*weigh = 0;
+		}
+		else if (result >= 255) {
+			*weigh = 255;
+		}
+		else {
+			*weigh = result;
+		}
+		}break;
+	case FLOAT:
+		((float*)data)[pos] += mutation;
+		break;
+	case BIT:
+	case SIGN:
+		{
+		std::string error = "XmmVector::mutate is not implemented for VectorType BIT nor SIGN.";
+		throw error;
+		}
+	}
 }
 
 unsigned XmmVector::getByteSize()

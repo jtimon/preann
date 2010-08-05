@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 					delete(vector);
 
 					if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
-						string error = "Memory loss detected testing class Vector.\n";
+						std::string error = "Memory loss detected testing class Vector.\n";
 						throw error;
 					}
 				}
@@ -119,8 +119,7 @@ int main(int argc, char *argv[]) {
 					}
 					printf(" size = %d \n", size);
 
-					Layer* layer = Factory::newLayer(implementationType);
-					layer->init(size, vectorType, IDENTITY);
+					Layer* layer = Factory::newLayer(size, vectorType, implementationType, IDENTITY);
 					layer->addInput(layer->getOutput());
 					layer->addInput(layer->getOutput());
 					layer->addInput(layer->getOutput());
@@ -136,7 +135,7 @@ int main(int argc, char *argv[]) {
 					printf("-- -------------- --\n");
 
 					if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
-						string error = "Memory loss detected testing class Layer.\n";
+						std::string error = "Memory loss detected testing class Layer.\n";
 						throw error;
 					}
 				}
@@ -147,7 +146,7 @@ int main(int argc, char *argv[]) {
 		printf("Exit success.\n", 1);
 		mem_printTotalAllocated();
 		mem_printTotalPointers();
-	} catch (string error) {
+	} catch (std::string error) {
 		cout << "Error: " << error << endl;
 	} catch (...) {
 		printf("An error was thrown.\n", 1);

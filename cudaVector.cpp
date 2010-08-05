@@ -43,11 +43,11 @@ CudaVector::~CudaVector()
 void CudaVector::copyFrom2(Interface* interface, unsigned block_size)
 {
 	if (vectorType != interface->getVectorType()){
-		string error = "The Type of the Interface is different than the Vector Type.";
+		std::string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
 	if (size < interface->getSize()){
-		string error = "The Interface is greater than the Vector.";
+		std::string error = "The Interface is greater than the Vector.";
 		throw error;
 	}
 	if (interface->getVectorType() == FLOAT){
@@ -85,11 +85,11 @@ void CudaVector::copyFrom2(Interface* interface, unsigned block_size)
 void CudaVector::copyFrom(Interface *interface)
 {
 	if (size < interface->getSize()){
-		string error = "The Interface is greater than the Vector.";
+		std::string error = "The Interface is greater than the Vector.";
 		throw error;
 	}
 	if (vectorType != interface->getVectorType()){
-		string error = "The Type of the Interface is different than the Vector Type.";
+		std::string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
 	cuda_copyToDevice(data, interface->getDataPointer(), interface->getByteSize());
@@ -98,11 +98,11 @@ void CudaVector::copyFrom(Interface *interface)
 void CudaVector::copyTo(Interface *interface)
 {
 	if (interface->getSize() < size){
-		string error = "The Vector is greater than the Interface.";
+		std::string error = "The Vector is greater than the Interface.";
 		throw error;
 	}
 	if (vectorType != interface->getVectorType()){
-		string error = "The Type of the Interface is different than the Vector Type.";
+		std::string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
 	cuda_copyToHost(interface->getDataPointer(), data, this->getByteSize());
@@ -110,12 +110,15 @@ void CudaVector::copyTo(Interface *interface)
 
 void CudaVector::activation(float* results, FunctionType functionType)
 {
-	//TODO quitar mensaje
-	for (unsigned i=0; i < size; i++){
-		printf(" %f ", results[i]);
-	}
-	printf(" \n ");
 	cuda_activation(data, size, vectorType, results, functionType, CUDA_THREADS_PER_BLOCK);
+}
+
+void CudaVector::mutate(unsigned pos, float mutation)
+{
+	if (pos > size){
+		std::string error = "The position being mutated is greater than the size of the vector.";
+	}
+	cuda_mutate(data, pos, mutation, vectorType);
 }
 
 unsigned CudaVector::getByteSize()

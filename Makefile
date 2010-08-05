@@ -1,93 +1,105 @@
-
 # Project: Paralel Reinforcement Evolutionary Artificial Neural Network
 
-TEST_MEMORY_LOSSES = ./bin/testMemoryLosses
-TEST_LAYERS = ./bin/testLayers
-TEST_NEURAL_NETS = ./bin/testNeuralNets
-PREANN = ./bin/preann
+# --------------- VARIABLES ---------------------
 
-CLASSIFCATON_OBJ = classificationTask.o
-GA_OBJ = population.o task.o individual.o
-NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o factory.o interface.o cudaVector.o
+SHELL = /bin/sh
 
 CXX = g++-4.3 -ggdb -c
 NVCC_LINK = /usr/local/cuda/bin/nvcc -L/usr/local/cuda/lib -lcudart
 NVCC_COMPILE = /usr/local/cuda/bin/nvcc -g -G -c -arch sm_11 --device-emulation
 NASM = nasm -f elf
 
-all: $(PREANN) $(TEST_NEURAL_NETS) $(TEST_MEMORY_LOSSES) $(TEST_LAYERS)
+CLASSIFCATON_OBJ = classificationTask.o
+GA_OBJ = population.o task.o individual.o
+NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o factory.o interface.o cudaVector.o
 
-$(TEST_LAYERS): $(NETS_OBJ) testLayers.o
-	$(NVCC_LINK) -o $(TEST_LAYERS) $(NETS_OBJ) testLayers.o
+TESTS = ./bin/testMemoryLosses ./bin/testLayers ./bin/testNeuralNets
+
+PROGRAMS = $(TESTS) ./bin/preann  
+
+all: $(PROGRAMS)
+# --------------- LINKED PROGRAMS ---------------------
+
+./bin/testLayers: $(NETS_OBJ) testLayers.o
+	$(NVCC_LINK) $^ -o $@ 
+./bin/testMemoryLosses: $(NETS_OBJ) testMemoryLosses.o
+	$(NVCC_LINK) $^ -o $@ 
+./bin/testNeuralNets: $(NETS_OBJ) testNeuralNets.o
+	$(NVCC_LINK) $^ -o $@ 
+./bin/preann: $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ) main.o
+	$(NVCC_LINK) $^ -o $@ 
+
+# --------------- MAIN OBJECTS ---------------------
+
 testLayers.o : testLayers.cpp $(NETS_OBJ)
 	$(CXX) testLayers.cpp
-
-$(TEST_MEMORY_LOSSES): $(NETS_OBJ) testMemoryLosses.o
-	$(NVCC_LINK) -o $(TEST_MEMORY_LOSSES) $(NETS_OBJ) testMemoryLosses.o
 testMemoryLosses.o : testMemoryLosses.cpp $(NETS_OBJ)
 	$(CXX) testMemoryLosses.cpp
-
-$(TEST_NEURAL_NETS): $(NETS_OBJ) testNeuralNets.o
-	$(NVCC_LINK) -o $(TEST_NEURAL_NETS) $(NETS_OBJ) testNeuralNets.o
 testNeuralNets.o : testNeuralNets.cpp $(NETS_OBJ)
 	$(CXX) testNeuralNets.cpp
-
-$(PREANN): $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ) main.o
-	$(NVCC_LINK) -o $(PREANN) $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ) main.o
 main.o : main.cpp $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ)
 	$(CXX) main.cpp
 
+# --------------- OBJECTS ---------------------
+
 population.o : population.cpp population.h task.o
-	$(CXX) population.cpp
+	$(CXX) $<
 classificationTask.o : classificationTask.cpp classificationTask.h task.o
-	$(CXX) classificationTask.cpp 
+	$(CXX) $< 
 task.o : task.cpp task.h individual.o
-	$(CXX) task.cpp
+	$(CXX) $<
 individual.o : individual.cpp individual.h neuralNet.o
-	$(CXX) individual.cpp
+	$(CXX) $<
 neuralNet.o : neuralNet.cpp neuralNet.h layer.o factory.o
-	$(CXX) neuralNet.cpp
+	$(CXX) $<
 factory.o : factory.cpp factory.h cppLayer.o xmmLayer.o cudaLayer.o cudaLayer2.o
-	$(CXX) factory.cpp
+	$(CXX) $<
 
 cudaLayer2.o : cudaLayer2.cpp cudaLayer2.h cudaLayer.o
-	$(CXX) cudaLayer2.cpp
+	$(CXX) $<
 cudaLayer.o : cudaLayer.cpp cudaLayer.h cuda_code.o
-	$(CXX) cudaLayer.cpp
+	$(CXX) $<
 
 xmmLayer.o : xmmLayer.cpp xmmLayer.h cppLayer.o sse2_code.o
-	$(CXX) xmmLayer.cpp
+	$(CXX) $<
 cppLayer.o : cppLayer.cpp cppLayer.h
-	$(CXX) cppLayer.cpp
+	$(CXX) $<
 
 cppLayer.o cudaLayer.o : layer.o
 
-layer.o : layer.h layer.cpp vector.o
-	$(CXX) layer.cpp
+layer.o : layer.cpp layer.h vector.o
+	$(CXX) $<
 
-cudaVector.o : cudaVector.h cudaVector.cpp cuda_code.o
-	$(NVCC_COMPILE) -c cudaVector.cpp
-xmmVector.o : xmmVector.h xmmVector.cpp sse2_code.o
-	$(CXX) xmmVector.cpp
-cppVector.o : cppVector.h cppVector.cpp
-	$(CXX) cppVector.cpp
+cudaVector.o : cudaVector.cpp cudaVector.h cuda_code.o
+	$(NVCC_COMPILE) -c $<
+xmmVector.o : xmmVector.cpp xmmVector.h sse2_code.o
+	$(CXX) $<
+cppVector.o : cppVector.cpp cppVector.h
+	$(CXX) $<
 
+# Vector abstract class is required by all of its implementations.
 cppVector.o xmmVector.o cudaVector.o : vector.o
   
-vector.o : vector.h vector.cpp interface.o
-	$(CXX) vector.cpp
-interface.o : interface.h interface.cpp commonFunctions.o
-	$(CXX) interface.cpp
+vector.o : vector.cpp vector.h interface.o
+	$(CXX) $<
+interface.o : interface.cpp interface.h commonFunctions.o
+	$(CXX) $<
 commonFunctions.o : commonFunctions.c generalDefinitions.h
-	$(CXX) commonFunctions.c
+	$(CXX) $<
 	
 chronometer.o : chronometer.cpp chronometer.h
-	$(CXX) chronometer.cpp
+	$(CXX) $<
 
-cuda_code.o : cuda_code.h cuda_code.cu generalDefinitions.h
-	$(NVCC_COMPILE) cuda_code.cu
+cuda_code.o : cuda_code.cu cuda_code.h generalDefinitions.h
+	$(NVCC_COMPILE) $<
 sse2_code.o : sse2_code.asm sse2_code.h
-	$(NASM) sse2_code.asm
+	$(NASM) $<
 
 clean: 
-	rm preann $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ)
+	rm *.o $(PROGRAMS) 
+
+
+
+#       Only use these programs directly
+#    awk cat cmp cp diff echo egrep expr false grep install-info ln ls
+#     mkdir mv printf pwd rm rmdir sed sleep sort tar test touch tr true

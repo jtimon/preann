@@ -150,13 +150,6 @@ extern "C" void cuda_setZero(void* data, unsigned byteSize, VectorType vectorTyp
 	}
 }
 
-//TODO cambiar la version en c por un kernel
-//extern "C"
-//float* cuda_transposeMatrix(float* Matrix, unsigned width, unsigned height)
-//{
-//
-//}
-
 // GENETIC OPERATORS
 
 //TODO para usar esto, el vector tiene que se creado de tamaño ((size-1)/(BITS_PER_UNSIGNED * block_size)+1) * (BITS_PER_UNSIGNED * block_size)
@@ -220,10 +213,19 @@ void mutateByteKernel(unsigned char* vector, unsigned pos, int mutation)
 
 extern "C" void cuda_mutate(void* vector, unsigned pos, float mutation, VectorType vectorType)
 {
-	if (vectorType == FLOAT) {
-		mutateFloatKernel<<< 1, 8 >>>((float*)vector, pos, mutation);
-	} else {
+	switch (vectorType){
+	case BYTE:
 		mutateByteKernel<<< 1, 8 >>>((unsigned char*)vector, pos, (int)mutation);
+		break;
+	case FLOAT:
+		mutateFloatKernel<<< 1, 8 >>>((float*)vector, pos, mutation);
+		break;
+	case BIT:
+	case SIGN:
+		{
+		std::string error = "cuda_mutate is not implemented for VectorType BIT nor SIGN.";
+		throw error;
+		}
 	}
 }
 
@@ -429,7 +431,6 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size,
 	unsigned shared_mem_size;
 
 	if (inputType == FLOAT) {
-		//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
 		if (input_size > 4032) {
 			string error = "The maximum float input size is 4032.";
 			throw error;
@@ -440,7 +441,6 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size,
 	} else {
 
 		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
-		//TODO quitar estas comprobaciones y hacer que sirva para cualquier tamaño de entrada
 		if (shared_mem_size > 16128) {
 			//16128 * 8
 			string error = "The maximum bit/sign input size is 129024.";
@@ -478,7 +478,8 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
 		while (input_size > CUDA_MAX_SHARED_BITS) {
 
 			shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(unsigned);
-			printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
+			// FIXME ??? probar sin emulación
+//			printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
 			if (inputType == BIT) {
 				SumBitsInvertedConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
 			} else {
@@ -489,7 +490,8 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
 			input_size -= CUDA_MAX_SHARED_BITS;
 		}
 		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
-		printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
+		// FIXME ??? probar sin emulación
+		//printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
 		if (inputType == BIT) {
 			SumBitsInvertedConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
 		} else {

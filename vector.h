@@ -16,20 +16,22 @@ protected:
 	void* data;
 	VectorType vectorType;
 
-	Vector(){};
+	Vector();
 public:
 	virtual ~Vector();
 
 	virtual void copyFrom(Interface* interface) = 0;
 	virtual void copyTo(Interface* interface) = 0;
 	virtual void activation(float* results, FunctionType functionType) = 0;
+	virtual void mutate(unsigned pos, float mutation) = 0;
 
 	void* getDataPointer();
 	unsigned getSize();
 	VectorType getVectorType();
 	FunctionType getFunctionType();
-	Interface* createInterface();
+	Interface* toInterface();
 	void print();
+	void save(FILE* stream);
 
 protected:
 	template <class vectorType>

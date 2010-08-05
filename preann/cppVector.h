@@ -12,15 +12,15 @@
 
 class CppVector: public Vector {
 	virtual unsigned getByteSize();
-protected:
-	CppVector(){};
 public:
+	CppVector(){};
 	CppVector(unsigned size, VectorType vectorType);
 	virtual ~CppVector();
 
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
 	virtual void activation(float* results, FunctionType functionType);
+	virtual void mutate(unsigned pos, float mutation);
 
 };
 
