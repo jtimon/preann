@@ -14,11 +14,11 @@ unsigned totalAllocated = 0;
 
 void* mi_malloc(unsigned size) {
 	if (size == 0) {
-		string error = "No se pueden reservar 0 bytes";
+		std::string error = "No se pueden reservar 0 bytes";
 		throw error;
 	}
 	if (ptr_counter == 5000) {
-		string error = "No se pueden reservar más de 5000 punteros";
+		std::string error = "No se pueden reservar más de 5000 punteros";
 		throw error;
 	}
 	void* toReturn = malloc(size);
@@ -50,7 +50,7 @@ void mi_free(void* ptr) {
 	}
 	if (!found) {
 		cout<<"Unable to free "<<(unsigned)ptr<<endl;
-		string error = "The pointer to free wasn't found";
+		std::string error = "The pointer to free wasn't found";
 		throw error;
 		//free(ptr);
 	}
@@ -123,19 +123,19 @@ float Function(float number, FunctionType functionType) {
 	}
 }
 
-int randomInt(unsigned rango) {
-	return (rand() % (2 * rango + 1)) - rango;
+int randomInt(unsigned range) {
+	return (rand() % (2 * range + 1)) - range;
 }
 
-float randomFloat(float rango) {
-	return ((rand() / (float) RAND_MAX) * (2 * rango)) - rango;
+float randomFloat(float range) {
+	return ((rand() / (float) RAND_MAX) * (2 * range)) - range;
 }
 
-unsigned randomUnsigned(unsigned rango) {
-	return rand() % rango;
+unsigned randomUnsigned(unsigned range) {
+	return rand() % range;
 }
 
-float randomPositiveFloat(float rango) {
-	return (rand() / (float) RAND_MAX) * (rango);
+float randomPositiveFloat(float range) {
+	return (rand() / (float) RAND_MAX) * (range);
 }
 
