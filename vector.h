@@ -30,9 +30,14 @@ public:
 	VectorType getVectorType();
 	FunctionType getFunctionType();
 	Interface* toInterface();
+	void copyFromVector(Vector* vector);
+	void copyToVector(Vector* vector);
+
 	void print();
 	void save(FILE* stream);
-
+	float compareTo(Vector* other);
+	void random(float range);
+	void transposeMatrix(unsigned width);
 protected:
 	template <class vectorType>
 	void SetValueToAnArray(void* array, unsigned size, vectorType value)

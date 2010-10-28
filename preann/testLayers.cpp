@@ -11,93 +11,79 @@ using namespace std;
 
 #define PATH "/home/timon/layer.lay"
 
-#define VECTOR_TYPE_DIM 2
-#define IMPLEMENTATION_TYPE_DIM 4
 #define INITIAL_WEIGHS_RANGE 20
 
-#define MAX_SIZE 200
-#define NUM_INPUTS 2
 
-void printImplementationType(ImplementationType implementationType)
+void printTestParams(ImplementationType implementationType, VectorType vectorType, unsigned size, unsigned numInputs)
 {
     switch (implementationType){
-        case C:
-            printf(" C ");
-            break;
-        case SSE2:
-            printf(" SSE2 ");
-            break;
-        case CUDA:
-            printf(" CUDA ");
-            break;
-        case CUDA2:
-            printf(" CUDA2 ");
-            break;
+        case C: 	printf(" C     "); 	break;
+        case SSE2: 	printf(" SSE2  ");	break;
+        case CUDA: 	printf(" CUDA  ");	break;
+        case CUDA2:	printf(" CUDA2 ");	break;
     }
-}
-
-void printVectorType(VectorType vectorType)
-{
     switch (vectorType){
-        case FLOAT:
-            printf(" FLOAT ");
-            break;
-        case BIT:
-            printf(" BIT ");
-            break;
-        case SIGN:
-            printf(" SIGN ");
-            break;
+        case FLOAT: printf(" FLOAT "); 	break;
+        case BIT: 	printf(" BIT   ");	break;
+        case SIGN: 	printf(" SIGN  ");	break;
+        case BYTE:	printf(" BYTE  ");	break;
     }
+    printf(" size = %d numInputs %d weighsRange %d \n", size, numInputs, INITIAL_WEIGHS_RANGE);
 }
 
-void printTestParams(ImplementationType implementationType, VectorType vectorType, unsigned size)
+unsigned char areEqual(float expected, float actual, VectorType vectorType)
 {
-    printImplementationType(implementationType);
-    printVectorType(vectorType);
-    printf(" size = %d numInputs %d weighsRange %d \n", size, NUM_INPUTS, INITIAL_WEIGHS_RANGE);
+	if (vectorType == FLOAT){
+		return (expected - 1 < actual
+			 && expected + 1 > actual);
+	} else {
+		return expected == actual;
+	}
 }
 
-void assertEquals(Interface* expected, Interface* actual)
+unsigned assertEquals(Vector* expected, Vector* actual)
 {
-	if (expected->getVectorType() != actual->getVectorType()){
-		throw "The interfaces are not even of the same type!";
-	}
-	if (expected->getSize() != actual->getSize()){
-		throw "The interfaces are not even of the same size!";
-	}
-	for (unsigned i=0; i < expected->getSize(); i++) {
-		if ((int)expected->getElement(i) != (int)actual->getElement(i)){
-			printf("expected:\n");
-			expected->print();
-			printf("actual:\n");
-			actual->print();
-			char buffer[100];
-			sprintf(buffer, "The interfaces are not equal at the position %d.", i);
-			std::string error = buffer;
-			throw error;
-		}
-	}
+    if(expected->getVectorType() != actual->getVectorType()){
+        throw "The vectors are not even of the same type!";
+    }
+    if(expected->getSize() != actual->getSize()){
+        throw "The vectors are not even of the same size!";
+    }
+
+	unsigned differencesCounter = 0;
+	Interface* expectedInt = expected->toInterface();
+	Interface* actualInt = actual->toInterface();
+
+    for(unsigned i = 0;i < expectedInt->getSize();i++){
+        if(!areEqual(expectedInt->getElement(i), actualInt->getElement(i), expectedInt->getVectorType())){
+            printf("The vectors are not equal at the position %d (expected = %f actual %f).\n", i, expectedInt->getElement(i), actualInt->getElement(i));
+            ++differencesCounter;
+        }
+    }
+    delete(expectedInt);
+	delete(actualInt);
+	return differencesCounter;
 }
 
-Layer* createAndLoadLayer(ImplementationType implementationType, FILE* stream, Interface* controlInput)
+Layer* createAndLoadLayer(ImplementationType implementationType, Vector* controlInput, unsigned numInputs)
 {
     Layer *layer = Factory::newLayer(implementationType);
-    stream = fopen(PATH, "r+b");
+    FILE* stream = fopen(PATH, "r+b");
     layer->load(stream);
     fclose(stream);
-    for (unsigned numInputs = 0; numInputs < NUM_INPUTS; numInputs++){
-					layer->setInput(controlInput, numInputs);
-				}
+    for (unsigned i = 0; i < numInputs; i++){
+		layer->setInput(controlInput, i);
+	}
     return layer;
 }
 
-Layer* createAndSaveLayer(unsigned& size, VectorType& vectorType, Interface* controlInput)
+Layer* createAndSaveLayer(unsigned& size, VectorType vectorType, Vector* controlInput, unsigned numInputs)
 {
-    Layer *controlLayer = Factory::newLayer(size, vectorType, C, IDENTITY);
-    for (unsigned numInputs = 0; numInputs < NUM_INPUTS; numInputs++){
-				controlLayer->addInput(controlInput);
-			}
+    Layer* controlLayer = Factory::newLayer(size, vectorType, C, IDENTITY);
+
+    for (unsigned i = 0; i < numInputs; i++){
+		controlLayer->addInput(controlInput);
+	}
     controlLayer->randomWeighs(INITIAL_WEIGHS_RANGE);
 
 	FILE* stream = fopen(PATH, "w+b");
@@ -106,78 +92,79 @@ Layer* createAndSaveLayer(unsigned& size, VectorType& vectorType, Interface* con
     return controlLayer;
 }
 
+#define IMPLEMENTATION_TYPE_DIM 2
+
+void testLayer(unsigned size, VectorType vectorType, unsigned numInputs)
+{
+    Vector *controlInputVector = Factory::newVector(size, vectorType, C);
+    controlInputVector->random(INITIAL_WEIGHS_RANGE);
+
+    Layer* controlLayer = createAndSaveLayer(size, vectorType, controlInputVector, numInputs);
+    controlLayer->calculateOutput();
+
+    for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
+		ImplementationType implementationType = (ImplementationType)((implType));
+
+		printTestParams(implementationType, vectorType, size, numInputs);
+
+		Vector* inputVector = Factory::newVector(size, vectorType, implementationType);
+		inputVector->copyFromVector(controlInputVector);
+
+		Layer* layer = createAndLoadLayer(implementationType, inputVector, numInputs);
+
+	    //test calculation
+		layer->calculateOutput();
+
+	    unsigned differences = assertEquals(controlLayer->getOutput(), layer->getOutput());
+	    if (differences != 0)
+	    	printf("Errors on outputs: %d \n", differences);
+
+
+		//test Weighs
+	    for(unsigned i = 0; i < numInputs; i++){
+	        Vector* expectedWeighs = controlLayer->getConnection(i);
+	        Vector* actualWeighs = layer->getConnection(i);
+	        if(implementationType == CUDA2){
+	            unsigned inputSize = actualWeighs->getSize() / layer->getOutput()->getSize();
+	            actualWeighs->transposeMatrix(inputSize);
+	        }
+	        differences = assertEquals(expectedWeighs, actualWeighs);
+	        if (differences != 0)
+	        	printf("Errors on weighs (input %d): %d \n", i, differences);
+	    }
+
+		delete (layer);
+	    delete (inputVector);
+	}
+    delete (controlLayer);
+    delete (controlInputVector);
+}
+
+#define VECTOR_TYPE_DIM 3
+#define SIZE_MAX 5
+#define SIZE_INC 1
+#define NUM_INPUTS 1
+
 int main(int argc, char *argv[]) {
 	Chronometer total;
 	total.start();
 
-	unsigned errorCount = 0;
-
 	try {
 		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
-			VectorType vectorType = (VectorType) vectType;
-			printVectorType(vectorType);
-			printf("\n---------\n");
-		if (vectType != BYTE) for (unsigned size = 1; size < MAX_SIZE; size++){
-
-			Interface* controlInput = new Interface(size, vectorType);
-			controlInput->random(INITIAL_WEIGHS_RANGE);
-
-			Layer* controlLayer = createAndSaveLayer(size, vectorType, controlInput);
-
-			controlLayer->calculateOutput();
-			Interface* expectedOutput = controlLayer->getOutput()->toInterface();
-
-			for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
-
-				ImplementationType implementationType = (ImplementationType)(implType);
-
-				Layer* layer = createAndLoadLayer(implementationType, stream, controlInput);
-				layer->calculateOutput();
-				Interface* actual = layer->getOutput()->toInterface();
-
-				try{
-					assertEquals(expectedOutput, actual);
-				} catch (std::string error) {
-					printTestParams(implementationType, vectorType, size);
-					cout << ++errorCount <<" Error on outputs: " << error <<endl<<endl;
+//			if (vectType != BYTE)
+			if (vectType == SIGN)
+				for (unsigned size = 1; size < SIZE_MAX; size += SIZE_INC) {
+					testLayer(size, (VectorType) vectType, NUM_INPUTS);
 				}
-				delete (actual);
-
-				for (unsigned i = 0; i < NUM_INPUTS; i++){
-					Interface* expectedWeighs = controlLayer->getConnection(i)->toInterface();
-					Interface* actualWeighs = layer->getConnection(i)->toInterface();
-
-					if(implementationType == CUDA2){
-						unsigned inputSize = actualWeighs->getSize() / layer->getOutput()->getSize();
-						actualWeighs->transposeMatrix(inputSize);
-					}
-
-					try{
-						assertEquals(expectedWeighs, actualWeighs);
-					} catch (std::string error) {
-						printTestParams(implementationType, vectorType, size);
-						cout << ++errorCount <<" Error on weighs: " << error <<endl<<endl;
-					}
-					delete(expectedWeighs);
-					delete(actualWeighs);
-				}
-				delete(layer);
-			}
-			delete (expectedOutput);
-			delete(controlLayer);
-		}}
-
-		if (errorCount == 0) {
-			printf("Exit success.\n");
-		} else {
-			printf("Exit with %d errors.\n", errorCount);
 		}
+
+		printf("Exit success.\n");
 		mem_printTotalAllocated();
 		mem_printTotalPointers();
 	} catch (std::string error) {
 		cout << "Error: " << error << endl;
-	} catch (...) {
-		printf("An error was thrown.\n", 1);
+//	} catch (...) {
+//		printf("An error was thrown.\n", 1);
 	}
 
 	//mem_printListOfPointers();
