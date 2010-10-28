@@ -13,7 +13,6 @@
 
 class Factory {
 public:
-	static Vector* newVector(ImplementationType implementationType);
 	static Vector* newVector(unsigned size, VectorType vectorType, ImplementationType implementationType);
 	static Layer* newLayer(ImplementationType implementationType);
 	static Layer* newLayer(unsigned size, VectorType outputType, ImplementationType implementationType, FunctionType functionType);
