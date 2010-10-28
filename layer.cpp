@@ -66,7 +66,6 @@ void Layer::checkCompatibility(Layer* layer)
 			throw error;
 		}
 	}
-
 }
 
 void Layer::calculateOutput()
@@ -81,6 +80,8 @@ void Layer::calculateOutput()
 	for(unsigned i=0; i < numberInputs; i++){
 		inputCalculation(inputs[i], connections[i]->getDataPointer(), results);
 	}
+
+
 	output->activation(results, functionType);
 }
 
@@ -120,6 +121,12 @@ void Layer::addInput(Vector* input)
 
 void Layer::setInput(Vector* input, unsigned pos)
 {
+	if (pos >= numberInputs){
+		char buffer[100];
+		sprintf(buffer, "Cannot set the input in position %d: the layer just have %d inputs.", pos, numberInputs);
+		std::string error = buffer;
+		throw error;
+	}
 	switch (input->getVectorType()){
 	case BYTE:
 		{
