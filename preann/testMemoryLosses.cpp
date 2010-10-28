@@ -11,7 +11,7 @@ using namespace std;
 
 #define VECTOR_TYPE_DIM 3
 #define IMPLEMENTATION_TYPE_DIM 4
-#define MAX_SIZE 200
+#define SIZE_MAX 200
 
 int main(int argc, char *argv[]) {
 	Chronometer total;
@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 		//test Vectors
 		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
 			for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
-				for (unsigned size = 1; size < MAX_SIZE; size++){
+				for (unsigned size = 1; size < SIZE_MAX; size++){
 
 					printf(" Vector ");
 					VectorType vectorType;
