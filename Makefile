@@ -13,15 +13,19 @@ CLASSIFCATON_OBJ = classificationTask.o
 GA_OBJ = population.o task.o individual.o
 NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o factory.o interface.o cudaVector.o
 
-TESTS = ./bin/testMemoryLosses ./bin/testLayers ./bin/testNeuralNets
+TESTS = ./bin/testMemoryLosses ./bin/testLayers ./bin/testNeuralNets ./bin/testVectors
 
 PROGRAMS = $(TESTS) ./bin/preann  
 
 all: $(PROGRAMS)
 # --------------- LINKED PROGRAMS ---------------------
 
+./bin/testVectors: $(NETS_OBJ) testVectors.o
+	$(NVCC_LINK) $^ -o $@ 
+	./bin/testVectors > ./testResults/testVectors.log
 ./bin/testLayers: $(NETS_OBJ) testLayers.o
 	$(NVCC_LINK) $^ -o $@ 
+#	./bin/testLayers > ./testResults/testLayers.log
 ./bin/testMemoryLosses: $(NETS_OBJ) testMemoryLosses.o
 	$(NVCC_LINK) $^ -o $@ 
 ./bin/testNeuralNets: $(NETS_OBJ) testNeuralNets.o
@@ -30,7 +34,8 @@ all: $(PROGRAMS)
 	$(NVCC_LINK) $^ -o $@ 
 
 # --------------- MAIN OBJECTS ---------------------
-
+testVectors.o : testVectors.cpp $(NETS_OBJ)
+	$(CXX) testVectors.cpp
 testLayers.o : testLayers.cpp $(NETS_OBJ)
 	$(CXX) testLayers.cpp
 testMemoryLosses.o : testMemoryLosses.cpp $(NETS_OBJ)
