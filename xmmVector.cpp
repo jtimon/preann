@@ -34,6 +34,9 @@ XmmVector::~XmmVector()
 Vector* XmmVector::clone()
 {
 	//TODO implementar XmmVector::clone()
+	Vector* clone = new XmmVector(size, vectorType);
+	copyToVector(clone);
+	return clone;
 }
 
 void XmmVector::bitCopyFrom(Interface *interface, unsigned char *vectorData)
@@ -146,6 +149,70 @@ void XmmVector::copyTo(Interface* interface)
 		bitCopyTo(vectorData, interface);
 		break;
 	}
+}
+
+void XmmVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
+{
+	void* inputWeighs = inputWeighsVect->getDataPointer();
+	float* results = (float*)this->getDataPointer();
+	void* inputPtr = input->getDataPointer();
+
+	unsigned numLoops;
+	unsigned weighPos = 0;
+
+	if (input->getVectorType() == FLOAT) {
+
+		numLoops = ((input->getSize()-1)/FLOATS_PER_BLOCK)+1;
+
+		for (unsigned j=0; j < size; j++){
+
+			float auxResult;
+			XMMreal(inputPtr, numLoops,
+					(((float*)inputWeighs) + weighPos), auxResult);
+			results[j] += auxResult;
+			weighPos += input->getSize();
+		}
+	}
+	else {
+		numLoops = ((input->getSize()-1)/BYTES_PER_BLOCK)+1;
+
+		if (input->getVectorType() == BIT) {
+			for (unsigned j=0; j < size; j++){
+
+				results[j] += XMMbinario(inputPtr, numLoops,
+						(((unsigned char*)inputWeighs) + weighPos));
+				weighPos += input->getSize();
+			}
+		}
+		else if (input->getVectorType() == SIGN) {
+			for (unsigned j=0; j < size; j++){
+
+				results[j] += XMMbipolar(inputPtr, numLoops,
+									(((unsigned char*)inputWeighs) + weighPos));
+				weighPos += input->getSize();
+			}
+		}
+	}
+
+/*
+	for (unsigned j=0; j < size; j++){
+		unsigned weighPos = j * input->getWeighsSize();
+
+		if (input->getVectorType() == FLOAT) {
+			float auxResult;
+			XMMreal(inputPtr, ((XmmVector*)input)->getNumLoops(),
+					(((float*)inputWeighs) + weighPos), auxResult);
+			results[j] += auxResult;
+		}
+		else if (input->getVectorType() == BIT) {
+			results[j] += XMMbinario(inputPtr, ((XmmVector*)input)->getNumLoops(),
+					(((unsigned char*)inputWeighs) + weighPos));
+		}
+		else if (input->getVectorType() == SIGN) {
+			results[j] += XMMbipolar(inputPtr, ((XmmVector*)input)->getNumLoops(),
+								(((unsigned char*)inputWeighs) + weighPos));
+		}
+	}*/
 }
 
 void XmmVector::activation(Vector* resultsVect, FunctionType functionType)

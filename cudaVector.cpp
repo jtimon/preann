@@ -7,6 +7,8 @@
 
 #include "cudaVector.h"
 
+unsigned CudaVector::algorithm = 0;
+
 //TODO no me gusta, no cuadra con la factory
 //special constructor for bit coalescing vectors
 CudaVector::CudaVector(unsigned size, VectorType vectorType, unsigned block_size)
@@ -85,6 +87,9 @@ void CudaVector::copyFrom2(Interface* interface, unsigned block_size)
 Vector* CudaVector::clone()
 {
 	//TODO implementar CudaVector::clone()
+	Vector* clone = new CudaVector(size, vectorType);
+	copyToVector(clone);
+	return clone;
 }
 
 void CudaVector::copyFrom(Interface *interface)
@@ -111,6 +116,19 @@ void CudaVector::copyTo(Interface *interface)
 		throw error;
 	}
 	cuda_copyToHost(interface->getDataPointer(), data, this->getByteSize());
+}
+
+void CudaVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
+{
+	void* inputWeighs = inputWeighsVect->getDataPointer();
+	float* results = (float*)data;
+	//FIXME este método no funciona correctamente para SIGN
+	if (CudaVector::algorithm == 0) {
+		cuda_inputCalculationReduction(input->getDataPointer(), input->getSize(), input->getVectorType(), size, inputWeighs, results, Cuda_Threads_Per_Block);
+	}
+	else if (CudaVector::algorithm == 1) {
+		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), size, inputWeighs, results, Cuda_Threads_Per_Block);
+	}
 }
 
 void CudaVector::activation(Vector* resultsVect, FunctionType functionType)

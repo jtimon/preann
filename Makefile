@@ -11,7 +11,7 @@ NASM = nasm -f elf
 
 CLASSIFCATON_OBJ = classificationTask.o
 GA_OBJ = population.o task.o individual.o
-NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o factory.o interface.o cudaVector.o
+NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o factory.o interface.o cudaVector.o cudaVector2.o
 
 TESTS = ./bin/testMemoryLosses ./bin/testLayers ./bin/testNeuralNets ./bin/testVectors
 
@@ -25,7 +25,7 @@ all: $(PROGRAMS)
 	./bin/testVectors > ./testResults/testVectors.log
 ./bin/testLayers: $(NETS_OBJ) testLayers.o
 	$(NVCC_LINK) $^ -o $@ 
-#	./bin/testLayers > ./testResults/testLayers.log
+	./bin/testLayers > ./testResults/testLayers.log
 ./bin/testMemoryLosses: $(NETS_OBJ) testMemoryLosses.o
 	$(NVCC_LINK) $^ -o $@ 
 ./bin/testNeuralNets: $(NETS_OBJ) testNeuralNets.o
@@ -75,6 +75,8 @@ cppLayer.o cudaLayer.o : layer.o
 layer.o : layer.cpp layer.h vector.o
 	$(CXX) $<
 
+cudaVector2.o : cudaVector2.cpp cudaVector2.h cudaVector.o
+	$(NVCC_COMPILE) -c $<
 cudaVector.o : cudaVector.cpp cudaVector.h cuda_code.o
 	$(NVCC_COMPILE) -c $<
 xmmVector.o : xmmVector.cpp xmmVector.h sse2_code.o

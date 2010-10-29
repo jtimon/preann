@@ -78,7 +78,7 @@ void Layer::calculateOutput()
 	Vector* results = thresholds->clone();
 
 	for(unsigned i=0; i < numberInputs; i++){
-		inputCalculation(inputs[i], connections[i], results);
+		results->inputCalculation(inputs[i], connections[i]);
 	}
 
 	output->activation(results, functionType);

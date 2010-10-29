@@ -1,9 +1,3 @@
-/*
- * cppVector.cpp
- *
- *  Created on: Nov 16, 2009
- *      Author: timon
- */
 
 #include "cppVector.h"
 
@@ -16,17 +10,10 @@ CppVector::CppVector(unsigned size, VectorType vectorType)
 	data = mi_malloc(byteSize);
 
 	switch (vectorType){
-
-	case BYTE:
-		SetValueToAnArray<unsigned char>(data, byteSize, 128);
-		break;
-	case FLOAT:
-		SetValueToAnArray<float>(data, byteSize/sizeof(float), 0);
-		break;
-	case BIT:
-	case SIGN:
-		SetValueToAnArray<unsigned char>(data, byteSize, 0);
-		break;
+		case BYTE:  SetValueToAnArray<unsigned char>(data, byteSize, 128); 		break;
+		case FLOAT: SetValueToAnArray<float>(data, byteSize/sizeof(float), 0);  break;
+		case BIT:
+		case SIGN: 	SetValueToAnArray<unsigned char>(data, byteSize, 0);		break;
 	}
 }
 
@@ -41,6 +28,9 @@ CppVector::~CppVector()
 Vector* CppVector::clone()
 {
 	//TODO implementar CppVector::clone()
+	Vector* clone = new CppVector(size, vectorType);
+	copyToVector(clone);
+	return clone;
 }
 
 void CppVector::copyFrom(Interface* interface)
@@ -67,6 +57,32 @@ void CppVector::copyTo(Interface* interface)
 		throw error;
 	}
 	memcpy(interface->getDataPointer(), data, this->getByteSize());
+}
+
+void CppVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
+{
+	void* inputWeighs = inputWeighsVect->getDataPointer();
+	float* results = (float*)this->getDataPointer();
+
+	void* inputPtr = input->getDataPointer();
+	unsigned inputSize = input->getSize();
+
+	for (unsigned j=0; j < size; j++){
+
+		for (unsigned k=0; k < inputSize; k++){
+
+			unsigned weighPos = (j * inputSize) + k;
+			if (input->getVectorType() == FLOAT) {
+				results[j] += ((float*)inputPtr)[k] * ((float*)inputWeighs)[weighPos];
+			} else {
+				if ( ((unsigned*)inputPtr)[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
+					results[j] += (((unsigned char*)inputWeighs)[weighPos] - 128);
+				} else if (input->getVectorType() == SIGN) {
+					results[j] -= (((unsigned char*)inputWeighs)[weighPos] - 128);
+				}
+			}
+		}
+	}
 }
 
 void CppVector::activation(Vector* resultsVect, FunctionType functionType)

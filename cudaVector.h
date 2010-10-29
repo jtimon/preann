@@ -12,9 +12,10 @@
 #include "cuda_code.h"
 
 class CudaVector: public Vector {
-
+protected:
 	virtual unsigned getByteSize();
 public:
+	static unsigned algorithm;
 	CudaVector() {};
 	CudaVector(unsigned size, VectorType vectorType, unsigned block_size);
 	CudaVector(unsigned size, VectorType vectorType);
@@ -26,6 +27,7 @@ public:
 	virtual Vector* clone();
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
+	virtual void inputCalculation(Vector* input, Vector* inputWeighs);
 	virtual void activation(Vector* results, FunctionType functionType);
 	virtual void mutate(unsigned pos, float mutation);
 };

@@ -1,7 +1,5 @@
 #include "cudaLayer.h"
 
-unsigned CudaLayer::algorithm = 0;
-
 CudaLayer::CudaLayer()
 {
 }
@@ -28,10 +26,10 @@ void CudaLayer::inputCalculation(Vector* input, Vector* inputWeighsVect, Vector*
 	void* inputWeighs = inputWeighsVect->getDataPointer();
 	float* results = (float*)resultsVect->getDataPointer();
 	//FIXME este método no funciona correctamente para SIGN
-	if (CudaLayer::algorithm == 0) {
+	if (CudaVector::algorithm == 0) {
 		cuda_inputCalculationReduction(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
 	}
-	else if (CudaLayer::algorithm == 1) {
+	else if (CudaVector::algorithm == 1) {
 		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
 	}
 }

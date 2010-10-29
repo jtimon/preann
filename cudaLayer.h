@@ -20,7 +20,6 @@ protected:
 	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 	virtual void mutateThreshold(unsigned outputPos, float mutation);
 public:
-	static unsigned algorithm;
 	static unsigned blockSize;
 	CudaLayer();
 	virtual ~CudaLayer();

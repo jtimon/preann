@@ -5,7 +5,7 @@
 #include "cppLayer.h"
 #include "xmmVector.h"
 #include "xmmLayer.h"
-#include "cudaVector.h"
+#include "cudaVector2.h"
 #include "cudaLayer2.h"
 
 Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType)
@@ -16,8 +16,9 @@ Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationT
 		case SSE2:
 			return new XmmVector(size, vectorType);
 		case CUDA:
-		case CUDA2:
 			return new CudaVector(size, vectorType);
+		case CUDA2:
+			return new CudaVector2(size, vectorType);
 	}
 }
 

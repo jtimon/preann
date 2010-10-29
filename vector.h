@@ -23,7 +23,7 @@ public:
 	virtual Vector* clone() = 0;
 	virtual void copyFrom(Interface* interface) = 0;
 	virtual void copyTo(Interface* interface) = 0;
-	//TODO change parameter results to a Vector
+	virtual void inputCalculation(Vector* input, Vector* inputWeighs) = 0;
 	virtual void activation(Vector* results, FunctionType functionType) = 0;
 	virtual void mutate(unsigned pos, float mutation) = 0;
 
