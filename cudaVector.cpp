@@ -147,7 +147,10 @@ void CudaVector::mutate(unsigned pos, float mutation)
 
 void CudaVector::mutate(unsigned pos, float mutation, unsigned inputSize)
 {
-	//TODO impl CudaVector::mutate
+	if (pos > size){
+		std::string error = "The position being mutated is greater than the size of the vector.";
+	}
+	cuda_mutate(data, pos, mutation, vectorType);
 }
 void CudaVector::weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize)
 {

@@ -7,14 +7,6 @@
 
 #include "cudaLayer2.h"
 
-CudaLayer2::CudaLayer2()
-{
-}
-
-CudaLayer2::~CudaLayer2()
-{
-}
-
 void CudaLayer2::crossoverWeighs(Layer *other, unsigned  inputLayer, Interface *bitVector)
 {
 	// TODO CudaLayer2::crossoverWeighs
@@ -39,23 +31,3 @@ void CudaLayer2::crossoverWeighs(Layer *other, unsigned  inputLayer, Interface *
 	cuda_crossover(thisWeighs, otherWeighs, cudaBitVectorPtr, weighsSize, inputs[inputLayer]->getVectorType(), Cuda_Threads_Per_Block);
 }
 
-void CudaLayer2::mutateWeigh(unsigned  outputPos, unsigned  inputLayer, unsigned  inputPos, float mutation)
-{
-	if (outputPos > output->getSize()) {
-		std::string error = "Cannot mutate that output: the Layer hasn't so many neurons.";
-		throw error;
-	}
-	if (inputLayer > output->getSize()) {
-		std::string error = "Cannot mutate that input: the Layer hasn't so many inputs.";
-		throw error;
-	}
-	if (inputPos > inputs[inputLayer]->getSize()) {
-		std::string error = "Cannot mutate that input: the input hasn't so many neurons.";
-		throw error;
-	}
-
-	Vector* input = getInput(inputLayer);
-	unsigned weighPos = outputPos + (inputPos * output->getSize());
-
-	cuda_mutate(getConnection(inputLayer)->getDataPointer(), weighPos, mutation, input->getVectorType());
-}

@@ -22,6 +22,24 @@ Layer::Layer()
 
 Layer::~Layer()
 {
+	if (inputs) {
+		for (unsigned i=0; i < numberInputs; i++){
+			delete(connections[i]);
+		}
+
+		mi_free(inputs);
+		mi_free(connections);
+		inputs = NULL;
+		connections = NULL;
+	}
+	if (thresholds) {
+		delete(thresholds);
+		thresholds = NULL;
+	}
+	if (output) {
+		delete (output);
+		output = NULL;
+	}
 }
 
 void Layer::init(unsigned size, VectorType outputType, FunctionType functionType)
@@ -196,7 +214,7 @@ void Layer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputP
 		throw error;
 	}
 	unsigned weighPos = (outputPos * inputs[inputLayer]->getSize()) + inputPos;
-	connections[inputLayer]->mutate(weighPos, mutation);
+	connections[inputLayer]->mutate(weighPos, mutation, inputs[inputLayer]->getSize());
 }
 
 void Layer::mutateThreshold(unsigned outputPos, float mutation)
@@ -205,7 +223,7 @@ void Layer::mutateThreshold(unsigned outputPos, float mutation)
 		std::string error = "Cannot mutate that Threshold: the Layer hasn't so many neurons.";
 		throw error;
 	}
-	thresholds->mutate(outputPos, mutation);
+	thresholds->mutate(outputPos, mutation, 1);
 }
 
 void Layer::swapWeighs(Layer* layer)

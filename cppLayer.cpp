@@ -1,41 +1,6 @@
 
 #include "cppLayer.h"
 
-CppLayer::CppLayer()
-{
-}
-
-CppLayer::~CppLayer()
-{
-	if (inputs) {
-		for (unsigned i=0; i < numberInputs; i++){
-			delete(connections[i]);
-		}
-
-		mi_free(inputs);
-		mi_free(connections);
-		inputs = NULL;
-		connections = NULL;
-	}
-	if (thresholds) {
-		delete(thresholds);
-		thresholds = NULL;
-	}
-	if (output) {
-		delete (output);
-		output = NULL;
-	}
-}
-
-void CppLayer::copyWeighs(Layer* sourceLayer)
-{
-	memcpy(thresholds, sourceLayer->getThresholdsPtr(), output->getSize() * sizeof(float));
-
-	for (unsigned i=0; i < numberInputs; i++){
-		//TODO implementar metodo
-	}
-}
-
 void CppLayer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
 {
 	unsigned weighsSize = bitVector->getSize();

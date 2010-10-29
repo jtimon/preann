@@ -13,13 +13,12 @@
 class CppLayer : public Layer
 {
 public:
-	CppLayer();
-	virtual ~CppLayer();
+	CppLayer() {};
+	virtual ~CppLayer() {};
 	virtual ImplementationType getImplementationType() {
 		return C;
 	};
 
-	virtual void copyWeighs(Layer* sourceLayer);
 	virtual void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector);
 
 };

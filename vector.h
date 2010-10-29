@@ -25,7 +25,6 @@ public:
 	virtual void copyTo(Interface* interface) = 0;
 	virtual void inputCalculation(Vector* input, Vector* inputWeighs) = 0;
 	virtual void activation(Vector* results, FunctionType functionType) = 0;
-	virtual void mutate(unsigned pos, float mutation) = 0;
 	virtual void mutate(unsigned pos, float mutation, unsigned inputSize) = 0;
 	virtual void weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize) = 0;
 

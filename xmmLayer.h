@@ -7,8 +7,8 @@
 class XmmLayer: public CppLayer
 {
 public:
-	XmmLayer();
-	virtual ~XmmLayer();
+	XmmLayer() {};
+	virtual ~XmmLayer() {};
 	virtual ImplementationType getImplementationType() {
 		return SSE2;
 	};

@@ -114,7 +114,7 @@ void CppVector::activation(Vector* resultsVect, FunctionType functionType)
 	mi_free(results);
 }
 
-void CppVector::mutate(unsigned pos, float mutation)
+void CppVector::mutate(unsigned pos, float mutation, unsigned inputSize)
 {
 	if (pos > size){
 		std::string error = "The position being mutated is greater than the size of the vector.";
@@ -143,11 +143,6 @@ void CppVector::mutate(unsigned pos, float mutation)
 		throw error;
 		}
 	}
-}
-
-void CppVector::mutate(unsigned pos, float mutation, unsigned inputSize)
-{
-	//TODO impl CppVector::mutate
 }
 void CppVector::weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize)
 {

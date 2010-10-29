@@ -12,10 +12,9 @@
 
 class CudaLayer2: public CudaLayer {
 protected:
-	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 public:
-	CudaLayer2();
-	virtual ~CudaLayer2();
+	CudaLayer2() {};
+	virtual ~CudaLayer2() {};
 	virtual ImplementationType getImplementationType() {
 		return CUDA2;
 	};

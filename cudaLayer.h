@@ -13,13 +13,9 @@
 #include "cudaVector.h"
 
 class CudaLayer: public Layer {
-protected:
-	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
-	virtual void mutateThreshold(unsigned outputPos, float mutation);
 public:
-	static unsigned blockSize;
-	CudaLayer();
-	virtual ~CudaLayer();
+	CudaLayer() {};
+	virtual ~CudaLayer() {};
 	virtual ImplementationType getImplementationType() {
 		return CUDA;
 	};

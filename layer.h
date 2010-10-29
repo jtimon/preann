@@ -25,7 +25,7 @@ protected:
 	Vector* newVector(FILE* stream);
 	Vector* newVector(unsigned size, VectorType vectorType);
 public:
-	virtual void init(unsigned size, VectorType outputType, FunctionType functionType);
+	void init(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~Layer();
 	virtual ImplementationType getImplementationType() = 0;
 

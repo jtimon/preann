@@ -56,7 +56,15 @@ void CudaVector2::inputCalculation(Vector* input, Vector* inputWeighsVect)
 
 void CudaVector2::mutate(unsigned pos, float mutation, unsigned inputSize)
 {
-	//TODO impl CudaVector2::mutate
+	if (pos > size){
+		std::string error = "The position being mutated is greater than the size of the vector.";
+	}
+	//TODO simplificar cuentas
+	unsigned outputPos = pos / inputSize;
+	unsigned inputPos = (pos % inputSize);
+	unsigned outputSize = size / inputSize;
+	unsigned weighPos = outputPos + (inputPos * outputSize);
+	cuda_mutate(data, weighPos, mutation, vectorType);
 }
 void CudaVector2::weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize)
 {
