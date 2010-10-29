@@ -19,7 +19,8 @@ protected:
 	FunctionType functionType;
 
 	virtual float* negativeThresholds() = 0;
-	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results) = 0;
+	//TODO change parameter results to a Vector
+	virtual void inputCalculation(Vector* input, Vector* inputWeighs, Vector* results) = 0;
 
 	void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 	void mutateThreshold(unsigned outputPos, float mutation);

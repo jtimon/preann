@@ -74,13 +74,12 @@ void Layer::calculateOutput()
 		std::string error = "Cannot calculate the output of a Layer without output.";
 		throw error;
 	}
-
-	float* results = negativeThresholds();
+	//TODO use clone on the thresholds (do not subtract them, just use them as they are)
+	Vector* results = thresholds->clone();
 
 	for(unsigned i=0; i < numberInputs; i++){
-		inputCalculation(inputs[i], connections[i]->getDataPointer(), results);
+		inputCalculation(inputs[i], connections[i], results);
 	}
-
 
 	output->activation(results, functionType);
 }

@@ -38,6 +38,11 @@ CppVector::~CppVector()
 	}
 }
 
+Vector* CppVector::clone()
+{
+	//TODO implementar CppVector::clone()
+}
+
 void CppVector::copyFrom(Interface* interface)
 {
 	if (size < interface->getSize()){
@@ -64,8 +69,10 @@ void CppVector::copyTo(Interface* interface)
 	memcpy(interface->getDataPointer(), data, this->getByteSize());
 }
 
-void CppVector::activation(float* results, FunctionType functionType)
+void CppVector::activation(Vector* resultsVect, FunctionType functionType)
 {
+	float* results = (float*)resultsVect->getDataPointer();
+
 	if (vectorType == FLOAT){
 		for (unsigned i=0; i < size; i++){
 			((float*)data)[i] = Function(results[i], functionType);

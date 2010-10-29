@@ -31,6 +31,11 @@ XmmVector::~XmmVector()
 	}
 }
 
+Vector* XmmVector::clone()
+{
+	//TODO implementar XmmVector::clone()
+}
+
 void XmmVector::bitCopyFrom(Interface *interface, unsigned char *vectorData)
 {
     unsigned blockOffset = 0;
@@ -143,8 +148,10 @@ void XmmVector::copyTo(Interface* interface)
 	}
 }
 
-void XmmVector::activation(float* results, FunctionType functionType)
+void XmmVector::activation(Vector* resultsVect, FunctionType functionType)
 {
+	float* results = (float*)resultsVect->getDataPointer();
+
 	if (vectorType == FLOAT){
 		for (unsigned i=0; i < size; i++){
 			((float*)data)[i] = Function(results[i], functionType);

@@ -14,7 +14,7 @@ class CppLayer : public Layer
 {
 protected:
 	virtual float* negativeThresholds();
-	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results);
+	virtual void inputCalculation(Vector* input, Vector* inputWeighs, Vector* results);
 public:
 	CppLayer();
 	virtual ~CppLayer();

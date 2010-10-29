@@ -20,10 +20,13 @@ public:
 	CudaVector(unsigned size, VectorType vectorType);
 	virtual ~CudaVector();
 
+	//TODO deshacerse de CudaVector::copyFrom2
 	virtual void copyFrom2(Interface* interface, unsigned block_size);
+
+	virtual Vector* clone();
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
-	virtual void activation(float* results, FunctionType functionType);
+	virtual void activation(Vector* results, FunctionType functionType);
 	virtual void mutate(unsigned pos, float mutation);
 };
 

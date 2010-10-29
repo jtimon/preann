@@ -23,8 +23,10 @@ CudaLayer::~CudaLayer()
 	}
 }
 
-void CudaLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
+void CudaLayer::inputCalculation(Vector* input, Vector* inputWeighsVect, Vector* resultsVect)
 {
+	void* inputWeighs = inputWeighsVect->getDataPointer();
+	float* results = (float*)resultsVect->getDataPointer();
 	//FIXME este método no funciona correctamente para SIGN
 	if (CudaLayer::algorithm == 0) {
 		cuda_inputCalculationReduction(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);

@@ -14,7 +14,7 @@
 
 class CudaLayer: public Layer {
 protected:
-	virtual void inputCalculation(Vector* input, void* inputWeighs, float* results);
+	virtual void inputCalculation(Vector* input, Vector* inputWeighs, Vector* results);
 	virtual float* negativeThresholds();
 
 	virtual void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);

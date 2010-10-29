@@ -25,8 +25,10 @@ XmmLayer::~XmmLayer()
 	}
 }
 
-void XmmLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
+void XmmLayer::inputCalculation(Vector* input, Vector* inputWeighsVect, Vector* resultsVect)
 {
+	void* inputWeighs = inputWeighsVect->getDataPointer();
+	float* results = (float*)resultsVect->getDataPointer();
 	void* inputPtr = input->getDataPointer();
 
 	unsigned numLoops;

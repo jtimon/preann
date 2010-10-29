@@ -37,8 +37,11 @@ float* CppLayer::negativeThresholds()
 	return results;
 }
 
-void CppLayer::inputCalculation(Vector* input, void* inputWeighs, float* results)
+void CppLayer::inputCalculation(Vector* input, Vector* inputWeighsVect, Vector* resultsVect)
 {
+	void* inputWeighs = inputWeighsVect->getDataPointer();
+	float* results = (float*)resultsVect->getDataPointer();
+
 	void* inputPtr = input->getDataPointer();
 	unsigned inputSize = input->getSize();
 

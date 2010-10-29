@@ -82,6 +82,11 @@ void CudaVector::copyFrom2(Interface* interface, unsigned block_size)
 	}
 }
 
+Vector* CudaVector::clone()
+{
+	//TODO implementar CudaVector::clone()
+}
+
 void CudaVector::copyFrom(Interface *interface)
 {
 	if (size < interface->getSize()){
@@ -108,8 +113,9 @@ void CudaVector::copyTo(Interface *interface)
 	cuda_copyToHost(interface->getDataPointer(), data, this->getByteSize());
 }
 
-void CudaVector::activation(float* results, FunctionType functionType)
+void CudaVector::activation(Vector* resultsVect, FunctionType functionType)
 {
+	float* results = (float*)resultsVect->getDataPointer();
 	cuda_activation(data, size, vectorType, results, functionType, CUDA_THREADS_PER_BLOCK);
 }
 
