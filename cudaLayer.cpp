@@ -21,24 +21,6 @@ CudaLayer::~CudaLayer()
 	}
 }
 
-void CudaLayer::inputCalculation(Vector* input, Vector* inputWeighsVect, Vector* resultsVect)
-{
-	void* inputWeighs = inputWeighsVect->getDataPointer();
-	float* results = (float*)resultsVect->getDataPointer();
-	//FIXME este método no funciona correctamente para SIGN
-	if (CudaVector::algorithm == 0) {
-		cuda_inputCalculationReduction(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
-	}
-	else if (CudaVector::algorithm == 1) {
-		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), output->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
-	}
-}
-
-float* CudaLayer::negativeThresholds()
-{
-	return cuda_getNegativeThresholds((float*)thresholds->getDataPointer(), output->getSize(), Cuda_Threads_Per_Block);
-}
-
 void CudaLayer::copyWeighs(Layer* sourceLayer)
 {
 	//TODO implementar metodo

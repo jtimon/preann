@@ -27,42 +27,6 @@ CppLayer::~CppLayer()
 	}
 }
 
-float* CppLayer::negativeThresholds()
-{
-	float* results = (float*) mi_malloc(output->getSize() * sizeof(float));
-	float* thresholdsDataPtr = (float*) thresholds->getDataPointer();
-	for (unsigned j=0; j < output->getSize(); j++) {
-		results[j] = - thresholdsDataPtr[j];
-	}
-	return results;
-}
-
-void CppLayer::inputCalculation(Vector* input, Vector* inputWeighsVect, Vector* resultsVect)
-{
-	void* inputWeighs = inputWeighsVect->getDataPointer();
-	float* results = (float*)resultsVect->getDataPointer();
-
-	void* inputPtr = input->getDataPointer();
-	unsigned inputSize = input->getSize();
-
-	for (unsigned j=0; j < output->getSize(); j++){
-
-		for (unsigned k=0; k < inputSize; k++){
-
-			unsigned weighPos = (j * inputSize) + k;
-			if (input->getVectorType() == FLOAT) {
-				results[j] += ((float*)inputPtr)[k] * ((float*)inputWeighs)[weighPos];
-			} else {
-				if ( ((unsigned*)inputPtr)[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
-					results[j] += (((unsigned char*)inputWeighs)[weighPos] - 128);
-				} else if (input->getVectorType() == SIGN) {
-					results[j] -= (((unsigned char*)inputWeighs)[weighPos] - 128);
-				}
-			}
-		}
-	}
-}
-
 void CppLayer::copyWeighs(Layer* sourceLayer)
 {
 	memcpy(thresholds, sourceLayer->getThresholdsPtr(), output->getSize() * sizeof(float));

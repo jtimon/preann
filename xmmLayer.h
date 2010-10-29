@@ -6,8 +6,6 @@
 
 class XmmLayer: public CppLayer
 {
-protected:
-	virtual void inputCalculation(Vector* input, Vector* inputWeighs, Vector* results);
 public:
 	XmmLayer();
 	virtual ~XmmLayer();

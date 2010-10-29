@@ -18,8 +18,6 @@ protected:
 
 	FunctionType functionType;
 
-	virtual float* negativeThresholds() = 0;
-
 	void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 	void mutateThreshold(unsigned outputPos, float mutation);
 

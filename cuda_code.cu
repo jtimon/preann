@@ -232,24 +232,6 @@ extern "C" void cuda_mutate(void* vector, unsigned pos, float mutation, VectorTy
 // LAYER CALCULATION
 
 __global__
-void negative_thresholds_kernel(float* results, float* thresholds, unsigned results_sz) {
-	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	if (idx < results_sz)
-		results[idx] = -thresholds[idx];
-}
-
-extern "C" float* cuda_getNegativeThresholds(float* thresholds, unsigned size, unsigned block_size)
-{
-	unsigned grid_size = ((size - 1) / block_size) + 1;
-
-	float* results;
-	cudaMalloc((void**) &(results), size * sizeof(float));
-
-	negative_thresholds_kernel<<< grid_size, block_size >>>(results, thresholds, size);
-	return results;
-}
-
-__global__
 void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned output_size, float* weighs, float* results)
 {
 	extern __shared__ float sdata[];
