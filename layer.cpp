@@ -3,14 +3,7 @@
 
 Vector* Layer::newVector(FILE* stream)
 {
-	Interface* interface = new Interface();
-	interface->load(stream);
-
-	Vector* vector = Factory::newVector(interface->getSize(), interface->getVectorType(), getImplementationType());
-	vector->copyFrom(interface);
-
-	delete(interface);
-	return  vector;
+	return  Factory::newVector(stream, getImplementationType());
 }
 
 Vector* Layer::newVector(unsigned size, VectorType vectorType)
@@ -141,20 +134,20 @@ void Layer::setInput(Vector* input, unsigned pos)
 void Layer::save(FILE* stream)
 {
 	fwrite(&functionType, sizeof(FunctionType), 1, stream);
-	thresholds->save(stream);
-	output->save(stream);
+	Factory::saveVector(thresholds, stream);
+	Factory::saveVector(output, stream);
 
 	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
 	for(unsigned i=0; i < numberInputs; i++){
-		connections[i]->save(stream);
+		Factory::saveMatrix(connections[i], stream, output->getSize(), getImplementationType());
 	}
 }
 
 void Layer::load(FILE* stream)
 {
 	fread(&functionType, sizeof(FunctionType), 1, stream);
-	thresholds = newVector(stream);
-	output = newVector(stream);
+	thresholds = Factory::newVector(stream, getImplementationType());
+	output = Factory::newVector(stream, getImplementationType());
 
 	fread(&numberInputs, sizeof(unsigned), 1, stream);
 	inputs = (Vector**) mi_malloc(numberInputs * sizeof(Vector*));
@@ -162,7 +155,7 @@ void Layer::load(FILE* stream)
 	for(unsigned i=0; i < numberInputs; i++){
 		//TODO esto puede llevar al pete
 		inputs[i] = NULL;
-		connections[i] = newVector(stream);
+		connections[i] = Factory::newMatrix(stream, output->getSize(), getImplementationType());
 	}
 }
 
@@ -178,7 +171,6 @@ void Layer::randomWeighs(float range)
 	aux->random(range);
 	thresholds->copyFrom(aux);
 	delete(aux);
-
 
 	for (unsigned i=0; i < numberInputs; i++){
 		Vector* connection = connections[i];
@@ -257,18 +249,21 @@ FunctionType Layer::getFunctionType()
    return functionType;
 }
 
-/*
+
 void Layer::copyWeighs(Layer* other)
 {
-	memcpy(thresholds, other->getThresholdsPtr(), output->getSize() * sizeof(float));
-	unsigned size;
-	if (inputType == FLOAT){
-		size = output->getSize() * totalWeighsPerOutput * sizeof(float);
-	} else {
-		size = output->getSize() * totalWeighsPerOutput * sizeof(unsigned char);
-	}
-	memcpy(weighs, other->getWeighsPtr(), size);
-}*/
+	//TODO implementar metodo
+	std::string error = "CudaLayer::copyWeighs is not implemented.";
+	throw error;
+//	memcpy(thresholds, other->getThresholdsPtr(), output->getSize() * sizeof(float));
+//	unsigned size;
+//	if (inputType == FLOAT){
+//		size = output->getSize() * totalWeighsPerOutput * sizeof(float);
+//	} else {
+//		size = output->getSize() * totalWeighsPerOutput * sizeof(unsigned char);
+//	}
+//	memcpy(weighs, other->getWeighsPtr(), size);
+}
 
 void Layer::mutateWeigh(float mutationRange)
 {

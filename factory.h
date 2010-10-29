@@ -13,6 +13,12 @@
 
 class Factory {
 public:
+	static void saveMatrix(Vector* matrix, FILE* stream, unsigned width, ImplementationType implementationType);
+	static Vector* newMatrix(FILE* stream, unsigned width, ImplementationType implementationType);
+	static void saveVector(Vector* vector, FILE* stream);
+	static Vector* newVector(FILE* stream, ImplementationType implementationType);
+
+	static Vector* newVector(Interface* interface, ImplementationType implementationType);
 	static Vector* newVector(unsigned size, VectorType vectorType, ImplementationType implementationType);
 	static Layer* newLayer(ImplementationType implementationType);
 	static Layer* newLayer(unsigned size, VectorType outputType, ImplementationType implementationType, FunctionType functionType);

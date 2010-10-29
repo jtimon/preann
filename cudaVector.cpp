@@ -145,6 +145,15 @@ void CudaVector::mutate(unsigned pos, float mutation)
 	cuda_mutate(data, pos, mutation, vectorType);
 }
 
+void CudaVector::mutate(unsigned pos, float mutation, unsigned inputSize)
+{
+	//TODO impl CudaVector::mutate
+}
+void CudaVector::weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize)
+{
+	//TODO impl CudaVector::weighCrossover
+}
+
 unsigned CudaVector::getByteSize()
 {
 	switch (vectorType){

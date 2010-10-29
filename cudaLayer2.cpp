@@ -15,43 +15,6 @@ CudaLayer2::~CudaLayer2()
 {
 }
 
-void CudaLayer2::save(FILE* stream)
-{
-	fwrite(&functionType, sizeof(FunctionType), 1, stream);
-	thresholds->save(stream);
-	output->save(stream);
-
-	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
-	for(unsigned i=0; i < numberInputs; i++){
-		Interface* interface = connections[i]->toInterface();
-		interface->transposeMatrix(output->getSize());
-		interface->save(stream);
-		delete(interface);
-	}
-}
-
-void CudaLayer2::load(FILE* stream)
-{
-	fread(&functionType, sizeof(FunctionType), 1, stream);
-	thresholds = newVector(stream);
-	output = newVector(stream);
-
-	fread(&numberInputs, sizeof(unsigned), 1, stream);
-	inputs = (Vector**) mi_malloc(numberInputs * sizeof(Vector*));
-	connections = (Vector**) mi_malloc(numberInputs * sizeof(Vector*));
-	for(unsigned i=0; i < numberInputs; i++){
-		//TODO esto puede llevar al pete
-		inputs[i] = NULL;
-		Interface* interface = new Interface();
-		interface->load(stream);
-		unsigned inputSize = interface->getSize() / output->getSize();
-		interface->transposeMatrix(inputSize);
-		connections[i] = newVector(interface->getSize(), interface->getVectorType());
-		connections[i]->copyFrom(interface);
-		delete(interface);
-	}
-}
-
 void CudaLayer2::crossoverWeighs(Layer *other, unsigned  inputLayer, Interface *bitVector)
 {
 	// TODO CudaLayer2::crossoverWeighs

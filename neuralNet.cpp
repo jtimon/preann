@@ -268,8 +268,7 @@ void NeuralNet::addInputConnection(unsigned sourceInputPos,
 	}
 
 	layers[destinationLayerPos]->addInput(inputs[sourceInputPos]);
-	inputsToLayersGraph[(sourceInputPos * numberLayers) + destinationLayerPos]
-			= 1;
+	inputsToLayersGraph[(sourceInputPos * numberLayers) + destinationLayerPos] = 1;
 }
 
 void NeuralNet::addLayersConnection(unsigned sourceLayerPos,

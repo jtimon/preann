@@ -20,6 +20,9 @@ public:
 
 	Vector* clone();
 	virtual void inputCalculation(Vector* input, Vector* inputWeighs);
+	//for weighs
+	virtual void mutate(unsigned pos, float mutation, unsigned inputSize);
+	virtual void weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize);
 };
 
 #endif /* CUDAVECTOR2_H_ */

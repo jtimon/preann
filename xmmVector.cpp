@@ -286,6 +286,15 @@ void XmmVector::mutate(unsigned pos, float mutation)
 	}
 }
 
+void XmmVector::mutate(unsigned pos, float mutation, unsigned inputSize)
+{
+	//TODO impl XmmVector::mutate
+}
+void XmmVector::weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize)
+{
+	//TODO impl XmmVector::weighCrossover
+}
+
 unsigned XmmVector::getByteSize()
 {
 	unsigned numBlocks;

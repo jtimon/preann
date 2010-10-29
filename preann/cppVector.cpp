@@ -145,6 +145,16 @@ void CppVector::mutate(unsigned pos, float mutation)
 	}
 }
 
+void CppVector::mutate(unsigned pos, float mutation, unsigned inputSize)
+{
+	//TODO impl CppVector::mutate
+}
+void CppVector::weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize)
+{
+	//TODO impl CppVector::weighCrossover
+}
+
+
 unsigned CppVector::getByteSize()
 {
 	switch (vectorType){

@@ -8,6 +8,60 @@
 #include "cudaVector2.h"
 #include "cudaLayer2.h"
 
+void Factory::saveMatrix(Vector* matrix, FILE* stream, unsigned width, ImplementationType implementationType)
+{
+	Interface* interface = matrix->toInterface();
+
+	if (implementationType == CUDA2){
+		interface->transposeMatrix(width);
+	}
+
+	interface->save(stream);
+	delete(interface);
+}
+
+Vector* Factory::newMatrix(FILE* stream, unsigned width, ImplementationType implementationType)
+{
+	Interface* interface = new Interface();
+	interface->load(stream);
+
+	if (implementationType == CUDA2){
+		unsigned inputSize = interface->getSize() / width;
+		interface->transposeMatrix(width);
+	}
+
+	Vector* vector = Factory::newVector(interface, implementationType);
+
+	delete(interface);
+	return vector;
+}
+
+void Factory::saveVector(Vector* vector, FILE* stream)
+{
+	Interface* interface = vector->toInterface();
+	interface->save(stream);
+	delete(interface);
+}
+
+
+Vector* Factory::newVector(FILE* stream, ImplementationType implementationType)
+{
+	Interface* interface = new Interface();
+	interface->load(stream);
+
+	Vector* vector = Factory::newVector(interface, implementationType);
+
+	delete(interface);
+	return vector;
+}
+
+Vector* Factory::newVector(Interface* interface, ImplementationType implementationType)
+{
+	Vector* toReturn = Factory::newVector(interface->getSize(), interface->getVectorType(), implementationType);
+	toReturn->copyFrom(interface);
+	return toReturn;
+}
+
 Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType)
 {
 	switch(implementationType){

@@ -60,13 +60,6 @@ void Vector::print()
 	delete(interface);
 }
 
-void Vector::save(FILE* stream)
-{
-	Interface* interface = toInterface();
-	interface->save(stream);
-	delete(interface);
-}
-
 float Vector::compareTo(Vector* other)
 {
 	Interface* interface = toInterface();

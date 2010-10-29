@@ -54,3 +54,11 @@ void CudaVector2::inputCalculation(Vector* input, Vector* inputWeighsVect)
 	cuda_inputCalculationInvertedMatrix(input->getDataPointer(), input->getSize(), input->getVectorType(), size, inputWeighs, results, Cuda_Threads_Per_Block);
 }
 
+void CudaVector2::mutate(unsigned pos, float mutation, unsigned inputSize)
+{
+	//TODO impl CudaVector2::mutate
+}
+void CudaVector2::weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize)
+{
+	//TODO impl CudaVector2::weighCrossover
+}

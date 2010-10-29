@@ -21,20 +21,6 @@ CudaLayer::~CudaLayer()
 	}
 }
 
-void CudaLayer::copyWeighs(Layer* sourceLayer)
-{
-	//TODO implementar metodo
-	std::string error = "CudaLayer::copyWeighs is not implemented.";
-	throw error;
-}
-
-void CudaLayer::randomWeighs(float range)
-{
-	//TODO implementar metodo
-	std::string error = "CudaLayer::randomWeighs is not implemented.";
-	throw error;
-}
-
 void CudaLayer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation)
 {
 	if (outputPos > output->getSize()) {

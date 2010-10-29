@@ -29,16 +29,16 @@ public:
 	virtual ~Layer();
 	virtual ImplementationType getImplementationType() = 0;
 
-	virtual void copyWeighs(Layer* sourceLayer) = 0;
 	virtual void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector) = 0;
 
-
+	void save(FILE* stream);
+	void load(FILE* stream);
 	void checkCompatibility(Layer* layer);
 	void calculateOutput();
 	void addInput(Vector* input);
 	void setInput(Vector* input, unsigned pos);
-	virtual void save(FILE* stream);
-	virtual void load(FILE* stream);
+
+	void copyWeighs(Layer* sourceLayer);
 	void randomWeighs(float range);
 
 	void swapWeighs(Layer* layer);

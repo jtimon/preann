@@ -26,6 +26,8 @@ public:
 	virtual void inputCalculation(Vector* input, Vector* inputWeighs) = 0;
 	virtual void activation(Vector* results, FunctionType functionType) = 0;
 	virtual void mutate(unsigned pos, float mutation) = 0;
+	virtual void mutate(unsigned pos, float mutation, unsigned inputSize) = 0;
+	virtual void weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize) = 0;
 
 	void* getDataPointer();
 	unsigned getSize();
@@ -36,7 +38,6 @@ public:
 	void copyToVector(Vector* vector);
 
 	void print();
-	void save(FILE* stream);
 	float compareTo(Vector* other);
 	void random(float range);
 	void transposeMatrix(unsigned width);

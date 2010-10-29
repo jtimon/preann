@@ -24,8 +24,6 @@ public:
 		return CUDA;
 	};
 
-	virtual void copyWeighs(Layer* sourceLayer);
-	virtual void randomWeighs(float range);
 	virtual void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector);
 
 };

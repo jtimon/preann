@@ -92,7 +92,7 @@ Layer* createAndSaveLayer(unsigned& size, VectorType vectorType, Vector* control
     return controlLayer;
 }
 
-#define IMPLEMENTATION_TYPE_DIM 2
+#define IMPLEMENTATION_TYPE_DIM 4
 
 void testLayer(unsigned size, VectorType vectorType, unsigned numInputs)
 {
@@ -140,10 +140,10 @@ void testLayer(unsigned size, VectorType vectorType, unsigned numInputs)
     delete (controlInputVector);
 }
 
-#define VECTOR_TYPE_DIM 3
-#define SIZE_MAX 5
-#define SIZE_INC 1
-#define NUM_INPUTS 1
+#define VECTOR_TYPE_DIM 2
+#define SIZE_MAX 100
+#define SIZE_INC 10
+#define NUM_INPUTS 2
 
 int main(int argc, char *argv[]) {
 	Chronometer total;

@@ -20,9 +20,6 @@ public:
 		return CUDA2;
 	};
 
-	virtual void save(FILE* stream);
-	virtual void load(FILE* stream);
-
 	virtual void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector);
 };
 
