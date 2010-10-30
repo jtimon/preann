@@ -11,7 +11,7 @@ NASM = nasm -f elf
 
 CLASSIFCATON_OBJ = classificationTask.o
 GA_OBJ = population.o task.o individual.o
-NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o cudaLayer2.o cudaLayer.o xmmLayer.o cppLayer.o neuralNet.o factory.o interface.o cudaVector.o cudaVector2.o
+NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o neuralNet.o factory.o interface.o cudaVector.o cudaVector2.o
 
 TESTS = ./bin/testMemoryLosses ./bin/testLayers ./bin/testNeuralNets ./bin/testVectors
 
@@ -55,24 +55,12 @@ task.o : task.cpp task.h individual.o
 	$(CXX) $<
 individual.o : individual.cpp individual.h neuralNet.o
 	$(CXX) $<
-neuralNet.o : neuralNet.cpp neuralNet.h layer.o factory.o
+neuralNet.o : neuralNet.cpp neuralNet.h layer.o
 	$(CXX) $<
-factory.o : factory.cpp factory.h cppLayer.o xmmLayer.o cudaLayer.o cudaLayer2.o
+layer.o : layer.cpp layer.h factory.o
 	$(CXX) $<
-
-cudaLayer2.o : cudaLayer2.cpp cudaLayer2.h cudaLayer.o
-	$(CXX) $<
-cudaLayer.o : cudaLayer.cpp cudaLayer.h cuda_code.o
-	$(CXX) $<
-
-xmmLayer.o : xmmLayer.cpp xmmLayer.h cppLayer.o sse2_code.o
-	$(CXX) $<
-cppLayer.o : cppLayer.cpp cppLayer.h
-	$(CXX) $<
-
-cppLayer.o cudaLayer.o : layer.o
-
-layer.o : layer.cpp layer.h vector.o
+	
+factory.o : factory.cpp factory.h cppVector.o xmmVector.o cudaVector.o cudaVector2.o
 	$(CXX) $<
 
 cudaVector2.o : cudaVector2.cpp cudaVector2.h cudaVector.o

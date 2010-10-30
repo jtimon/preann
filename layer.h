@@ -6,9 +6,8 @@
 class Layer
 {
 private:
-
+	Layer() {};
 protected:
-	Layer();
 	Vector** inputs;
 	Vector** connections;
 	unsigned numberInputs;
@@ -29,13 +28,13 @@ protected:
 	Vector* newVector(FILE* stream);
 	Vector* newVector(unsigned size, VectorType vectorType);
 public:
-	void init(unsigned size, VectorType outputType, FunctionType functionType);
+	Layer(unsigned size, VectorType outputType, FunctionType functionType, ImplementationType implementationType);
+	Layer(FILE* stream, ImplementationType implementationType);
 	virtual ~Layer();
 
 	void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector);
 
 	void save(FILE* stream);
-	void load(FILE* stream);
 	void checkCompatibility(Layer* layer);
 	void calculateOutput();
 	void addInput(Vector* input);

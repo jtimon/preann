@@ -7,12 +7,9 @@ using namespace std;
 #include "population.h"
 #include "chronometer.h"
 #include "cuda_code.h"
-#include "cudaLayer2.h"
-
-#define PATH "/home/timon/layer.lay"
+#include "cudaVector.h"
 
 #define INITIAL_WEIGHS_RANGE 20
-
 
 void printTestParams(ImplementationType implementationType, VectorType vectorType, unsigned size, unsigned numInputs)
 {
@@ -41,109 +38,13 @@ unsigned char areEqual(float expected, float actual, VectorType vectorType)
 	}
 }
 
-unsigned assertEquals(Vector* expected, Vector* actual)
-{
-    if(expected->getVectorType() != actual->getVectorType()){
-        throw "The vectors are not even of the same type!";
-    }
-    if(expected->getSize() != actual->getSize()){
-        throw "The vectors are not even of the same size!";
-    }
 
-	unsigned differencesCounter = 0;
-	Interface* expectedInt = expected->toInterface();
-	Interface* actualInt = actual->toInterface();
-
-    for(unsigned i = 0;i < expectedInt->getSize();i++){
-        if(!areEqual(expectedInt->getElement(i), actualInt->getElement(i), expectedInt->getVectorType())){
-            printf("The vectors are not equal at the position %d (expected = %f actual %f).\n", i, expectedInt->getElement(i), actualInt->getElement(i));
-            ++differencesCounter;
-        }
-    }
-    delete(expectedInt);
-	delete(actualInt);
-	return differencesCounter;
-}
-
-Layer* createAndLoadLayer(ImplementationType implementationType, Vector* controlInput, unsigned numInputs)
-{
-    Layer *layer = Factory::newLayer(implementationType);
-    FILE* stream = fopen(PATH, "r+b");
-    layer->load(stream);
-    fclose(stream);
-    for (unsigned i = 0; i < numInputs; i++){
-		layer->setInput(controlInput, i);
-	}
-    return layer;
-}
-
-Layer* createAndSaveLayer(unsigned& size, VectorType vectorType, Vector* controlInput, unsigned numInputs)
-{
-    Layer* controlLayer = Factory::newLayer(size, vectorType, C, IDENTITY);
-
-    for (unsigned i = 0; i < numInputs; i++){
-		controlLayer->addInput(controlInput);
-	}
-    controlLayer->randomWeighs(INITIAL_WEIGHS_RANGE);
-
-	FILE* stream = fopen(PATH, "w+b");
-	controlLayer->save(stream);
-	fclose(stream);
-    return controlLayer;
-}
 
 #define IMPLEMENTATION_TYPE_DIM 2
-
-void testLayer(unsigned size, VectorType vectorType, unsigned numInputs)
-{
-    Vector *controlInputVector = Factory::newVector(size, vectorType, C);
-    controlInputVector->random(INITIAL_WEIGHS_RANGE);
-
-    Layer* controlLayer = createAndSaveLayer(size, vectorType, controlInputVector, numInputs);
-    controlLayer->calculateOutput();
-
-    for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
-		ImplementationType implementationType = (ImplementationType)((implType));
-
-		printTestParams(implementationType, vectorType, size, numInputs);
-
-		Vector* inputVector = Factory::newVector(size, vectorType, implementationType);
-		inputVector->copyFromVector(controlInputVector);
-
-		Layer* layer = createAndLoadLayer(implementationType, inputVector, numInputs);
-
-	    //test calculation
-		layer->calculateOutput();
-
-	    unsigned differences = assertEquals(controlLayer->getOutput(), layer->getOutput());
-	    if (differences != 0)
-	    	printf("Errors on outputs: %d \n", differences);
-
-
-		//test Weighs
-	    for(unsigned i = 0; i < numInputs; i++){
-	        Vector* expectedWeighs = controlLayer->getConnection(i);
-	        Vector* actualWeighs = layer->getConnection(i);
-	        if(implementationType == CUDA2){
-	            unsigned inputSize = actualWeighs->getSize() / layer->getOutput()->getSize();
-	            actualWeighs->transposeMatrix(inputSize);
-	        }
-	        differences = assertEquals(expectedWeighs, actualWeighs);
-	        if (differences != 0)
-	        	printf("Errors on weighs (input %d): %d \n", i, differences);
-	    }
-
-		delete (layer);
-	    delete (inputVector);
-	}
-    delete (controlLayer);
-    delete (controlInputVector);
-}
-
 #define VECTOR_TYPE_DIM 3
 #define SIZE_MAX 5
 #define SIZE_INC 1
-#define NUM_INPUTS 1
+#define PATH "/home/timon/layer.lay"
 
 int main(int argc, char *argv[]) {
 	Chronometer total;
@@ -151,11 +52,15 @@ int main(int argc, char *argv[]) {
 
 	try {
 		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
-//			if (vectType != BYTE)
-			if (vectType == SIGN)
-				for (unsigned size = 1; size < SIZE_MAX; size += SIZE_INC) {
-					testLayer(size, (VectorType) vectType, NUM_INPUTS);
-				}
+			for (unsigned size = 1; size < SIZE_MAX; size += SIZE_INC) {
+				Interface* control = new Interface(size, (VectorType)vectType);
+				control->random(INITIAL_WEIGHS_RANGE);
+
+				Vector* vector = Factory::newVector(size, (VectorType)vectType, C);
+				vector->random(INITIAL_WEIGHS_RANGE);
+
+				Vector* another = vector->clone();
+			}
 		}
 
 		printf("Exit success.\n");

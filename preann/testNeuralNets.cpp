@@ -6,48 +6,81 @@ using namespace std;
 #include "population.h"
 #include "chronometer.h"
 #include "cuda_code.h"
-#include "cudaLayer2.h"
+#include "cudaVector2.h"
 
 #define PATH "/home/timon/test.nn"
 //TODO pensar una forma de poner un error razonable
-#define ALLOWED_ERROR (0.01)
+//#define ALLOWED_ERROR (0.01)
+//
+//void assertEquals(Interface* expected, Interface* actual)
+//{
+//	if (expected->getVectorType() != actual->getVectorType()){
+//		throw "The interfaces are not even of the same type!";
+//	}
+//	if (expected->getVectorType() == FLOAT){
+//		float allowedError = ALLOWED_ERROR * expected->getSize();
+//		printf("allowedError %f\n", allowedError);
+//		for (unsigned i=0; i < expected->getSize(); i++) {
+//
+//			float difference = (expected->getElement(i) / 100) * (expected->getElement(i) - actual->getElement(i));
+//
+//			if ((difference > 0 && difference > allowedError) ||
+//					(difference < 0 && difference < - allowedError)){
+//				printf("expected:\n");
+//				expected->print();
+//				printf("actual:\n");
+//				actual->print();
+//				char buffer[100];
+//				sprintf(buffer, "The interfaces are not equal at the position %d.", i);
+//				std::string error = buffer;
+//				throw error;
+//			}
+//		}
+//	} else {
+//		for (unsigned i=0; i < expected->getSize(); i++) {
+//			if (expected->getElement(i) != actual->getElement(i)){
+//				printf("expected:\n");
+//				expected->print();
+//				printf("actual:\n");
+//				actual->print();
+//				char buffer[100];
+//				sprintf(buffer, "The interfaces are not equal at the position %d.", i);
+//				std::string error = buffer;
+//				throw error;
+//			}
+//		}
+//	}
+//}
+
+unsigned char areEqual(float expected, float actual, VectorType vectorType)
+{
+	if (vectorType == FLOAT){
+		return (expected - 1 < actual
+			 && expected + 1 > actual);
+	} else {
+		return expected == actual;
+	}
+}
 
 void assertEquals(Interface* expected, Interface* actual)
 {
 	if (expected->getVectorType() != actual->getVectorType()){
 		throw "The interfaces are not even of the same type!";
 	}
-	if (expected->getVectorType() == FLOAT){
-		float allowedError = ALLOWED_ERROR * expected->getSize();
-		printf("allowedError %f\n", allowedError);
-		for (unsigned i=0; i < expected->getSize(); i++) {
-
-			float difference = (expected->getElement(i) / 100) * (expected->getElement(i) - actual->getElement(i));
-
-			if ((difference > 0 && difference > allowedError) ||
-					(difference < 0 && difference < - allowedError)){
-				printf("expected:\n");
-				expected->print();
-				printf("actual:\n");
-				actual->print();
-				char buffer[100];
-				sprintf(buffer, "The interfaces are not equal at the position %d.", i);
-				std::string error = buffer;
-				throw error;
-			}
-		}
-	} else {
-		for (unsigned i=0; i < expected->getSize(); i++) {
-			if (expected->getElement(i) != actual->getElement(i)){
-				printf("expected:\n");
-				expected->print();
-				printf("actual:\n");
-				actual->print();
-				char buffer[100];
-				sprintf(buffer, "The interfaces are not equal at the position %d.", i);
-				std::string error = buffer;
-				throw error;
-			}
+	if (expected->getSize() != actual->getSize()){
+		throw "The interfaces are not even of the same size!";
+	}
+	for (unsigned i=0; i < expected->getSize(); i++) {
+		if (!areEqual(expected->getElement(i), actual->getElement(i), expected->getVectorType())){
+//			printf("expected:\n");
+//			expected->print();
+//			printf("actual:\n");
+//			actual->print();
+			char buffer[100];
+			sprintf(buffer, "The interfaces are not equal at the position %d (expected = %f actual %f).",
+					i, expected->getElement(i), actual->getElement(i) );
+			std::string error = buffer;
+			throw error;
 		}
 	}
 }
@@ -148,7 +181,7 @@ int main(int argc, char *argv[]) {
 				for (unsigned algorithm = 0; algorithm < 1; algorithm++){
 					//algorithm = 2;
 					printf("CUDA [algorithm %d]  ", algorithm);
-					CudaLayer::algorithm = algorithm;
+					CudaVector::algorithm = algorithm;
 					for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
 						Cuda_Threads_Per_Block = blockSize;
 						nn = new NeuralNet(CUDA);

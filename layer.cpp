@@ -11,13 +11,43 @@ Vector* Layer::newVector(unsigned size, VectorType vectorType)
 	return Factory::newVector(size, vectorType, getImplementationType());
 }
 
-Layer::Layer()
+Layer::Layer(unsigned size, VectorType outputType, FunctionType functionType, ImplementationType implementationType)
 {
 	inputs = NULL;
 	connections = NULL;
 	numberInputs = 0;
-	thresholds = NULL;
-	output = NULL;
+
+	this->functionType = functionType;
+	output = Factory::newVector(size, outputType, implementationType);
+	thresholds = Factory::newVector(size, FLOAT, implementationType);
+}
+
+Layer::Layer(FILE* stream, ImplementationType implementationType)
+{
+	fread(&functionType, sizeof(FunctionType), 1, stream);
+	thresholds = Factory::newVector(stream, implementationType);
+	output = Factory::newVector(stream, implementationType);
+
+	fread(&numberInputs, sizeof(unsigned), 1, stream);
+	inputs = (Vector**) mi_malloc(numberInputs * sizeof(Vector*));
+	connections = (Vector**) mi_malloc(numberInputs * sizeof(Vector*));
+	for(unsigned i=0; i < numberInputs; i++){
+		//TODO esto puede llevar al pete
+		inputs[i] = NULL;
+		connections[i] = Factory::newMatrix(stream, output->getSize(), implementationType);
+	}
+}
+
+void Layer::save(FILE* stream)
+{
+	fwrite(&functionType, sizeof(FunctionType), 1, stream);
+	Factory::saveVector(thresholds, stream);
+	Factory::saveVector(output, stream);
+
+	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
+	for(unsigned i=0; i < numberInputs; i++){
+		Factory::saveMatrix(connections[i], stream, output->getSize(), getImplementationType());
+	}
 }
 
 Layer::~Layer()
@@ -40,13 +70,6 @@ Layer::~Layer()
 		delete (output);
 		output = NULL;
 	}
-}
-
-void Layer::init(unsigned size, VectorType outputType, FunctionType functionType)
-{
-	this->functionType = functionType;
-	output = newVector(size, outputType);
-	thresholds = newVector(size, FLOAT);
 }
 
 void Layer::checkCompatibility(Layer* layer)
@@ -147,34 +170,6 @@ void Layer::setInput(Vector* input, unsigned pos)
 		break;
 	}
 	inputs[pos] = input;
-}
-
-void Layer::save(FILE* stream)
-{
-	fwrite(&functionType, sizeof(FunctionType), 1, stream);
-	Factory::saveVector(thresholds, stream);
-	Factory::saveVector(output, stream);
-
-	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
-	for(unsigned i=0; i < numberInputs; i++){
-		Factory::saveMatrix(connections[i], stream, output->getSize(), getImplementationType());
-	}
-}
-
-void Layer::load(FILE* stream)
-{
-	fread(&functionType, sizeof(FunctionType), 1, stream);
-	thresholds = Factory::newVector(stream, getImplementationType());
-	output = Factory::newVector(stream, getImplementationType());
-
-	fread(&numberInputs, sizeof(unsigned), 1, stream);
-	inputs = (Vector**) mi_malloc(numberInputs * sizeof(Vector*));
-	connections = (Vector**) mi_malloc(numberInputs * sizeof(Vector*));
-	for(unsigned i=0; i < numberInputs; i++){
-		//TODO esto puede llevar al pete
-		inputs[i] = NULL;
-		connections[i] = Factory::newMatrix(stream, output->getSize(), getImplementationType());
-	}
 }
 
 void Layer::randomWeighs(float range)

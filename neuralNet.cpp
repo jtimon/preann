@@ -119,7 +119,7 @@ void NeuralNet::addLayer(Layer* layer) {
 }
 
 void NeuralNet::addLayer(unsigned size, VectorType destinationType, FunctionType functiontype) {
-	Layer* layer = Factory::newLayer(size, destinationType, implementationType, functiontype);
+	Layer* layer = new Layer(size, destinationType, functiontype, implementationType);
 	addLayer(layer);
 }
 

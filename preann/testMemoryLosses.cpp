@@ -7,7 +7,7 @@ using namespace std;
 #include "population.h"
 #include "chronometer.h"
 #include "cuda_code.h"
-#include "cudaLayer2.h"
+#include "cudaVector2.h"
 
 #define VECTOR_TYPE_DIM 3
 #define IMPLEMENTATION_TYPE_DIM 4
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 					}
 					printf(" size = %d \n", size);
 
-					Layer* layer = Factory::newLayer(size, vectorType, implementationType, IDENTITY);
+					Layer* layer = new Layer(size, vectorType, IDENTITY, implementationType);
 					layer->addInput(layer->getOutput());
 					layer->addInput(layer->getOutput());
 					layer->addInput(layer->getOutput());

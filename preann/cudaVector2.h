@@ -10,6 +10,7 @@
 
 #include "cudaVector.h"
 
+//TODO deberia CudaVector2: heredar de CudaVector ??
 class CudaVector2: public CudaVector {
 
 public:

@@ -2,6 +2,7 @@
 #define NEURALNET_H_
 
 #include "factory.h"
+#include "layer.h"
 
 class NeuralNet
 {

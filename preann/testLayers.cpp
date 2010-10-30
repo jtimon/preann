@@ -7,7 +7,7 @@ using namespace std;
 #include "population.h"
 #include "chronometer.h"
 #include "cuda_code.h"
-#include "cudaLayer2.h"
+#include "cudaVector2.h"
 
 #define PATH "/home/timon/layer.lay"
 
@@ -67,10 +67,10 @@ unsigned assertEquals(Vector* expected, Vector* actual)
 
 Layer* createAndLoadLayer(ImplementationType implementationType, Vector* controlInput, unsigned numInputs)
 {
-    Layer *layer = Factory::newLayer(implementationType);
     FILE* stream = fopen(PATH, "r+b");
-    layer->load(stream);
+    Layer *layer = new Layer(stream, implementationType);
     fclose(stream);
+
     for (unsigned i = 0; i < numInputs; i++){
 		layer->setInput(controlInput, i);
 	}
@@ -79,7 +79,7 @@ Layer* createAndLoadLayer(ImplementationType implementationType, Vector* control
 
 Layer* createAndSaveLayer(unsigned& size, VectorType vectorType, Vector* controlInput, unsigned numInputs)
 {
-    Layer* controlLayer = Factory::newLayer(size, vectorType, C, IDENTITY);
+    Layer* controlLayer = new Layer(size, vectorType, IDENTITY, C);
 
     for (unsigned i = 0; i < numInputs; i++){
 		controlLayer->addInput(controlInput);
