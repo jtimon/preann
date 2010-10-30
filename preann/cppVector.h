@@ -16,6 +16,9 @@ public:
 	CppVector(){};
 	CppVector(unsigned size, VectorType vectorType);
 	virtual ~CppVector();
+	virtual ImplementationType getImplementationType() {
+		return C;
+	};
 
 	virtual Vector* clone();
 	virtual void copyFrom(Interface* interface);
@@ -24,7 +27,7 @@ public:
 	virtual void activation(Vector* results, FunctionType functionType);
 	//for weighs
 	virtual void mutate(unsigned pos, float mutation, unsigned inputSize);
-	virtual void weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize);
+	virtual void weighCrossover(Vector* other, Interface* bitVector, unsigned inputSize);
 
 };
 

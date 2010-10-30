@@ -20,6 +20,9 @@ public:
 	CudaVector(unsigned size, VectorType vectorType, unsigned block_size);
 	CudaVector(unsigned size, VectorType vectorType);
 	virtual ~CudaVector();
+	virtual ImplementationType getImplementationType() {
+		return CUDA;
+	};
 
 	//TODO deshacerse de CudaVector::copyFrom2
 	virtual void copyFrom2(Interface* interface, unsigned block_size);
@@ -32,7 +35,7 @@ public:
 	virtual void mutate(unsigned pos, float mutation);
 	//for weighs
 	virtual void mutate(unsigned pos, float mutation, unsigned inputSize);
-	virtual void weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize);
+	virtual void weighCrossover(Vector* other, Interface* bitVector, unsigned inputSize);
 };
 
 #endif /* CUDAVECTOR_H_ */

@@ -3,12 +3,12 @@
 
 #include "vector.h"
 
-typedef enum {C, SSE2, CUDA, CUDA2} ImplementationType;
-
 class Layer
 {
-protected:
+private:
 
+protected:
+	Layer();
 	Vector** inputs;
 	Vector** connections;
 	unsigned numberInputs;
@@ -18,18 +18,21 @@ protected:
 
 	FunctionType functionType;
 
+
+	ImplementationType getImplementationType() {
+		return output->getImplementationType();
+	};
+
 	void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 	void mutateThreshold(unsigned outputPos, float mutation);
 
-	Layer();
 	Vector* newVector(FILE* stream);
 	Vector* newVector(unsigned size, VectorType vectorType);
 public:
 	void init(unsigned size, VectorType outputType, FunctionType functionType);
 	virtual ~Layer();
-	virtual ImplementationType getImplementationType() = 0;
 
-	virtual void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector) = 0;
+	void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector);
 
 	void save(FILE* stream);
 	void load(FILE* stream);

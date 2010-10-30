@@ -18,9 +18,6 @@ public:
 	virtual ImplementationType getImplementationType() {
 		return C;
 	};
-
-	virtual void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector);
-
 };
 
 #endif /* CPPLAYER_H_ */

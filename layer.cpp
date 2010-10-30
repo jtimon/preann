@@ -308,6 +308,11 @@ void Layer::mutateWeighs(float probability, float mutationRange)
 	}
 }
 
+void Layer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
+{
+	connections[inputLayer]->weighCrossover(other->getConnection(inputLayer), bitVector, inputs[inputLayer]->getSize());
+}
+
 void Layer::crossoverInput(Layer *other, unsigned  inputLayer, Interface *bitVector)
 {
 	checkCompatibility(other);

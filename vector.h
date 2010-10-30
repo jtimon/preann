@@ -10,6 +10,8 @@
 
 #include "interface.h"
 
+typedef enum {C, SSE2, CUDA, CUDA2} ImplementationType;
+
 class Vector {
 protected:
 	unsigned size;
@@ -19,6 +21,7 @@ protected:
 	Vector();
 public:
 	virtual ~Vector();
+	virtual ImplementationType getImplementationType() = 0;
 
 	virtual Vector* clone() = 0;
 	virtual void copyFrom(Interface* interface) = 0;
@@ -26,7 +29,7 @@ public:
 	virtual void inputCalculation(Vector* input, Vector* inputWeighs) = 0;
 	virtual void activation(Vector* results, FunctionType functionType) = 0;
 	virtual void mutate(unsigned pos, float mutation, unsigned inputSize) = 0;
-	virtual void weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize) = 0;
+	virtual void weighCrossover(Vector* other, Interface* bitVector, unsigned inputSize) = 0;
 
 	void* getDataPointer();
 	unsigned getSize();

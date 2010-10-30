@@ -118,6 +118,7 @@ void CppVector::mutate(unsigned pos, float mutation, unsigned inputSize)
 {
 	if (pos > size){
 		std::string error = "The position being mutated is greater than the size of the vector.";
+		throw error;
 	}
 	switch (vectorType){
 	case BYTE:{
@@ -144,9 +145,52 @@ void CppVector::mutate(unsigned pos, float mutation, unsigned inputSize)
 		}
 	}
 }
-void CppVector::weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize)
+void CppVector::weighCrossover(Vector* other, Interface* bitVector, unsigned inputSize)
 {
-	//TODO impl CppVector::weighCrossover
+	if (size != other->getSize()){
+		std::string error = "The vectors must have the same size to crossover them.";
+		throw error;
+	}
+	if (vectorType != other->getVectorType()){
+		std::string error = "The vectors must have the same type to crossover them.";
+		throw error;
+	}
+
+	void* otherWeighs = other->getDataPointer();
+	void* thisWeighs = this->getDataPointer();
+
+	switch (vectorType){
+	case BYTE:{
+		unsigned char auxWeigh;
+
+		for (unsigned i=0; i < size; i++){
+
+			if (bitVector->getElement(i)){
+				auxWeigh = ((unsigned char*)thisWeighs)[i];
+				((unsigned char*)thisWeighs)[i] = ((unsigned char*)otherWeighs)[i];
+				((unsigned char*)otherWeighs)[i] = auxWeigh;
+			}
+		}
+		}break;
+	case FLOAT:
+		float auxWeigh;
+
+		for (unsigned i=0; i < size; i++){
+
+			if (bitVector->getElement(i)){
+				auxWeigh = ((float*)thisWeighs)[i];
+				((float*)thisWeighs)[i] = ((float*)otherWeighs)[i];
+				((float*)otherWeighs)[i] = auxWeigh;
+			}
+		}
+		break;
+	case BIT:
+	case SIGN:
+		{
+		std::string error = "CppVector::weighCrossover is not implemented for VectorType BIT nor SIGN.";
+		throw error;
+		}
+	}
 }
 
 

@@ -175,14 +175,26 @@ void crossoverKernel(type* vector1, type* vector2, unsigned* bitVector, unsigned
 }
 
 extern "C"
-void cuda_crossover(void* vector1, void* vector2, unsigned* bitVector, unsigned size, VectorType inputType,unsigned block_size)
+void cuda_crossover(void* vector1, void* vector2, unsigned* bitVector, unsigned size, VectorType vectorType,unsigned block_size)
 {
 	unsigned grid_size = ((size - 1)/(block_size * BITS_PER_UNSIGNED)) + 1;
 
-	if (inputType == FLOAT){
-		crossoverKernel<float><<< grid_size, block_size >>>((float*)vector1, (float*)vector2, (unsigned*)bitVector, size);
-	} else {
-		crossoverKernel<unsigned char><<< grid_size, block_size >>>((unsigned char*)vector1, (unsigned char*)vector2, (unsigned*)bitVector, size);
+	switch (vectorType){
+        case BYTE:
+			crossoverKernel<unsigned char><<< grid_size, block_size >>>
+				((unsigned char*)vector1, (unsigned char*)vector2, (unsigned*)bitVector, size);
+
+        break;
+    case FLOAT:
+    	crossoverKernel<float><<< grid_size, block_size >>>
+				((float*)vector1, (float*)vector2, (unsigned*)bitVector, size);
+		break;
+	case BIT:
+	case SIGN:
+		{
+		std::string error = "cuda_crossover is not implemented for VectorType BIT nor SIGN.";
+		throw error;
+		}
 	}
 }
 

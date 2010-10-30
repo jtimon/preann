@@ -19,16 +19,18 @@ public:
     XmmVector() {};
 	XmmVector(unsigned size, VectorType vectorType);
 	virtual ~XmmVector();
+	virtual ImplementationType getImplementationType() {
+		return SSE2;
+	};
 
 	virtual Vector* clone();
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
 	virtual void inputCalculation(Vector* input, Vector* inputWeighs);
 	virtual void activation(Vector* results, FunctionType functionType);
-	virtual void mutate(unsigned pos, float mutation);
 	//for weighs
 	virtual void mutate(unsigned pos, float mutation, unsigned inputSize);
-	virtual void weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize);
+	virtual void weighCrossover(Vector* other, Interface* bitVector, unsigned inputSize);
 };
 
 #endif /* XMMVECTOR_H_ */

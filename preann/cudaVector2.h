@@ -17,12 +17,15 @@ public:
 	CudaVector2(unsigned size, VectorType vectorType, unsigned block_size);
 	CudaVector2(unsigned size, VectorType vectorType);
 	virtual ~CudaVector2();
+	virtual ImplementationType getImplementationType() {
+		return CUDA2;
+	};
 
 	Vector* clone();
 	virtual void inputCalculation(Vector* input, Vector* inputWeighs);
 	//for weighs
 	virtual void mutate(unsigned pos, float mutation, unsigned inputSize);
-	virtual void weighCrossover(Vector* other, Vector* bitVector, unsigned inputSize);
+	virtual void weighCrossover(Vector* other, Interface* bitVector, unsigned inputSize);
 };
 
 #endif /* CUDAVECTOR2_H_ */

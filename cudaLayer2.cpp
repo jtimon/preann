@@ -1,9 +1,3 @@
-/*
- * cudaLayer2.cu
- *
- *  Created on: Apr 15, 2010
- *      Author: timon
- */
 
 #include "cudaLayer2.h"
 
