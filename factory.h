@@ -17,6 +17,7 @@ public:
 	static Vector* newVector(FILE* stream, ImplementationType implementationType);
 
 	static Vector* newVector(Interface* interface, ImplementationType implementationType);
+	static Vector* newVector(Vector* vector, ImplementationType implementationType);
 	static Vector* newVector(unsigned size, VectorType vectorType, ImplementationType implementationType);
 };
 

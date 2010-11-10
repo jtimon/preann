@@ -59,6 +59,14 @@ Vector* Factory::newVector(Interface* interface, ImplementationType implementati
 	return toReturn;
 }
 
+Vector* Factory::newVector(Vector* vector, ImplementationType implementationType)
+{
+    Interface* interface = vector->toInterface();
+    Vector* toReturn = Factory::newVector(interface, implementationType);
+    delete(interface);
+    return toReturn;
+}
+
 Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType)
 {
 	switch(implementationType){
