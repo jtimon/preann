@@ -11,7 +11,7 @@ NASM = nasm -f elf
 
 CLASSIFCATON_OBJ = classificationTask.o
 GA_OBJ = population.o task.o individual.o
-NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o neuralNet.o factory.o interface.o cudaVector.o cudaVector2.o
+NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o neuralNet.o factory.o interface.o cudaVector.o cudaVector2.o connection.o
 
 TESTS = ./bin/testMemoryLosses ./bin/testLayers ./bin/testNeuralNets ./bin/testVectors
 
@@ -57,7 +57,9 @@ individual.o : individual.cpp individual.h neuralNet.o
 	$(CXX) $<
 neuralNet.o : neuralNet.cpp neuralNet.h layer.o
 	$(CXX) $<
-layer.o : layer.cpp layer.h factory.o
+layer.o : layer.cpp layer.h connection.o
+	$(CXX) $<
+connection.o : connection.cpp connection.h factory.o
 	$(CXX) $<
 	
 factory.o : factory.cpp factory.h cppVector.o xmmVector.o cudaVector.o cudaVector2.o

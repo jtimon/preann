@@ -1,22 +1,20 @@
 #ifndef ABSTRACTLAYER_H_
 #define ABSTRACTLAYER_H_
 
-#include "vector.h"
+#include "connection.h"
 
 class Layer
 {
 private:
 	Layer() {};
 protected:
-	Vector** inputs;
-	Vector** connections;
+	Connection** connections;
 	unsigned numberInputs;
 
 	Vector* thresholds;
 	Vector* output;
 
 	FunctionType functionType;
-
 
 	ImplementationType getImplementationType() {
 		return output->getImplementationType();
@@ -48,7 +46,7 @@ public:
 	Vector* getInput(unsigned pos);
 	Vector* getOutput();
 	float* getThresholdsPtr();
-	Vector* getConnection(unsigned inputPos);
+	Connection* getConnection(unsigned inputPos);
 	FunctionType getFunctionType();
 
 	void mutateWeigh(float mutationRange);

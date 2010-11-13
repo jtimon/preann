@@ -13,7 +13,6 @@ Vector* Layer::newVector(unsigned size, VectorType vectorType)
 
 Layer::Layer(unsigned size, VectorType outputType, FunctionType functionType, ImplementationType implementationType)
 {
-	inputs = NULL;
 	connections = NULL;
 	numberInputs = 0;
 
@@ -29,12 +28,11 @@ Layer::Layer(FILE* stream, ImplementationType implementationType)
 	output = Factory::newVector(stream, implementationType);
 
 	fread(&numberInputs, sizeof(unsigned), 1, stream);
-	inputs = (Vector**) mi_malloc(numberInputs * sizeof(Vector*));
-	connections = (Vector**) mi_malloc(numberInputs * sizeof(Vector*));
+	connections = (Connection**) mi_malloc(numberInputs * sizeof(Connection*));
+
 	for(unsigned i=0; i < numberInputs; i++){
 		//TODO esto puede llevar al pete
-		inputs[i] = NULL;
-		connections[i] = Factory::newMatrix(stream, output->getSize(), implementationType);
+		connections[i] = new Connection(stream, output->getSize(), implementationType);
 	}
 }
 
@@ -46,20 +44,17 @@ void Layer::save(FILE* stream)
 
 	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
 	for(unsigned i=0; i < numberInputs; i++){
-		Factory::saveMatrix(connections[i], stream, output->getSize(), getImplementationType());
+		connections[i]->save(stream);
 	}
 }
 
 Layer::~Layer()
 {
-	if (inputs) {
+	if (connections) {
 		for (unsigned i=0; i < numberInputs; i++){
 			delete(connections[i]);
 		}
-
-		mi_free(inputs);
 		mi_free(connections);
-		inputs = NULL;
 		connections = NULL;
 	}
 	if (thresholds) {
@@ -112,7 +107,7 @@ void Layer::calculateOutput()
 	Vector* results = thresholds->clone();
 
 	for(unsigned i=0; i < numberInputs; i++){
-		results->inputCalculation(inputs[i], connections[i]);
+		connections[i]->addToResults(results);
 	}
 
 	output->activation(results, functionType);
@@ -120,35 +115,17 @@ void Layer::calculateOutput()
 
 void Layer::addInput(Vector* input)
 {
-	Vector* newWeighs;
-	switch (input->getVectorType()){
-	case BYTE:
-		{
-		std::string error = "Layer::addInput is not implemented for an input Vector of the VectorType BYTE";
-		throw error;
-		}
-	case FLOAT:
-		newWeighs = newVector(input->getSize() * output-> getSize(), FLOAT);
-		break;
-	case BIT:
-	case SIGN:
-		newWeighs = newVector(input->getSize() * output-> getSize(), BYTE);
-		break;
-	}
 	//TODO probar qué sucede con varios tipos de entrada
-	Vector** newInputs = (Vector**) mi_malloc(sizeof(Vector*) * (numberInputs + 1));
-	Vector** newConnections = (Vector**) mi_malloc(sizeof(Vector*) * (numberInputs + 1));
-	if (inputs) {
-		memcpy(newInputs, inputs, numberInputs * sizeof(Vector*));
-		memcpy(newConnections, connections, numberInputs * sizeof(Vector*));
-		mi_free(inputs);
+	Connection* newConnection = new Connection(input, output->getSize(), getImplementationType());
+	Connection** newConnections = (Connection**) mi_malloc(sizeof(Connection*) * (numberInputs + 1));
+
+	if (connections) {
+		memcpy(newConnections, connections, numberInputs * sizeof(Connection*));
 		mi_free(connections);
 	}
-	inputs = newInputs;
-	connections = newConnections;
 
-	inputs[numberInputs] = input;
-	connections[numberInputs] = newWeighs;
+	connections = newConnections;
+	connections[numberInputs] = newConnection;
 	++numberInputs;
 }
 
@@ -169,7 +146,7 @@ void Layer::setInput(Vector* input, unsigned pos)
 	default:
 		break;
 	}
-	inputs[pos] = input;
+	connections[pos]->setInput(input);
 }
 
 void Layer::randomWeighs(float range)
@@ -186,10 +163,10 @@ void Layer::randomWeighs(float range)
 	delete(aux);
 
 	for (unsigned i=0; i < numberInputs; i++){
-		Vector* connection = connections[i];
-		aux = new Interface(connection->getSize(), connection->getVectorType());
+		Vector* weighs = connections[i]->getWeighs();
+		aux = new Interface(weighs->getSize(), weighs->getVectorType());
 		aux->random(range);
-		connection->copyFrom(aux);
+		weighs->copyFrom(aux);
 		delete(aux);
 	}
 }
@@ -204,12 +181,12 @@ void Layer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputP
 		std::string error = "Cannot mutate that input: the Layer hasn't so many inputs.";
 		throw error;
 	}
-	if (inputPos > inputs[inputLayer]->getSize()) {
+	if (inputPos > connections[inputLayer]->getInput()->getSize()) {
 		std::string error = "Cannot mutate that input: the input hasn't so many neurons.";
 		throw error;
 	}
-	unsigned weighPos = (outputPos * inputs[inputLayer]->getSize()) + inputPos;
-	connections[inputLayer]->mutate(weighPos, mutation, inputs[inputLayer]->getSize());
+	unsigned weighPos = (outputPos * connections[inputLayer]->getInput()->getSize()) + inputPos;
+	connections[inputLayer]->mutate(weighPos, mutation);
 }
 
 void Layer::mutateThreshold(unsigned outputPos, float mutation)
@@ -239,7 +216,7 @@ unsigned Layer::getNumberInputs()
 
 Vector* Layer::getInput(unsigned pos)
 {
-	return inputs[pos];
+	return connections[pos]->getInput();
 }
 
 Vector* Layer::getOutput()
@@ -252,7 +229,7 @@ float* Layer::getThresholdsPtr()
 	return (float*)thresholds->getDataPointer();
 }
 
-Vector* Layer::getConnection(unsigned inputPos)
+Connection* Layer::getConnection(unsigned inputPos)
 {
 	return connections[inputPos];
 }
@@ -282,7 +259,7 @@ void Layer::mutateWeigh(float mutationRange)
 {
 	unsigned chosenInput = randomUnsigned(this->numberInputs);
 	unsigned chosenOutput = randomUnsigned(output->getSize());
-	unsigned chosenInputPos = randomUnsigned(inputs[chosenInput]->getSize());
+	unsigned chosenInputPos = randomUnsigned(connections[chosenInput]->getInput()->getSize());
 
 	mutateWeigh(chosenOutput, chosenInput, chosenInputPos, randomFloat(mutationRange));
 }
@@ -291,7 +268,7 @@ void Layer::mutateWeighs(float probability, float mutationRange)
 {
 	for (unsigned i=0; i < output->getSize(); i++){
 		for (unsigned j=0; j < numberInputs; j++){
-			for (unsigned k=0; k < inputs[j]->getSize(); k++){
+			for (unsigned k=0; k < connections[j]->getInput()->getSize(); k++){
 				if (randomPositiveFloat(1) < probability) {
 					mutateWeigh(i, j, k, randomFloat(mutationRange));
 				}
@@ -305,14 +282,14 @@ void Layer::mutateWeighs(float probability, float mutationRange)
 
 void Layer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
 {
-	connections[inputLayer]->weighCrossover(other->getConnection(inputLayer), bitVector, inputs[inputLayer]->getSize());
+	connections[inputLayer]->crossover(other->getConnection(inputLayer), bitVector);
 }
 
 void Layer::crossoverInput(Layer *other, unsigned  inputLayer, Interface *bitVector)
 {
 	checkCompatibility(other);
 
-	unsigned inputSize = inputs[inputLayer]->getSize();
+	unsigned inputSize = connections[inputLayer]->getInput()->getSize();
 	unsigned outputSize = output->getSize();
 	Interface* inputBitVector = new Interface(inputSize * outputSize, BIT);
 
@@ -337,7 +314,7 @@ void Layer::crossoverNeurons(Layer *other, Interface *bitVector)
 
 	for (unsigned i=0; i < numberInputs; i++){
 
-		unsigned inputSize = inputs[i]->getSize();
+		unsigned inputSize = connections[i]->getInput()->getSize();
 		Interface* inputBitVector = new Interface(inputSize * outputSize, BIT);
 
 		for (unsigned j=0; j < outputSize; j++){

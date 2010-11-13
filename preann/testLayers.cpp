@@ -122,8 +122,8 @@ void testLayer(unsigned size, VectorType vectorType, unsigned numInputs)
 
 		//test Weighs
 	    for(unsigned i = 0; i < numInputs; i++){
-	        Vector* expectedWeighs = controlLayer->getConnection(i);
-	        Vector* actualWeighs = layer->getConnection(i);
+	        Vector* expectedWeighs = controlLayer->getConnection(i)->getWeighs();
+	        Vector* actualWeighs = layer->getConnection(i)->getWeighs();
 	        if(implementationType == CUDA2){
 	            unsigned inputSize = actualWeighs->getSize() / layer->getOutput()->getSize();
 	            actualWeighs->transposeMatrix(inputSize);
@@ -140,7 +140,7 @@ void testLayer(unsigned size, VectorType vectorType, unsigned numInputs)
     delete (controlInputVector);
 }
 
-#define VECTOR_TYPE_DIM 2
+#define VECTOR_TYPE_DIM 3
 #define SIZE_MAX 100
 #define SIZE_INC 10
 #define NUM_INPUTS 2
@@ -151,8 +151,8 @@ int main(int argc, char *argv[]) {
 
 	try {
 		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
-//			if (vectType != BYTE)
-			if (vectType == SIGN)
+			if (vectType != BYTE)
+//			if (vectType == SIGN)
 				for (unsigned size = 1; size < SIZE_MAX; size += SIZE_INC) {
 					testLayer(size, (VectorType) vectType, NUM_INPUTS);
 				}
