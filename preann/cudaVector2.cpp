@@ -54,48 +54,16 @@ void CudaVector2::inputCalculation(Vector* input, Vector* inputWeighsVect)
 	cuda_inputCalculationInvertedMatrix(input->getDataPointer(), input->getSize(), input->getVectorType(), size, inputWeighs, results, Cuda_Threads_Per_Block);
 }
 
-void CudaVector2::mutate(unsigned pos, float mutation, unsigned inputSize)
+void CudaVector2::mutate(unsigned pos, float mutation)
 {
-	if (pos > size){
-		std::string error = "The position being mutated is greater than the size of the vector.";
-		throw error;
-	}
-	//TODO simplificar cuentas
-	unsigned outputPos = pos / inputSize;
-	unsigned inputPos = (pos % inputSize);
-	unsigned outputSize = size / inputSize;
-	unsigned weighPos = outputPos + (inputPos * outputSize);
-	cuda_mutate(data, weighPos, mutation, vectorType);
+	cuda_mutate(data, pos, mutation, vectorType);
 }
-void CudaVector2::weighCrossover(Vector* other, Interface* bitVector, unsigned inputSize)
+void CudaVector2::weighCrossover(Vector* other, Interface* bitVector)
 {
-	//TODO impl CudaVector2::weighCrossover
-    if(size != other->getSize()){
-        std::string error = "The vectors must have the same size to crossover them.";
-        throw error;
-    }
-    if(vectorType != other->getVectorType()){
-        std::string error = "The vectors must have the same type to crossover them.";
-        throw error;
-    }
-
-	Interface invertedBitVector = Interface(size, BIT);
-
-	unsigned width = size / inputSize;
-	unsigned height = inputSize;
-
-	for (unsigned i=0; i < width; i++){
-		for (unsigned j=0; j < height; j++){
-			invertedBitVector.setElement(i  + (j * width), bitVector->getElement((i * height) + j));
-		}
-	}
-
     CudaVector2* cudaBitVector = new CudaVector2(size, BIT, Cuda_Threads_Per_Block);
-    cudaBitVector->copyFrom2(&invertedBitVector, Cuda_Threads_Per_Block);
-
+    cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
     unsigned* cudaBitVectorPtr = (unsigned*)(cudaBitVector->getDataPointer());
 
     cuda_crossover(this->getDataPointer(), other->getDataPointer(), cudaBitVectorPtr, size, vectorType, Cuda_Threads_Per_Block);
-
     delete(cudaBitVector);
 }

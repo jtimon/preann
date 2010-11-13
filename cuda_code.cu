@@ -73,17 +73,28 @@ void activation_bit_kernel(float* results, unsigned* output, unsigned output_sz)
 
 extern "C" void cuda_activation(void* data, unsigned size, VectorType vectorType, float* results, FunctionType functionType, unsigned block_size)
 {
-
 	unsigned grid_size;
 
-	if (vectorType == FLOAT) {
-		grid_size = ((size - 1) / block_size) + 1;
-		activation_float_kernel<<< grid_size, block_size >>>(results, (float*)data, size, functionType);
-	} else {
-		grid_size = ((size - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
-		activation_bit_kernel<<< grid_size, block_size >>>(results, (unsigned*)data, size);
+	switch (vectorType){
+	case BYTE:
+		{
+			std::string error = "cuda_activation is not implemented for VectorType BYTE.";
+			throw error;
+		}
+	case FLOAT:
+		{
+			grid_size = ((size - 1) / block_size) + 1;
+			activation_float_kernel<<< grid_size, block_size >>>(results, (float*)data, size, functionType);
+		}
+		break;
+	case BIT:
+	case SIGN:
+		{
+			grid_size = ((size - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
+			activation_bit_kernel<<< grid_size, block_size >>>(results, (unsigned*)data, size);
+		}
+		break;
 	}
-	cudaFree(results);
 	checkCUDAError("activation");
 }
 
@@ -181,7 +192,7 @@ void cuda_crossover(void* vector1, void* vector2, unsigned* bitVector, unsigned 
 
 	switch (vectorType){
         case BYTE:
-			crossoverKernel<unsigned char><<< grid_size, block_size >>>
+		crossoverKernel<unsigned char><<< grid_size, block_size >>>
 				((unsigned char*)vector1, (unsigned char*)vector2, (unsigned*)bitVector, size);
 
         break;
@@ -424,7 +435,11 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size,
 	unsigned grid_size = ((output_size - 1) / block_size) + 1;
 	unsigned shared_mem_size;
 
-	if (inputType == FLOAT) {
+	if (inputType == BYTE) {
+		std::string error = "cuda_inputCalculation is not implemented for VectorType BYTE as input.";
+		throw error;
+	}
+	else if (inputType == FLOAT) {
 		if (input_size > 4032) {
 			string error = "The maximum float input size is 4032.";
 			throw error;
@@ -455,7 +470,11 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
 	unsigned grid_size = ((output_size - 1) / block_size) + 1;
 	unsigned shared_mem_size;
 
-	if (inputType == FLOAT) {
+	if (inputType == BYTE) {
+		std::string error = "cuda_inputCalculation is not implemented for VectorType BYTE as input.";
+		throw error;
+	}
+	else if (inputType == FLOAT) {
 		while (input_size > CUDA_MAX_SHARED_FLOATS) {
 
 			shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(float);
@@ -570,7 +589,11 @@ extern "C" void cuda_inputCalculationReduction(void* inputPtr, unsigned input_si
 	unsigned grid_size = output_size;
 	unsigned shared_mem_size = block_size * sizeof(float);
 
-	if (inputType == FLOAT) {
+	if (inputType == BYTE) {
+		std::string error = "cuda_inputCalculation is not implemented for VectorType BYTE as input.";
+		throw error;
+	}
+	else if (inputType == FLOAT) {
 		switch (block_size) {
 		case 512:
 			SumConnectionsKernel<512, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;

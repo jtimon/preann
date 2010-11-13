@@ -111,6 +111,7 @@ void Layer::calculateOutput()
 	}
 
 	output->activation(results, functionType);
+	delete(results);
 }
 
 void Layer::addInput(Vector* input)
@@ -195,7 +196,8 @@ void Layer::mutateThreshold(unsigned outputPos, float mutation)
 		std::string error = "Cannot mutate that Threshold: the Layer hasn't so many neurons.";
 		throw error;
 	}
-	thresholds->mutate(outputPos, mutation, 1);
+	thresholds->mutate(outputPos, mutation);
+	//TODO Layer::crossoverThreshold
 }
 
 void Layer::swapWeighs(Layer* layer)

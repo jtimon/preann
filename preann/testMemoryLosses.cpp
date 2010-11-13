@@ -9,7 +9,6 @@ using namespace std;
 #include "cuda_code.h"
 #include "cudaVector2.h"
 
-#define VECTOR_TYPE_DIM 3
 #define IMPLEMENTATION_TYPE_DIM 4
 #define SIZE_MAX 200
 

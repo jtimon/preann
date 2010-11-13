@@ -145,30 +145,13 @@ void CudaVector::mutate(unsigned pos, float mutation)
 	cuda_mutate(data, pos, mutation, vectorType);
 }
 
-void CudaVector::mutate(unsigned pos, float mutation, unsigned inputSize)
+void CudaVector::weighCrossover(Vector* other, Interface* bitVector)
 {
-	if (pos > size){
-		std::string error = "The position being mutated is greater than the size of the vector.";
-		throw error;
-	}
-	cuda_mutate(data, pos, mutation, vectorType);
-}
-void CudaVector::weighCrossover(Vector* other, Interface* bitVector, unsigned inputSize)
-{
-    if(size != other->getSize()){
-        std::string error = "The vectors must have the same size to crossover them.";
-        throw error;
-    }
-    if(vectorType != other->getVectorType()){
-        std::string error = "The vectors must have the same type to crossover them.";
-        throw error;
-    }
     CudaVector* cudaBitVector = new CudaVector(size, BIT, Cuda_Threads_Per_Block);
     cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
     unsigned* cudaBitVectorPtr = (unsigned*)(cudaBitVector->getDataPointer());
 
     cuda_crossover(this->getDataPointer(), other->getDataPointer(), cudaBitVectorPtr, size, vectorType, Cuda_Threads_Per_Block);
-
     delete(cudaBitVector);
 }
 

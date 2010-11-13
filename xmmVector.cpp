@@ -160,8 +160,14 @@ void XmmVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
 	unsigned numLoops;
 	unsigned weighPos = 0;
 
-	if (input->getVectorType() == FLOAT) {
-
+	switch (input->getVectorType()){
+	case BYTE:
+	{
+		std::string error = "CppVector::inputCalculation is not implemented for VectorType BYTE as input.";
+		throw error;
+	}
+	case FLOAT:
+	{
 		numLoops = ((input->getSize()-1)/FLOATS_PER_BLOCK)+1;
 
 		for (unsigned j=0; j < size; j++){
@@ -173,89 +179,86 @@ void XmmVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
 			weighPos += input->getSize();
 		}
 	}
-	else {
+	break;
+	case BIT:
+	{
 		numLoops = ((input->getSize()-1)/BYTES_PER_BLOCK)+1;
 
-		if (input->getVectorType() == BIT) {
-			for (unsigned j=0; j < size; j++){
+		for (unsigned j=0; j < size; j++){
 
-				results[j] += XMMbinario(inputPtr, numLoops,
-						(((unsigned char*)inputWeighs) + weighPos));
-				weighPos += input->getSize();
-			}
-		}
-		else if (input->getVectorType() == SIGN) {
-			for (unsigned j=0; j < size; j++){
-
-				results[j] += XMMbipolar(inputPtr, numLoops,
-									(((unsigned char*)inputWeighs) + weighPos));
-				weighPos += input->getSize();
-			}
+			results[j] += XMMbinario(inputPtr, numLoops,
+					(((unsigned char*)inputWeighs) + weighPos));
+			weighPos += input->getSize();
 		}
 	}
+	break;
+	case SIGN:
+	{
+		numLoops = ((input->getSize()-1)/BYTES_PER_BLOCK)+1;
 
-/*
-	for (unsigned j=0; j < size; j++){
-		unsigned weighPos = j * input->getWeighsSize();
+		for (unsigned j=0; j < size; j++){
 
-		if (input->getVectorType() == FLOAT) {
-			float auxResult;
-			XMMreal(inputPtr, ((XmmVector*)input)->getNumLoops(),
-					(((float*)inputWeighs) + weighPos), auxResult);
-			results[j] += auxResult;
-		}
-		else if (input->getVectorType() == BIT) {
-			results[j] += XMMbinario(inputPtr, ((XmmVector*)input)->getNumLoops(),
-					(((unsigned char*)inputWeighs) + weighPos));
-		}
-		else if (input->getVectorType() == SIGN) {
-			results[j] += XMMbipolar(inputPtr, ((XmmVector*)input)->getNumLoops(),
+			results[j] += XMMbipolar(inputPtr, numLoops,
 								(((unsigned char*)inputWeighs) + weighPos));
+			weighPos += input->getSize();
 		}
-	}*/
+	}
+	break;
+	}
 }
 
 void XmmVector::activation(Vector* resultsVect, FunctionType functionType)
 {
 	float* results = (float*)resultsVect->getDataPointer();
 
-	if (vectorType == FLOAT){
-		for (unsigned i=0; i < size; i++){
-			((float*)data)[i] = Function(results[i], functionType);
-		}
-	} else {
-		unsigned char* vectorData = (unsigned char*)data;
-
-		unsigned blockOffset = 0;
-		unsigned bytePos = 0;
-		unsigned char vectorMask = 128;
-
-		for (unsigned i=0; i < size; i++){
-
-			if (results[i] > 0){
-				vectorData[blockOffset + bytePos] |= vectorMask;
-			} else {
-				vectorData[blockOffset + bytePos] &= ~vectorMask;
+	switch (vectorType){
+	case BYTE:
+		{
+			std::string error = "XmmVector::activation is not implemented for VectorType BYTE.";
+			throw error;
+		}break;
+	case FLOAT:
+		{
+			for (unsigned i=0; i < size; i++){
+				((float*)data)[i] = Function(results[i], functionType);
 			}
+		}
+		break;
+	case BIT:
+	case SIGN:
+		{
+			unsigned char* vectorData = (unsigned char*)data;
 
-			if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK-1)){
-				bytePos = 0;
-				if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK-1)){
-					blockOffset += BYTES_PER_BLOCK;
-					vectorMask = 128;
+			unsigned blockOffset = 0;
+			unsigned bytePos = 0;
+			unsigned char vectorMask = 128;
+
+			for (unsigned i=0; i < size; i++){
+
+				if (results[i] > 0){
+					vectorData[blockOffset + bytePos] |= vectorMask;
 				} else {
-					vectorMask >>= 1;
+					vectorData[blockOffset + bytePos] &= ~vectorMask;
 				}
-			} else {
-				++bytePos;
+
+				if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK-1)){
+					bytePos = 0;
+					if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK-1)){
+						blockOffset += BYTES_PER_BLOCK;
+						vectorMask = 128;
+					} else {
+						vectorMask >>= 1;
+					}
+				} else {
+					++bytePos;
+				}
 			}
 		}
 	}
-	mi_free(results);
 }
 
 //TODO esto es igual en CppVector
-void XmmVector::mutate(unsigned pos, float mutation, unsigned inputSize)
+void XmmVector::mutate(unsigned pos, float mutation)
 {
 	if (pos > size){
 		std::string error = "The position being mutated is greater than the size of the vector.";
@@ -287,7 +290,7 @@ void XmmVector::mutate(unsigned pos, float mutation, unsigned inputSize)
 	}
 }
 //TODO esto es igual en CppVector
-void XmmVector::weighCrossover(Vector* other, Interface* bitVector, unsigned inputSize)
+void XmmVector::weighCrossover(Vector* other, Interface* bitVector)
 {
 	if (size != other->getSize()){
 		std::string error = "The vectors must have the same size to crossover them.";

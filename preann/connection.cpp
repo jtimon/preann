@@ -31,15 +31,16 @@ Connection::Connection(Vector* input, unsigned outputSize, ImplementationType im
 
 Connection::Connection(FILE* stream, unsigned outputSize, ImplementationType implementationType)
 {
+	tInput = NULL;
 	Interface* interface = new Interface();
 	interface->load(stream);
+	tWeighs = Factory::newVector(interface->getSize(), interface->getVectorType(), implementationType);
 
-	if (implementationType == CUDA2){
+	if (tWeighs->requiresTransposing()){
 		unsigned inputSize = interface->getSize() / outputSize;
 		interface->transposeMatrix(inputSize);
 	}
-	tInput = NULL;
-	tWeighs = Factory::newVector(interface, implementationType);
+	tWeighs->copyFrom(interface);
 }
 
 Connection::~Connection()
@@ -79,7 +80,7 @@ void Connection::save(FILE* stream)
 {
 	Interface* interface = tWeighs->toInterface();
 
-	if (tWeighs->getImplementationType() == CUDA2){
+	if (tWeighs->requiresTransposing()){
 		unsigned outputSize = interface->getSize() / tInput->getSize();
 		interface->transposeMatrix(outputSize);
 	}
@@ -90,12 +91,47 @@ void Connection::save(FILE* stream)
 
 void Connection::mutate(unsigned pos, float mutation)
 {
-	tWeighs->mutate(pos, mutation, tInput->getSize());
+	if (pos > tWeighs->getSize()){
+		std::string error = "The position being mutated is greater than the size of the vector.";
+		throw error;
+	}
+	if (tWeighs->requiresTransposing()) {
+		//TODO simplificar cuentas
+		unsigned outputPos = pos / tInput->getSize();
+		unsigned inputPos = (pos % tInput->getSize());
+		unsigned outputSize = tWeighs->getSize() / tInput->getSize();
+		pos = outputPos + (inputPos * outputSize);
+	}
+	tWeighs->mutate(pos, mutation);
 }
 
 void Connection::crossover(Connection* other, Interface* bitVector)
 {
-	tWeighs->weighCrossover(other->getWeighs(), bitVector, tInput->getSize());
+    if(this->getWeighs()->getSize() != other->getWeighs()->getSize()){
+        std::string error = "The Connections must have the same size to crossover them.";
+        throw error;
+    }
+    if(this->getWeighs()->getVectorType() != other->getWeighs()->getVectorType()){
+        std::string error = "The Connections must have the same type to crossover them.";
+        throw error;
+    }
+    if (tWeighs->requiresTransposing()) {
+		Interface* invertedBitVector = new Interface(tWeighs->getSize(), BIT);
+
+		unsigned width = tWeighs->getSize() / tInput->getSize();
+		unsigned height = tInput->getSize();
+
+		for (unsigned i=0; i < width; i++){
+			for (unsigned j=0; j < height; j++){
+				invertedBitVector->setElement(i  + (j * width), bitVector->getElement((i * height) + j));
+			}
+		}
+
+		tWeighs->weighCrossover(other->getWeighs(), invertedBitVector);
+		delete(invertedBitVector);
+    } else {
+    	tWeighs->weighCrossover(other->getWeighs(), bitVector);
+    }
 }
 
 void Connection::addToResults(Vector* results)

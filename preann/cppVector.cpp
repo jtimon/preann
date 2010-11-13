@@ -61,27 +61,44 @@ void CppVector::copyTo(Interface* interface)
 
 void CppVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
 {
-	void* inputWeighs = inputWeighsVect->getDataPointer();
 	float* results = (float*)this->getDataPointer();
-
-	void* inputPtr = input->getDataPointer();
 	unsigned inputSize = input->getSize();
 
-	for (unsigned j=0; j < size; j++){
+	switch (input->getVectorType()){
+	case BYTE:
+	{
+		std::string error = "CppVector::inputCalculation is not implemented for VectorType BYTE as input.";
+		throw error;
+	}
+	case FLOAT:
+	{
+		float* inputWeighs = (float*)inputWeighsVect->getDataPointer();
+		float* inputPtr = (float*)input->getDataPointer();
+		for (unsigned j=0; j < size; j++){
+			for (unsigned k=0; k < inputSize; k++){
+				results[j] += inputPtr[k] * inputWeighs[(j * inputSize) + k];
+			}
+		}
+	}
+	break;
+	case BIT:
+	case SIGN:
+	{
+		unsigned char* inputWeighs = (unsigned char*)inputWeighsVect->getDataPointer();
+		unsigned* inputPtr = (unsigned*)input->getDataPointer();
 
-		for (unsigned k=0; k < inputSize; k++){
-
-			unsigned weighPos = (j * inputSize) + k;
-			if (input->getVectorType() == FLOAT) {
-				results[j] += ((float*)inputPtr)[k] * ((float*)inputWeighs)[weighPos];
-			} else {
-				if ( ((unsigned*)inputPtr)[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
-					results[j] += (((unsigned char*)inputWeighs)[weighPos] - 128);
+		for (unsigned j=0; j < size; j++){
+			for (unsigned k=0; k < inputSize; k++){
+				unsigned weighPos = (j * inputSize) + k;
+				if ( inputPtr[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
+					results[j] += inputWeighs[weighPos] - 128;
 				} else if (input->getVectorType() == SIGN) {
-					results[j] -= (((unsigned char*)inputWeighs)[weighPos] - 128);
+					results[j] -= inputWeighs[weighPos] - 128;
 				}
 			}
 		}
+	}
+	break;
 	}
 }
 
@@ -89,32 +106,43 @@ void CppVector::activation(Vector* resultsVect, FunctionType functionType)
 {
 	float* results = (float*)resultsVect->getDataPointer();
 
-	if (vectorType == FLOAT){
-		for (unsigned i=0; i < size; i++){
-			((float*)data)[i] = Function(results[i], functionType);
-		}
-	} else {
-		unsigned* vectorData = (unsigned*)data;
-		unsigned mask;
-		for (unsigned i=0; i < size; i++){
-
-			if (i % BITS_PER_UNSIGNED == 0){
-				mask = 0x80000000;
-			} else {
-				mask >>= 1;
+	switch (vectorType){
+	case BYTE:
+		{
+			std::string error = "CppVector::activation is not implemented for VectorType BYTE.";
+			throw error;
+		}break;
+	case FLOAT:
+		{
+			for (unsigned i=0; i < size; i++){
+				((float*)data)[i] = Function(results[i], functionType);
 			}
+		}
+		break;
+	case BIT:
+	case SIGN:
+		{
+			unsigned* vectorData = (unsigned*)data;
+			unsigned mask;
+			for (unsigned i=0; i < size; i++){
 
-			if (results[i] > 0){
-				vectorData[i/BITS_PER_UNSIGNED] |= mask;
-			} else {
-				vectorData[i/BITS_PER_UNSIGNED] &= ~mask;
+				if (i % BITS_PER_UNSIGNED == 0){
+					mask = 0x80000000;
+				} else {
+					mask >>= 1;
+				}
+
+				if (results[i] > 0){
+					vectorData[i/BITS_PER_UNSIGNED] |= mask;
+				} else {
+					vectorData[i/BITS_PER_UNSIGNED] &= ~mask;
+				}
 			}
 		}
 	}
-	mi_free(results);
 }
 
-void CppVector::mutate(unsigned pos, float mutation, unsigned inputSize)
+void CppVector::mutate(unsigned pos, float mutation)
 {
 	if (pos > size){
 		std::string error = "The position being mutated is greater than the size of the vector.";
@@ -140,12 +168,12 @@ void CppVector::mutate(unsigned pos, float mutation, unsigned inputSize)
 	case BIT:
 	case SIGN:
 		{
-		std::string error = "CppVector::mutate is not implemented for VectorType BIT nor SIGN.";
-		throw error;
+		unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
+		((unsigned*)data)[pos / BITS_PER_UNSIGNED] ^= mask;
 		}
 	}
 }
-void CppVector::weighCrossover(Vector* other, Interface* bitVector, unsigned inputSize)
+void CppVector::weighCrossover(Vector* other, Interface* bitVector)
 {
 	if (size != other->getSize()){
 		std::string error = "The vectors must have the same size to crossover them.";

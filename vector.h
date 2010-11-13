@@ -10,6 +10,7 @@
 
 #include "interface.h"
 
+#define IMPLEMENTATION_TYPE_DIM 4
 typedef enum {C, SSE2, CUDA, CUDA2} ImplementationType;
 
 class Vector {
@@ -26,10 +27,11 @@ public:
 	virtual Vector* clone() = 0;
 	virtual void copyFrom(Interface* interface) = 0;
 	virtual void copyTo(Interface* interface) = 0;
+	//TODO change the parameter to results instead of input
 	virtual void inputCalculation(Vector* input, Vector* inputWeighs) = 0;
 	virtual void activation(Vector* results, FunctionType functionType) = 0;
-	virtual void mutate(unsigned pos, float mutation, unsigned inputSize) = 0;
-	virtual void weighCrossover(Vector* other, Interface* bitVector, unsigned inputSize) = 0;
+	virtual void mutate(unsigned pos, float mutation) = 0;
+	virtual void weighCrossover(Vector* other, Interface* bitVector) = 0;
 
 	void* getDataPointer();
 	unsigned getSize();
@@ -43,6 +45,10 @@ public:
 	float compareTo(Vector* other);
 	void random(float range);
 	void transposeMatrix(unsigned width);
+	unsigned char requiresTransposing(){
+		return 0;
+	}
+
 protected:
 	template <class vectorType>
 	void SetValueToAnArray(void* array, unsigned size, vectorType value)
