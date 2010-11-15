@@ -336,9 +336,12 @@ void SumBitsConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned ou
 
 		for (unsigned i=0; i < input_blocks_to_read; i++) {
 
+			//TODO check performance penalty (this is just for SIGN)
+			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
+
 			unsigned input_block = shared_inputs[i];
 			unsigned mask = 0x80000000;
-			for (unsigned j=0; j < BITS_PER_UNSIGNED; j++) {
+			for (unsigned j=0; j < maxBits; j++) {
 
 				if (input_block & mask) {
 					result += weighs[weighsOffset] - 128;
@@ -408,10 +411,13 @@ void SumBitsInvertedConnectionsKernel(unsigned* inputs, unsigned input_size, uns
 
 		for (unsigned i=0; i < input_blocks_to_read; i++) {
 
+			//TODO check performance penalty (this is just for SIGN)
+			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
+
 			unsigned weighsOffset = (i * BITS_PER_UNSIGNED * output_size) + outputNeuron;
 			unsigned input_block = shared_inputs[i];
 			unsigned mask = 0x80000000;
-			for (unsigned j=0; j < BITS_PER_UNSIGNED; j++) {
+			for (unsigned j=0; j < maxBits; j++) {
 
 				if (input_block & mask) {
 					result += weighs[weighsOffset] - 128;
@@ -535,15 +541,19 @@ void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned output_s
 		unsigned input_blocks_to_read = ((input_size - 1) / BITS_PER_UNSIGNED) + 1;
 		while (i < input_blocks_to_read) {
 
+			//TODO check performance penalty (this is just for SIGN)
+			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
+
 			unsigned mask = 0x80000000;
 			unsigned currentInput = ((unsigned*)inputPtr)[i];
-			for (unsigned j=0; j < BITS_PER_UNSIGNED; j++) {
+
+			for (unsigned j=0; j < maxBits; j++) {
 
 				if (currentInput & mask) {
 					result += ((unsigned char*)weighs)[weighsOffset + j] - 128;
 				} else {
 					if (inputType == SIGN) {
-						result += 128 - ((unsigned char*)weighs)[weighsOffset + j];
+						result -= ((unsigned char*)weighs)[weighsOffset + j] - 128;
 					}
 				}
 				mask >>= 1;
