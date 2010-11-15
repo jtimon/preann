@@ -1,10 +1,3 @@
-/*
- * connection.h
- *
- *  Created on: Nov 13, 2010
- *      Author: timon
- */
-
 #ifndef CONNECTION_H_
 #define CONNECTION_H_
 

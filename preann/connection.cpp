@@ -20,11 +20,11 @@ Connection::Connection(Vector* input, unsigned outputSize, ImplementationType im
 			throw error;
 			}
 		case FLOAT:
-			tWeighs = Factory::newVector(input->getSize() * outputSize, FLOAT, implementationType);
+			tWeighs = Factory::newWeighs(input->getSize(), outputSize, FLOAT, implementationType);
 			break;
 		case BIT:
 		case SIGN:
-			tWeighs = Factory::newVector(input->getSize() * outputSize, BYTE, implementationType);
+			tWeighs = Factory::newWeighs(input->getSize(), outputSize, BYTE, implementationType);
 			break;
 	}
 }
@@ -34,7 +34,7 @@ Connection::Connection(FILE* stream, unsigned outputSize, ImplementationType imp
 	tInput = NULL;
 	Interface* interface = new Interface();
 	interface->load(stream);
-	tWeighs = Factory::newVector(interface->getSize(), interface->getVectorType(), implementationType);
+	tWeighs = Factory::newWeighs(interface->getVectorType() / outputSize, outputSize, interface->getVectorType(), implementationType);
 
 	if (tWeighs->requiresTransposing()){
 		unsigned inputSize = interface->getSize() / outputSize;
@@ -136,6 +136,6 @@ void Connection::crossover(Connection* other, Interface* bitVector)
 
 void Connection::addToResults(Vector* results)
 {
-	results->inputCalculation(tInput, tWeighs);
+	tWeighs->inputCalculation(results, tInput);
 }
 
