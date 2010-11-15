@@ -156,6 +156,10 @@ unsigned testInputCalculation(Vector* toTest, unsigned outputSize)
 	}
 	cResults->inputCalculation(cVector, cInputWeighs);
 
+//	toTest->print();
+//	inputWeighs->print();
+//	results->print();
+
 	unsigned differencesCounter = assertEquals(cResults, results);
 
 	delete(results);
@@ -223,8 +227,10 @@ unsigned testWeighCrossover(Vector* toTest)
 	return differences;
 }
 
-#define SIZE_MAX 20
-#define SIZE_INC 5
+#define SZ_OUTPUT 4
+#define SIZE_MIN 4
+#define SIZE_MAX 128
+#define SIZE_INC 4
 #define PATH "/home/timon/layer.lay"
 
 int main(int argc, char *argv[]) {
@@ -233,7 +239,7 @@ int main(int argc, char *argv[]) {
 	unsigned errorCount = 0;
 
 	try {
-		for (unsigned size = 1; size < SIZE_MAX; size += SIZE_INC) {
+		for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_INC) {
 			for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
 				VectorType vectorType = (VectorType)((vectType));
 				FunctionType functionType = (FunctionType)(vectType);
@@ -242,6 +248,9 @@ int main(int argc, char *argv[]) {
 //				if (vectorType == SIGN)
 				for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
 					ImplementationType implementationType = (ImplementationType)((implType));
+					//TODO comentar
+					if (implementationType == CUDA2){
+//					{
 					printf("----------------------------\n");
 					printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 
@@ -269,7 +278,7 @@ int main(int argc, char *argv[]) {
 							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 							printf("Errors on activation: %d \n", errorCount);
 						}
-						errorCount = testInputCalculation(vector, size);
+						errorCount = testInputCalculation(vector, SZ_OUTPUT);
 						if (errorCount != 0){
 							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 							printf("Errors on inputCalculation: %d \n", errorCount);
@@ -289,6 +298,7 @@ int main(int argc, char *argv[]) {
 //						}
 					}
 					delete(vector);
+					}
 				}
 			}
 		}
