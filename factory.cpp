@@ -39,6 +39,20 @@ Vector* Factory::newVector(Vector* vector, ImplementationType implementationType
     return toReturn;
 }
 
+Vector* Factory::newWeighs(unsigned inputSize, unsigned outputSize, VectorType vectorType, ImplementationType implementationType)
+{
+	switch(implementationType){
+		case C:
+			return new CppVector(inputSize * outputSize, vectorType);
+		case SSE2:
+			return new XmmVector(inputSize, outputSize, vectorType);
+		case CUDA:
+			return new CudaVector(inputSize * outputSize, vectorType);
+		case CUDA2:
+			return new CudaVector2(inputSize * outputSize, vectorType);
+	}
+}
+
 Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType)
 {
 	switch(implementationType){

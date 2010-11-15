@@ -17,6 +17,7 @@ public:
 	static Vector* newVector(Interface* interface, ImplementationType implementationType);
 	static Vector* newVector(Vector* vector, ImplementationType implementationType);
 	static Vector* newVector(unsigned size, VectorType vectorType, ImplementationType implementationType);
+	static Vector* newWeighs(unsigned inputSize, unsigned outputSize, VectorType vectorType, ImplementationType implementationType);
 };
 
 #endif /* FACTORY_H_ */
