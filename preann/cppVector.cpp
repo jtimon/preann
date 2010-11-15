@@ -59,9 +59,9 @@ void CppVector::copyTo(Interface* interface)
 	memcpy(interface->getDataPointer(), data, this->getByteSize());
 }
 
-void CppVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
+void CppVector::inputCalculation(Vector* resultsVect, Vector* input)
 {
-	float* results = (float*)this->getDataPointer();
+	float* results = (float*)resultsVect->getDataPointer();
 	unsigned inputSize = input->getSize();
 
 	switch (input->getVectorType()){
@@ -72,9 +72,9 @@ void CppVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
 	}
 	case FLOAT:
 	{
-		float* inputWeighs = (float*)inputWeighsVect->getDataPointer();
+		float* inputWeighs = (float*)this->getDataPointer();
 		float* inputPtr = (float*)input->getDataPointer();
-		for (unsigned j=0; j < size; j++){
+		for (unsigned j=0; j < resultsVect->getSize(); j++){
 			for (unsigned k=0; k < inputSize; k++){
 				results[j] += inputPtr[k] * inputWeighs[(j * inputSize) + k];
 			}
@@ -84,10 +84,10 @@ void CppVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
 	case BIT:
 	case SIGN:
 	{
-		unsigned char* inputWeighs = (unsigned char*)inputWeighsVect->getDataPointer();
+		unsigned char* inputWeighs = (unsigned char*)this->getDataPointer();
 		unsigned* inputPtr = (unsigned*)input->getDataPointer();
 
-		for (unsigned j=0; j < size; j++){
+		for (unsigned j=0; j < resultsVect->getSize(); j++){
 			for (unsigned k=0; k < inputSize; k++){
 				unsigned weighPos = (j * inputSize) + k;
 				if ( inputPtr[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
