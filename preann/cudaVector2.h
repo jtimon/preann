@@ -23,8 +23,8 @@ public:
 	};
 
 	Vector* clone();
-	virtual void inputCalculation(Vector* input, Vector* inputWeighs);
 	//for weighs
+	virtual void inputCalculation(Vector* results, Vector* input);
 	virtual void mutate(unsigned pos, float mutation);
 	virtual void weighCrossover(Vector* other, Interface* bitVector);
 

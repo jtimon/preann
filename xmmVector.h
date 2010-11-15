@@ -11,7 +11,7 @@
 #include "vector.h"
 #include "sse2_code.h"
 
-class XmmVector: public Vector {
+class XmmVector: virtual public Vector {
 	virtual unsigned getByteSize();
     void bitCopyFrom(Interface *interface, unsigned char *vectorData);
     void bitCopyTo(unsigned char *vectorData, Interface *interface);
@@ -26,11 +26,12 @@ public:
 	virtual Vector* clone();
 	virtual void copyFrom(Interface* interface);
 	virtual void copyTo(Interface* interface);
-	virtual void inputCalculation(Vector* input, Vector* inputWeighs);
 	virtual void activation(Vector* results, FunctionType functionType);
 	//for weighs
+	virtual void inputCalculation(Vector* results, Vector* input);
 	virtual void mutate(unsigned pos, float mutation);
 	virtual void weighCrossover(Vector* other, Interface* bitVector);
+
 };
 
 #endif /* XMMVECTOR_H_ */

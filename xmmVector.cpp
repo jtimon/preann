@@ -151,10 +151,10 @@ void XmmVector::copyTo(Interface* interface)
 	}
 }
 
-void XmmVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
+void XmmVector::inputCalculation(Vector* resultsVect, Vector* input)
 {
-	void* inputWeighs = inputWeighsVect->getDataPointer();
-	float* results = (float*)this->getDataPointer();
+	void* inputWeighs = this->getDataPointer();
+	float* results = (float*)resultsVect->getDataPointer();
 	void* inputPtr = input->getDataPointer();
 
 	unsigned numLoops;
@@ -169,9 +169,7 @@ void XmmVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
 	case FLOAT:
 	{
 		numLoops = ((input->getSize()-1)/FLOATS_PER_BLOCK)+1;
-
-		for (unsigned j=0; j < size; j++){
-
+		for (unsigned j=0; j < resultsVect->getSize(); j++){
 			float auxResult;
 			XMMreal(inputPtr, numLoops,
 					(((float*)inputWeighs) + weighPos), auxResult);
@@ -183,9 +181,7 @@ void XmmVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
 	case BIT:
 	{
 		numLoops = ((input->getSize()-1)/BYTES_PER_BLOCK)+1;
-
-		for (unsigned j=0; j < size; j++){
-
+		for (unsigned j=0; j < resultsVect->getSize(); j++){
 			results[j] += XMMbinario(inputPtr, numLoops,
 					(((unsigned char*)inputWeighs) + weighPos));
 			weighPos += input->getSize();
@@ -195,12 +191,11 @@ void XmmVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
 	case SIGN:
 	{
 		numLoops = ((input->getSize()-1)/BYTES_PER_BLOCK)+1;
-
-		for (unsigned j=0; j < size; j++){
-
+		for (unsigned j=0; j < resultsVect->getSize(); j++){
 			results[j] += XMMbipolar(inputPtr, numLoops,
 								(((unsigned char*)inputWeighs) + weighPos));
 			weighPos += input->getSize();
+//TODO descomentar 	weighPos += BYTES_PER_BLOCK;
 		}
 	}
 	break;

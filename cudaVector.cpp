@@ -118,16 +118,16 @@ void CudaVector::copyTo(Interface *interface)
 	cuda_copyToHost(interface->getDataPointer(), data, this->getByteSize());
 }
 
-void CudaVector::inputCalculation(Vector* input, Vector* inputWeighsVect)
+void CudaVector::inputCalculation(Vector* resultsVect, Vector* input)
 {
-	void* inputWeighs = inputWeighsVect->getDataPointer();
-	float* results = (float*)data;
+	void* inputWeighs = this->getDataPointer();
+	float* results = (float*)resultsVect->getDataPointer();
 	//FIXME este método no funciona correctamente para SIGN
 	if (CudaVector::algorithm == 0) {
-		cuda_inputCalculationReduction(input->getDataPointer(), input->getSize(), input->getVectorType(), size, inputWeighs, results, Cuda_Threads_Per_Block);
+		cuda_inputCalculationReduction(input->getDataPointer(), input->getSize(), input->getVectorType(), resultsVect->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
 	}
 	else if (CudaVector::algorithm == 1) {
-		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), size, inputWeighs, results, Cuda_Threads_Per_Block);
+		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), resultsVect->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
 	}
 }
 
