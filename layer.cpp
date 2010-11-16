@@ -31,8 +31,8 @@ Layer::Layer(FILE* stream, ImplementationType implementationType)
 	connections = (Connection**) mi_malloc(numberInputs * sizeof(Connection*));
 
 	for(unsigned i=0; i < numberInputs; i++){
-		//TODO esto puede llevar al pete
-		connections[i] = new Connection(stream, output->getSize(), implementationType);
+		//TODO E esto puede llevar al pete
+		connections[i] = Factory::newConnection(stream, output->getSize(), implementationType);
 	}
 }
 
@@ -103,7 +103,7 @@ void Layer::calculateOutput()
 		std::string error = "Cannot calculate the output of a Layer without output.";
 		throw error;
 	}
-	//TODO use clone on the thresholds (do not subtract them, just use them as they are)
+	//TODO B do not use clone on the thresholds, compare with them in activation (one write less)
 	Vector* results = thresholds->clone();
 
 	for(unsigned i=0; i < numberInputs; i++){
@@ -116,8 +116,8 @@ void Layer::calculateOutput()
 
 void Layer::addInput(Vector* input)
 {
-	//TODO probar qué sucede con varios tipos de entrada
-	Connection* newConnection = new Connection(input, output->getSize(), getImplementationType());
+	//TODO T probar qué sucede con varios tipos de entrada
+	Connection* newConnection = Factory::newConnection(input, output->getSize(), getImplementationType());
 	Connection** newConnections = (Connection**) mi_malloc(sizeof(Connection*) * (numberInputs + 1));
 
 	if (connections) {
@@ -152,22 +152,15 @@ void Layer::setInput(Vector* input, unsigned pos)
 
 void Layer::randomWeighs(float range)
 {
-	//TODO quitar esta comprobacion cuando deje de poder haber capas sin tamaño
-	if (output == NULL){
-		std::string error = "Cannot set random weighs to a layer with no output.";
-		throw error;
-	}
-
 	Interface* aux = new Interface(output->getSize(), FLOAT);
 	aux->random(range);
 	thresholds->copyFrom(aux);
 	delete(aux);
 
 	for (unsigned i=0; i < numberInputs; i++){
-		Vector* weighs = connections[i]->getWeighs();
-		aux = new Interface(weighs->getSize(), weighs->getVectorType());
+		aux = new Interface(connections[i]->getSize(), connections[i]->getVectorType());
 		aux->random(range);
-		weighs->copyFrom(aux);
+		connections[i]->copyFrom(aux);
 		delete(aux);
 	}
 }
@@ -197,7 +190,7 @@ void Layer::mutateThreshold(unsigned outputPos, float mutation)
 		throw error;
 	}
 	thresholds->mutate(outputPos, mutation);
-	//TODO Layer::crossoverThreshold
+	//TODO L Layer::crossoverThreshold
 }
 
 void Layer::swapWeighs(Layer* layer)
@@ -244,7 +237,7 @@ FunctionType Layer::getFunctionType()
 
 void Layer::copyWeighs(Layer* other)
 {
-	//TODO implementar metodo
+	//TODO L implementar metodo
 	std::string error = "CudaLayer::copyWeighs is not implemented.";
 	throw error;
 //	memcpy(thresholds, other->getThresholdsPtr(), output->getSize() * sizeof(float));
@@ -309,7 +302,7 @@ void Layer::crossoverInput(Layer *other, unsigned  inputLayer, Interface *bitVec
 
 void Layer::crossoverNeurons(Layer *other, Interface *bitVector)
 {
-	//TODO comprobar esto en un nivel superior (o no comprobarlo) (o comprobarlo opcionalmente)
+	//TODO D comprobar esto en un nivel superior (o no comprobarlo) (o comprobarlo opcionalmente)
 	checkCompatibility(other);
 
 	unsigned outputSize = output->getSize();

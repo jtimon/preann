@@ -129,46 +129,47 @@ unsigned testCopyTo(Vector* toTest)
 	return differencesCounter;
 }
 
-unsigned testInputCalculation(Vector* toTest, unsigned outputSize)
-{
-	VectorType weighsType;
-	if (toTest->getVectorType() == FLOAT){
-		weighsType = FLOAT;
-	} else {
-		weighsType = BYTE;
-	}
-	unsigned inputSize = toTest->getSize();
-
-	Vector* results = Factory::newVector(outputSize, FLOAT, toTest->getImplementationType());
-	Vector* inputWeighs = Factory::newVector(inputSize * outputSize, weighsType, toTest->getImplementationType());
-	inputWeighs->random(INITIAL_WEIGHS_RANGE);
-
-	Vector* cVector = Factory::newVector(toTest, C);
-	Vector* cResults = Factory::newVector(outputSize, FLOAT, C);
-	Vector* cInputWeighs = Factory::newVector(inputWeighs, C);
-
-	if (inputWeighs->requiresTransposing()){
-		inputWeighs->transposeMatrix(inputSize);
-	}
-	results->inputCalculation(toTest, inputWeighs);
-	if (cInputWeighs->requiresTransposing()){
-		cInputWeighs->transposeMatrix(inputSize);
-	}
-	cResults->inputCalculation(cVector, cInputWeighs);
-
-//	toTest->print();
-//	inputWeighs->print();
-//	results->print();
-
-	unsigned differencesCounter = assertEquals(cResults, results);
-
-	delete(results);
-	delete(inputWeighs);
-	delete(cVector);
-	delete(cResults);
-	delete(cInputWeighs);
-	return differencesCounter;
-}
+//unsigned testInputCalculation(Vector* toTest, unsigned outputSize)
+//{
+//	VectorType weighsType;
+//	if (toTest->getVectorType() == FLOAT){
+//		weighsType = FLOAT;
+//	} else {
+//		weighsType = BYTE;
+//	}
+//	unsigned inputSize = toTest->getSize();
+//
+//	Vector* results = Factory::newVector(outputSize, FLOAT, toTest->getImplementationType());
+//	Vector* inputWeighs = Factory::newVector(inputSize * outputSize, weighsType, toTest->getImplementationType());
+//	inputWeighs->random(INITIAL_WEIGHS_RANGE);
+//
+//	Vector* cVector = Factory::newVector(toTest, C);
+//	Vector* cResults = Factory::newVector(outputSize, FLOAT, C);
+//	Vector* cInputWeighs = Factory::newVector(inputWeighs, C);
+//
+//	if (inputWeighs->requiresTransposing()){
+//		inputWeighs->transposeMatrix(inputSize);
+//	}
+//	inputWeighs->
+//	results->inputCalculation(toTest, inputWeighs);
+//	if (cInputWeighs->requiresTransposing()){
+//		cInputWeighs->transposeMatrix(inputSize);
+//	}
+//	cResults->inputCalculation(cVector, cInputWeighs);
+//
+////	toTest->print();
+////	inputWeighs->print();
+////	results->print();
+//
+//	unsigned differencesCounter = assertEquals(cResults, results);
+//
+//	delete(results);
+//	delete(inputWeighs);
+//	delete(cVector);
+//	delete(cResults);
+//	delete(cInputWeighs);
+//	return differencesCounter;
+//}
 
 unsigned testActivation(Vector* toTest, FunctionType functionType)
 {
@@ -214,8 +215,8 @@ unsigned testWeighCrossover(Vector* toTest)
 	Vector* cVector = Factory::newVector(toTest, C);
 	Vector* cOther = Factory::newVector(other, C);
 
-	toTest->weighCrossover(other, bitVector);
-	cVector->weighCrossover(cOther, bitVector);
+	toTest->crossover(other, bitVector);
+	cVector->crossover(cOther, bitVector);
 
 	unsigned differences = assertEquals(cVector, toTest);
 	differences += assertEquals(cOther, other);
@@ -244,11 +245,11 @@ int main(int argc, char *argv[]) {
 				VectorType vectorType = (VectorType)((vectType));
 				FunctionType functionType = (FunctionType)(vectType);
 
-				//TODO comentar
+				//TODO z comentar
 //				if (vectorType == SIGN)
 				for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
 					ImplementationType implementationType = (ImplementationType)((implType));
-					//TODO comentar
+					//TODO z comentar
 					if (implementationType == CUDA2){
 //					{
 					printf("----------------------------\n");
@@ -278,7 +279,7 @@ int main(int argc, char *argv[]) {
 							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 							printf("Errors on activation: %d \n", errorCount);
 						}
-						errorCount = testInputCalculation(vector, SZ_OUTPUT);
+//						errorCount = testInputCalculation(vector, SZ_OUTPUT);
 						if (errorCount != 0){
 							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 							printf("Errors on inputCalculation: %d \n", errorCount);
@@ -290,7 +291,7 @@ int main(int argc, char *argv[]) {
 							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 							printf("Errors on mutate: %d \n", errorCount);
 						}
-						//TODO descomentar y que funcione CUDA/CUDA2
+						//TODO B descomentar y que funcione CUDA/CUDA2
 //						errorCount = testWeighCrossover(vector);
 //						if (errorCount != 0){
 //							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);

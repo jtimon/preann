@@ -9,7 +9,7 @@ using namespace std;
 
 #define PATH "/home/timon/test.nn"
 
-//TODO esto peta con BIT inputType = BIT maxSize = 163840, 16258024
+//TODO Z esto peta con BIT inputType = BIT maxSize = 163840, 16258024
 //este to do estaba en CppLayer::randomweighs
 
 float testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType,
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 				mem_printTotalAllocated();
 				mem_printTotalPointers();
 				//nn->createFeedForwardNet(numlayers, size, inputType, functionType);
-				//TODO petaba con 16 < numlayers <=30 y size 512 (en Desktop)
+				//TODO TCC petaba con 16 < numlayers <=30 y size 512 (en Desktop)
 				nn->createFullyConnectedNet(numlayers, size, inputType,
 						functionType);
 

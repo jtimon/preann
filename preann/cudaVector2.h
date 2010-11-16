@@ -10,7 +10,6 @@
 
 #include "cudaVector.h"
 
-//TODO deberia CudaVector2: heredar de CudaVector ??
 class CudaVector2: public CudaVector {
 
 public:
@@ -18,6 +17,7 @@ public:
 	CudaVector2(unsigned size, VectorType vectorType, unsigned block_size);
 	CudaVector2(unsigned size, VectorType vectorType);
 	virtual ~CudaVector2();
+	//TODO W!!! cuidadin que ya nadie usa esto
 	virtual ImplementationType getImplementationType() {
 		return CUDA2;
 	};

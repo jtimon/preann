@@ -13,7 +13,9 @@
 
 class CudaVector: virtual public Vector {
 protected:
-	virtual unsigned getByteSize();
+	unsigned getByteSize();
+	virtual void copyFromImpl(Interface* interface);
+	virtual void copyToImpl(Interface* interface);
 public:
 	static unsigned algorithm;
 	CudaVector() {};
@@ -24,17 +26,14 @@ public:
 		return CUDA;
 	};
 
-	//TODO deshacerse de CudaVector::copyFrom2
+	//TODO D deshacerse de CudaVector::copyFrom2 o ponerle otro nombre
 	virtual void copyFrom2(Interface* interface, unsigned block_size);
 
 	virtual Vector* clone();
-	virtual void copyFrom(Interface* interface);
-	virtual void copyTo(Interface* interface);
 	virtual void activation(Vector* results, FunctionType functionType);
 
-	virtual void inputCalculation(Vector* results, Vector* input);
 	virtual void mutate(unsigned pos, float mutation);
-	virtual void weighCrossover(Vector* other, Interface* bitVector);
+	virtual void crossover(Vector* other, Interface* bitVector);
 };
 
 #endif /* CUDAVECTOR_H_ */

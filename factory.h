@@ -7,9 +7,11 @@
 #ifndef FACTORY_H_
 #define FACTORY_H_
 
-#include "vector.h"
+#include "connection.h"
 
 class Factory {
+protected:
+	static VectorType weighForInput(VectorType inputType);
 public:
 	static void saveVector(Vector* vector, FILE* stream);
 	static Vector* newVector(FILE* stream, ImplementationType implementationType);
@@ -17,7 +19,8 @@ public:
 	static Vector* newVector(Interface* interface, ImplementationType implementationType);
 	static Vector* newVector(Vector* vector, ImplementationType implementationType);
 	static Vector* newVector(unsigned size, VectorType vectorType, ImplementationType implementationType);
-	static Vector* newWeighs(unsigned inputSize, unsigned outputSize, VectorType vectorType, ImplementationType implementationType);
+	static Connection* newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType);
+	static Connection* newConnection(FILE* stream, unsigned outputSize, ImplementationType implementationType);
 };
 
 #endif /* FACTORY_H_ */

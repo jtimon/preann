@@ -1,9 +1,10 @@
 #include "factory.h"
 
-//TODO implementar diferentes veces para decidir en el makefile
-#include "cppVector.h"
-#include "xmmVector.h"
-#include "cudaVector2.h"
+//TODO Z implementar diferentes veces para decidir en el makefile
+#include "cppConnection.h"
+#include "xmmConnection.h"
+#include "cuda2Connection.h"
+#include "cudaInvertedConnection.h"
 
 void Factory::saveVector(Vector* vector, FILE* stream)
 {
@@ -39,20 +40,6 @@ Vector* Factory::newVector(Vector* vector, ImplementationType implementationType
     return toReturn;
 }
 
-Vector* Factory::newWeighs(unsigned inputSize, unsigned outputSize, VectorType vectorType, ImplementationType implementationType)
-{
-	switch(implementationType){
-		case C:
-			return new CppVector(inputSize * outputSize, vectorType);
-		case SSE2:
-			return new XmmVector(inputSize, outputSize, vectorType);
-		case CUDA:
-			return new CudaVector(inputSize * outputSize, vectorType);
-		case CUDA2:
-			return new CudaVector2(inputSize * outputSize, vectorType);
-	}
-}
-
 Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType)
 {
 	switch(implementationType){
@@ -61,8 +48,45 @@ Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationT
 		case SSE2:
 			return new XmmVector(size, vectorType);
 		case CUDA:
-			return new CudaVector(size, vectorType);
 		case CUDA2:
-			return new CudaVector2(size, vectorType);
+			return new CudaVector(size, vectorType);
+	}
+}
+
+Connection* Factory::newConnection(FILE* stream, unsigned outputSize, ImplementationType implementationType)
+{
+	std::string error = "Factory::newConnection(FILE* ... deprecated";
+	throw error;
+}
+
+VectorType Factory::weighForInput(VectorType inputType)
+{
+	switch (inputType){
+		case BYTE:
+			{
+			std::string error = "Connections are not implemented for an input Vector of the VectorType BYTE";
+			throw error;
+			}
+		case FLOAT:
+			return FLOAT;
+		case BIT:
+		case SIGN:
+			return BYTE;
+	}
+}
+
+Connection* Factory::newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType)
+{
+	switch(implementationType){
+		case C:
+			return new CppConnection(input, outputSize, Factory::weighForInput(input->getVectorType()));
+		case SSE2:
+			return new XmmConnection(input, outputSize, Factory::weighForInput(input->getVectorType()));
+		case CUDA:
+			return new CudaConnection(input, outputSize, Factory::weighForInput(input->getVectorType()));
+		case CUDA2:
+			return new Cuda2Connection(input, outputSize, Factory::weighForInput(input->getVectorType()));
+		case CUDA_INV:
+			return new CudaInvertedConnection(input, outputSize, Factory::weighForInput(input->getVectorType()));
 	}
 }

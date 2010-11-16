@@ -7,9 +7,7 @@
 
 #include "cudaVector.h"
 
-unsigned CudaVector::algorithm = 0;
-
-//TODO no me gusta, no cuadra con la factory
+//TODO F no me gusta, no cuadra con la factory
 //special constructor for bit coalescing vectors
 CudaVector::CudaVector(unsigned size, VectorType vectorType, unsigned block_size)
 {
@@ -86,49 +84,19 @@ void CudaVector::copyFrom2(Interface* interface, unsigned block_size)
 
 Vector* CudaVector::clone()
 {
-	//TODO implementar CudaVector::clone()
 	Vector* clone = new CudaVector(size, vectorType);
 	copyToVector(clone);
 	return clone;
 }
 
-void CudaVector::copyFrom(Interface *interface)
+void CudaVector::copyFromImpl(Interface *interface)
 {
-	if (size < interface->getSize()){
-		std::string error = "The Interface is greater than the Vector.";
-		throw error;
-	}
-	if (vectorType != interface->getVectorType()){
-		std::string error = "The Type of the Interface is different than the Vector Type.";
-		throw error;
-	}
 	cuda_copyToDevice(data, interface->getDataPointer(), interface->getByteSize());
 }
 
-void CudaVector::copyTo(Interface *interface)
+void CudaVector::copyToImpl(Interface *interface)
 {
-	if (interface->getSize() < size){
-		std::string error = "The Vector is greater than the Interface.";
-		throw error;
-	}
-	if (vectorType != interface->getVectorType()){
-		std::string error = "The Type of the Interface is different than the Vector Type.";
-		throw error;
-	}
 	cuda_copyToHost(interface->getDataPointer(), data, this->getByteSize());
-}
-
-void CudaVector::inputCalculation(Vector* resultsVect, Vector* input)
-{
-	void* inputWeighs = this->getDataPointer();
-	float* results = (float*)resultsVect->getDataPointer();
-	//FIXME este método no funciona correctamente para SIGN
-	if (CudaVector::algorithm == 0) {
-		cuda_inputCalculationReduction(input->getDataPointer(), input->getSize(), input->getVectorType(), resultsVect->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
-	}
-	else if (CudaVector::algorithm == 1) {
-		cuda_inputCalculation(input->getDataPointer(), input->getSize(), input->getVectorType(), resultsVect->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
-	}
 }
 
 void CudaVector::activation(Vector* resultsVect, FunctionType functionType)
@@ -145,8 +113,16 @@ void CudaVector::mutate(unsigned pos, float mutation)
 	cuda_mutate(data, pos, mutation, vectorType);
 }
 
-void CudaVector::weighCrossover(Vector* other, Interface* bitVector)
+void CudaVector::crossover(Vector* other, Interface* bitVector)
 {
+	if (size != other->getSize()){
+		std::string error = "The Connections must have the same size to crossover them.";
+		throw error;
+	}
+	if (vectorType != other->getVectorType()){
+		std::string error = "The Connections must have the same type to crossover them.";
+		throw error;
+	}
     CudaVector* cudaBitVector = new CudaVector(size, BIT, Cuda_Threads_Per_Block);
     cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
     unsigned* cudaBitVectorPtr = (unsigned*)(cudaBitVector->getDataPointer());

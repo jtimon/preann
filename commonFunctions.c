@@ -12,7 +12,7 @@ unsigned ptr_sizes[5000];
 unsigned ptr_counter = 0;
 unsigned totalAllocated = 0;
 
-//TODO usar realloc en vez de free y malloc
+//TODO z usar realloc en vez de free y malloc
 void* mi_malloc(unsigned size) {
 	if (size == 0) {
 		std::string error = "No se pueden reservar 0 bytes";
@@ -100,7 +100,7 @@ float Function(float number, FunctionType functionType) {
 
 	switch (functionType) {
 
-	//TODO add different activation functions
+	//TODO z add different activation functions
 	//break;
 	case BINARY_STEP:
 		if (number > 0) {

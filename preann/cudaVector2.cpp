@@ -40,30 +40,16 @@ CudaVector2::~CudaVector2()
 
 Vector* CudaVector2::clone()
 {
-	//TODO implementar CudaVector2::clone()
 	Vector* clone = new CudaVector2(size, vectorType);
 	copyToVector(clone);
 	return clone;
 }
 
-void CudaVector2::inputCalculation(Vector* resultsVect, Vector* input)
-{
-	void* inputWeighs = this->getDataPointer();
-	float* results = (float*)resultsVect->getDataPointer();
-
-	cuda_inputCalculationInvertedMatrix(input->getDataPointer(), input->getSize(), input->getVectorType(), resultsVect->getSize(), inputWeighs, results, Cuda_Threads_Per_Block);
-}
-
 void CudaVector2::mutate(unsigned pos, float mutation)
 {
-	cuda_mutate(data, pos, mutation, vectorType);
+	//TODO W eliminar
 }
 void CudaVector2::weighCrossover(Vector* other, Interface* bitVector)
 {
-    CudaVector2* cudaBitVector = new CudaVector2(size, BIT, Cuda_Threads_Per_Block);
-    cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
-    unsigned* cudaBitVectorPtr = (unsigned*)(cudaBitVector->getDataPointer());
-
-    cuda_crossover(this->getDataPointer(), other->getDataPointer(), cudaBitVectorPtr, size, vectorType, Cuda_Threads_Per_Block);
-    delete(cudaBitVector);
+	//TODO W eliminar
 }

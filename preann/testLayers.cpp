@@ -92,8 +92,6 @@ Layer* createAndSaveLayer(unsigned& size, VectorType vectorType, Vector* control
     return controlLayer;
 }
 
-#define IMPLEMENTATION_TYPE_DIM 4
-
 void testLayer(unsigned size, VectorType vectorType, unsigned numInputs)
 {
     Vector *controlInputVector = Factory::newVector(size, vectorType, C);
@@ -121,17 +119,17 @@ void testLayer(unsigned size, VectorType vectorType, unsigned numInputs)
 
 
 		//test Weighs
-	    for(unsigned i = 0; i < numInputs; i++){
-	        Vector* expectedWeighs = controlLayer->getConnection(i)->getWeighs();
-	        Vector* actualWeighs = layer->getConnection(i)->getWeighs();
-	        if(implementationType == CUDA2){
-	            unsigned inputSize = actualWeighs->getSize() / layer->getOutput()->getSize();
-	            actualWeighs->transposeMatrix(inputSize);
-	        }
-	        differences = assertEquals(expectedWeighs, actualWeighs);
-	        if (differences != 0)
-	        	printf("Errors on weighs (input %d): %d \n", i, differences);
-	    }
+//	    for(unsigned i = 0; i < numInputs; i++){
+//	        Vector* expectedWeighs = controlLayer->getConnection(i)->getWeighs();
+//	        Vector* actualWeighs = layer->getConnection(i)->getWeighs();
+//	        if(implementationType == CUDA2){
+//	            unsigned inputSize = actualWeighs->getSize() / layer->getOutput()->getSize();
+//	            actualWeighs->transposeMatrix(inputSize);
+//	        }
+//	        differences = assertEquals(expectedWeighs, actualWeighs);
+//	        if (differences != 0)
+//	        	printf("Errors on weighs (input %d): %d \n", i, differences);
+//	    }
 
 		delete (layer);
 	    delete (inputVector);

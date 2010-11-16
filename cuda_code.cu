@@ -16,7 +16,7 @@ float Func(float number, FunctionType functionType)
 {
 	switch (functionType) {
 
-	//TODO add different activation functions
+	//TODO z add different activation functions
 	case BINARY_STEP:
 		if (number > 0) {
 			return 1;
@@ -163,7 +163,7 @@ extern "C" void cuda_setZero(void* data, unsigned byteSize, VectorType vectorTyp
 
 // GENETIC OPERATORS
 
-//TODO para usar esto, el vector tiene que se creado de tamaño ((size-1)/(BITS_PER_UNSIGNED * block_size)+1) * (BITS_PER_UNSIGNED * block_size)
+//TODO A para usar esto, el vector tiene que se creado de tamaño ((size-1)/(BITS_PER_UNSIGNED * block_size)+1) * (BITS_PER_UNSIGNED * block_size)
 template <class type>
 __global__
 void crossoverKernel(type* vector1, type* vector2, unsigned* bitVector, unsigned size)
@@ -278,7 +278,7 @@ void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned out
 			result += sdata[i] * weighs[weighsOffset + i];
 			//printf(" peso %f ", weighs[weighsOffset + i]);
 		}
-		/////TODO OTRA OPCION
+		/////TODO R OTRA OPCION
 	/*	if (blockDim.x <= input_size){
 			unsigned pos = tid;
 			while (pos < input_size){
@@ -336,7 +336,7 @@ void SumBitsConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned ou
 
 		for (unsigned i=0; i < input_blocks_to_read; i++) {
 
-			//TODO check performance penalty (this is just for SIGN)
+			//TODO CC check performance penalty (this is just for SIGN)
 			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
 			unsigned input_block = shared_inputs[i];
@@ -411,7 +411,7 @@ void SumBitsInvertedConnectionsKernel(unsigned* inputs, unsigned input_size, uns
 
 		for (unsigned i=0; i < input_blocks_to_read; i++) {
 
-			//TODO check performance penalty (this is just for SIGN)
+			//TODO CC check performance penalty (this is just for SIGN)
 			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
 			unsigned weighsOffset = (i * BITS_PER_UNSIGNED * output_size) + outputNeuron;
@@ -493,11 +493,11 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
 		shared_mem_size = input_size * sizeof(float);
 		SumFloatsInvertedConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, (float*)weighs, results, output_size);
 	} else {
-		//TODO esta parte no funciona bien
+		//TODO CC esta parte no funciona bien
 		while (input_size > CUDA_MAX_SHARED_BITS) {
 
 			shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(unsigned);
-			// FIXME ??? probar sin emulación
+			// TODO TCC probar sin emulación
 //			printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
 			if (inputType == BIT) {
 				SumBitsInvertedConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
@@ -509,7 +509,7 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
 			input_size -= CUDA_MAX_SHARED_BITS;
 		}
 		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
-		// FIXME ??? probar sin emulación
+		// TODO TCC probar sin emulación
 		//printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
 		if (inputType == BIT) {
 			SumBitsInvertedConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
@@ -541,7 +541,7 @@ void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned output_s
 		unsigned input_blocks_to_read = ((input_size - 1) / BITS_PER_UNSIGNED) + 1;
 		while (i < input_blocks_to_read) {
 
-			//TODO check performance penalty (this is just for SIGN)
+			//TODO CC check performance penalty (this is just for SIGN)
 			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
 			unsigned mask = 0x80000000;

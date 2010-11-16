@@ -27,79 +27,19 @@ CppVector::~CppVector()
 
 Vector* CppVector::clone()
 {
-	//TODO implementar CppVector::clone()
 	Vector* clone = new CppVector(size, vectorType);
 	copyToVector(clone);
 	return clone;
 }
 
-void CppVector::copyFrom(Interface* interface)
+void CppVector::copyFromImpl(Interface* interface)
 {
-	if (size < interface->getSize()){
-		std::string error = "The Interface is greater than the Vector.";
-		throw error;
-	}
-	if (vectorType != interface->getVectorType()){
-		std::string error = "The Type of the Interface is different than the Vector Type.";
-		throw error;
-	}
 	memcpy(data, interface->getDataPointer(), interface->getByteSize());
 }
 
-void CppVector::copyTo(Interface* interface)
+void CppVector::copyToImpl(Interface* interface)
 {
-	if (interface->getSize() < size){
-		std::string error = "The Vector is greater than the Interface.";
-		throw error;
-	}
-	if (vectorType != interface->getVectorType()){
-		std::string error = "The Type of the Interface is different than the Vector Type.";
-		throw error;
-	}
 	memcpy(interface->getDataPointer(), data, this->getByteSize());
-}
-
-void CppVector::inputCalculation(Vector* resultsVect, Vector* input)
-{
-	float* results = (float*)resultsVect->getDataPointer();
-	unsigned inputSize = input->getSize();
-
-	switch (input->getVectorType()){
-	case BYTE:
-	{
-		std::string error = "CppVector::inputCalculation is not implemented for VectorType BYTE as input.";
-		throw error;
-	}
-	case FLOAT:
-	{
-		float* inputWeighs = (float*)this->getDataPointer();
-		float* inputPtr = (float*)input->getDataPointer();
-		for (unsigned j=0; j < resultsVect->getSize(); j++){
-			for (unsigned k=0; k < inputSize; k++){
-				results[j] += inputPtr[k] * inputWeighs[(j * inputSize) + k];
-			}
-		}
-	}
-	break;
-	case BIT:
-	case SIGN:
-	{
-		unsigned char* inputWeighs = (unsigned char*)this->getDataPointer();
-		unsigned* inputPtr = (unsigned*)input->getDataPointer();
-
-		for (unsigned j=0; j < resultsVect->getSize(); j++){
-			for (unsigned k=0; k < inputSize; k++){
-				unsigned weighPos = (j * inputSize) + k;
-				if ( inputPtr[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
-					results[j] += inputWeighs[weighPos] - 128;
-				} else if (input->getVectorType() == SIGN) {
-					results[j] -= inputWeighs[weighPos] - 128;
-				}
-			}
-		}
-	}
-	break;
-	}
 }
 
 void CppVector::activation(Vector* resultsVect, FunctionType functionType)
@@ -173,14 +113,14 @@ void CppVector::mutate(unsigned pos, float mutation)
 		}
 	}
 }
-void CppVector::weighCrossover(Vector* other, Interface* bitVector)
+void CppVector::crossover(Vector* other, Interface* bitVector)
 {
 	if (size != other->getSize()){
-		std::string error = "The vectors must have the same size to crossover them.";
+		std::string error = "The Connections must have the same size to crossover them.";
 		throw error;
 	}
 	if (vectorType != other->getVectorType()){
-		std::string error = "The vectors must have the same type to crossover them.";
+		std::string error = "The Connections must have the same type to crossover them.";
 		throw error;
 	}
 

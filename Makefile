@@ -11,7 +11,7 @@ NASM = nasm -f elf
 
 CLASSIFCATON_OBJ = classificationTask.o
 GA_OBJ = population.o task.o individual.o
-NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o neuralNet.o factory.o interface.o cudaVector.o cudaVector2.o connection.o
+NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o cppVector.o xmmVector.o layer.o neuralNet.o factory.o interface.o cudaVector.o connection.o cppConnection.o xmmConnection.o cudaConnection.o cuda2Connection.o cudaInvertedConnection.o
 
 TESTS = ./bin/testMemoryLosses ./bin/testLayers ./bin/testNeuralNets ./bin/testVectors
 
@@ -25,7 +25,7 @@ all: $(PROGRAMS)
 	./bin/testVectors > ./testResults/testVectors.log
 ./bin/testLayers: $(NETS_OBJ) testLayers.o
 	$(NVCC_LINK) $^ -o $@ 
-	./bin/testLayers > ./testResults/testLayers.log
+#	./bin/testLayers > ./testResults/testLayers.log
 ./bin/testMemoryLosses: $(NETS_OBJ) testMemoryLosses.o
 	$(NVCC_LINK) $^ -o $@ 
 ./bin/testNeuralNets: $(NETS_OBJ) testNeuralNets.o
@@ -57,16 +57,29 @@ individual.o : individual.cpp individual.h neuralNet.o
 	$(CXX) $<
 neuralNet.o : neuralNet.cpp neuralNet.h layer.o
 	$(CXX) $<
-layer.o : layer.cpp layer.h connection.o
-	$(CXX) $<
-connection.o : connection.cpp connection.h factory.o
+layer.o : layer.cpp layer.h factory.o
 	$(CXX) $<
 	
-factory.o : factory.cpp factory.h cppVector.o xmmVector.o cudaVector.o cudaVector2.o
+factory.o : factory.cpp factory.h cppVector.o xmmVector.o cudaVector.o cppConnection.o xmmConnection.o cudaConnection.o cuda2Connection.o cudaInvertedConnection.o
 	$(CXX) $<
 
-cudaVector2.o : cudaVector2.cpp cudaVector2.h cudaVector.o
+cudaInvertedConnection.o : cudaInvertedConnection.cpp cudaInvertedConnection.h cudaVector.o
 	$(NVCC_COMPILE) -c $<
+cuda2Connection.o : cuda2Connection.cpp cuda2Connection.h cudaConnection.o
+	$(NVCC_COMPILE) -c $<
+cudaConnection.o : cudaConnection.cpp cudaConnection.h cudaVector.o
+	$(NVCC_COMPILE) -c $<
+xmmConnection.o : xmmConnection.cpp xmmConnection.h xmmVector.o
+	$(CXX) $<
+cppConnection.o : cppConnection.cpp cppConnection.h
+	$(CXX) $<
+
+# Vector abstract class is required by all of its implementations.
+cppConnection.o xmmConnection.o cudaConnection.o cuda2Connection.o cudaInvertedConnection.o : connection.o
+
+connection.o : connection.cpp connection.h vector.o
+	$(CXX) $<
+
 cudaVector.o : cudaVector.cpp cudaVector.h cuda_code.o
 	$(NVCC_COMPILE) -c $<
 xmmVector.o : xmmVector.cpp xmmVector.h sse2_code.o

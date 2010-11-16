@@ -10,8 +10,8 @@
 
 #include "interface.h"
 
-#define IMPLEMENTATION_TYPE_DIM 4
-typedef enum {C, SSE2, CUDA, CUDA2} ImplementationType;
+#define IMPLEMENTATION_TYPE_DIM 5
+typedef enum {C, SSE2, CUDA, CUDA2, CUDA_INV} ImplementationType;
 
 class Vector {
 protected:
@@ -19,19 +19,21 @@ protected:
 	void* data;
 	VectorType vectorType;
 
-	Vector();
+	Vector() {};
+	virtual void copyFromImpl(Interface* interface) = 0;
+	virtual void copyToImpl(Interface* interface) = 0;
 public:
-	virtual ~Vector();
+	virtual ~Vector() {};
 	virtual ImplementationType getImplementationType() = 0;
 
 	virtual Vector* clone() = 0;
-	virtual void copyFrom(Interface* interface) = 0;
-	virtual void copyTo(Interface* interface) = 0;
 	virtual void activation(Vector* results, FunctionType functionType) = 0;
 
-	virtual void inputCalculation(Vector* results, Vector* input) = 0;
 	virtual void mutate(unsigned pos, float mutation) = 0;
-	virtual void weighCrossover(Vector* other, Interface* bitVector) = 0;
+	virtual void crossover(Vector* other, Interface* bitVector) = 0;
+
+	void copyFrom(Interface* interface);
+	void copyTo(Interface* interface);
 
 	void* getDataPointer();
 	unsigned getSize();
@@ -41,6 +43,7 @@ public:
 	void copyFromVector(Vector* vector);
 	void copyToVector(Vector* vector);
 
+	void save(FILE* stream);
 	void print();
 	float compareTo(Vector* other);
 	void random(float range);

@@ -30,7 +30,7 @@ NeuralNet::~NeuralNet() {
 	if (inputs) {
 		for (unsigned i = 0; i < numberInputs; i++) {
 			delete (inputs[i]);
-			//TODO pensar donde se liberan las primeras interfaces si se usa setInput
+			//TODO N pensar donde se liberan las primeras interfaces si se usa setInput
 			delete (inputInterfaces[i]);
 		}
 		mi_free(inputs);
@@ -338,7 +338,7 @@ void NeuralNet::createFullyConnectedNet(unsigned numLayers,
 	createOutput(numLayers - 1);
 }
 
-//TODO rehacer save y load
+//TODO N rehacer save y load
 void NeuralNet::save(FILE* stream) {
 //	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
 //	fwrite(&numberLayers, sizeof(unsigned), 1, stream);

@@ -9,7 +9,7 @@ using namespace std;
 #include "cudaVector2.h"
 
 #define PATH "/home/timon/test.nn"
-//TODO pensar una forma de poner un error razonable
+//TODO T pensar una forma de poner un error razonable
 //#define ALLOWED_ERROR (0.01)
 //
 //void assertEquals(Interface* expected, Interface* actual)
@@ -111,101 +111,101 @@ int main(int argc, char *argv[]) {
 	total.start();
 	try {
 
-		Chronometer chrono;
-		NeuralNet* nn;
-		Population* population;
-
-		FILE* stream;
-		VectorType inputType;
-		FunctionType functionType;
-		unsigned minSize, maxSize, sizeIncrease;
-
-		unsigned rangeWeighs = 20;
-		unsigned numlayers = 2;
-		unsigned times = 1;
-
-		for (unsigned type = 0; type < 3; type++) {
-
-			switch (type) {
-			case 0:
-				cout << "version float" << endl;
-				inputType = FLOAT;
-				functionType = IDENTITY;
-				minSize = 32;
-				maxSize = 2000;
-				sizeIncrease = 500;
-				break;
-			case 1:
-				cout << "version bit" << endl;
-				inputType = BIT;
-				functionType = BINARY_STEP;
-				minSize = 32;
-				maxSize = 2000;
-				sizeIncrease = 500;
-				break;
-			case 2:
-				cout << "version sign" << endl;
-				inputType = SIGN;
-				functionType = BIPOLAR_STEP;
-				minSize = 32;
-				maxSize = 2000;
-				sizeIncrease = 500;
-				break;
-			}
-
-			for (unsigned size = minSize; size <= maxSize; size += sizeIncrease) {
-				cout << "size: " << size << endl;
-				nn = new NeuralNet();
-
-				nn->createInput(size, inputType);
-				//nn->createFeedForwardNet(numlayers, size, inputType, functionType);
-				//TODO petaba con 16 < numlayers <=30 y size 512 (en Desktop)
-				nn->createFullyConnectedNet(numlayers, size, inputType, functionType);
-
-				nn->randomWeighs(rangeWeighs);
-				stream = fopen(PATH, "w+b");
-				nn->save(stream);
-				fclose(stream);
-				delete (nn);
-
-				nn = new NeuralNet(C);
-				Interface* cppResult = testNeuralNet(nn, size, inputType, times, chrono);
-				printf("C++ %f \n", chrono.getSeconds());
-
-				nn = new NeuralNet(SSE2);
-				Interface* xmmResult = testNeuralNet(nn, size, inputType, times, chrono);
-				printf("XMM %f \n", chrono.getSeconds());
-				assertEquals(cppResult, xmmResult);
-				delete(xmmResult);
-
-				for (unsigned algorithm = 0; algorithm < 1; algorithm++){
-					//algorithm = 2;
-					printf("CUDA [algorithm %d]  ", algorithm);
-					CudaVector::algorithm = algorithm;
-					for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
-						Cuda_Threads_Per_Block = blockSize;
-						nn = new NeuralNet(CUDA);
-						Interface* cudaResult = testNeuralNet(nn, size, inputType, times, chrono);
-						printf("(%d) %f ", blockSize, chrono.getSeconds());
-						assertEquals(cppResult, cudaResult);
-						delete(cudaResult);
-					}
-					printf("\n", 1);
-				}
-
-				printf("CUDA2 ", 1);
-				for (unsigned blockSize = 512; blockSize <= 512; blockSize *= 2) {
-					Cuda_Threads_Per_Block = blockSize;
-					nn = new NeuralNet(CUDA2);
-					Interface* cudaResult = testNeuralNet(nn, size, inputType, times, chrono);
-					printf("(%d) %f ", blockSize, chrono.getSeconds());
-					assertEquals(cppResult, cudaResult);
-					delete(cudaResult);
-				}
-				printf("\n", 1);
-				delete(cppResult);
-			}
-		}
+//		Chronometer chrono;
+//		NeuralNet* nn;
+//		Population* population;
+//
+//		FILE* stream;
+//		VectorType inputType;
+//		FunctionType functionType;
+//		unsigned minSize, maxSize, sizeIncrease;
+//
+//		unsigned rangeWeighs = 20;
+//		unsigned numlayers = 2;
+//		unsigned times = 1;
+//
+//		for (unsigned type = 0; type < 3; type++) {
+//
+//			switch (type) {
+//			case 0:
+//				cout << "version float" << endl;
+//				inputType = FLOAT;
+//				functionType = IDENTITY;
+//				minSize = 32;
+//				maxSize = 2000;
+//				sizeIncrease = 500;
+//				break;
+//			case 1:
+//				cout << "version bit" << endl;
+//				inputType = BIT;
+//				functionType = BINARY_STEP;
+//				minSize = 32;
+//				maxSize = 2000;
+//				sizeIncrease = 500;
+//				break;
+//			case 2:
+//				cout << "version sign" << endl;
+//				inputType = SIGN;
+//				functionType = BIPOLAR_STEP;
+//				minSize = 32;
+//				maxSize = 2000;
+//				sizeIncrease = 500;
+//				break;
+//			}
+//
+//			for (unsigned size = minSize; size <= maxSize; size += sizeIncrease) {
+//				cout << "size: " << size << endl;
+//				nn = new NeuralNet();
+//
+//				nn->createInput(size, inputType);
+//				//nn->createFeedForwardNet(numlayers, size, inputType, functionType);
+//				//TODO TCC petaba con 16 < numlayers <=30 y size 512 (en Desktop)
+//				nn->createFullyConnectedNet(numlayers, size, inputType, functionType);
+//
+//				nn->randomWeighs(rangeWeighs);
+//				stream = fopen(PATH, "w+b");
+//				nn->save(stream);
+//				fclose(stream);
+//				delete (nn);
+//
+//				nn = new NeuralNet(C);
+//				Interface* cppResult = testNeuralNet(nn, size, inputType, times, chrono);
+//				printf("C++ %f \n", chrono.getSeconds());
+//
+//				nn = new NeuralNet(SSE2);
+//				Interface* xmmResult = testNeuralNet(nn, size, inputType, times, chrono);
+//				printf("XMM %f \n", chrono.getSeconds());
+//				assertEquals(cppResult, xmmResult);
+//				delete(xmmResult);
+//
+//				for (unsigned algorithm = 0; algorithm < 1; algorithm++){
+//					//algorithm = 2;
+//					printf("CUDA [algorithm %d]  ", algorithm);
+//					CudaVector::algorithm = algorithm;
+//					for (unsigned blockSize = 512; blockSize <=512; blockSize *= 2){
+//						Cuda_Threads_Per_Block = blockSize;
+//						nn = new NeuralNet(CUDA);
+//						Interface* cudaResult = testNeuralNet(nn, size, inputType, times, chrono);
+//						printf("(%d) %f ", blockSize, chrono.getSeconds());
+//						assertEquals(cppResult, cudaResult);
+//						delete(cudaResult);
+//					}
+//					printf("\n", 1);
+//				}
+//
+//				printf("CUDA2 ", 1);
+//				for (unsigned blockSize = 512; blockSize <= 512; blockSize *= 2) {
+//					Cuda_Threads_Per_Block = blockSize;
+//					nn = new NeuralNet(CUDA2);
+//					Interface* cudaResult = testNeuralNet(nn, size, inputType, times, chrono);
+//					printf("(%d) %f ", blockSize, chrono.getSeconds());
+//					assertEquals(cppResult, cudaResult);
+//					delete(cudaResult);
+//				}
+//				printf("\n", 1);
+//				delete(cppResult);
+//			}
+//		}
 
 
 		printf("Exit success.\n", 1);

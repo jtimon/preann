@@ -7,14 +7,30 @@
 
 #include "vector.h"
 
-Vector::Vector()
+void Vector::copyFrom(Interface* interface)
 {
-	this->size = 0;
-	data = NULL;
+	if (size < interface->getSize()){
+		std::string error = "The Interface is greater than the Vector.";
+		throw error;
+	}
+	if (vectorType != interface->getVectorType()){
+		std::string error = "The Type of the Interface is different than the Vector Type.";
+		throw error;
+	}
+	copyFromImpl(interface);
 }
 
-Vector::~Vector()
+void Vector::copyTo(Interface* interface)
 {
+	if (interface->getSize() < size){
+		std::string error = "The Vector is greater than the Interface.";
+		throw error;
+	}
+	if (vectorType != interface->getVectorType()){
+		std::string error = "The Type of the Interface is different than the Vector Type.";
+		throw error;
+	}
+	copyToImpl(interface);
 }
 
 void* Vector::getDataPointer()
@@ -35,7 +51,7 @@ VectorType Vector::getVectorType()
 Interface* Vector::toInterface()
 {
 	Interface* toReturn = new Interface(this->size, this->vectorType);
-	this->copyTo(toReturn);
+	this->copyToImpl(toReturn);
 	return toReturn;
 }
 
@@ -50,6 +66,13 @@ void Vector::copyToVector(Vector* vector)
 {
 	Interface* interface = this->toInterface();
 	vector->copyFrom(interface);
+	delete(interface);
+}
+
+void Vector::save(FILE* stream)
+{
+	Interface* interface = toInterface();
+	interface->save(stream);
 	delete(interface);
 }
 
@@ -76,7 +99,7 @@ void Vector::random(float range)
 {
 	Interface* interface = this->toInterface();
 	interface->random(range);
-	this->copyFrom(interface);
+	this->copyFromImpl(interface);
 	delete(interface);
 }
 
@@ -84,7 +107,7 @@ void Vector::transposeMatrix(unsigned width)
 {
 	Interface* interface = this->toInterface();
 	interface->transposeMatrix(width);
-	this->copyFrom(interface);
+	this->copyFromImpl(interface);
 	delete(interface);
 }
 

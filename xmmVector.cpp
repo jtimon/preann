@@ -5,7 +5,7 @@ XmmVector::XmmVector(unsigned size, VectorType vectorType)
 	this->size = size;
 	this->vectorType = vectorType;
 
-	size_t byteSize = getByteSize();
+	size_t byteSize = getByteSize(size, vectorType);
 	data = mi_malloc(byteSize);
 
 	switch (vectorType){
@@ -33,7 +33,6 @@ XmmVector::~XmmVector()
 
 Vector* XmmVector::clone()
 {
-	//TODO implementar XmmVector::clone()
 	Vector* clone = new XmmVector(size, vectorType);
 	copyToVector(clone);
 	return clone;
@@ -66,16 +65,8 @@ void XmmVector::bitCopyFrom(Interface *interface, unsigned char *vectorData)
 	}
 }
 
-void XmmVector::copyFrom(Interface* interface)
+void XmmVector::copyFromImpl(Interface* interface)
 {
-	if (size < interface->getSize()){
-		std::string error = "The Interface is greater than the Vector.";
-		throw error;
-	}
-	if (vectorType != interface->getVectorType()){
-		std::string error = "The Type of the Interface is different than the Vector Type.";
-		throw error;
-	}
 	switch (vectorType){
 	case BYTE:
 		for (unsigned i=0; i < size; i++){
@@ -122,16 +113,8 @@ void XmmVector::bitCopyTo(unsigned char *vectorData, Interface *interface)
 	}
 }
 
-void XmmVector::copyTo(Interface* interface)
+void XmmVector::copyToImpl(Interface* interface)
 {
-	if (interface->getSize() < size){
-		std::string error = "The Vector is greater than the Interface.";
-		throw error;
-	}
-	if (vectorType != interface->getVectorType()){
-		std::string error = "The Type of the Interface is different than the Vector Type.";
-		throw error;
-	}
 	switch (vectorType){
 	case BYTE:
 		for (unsigned i=0; i < size; i++){
@@ -148,57 +131,6 @@ void XmmVector::copyTo(Interface* interface)
 		unsigned char* vectorData = (unsigned char*)(data);
 		bitCopyTo(vectorData, interface);
 		break;
-	}
-}
-
-void XmmVector::inputCalculation(Vector* resultsVect, Vector* input)
-{
-	void* inputWeighs = this->getDataPointer();
-	float* results = (float*)resultsVect->getDataPointer();
-	void* inputPtr = input->getDataPointer();
-
-	unsigned numLoops;
-	unsigned weighPos = 0;
-
-	switch (input->getVectorType()){
-	case BYTE:
-	{
-		std::string error = "CppVector::inputCalculation is not implemented for VectorType BYTE as input.";
-		throw error;
-	}
-	case FLOAT:
-	{
-		numLoops = ((input->getSize()-1)/FLOATS_PER_BLOCK)+1;
-		for (unsigned j=0; j < resultsVect->getSize(); j++){
-			float auxResult;
-			XMMreal(inputPtr, numLoops,
-					(((float*)inputWeighs) + weighPos), auxResult);
-			results[j] += auxResult;
-			weighPos += input->getSize();
-		}
-	}
-	break;
-	case BIT:
-	{
-		numLoops = ((input->getSize()-1)/BYTES_PER_BLOCK)+1;
-		for (unsigned j=0; j < resultsVect->getSize(); j++){
-			results[j] += XMMbinario(inputPtr, numLoops,
-					(((unsigned char*)inputWeighs) + weighPos));
-			weighPos += input->getSize();
-		}
-	}
-	break;
-	case SIGN:
-	{
-		numLoops = ((input->getSize()-1)/BYTES_PER_BLOCK)+1;
-		for (unsigned j=0; j < resultsVect->getSize(); j++){
-			results[j] += XMMbipolar(inputPtr, numLoops,
-								(((unsigned char*)inputWeighs) + weighPos));
-			weighPos += input->getSize();
-//TODO descomentar 	weighPos += BYTES_PER_BLOCK;
-		}
-	}
-	break;
 	}
 }
 
@@ -252,7 +184,7 @@ void XmmVector::activation(Vector* resultsVect, FunctionType functionType)
 	}
 }
 
-//TODO esto es igual en CppVector
+//TODO D esto es igual en CppVector
 void XmmVector::mutate(unsigned pos, float mutation)
 {
 	if (pos > size){
@@ -284,15 +216,16 @@ void XmmVector::mutate(unsigned pos, float mutation)
 		}
 	}
 }
-//TODO esto es igual en CppVector
-void XmmVector::weighCrossover(Vector* other, Interface* bitVector)
+
+//TODO D esto es igual en CppVector
+void XmmVector::crossover(Vector* other, Interface* bitVector)
 {
 	if (size != other->getSize()){
-		std::string error = "The vectors must have the same size to crossover them.";
+		std::string error = "The Connections must have the same size to crossover them.";
 		throw error;
 	}
 	if (vectorType != other->getVectorType()){
-		std::string error = "The vectors must have the same type to crossover them.";
+		std::string error = "The Connections must have the same type to crossover them.";
 		throw error;
 	}
 
@@ -327,13 +260,13 @@ void XmmVector::weighCrossover(Vector* other, Interface* bitVector)
 	case BIT:
 	case SIGN:
 		{
-		std::string error = "XmmVector::weighCrossover is not implemented for VectorType BIT nor SIGN.";
+		std::string error = "XmmConnection::weighCrossover is not implemented for VectorType BIT nor SIGN.";
 		throw error;
 		}
 	}
 }
 
-unsigned XmmVector::getByteSize()
+unsigned XmmVector::getByteSize(unsigned size, VectorType vectorType)
 {
 	unsigned numBlocks;
 	switch (vectorType){
