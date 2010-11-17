@@ -56,13 +56,13 @@ Layer* NeuralNet::getLayer(unsigned pos) {
 
 void NeuralNet::calculateOutput() {
 	for (unsigned i = 0; i < numberInputs; i++) {
-		inputs[i]->copyFrom(inputInterfaces[i]);
+		inputs[i]->copyFromInterface(inputInterfaces[i]);
 	}
 	for (unsigned i = 0; i < numberLayers; i++) {
 		layers[i]->calculateOutput();
 	}
 	for (unsigned i = 0; i < numberOutputs; i++) {
-		layers[outputLayers[i]]->getOutput()->copyTo(outputs[i]);
+		layers[outputLayers[i]]->getOutput()->copyToInterface(outputs[i]);
 	}
 }
 

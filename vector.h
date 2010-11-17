@@ -33,16 +33,16 @@ public:
 	virtual void mutate(unsigned pos, float mutation) = 0;
 
 	void crossover(Vector* other, Interface* bitVector);
-	void copyFrom(Interface* interface);
-	void copyTo(Interface* interface);
+	void copyFromInterface(Interface* interface);
+	void copyToInterface(Interface* interface);
 
 	void* getDataPointer();
 	unsigned getSize();
 	VectorType getVectorType();
 	FunctionType getFunctionType();
 	Interface* toInterface();
-	void copyFromVector(Vector* vector);
-	void copyToVector(Vector* vector);
+	void copyFrom(Vector* vector);
+	void copyTo(Vector* vector);
 
 	void save(FILE* stream);
 	void print();

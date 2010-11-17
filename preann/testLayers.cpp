@@ -7,12 +7,12 @@ using namespace std;
 #include "population.h"
 #include "chronometer.h"
 #include "cuda_code.h"
-#include "cudaVector2.h"
 
 #define PATH "/home/timon/layer.lay"
 
 #define INITIAL_WEIGHS_RANGE 20
 
+//TODO L revisar profundamente
 
 void printTestParams(ImplementationType implementationType, VectorType vectorType, unsigned size, unsigned numInputs)
 {
@@ -106,7 +106,7 @@ void testLayer(unsigned size, VectorType vectorType, unsigned numInputs)
 		printTestParams(implementationType, vectorType, size, numInputs);
 
 		Vector* inputVector = Factory::newVector(size, vectorType, implementationType);
-		inputVector->copyFromVector(controlInputVector);
+		inputVector->copyFrom(controlInputVector);
 
 		Layer* layer = createAndLoadLayer(implementationType, inputVector, numInputs);
 

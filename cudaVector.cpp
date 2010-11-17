@@ -85,7 +85,7 @@ void CudaVector::copyFrom2(Interface* interface, unsigned block_size)
 Vector* CudaVector::clone()
 {
 	Vector* clone = new CudaVector(size, vectorType);
-	copyToVector(clone);
+	copyTo(clone);
 	return clone;
 }
 
@@ -115,14 +115,6 @@ void CudaVector::mutate(unsigned pos, float mutation)
 
 void CudaVector::crossoverImpl(Vector* other, Interface* bitVector)
 {
-	if (size != other->getSize()){
-		std::string error = "The Connections must have the same size to crossover them.";
-		throw error;
-	}
-	if (vectorType != other->getVectorType()){
-		std::string error = "The Connections must have the same type to crossover them.";
-		throw error;
-	}
     CudaVector* cudaBitVector = new CudaVector(size, BIT, Cuda_Threads_Per_Block);
     cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
     unsigned* cudaBitVectorPtr = (unsigned*)(cudaBitVector->getDataPointer());

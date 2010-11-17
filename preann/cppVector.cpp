@@ -28,7 +28,7 @@ CppVector::~CppVector()
 Vector* CppVector::clone()
 {
 	Vector* clone = new CppVector(size, vectorType);
-	copyToVector(clone);
+	copyTo(clone);
 	return clone;
 }
 

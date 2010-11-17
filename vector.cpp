@@ -20,7 +20,7 @@ void Vector::crossover(Vector* other, Interface* bitVector)
 	crossoverImpl(other, bitVector);
 }
 
-void Vector::copyFrom(Interface* interface)
+void Vector::copyFromInterface(Interface* interface)
 {
 	if (size < interface->getSize()){
 		std::string error = "The Interface is greater than the Vector.";
@@ -33,7 +33,7 @@ void Vector::copyFrom(Interface* interface)
 	copyFromImpl(interface);
 }
 
-void Vector::copyTo(Interface* interface)
+void Vector::copyToInterface(Interface* interface)
 {
 	if (interface->getSize() < size){
 		std::string error = "The Vector is greater than the Interface.";
@@ -68,17 +68,17 @@ Interface* Vector::toInterface()
 	return toReturn;
 }
 
-void Vector::copyFromVector(Vector* vector)
+void Vector::copyFrom(Vector* vector)
 {
 	Interface* interface = vector->toInterface();
-	this->copyFrom(interface);
+	this->copyFromInterface(interface);
 	delete(interface);
 }
 
-void Vector::copyToVector(Vector* vector)
+void Vector::copyTo(Vector* vector)
 {
 	Interface* interface = this->toInterface();
-	vector->copyFrom(interface);
+	vector->copyFromInterface(interface);
 	delete(interface);
 }
 

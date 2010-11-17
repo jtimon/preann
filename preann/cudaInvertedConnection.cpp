@@ -66,6 +66,20 @@ void CudaInvertedConnection::copyFromImpl(Interface* interface)
 void CudaInvertedConnection::copyToImpl(Interface* interface)
 {
 	unsigned outputSize = size / tInput->getSize();
-	interface->transposeMatrix(outputSize);
 	CudaVector::copyToImpl(interface);
+	interface->transposeMatrix(outputSize);
 }
+
+//void CudaInvertedConnection::copyFromImpl(Interface* interface)
+//{
+//	unsigned outputSize = size / tInput->getSize();
+//	interface->transposeMatrix(outputSize);
+//
+//	CudaVector::copyFromImpl(interface);
+//}
+//
+//void CudaInvertedConnection::copyToImpl(Interface* interface)
+//{
+//	interface->transposeMatrix(tInput->getSize());
+//	CudaVector::copyToImpl(interface);
+//}

@@ -1,6 +1,11 @@
 #include "layer.h"
 #include "factory.h"
 
+ImplementationType Layer::getImplementationType()
+{
+	return tImplementationType;
+}
+
 Vector* Layer::newVector(FILE* stream)
 {
 	return  Factory::newVector(stream, tImplementationType);
@@ -157,13 +162,13 @@ void Layer::randomWeighs(float range)
 {
 	Interface* aux = new Interface(output->getSize(), FLOAT);
 	aux->random(range);
-	thresholds->copyFrom(aux);
+	thresholds->copyFromInterface(aux);
 	delete(aux);
 
 	for (unsigned i=0; i < numberInputs; i++){
 		aux = new Interface(connections[i]->getSize(), connections[i]->getVectorType());
 		aux->random(range);
-		connections[i]->copyFrom(aux);
+		connections[i]->copyFromInterface(aux);
 		delete(aux);
 	}
 }

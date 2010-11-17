@@ -12,10 +12,11 @@ using namespace std;
 void printTestParams(ImplementationType implementationType, VectorType vectorType, unsigned size, unsigned weighsRange)
 {
     switch (implementationType){
-        case C: 	printf(" C     "); 	break;
-        case SSE2: 	printf(" SSE2  ");	break;
-        case CUDA: 	printf(" CUDA  ");	break;
-        case CUDA2:	printf(" CUDA2 ");	break;
+        case C: 		printf(" C        "); 	break;
+        case SSE2: 		printf(" SSE2     ");	break;
+        case CUDA: 		printf(" CUDA     ");	break;
+        case CUDA2:		printf(" CUDA2    ");	break;
+        case CUDA_INV:	printf(" CUDA_INV ");	break;
     }
     switch (vectorType){
         case FLOAT: printf(" FLOAT "); 	break;
@@ -101,8 +102,8 @@ unsigned testCopyFrom(Vector* toTest)
 	unsigned differencesCounter = 0;
 	Vector* cVector = Factory::newVector(toTest, C);
 
-	toTest->copyFrom(interface);
-	cVector->copyFrom(interface);
+	toTest->copyFromInterface(interface);
+	cVector->copyFromInterface(interface);
 
 	differencesCounter += assertEquals(cVector, toTest);
 
@@ -118,8 +119,8 @@ unsigned testCopyTo(Vector* toTest)
 	Vector* cVector = Factory::newVector(toTest, C);
 	Interface* cInterface = new Interface(toTest->getSize(), toTest->getVectorType());
 
-	toTest->copyTo(interface);
-	cVector->copyTo(cInterface);
+	toTest->copyToInterface(interface);
+	cVector->copyToInterface(cInterface);
 
 	unsigned differencesCounter = assertEqualsInterfaces(cInterface, interface);
 
@@ -129,47 +130,29 @@ unsigned testCopyTo(Vector* toTest)
 	return differencesCounter;
 }
 
-//unsigned testInputCalculation(Vector* toTest, unsigned outputSize)
-//{
-//	VectorType weighsType;
-//	if (toTest->getVectorType() == FLOAT){
-//		weighsType = FLOAT;
-//	} else {
-//		weighsType = BYTE;
-//	}
-//	unsigned inputSize = toTest->getSize();
-//
-//	Vector* results = Factory::newVector(outputSize, FLOAT, toTest->getImplementationType());
-//	Vector* inputWeighs = Factory::newVector(inputSize * outputSize, weighsType, toTest->getImplementationType());
-//	inputWeighs->random(INITIAL_WEIGHS_RANGE);
-//
-//	Vector* cVector = Factory::newVector(toTest, C);
-//	Vector* cResults = Factory::newVector(outputSize, FLOAT, C);
-//	Vector* cInputWeighs = Factory::newVector(inputWeighs, C);
-//
-//	if (inputWeighs->requiresTransposing()){
-//		inputWeighs->transposeMatrix(inputSize);
-//	}
-//	inputWeighs->
-//	results->inputCalculation(toTest, inputWeighs);
-//	if (cInputWeighs->requiresTransposing()){
-//		cInputWeighs->transposeMatrix(inputSize);
-//	}
-//	cResults->inputCalculation(cVector, cInputWeighs);
-//
-////	toTest->print();
-////	inputWeighs->print();
-////	results->print();
-//
-//	unsigned differencesCounter = assertEquals(cResults, results);
-//
-//	delete(results);
-//	delete(inputWeighs);
-//	delete(cVector);
-//	delete(cResults);
-//	delete(cInputWeighs);
-//	return differencesCounter;
-//}
+unsigned testAddToResults(Connection* toTest)
+{
+	unsigned outputSize = toTest->getSize() / toTest->getInput()->getSize();
+
+	Vector* results = Factory::newVector(outputSize, FLOAT, toTest->getImplementationType());
+
+	Vector* cInput = Factory::newVector(toTest->getInput(), C);
+	Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
+	cConnection->copyFrom(toTest);
+
+	Vector* cResults = Factory::newVector(outputSize, FLOAT, C);
+
+	toTest->addToResults(results);
+	cConnection->addToResults(cResults);
+
+	unsigned differencesCounter = assertEquals(cResults, results);
+
+	delete(results);
+	delete(cInput);
+	delete(cConnection);
+	delete(cResults);
+	return differencesCounter;
+}
 
 unsigned testActivation(Vector* toTest, FunctionType functionType)
 {
@@ -204,7 +187,7 @@ unsigned testMutate(Vector* toTest, unsigned times, float mutation)
 	return differences;
 }
 
-unsigned testWeighCrossover(Vector* toTest)
+unsigned testCrossover(Vector* toTest)
 {
 	Interface* bitVector = new Interface(toTest->getSize(), BIT);
 	bitVector->random(1);
@@ -228,10 +211,13 @@ unsigned testWeighCrossover(Vector* toTest)
 	return differences;
 }
 
-#define SZ_OUTPUT 4
 #define SIZE_MIN 4
 #define SIZE_MAX 128
-#define SIZE_INC 4
+#define SIZE_INC 16
+#define OUTPUT_SIZE_MIN 5
+#define OUTPUT_SIZE_MAX 5
+#define OUTPUT_SIZE_INC 5
+
 #define PATH "/home/timon/layer.lay"
 
 int main(int argc, char *argv[]) {
@@ -250,13 +236,13 @@ int main(int argc, char *argv[]) {
 				for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
 					ImplementationType implementationType = (ImplementationType)((implType));
 					//TODO z comentar
-					if (implementationType == CUDA2){
-//					{
+//					if (implementationType == CUDA2){
+					{
 					printf("----------------------------\n");
 					printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 
 					Vector* vector = Factory::newVector(size, (VectorType)vectType, implementationType);
-					vector->random(INITIAL_WEIGHS_RANGE);
+//					vector->random(INITIAL_WEIGHS_RANGE);
 
 					errorCount = testClone(vector);
 				    if (errorCount != 0){
@@ -279,11 +265,6 @@ int main(int argc, char *argv[]) {
 							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 							printf("Errors on activation: %d \n", errorCount);
 						}
-//						errorCount = testInputCalculation(vector, SZ_OUTPUT);
-						if (errorCount != 0){
-							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
-							printf("Errors on inputCalculation: %d \n", errorCount);
-						}
 					}
 					if (vectorType != BIT && vectorType != SIGN) {
 						errorCount = testMutate(vector, 10, 10);
@@ -292,12 +273,27 @@ int main(int argc, char *argv[]) {
 							printf("Errors on mutate: %d \n", errorCount);
 						}
 						//TODO B descomentar y que funcione CUDA/CUDA2
-//						errorCount = testWeighCrossover(vector);
-//						if (errorCount != 0){
-//							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
-//							printf("Errors on crossover: %d \n", errorCount);
-//						}
+						errorCount = testCrossover(vector);
+						if (errorCount != 0){
+							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+							printf("Errors on crossover: %d \n", errorCount);
+						}
 					}
+
+					for (unsigned outputSize = OUTPUT_SIZE_MIN; outputSize <= OUTPUT_SIZE_MAX; outputSize += OUTPUT_SIZE_INC) {
+						if (vectorType != BYTE) {
+
+							Connection* connection = Factory::newConnection(vector, outputSize, implementationType);
+//							connection->random(INITIAL_WEIGHS_RANGE);
+
+							errorCount = testAddToResults(connection);
+							if (errorCount != 0){
+								printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+								printf("Errors on testAddToResults: %d \n", errorCount);
+							}
+						}
+					}
+
 					delete(vector);
 					}
 				}

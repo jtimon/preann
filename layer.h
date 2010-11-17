@@ -20,6 +20,7 @@ protected:
 	void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 	void mutateThreshold(unsigned outputPos, float mutation);
 
+	ImplementationType getImplementationType();
 	Vector* newVector(FILE* stream);
 	Vector* newVector(unsigned size, VectorType vectorType);
 public:

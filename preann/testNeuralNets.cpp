@@ -3,10 +3,11 @@
 
 using namespace std;
 
+//TODO N revisar profundamente
+
 #include "population.h"
 #include "chronometer.h"
 #include "cuda_code.h"
-#include "cudaVector2.h"
 
 #define PATH "/home/timon/test.nn"
 //TODO T pensar una forma de poner un error razonable

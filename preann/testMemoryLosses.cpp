@@ -7,10 +7,10 @@ using namespace std;
 #include "population.h"
 #include "chronometer.h"
 #include "cuda_code.h"
-#include "cudaVector2.h"
 
 #define SIZE_MAX 200
 
+//TODO D revisar profundamente
 int main(int argc, char *argv[]) {
 	Chronometer total;
 	total.start();

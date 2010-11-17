@@ -34,7 +34,7 @@ XmmVector::~XmmVector()
 Vector* XmmVector::clone()
 {
 	Vector* clone = new XmmVector(size, vectorType);
-	copyToVector(clone);
+	copyTo(clone);
 	return clone;
 }
 
