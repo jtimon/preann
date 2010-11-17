@@ -15,10 +15,7 @@ protected:
 	Vector* output;
 
 	FunctionType functionType;
-
-	ImplementationType getImplementationType() {
-		return output->getImplementationType();
-	};
+	ImplementationType tImplementationType;
 
 	void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 	void mutateThreshold(unsigned outputPos, float mutation);

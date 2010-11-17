@@ -3,19 +3,20 @@
 
 Vector* Layer::newVector(FILE* stream)
 {
-	return  Factory::newVector(stream, getImplementationType());
+	return  Factory::newVector(stream, tImplementationType);
 }
 
 Vector* Layer::newVector(unsigned size, VectorType vectorType)
 {
-	return Factory::newVector(size, vectorType, getImplementationType());
+	return Factory::newVector(size, vectorType, tImplementationType);
 }
 
 Layer::Layer(unsigned size, VectorType outputType, FunctionType functionType, ImplementationType implementationType)
 {
+	tImplementationType = implementationType;
+
 	connections = NULL;
 	numberInputs = 0;
-
 	this->functionType = functionType;
 	output = Factory::newVector(size, outputType, implementationType);
 	thresholds = Factory::newVector(size, FLOAT, implementationType);
@@ -23,6 +24,8 @@ Layer::Layer(unsigned size, VectorType outputType, FunctionType functionType, Im
 
 Layer::Layer(FILE* stream, ImplementationType implementationType)
 {
+	tImplementationType = implementationType;
+
 	fread(&functionType, sizeof(FunctionType), 1, stream);
 	thresholds = Factory::newVector(stream, implementationType);
 	output = Factory::newVector(stream, implementationType);
