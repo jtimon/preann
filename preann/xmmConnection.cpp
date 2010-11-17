@@ -147,13 +147,8 @@ void XmmConnection::copyToImpl(Interface* interface)
 	}
 }
 
-void XmmConnection::mutate(unsigned pos, float mutation)
+void XmmConnection::mutateImpl(unsigned pos, float mutation)
 {
-	if (pos > size){
-		std::string error = "The position being mutated is greater than the size of the vector.";
-		throw error;
-	}
-
 	unsigned offsetPerInput = getByteSize(tInput->getSize(), vectorType);
 	unsigned outputPos = pos / tInput->getSize();
     unsigned inputPos = pos % tInput->getSize();

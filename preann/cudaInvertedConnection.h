@@ -15,7 +15,7 @@ public:
 	CudaInvertedConnection(Vector* input, unsigned outputSize, VectorType vectorType);
 	virtual ~CudaInvertedConnection() {};
 
-	virtual void mutate(unsigned pos, float mutation);
+	virtual void mutateImpl(unsigned pos, float mutation);
 	virtual void addToResults(Vector* results);
 
 };

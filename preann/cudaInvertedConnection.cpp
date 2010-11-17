@@ -12,12 +12,8 @@ CudaInvertedConnection::CudaInvertedConnection(Vector* input, unsigned outputSiz
 	tInput = input;
 }
 
-void CudaInvertedConnection::mutate(unsigned pos, float mutation)
+void CudaInvertedConnection::mutateImpl(unsigned pos, float mutation)
 {
-	if (pos > size){
-		std::string error = "The position being mutated is greater than the size of the vector.";
-		throw error;
-	}
 	//TODO z simplificar cuentas
 	unsigned outputPos = pos / tInput->getSize();
 	unsigned inputPos = (pos % tInput->getSize());
@@ -69,17 +65,3 @@ void CudaInvertedConnection::copyToImpl(Interface* interface)
 	CudaVector::copyToImpl(interface);
 	interface->transposeMatrix(outputSize);
 }
-
-//void CudaInvertedConnection::copyFromImpl(Interface* interface)
-//{
-//	unsigned outputSize = size / tInput->getSize();
-//	interface->transposeMatrix(outputSize);
-//
-//	CudaVector::copyFromImpl(interface);
-//}
-//
-//void CudaInvertedConnection::copyToImpl(Interface* interface)
-//{
-//	interface->transposeMatrix(tInput->getSize());
-//	CudaVector::copyToImpl(interface);
-//}

@@ -22,6 +22,7 @@ protected:
 	Vector() {};
 	virtual void copyFromImpl(Interface* interface) = 0;
 	virtual void copyToImpl(Interface* interface) = 0;
+	virtual void mutateImpl(unsigned pos, float mutation) = 0;
 	virtual void crossoverImpl(Vector* other, Interface* bitVector) = 0;
 public:
 	virtual ~Vector() {};
@@ -30,29 +31,24 @@ public:
 	virtual Vector* clone() = 0;
 	virtual void activation(Vector* results, FunctionType functionType) = 0;
 
-	virtual void mutate(unsigned pos, float mutation) = 0;
-
-	void crossover(Vector* other, Interface* bitVector);
 	void copyFromInterface(Interface* interface);
 	void copyToInterface(Interface* interface);
+	void copyFrom(Vector* vector);
+	void copyTo(Vector* vector);
+	void mutate(unsigned pos, float mutation);
+	void crossover(Vector* other, Interface* bitVector);
 
 	void* getDataPointer();
 	unsigned getSize();
 	VectorType getVectorType();
 	FunctionType getFunctionType();
 	Interface* toInterface();
-	void copyFrom(Vector* vector);
-	void copyTo(Vector* vector);
+
 
 	void save(FILE* stream);
 	void print();
 	float compareTo(Vector* other);
 	void random(float range);
-	void transposeMatrix(unsigned width);
-	unsigned char requiresTransposing(){
-		return 0;
-	}
-
 protected:
 	template <class vectorType>
 	void SetValueToAnArray(void* array, unsigned size, vectorType value)

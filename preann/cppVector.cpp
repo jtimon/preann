@@ -82,12 +82,8 @@ void CppVector::activation(Vector* resultsVect, FunctionType functionType)
 	}
 }
 
-void CppVector::mutate(unsigned pos, float mutation)
+void CppVector::mutateImpl(unsigned pos, float mutation)
 {
-	if (pos > size){
-		std::string error = "The position being mutated is greater than the size of the vector.";
-		throw error;
-	}
 	switch (vectorType){
 	case BYTE:{
 		unsigned char* weigh = &(((unsigned char*)data)[pos]);

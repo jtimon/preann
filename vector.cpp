@@ -7,6 +7,15 @@
 
 #include "vector.h"
 
+void Vector::mutate(unsigned pos, float mutation)
+{
+	if (pos > size){
+		std::string error = "The position being mutated is greater than the size of the vector.";
+		throw error;
+	}
+	mutateImpl(pos, mutation);
+}
+
 void Vector::crossover(Vector* other, Interface* bitVector)
 {
 	if (size != other->getSize()){
@@ -112,14 +121,6 @@ void Vector::random(float range)
 {
 	Interface* interface = this->toInterface();
 	interface->random(range);
-	this->copyFromImpl(interface);
-	delete(interface);
-}
-
-void Vector::transposeMatrix(unsigned width)
-{
-	Interface* interface = this->toInterface();
-	interface->transposeMatrix(width);
 	this->copyFromImpl(interface);
 	delete(interface);
 }

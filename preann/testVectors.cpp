@@ -242,7 +242,7 @@ int main(int argc, char *argv[]) {
 					printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 
 					Vector* vector = Factory::newVector(size, (VectorType)vectType, implementationType);
-//					vector->random(INITIAL_WEIGHS_RANGE);
+					vector->random(INITIAL_WEIGHS_RANGE);
 
 					errorCount = testClone(vector);
 				    if (errorCount != 0){
@@ -284,7 +284,7 @@ int main(int argc, char *argv[]) {
 						if (vectorType != BYTE) {
 
 							Connection* connection = Factory::newConnection(vector, outputSize, implementationType);
-//							connection->random(INITIAL_WEIGHS_RANGE);
+							connection->random(INITIAL_WEIGHS_RANGE);
 
 							errorCount = testAddToResults(connection);
 							if (errorCount != 0){

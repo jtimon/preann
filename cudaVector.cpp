@@ -105,11 +105,8 @@ void CudaVector::activation(Vector* resultsVect, FunctionType functionType)
 	cuda_activation(data, size, vectorType, results, functionType, CUDA_THREADS_PER_BLOCK);
 }
 
-void CudaVector::mutate(unsigned pos, float mutation)
+void CudaVector::mutateImpl(unsigned pos, float mutation)
 {
-	if (pos > size){
-		std::string error = "The position being mutated is greater than the size of the vector.";
-	}
 	cuda_mutate(data, pos, mutation, vectorType);
 }
 

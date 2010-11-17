@@ -32,7 +32,7 @@ public:
 	virtual Vector* clone();
 	virtual void activation(Vector* results, FunctionType functionType);
 
-	virtual void mutate(unsigned pos, float mutation);
+	virtual void mutateImpl(unsigned pos, float mutation);
 	virtual void crossoverImpl(Vector* other, Interface* bitVector);
 };
 

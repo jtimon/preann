@@ -21,7 +21,7 @@ public:
 	XmmConnection(Vector* input, unsigned outputSize, VectorType vectorType);
 	virtual ~XmmConnection() {};
 
-	virtual void mutate(unsigned pos, float mutation);
+	virtual void mutateImpl(unsigned pos, float mutation);
 	virtual void addToResults(Vector* results);
 
 };

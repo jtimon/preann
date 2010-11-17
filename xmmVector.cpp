@@ -185,12 +185,8 @@ void XmmVector::activation(Vector* resultsVect, FunctionType functionType)
 }
 
 //TODO D esto es igual en CppVector
-void XmmVector::mutate(unsigned pos, float mutation)
+void XmmVector::mutateImpl(unsigned pos, float mutation)
 {
-	if (pos > size){
-		std::string error = "The position being mutated is greater than the size of the vector.";
-		throw error;
-	}
 	switch (vectorType){
 	case BYTE:{
 		unsigned char* weigh = &(((unsigned char*)data)[pos]);
