@@ -336,7 +336,7 @@ void SumBitsConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned ou
 
 		for (unsigned i=0; i < input_blocks_to_read; i++) {
 
-			//TODO CC check performance penalty (this is just for SIGN)
+			//TODO TCC check performance penalty (this is just for SIGN)
 			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
 			unsigned input_block = shared_inputs[i];
@@ -411,7 +411,7 @@ void SumBitsInvertedConnectionsKernel(unsigned* inputs, unsigned input_size, uns
 
 		for (unsigned i=0; i < input_blocks_to_read; i++) {
 
-			//TODO CC check performance penalty (this is just for SIGN)
+			//TODO TCC check performance penalty (this is just for SIGN)
 			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
 			unsigned weighsOffset = (i * BITS_PER_UNSIGNED * output_size) + outputNeuron;
@@ -493,7 +493,7 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
 		shared_mem_size = input_size * sizeof(float);
 		SumFloatsInvertedConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, (float*)weighs, results, output_size);
 	} else {
-		//TODO CC esta parte no funciona bien
+		//TODO TCC esta parte no funciona bien
 		while (input_size > CUDA_MAX_SHARED_BITS) {
 
 			shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(unsigned);
@@ -541,7 +541,7 @@ void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned output_s
 		unsigned input_blocks_to_read = ((input_size - 1) / BITS_PER_UNSIGNED) + 1;
 		while (i < input_blocks_to_read) {
 
-			//TODO CC check performance penalty (this is just for SIGN)
+			//TODO TCC check performance penalty (this is just for SIGN)
 			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
 			unsigned mask = 0x80000000;
