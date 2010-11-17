@@ -13,7 +13,6 @@ public:
 	Vector* getInput();
 	void setInput(Vector* input);
 
-	virtual void crossover(Connection* other, Interface* bitVector) = 0;
 	virtual void addToResults(Vector* results) = 0;
 };
 

@@ -7,6 +7,19 @@
 
 #include "vector.h"
 
+void Vector::crossover(Vector* other, Interface* bitVector)
+{
+	if (size != other->getSize()){
+		std::string error = "The Vectors must have the same size to crossover them.";
+		throw error;
+	}
+	if (vectorType != other->getVectorType()){
+		std::string error = "The Vectors must have the same type to crossover them.";
+		throw error;
+	}
+	crossoverImpl(other, bitVector);
+}
+
 void Vector::copyFrom(Interface* interface)
 {
 	if (size < interface->getSize()){

@@ -32,105 +32,6 @@ XmmConnection::XmmConnection(Vector* input, unsigned outputSize, VectorType vect
 	}
 }
 
-void XmmConnection::mutate(unsigned pos, float mutation)
-{
-	if (pos > size){
-		std::string error = "The position being mutated is greater than the size of the vector.";
-		throw error;
-	}
-
-	unsigned offsetPerInput = getByteSize(tInput->getSize(), vectorType);
-	unsigned outputPos = pos / tInput->getSize();
-    unsigned inputPos = pos % tInput->getSize();
-    unsigned elem = (outputPos * offsetPerInput) + inputPos;
-
-    switch (vectorType){
-        case BYTE:
-            {
-                unsigned char *weigh = &(((unsigned char*)(data))[elem]);
-                int result = (int)(mutation) + *weigh;
-                if(result <= 0){
-                    *weigh = 0;
-            }else
-                if(result >= 255){
-                    *weigh = 255;
-                }else{
-                    *weigh = result;
-                }
-
-        }
-        break;
-    case FLOAT:
-        ((float*)(data))[elem] += mutation;
-			break;
-		case BIT:
-		case SIGN:
-			std::string error = "XmmConnection::mutate is not implemented for VectorType BIT nor SIGN.";
-			throw error;
-	}
-}
-
-void XmmConnection::crossover(Connection* other, Interface* bitVector)
-{
-	if (size != other->getSize()){
-		std::string error = "The Connections must have the same size to crossover them.";
-		throw error;
-	}
-	if (vectorType != other->getVectorType()){
-		std::string error = "The Connections must have the same type to crossover them.";
-		throw error;
-	}
-
-	void* otherWeighs = other->getDataPointer();
-
-	unsigned offsetPerInput = getByteSize(tInput->getSize(), vectorType);
-	unsigned offset = 0;
-	unsigned inputSize = tInput->getSize();
-	unsigned outputSize = size / inputSize;
-	unsigned elem = 0;
-
-	switch (vectorType){
-		case BYTE:
-			unsigned char auxChar;
-
-			for (unsigned j=0; j < outputSize; j++){
-				for (unsigned i=0; i < inputSize; i++){
-
-					if (bitVector->getElement(elem++)){
-						auxChar = ((unsigned char*)(data) + offset)[i];
-						((unsigned char*)(data) + offset)[i] = ((unsigned char*)(otherWeighs) + offset)[i];
-						((unsigned char*)(otherWeighs) + offset)[i] = auxChar;
-					}
-				}
-				offset += offsetPerInput;
-			}
-			break;
-		case FLOAT:
-			float auxFloat;
-			offsetPerInput = offsetPerInput / sizeof(float);
-
-			for (unsigned i=0; i < size; i++){
-
-				for (unsigned j=0; j < outputSize; j++){
-					for (unsigned i=0; i < inputSize; i++){
-
-						if (bitVector->getElement(elem++)){
-							auxFloat = ((float*)(data) + offset)[i];
-							((float*)(data) + offset)[i] = ((float*)(otherWeighs) + offset)[i];
-							((float*)(otherWeighs) + offset)[i] = auxFloat;
-						}
-					}
-					offset += offsetPerInput;
-				}
-			}
-			break;
-		case BIT:
-		case SIGN:
-			std::string error = "XmmConnection::weighCrossover is not implemented for VectorType BIT nor SIGN.";
-			throw error;
-	}
-}
-
 void XmmConnection::addToResults(Vector* resultsVect)
 {
 	void* inputWeighs = this->getDataPointer();
@@ -243,5 +144,95 @@ void XmmConnection::copyToImpl(Interface* interface)
 				std::string error = "XmmConnection::copyToImpl is not implemented for VectorType BIT nor SIGN.";
 				throw error;
 			}
+	}
+}
+
+void XmmConnection::mutate(unsigned pos, float mutation)
+{
+	if (pos > size){
+		std::string error = "The position being mutated is greater than the size of the vector.";
+		throw error;
+	}
+
+	unsigned offsetPerInput = getByteSize(tInput->getSize(), vectorType);
+	unsigned outputPos = pos / tInput->getSize();
+    unsigned inputPos = pos % tInput->getSize();
+    unsigned elem = (outputPos * offsetPerInput) + inputPos;
+
+    switch (vectorType){
+        case BYTE:
+            {
+                unsigned char *weigh = &(((unsigned char*)(data))[elem]);
+                int result = (int)(mutation) + *weigh;
+                if(result <= 0){
+                    *weigh = 0;
+            }else
+                if(result >= 255){
+                    *weigh = 255;
+                }else{
+                    *weigh = result;
+                }
+
+        }
+        break;
+    case FLOAT:
+        ((float*)(data))[elem] += mutation;
+			break;
+		case BIT:
+		case SIGN:
+			std::string error = "XmmConnection::mutate is not implemented for VectorType BIT nor SIGN.";
+			throw error;
+	}
+}
+
+void XmmConnection::crossoverImpl(Vector* other, Interface* bitVector)
+{
+	void* otherWeighs = other->getDataPointer();
+
+	unsigned offsetPerInput = getByteSize(tInput->getSize(), vectorType);
+	unsigned offset = 0;
+	unsigned inputSize = tInput->getSize();
+	unsigned outputSize = size / inputSize;
+	unsigned elem = 0;
+
+	switch (vectorType){
+		case BYTE:
+			unsigned char auxChar;
+
+			for (unsigned j=0; j < outputSize; j++){
+				for (unsigned i=0; i < inputSize; i++){
+
+					if (bitVector->getElement(elem++)){
+						auxChar = ((unsigned char*)(data) + offset)[i];
+						((unsigned char*)(data) + offset)[i] = ((unsigned char*)(otherWeighs) + offset)[i];
+						((unsigned char*)(otherWeighs) + offset)[i] = auxChar;
+					}
+				}
+				offset += offsetPerInput;
+			}
+			break;
+		case FLOAT:
+			float auxFloat;
+			offsetPerInput = offsetPerInput / sizeof(float);
+
+			for (unsigned i=0; i < size; i++){
+
+				for (unsigned j=0; j < outputSize; j++){
+					for (unsigned i=0; i < inputSize; i++){
+
+						if (bitVector->getElement(elem++)){
+							auxFloat = ((float*)(data) + offset)[i];
+							((float*)(data) + offset)[i] = ((float*)(otherWeighs) + offset)[i];
+							((float*)(otherWeighs) + offset)[i] = auxFloat;
+						}
+					}
+					offset += offsetPerInput;
+				}
+			}
+			break;
+		case BIT:
+		case SIGN:
+			std::string error = "XmmConnection::weighCrossover is not implemented for VectorType BIT nor SIGN.";
+			throw error;
 	}
 }

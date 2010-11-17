@@ -16,12 +16,12 @@ protected:
 	//redefined from XmmVector
 	virtual void copyFromImpl(Interface* interface);
 	virtual void copyToImpl(Interface* interface);
+	virtual void crossoverImpl(Vector* other, Interface* bitVector);
 public:
 	XmmConnection(Vector* input, unsigned outputSize, VectorType vectorType);
 	virtual ~XmmConnection() {};
 
 	virtual void mutate(unsigned pos, float mutation);
-	virtual void crossover(Connection* other, Interface* bitVector);
 	virtual void addToResults(Vector* results);
 
 };

@@ -27,7 +27,7 @@ public:
 	virtual void activation(Vector* results, FunctionType functionType);
 	//for weighs
 	virtual void mutate(unsigned pos, float mutation);
-	virtual void crossover(Vector* other, Interface* bitVector);
+	virtual void crossoverImpl(Vector* other, Interface* bitVector);
 
 };
 

@@ -12,25 +12,6 @@ CudaConnection::CudaConnection(Vector* input, unsigned outputSize, VectorType ve
 	tInput = input;
 }
 
-//TODO D igual que en la version Vector
-void CudaConnection::crossover(Connection* other, Interface* bitVector)
-{
-	if (size != other->getSize()){
-		std::string error = "The Connections must have the same size to crossover them.";
-		throw error;
-	}
-	if (vectorType != other->getVectorType()){
-		std::string error = "The Connections must have the same type to crossover them.";
-		throw error;
-	}
-    CudaVector* cudaBitVector = new CudaVector(size, BIT, Cuda_Threads_Per_Block);
-    cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
-    unsigned* cudaBitVectorPtr = (unsigned*)(cudaBitVector->getDataPointer());
-
-    cuda_crossover(this->getDataPointer(), other->getDataPointer(), cudaBitVectorPtr, size, vectorType, Cuda_Threads_Per_Block);
-    delete(cudaBitVector);
-}
-
 void CudaConnection::addToResults(Vector* results)
 {
 	void* inputWeighs = this->getDataPointer();

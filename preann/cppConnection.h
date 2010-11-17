@@ -10,7 +10,6 @@ public:
 	CppConnection(Vector* input, unsigned outputSize, VectorType vectorType);
 	virtual ~CppConnection() {};
 
-	virtual void crossover(Connection* other, Interface* bitVector);
 	virtual void addToResults(Vector* results);
 };
 

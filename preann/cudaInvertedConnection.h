@@ -10,12 +10,12 @@ protected:
 	//redefined from CudaVector
 	virtual void copyFromImpl(Interface* interface);
 	virtual void copyToImpl(Interface* interface);
+	virtual void crossoverImpl(Connection* other, Interface* bitVector);
 public:
 	CudaInvertedConnection(Vector* input, unsigned outputSize, VectorType vectorType);
 	virtual ~CudaInvertedConnection() {};
 
 	virtual void mutate(unsigned pos, float mutation);
-	virtual void crossover(Connection* other, Interface* bitVector);
 	virtual void addToResults(Vector* results);
 
 };

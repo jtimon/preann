@@ -218,17 +218,8 @@ void XmmVector::mutate(unsigned pos, float mutation)
 }
 
 //TODO D esto es igual en CppVector
-void XmmVector::crossover(Vector* other, Interface* bitVector)
+void XmmVector::crossoverImpl(Vector* other, Interface* bitVector)
 {
-	if (size != other->getSize()){
-		std::string error = "The Connections must have the same size to crossover them.";
-		throw error;
-	}
-	if (vectorType != other->getVectorType()){
-		std::string error = "The Connections must have the same type to crossover them.";
-		throw error;
-	}
-
 	void* otherWeighs = other->getDataPointer();
 	void* thisWeighs = this->getDataPointer();
 

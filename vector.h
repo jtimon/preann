@@ -22,6 +22,7 @@ protected:
 	Vector() {};
 	virtual void copyFromImpl(Interface* interface) = 0;
 	virtual void copyToImpl(Interface* interface) = 0;
+	virtual void crossoverImpl(Vector* other, Interface* bitVector) = 0;
 public:
 	virtual ~Vector() {};
 	virtual ImplementationType getImplementationType() = 0;
@@ -30,8 +31,8 @@ public:
 	virtual void activation(Vector* results, FunctionType functionType) = 0;
 
 	virtual void mutate(unsigned pos, float mutation) = 0;
-	virtual void crossover(Vector* other, Interface* bitVector) = 0;
 
+	void crossover(Vector* other, Interface* bitVector);
 	void copyFrom(Interface* interface);
 	void copyTo(Interface* interface);
 

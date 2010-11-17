@@ -113,7 +113,7 @@ void CudaVector::mutate(unsigned pos, float mutation)
 	cuda_mutate(data, pos, mutation, vectorType);
 }
 
-void CudaVector::crossover(Vector* other, Interface* bitVector)
+void CudaVector::crossoverImpl(Vector* other, Interface* bitVector)
 {
 	if (size != other->getSize()){
 		std::string error = "The Connections must have the same size to crossover them.";

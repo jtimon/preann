@@ -12,33 +12,6 @@ CudaInvertedConnection::CudaInvertedConnection(Vector* input, unsigned outputSiz
 	tInput = input;
 }
 
-//void CudaInvertedConnection::load(FILE* stream)
-//{
-//	tInput = NULL;
-//	Interface* interface = new Interface();
-//	interface->load(stream);
-//	tWeighs = Factory::newWeighs(interface->getVectorType() / outputSize, outputSize, interface->getVectorType(), implementationType);
-//
-//	if (tWeighs->requiresTransposing()){
-//		unsigned inputSize = interface->getSize() / outputSize;
-//		interface->transposeMatrix(inputSize);
-//	}
-//	tWeighs->copyFrom(interface);
-//}
-//
-//void CudaInvertedConnection::save(FILE* stream)
-//{
-//	Interface* interface = this->toInterface();
-//
-//	if (requiresTransposing()){
-//		unsigned outputSize = interface->getSize() / tInput->getSize();
-//		interface->transposeMatrix(outputSize);
-//	}
-//
-//	interface->save(stream);
-//	delete(interface);
-//}
-
 void CudaInvertedConnection::mutate(unsigned pos, float mutation)
 {
 	if (pos > size){
@@ -54,16 +27,8 @@ void CudaInvertedConnection::mutate(unsigned pos, float mutation)
 	cuda_mutate(data, pos, mutation, vectorType);
 }
 
-void CudaInvertedConnection::crossover(Connection* other, Interface* bitVector)
+void CudaInvertedConnection::crossoverImpl(Connection* other, Interface* bitVector)
 {
-    if(size != other->getSize()){
-        std::string error = "The Connections must have the same size to crossover them.";
-        throw error;
-    }
-    if(vectorType != other->getVectorType()){
-        std::string error = "The Connections must have the same type to crossover them.";
-        throw error;
-    }
 	Interface* invertedBitVector = new Interface(size, BIT);
 
 	unsigned width = size / tInput->getSize();
@@ -94,10 +59,13 @@ void CudaInvertedConnection::addToResults(Vector* results)
 
 void CudaInvertedConnection::copyFromImpl(Interface* interface)
 {
-	//TODO A implement CudaInvertedConnection::copyFrom
+	interface->transposeMatrix(tInput->getSize());
+	CudaVector::copyFromImpl(interface);
 }
 
 void CudaInvertedConnection::copyToImpl(Interface* interface)
 {
-	//TODO A implement CudaInvertedConnection::copyTo
+	unsigned outputSize = size / tInput->getSize();
+	interface->transposeMatrix(outputSize);
+	CudaVector::copyToImpl(interface);
 }

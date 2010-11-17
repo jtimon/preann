@@ -6,55 +6,6 @@ CppConnection::CppConnection(Vector* input, unsigned outputSize, VectorType vect
 	tInput = input;
 }
 
-//TODO D igual que en la version Vector
-void CppConnection::crossover(Connection* other, Interface* bitVector)
-{
-	if (size != other->getSize()){
-		std::string error = "The Connections must have the same size to crossover them.";
-		throw error;
-	}
-	if (vectorType != other->getVectorType()){
-		std::string error = "The Connections must have the same type to crossover them.";
-		throw error;
-	}
-
-	void* otherWeighs = other->getDataPointer();
-	void* thisWeighs = this->getDataPointer();
-
-	switch (vectorType){
-	case BYTE:{
-		unsigned char auxWeigh;
-
-		for (unsigned i=0; i < size; i++){
-
-			if (bitVector->getElement(i)){
-				auxWeigh = ((unsigned char*)thisWeighs)[i];
-				((unsigned char*)thisWeighs)[i] = ((unsigned char*)otherWeighs)[i];
-				((unsigned char*)otherWeighs)[i] = auxWeigh;
-			}
-		}
-		}break;
-	case FLOAT:
-		float auxWeigh;
-
-		for (unsigned i=0; i < size; i++){
-
-			if (bitVector->getElement(i)){
-				auxWeigh = ((float*)thisWeighs)[i];
-				((float*)thisWeighs)[i] = ((float*)otherWeighs)[i];
-				((float*)otherWeighs)[i] = auxWeigh;
-			}
-		}
-		break;
-	case BIT:
-	case SIGN:
-		{
-		std::string error = "CppConnection::weighCrossover is not implemented for VectorType BIT nor SIGN.";
-		throw error;
-		}
-	}
-}
-
 void CppConnection::addToResults(Vector* resultsVect)
 {
 	float* results = (float*)resultsVect->getDataPointer();

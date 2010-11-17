@@ -163,7 +163,7 @@ extern "C" void cuda_setZero(void* data, unsigned byteSize, VectorType vectorTyp
 
 // GENETIC OPERATORS
 
-//TODO A para usar esto, el vector tiene que se creado de tamaño ((size-1)/(BITS_PER_UNSIGNED * block_size)+1) * (BITS_PER_UNSIGNED * block_size)
+//TODO W!! para usar esto, el vector tiene que se creado de tamaño ((size-1)/(BITS_PER_UNSIGNED * block_size)+1) * (BITS_PER_UNSIGNED * block_size)
 template <class type>
 __global__
 void crossoverKernel(type* vector1, type* vector2, unsigned* bitVector, unsigned size)
