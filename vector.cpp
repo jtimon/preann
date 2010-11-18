@@ -9,7 +9,7 @@
 
 void Vector::mutate(unsigned pos, float mutation)
 {
-	if (pos > size){
+	if (pos > tSize){
 		std::string error = "The position being mutated is greater than the size of the vector.";
 		throw error;
 	}
@@ -18,7 +18,7 @@ void Vector::mutate(unsigned pos, float mutation)
 
 void Vector::crossover(Vector* other, Interface* bitVector)
 {
-	if (size != other->getSize()){
+	if (tSize != other->getSize()){
 		std::string error = "The Vectors must have the same size to crossover them.";
 		throw error;
 	}
@@ -31,7 +31,7 @@ void Vector::crossover(Vector* other, Interface* bitVector)
 
 void Vector::copyFromInterface(Interface* interface)
 {
-	if (size < interface->getSize()){
+	if (tSize < interface->getSize()){
 		std::string error = "The Interface is greater than the Vector.";
 		throw error;
 	}
@@ -44,7 +44,7 @@ void Vector::copyFromInterface(Interface* interface)
 
 void Vector::copyToInterface(Interface* interface)
 {
-	if (interface->getSize() < size){
+	if (interface->getSize() < tSize){
 		std::string error = "The Vector is greater than the Interface.";
 		throw error;
 	}
@@ -62,7 +62,7 @@ void* Vector::getDataPointer()
 
 unsigned Vector::getSize()
 {
-	return size;
+	return tSize;
 }
 
 VectorType Vector::getVectorType()
@@ -72,7 +72,7 @@ VectorType Vector::getVectorType()
 
 Interface* Vector::toInterface()
 {
-	Interface* toReturn = new Interface(this->size, this->vectorType);
+	Interface* toReturn = new Interface(this->tSize, this->vectorType);
 	this->copyToImpl(toReturn);
 	return toReturn;
 }

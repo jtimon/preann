@@ -3,7 +3,7 @@
 
 CppVector::CppVector(unsigned size, VectorType vectorType)
 {
-	this->size = size;
+	this->tSize = size;
 	this->vectorType = vectorType;
 
 	size_t byteSize = getByteSize();
@@ -27,7 +27,7 @@ CppVector::~CppVector()
 
 Vector* CppVector::clone()
 {
-	Vector* clone = new CppVector(size, vectorType);
+	Vector* clone = new CppVector(tSize, vectorType);
 	copyTo(clone);
 	return clone;
 }
@@ -54,7 +54,7 @@ void CppVector::activation(Vector* resultsVect, FunctionType functionType)
 		}break;
 	case FLOAT:
 		{
-			for (unsigned i=0; i < size; i++){
+			for (unsigned i=0; i < tSize; i++){
 				((float*)data)[i] = Function(results[i], functionType);
 			}
 		}
@@ -64,7 +64,7 @@ void CppVector::activation(Vector* resultsVect, FunctionType functionType)
 		{
 			unsigned* vectorData = (unsigned*)data;
 			unsigned mask;
-			for (unsigned i=0; i < size; i++){
+			for (unsigned i=0; i < tSize; i++){
 
 				if (i % BITS_PER_UNSIGNED == 0){
 					mask = 0x80000000;
@@ -111,7 +111,7 @@ void CppVector::mutateImpl(unsigned pos, float mutation)
 }
 void CppVector::crossoverImpl(Vector* other, Interface* bitVector)
 {
-	if (size != other->getSize()){
+	if (tSize != other->getSize()){
 		std::string error = "The Connections must have the same size to crossover them.";
 		throw error;
 	}
@@ -127,7 +127,7 @@ void CppVector::crossoverImpl(Vector* other, Interface* bitVector)
 	case BYTE:{
 		unsigned char auxWeigh;
 
-		for (unsigned i=0; i < size; i++){
+		for (unsigned i=0; i < tSize; i++){
 
 			if (bitVector->getElement(i)){
 				auxWeigh = ((unsigned char*)thisWeighs)[i];
@@ -139,7 +139,7 @@ void CppVector::crossoverImpl(Vector* other, Interface* bitVector)
 	case FLOAT:
 		float auxWeigh;
 
-		for (unsigned i=0; i < size; i++){
+		for (unsigned i=0; i < tSize; i++){
 
 			if (bitVector->getElement(i)){
 				auxWeigh = ((float*)thisWeighs)[i];
@@ -162,11 +162,11 @@ unsigned CppVector::getByteSize()
 {
 	switch (vectorType){
 	case BYTE:
-		return size;
+		return tSize;
 	case FLOAT:
-		return size * sizeof(float);
+		return tSize * sizeof(float);
 	case BIT:
 	case SIGN:
-		return (((size-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
+		return (((tSize-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
 	}
 }

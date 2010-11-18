@@ -12,7 +12,7 @@
 CudaVector::CudaVector(unsigned size, VectorType vectorType, unsigned block_size)
 {
 	(((size-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
-	this->size = size;
+	this->tSize = size;
 	this->vectorType = vectorType;
 
 	unsigned byte_sz = ((size-1)/(BITS_PER_UNSIGNED * block_size)+1) * (sizeof(unsigned) * block_size);
@@ -23,7 +23,7 @@ CudaVector::CudaVector(unsigned size, VectorType vectorType, unsigned block_size
 
 CudaVector::CudaVector(unsigned size, VectorType vectorType)
 {
-	this->size = size;
+	this->tSize = size;
 	this->vectorType = vectorType;
 
 	unsigned byte_sz = getByteSize();
@@ -46,7 +46,7 @@ void CudaVector::copyFrom2(Interface* interface, unsigned block_size)
 		std::string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
-	if (size < interface->getSize()){
+	if (tSize < interface->getSize()){
 		std::string error = "The Interface is greater than the Vector.";
 		throw error;
 	}
@@ -84,7 +84,7 @@ void CudaVector::copyFrom2(Interface* interface, unsigned block_size)
 
 Vector* CudaVector::clone()
 {
-	Vector* clone = new CudaVector(size, vectorType);
+	Vector* clone = new CudaVector(tSize, vectorType);
 	copyTo(clone);
 	return clone;
 }
@@ -102,7 +102,7 @@ void CudaVector::copyToImpl(Interface *interface)
 void CudaVector::activation(Vector* resultsVect, FunctionType functionType)
 {
 	float* results = (float*)resultsVect->getDataPointer();
-	cuda_activation(data, size, vectorType, results, functionType, CUDA_THREADS_PER_BLOCK);
+	cuda_activation(data, tSize, vectorType, results, functionType, CUDA_THREADS_PER_BLOCK);
 }
 
 void CudaVector::mutateImpl(unsigned pos, float mutation)
@@ -112,11 +112,11 @@ void CudaVector::mutateImpl(unsigned pos, float mutation)
 
 void CudaVector::crossoverImpl(Vector* other, Interface* bitVector)
 {
-    CudaVector* cudaBitVector = new CudaVector(size, BIT, Cuda_Threads_Per_Block);
+    CudaVector* cudaBitVector = new CudaVector(tSize, BIT, Cuda_Threads_Per_Block);
     cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
     unsigned* cudaBitVectorPtr = (unsigned*)(cudaBitVector->getDataPointer());
 
-    cuda_crossover(this->getDataPointer(), other->getDataPointer(), cudaBitVectorPtr, size, vectorType, Cuda_Threads_Per_Block);
+    cuda_crossover(this->getDataPointer(), other->getDataPointer(), cudaBitVectorPtr, tSize, vectorType, Cuda_Threads_Per_Block);
     delete(cudaBitVector);
 }
 
@@ -124,12 +124,12 @@ unsigned CudaVector::getByteSize()
 {
 	switch (vectorType){
 	case BYTE:
-		return size;
+		return tSize;
 		break;
 	case FLOAT:
-		return size * sizeof(float);
+		return tSize * sizeof(float);
 	case BIT:
 	case SIGN:
-		return (((size-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
+		return (((tSize-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
 	}
 }

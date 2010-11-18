@@ -20,7 +20,7 @@ void Connection::setInput(Vector* input)
 			throw error;
 		}
 	} else {
-		if (size % input->getSize() != 0){
+		if (tSize % input->getSize() != 0){
 			std::string error = "Cannot set an input of a size than cannot divide the weighs size";
 			throw error;
 		}

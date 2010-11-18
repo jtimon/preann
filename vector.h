@@ -15,7 +15,7 @@ typedef enum {C, SSE2, CUDA, CUDA2, CUDA_INV} ImplementationType;
 
 class Vector {
 protected:
-	unsigned size;
+	unsigned tSize;
 	void* data;
 	VectorType vectorType;
 

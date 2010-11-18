@@ -10,7 +10,7 @@
 XmmConnection::XmmConnection(Vector* input, unsigned outputSize, VectorType vectorType)
 {
 	tInput = input;
-	this->size = input->getSize() * outputSize;
+	this->tSize = input->getSize() * outputSize;
 	this->vectorType = vectorType;
 
 	unsigned byteSize = getByteSize(input->getSize(), vectorType);
@@ -82,7 +82,7 @@ void XmmConnection::copyFromImpl(Interface* interface)
 	unsigned offsetPerInput = getByteSize(tInput->getSize(), vectorType);
 	unsigned offset = 0;
 	unsigned inputSize = tInput->getSize();
-	unsigned outputSize = size / inputSize;
+	unsigned outputSize = tSize / inputSize;
 	unsigned elem = 0;
 
 	switch (vectorType){
@@ -117,7 +117,7 @@ void XmmConnection::copyToImpl(Interface* interface)
 	unsigned offsetPerInput = getByteSize(tInput->getSize(), vectorType);
 	unsigned offset = 0;
 	unsigned inputSize = tInput->getSize();
-	unsigned outputSize = size / inputSize;
+	unsigned outputSize = tSize / inputSize;
 	unsigned elem = 0;
 
 	switch (vectorType){
@@ -187,7 +187,7 @@ void XmmConnection::crossoverImpl(Vector* other, Interface* bitVector)
 	unsigned offsetPerInput = getByteSize(tInput->getSize(), vectorType);
 	unsigned offset = 0;
 	unsigned inputSize = tInput->getSize();
-	unsigned outputSize = size / inputSize;
+	unsigned outputSize = tSize / inputSize;
 	unsigned elem = 0;
 
 	switch (vectorType){
@@ -210,19 +210,16 @@ void XmmConnection::crossoverImpl(Vector* other, Interface* bitVector)
 			float auxFloat;
 			offsetPerInput = offsetPerInput / sizeof(float);
 
-			for (unsigned i=0; i < size; i++){
+			for (unsigned j=0; j < outputSize; j++){
+				for (unsigned i=0; i < inputSize; i++){
 
-				for (unsigned j=0; j < outputSize; j++){
-					for (unsigned i=0; i < inputSize; i++){
-
-						if (bitVector->getElement(elem++)){
-							auxFloat = ((float*)(data) + offset)[i];
-							((float*)(data) + offset)[i] = ((float*)(otherWeighs) + offset)[i];
-							((float*)(otherWeighs) + offset)[i] = auxFloat;
-						}
+					if (bitVector->getElement(elem++)){
+						auxFloat = ((float*)(data) + offset)[i];
+						((float*)(data) + offset)[i] = ((float*)(otherWeighs) + offset)[i];
+						((float*)(otherWeighs) + offset)[i] = auxFloat;
 					}
-					offset += offsetPerInput;
 				}
+				offset += offsetPerInput;
 			}
 			break;
 		case BIT:

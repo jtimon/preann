@@ -2,7 +2,7 @@
 
 XmmVector::XmmVector(unsigned size, VectorType vectorType)
 {
-	this->size = size;
+	this->tSize = size;
 	this->vectorType = vectorType;
 
 	size_t byteSize = getByteSize(size, vectorType);
@@ -33,7 +33,7 @@ XmmVector::~XmmVector()
 
 Vector* XmmVector::clone()
 {
-	Vector* clone = new XmmVector(size, vectorType);
+	Vector* clone = new XmmVector(tSize, vectorType);
 	copyTo(clone);
 	return clone;
 }
@@ -43,7 +43,7 @@ void XmmVector::bitCopyFrom(Interface *interface, unsigned char *vectorData)
     unsigned blockOffset = 0;
     unsigned bytePos = 0;
     unsigned char vectorMask = 128;
-    for (unsigned i=0; i < size; i++){
+    for (unsigned i=0; i < tSize; i++){
 
 		if (interface->getElement(i) > 0){
 			vectorData[blockOffset + bytePos] |= vectorMask;
@@ -69,12 +69,12 @@ void XmmVector::copyFromImpl(Interface* interface)
 {
 	switch (vectorType){
 	case BYTE:
-		for (unsigned i=0; i < size; i++){
+		for (unsigned i=0; i < tSize; i++){
 			((unsigned char*)(data))[i] = interface->getElement(i);
 		}
 		break;
 	case FLOAT:
-		for(unsigned i = 0;i < size;i++){
+		for(unsigned i = 0;i < tSize;i++){
 			((float*)(data))[i] = interface->getElement(i);
 		}
 		break;
@@ -91,7 +91,7 @@ void XmmVector::bitCopyTo(unsigned char *vectorData, Interface *interface)
     unsigned blockOffset = 0;
     unsigned bytePos = 0;
     unsigned char vectorMask = 128;
-    for (unsigned i=0; i < size; i++){
+    for (unsigned i=0; i < tSize; i++){
 
 		if (vectorData[blockOffset + bytePos] & vectorMask){
 			interface->setElement(i, 1);
@@ -117,12 +117,12 @@ void XmmVector::copyToImpl(Interface* interface)
 {
 	switch (vectorType){
 	case BYTE:
-		for (unsigned i=0; i < size; i++){
+		for (unsigned i=0; i < tSize; i++){
 			interface->setElement(i, ((unsigned char*)data)[i]);
 		}
 		break;
 	case FLOAT:
-		for (unsigned i=0; i < size; i++){
+		for (unsigned i=0; i < tSize; i++){
 			interface->setElement(i, ((float*)data)[i]);
 		}
 		break;
@@ -146,7 +146,7 @@ void XmmVector::activation(Vector* resultsVect, FunctionType functionType)
 		}break;
 	case FLOAT:
 		{
-			for (unsigned i=0; i < size; i++){
+			for (unsigned i=0; i < tSize; i++){
 				((float*)data)[i] = Function(results[i], functionType);
 			}
 		}
@@ -160,7 +160,7 @@ void XmmVector::activation(Vector* resultsVect, FunctionType functionType)
 			unsigned bytePos = 0;
 			unsigned char vectorMask = 128;
 
-			for (unsigned i=0; i < size; i++){
+			for (unsigned i=0; i < tSize; i++){
 
 				if (results[i] > 0){
 					vectorData[blockOffset + bytePos] |= vectorMask;
@@ -223,7 +223,7 @@ void XmmVector::crossoverImpl(Vector* other, Interface* bitVector)
 	case BYTE:{
 		unsigned char auxWeigh;
 
-		for (unsigned i=0; i < size; i++){
+		for (unsigned i=0; i < tSize; i++){
 
 			if (bitVector->getElement(i)){
 				auxWeigh = ((unsigned char*)thisWeighs)[i];
@@ -235,7 +235,7 @@ void XmmVector::crossoverImpl(Vector* other, Interface* bitVector)
 	case FLOAT:
 		float auxWeigh;
 
-		for (unsigned i=0; i < size; i++){
+		for (unsigned i=0; i < tSize; i++){
 
 			if (bitVector->getElement(i)){
 				auxWeigh = ((float*)thisWeighs)[i];
