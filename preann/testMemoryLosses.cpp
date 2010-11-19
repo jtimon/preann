@@ -8,57 +8,42 @@ using namespace std;
 #include "chronometer.h"
 #include "cuda_code.h"
 
-#define SIZE_MAX 200
 
-//TODO D revisar profundamente
+void printTestParams(ImplementationType implementationType, VectorType vectorType, unsigned size)
+{
+    switch (implementationType){
+        case C: 		printf(" C        "); 	break;
+        case SSE2: 		printf(" SSE2     ");	break;
+        case CUDA: 		printf(" CUDA     ");	break;
+        case CUDA2:		printf(" CUDA2    ");	break;
+        case CUDA_INV:	printf(" CUDA_INV ");	break;
+    }
+    switch (vectorType){
+        case FLOAT: printf(" FLOAT "); 	break;
+        case BIT: 	printf(" BIT   ");	break;
+        case SIGN: 	printf(" SIGN  ");	break;
+        case BYTE:	printf(" BYTE  ");	break;
+    }
+    printf(" size = %d \n", size);
+}
+
+#define SIZE_MIN 1
+#define SIZE_MAX 1000
+#define SIZE_INC 100
+
 int main(int argc, char *argv[]) {
 	Chronometer total;
 	total.start();
 	try {
 
-		//test Vectors
-		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
-			for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
-				for (unsigned size = 1; size < SIZE_MAX; size++){
+		for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_INC) {
+			for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
+				VectorType vectorType = (VectorType)((vectType));
+				for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
+					ImplementationType implementationType = (ImplementationType)((implType));
 
-					printf(" Vector ");
-					VectorType vectorType;
-					switch (vectType) {
-					case 0:
-						vectorType = FLOAT;
-						printf(" FLOAT ");
-						break;
-					case 1:
-						vectorType = BIT;
-						printf(" BIT ");
-						break;
-					case 2:
-						vectorType = SIGN;
-						printf(" SIGN ");
-						break;
-					}
-
-					ImplementationType implementationType;
-					switch (implType) {
-					case 0:
-						implementationType = C;
-						printf(" C ");
-						break;
-					case 1:
-						implementationType = SSE2;
-						printf(" SSE2 ");
-						break;
-					case 2:
-						implementationType = CUDA;
-						printf(" CUDA ");
-						break;
-					case 3:
-						implementationType = CUDA2;
-						printf(" CUDA2 ");
-						break;
-					}
-
-					printf(" size = %d \n", size);
+					printTestParams(implementationType, vectorType, size);
+					printf("-----------Vector-----------\n");
 					Vector* vector = Factory::newVector(size, vectorType, implementationType);
 
 					mem_printTotalAllocated();
@@ -70,52 +55,23 @@ int main(int argc, char *argv[]) {
 						std::string error = "Memory loss detected testing class Vector.\n";
 						throw error;
 					}
-				}
-			}
-		}
 
-		//test Layers
-		for (unsigned vectType = 0; vectType < 3; vectType++) {
-			for (unsigned implType = 0; implType < 4; implType++) {
-				for (unsigned size = 1; size < 200; size++){
+					printf("-----------Connection-----------\n");
+					vector = Factory::newVector(size, vectorType, implementationType);
+					Connection* connection = Factory::newConnection(vector, size, implementationType);
 
-					printf(" Layer ");
-					VectorType vectorType;
-					switch (vectType) {
-					case 0:
-						vectorType = FLOAT;
-						printf(" FLOAT ");
-						break;
-					case 1:
-						vectorType = BIT;
-						printf(" BIT ");
-						break;
-					case 2:
-						vectorType = SIGN;
-						printf(" SIGN ");
-						break;
+					mem_printTotalAllocated();
+					mem_printTotalPointers();
+					printf("------------------\n");
+					delete(connection);
+					delete(vector);
+
+					if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
+						std::string error = "Memory loss detected testing class Connection.\n";
+						throw error;
 					}
 
-					ImplementationType implementationType;
-					switch (implType) {
-					case 0:
-						implementationType = C;
-						printf(" C ");
-						break;
-					case 1:
-						implementationType = SSE2;
-						printf(" SSE2 ");
-						break;
-					case 2:
-						implementationType = CUDA;
-						printf(" CUDA ");
-						break;
-					case 3:
-						implementationType = CUDA2;
-						printf(" CUDA2 ");
-						break;
-					}
-					printf(" size = %d \n", size);
+					printf("-----------Layer-----------\n");
 
 					Layer* layer = new Layer(size, vectorType, IDENTITY, implementationType);
 					layer->addInput(layer->getOutput());
@@ -124,13 +80,8 @@ int main(int argc, char *argv[]) {
 
 					mem_printTotalAllocated();
 					mem_printTotalPointers();
-
+					printf("------------------\n");
 					delete(layer);
-
-					printf("-- after deleting --\n");
-					mem_printTotalAllocated();
-					mem_printTotalPointers();
-					printf("-- -------------- --\n");
 
 					if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
 						std::string error = "Memory loss detected testing class Layer.\n";
@@ -139,7 +90,6 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		}
-
 
 		printf("Exit success.\n", 1);
 		mem_printTotalAllocated();
