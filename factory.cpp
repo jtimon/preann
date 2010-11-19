@@ -62,18 +62,26 @@ Connection* Factory::newConnection(FILE* stream, unsigned outputSize, Implementa
 
 Connection* Factory::newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType)
 {
+	VectorType vectorType = Factory::weighForInput(input->getVectorType());
+	Connection* toReturn;
 	switch(implementationType){
 		case C:
-			return new CppConnection(input, outputSize, Factory::weighForInput(input->getVectorType()));
+			toReturn = new CppConnection(input, outputSize, vectorType);
+			break;
 		case SSE2:
-			return new XmmConnection(input, outputSize, Factory::weighForInput(input->getVectorType()));
+			toReturn = new XmmConnection(input, outputSize, vectorType);
+			break;
 		case CUDA:
-			return new CudaConnection(input, outputSize, Factory::weighForInput(input->getVectorType()));
+			toReturn = new CudaConnection(input, outputSize, vectorType);
+			break;
 		case CUDA2:
-			return new Cuda2Connection(input, outputSize, Factory::weighForInput(input->getVectorType()));
+			toReturn = new Cuda2Connection(input, outputSize, vectorType);
+			break;
 		case CUDA_INV:
-			return new CudaInvertedConnection(input, outputSize, Factory::weighForInput(input->getVectorType()));
+			toReturn = new CudaInvertedConnection(input, outputSize, vectorType);
+			break;
 	}
+	return toReturn;
 }
 
 VectorType Factory::weighForInput(VectorType inputType)
