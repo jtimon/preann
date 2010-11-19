@@ -11,7 +11,7 @@
 #include "connection.h"
 #include "xmmVector.h"
 
-class XmmConnection: public virtual Connection, public XmmVector {
+class XmmConnection: virtual public Connection, public XmmVector {
 protected:
 	//redefined from XmmVector
 	virtual void copyFromImpl(Interface* interface);
