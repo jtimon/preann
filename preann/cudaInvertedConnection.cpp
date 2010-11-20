@@ -23,25 +23,12 @@ void CudaInvertedConnection::mutateImpl(unsigned pos, float mutation)
 	cuda_mutate(data, pos, mutation, vectorType);
 }
 
-void CudaInvertedConnection::crossoverImpl(Connection* other, Interface* bitVector)
+void CudaInvertedConnection::crossoverImpl(Vector* other, Interface* bitVector)
 {
-	Interface* invertedBitVector = new Interface(tSize, BIT);
+	Interface invertedBitVector = Interface(bitVector);
+	invertedBitVector.transposeMatrix(tInput->getSize());
 
-	unsigned width = tSize / tInput->getSize();
-	unsigned height = tInput->getSize();
-
-	for (unsigned i=0; i < width; i++){
-		for (unsigned j=0; j < height; j++){
-			invertedBitVector->setElement(i  + (j * width), bitVector->getElement((i * height) + j));
-		}
-	}
-	CudaVector* cudaBitVector = new CudaVector(bitVector, Cuda_Threads_Per_Block);
-
-	cuda_crossover(this->getDataPointer(), other->getDataPointer(), (unsigned*)(cudaBitVector->getDataPointer()),
-						tSize, vectorType, Cuda_Threads_Per_Block);
-
-	delete(cudaBitVector);
-	delete(invertedBitVector);
+	CudaVector::crossoverImpl(other, &invertedBitVector);
 }
 
 void CudaInvertedConnection::addToResults(Vector* results)
@@ -60,7 +47,6 @@ void CudaInvertedConnection::copyFromImpl(Interface* interface)
 
 void CudaInvertedConnection::copyToImpl(Interface* interface)
 {
-	unsigned outputSize = tSize / tInput->getSize();
 	CudaVector::copyToImpl(interface);
-	interface->transposeMatrix(outputSize);
+	interface->transposeMatrix(tSize / tInput->getSize());
 }

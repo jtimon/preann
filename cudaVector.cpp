@@ -92,11 +92,10 @@ void CudaVector::mutateImpl(unsigned pos, float mutation)
 
 void CudaVector::crossoverImpl(Vector* other, Interface* bitVector)
 {
-    CudaVector* cudaBitVector = new CudaVector(bitVector, Cuda_Threads_Per_Block);
+    CudaVector cudaBitVector = CudaVector(bitVector, Cuda_Threads_Per_Block);
 
-    cuda_crossover(this->getDataPointer(), other->getDataPointer(), (unsigned*)(cudaBitVector->getDataPointer()),
+    cuda_crossover(this->getDataPointer(), other->getDataPointer(), (unsigned*)cudaBitVector.getDataPointer(),
 						tSize, vectorType, Cuda_Threads_Per_Block);
-    delete(cudaBitVector);
 }
 
 unsigned CudaVector::getByteSize()

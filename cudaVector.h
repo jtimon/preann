@@ -16,10 +16,12 @@ protected:
 	unsigned getByteSize();
 	virtual void copyFromImpl(Interface* interface);
 	virtual void copyToImpl(Interface* interface);
+	virtual void mutateImpl(unsigned pos, float mutation);
+	virtual void crossoverImpl(Vector* other, Interface* bitVector);
+	CudaVector(Interface* bitVector, unsigned block_size);
 public:
 	CudaVector() {};
 	CudaVector(unsigned size, VectorType vectorType);
-	CudaVector(Interface* bitVector, unsigned block_size);
 	virtual ~CudaVector();
 	virtual ImplementationType getImplementationType() {
 		return CUDA;
@@ -27,9 +29,6 @@ public:
 
 	virtual Vector* clone();
 	virtual void activation(Vector* results, FunctionType functionType);
-
-	virtual void mutateImpl(unsigned pos, float mutation);
-	virtual void crossoverImpl(Vector* other, Interface* bitVector);
 };
 
 #endif /* CUDAVECTOR_H_ */

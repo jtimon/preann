@@ -1,10 +1,3 @@
-/*
- * xmmConnection.h
- *
- *  Created on: Nov 15, 2010
- *      Author: timon
- */
-
 #ifndef XMMCONNECTION_H_
 #define XMMCONNECTION_H_
 

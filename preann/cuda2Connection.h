@@ -14,6 +14,9 @@ class Cuda2Connection: public CudaConnection {
 public:
 	Cuda2Connection(Vector* input, unsigned outputSize, VectorType vectorType);
 	virtual ~Cuda2Connection() {};
+	virtual ImplementationType getImplementationType() {
+		return CUDA2;
+	};
 
 	virtual void addToResults(Vector* results);
 };

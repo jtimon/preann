@@ -263,12 +263,12 @@ unsigned testCrossover(Connection* toTest)
 	return differences;
 }
 
-#define SIZE_MIN 4
+#define SIZE_MIN 2
 #define SIZE_MAX 128
 #define SIZE_INC 16
-#define OUTPUT_SIZE_MIN 5
-#define OUTPUT_SIZE_MAX 5
-#define OUTPUT_SIZE_INC 5
+#define OUTPUT_SIZE_MIN 3
+#define OUTPUT_SIZE_MAX 3
+#define OUTPUT_SIZE_INC 3
 #define NUM_MUTATIONS 10
 
 #define PATH "/home/timon/layer.lay"
@@ -284,8 +284,6 @@ int main(int argc, char *argv[]) {
 				VectorType vectorType = (VectorType)((vectType));
 				FunctionType functionType = (FunctionType)(vectType);
 
-				//TODO z comentar
-//				if (vectorType == SIGN)
 				for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
 					ImplementationType implementationType = (ImplementationType)((implType));
 //					if (implementationType != C){
