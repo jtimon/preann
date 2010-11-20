@@ -163,16 +163,18 @@ extern "C" void cuda_setZero(void* data, unsigned byteSize, VectorType vectorTyp
 
 // GENETIC OPERATORS
 
-//TODO W!! para usar esto, el vector tiene que se creado de tamaño ((size-1)/(BITS_PER_UNSIGNED * block_size)+1) * (BITS_PER_UNSIGNED * block_size)
 template <class type>
 __global__
 void crossoverKernel(type* vector1, type* vector2, unsigned* bitVector, unsigned size)
 {
 	unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
-	unsigned bitsForTheThread = bitVector[(blockIdx.x * blockDim.x) + threadIdx.x];
-	unsigned mask = 0x80000000;
 	unsigned maxPosForThisBlock = min ( (blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED,
 										size);
+	unsigned bitsForTheThread, mask;
+	if (weighPos < maxPosForThisBlock) {
+		bitsForTheThread = bitVector[(blockIdx.x * blockDim.x) + threadIdx.x];
+		mask = 0x80000000;
+	}
 	__syncthreads();
 	while (weighPos < maxPosForThisBlock){
 		if (mask & bitsForTheThread){

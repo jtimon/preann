@@ -288,8 +288,8 @@ int main(int argc, char *argv[]) {
 //				if (vectorType == SIGN)
 				for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
 					ImplementationType implementationType = (ImplementationType)((implType));
-					if (implementationType != C){
-
+//					if (implementationType != C){
+					{
 					printf("----------------------------\n");
 					printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 
@@ -324,12 +324,11 @@ int main(int argc, char *argv[]) {
 							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 							printf("Errors on mutate: %d \n", errorCount);
 						}
-						//TODO B descomentar y que funcione en las versiones CUDA
-//						errorCount = testCrossover(vector);
-//						if (errorCount != 0){
-//							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
-//							printf("Errors on crossover: %d \n", errorCount);
-//						}
+						errorCount = testCrossover(vector);
+						if (errorCount != 0){
+							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+							printf("Errors on crossover: %d \n", errorCount);
+						}
 					}
 					if (vectorType != BYTE)
 					for (unsigned outputSize = OUTPUT_SIZE_MIN; outputSize <= OUTPUT_SIZE_MAX; outputSize += OUTPUT_SIZE_INC) {
@@ -342,25 +341,23 @@ int main(int argc, char *argv[]) {
 							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 							printf("Errors on Connection::addToResults: %d \n", errorCount);
 						}
-						if (vectorType != BIT && vectorType != SIGN) {
-							errorCount = testMutate(connection, NUM_MUTATIONS);
-							if (errorCount != 0){
-								printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
-								printf("Errors on Connection::mutate: %d \n", errorCount);
-							}
-							errorCount = testCrossover(connection);
-							if (errorCount != 0){
-								printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
-								printf("Errors on Connection::crossover: %d \n", errorCount);
-							}
+						errorCount = testMutate(connection, NUM_MUTATIONS);
+						if (errorCount != 0){
+							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+							printf("Errors on Connection::mutate: %d \n", errorCount);
 						}
+						errorCount = testCrossover(connection);
+						if (errorCount != 0){
+							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+							printf("Errors on Connection::crossover: %d \n", errorCount);
+						}
+						delete(connection);
 					}
 					delete(vector);
 					}
 				}
 			}
 		}
-
 		printf("Exit success.\n");
 		mem_printTotalAllocated();
 		mem_printTotalPointers();

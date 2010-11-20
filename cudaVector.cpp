@@ -7,18 +7,40 @@
 
 #include "cudaVector.h"
 
-//TODO F no me gusta, no cuadra con la factory
 //special constructor for bit coalescing vectors
-CudaVector::CudaVector(unsigned size, VectorType vectorType, unsigned block_size)
+CudaVector::CudaVector(Interface* bitVector, unsigned block_size)
 {
-	(((size-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
-	this->tSize = size;
-	this->vectorType = vectorType;
+	if (bitVector->getVectorType() != BIT){
+		std::string error = "The Vector type must be BIT to use a BitVector CudaVector constructor.";
+		throw error;
+	}
+	unsigned bitVectorSize = bitVector->getSize();
+	unsigned maxWeighsPerBlock = BITS_PER_UNSIGNED * block_size;
 
-	unsigned byte_sz = ((size-1)/(BITS_PER_UNSIGNED * block_size)+1) * (sizeof(unsigned) * block_size);
-	data = cuda_malloc(byte_sz);
+	tSize = (bitVectorSize / maxWeighsPerBlock) * maxWeighsPerBlock;
+	tSize += min(bitVectorSize % maxWeighsPerBlock, block_size) * BITS_PER_UNSIGNED;
 
-	cuda_setZero(data, byte_sz, vectorType, CUDA_THREADS_PER_BLOCK);
+	Interface interfaceOrderedByBlockSize = Interface(tSize, BIT);
+	unsigned byteSize = interfaceOrderedByBlockSize.getByteSize();
+	data = cuda_malloc(byteSize);
+
+	unsigned bit = 0, thread = 0, block_offset = 0;
+	for (unsigned i=0; i < bitVectorSize; i++){
+
+		unsigned weighPos = (thread * BITS_PER_UNSIGNED) + bit + block_offset;
+		thread++;
+		interfaceOrderedByBlockSize.setElement(weighPos, bitVector->getElement(i));
+
+		if (thread == block_size){
+			thread = 0;
+			bit++;
+			if (bit == BITS_PER_UNSIGNED){
+				bit = 0;
+				block_offset += (block_size * BITS_PER_UNSIGNED);
+			}
+		}
+	}
+	cuda_copyToDevice(data, interfaceOrderedByBlockSize.getDataPointer(), byteSize);
 }
 
 CudaVector::CudaVector(unsigned size, VectorType vectorType)
@@ -37,48 +59,6 @@ CudaVector::~CudaVector()
 	if (data) {
 		cuda_free(data);
 		data = NULL;
-	}
-}
-
-void CudaVector::copyFrom2(Interface* interface, unsigned block_size)
-{
-	if (vectorType != interface->getVectorType()){
-		std::string error = "The Type of the Interface is different than the Vector Type.";
-		throw error;
-	}
-	if (tSize < interface->getSize()){
-		std::string error = "The Interface is greater than the Vector.";
-		throw error;
-	}
-	if (interface->getVectorType() == FLOAT){
-		cuda_copyToDevice(data, interface->getDataPointer(), interface->getByteSize());
-	} else {
-
-
-		unsigned interfaceSize = interface->getSize();
-
-		unsigned otherSize = ((interfaceSize-1)/(BITS_PER_UNSIGNED * block_size)+1) * (BITS_PER_UNSIGNED * block_size);
-		Interface interfaceOrderedByBlockSize = Interface(otherSize, interface->getVectorType());
-
-		unsigned bit = 0;
-		unsigned thread = 0;
-		unsigned block_offset = 0;
-
-		for (unsigned i=0; i < interfaceSize; i++){
-
-			unsigned weighPos = (thread * BITS_PER_UNSIGNED) + bit + block_offset;
-			interfaceOrderedByBlockSize.setElement(weighPos, interface->getElement(i++));
-			thread++;
-			if (thread == block_size){
-				thread = 0;
-				bit++;
-				if (bit == BITS_PER_UNSIGNED){
-					bit = 0;
-					block_offset += (block_size * BITS_PER_UNSIGNED);
-				}
-			}
-		}
-		cuda_copyToDevice(data, interfaceOrderedByBlockSize.getDataPointer(), interfaceOrderedByBlockSize.getByteSize());
 	}
 }
 
@@ -112,11 +92,10 @@ void CudaVector::mutateImpl(unsigned pos, float mutation)
 
 void CudaVector::crossoverImpl(Vector* other, Interface* bitVector)
 {
-    CudaVector* cudaBitVector = new CudaVector(tSize, BIT, Cuda_Threads_Per_Block);
-    cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
-    unsigned* cudaBitVectorPtr = (unsigned*)(cudaBitVector->getDataPointer());
+    CudaVector* cudaBitVector = new CudaVector(bitVector, Cuda_Threads_Per_Block);
 
-    cuda_crossover(this->getDataPointer(), other->getDataPointer(), cudaBitVectorPtr, tSize, vectorType, Cuda_Threads_Per_Block);
+    cuda_crossover(this->getDataPointer(), other->getDataPointer(), (unsigned*)(cudaBitVector->getDataPointer()),
+						tSize, vectorType, Cuda_Threads_Per_Block);
     delete(cudaBitVector);
 }
 

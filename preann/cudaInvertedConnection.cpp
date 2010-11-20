@@ -35,11 +35,10 @@ void CudaInvertedConnection::crossoverImpl(Connection* other, Interface* bitVect
 			invertedBitVector->setElement(i  + (j * width), bitVector->getElement((i * height) + j));
 		}
 	}
-	CudaVector* cudaBitVector = new CudaVector(tSize, BIT, Cuda_Threads_Per_Block);
-	cudaBitVector->copyFrom2(bitVector, Cuda_Threads_Per_Block);
-	unsigned* cudaBitVectorPtr = (unsigned*)(cudaBitVector->getDataPointer());
+	CudaVector* cudaBitVector = new CudaVector(bitVector, Cuda_Threads_Per_Block);
 
-	cuda_crossover(this->getDataPointer(), other->getDataPointer(), cudaBitVectorPtr, tSize, vectorType, Cuda_Threads_Per_Block);
+	cuda_crossover(this->getDataPointer(), other->getDataPointer(), (unsigned*)(cudaBitVector->getDataPointer()),
+						tSize, vectorType, Cuda_Threads_Per_Block);
 
 	delete(cudaBitVector);
 	delete(invertedBitVector);

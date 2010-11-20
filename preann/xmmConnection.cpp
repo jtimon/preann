@@ -171,6 +171,8 @@ void XmmConnection::mutateImpl(unsigned pos, float mutation)
         }
         break;
     case FLOAT:
+    	offsetPerInput = offsetPerInput / sizeof(float);
+    	elem = (outputPos * offsetPerInput) + inputPos;
         ((float*)(data))[elem] += mutation;
 			break;
 		case BIT:
@@ -224,7 +226,7 @@ void XmmConnection::crossoverImpl(Vector* other, Interface* bitVector)
 			break;
 		case BIT:
 		case SIGN:
-			std::string error = "XmmConnection::weighCrossover is not implemented for VectorType BIT nor SIGN.";
+			std::string error = "XmmConnection::crossoverImpl is not implemented for VectorType BIT nor SIGN.";
 			throw error;
 	}
 }
