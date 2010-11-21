@@ -1,9 +1,3 @@
-/*
- * connection.cpp
- *
- *  Created on: Nov 13, 2010
- *      Author: timon
- */
 
 #include "connection.h"
 
@@ -27,4 +21,5 @@ void Connection::setInput(Vector* input)
 	}
 	tInput = input;
 }
+
 
