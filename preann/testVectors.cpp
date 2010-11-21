@@ -96,37 +96,34 @@ unsigned testClone(Vector* toTest)
 
 unsigned testCopyFrom(Vector* toTest)
 {
-	Interface* interface = new Interface(toTest->getSize(), toTest->getVectorType());
-	interface->random(INITIAL_WEIGHS_RANGE);
+	Interface interface = Interface(toTest->getSize(), toTest->getVectorType());
+	interface.random(INITIAL_WEIGHS_RANGE);
 
 	unsigned differencesCounter = 0;
 	Vector* cVector = Factory::newVector(toTest, C);
 
-	toTest->copyFromInterface(interface);
-	cVector->copyFromInterface(interface);
+	toTest->copyFromInterface(&interface);
+	cVector->copyFromInterface(&interface);
 
 	differencesCounter += assertEquals(cVector, toTest);
 
 	delete(cVector);
-	delete(interface);
 	return differencesCounter;
 }
 
 unsigned testCopyTo(Vector* toTest)
 {
-	Interface* interface = new Interface(toTest->getSize(), toTest->getVectorType());
+	Interface interface = Interface(toTest->getSize(), toTest->getVectorType());
 
 	Vector* cVector = Factory::newVector(toTest, C);
-	Interface* cInterface = new Interface(toTest->getSize(), toTest->getVectorType());
+	Interface cInterface = Interface(toTest->getSize(), toTest->getVectorType());
 
-	toTest->copyToInterface(interface);
-	cVector->copyToInterface(cInterface);
+	toTest->copyToInterface(&interface);
+	cVector->copyToInterface(&cInterface);
 
-	unsigned differencesCounter = assertEqualsInterfaces(cInterface, interface);
+	unsigned differencesCounter = assertEqualsInterfaces(&cInterface, &interface);
 
-	delete(interface);
 	delete(cVector);
-	delete(cInterface);
 	return differencesCounter;
 }
 
@@ -166,8 +163,8 @@ unsigned testMutate(Vector* toTest, unsigned times)
 
 unsigned testCrossover(Vector* toTest)
 {
-	Interface* bitVector = new Interface(toTest->getSize(), BIT);
-	bitVector->random(1);
+	Interface bitVector = Interface(toTest->getSize(), BIT);
+	bitVector.random(1);
 
 	Vector* other = Factory::newVector(toTest->getSize(), toTest->getVectorType(), toTest->getImplementationType());
 	other->random(INITIAL_WEIGHS_RANGE);
@@ -175,13 +172,12 @@ unsigned testCrossover(Vector* toTest)
 	Vector* cVector = Factory::newVector(toTest, C);
 	Vector* cOther = Factory::newVector(other, C);
 
-	toTest->crossover(other, bitVector);
-	cVector->crossover(cOther, bitVector);
+	toTest->crossover(other, &bitVector);
+	cVector->crossover(cOther, &bitVector);
 
 	unsigned differences = assertEquals(cVector, toTest);
 	differences += assertEquals(cOther, other);
 
-	delete(bitVector);
 	delete(other);
 	delete(cVector);
 	delete(cOther);
@@ -246,16 +242,15 @@ unsigned testCrossover(Connection* toTest)
 	Connection* cOther = Factory::newConnection(cInput, outputSize, C);
 	cOther->copyFrom(other);
 
-	Interface* bitVector = new Interface(toTest->getSize(), BIT);
-	bitVector->random(1);
+	Interface bitVector = Interface(toTest->getSize(), BIT);
+	bitVector.random(1);
 
-	toTest->crossover(other, bitVector);
-	cConnection->crossover(cOther, bitVector);
+	toTest->crossover(other, &bitVector);
+	cConnection->crossover(cOther, &bitVector);
 
 	unsigned differences = assertEquals(cConnection, toTest);
 	differences += assertEquals(cOther, other);
 
-	delete(bitVector);
 	delete(other);
 	delete(cInput);
 	delete(cConnection);
