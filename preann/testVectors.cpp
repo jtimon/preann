@@ -196,8 +196,8 @@ unsigned testAddToResults(Connection* toTest)
 
 	Vector* cResults = Factory::newVector(outputSize, FLOAT, C);
 
-	toTest->addToResults(results);
-	cConnection->addToResults(cResults);
+	toTest->calculateAndAddTo(results);
+	cConnection->calculateAndAddTo(cResults);
 
 	unsigned differencesCounter = assertEquals(cResults, results);
 

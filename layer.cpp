@@ -115,7 +115,7 @@ void Layer::calculateOutput()
 	Vector* results = thresholds->clone();
 
 	for(unsigned i=0; i < numberInputs; i++){
-		connections[i]->addToResults(results);
+		connections[i]->calculateAndAddTo(results);
 	}
 
 	output->activation(results, functionType);

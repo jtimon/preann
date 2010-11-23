@@ -31,7 +31,7 @@ void CudaInvertedConnection::crossoverImpl(Vector* other, Interface* bitVector)
 	CudaVector::crossoverImpl(other, &invertedBitVector);
 }
 
-void CudaInvertedConnection::addToResults(Vector* results)
+void CudaInvertedConnection::calculateAndAddTo(Vector* results)
 {
 	void* inputWeighs = this->getDataPointer();
 	float* resultsPtr = (float*)results->getDataPointer();

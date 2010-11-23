@@ -12,7 +12,7 @@ CudaConnection::CudaConnection(Vector* input, unsigned outputSize, VectorType ve
 	tInput = input;
 }
 
-void CudaConnection::addToResults(Vector* results)
+void CudaConnection::calculateAndAddTo(Vector* results)
 {
 	void* inputWeighs = this->getDataPointer();
 	float* resultsPtr = (float*)results->getDataPointer();

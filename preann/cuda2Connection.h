@@ -18,7 +18,7 @@ public:
 		return CUDA2;
 	};
 
-	virtual void addToResults(Vector* results);
+	virtual void calculateAndAddTo(Vector* results);
 };
 
 #endif /* CUDA2CONNECTION_H_ */

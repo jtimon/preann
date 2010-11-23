@@ -15,7 +15,7 @@ public:
 	XmmConnection(Vector* input, unsigned outputSize, VectorType vectorType);
 	virtual ~XmmConnection() {};
 
-	virtual void addToResults(Vector* results);
+	virtual void calculateAndAddTo(Vector* results);
 
 };
 

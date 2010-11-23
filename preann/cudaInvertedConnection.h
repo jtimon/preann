@@ -18,7 +18,7 @@ public:
 		return CUDA_INV;
 	};
 
-	virtual void addToResults(Vector* results);
+	virtual void calculateAndAddTo(Vector* results);
 
 };
 

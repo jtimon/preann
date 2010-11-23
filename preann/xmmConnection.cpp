@@ -32,7 +32,7 @@ XmmConnection::XmmConnection(Vector* input, unsigned outputSize, VectorType vect
 	}
 }
 
-void XmmConnection::addToResults(Vector* resultsVect)
+void XmmConnection::calculateAndAddTo(Vector* resultsVect)
 {
 	void* inputWeighs = this->getDataPointer();
 	float* results = (float*)resultsVect->getDataPointer();

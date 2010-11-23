@@ -13,7 +13,7 @@ public:
 	Vector* getInput();
 	void setInput(Vector* input);
 
-	virtual void addToResults(Vector* results) = 0;
+	virtual void calculateAndAddTo(Vector* results) = 0;
 };
 
 #endif /* CONNECTION_H_ */

@@ -16,7 +16,7 @@ public:
 	CudaConnection(Vector* input, unsigned outputSize, VectorType vectorType);
 	virtual ~CudaConnection() {};
 
-	virtual void addToResults(Vector* results);
+	virtual void calculateAndAddTo(Vector* results);
 };
 
 #endif /* CUDACONNECTION_H_ */

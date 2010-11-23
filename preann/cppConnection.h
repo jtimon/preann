@@ -10,7 +10,7 @@ public:
 	CppConnection(Vector* input, unsigned outputSize, VectorType vectorType);
 	virtual ~CppConnection() {};
 
-	virtual void addToResults(Vector* results);
+	virtual void calculateAndAddTo(Vector* results);
 };
 
 #endif /* CPPCONNECTION_H_ */

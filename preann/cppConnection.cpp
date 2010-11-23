@@ -6,7 +6,7 @@ CppConnection::CppConnection(Vector* input, unsigned outputSize, VectorType vect
 	tInput = input;
 }
 
-void CppConnection::addToResults(Vector* resultsVect)
+void CppConnection::calculateAndAddTo(Vector* resultsVect)
 {
 	float* results = (float*)resultsVect->getDataPointer();
 	unsigned inputSize = tInput->getSize();

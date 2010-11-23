@@ -11,7 +11,7 @@ Cuda2Connection::Cuda2Connection(Vector* input, unsigned outputSize, VectorType 
 {
 }
 
-void Cuda2Connection::addToResults(Vector* results)
+void Cuda2Connection::calculateAndAddTo(Vector* results)
 {
 	void* inputWeighs = this->getDataPointer();
 	float* resultsPtr = (float*)results->getDataPointer();
