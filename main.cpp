@@ -9,7 +9,7 @@ using namespace std;
 
 #define PATH "/home/timon/test.nn"
 
-//TODO Z esto peta con BIT inputType = BIT maxSize = 163840, 16258024
+//TODO TCC esto peta con BIT inputType = BIT maxSize = 163840, 16258024
 //este to do estaba en CppLayer::randomweighs
 
 float testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType,
