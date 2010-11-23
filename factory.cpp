@@ -40,17 +40,32 @@ Vector* Factory::newVector(Vector* vector, ImplementationType implementationType
     return toReturn;
 }
 
-Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType)
+template <VectorType vectorTypeTempl>
+Vector* func_newVector(unsigned size, ImplementationType implementationType)
 {
 	switch(implementationType){
 		case C:
-			return new CppVector(size, vectorType);
+			return new CppVector<vectorTypeTempl>(size);
 		case SSE2:
-			return new XmmVector(size, vectorType);
+			return new XmmVector(size, vectorTypeTempl);
 		case CUDA:
 		case CUDA2:
 		case CUDA_INV:
-			return new CudaVector(size, vectorType);
+			return new CudaVector(size, vectorTypeTempl);
+	}
+}
+
+Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType)
+{
+	switch(vectorType){
+		case FLOAT:
+			return func_newVector<FLOAT>(size, implementationType);
+		case BYTE:
+			return func_newVector<BYTE>(size, implementationType);
+		case BIT:
+			return func_newVector<BIT>(size, implementationType);
+		case SIGN:
+			return func_newVector<SIGN>(size, implementationType);
 	}
 }
 
@@ -60,28 +75,37 @@ Connection* Factory::newConnection(FILE* stream, unsigned outputSize, Implementa
 	throw error;
 }
 
+template <VectorType vectorTypeTempl>
+Connection* func_newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType)
+{
+	switch(implementationType){
+		case C:
+			return new CppConnection<vectorTypeTempl>(input, outputSize);
+		case SSE2:
+			return new XmmConnection(input, outputSize, vectorTypeTempl);
+		case CUDA:
+			return new CudaConnection(input, outputSize, vectorTypeTempl);
+		case CUDA2:
+			return new Cuda2Connection(input, outputSize, vectorTypeTempl);
+		case CUDA_INV:
+			return new CudaInvertedConnection(input, outputSize, vectorTypeTempl);
+	}
+}
+
 Connection* Factory::newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType)
 {
 	VectorType vectorType = Factory::weighForInput(input->getVectorType());
-	Connection* toReturn;
-	switch(implementationType){
-		case C:
-			toReturn = new CppConnection(input, outputSize, vectorType);
-			break;
-		case SSE2:
-			toReturn = new XmmConnection(input, outputSize, vectorType);
-			break;
-		case CUDA:
-			toReturn = new CudaConnection(input, outputSize, vectorType);
-			break;
-		case CUDA2:
-			toReturn = new Cuda2Connection(input, outputSize, vectorType);
-			break;
-		case CUDA_INV:
-			toReturn = new CudaInvertedConnection(input, outputSize, vectorType);
-			break;
+
+	switch(vectorType){
+		case FLOAT:
+			return func_newConnection<FLOAT>(input, outputSize, implementationType);
+		case BYTE:
+			return func_newConnection<BYTE>(input, outputSize, implementationType);
+		case BIT:
+			return func_newConnection<BIT>(input, outputSize, implementationType);
+		case SIGN:
+			return func_newConnection<SIGN>(input, outputSize, implementationType);
 	}
-	return toReturn;
 }
 
 VectorType Factory::weighForInput(VectorType inputType)
