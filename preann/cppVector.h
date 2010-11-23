@@ -8,10 +8,10 @@
 #ifndef CPPVECTOR_H_
 #define CPPVECTOR_H_
 
-#include "vector.h"
+#include "vectorImpl.h"
 
 template <VectorType vectorTypeTempl>
-class CppVector: virtual public Vector {
+class CppVector: virtual public Vector, virtual public VectorImpl<vectorTypeTempl> {
 protected:
 	unsigned getByteSize();
 	virtual void copyToImpl(Interface* interface);

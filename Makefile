@@ -60,28 +60,12 @@ neuralNet.o : neuralNet.cpp neuralNet.h layer.o
 layer.o : layer.cpp layer.h factory.o
 	$(CXX) $<
 	
-factory.o : factory.cpp factory.h cppVector.h sse2_code.o cudaVector.o cppConnection.h xmmConnection.h cudaConnection.o cuda2Connection.o cudaInvertedConnection.o
-	$(CXX) $<
-
-cudaInvertedConnection.o : cudaInvertedConnection.cpp cudaInvertedConnection.h cudaVector.o
-	$(NVCC_COMPILE) -c $<
-cuda2Connection.o : cuda2Connection.cpp cuda2Connection.h cudaConnection.o
-	$(NVCC_COMPILE) -c $<
-cudaConnection.o : cudaConnection.cpp cudaConnection.h cudaVector.o
-	$(NVCC_COMPILE) -c $<
-
-# Vector abstract class is required by all of its implementations.
-cppConnection.o xmmConnection.o cudaConnection.o cuda2Connection.o cudaInvertedConnection.o : connection.o
+factory.o : factory.cpp factory.h cppVector.h vectorImpl.h sse2_code.o cudaVector.h cppConnection.h xmmConnection.h cudaConnection.h cuda2Connection.h cudaInvertedConnection.h cuda_code.o
+	$(NVCC_COMPILE) $<
 
 connection.o : connection.cpp connection.h vector.o
 	$(CXX) $<
 
-cudaVector.o : cudaVector.cpp cudaVector.h cuda_code.o
-	$(NVCC_COMPILE) -c $<
-
-# Vector abstract class is required by all of its implementations.
-xmmVector.o cudaVector.o : vector.o
-  
 vector.o : vector.cpp vector.h interface.o
 	$(CXX) $<
 interface.o : interface.cpp interface.h commonFunctions.o

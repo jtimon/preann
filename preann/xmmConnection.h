@@ -53,7 +53,7 @@ void XmmConnection<vectorTypeTempl>::calculateAndAddTo(Vector* resultsVect)
 	void* inputPtr = tInput->getDataPointer();
 
 	unsigned numLoops;
-	unsigned offsetPerInput = XmmVector<vectorTypeTempl>::getByteSize(tInput->getSize(), vectorType);
+	unsigned offsetPerInput = XmmVector<vectorTypeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
 	unsigned weighPos = 0;
 
 

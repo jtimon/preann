@@ -51,7 +51,7 @@ Vector* func_newVector(unsigned size, ImplementationType implementationType)
 		case CUDA:
 		case CUDA2:
 		case CUDA_INV:
-			return new CudaVector(size, vectorTypeTempl);
+			return new CudaVector<vectorTypeTempl>(size);
 	}
 }
 
@@ -84,11 +84,11 @@ Connection* func_newConnection(Vector* input, unsigned outputSize, Implementatio
 		case SSE2:
 			return new XmmConnection<vectorTypeTempl>(input, outputSize);
 		case CUDA:
-			return new CudaConnection(input, outputSize, vectorTypeTempl);
+			return new CudaConnection<vectorTypeTempl>(input, outputSize);
 		case CUDA2:
-			return new Cuda2Connection(input, outputSize, vectorTypeTempl);
+			return new Cuda2Connection<vectorTypeTempl>(input, outputSize);
 		case CUDA_INV:
-			return new CudaInvertedConnection(input, outputSize, vectorTypeTempl);
+			return new CudaInvertedConnection<vectorTypeTempl>(input, outputSize);
 	}
 }
 

@@ -17,7 +17,6 @@ class Vector {
 protected:
 	unsigned tSize;
 	void* data;
-	VectorType vectorType;
 
 	Vector() {};
 	virtual void copyFromImpl(Interface* interface) = 0;
@@ -27,6 +26,7 @@ protected:
 public:
 	virtual ~Vector() {};
 	virtual ImplementationType getImplementationType() = 0;
+	virtual VectorType getVectorType() = 0;
 
 	virtual Vector* clone() = 0;
 	virtual void activation(Vector* results, FunctionType functionType) = 0;
@@ -40,7 +40,7 @@ public:
 
 	void* getDataPointer();
 	unsigned getSize();
-	VectorType getVectorType();
+
 	FunctionType getFunctionType();
 	Interface* toInterface();
 

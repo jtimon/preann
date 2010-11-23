@@ -10,9 +10,10 @@
 
 #include "cudaConnection.h"
 
-class Cuda2Connection: public CudaConnection {
+template <VectorType vectorTypeTempl>
+class Cuda2Connection: virtual public Connection, public CudaConnection<vectorTypeTempl> {
 public:
-	Cuda2Connection(Vector* input, unsigned outputSize, VectorType vectorType);
+	Cuda2Connection(Vector* input, unsigned outputSize);
 	virtual ~Cuda2Connection() {};
 	virtual ImplementationType getImplementationType() {
 		return CUDA2;
@@ -20,5 +21,20 @@ public:
 
 	virtual void calculateAndAddTo(Vector* results);
 };
+
+template <VectorType vectorTypeTempl>
+Cuda2Connection<vectorTypeTempl>::Cuda2Connection(Vector* input, unsigned outputSize)
+		: CudaConnection<vectorTypeTempl>(input, outputSize)
+{
+}
+
+template <VectorType vectorTypeTempl>
+void Cuda2Connection<vectorTypeTempl>::calculateAndAddTo(Vector* results)
+{
+	void* inputWeighs = this->getDataPointer();
+	float* resultsPtr = (float*)results->getDataPointer();
+	// TODO TCC este método no funciona correctamente para SIGN
+	cuda_inputCalculationReduction(tInput->getDataPointer(), tInput->getSize(), tInput->getVectorType(), results->getSize(), inputWeighs, resultsPtr, Cuda_Threads_Per_Block);
+}
 
 #endif /* CUDA2CONNECTION_H_ */

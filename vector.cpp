@@ -22,7 +22,7 @@ void Vector::crossover(Vector* other, Interface* bitVector)
 		std::string error = "The Vectors must have the same size to crossover them.";
 		throw error;
 	}
-	if (vectorType != other->getVectorType()){
+	if (getVectorType() != other->getVectorType()){
 		std::string error = "The Vectors must have the same type to crossover them.";
 		throw error;
 	}
@@ -35,7 +35,7 @@ void Vector::copyFromInterface(Interface* interface)
 		std::string error = "The Interface is greater than the Vector.";
 		throw error;
 	}
-	if (vectorType != interface->getVectorType()){
+	if (getVectorType() != interface->getVectorType()){
 		std::string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
@@ -48,7 +48,7 @@ void Vector::copyToInterface(Interface* interface)
 		std::string error = "The Vector is greater than the Interface.";
 		throw error;
 	}
-	if (vectorType != interface->getVectorType()){
+	if (getVectorType() != interface->getVectorType()){
 		std::string error = "The Type of the Interface is different than the Vector Type.";
 		throw error;
 	}
@@ -65,14 +65,9 @@ unsigned Vector::getSize()
 	return tSize;
 }
 
-VectorType Vector::getVectorType()
-{
-	return vectorType;
-}
-
 Interface* Vector::toInterface()
 {
-	Interface* toReturn = new Interface(this->tSize, this->vectorType);
+	Interface* toReturn = new Interface(this->tSize, this->getVectorType());
 	this->copyToImpl(toReturn);
 	return toReturn;
 }

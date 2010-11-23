@@ -8,11 +8,11 @@
 #ifndef XMMVECTOR_H_
 #define XMMVECTOR_H_
 
-#include "vector.h"
+#include "vectorImpl.h"
 #include "sse2_code.h"
 
 template <VectorType vectorTypeTempl>
-class XmmVector: virtual public Vector {
+class XmmVector: virtual public Vector, virtual public VectorImpl<vectorTypeTempl> {
 protected:
 	static unsigned getByteSize(unsigned size, VectorType vectorType);
     void bitCopyFrom(Interface *interface, unsigned char *vectorData);
@@ -40,12 +40,11 @@ template <VectorType vectorTypeTempl>
 XmmVector<vectorTypeTempl>::XmmVector(unsigned size)
 {
 	this->tSize = size;
-	this->vectorType = vectorType;
 
-	size_t byteSize = getByteSize(size, vectorType);
+	size_t byteSize = getByteSize(size, vectorTypeTempl);
 	data = mi_malloc(byteSize);
 
-	switch (vectorType){
+	switch (vectorTypeTempl){
 
 	case BYTE:
 		SetValueToAnArray<unsigned char>(data, byteSize, 128);
@@ -108,7 +107,7 @@ void XmmVector<vectorTypeTempl>::bitCopyFrom(Interface *interface, unsigned char
 template <VectorType vectorTypeTempl>
 void XmmVector<vectorTypeTempl>::copyFromImpl(Interface* interface)
 {
-	switch (vectorType){
+	switch (vectorTypeTempl){
 	case BYTE:
 		for (unsigned i=0; i < tSize; i++){
 			((unsigned char*)(data))[i] = interface->getElement(i);
@@ -158,7 +157,7 @@ void XmmVector<vectorTypeTempl>::bitCopyTo(unsigned char *vectorData, Interface 
 template <VectorType vectorTypeTempl>
 void XmmVector<vectorTypeTempl>::copyToImpl(Interface* interface)
 {
-	switch (vectorType){
+	switch (vectorTypeTempl){
 	case BYTE:
 		for (unsigned i=0; i < tSize; i++){
 			interface->setElement(i, ((unsigned char*)data)[i]);
@@ -182,7 +181,7 @@ void XmmVector<vectorTypeTempl>::activation(Vector* resultsVect, FunctionType fu
 {
 	float* results = (float*)resultsVect->getDataPointer();
 
-	switch (vectorType){
+	switch (vectorTypeTempl){
 	case BYTE:
 		{
 			std::string error = "XmmVector::activation is not implemented for VectorType BYTE.";
@@ -232,7 +231,7 @@ void XmmVector<vectorTypeTempl>::activation(Vector* resultsVect, FunctionType fu
 template <VectorType vectorTypeTempl>
 void XmmVector<vectorTypeTempl>::mutateImpl(unsigned pos, float mutation)
 {
-	switch (vectorType){
+	switch (vectorTypeTempl){
 	case BYTE:{
 		unsigned char* weigh = &(((unsigned char*)data)[pos]);
 		int result = (int)mutation + *weigh;
@@ -265,7 +264,7 @@ void XmmVector<vectorTypeTempl>::crossoverImpl(Vector* other, Interface* bitVect
 	void* otherWeighs = other->getDataPointer();
 	void* thisWeighs = this->getDataPointer();
 
-	switch (vectorType){
+	switch (vectorTypeTempl){
 	case BYTE:{
 		unsigned char auxWeigh;
 
