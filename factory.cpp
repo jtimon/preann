@@ -47,7 +47,7 @@ Vector* func_newVector(unsigned size, ImplementationType implementationType)
 		case C:
 			return new CppVector<vectorTypeTempl>(size);
 		case SSE2:
-			return new XmmVector(size, vectorTypeTempl);
+			return new XmmVector<vectorTypeTempl>(size);
 		case CUDA:
 		case CUDA2:
 		case CUDA_INV:
@@ -82,7 +82,7 @@ Connection* func_newConnection(Vector* input, unsigned outputSize, Implementatio
 		case C:
 			return new CppConnection<vectorTypeTempl>(input, outputSize);
 		case SSE2:
-			return new XmmConnection(input, outputSize, vectorTypeTempl);
+			return new XmmConnection<vectorTypeTempl>(input, outputSize);
 		case CUDA:
 			return new CudaConnection(input, outputSize, vectorTypeTempl);
 		case CUDA2:

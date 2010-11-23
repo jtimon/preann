@@ -11,7 +11,7 @@ NASM = nasm -f elf
 
 CLASSIFCATON_OBJ = classificationTask.o
 GA_OBJ = population.o task.o individual.o
-NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o xmmVector.o layer.o neuralNet.o factory.o interface.o cudaVector.o connection.o xmmConnection.o cudaConnection.o cuda2Connection.o cudaInvertedConnection.o
+NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o layer.o neuralNet.o factory.o interface.o cudaVector.o connection.o cudaConnection.o cuda2Connection.o cudaInvertedConnection.o
 
 TESTS = ./bin/testMemoryLosses ./bin/testLayers ./bin/testNeuralNets ./bin/testVectors
 
@@ -60,7 +60,7 @@ neuralNet.o : neuralNet.cpp neuralNet.h layer.o
 layer.o : layer.cpp layer.h factory.o
 	$(CXX) $<
 	
-factory.o : factory.cpp factory.h cppVector.h xmmVector.o cudaVector.o cppConnection.h xmmConnection.o cudaConnection.o cuda2Connection.o cudaInvertedConnection.o
+factory.o : factory.cpp factory.h cppVector.h sse2_code.o cudaVector.o cppConnection.h xmmConnection.h cudaConnection.o cuda2Connection.o cudaInvertedConnection.o
 	$(CXX) $<
 
 cudaInvertedConnection.o : cudaInvertedConnection.cpp cudaInvertedConnection.h cudaVector.o
@@ -69,8 +69,6 @@ cuda2Connection.o : cuda2Connection.cpp cuda2Connection.h cudaConnection.o
 	$(NVCC_COMPILE) -c $<
 cudaConnection.o : cudaConnection.cpp cudaConnection.h cudaVector.o
 	$(NVCC_COMPILE) -c $<
-xmmConnection.o : xmmConnection.cpp xmmConnection.h xmmVector.o
-	$(CXX) $<
 
 # Vector abstract class is required by all of its implementations.
 cppConnection.o xmmConnection.o cudaConnection.o cuda2Connection.o cudaInvertedConnection.o : connection.o
@@ -80,8 +78,6 @@ connection.o : connection.cpp connection.h vector.o
 
 cudaVector.o : cudaVector.cpp cudaVector.h cuda_code.o
 	$(NVCC_COMPILE) -c $<
-xmmVector.o : xmmVector.cpp xmmVector.h sse2_code.o
-	$(CXX) $<
 
 # Vector abstract class is required by all of its implementations.
 xmmVector.o cudaVector.o : vector.o
