@@ -1,11 +1,11 @@
 /*
- * commonFunctions.c
+ * util.c
  *
  *  Created on: Nov 16, 2009
  *      Author: timon
  */
 
-#include "generalDefinitions.h"
+#include "util.h"
 
 void* ptrs[5000];
 unsigned ptr_sizes[5000];
@@ -94,34 +94,6 @@ unsigned mem_getPtrCounter(){
 
 unsigned mem_getTotalAllocated(){
 	return totalAllocated;
-}
-
-float Function(float number, FunctionType functionType) {
-
-	switch (functionType) {
-
-	//TODO z add different activation functions
-	//break;
-	case BINARY_STEP:
-		if (number > 0) {
-			return 1;
-		} else {
-			return 0;
-		}
-	case BIPOLAR_STEP:
-		if (number > 0) {
-			return 1;
-		} else {
-			return -1;
-		}
-		//case ANOTHER_FUNCTION:
-		//	return anotherFunction(number);
-
-		//break;
-	case IDENTITY:
-	default:
-		return number;
-	}
 }
 
 int randomInt(unsigned range) {

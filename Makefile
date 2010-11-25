@@ -11,7 +11,7 @@ NASM = nasm -f elf
 
 CLASSIFCATON_OBJ = classificationTask.o
 GA_OBJ = population.o task.o individual.o
-NETS_OBJ = sse2_code.o cuda_code.o chronometer.o commonFunctions.o vector.o layer.o neuralNet.o factory.o interface.o cudaVector.o connection.o cudaConnection.o cuda2Connection.o cudaInvertedConnection.o
+NETS_OBJ = sse2_code.o cuda_code.o chronometer.o util.o vector.o layer.o neuralNet.o factory.o interface.o connection.o
 
 TESTS = ./bin/testMemoryLosses ./bin/testLayers ./bin/testNeuralNets ./bin/testVectors
 
@@ -68,15 +68,15 @@ connection.o : connection.cpp connection.h vector.o
 
 vector.o : vector.cpp vector.h interface.o
 	$(CXX) $<
-interface.o : interface.cpp interface.h commonFunctions.o
+interface.o : interface.cpp interface.h util.o
 	$(CXX) $<
-commonFunctions.o : commonFunctions.c generalDefinitions.h
+util.o : util.c util.h
 	$(CXX) $<
 	
 chronometer.o : chronometer.cpp chronometer.h
 	$(CXX) $<
 
-cuda_code.o : cuda_code.cu cuda_code.h generalDefinitions.h
+cuda_code.o : cuda_code.cu cuda_code.h util.h
 	$(NVCC_COMPILE) $<
 sse2_code.o : sse2_code.asm sse2_code.h
 	$(NASM) $<

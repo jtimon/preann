@@ -1,5 +1,5 @@
 /*
- * generalDefinitions.h
+ * util.h
  *
  *  Created on: Nov 16, 2009
  *      Author: timon
@@ -28,7 +28,6 @@ typedef enum {IDENTITY, BINARY_STEP, BIPOLAR_STEP, REAL, SIGMOID, BIPOLAR_SIGMOI
 typedef enum {ROULETTE_WHEEL, RANKING, TOURNAMENT, TRUNCATION} SelectionType;
 typedef enum {WEIGH_UNIFORM, NEURON_UNIFORM, LAYER_UNIFORM, WEIGH_MULTIPOiNT, NEURON_MULTIPOiNT, LAYER_MULTIPOiNT} CrossoverType;
 
-float Function(float number, FunctionType functionType);
 int randomInt(unsigned range);
 float randomFloat(float range);
 unsigned randomUnsigned(unsigned range);
@@ -41,5 +40,35 @@ void mem_printTotalPointers();
 void mem_printListOfPointers();
 unsigned mem_getPtrCounter();
 unsigned mem_getTotalAllocated();
+
+
+template <class c_typeTempl>
+c_typeTempl Function(float number, FunctionType functionType) {
+
+	switch (functionType) {
+
+	//TODO z add different activation functions
+	//break;
+	case BINARY_STEP:
+		if (number > 0) {
+			return 1;
+		} else {
+			return 0;
+		}
+	case BIPOLAR_STEP:
+		if (number > 0) {
+			return 1;
+		} else {
+			return -1;
+		}
+		//case ANOTHER_FUNCTION:
+		//	return anotherFunction(number);
+
+		//break;
+	case IDENTITY:
+	default:
+		return number;
+	}
+}
 
 #endif /* GENERALDEFINITIONS_H_ */
