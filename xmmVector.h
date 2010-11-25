@@ -11,8 +11,8 @@
 #include "vectorImpl.h"
 #include "sse2_code.h"
 
-template <VectorType vectorTypeTempl>
-class XmmVector: virtual public Vector, virtual public VectorImpl<vectorTypeTempl> {
+template <VectorType vectorTypeTempl, class c_typeTempl>
+class XmmVector: virtual public Vector, virtual public VectorImpl<vectorTypeTempl, c_typeTempl> {
 protected:
 	static unsigned getByteSize(unsigned size, VectorType vectorType);
     void bitCopyFrom(Interface *interface, unsigned char *vectorData);
@@ -36,8 +36,8 @@ public:
 
 };
 
-template <VectorType vectorTypeTempl>
-XmmVector<vectorTypeTempl>::XmmVector(unsigned size)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+XmmVector<vectorTypeTempl, c_typeTempl>::XmmVector(unsigned size)
 {
 	this->tSize = size;
 
@@ -59,8 +59,8 @@ XmmVector<vectorTypeTempl>::XmmVector(unsigned size)
 	}
 }
 
-template <VectorType vectorTypeTempl>
-XmmVector<vectorTypeTempl>::~XmmVector()
+template <VectorType vectorTypeTempl, class c_typeTempl>
+XmmVector<vectorTypeTempl, c_typeTempl>::~XmmVector()
 {
 	if (data) {
 		mi_free(data);
@@ -68,16 +68,16 @@ XmmVector<vectorTypeTempl>::~XmmVector()
 	}
 }
 
-template <VectorType vectorTypeTempl>
-Vector* XmmVector<vectorTypeTempl>::clone()
+template <VectorType vectorTypeTempl, class c_typeTempl>
+Vector* XmmVector<vectorTypeTempl, c_typeTempl>::clone()
 {
-	Vector* clone = new XmmVector<vectorTypeTempl>(tSize);
+	Vector* clone = new XmmVector<vectorTypeTempl, c_typeTempl>(tSize);
 	copyTo(clone);
 	return clone;
 }
 
-template <VectorType vectorTypeTempl>
-void XmmVector<vectorTypeTempl>::bitCopyFrom(Interface *interface, unsigned char *vectorData)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmVector<vectorTypeTempl, c_typeTempl>::bitCopyFrom(Interface *interface, unsigned char *vectorData)
 {
     unsigned blockOffset = 0;
     unsigned bytePos = 0;
@@ -104,30 +104,44 @@ void XmmVector<vectorTypeTempl>::bitCopyFrom(Interface *interface, unsigned char
 	}
 }
 
-template <VectorType vectorTypeTempl>
-void XmmVector<vectorTypeTempl>::copyFromImpl(Interface* interface)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmVector<vectorTypeTempl, c_typeTempl>::copyFromImpl(Interface* interface)
 {
-	switch (vectorTypeTempl){
-	case BYTE:
-		for (unsigned i=0; i < tSize; i++){
-			((unsigned char*)(data))[i] = interface->getElement(i);
-		}
-		break;
-	case FLOAT:
-		for(unsigned i = 0;i < tSize;i++){
-			((float*)(data))[i] = interface->getElement(i);
-		}
-		break;
-	case BIT:
-	case SIGN:
-		unsigned char *vectorData = (unsigned char*)(data);
-		bitCopyFrom(interface, vectorData);
-		break;
+	switch (vectorTypeTempl) {
+		default:
+			memcpy(data, interface->getDataPointer(), interface->getByteSize());
+			break;
+		case BIT:
+		case SIGN:
+		    unsigned blockOffset = 0;
+		    unsigned bytePos = 0;
+		    unsigned char vectorMask = 128;
+		    unsigned char *vectorData = (unsigned char*)(data);
+
+		    for (unsigned i=0; i < tSize; i++){
+				if (interface->getElement(i) > 0){
+					vectorData[blockOffset + bytePos] |= vectorMask;
+				} else {
+					vectorData[blockOffset + bytePos] &= ~vectorMask;
+				}
+
+				if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK-1)){
+					bytePos = 0;
+					if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK-1)){
+						blockOffset += BYTES_PER_BLOCK;
+						vectorMask = 128;
+					} else {
+						vectorMask >>= 1;
+					}
+				} else {
+					++bytePos;
+				}
+			}
 	}
 }
 
-template <VectorType vectorTypeTempl>
-void XmmVector<vectorTypeTempl>::bitCopyTo(unsigned char *vectorData, Interface *interface)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmVector<vectorTypeTempl, c_typeTempl>::bitCopyTo(unsigned char *vectorData, Interface *interface)
 {
     unsigned blockOffset = 0;
     unsigned bytePos = 0;
@@ -154,8 +168,8 @@ void XmmVector<vectorTypeTempl>::bitCopyTo(unsigned char *vectorData, Interface 
 	}
 }
 
-template <VectorType vectorTypeTempl>
-void XmmVector<vectorTypeTempl>::copyToImpl(Interface* interface)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmVector<vectorTypeTempl, c_typeTempl>::copyToImpl(Interface* interface)
 {
 	switch (vectorTypeTempl){
 	case BYTE:
@@ -176,8 +190,8 @@ void XmmVector<vectorTypeTempl>::copyToImpl(Interface* interface)
 	}
 }
 
-template <VectorType vectorTypeTempl>
-void XmmVector<vectorTypeTempl>::activation(Vector* resultsVect, FunctionType functionType)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmVector<vectorTypeTempl, c_typeTempl>::activation(Vector* resultsVect, FunctionType functionType)
 {
 	float* results = (float*)resultsVect->getDataPointer();
 
@@ -228,8 +242,8 @@ void XmmVector<vectorTypeTempl>::activation(Vector* resultsVect, FunctionType fu
 }
 
 //TODO D esto es igual en CppVector
-template <VectorType vectorTypeTempl>
-void XmmVector<vectorTypeTempl>::mutateImpl(unsigned pos, float mutation)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmVector<vectorTypeTempl, c_typeTempl>::mutateImpl(unsigned pos, float mutation)
 {
 	switch (vectorTypeTempl){
 	case BYTE:{
@@ -258,8 +272,8 @@ void XmmVector<vectorTypeTempl>::mutateImpl(unsigned pos, float mutation)
 }
 
 //TODO D esto es igual en CppVector
-template <VectorType vectorTypeTempl>
-void XmmVector<vectorTypeTempl>::crossoverImpl(Vector* other, Interface* bitVector)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmVector<vectorTypeTempl, c_typeTempl>::crossoverImpl(Vector* other, Interface* bitVector)
 {
 	void* otherWeighs = other->getDataPointer();
 	void* thisWeighs = this->getDataPointer();
@@ -292,14 +306,14 @@ void XmmVector<vectorTypeTempl>::crossoverImpl(Vector* other, Interface* bitVect
 	case BIT:
 	case SIGN:
 		{
-		std::string error = "XmmConnection::weighCrossover is not implemented for VectorType BIT nor SIGN.";
+		std::string error = "XmmVector::crossoverImpl is not implemented for VectorType BIT nor SIGN.";
 		throw error;
 		}
 	}
 }
 
-template <VectorType vectorTypeTempl>
-unsigned XmmVector<vectorTypeTempl>::getByteSize(unsigned size, VectorType vectorType)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+unsigned XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(unsigned size, VectorType vectorType)
 {
 	unsigned numBlocks;
 	switch (vectorType){

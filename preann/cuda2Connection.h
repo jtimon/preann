@@ -10,8 +10,8 @@
 
 #include "cudaConnection.h"
 
-template <VectorType vectorTypeTempl>
-class Cuda2Connection: virtual public Connection, public CudaConnection<vectorTypeTempl> {
+template <VectorType vectorTypeTempl, class c_typeTempl>
+class Cuda2Connection: virtual public Connection, public CudaConnection<vectorTypeTempl, c_typeTempl> {
 public:
 	Cuda2Connection(Vector* input, unsigned outputSize);
 	virtual ~Cuda2Connection() {};
@@ -22,14 +22,14 @@ public:
 	virtual void calculateAndAddTo(Vector* results);
 };
 
-template <VectorType vectorTypeTempl>
-Cuda2Connection<vectorTypeTempl>::Cuda2Connection(Vector* input, unsigned outputSize)
-		: CudaConnection<vectorTypeTempl>(input, outputSize)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+Cuda2Connection<vectorTypeTempl, c_typeTempl>::Cuda2Connection(Vector* input, unsigned outputSize)
+		: CudaConnection<vectorTypeTempl, c_typeTempl>(input, outputSize)
 {
 }
 
-template <VectorType vectorTypeTempl>
-void Cuda2Connection<vectorTypeTempl>::calculateAndAddTo(Vector* results)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void Cuda2Connection<vectorTypeTempl, c_typeTempl>::calculateAndAddTo(Vector* results)
 {
 	void* inputWeighs = this->getDataPointer();
 	float* resultsPtr = (float*)results->getDataPointer();

@@ -4,8 +4,8 @@
 #include "connection.h"
 #include "cudaVector.h"
 
-template <VectorType vectorTypeTempl>
-class CudaInvertedConnection: public virtual Connection, public CudaVector<vectorTypeTempl> {
+template <VectorType vectorTypeTempl, class c_typeTempl>
+class CudaInvertedConnection: public virtual Connection, public CudaVector<vectorTypeTempl, c_typeTempl> {
 protected:
 	//redefined from CudaVector
 	virtual void copyFromImpl(Interface* interface);
@@ -23,15 +23,15 @@ public:
 
 };
 
-template <VectorType vectorTypeTempl>
-CudaInvertedConnection<vectorTypeTempl>::CudaInvertedConnection(Vector* input, unsigned outputSize)
-	: CudaVector<vectorTypeTempl>(input->getSize() * outputSize)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+CudaInvertedConnection<vectorTypeTempl, c_typeTempl>::CudaInvertedConnection(Vector* input, unsigned outputSize)
+	: CudaVector<vectorTypeTempl, c_typeTempl>(input->getSize() * outputSize)
 {
 	tInput = input;
 }
 
-template <VectorType vectorTypeTempl>
-void CudaInvertedConnection<vectorTypeTempl>::mutateImpl(unsigned pos, float mutation)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void CudaInvertedConnection<vectorTypeTempl, c_typeTempl>::mutateImpl(unsigned pos, float mutation)
 {
 	//TODO z simplificar cuentas
 	unsigned outputPos = pos / tInput->getSize();
@@ -42,17 +42,17 @@ void CudaInvertedConnection<vectorTypeTempl>::mutateImpl(unsigned pos, float mut
 	cuda_mutate(data, pos, mutation, vectorTypeTempl);
 }
 
-template <VectorType vectorTypeTempl>
-void CudaInvertedConnection<vectorTypeTempl>::crossoverImpl(Vector* other, Interface* bitVector)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void CudaInvertedConnection<vectorTypeTempl, c_typeTempl>::crossoverImpl(Vector* other, Interface* bitVector)
 {
 	Interface invertedBitVector = Interface(bitVector);
 	invertedBitVector.transposeMatrix(tInput->getSize());
 
-	CudaVector<vectorTypeTempl>::crossoverImpl(other, &invertedBitVector);
+	CudaVector<vectorTypeTempl, c_typeTempl>::crossoverImpl(other, &invertedBitVector);
 }
 
-template <VectorType vectorTypeTempl>
-void CudaInvertedConnection<vectorTypeTempl>::calculateAndAddTo(Vector* results)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void CudaInvertedConnection<vectorTypeTempl, c_typeTempl>::calculateAndAddTo(Vector* results)
 {
 	void* inputWeighs = this->getDataPointer();
 	float* resultsPtr = (float*)results->getDataPointer();
@@ -60,17 +60,17 @@ void CudaInvertedConnection<vectorTypeTempl>::calculateAndAddTo(Vector* results)
 	cuda_inputCalculationInvertedMatrix(tInput->getDataPointer(), tInput->getSize(), tInput->getVectorType(), results->getSize(), inputWeighs, resultsPtr, Cuda_Threads_Per_Block);
 }
 
-template <VectorType vectorTypeTempl>
-void CudaInvertedConnection<vectorTypeTempl>::copyFromImpl(Interface* interface)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void CudaInvertedConnection<vectorTypeTempl, c_typeTempl>::copyFromImpl(Interface* interface)
 {
 	interface->transposeMatrix(tInput->getSize());
-	CudaVector<vectorTypeTempl>::copyFromImpl(interface);
+	CudaVector<vectorTypeTempl, c_typeTempl>::copyFromImpl(interface);
 }
 
-template <VectorType vectorTypeTempl>
-void CudaInvertedConnection<vectorTypeTempl>::copyToImpl(Interface* interface)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void CudaInvertedConnection<vectorTypeTempl, c_typeTempl>::copyToImpl(Interface* interface)
 {
-	CudaVector<vectorTypeTempl>::copyToImpl(interface);
+	CudaVector<vectorTypeTempl, c_typeTempl>::copyToImpl(interface);
 	interface->transposeMatrix(tSize / tInput->getSize());
 }
 

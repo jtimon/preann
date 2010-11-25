@@ -17,7 +17,6 @@ class Vector {
 protected:
 	unsigned tSize;
 	void* data;
-
 	Vector() {};
 	virtual void copyFromImpl(Interface* interface) = 0;
 	virtual void copyToImpl(Interface* interface) = 0;

@@ -4,8 +4,8 @@
 #include "connection.h"
 #include "xmmVector.h"
 
-template <VectorType vectorTypeTempl>
-class XmmConnection: virtual public Connection, public XmmVector<vectorTypeTempl> {
+template <VectorType vectorTypeTempl, class c_typeTempl>
+class XmmConnection: virtual public Connection, public XmmVector<vectorTypeTempl, c_typeTempl> {
 protected:
 	//redefined from XmmVector
 	virtual void copyFromImpl(Interface* interface);
@@ -20,13 +20,13 @@ public:
 
 };
 
-template <VectorType vectorTypeTempl>
-XmmConnection<vectorTypeTempl>::XmmConnection(Vector* input, unsigned outputSize)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+XmmConnection<vectorTypeTempl, c_typeTempl>::XmmConnection(Vector* input, unsigned outputSize)
 {
 	tInput = input;
 	this->tSize = input->getSize() * outputSize;
 
-	unsigned byteSize = XmmVector<vectorTypeTempl>::getByteSize(input->getSize(), vectorTypeTempl);
+	unsigned byteSize = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(input->getSize(), vectorTypeTempl);
 	byteSize *= outputSize;
 	data = mi_malloc(byteSize);
 
@@ -45,15 +45,15 @@ XmmConnection<vectorTypeTempl>::XmmConnection(Vector* input, unsigned outputSize
 	}
 }
 
-template <VectorType vectorTypeTempl>
-void XmmConnection<vectorTypeTempl>::calculateAndAddTo(Vector* resultsVect)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmConnection<vectorTypeTempl, c_typeTempl>::calculateAndAddTo(Vector* resultsVect)
 {
 	void* inputWeighs = this->getDataPointer();
 	float* results = (float*)resultsVect->getDataPointer();
 	void* inputPtr = tInput->getDataPointer();
 
 	unsigned numLoops;
-	unsigned offsetPerInput = XmmVector<vectorTypeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
+	unsigned offsetPerInput = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
 	unsigned weighPos = 0;
 
 
@@ -91,10 +91,10 @@ void XmmConnection<vectorTypeTempl>::calculateAndAddTo(Vector* resultsVect)
 	}
 }
 
-template <VectorType vectorTypeTempl>
-void XmmConnection<vectorTypeTempl>::copyFromImpl(Interface* interface)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmConnection<vectorTypeTempl, c_typeTempl>::copyFromImpl(Interface* interface)
 {
-	unsigned offsetPerInput = XmmVector<vectorTypeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
+	unsigned offsetPerInput = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
 	unsigned offset = 0;
 	unsigned inputSize = tInput->getSize();
 	unsigned outputSize = tSize / inputSize;
@@ -127,10 +127,10 @@ void XmmConnection<vectorTypeTempl>::copyFromImpl(Interface* interface)
 	}
 }
 
-template <VectorType vectorTypeTempl>
-void XmmConnection<vectorTypeTempl>::copyToImpl(Interface* interface)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmConnection<vectorTypeTempl, c_typeTempl>::copyToImpl(Interface* interface)
 {
-	unsigned offsetPerInput = XmmVector<vectorTypeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
+	unsigned offsetPerInput = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
 	unsigned offset = 0;
 	unsigned inputSize = tInput->getSize();
 	unsigned outputSize = tSize / inputSize;
@@ -163,10 +163,10 @@ void XmmConnection<vectorTypeTempl>::copyToImpl(Interface* interface)
 	}
 }
 
-template <VectorType vectorTypeTempl>
-void XmmConnection<vectorTypeTempl>::mutateImpl(unsigned pos, float mutation)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmConnection<vectorTypeTempl, c_typeTempl>::mutateImpl(unsigned pos, float mutation)
 {
-	unsigned offsetPerInput = XmmVector<vectorTypeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
+	unsigned offsetPerInput = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
 	unsigned outputPos = pos / tInput->getSize();
     unsigned inputPos = pos % tInput->getSize();
     unsigned elem = (outputPos * offsetPerInput) + inputPos;
@@ -199,12 +199,12 @@ void XmmConnection<vectorTypeTempl>::mutateImpl(unsigned pos, float mutation)
 	}
 }
 
-template <VectorType vectorTypeTempl>
-void XmmConnection<vectorTypeTempl>::crossoverImpl(Vector* other, Interface* bitVector)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void XmmConnection<vectorTypeTempl, c_typeTempl>::crossoverImpl(Vector* other, Interface* bitVector)
 {
 	void* otherWeighs = other->getDataPointer();
 
-	unsigned offsetPerInput = XmmVector<vectorTypeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
+	unsigned offsetPerInput = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
 	unsigned offset = 0;
 	unsigned inputSize = tInput->getSize();
 	unsigned outputSize = tSize / inputSize;

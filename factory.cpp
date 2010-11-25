@@ -40,18 +40,18 @@ Vector* Factory::newVector(Vector* vector, ImplementationType implementationType
     return toReturn;
 }
 
-template <VectorType vectorTypeTempl>
+template <VectorType vectorTypeTempl, class c_typeTempl>
 Vector* func_newVector(unsigned size, ImplementationType implementationType)
 {
 	switch(implementationType){
 		case C:
-			return new CppVector<vectorTypeTempl>(size);
+			return new CppVector<vectorTypeTempl, c_typeTempl>(size);
 		case SSE2:
-			return new XmmVector<vectorTypeTempl>(size);
+			return new XmmVector<vectorTypeTempl, c_typeTempl>(size);
 		case CUDA:
 		case CUDA2:
 		case CUDA_INV:
-			return new CudaVector<vectorTypeTempl>(size);
+			return new CudaVector<vectorTypeTempl, c_typeTempl>(size);
 	}
 }
 
@@ -59,13 +59,13 @@ Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationT
 {
 	switch(vectorType){
 		case FLOAT:
-			return func_newVector<FLOAT>(size, implementationType);
+			return func_newVector<FLOAT, float>(size, implementationType);
 		case BYTE:
-			return func_newVector<BYTE>(size, implementationType);
+			return func_newVector<BYTE, unsigned char>(size, implementationType);
 		case BIT:
-			return func_newVector<BIT>(size, implementationType);
+			return func_newVector<BIT, unsigned>(size, implementationType);
 		case SIGN:
-			return func_newVector<SIGN>(size, implementationType);
+			return func_newVector<SIGN, unsigned>(size, implementationType);
 	}
 }
 
@@ -75,20 +75,20 @@ Connection* Factory::newConnection(FILE* stream, unsigned outputSize, Implementa
 	throw error;
 }
 
-template <VectorType vectorTypeTempl>
+template <VectorType vectorTypeTempl, class c_typeTempl>
 Connection* func_newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType)
 {
 	switch(implementationType){
 		case C:
-			return new CppConnection<vectorTypeTempl>(input, outputSize);
+			return new CppConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
 		case SSE2:
-			return new XmmConnection<vectorTypeTempl>(input, outputSize);
+			return new XmmConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
 		case CUDA:
-			return new CudaConnection<vectorTypeTempl>(input, outputSize);
+			return new CudaConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
 		case CUDA2:
-			return new Cuda2Connection<vectorTypeTempl>(input, outputSize);
+			return new Cuda2Connection<vectorTypeTempl, c_typeTempl>(input, outputSize);
 		case CUDA_INV:
-			return new CudaInvertedConnection<vectorTypeTempl>(input, outputSize);
+			return new CudaInvertedConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
 	}
 }
 
@@ -98,13 +98,13 @@ Connection* Factory::newConnection(Vector* input, unsigned outputSize, Implement
 
 	switch(vectorType){
 		case FLOAT:
-			return func_newConnection<FLOAT>(input, outputSize, implementationType);
+			return func_newConnection<FLOAT, float>(input, outputSize, implementationType);
 		case BYTE:
-			return func_newConnection<BYTE>(input, outputSize, implementationType);
+			return func_newConnection<BYTE, unsigned char>(input, outputSize, implementationType);
 		case BIT:
-			return func_newConnection<BIT>(input, outputSize, implementationType);
+			return func_newConnection<BIT, unsigned>(input, outputSize, implementationType);
 		case SIGN:
-			return func_newConnection<SIGN>(input, outputSize, implementationType);
+			return func_newConnection<SIGN, unsigned>(input, outputSize, implementationType);
 	}
 }
 

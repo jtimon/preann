@@ -10,8 +10,8 @@
 
 #include "vectorImpl.h"
 
-template <VectorType vectorTypeTempl>
-class CppVector: virtual public Vector, virtual public VectorImpl<vectorTypeTempl> {
+template <VectorType vectorTypeTempl, class c_typeTempl>
+class CppVector: virtual public Vector, virtual public VectorImpl<vectorTypeTempl, c_typeTempl> {
 protected:
 	unsigned getByteSize();
 	virtual void copyToImpl(Interface* interface);
@@ -32,8 +32,8 @@ public:
 
 };
 
-template <VectorType vectorTypeTempl>
-CppVector<vectorTypeTempl>::CppVector(unsigned size)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+CppVector<vectorTypeTempl, c_typeTempl>::CppVector(unsigned size)
 {
 	this->tSize = size;
 
@@ -41,15 +41,16 @@ CppVector<vectorTypeTempl>::CppVector(unsigned size)
 	data = mi_malloc(byteSize);
 
 	switch (vectorTypeTempl){
-		case BYTE:  SetValueToAnArray<unsigned char>(data, byteSize, 128); 		break;
-		case FLOAT: SetValueToAnArray<float>(data, byteSize/sizeof(float), 0);  break;
-		case BIT:
-		case SIGN: 	SetValueToAnArray<unsigned char>(data, byteSize, 0);		break;
+		case BYTE:
+			SetValueToAnArray<c_typeTempl>(data, byteSize/sizeof(c_typeTempl), 128);
+			break;
+		default:
+			SetValueToAnArray<c_typeTempl>(data, byteSize/sizeof(c_typeTempl), 0);
 	}
 }
 
-template <VectorType vectorTypeTempl>
-CppVector<vectorTypeTempl>::~CppVector()
+template <VectorType vectorTypeTempl, class c_typeTempl>
+CppVector<vectorTypeTempl, c_typeTempl>::~CppVector()
 {
 	if (data) {
 		mi_free(data);
@@ -57,28 +58,28 @@ CppVector<vectorTypeTempl>::~CppVector()
 	}
 }
 
-template <VectorType vectorTypeTempl>
-Vector* CppVector<vectorTypeTempl>::clone()
+template <VectorType vectorTypeTempl, class c_typeTempl>
+Vector* CppVector<vectorTypeTempl, c_typeTempl>::clone()
 {
-	Vector* clone = new CppVector<vectorTypeTempl>(tSize);
+	Vector* clone = new CppVector<vectorTypeTempl, c_typeTempl>(tSize);
 	copyTo(clone);
 	return clone;
 }
 
-template <VectorType vectorTypeTempl>
-void CppVector<vectorTypeTempl>::copyFromImpl(Interface* interface)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void CppVector<vectorTypeTempl, c_typeTempl>::copyFromImpl(Interface* interface)
 {
 	memcpy(data, interface->getDataPointer(), interface->getByteSize());
 }
 
-template <VectorType vectorTypeTempl>
-void CppVector<vectorTypeTempl>::copyToImpl(Interface* interface)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void CppVector<vectorTypeTempl, c_typeTempl>::copyToImpl(Interface* interface)
 {
 	memcpy(interface->getDataPointer(), data, this->getByteSize());
 }
 
-template <VectorType vectorTypeTempl>
-void CppVector<vectorTypeTempl>::activation(Vector* resultsVect, FunctionType functionType)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void CppVector<vectorTypeTempl, c_typeTempl>::activation(Vector* resultsVect, FunctionType functionType)
 {
 	float* results = (float*)resultsVect->getDataPointer();
 
@@ -118,12 +119,12 @@ void CppVector<vectorTypeTempl>::activation(Vector* resultsVect, FunctionType fu
 	}
 }
 
-template <VectorType vectorTypeTempl>
-void CppVector<vectorTypeTempl>::mutateImpl(unsigned pos, float mutation)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void CppVector<vectorTypeTempl, c_typeTempl>::mutateImpl(unsigned pos, float mutation)
 {
 	switch (vectorTypeTempl){
 	case BYTE:{
-		unsigned char* weigh = &(((unsigned char*)data)[pos]);
+		c_typeTempl* weigh = &(((c_typeTempl*)data)[pos]);
 		int result = (int)mutation + *weigh;
 		if (result <= 0){
 			*weigh = 0;
@@ -136,7 +137,7 @@ void CppVector<vectorTypeTempl>::mutateImpl(unsigned pos, float mutation)
 		}
 		}break;
 	case FLOAT:
-		((float*)data)[pos] += mutation;
+		((c_typeTempl*)data)[pos] += mutation;
 		break;
 	case BIT:
 	case SIGN:
@@ -147,8 +148,8 @@ void CppVector<vectorTypeTempl>::mutateImpl(unsigned pos, float mutation)
 	}
 }
 
-template <VectorType vectorTypeTempl>
-void CppVector<vectorTypeTempl>::crossoverImpl(Vector* other, Interface* bitVector)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void CppVector<vectorTypeTempl, c_typeTempl>::crossoverImpl(Vector* other, Interface* bitVector)
 {
 	if (tSize != other->getSize()){
 		std::string error = "The Connections must have the same size to crossover them.";
@@ -158,55 +159,39 @@ void CppVector<vectorTypeTempl>::crossoverImpl(Vector* other, Interface* bitVect
 		std::string error = "The Connections must have the same type to crossover them.";
 		throw error;
 	}
-
-	void* otherWeighs = other->getDataPointer();
-	void* thisWeighs = this->getDataPointer();
-
 	switch (vectorTypeTempl){
-	case BYTE:{
-		unsigned char auxWeigh;
-
-		for (unsigned i=0; i < tSize; i++){
-
-			if (bitVector->getElement(i)){
-				auxWeigh = ((unsigned char*)thisWeighs)[i];
-				((unsigned char*)thisWeighs)[i] = ((unsigned char*)otherWeighs)[i];
-				((unsigned char*)otherWeighs)[i] = auxWeigh;
+		case BIT:
+		case SIGN:
+			{
+			std::string error = "CppVector::crossoverImpl is not implemented for VectorType BIT nor SIGN.";
+			throw error;
 			}
-		}
-		}break;
-	case FLOAT:
-		float auxWeigh;
-
-		for (unsigned i=0; i < tSize; i++){
-
-			if (bitVector->getElement(i)){
-				auxWeigh = ((float*)thisWeighs)[i];
-				((float*)thisWeighs)[i] = ((float*)otherWeighs)[i];
-				((float*)otherWeighs)[i] = auxWeigh;
-			}
-		}
-		break;
-	case BIT:
-	case SIGN:
+		default:
 		{
-		std::string error = "CppVector::weighCrossover is not implemented for VectorType BIT nor SIGN.";
-		throw error;
+			c_typeTempl* otherWeighs = (c_typeTempl*)other->getDataPointer();
+			c_typeTempl* thisWeighs = (c_typeTempl*)this->getDataPointer();
+			c_typeTempl auxWeigh;
+
+			for (unsigned i=0; i < tSize; i++){
+				if (bitVector->getElement(i)){
+					auxWeigh = thisWeighs[i];
+					thisWeighs[i] = otherWeighs[i];
+					otherWeighs[i] = auxWeigh;
+				}
+			}
 		}
 	}
 }
 
-template <VectorType vectorTypeTempl>
-unsigned CppVector<vectorTypeTempl>::getByteSize()
+template <VectorType vectorTypeTempl, class c_typeTempl>
+unsigned CppVector<vectorTypeTempl, c_typeTempl>::getByteSize()
 {
 	switch (vectorTypeTempl){
-	case BYTE:
-		return tSize;
-	case FLOAT:
-		return tSize * sizeof(float);
-	case BIT:
-	case SIGN:
-		return (((tSize-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
+		case BIT:
+		case SIGN:
+			return (((tSize-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
+		default:
+			return tSize * sizeof(c_typeTempl);
 	}
 }
 

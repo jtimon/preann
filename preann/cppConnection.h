@@ -5,8 +5,8 @@
 #include "connection.h"
 #include "cppVector.h"
 
-template <VectorType vectorTypeTempl>
-class CppConnection: public virtual Connection, public CppVector<vectorTypeTempl> {
+template <VectorType vectorTypeTempl, class c_typeTempl>
+class CppConnection: public virtual Connection, public CppVector<vectorTypeTempl, c_typeTempl> {
 public:
 	CppConnection(Vector* input, unsigned outputSize);
 	virtual ~CppConnection() {};
@@ -14,14 +14,14 @@ public:
 	virtual void calculateAndAddTo(Vector* results);
 };
 
-template <VectorType vectorTypeTempl>
-CppConnection<vectorTypeTempl>::CppConnection(Vector* input, unsigned outputSize): CppVector<vectorTypeTempl>(input->getSize() * outputSize)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+CppConnection<vectorTypeTempl, c_typeTempl>::CppConnection(Vector* input, unsigned outputSize): CppVector<vectorTypeTempl, c_typeTempl>(input->getSize() * outputSize)
 {
 	tInput = input;
 }
 
-template <VectorType vectorTypeTempl>
-void CppConnection<vectorTypeTempl>::calculateAndAddTo(Vector* resultsVect)
+template <VectorType vectorTypeTempl, class c_typeTempl>
+void CppConnection<vectorTypeTempl, c_typeTempl>::calculateAndAddTo(Vector* resultsVect)
 {
 	float* results = (float*)resultsVect->getDataPointer();
 	unsigned inputSize = tInput->getSize();
