@@ -13,6 +13,19 @@
 
 template <VectorType vectorTypeTempl, class c_typeTempl>
 class CudaConnection: public virtual Connection, public CudaVector<vectorTypeTempl, c_typeTempl> {
+protected:
+	virtual void mutateImpl(unsigned pos, float mutation)
+	{
+		cuda_mutate(data, pos, mutation, vectorTypeTempl);
+	}
+
+	virtual void crossoverImpl(Vector* other, Interface* bitVector)
+	{
+		CudaVector<vectorTypeTempl, c_typeTempl> cudaBitVector(bitVector, Cuda_Threads_Per_Block);
+
+	    cuda_crossover(this->getDataPointer(), other->getDataPointer(), (unsigned*)cudaBitVector.getDataPointer(),
+							tSize, vectorTypeTempl, Cuda_Threads_Per_Block);
+	}
 public:
 	CudaConnection(Vector* input, unsigned outputSize)
 		: CudaVector<vectorTypeTempl, c_typeTempl>(input->getSize() * outputSize)

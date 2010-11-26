@@ -7,28 +7,6 @@
 
 #include "vector.h"
 
-void Vector::mutate(unsigned pos, float mutation)
-{
-	if (pos > getSize()){
-		std::string error = "The position being mutated is greater than the size of the vector.";
-		throw error;
-	}
-	mutateImpl(pos, mutation);
-}
-
-void Vector::crossover(Vector* other, Interface* bitVector)
-{
-	if (getSize() != other->getSize()){
-		std::string error = "The Vectors must have the same size to crossover them.";
-		throw error;
-	}
-	if (getVectorType() != other->getVectorType()){
-		std::string error = "The Vectors must have the same type to crossover them.";
-		throw error;
-	}
-	crossoverImpl(other, bitVector);
-}
-
 void Vector::copyFromInterface(Interface* interface)
 {
 	if (getSize() < interface->getSize()){
@@ -91,6 +69,13 @@ void Vector::save(FILE* stream)
 	Interface* interface = toInterface();
 	interface->save(stream);
 	delete(interface);
+}
+
+void Vector::load(FILE* stream)
+{
+	Interface interface(tSize, getVectorType());
+	interface.load(stream);
+	copyFromInterface(&interface);
 }
 
 void Vector::print()

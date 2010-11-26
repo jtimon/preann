@@ -36,7 +36,10 @@ protected:
 		Interface invertedBitVector = Interface(bitVector);
 		invertedBitVector.transposeMatrix(tInput->getSize());
 
-		CudaVector<vectorTypeTempl, c_typeTempl>::crossoverImpl(other, &invertedBitVector);
+		CudaVector<vectorTypeTempl, c_typeTempl> cudaBitVector(&invertedBitVector, Cuda_Threads_Per_Block);
+
+	    cuda_crossover(this->getDataPointer(), other->getDataPointer(), (unsigned*)cudaBitVector.getDataPointer(),
+							tSize, vectorTypeTempl, Cuda_Threads_Per_Block);
 	}
 public:
 	CudaInvertedConnection(Vector* input, unsigned outputSize)

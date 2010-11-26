@@ -340,54 +340,53 @@ void NeuralNet::createFullyConnectedNet(unsigned numLayers,
 
 //TODO N rehacer save y load
 void NeuralNet::save(FILE* stream) {
-//	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
-//	fwrite(&numberLayers, sizeof(unsigned), 1, stream);
-//	fwrite(&numberOutputs, sizeof(unsigned), 1, stream);
-//
-//	for (unsigned i = 0; i < numberLayers; i++) {
-//		layers[i]->save(stream);
-//	}
-//
-//	fwrite(inputsToLayersGraph, sizeof(unsigned char) * numberInputs
-//			* numberLayers, 1, stream);
-//	fwrite(layerConnectionsGraph, sizeof(unsigned char) * numberLayers
-//			* numberLayers, 1, stream);
-//	fwrite(outputLayers, sizeof(int) * numberOutputs, 1, stream);
-//
-//	for (unsigned i = 0; i < numberLayers; i++) {
-//		layers[i]->saveWeighs(stream);
-//	}
+	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
+	fwrite(&numberLayers, sizeof(unsigned), 1, stream);
+	fwrite(&numberOutputs, sizeof(unsigned), 1, stream);
+
+	for (unsigned i = 0; i < numberLayers; i++) {
+		layers[i]->save(stream);
+	}
+
+	fwrite(inputsToLayersGraph, sizeof(unsigned char) * numberInputs
+			* numberLayers, 1, stream);
+	fwrite(layerConnectionsGraph, sizeof(unsigned char) * numberLayers
+			* numberLayers, 1, stream);
+	fwrite(outputLayers, sizeof(int) * numberOutputs, 1, stream);
+
+	for (unsigned i = 0; i < numberLayers; i++) {
+		layers[i]->saveWeighs(stream);
+	}
 }
 
 void NeuralNet::load(FILE* stream) {
-//	unsigned auxNumberInputs;
-//	fread(&auxNumberInputs, sizeof(unsigned), 1, stream);
-//
-//	if (auxNumberInputs != numberInputs) {
-//		char buffer[100];
-//		sprintf(
-//				buffer,
-//				"the number of inputs (%d) does not match with the number of inputs of the Neural Net to load (%d).",
-//				numberInputs, auxNumberInputs);
-//		std::string error = buffer;
-//		throw error;
-//	}
-//
-//	fread(&numberLayers, sizeof(unsigned), 1, stream);
-//	fread(&numberOutputs, sizeof(unsigned), 1, stream);
-//
-//	layers = (Layer**) ((mi_malloc(sizeof(Layer*) * numberLayers)));
-//	for (unsigned i = 0; i < numberLayers; i++) {
-//		layers[i] = Factory::newLayer(this->implementationType);
-//		layers[i]->load(stream);
-//	}
-//
-//	loadGraphs(stream);
-//	stablishConnections();
-//
-//	for (unsigned i = 0; i < numberLayers; i++) {
-//		layers[i]->loadWeighs(stream);
-//	}
+	unsigned auxNumberInputs;
+	fread(&auxNumberInputs, sizeof(unsigned), 1, stream);
+
+	if (auxNumberInputs != numberInputs) {
+		char buffer[100];
+		sprintf(
+				buffer,
+				"the number of inputs (%d) does not match with the number of inputs of the Neural Net to load (%d).",
+				numberInputs, auxNumberInputs);
+		std::string error = buffer;
+		throw error;
+	}
+
+	fread(&numberLayers, sizeof(unsigned), 1, stream);
+	fread(&numberOutputs, sizeof(unsigned), 1, stream);
+
+	layers = (Layer**) ((mi_malloc(sizeof(Layer*) * numberLayers)));
+	for (unsigned i = 0; i < numberLayers; i++) {
+		layers[i] = new Layer(stream, implementationType);
+	}
+
+	loadGraphs(stream);
+	stablishConnections();
+
+	for (unsigned i = 0; i < numberLayers; i++) {
+		layers[i]->loadWeighs(stream);
+	}
 }
 
 void NeuralNet::loadGraphs(FILE* stream) {

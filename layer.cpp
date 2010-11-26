@@ -3,57 +3,41 @@
 
 ImplementationType Layer::getImplementationType()
 {
-	return tImplementationType;
+	return thresholds->getImplementationType();
 }
 
 Vector* Layer::newVector(FILE* stream)
 {
-	return  Factory::newVector(stream, tImplementationType);
+	return  Factory::newVector(stream, getImplementationType());
 }
 
 Vector* Layer::newVector(unsigned size, VectorType vectorType)
 {
-	return Factory::newVector(size, vectorType, tImplementationType);
+	return Factory::newVector(size, vectorType, getImplementationType());
 }
 
 Layer::Layer(unsigned size, VectorType outputType, FunctionType functionType, ImplementationType implementationType)
 {
-	tImplementationType = implementationType;
-
 	connections = NULL;
 	numberInputs = 0;
 	this->functionType = functionType;
 	output = Factory::newVector(size, outputType, implementationType);
-	thresholds = Factory::newVector(size, FLOAT, implementationType);
+	thresholds = Factory::newConnection(output, implementationType);
 }
 
 Layer::Layer(FILE* stream, ImplementationType implementationType)
 {
-	tImplementationType = implementationType;
-
+	connections = NULL;
+	numberInputs = 0;
 	fread(&functionType, sizeof(FunctionType), 1, stream);
-	thresholds = Factory::newVector(stream, implementationType);
 	output = Factory::newVector(stream, implementationType);
-
-	fread(&numberInputs, sizeof(unsigned), 1, stream);
-	connections = (Connection**) mi_malloc(numberInputs * sizeof(Connection*));
-
-	for(unsigned i=0; i < numberInputs; i++){
-		//TODO E esto puede llevar al pete
-		connections[i] = Factory::newConnection(stream, output->getSize(), implementationType);
-	}
+	thresholds = Factory::newConnection(output, implementationType);
 }
 
 void Layer::save(FILE* stream)
 {
 	fwrite(&functionType, sizeof(FunctionType), 1, stream);
-	Factory::saveVector(thresholds, stream);
-	Factory::saveVector(output, stream);
-
-	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
-	for(unsigned i=0; i < numberInputs; i++){
-		connections[i]->save(stream);
-	}
+	output->save(stream);
 }
 
 Layer::~Layer()
@@ -73,6 +57,29 @@ Layer::~Layer()
 		delete (output);
 		output = NULL;
 	}
+}
+
+void Layer::loadWeighs(FILE* stream)
+{
+	unsigned numInputs;
+	fread(&numberInputs, sizeof(unsigned), 1, stream);
+	if (numInputs != numberInputs){
+		std::string error = "Cannot load weighs: the layer doesn't have that numer of inputs.";
+		throw error;
+	}
+	for(unsigned i=0; i < numberInputs; i++){
+		connections[i]->load(stream);
+	}
+	thresholds->load(stream);
+}
+
+void Layer::saveWeighs(FILE* stream)
+{
+	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
+	for(unsigned i=0; i < numberInputs; i++){
+		connections[i]->save(stream);
+	}
+	thresholds->save(stream);
 }
 
 void Layer::checkCompatibility(Layer* layer)

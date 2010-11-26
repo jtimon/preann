@@ -111,60 +111,6 @@ public:
 		}
 	}
 
-	virtual void mutateImpl(unsigned pos, float mutation)
-	{
-		switch (vectorTypeTempl){
-		case BYTE:{
-			c_typeTempl* weigh = &(((c_typeTempl*)data)[pos]);
-			int result = (int)mutation + *weigh;
-			if (result <= 0){
-				*weigh = 0;
-			}
-			else if (result >= 255) {
-				*weigh = 255;
-			}
-			else {
-				*weigh = result;
-			}
-			}break;
-		case FLOAT:
-			((c_typeTempl*)data)[pos] += mutation;
-			break;
-		case BIT:
-		case SIGN:
-			{
-			unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
-			((unsigned*)data)[pos / BITS_PER_UNSIGNED] ^= mask;
-			}
-		}
-	}
-
-	virtual void crossoverImpl(Vector* other, Interface* bitVector)
-	{
-		switch (vectorTypeTempl){
-			case BIT:
-			case SIGN:
-				{
-				std::string error = "CppVector::crossoverImpl is not implemented for VectorType BIT nor SIGN.";
-				throw error;
-				}
-			default:
-			{
-				c_typeTempl* otherWeighs = (c_typeTempl*)other->getDataPointer();
-				c_typeTempl* thisWeighs = (c_typeTempl*)this->getDataPointer();
-				c_typeTempl auxWeigh;
-
-				for (unsigned i=0; i < tSize; i++){
-					if (bitVector->getElement(i)){
-						auxWeigh = thisWeighs[i];
-						thisWeighs[i] = otherWeighs[i];
-						otherWeighs[i] = auxWeigh;
-					}
-				}
-			}
-		}
-	}
-
 };
 
 #endif /* CPPVECTOR_H_ */

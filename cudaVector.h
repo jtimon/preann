@@ -33,20 +33,21 @@ protected:
 	{
 		cuda_copyToHost(interface->getDataPointer(), data, this->getByteSize());
 	}
+public:
 
-	virtual void mutateImpl(unsigned pos, float mutation)
+	virtual ImplementationType getImplementationType() {
+		return CUDA;
+	};
+
+	CudaVector(unsigned size)
 	{
-		cuda_mutate(data, pos, mutation, vectorTypeTempl);
+		this->tSize = size;
+
+		unsigned byte_sz = getByteSize();
+		data = cuda_malloc(byte_sz);
+
+		cuda_setZero(data, byte_sz, vectorTypeTempl, CUDA_THREADS_PER_BLOCK);
 	}
-
-	virtual void crossoverImpl(Vector* other, Interface* bitVector)
-	{
-	    CudaVector cudaBitVector = CudaVector(bitVector, Cuda_Threads_Per_Block);
-
-	    cuda_crossover(this->getDataPointer(), other->getDataPointer(), (unsigned*)cudaBitVector.getDataPointer(),
-							tSize, vectorTypeTempl, Cuda_Threads_Per_Block);
-	}
-
 	//special constructor for bit coalescing vectors
 	CudaVector(Interface* bitVector, unsigned block_size)
 	{
@@ -82,22 +83,6 @@ protected:
 		}
 		cuda_copyToDevice(data, interfaceOrderedByBlockSize.getDataPointer(), byteSize);
 	}
-public:
-
-	virtual ImplementationType getImplementationType() {
-		return CUDA;
-	};
-
-	CudaVector(unsigned size)
-	{
-		this->tSize = size;
-
-		unsigned byte_sz = getByteSize();
-		data = cuda_malloc(byte_sz);
-
-		cuda_setZero(data, byte_sz, vectorTypeTempl, CUDA_THREADS_PER_BLOCK);
-	}
-
 	virtual ~CudaVector()
 	{
 		if (data) {

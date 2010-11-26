@@ -16,12 +16,8 @@ void Factory::saveVector(Vector* vector, FILE* stream)
 
 Vector* Factory::newVector(FILE* stream, ImplementationType implementationType)
 {
-	Interface* interface = new Interface();
-	interface->load(stream);
-
-	Vector* vector = Factory::newVector(interface, implementationType);
-
-	delete(interface);
+	Interface interface(stream);
+	Vector* vector = Factory::newVector(&interface, implementationType);
 	return vector;
 }
 
@@ -69,12 +65,6 @@ Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationT
 	}
 }
 
-Connection* Factory::newConnection(FILE* stream, unsigned outputSize, ImplementationType implementationType)
-{
-	std::string error = "Factory::newConnection(FILE* ... deprecated";
-	throw error;
-}
-
 template <VectorType vectorTypeTempl, class c_typeTempl>
 Connection* func_newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType)
 {
@@ -90,6 +80,11 @@ Connection* func_newConnection(Vector* input, unsigned outputSize, Implementatio
 		case CUDA_INV:
 			return new CudaInvertedConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
 	}
+}
+
+Connection* Factory::newConnection(Vector* output, ImplementationType implementationType)
+{
+	return func_newConnection<FLOAT, float>(output, 1, implementationType);
 }
 
 Connection* Factory::newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType)

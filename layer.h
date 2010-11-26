@@ -11,11 +11,10 @@ protected:
 	Connection** connections;
 	unsigned numberInputs;
 
-	Vector* thresholds;
+	Connection* thresholds;
 	Vector* output;
 
 	FunctionType functionType;
-	ImplementationType tImplementationType;
 
 	void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
 	void mutateThreshold(unsigned outputPos, float mutation);
@@ -31,6 +30,8 @@ public:
 	void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector);
 
 	void save(FILE* stream);
+	void saveWeighs(FILE* stream);
+	void loadWeighs(FILE* stream);
 	void checkCompatibility(Layer* layer);
 	void calculateOutput();
 	void addInput(Vector* input);

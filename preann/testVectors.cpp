@@ -145,45 +145,6 @@ unsigned testActivation(Vector* toTest, FunctionType functionType)
 	return differencesCounter;
 }
 
-unsigned testMutate(Vector* toTest, unsigned times)
-{
-	Vector* cVector = Factory::newVector(toTest, C);
-
-	for(unsigned i=0; i < times; i++) {
-		float mutation = randomFloat(INITIAL_WEIGHS_RANGE);
-		unsigned pos = randomUnsigned(toTest->getSize());
-		toTest->mutate(pos, mutation);
-		cVector->mutate(pos, mutation);
-	}
-
-	unsigned differences = assertEquals(cVector, toTest);
-	delete(cVector);
-	return differences;
-}
-
-unsigned testCrossover(Vector* toTest)
-{
-	Interface bitVector = Interface(toTest->getSize(), BIT);
-	bitVector.random(1);
-
-	Vector* other = Factory::newVector(toTest->getSize(), toTest->getVectorType(), toTest->getImplementationType());
-	other->random(INITIAL_WEIGHS_RANGE);
-
-	Vector* cVector = Factory::newVector(toTest, C);
-	Vector* cOther = Factory::newVector(other, C);
-
-	toTest->crossover(other, &bitVector);
-	cVector->crossover(cOther, &bitVector);
-
-	unsigned differences = assertEquals(cVector, toTest);
-	differences += assertEquals(cOther, other);
-
-	delete(other);
-	delete(cVector);
-	delete(cOther);
-	return differences;
-}
-
 unsigned testAddToResults(Connection* toTest)
 {
 	unsigned outputSize = toTest->getSize() / toTest->getInput()->getSize();
@@ -261,9 +222,9 @@ unsigned testCrossover(Connection* toTest)
 #define SIZE_MIN 2
 #define SIZE_MAX 128
 #define SIZE_INC 16
-#define OUTPUT_SIZE_MIN 3
+#define OUTPUT_SIZE_MIN 1
 #define OUTPUT_SIZE_MAX 3
-#define OUTPUT_SIZE_INC 3
+#define OUTPUT_SIZE_INC 2
 #define NUM_MUTATIONS 10
 
 #define PATH "/home/timon/layer.lay"
@@ -309,18 +270,6 @@ int main(int argc, char *argv[]) {
 						if (errorCount != 0){
 							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 							printf("Errors on activation: %d \n", errorCount);
-						}
-					}
-					if (vectorType != BIT && vectorType != SIGN) {
-						errorCount = testMutate(vector, NUM_MUTATIONS);
-						if (errorCount != 0){
-							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
-							printf("Errors on mutate: %d \n", errorCount);
-						}
-						errorCount = testCrossover(vector);
-						if (errorCount != 0){
-							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
-							printf("Errors on crossover: %d \n", errorCount);
 						}
 					}
 					if (vectorType != BYTE)

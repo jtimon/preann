@@ -20,8 +20,6 @@ protected:
 	Vector() {};
 	virtual void copyFromImpl(Interface* interface) = 0;
 	virtual void copyToImpl(Interface* interface) = 0;
-	virtual void mutateImpl(unsigned pos, float mutation) = 0;
-	virtual void crossoverImpl(Vector* other, Interface* bitVector) = 0;
 public:
 	virtual ~Vector() {};
 	virtual ImplementationType getImplementationType() = 0;
@@ -34,8 +32,6 @@ public:
 	void copyToInterface(Interface* interface);
 	void copyFrom(Vector* vector);
 	void copyTo(Vector* vector);
-	void mutate(unsigned pos, float mutation);
-	void crossover(Vector* other, Interface* bitVector);
 
 	void* getDataPointer();
 	unsigned getSize();
@@ -43,8 +39,8 @@ public:
 	FunctionType getFunctionType();
 	Interface* toInterface();
 
-
 	void save(FILE* stream);
+	void load(FILE* stream);
 	void print();
 	float compareTo(Vector* other);
 	void random(float range);

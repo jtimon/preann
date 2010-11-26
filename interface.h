@@ -18,6 +18,7 @@ class Interface {
 
 public:
 	Interface();
+	Interface(FILE* stream);
 	Interface(unsigned size, VectorType vectorType);
 	Interface(Interface* toCopy);
 	virtual ~Interface();
