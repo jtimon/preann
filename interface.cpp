@@ -11,8 +11,9 @@ Interface::Interface(FILE* stream)
 {
 	fread(&size, sizeof(unsigned), 1, stream);
 	fread(&vectorType, sizeof(VectorType), 1, stream);
-	data = mi_malloc(getByteSize());
-	fread(data, getByteSize(), 1, stream);
+	unsigned byteSize = getByteSize();
+	data = mi_malloc(byteSize);
+	fread(data, byteSize, 1, stream);
 }
 
 Interface::Interface(unsigned  size, VectorType vectorType)
@@ -203,7 +204,6 @@ void Interface::load(FILE* stream)
 		std::string error = "The Type of the Interface is different than the Vector Type to load.";
 		throw error;
 	}
-	data = mi_malloc(getByteSize());
 	fread(data, getByteSize(), 1, stream);
 }
 

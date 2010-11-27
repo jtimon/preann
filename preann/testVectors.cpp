@@ -220,8 +220,8 @@ unsigned testCrossover(Connection* toTest)
 }
 
 #define SIZE_MIN 2
-#define SIZE_MAX 128
-#define SIZE_INC 16
+#define SIZE_MAX 500
+#define SIZE_INC 100
 #define OUTPUT_SIZE_MIN 1
 #define OUTPUT_SIZE_MAX 3
 #define OUTPUT_SIZE_INC 2

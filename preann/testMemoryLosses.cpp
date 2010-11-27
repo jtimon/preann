@@ -28,7 +28,7 @@ void printTestParams(ImplementationType implementationType, VectorType vectorTyp
 }
 
 #define SIZE_MIN 1
-#define SIZE_MAX 1000
+#define SIZE_MAX 500
 #define SIZE_INC 100
 
 int main(int argc, char *argv[]) {
@@ -55,37 +55,37 @@ int main(int argc, char *argv[]) {
 						std::string error = "Memory loss detected testing class Vector.\n";
 						throw error;
 					}
+					if (vectorType != BYTE){
+						printf("-----------Connection-----------\n");
+						vector = Factory::newVector(size, vectorType, implementationType);
+						Connection* connection = Factory::newConnection(vector, size, implementationType);
 
-					printf("-----------Connection-----------\n");
-					vector = Factory::newVector(size, vectorType, implementationType);
-					Connection* connection = Factory::newConnection(vector, size, implementationType);
+						mem_printTotalAllocated();
+						mem_printTotalPointers();
+						printf("------------------\n");
+						delete(connection);
+						delete(vector);
 
-					mem_printTotalAllocated();
-					mem_printTotalPointers();
-					printf("------------------\n");
-					delete(connection);
-					delete(vector);
+						if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
+							std::string error = "Memory loss detected testing class Connection.\n";
+							throw error;
+						}
 
-					if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
-						std::string error = "Memory loss detected testing class Connection.\n";
-						throw error;
-					}
+						printf("-----------Layer-----------\n");
+						Layer* layer = new Layer(size, vectorType, IDENTITY, implementationType);
+						layer->addInput(layer->getOutput());
+						layer->addInput(layer->getOutput());
+						layer->addInput(layer->getOutput());
 
-					printf("-----------Layer-----------\n");
+						mem_printTotalAllocated();
+						mem_printTotalPointers();
+						printf("------------------\n");
+						delete(layer);
 
-					Layer* layer = new Layer(size, vectorType, IDENTITY, implementationType);
-					layer->addInput(layer->getOutput());
-					layer->addInput(layer->getOutput());
-					layer->addInput(layer->getOutput());
-
-					mem_printTotalAllocated();
-					mem_printTotalPointers();
-					printf("------------------\n");
-					delete(layer);
-
-					if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
-						std::string error = "Memory loss detected testing class Layer.\n";
-						throw error;
+						if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
+							std::string error = "Memory loss detected testing class Layer.\n";
+							throw error;
+						}
 					}
 				}
 			}

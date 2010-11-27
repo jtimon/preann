@@ -20,7 +20,7 @@ public:
 	static Vector* newVector(Vector* vector, ImplementationType implementationType);
 	static Vector* newVector(unsigned size, VectorType vectorType, ImplementationType implementationType);
 	static Connection* newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType);
-	static Connection* newConnection(Vector* output, ImplementationType implementationType);
+	static Connection* newThresholds(Vector* output, ImplementationType implementationType);
 	static Connection* newConnection(FILE* stream, unsigned outputSize, ImplementationType implementationType);
 };
 

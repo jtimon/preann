@@ -6,14 +6,6 @@
 #include "cuda2Connection.h"
 #include "cudaInvertedConnection.h"
 
-void Factory::saveVector(Vector* vector, FILE* stream)
-{
-	Interface* interface = vector->toInterface();
-	interface->save(stream);
-	delete(interface);
-}
-
-
 Vector* Factory::newVector(FILE* stream, ImplementationType implementationType)
 {
 	Interface interface(stream);
@@ -82,7 +74,7 @@ Connection* func_newConnection(Vector* input, unsigned outputSize, Implementatio
 	}
 }
 
-Connection* Factory::newConnection(Vector* output, ImplementationType implementationType)
+Connection* Factory::newThresholds(Vector* output, ImplementationType implementationType)
 {
 	return func_newConnection<FLOAT, float>(output, 1, implementationType);
 }

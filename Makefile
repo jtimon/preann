@@ -13,7 +13,7 @@ CLASSIFCATON_OBJ = classificationTask.o
 GA_OBJ = population.o task.o individual.o
 NETS_OBJ = sse2_code.o cuda_code.o chronometer.o util.o vector.o layer.o neuralNet.o factory.o interface.o connection.o
 
-TESTS = ./bin/testMemoryLosses ./bin/testLayers ./bin/testNeuralNets ./bin/testVectors
+TESTS = ./bin/testMemoryLosses ./bin/testVectors ./bin/testLayers ./bin/testNeuralNets 
 
 PROGRAMS = $(TESTS) ./bin/preann  
 
@@ -25,9 +25,10 @@ all: $(PROGRAMS)
 	./bin/testVectors > ./testResults/testVectors.log
 ./bin/testLayers: $(NETS_OBJ) testLayers.o
 	$(NVCC_LINK) $^ -o $@ 
-#	./bin/testLayers > ./testResults/testLayers.log
+	./bin/testLayers > ./testResults/testLayers.log
 ./bin/testMemoryLosses: $(NETS_OBJ) testMemoryLosses.o
 	$(NVCC_LINK) $^ -o $@ 
+#	./bin/testMemoryLosses > ./testResults/testMemoryLosses.log
 ./bin/testNeuralNets: $(NETS_OBJ) testNeuralNets.o
 	$(NVCC_LINK) $^ -o $@ 
 ./bin/preann: $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ) main.o

@@ -22,7 +22,7 @@ Layer::Layer(unsigned size, VectorType outputType, FunctionType functionType, Im
 	numberInputs = 0;
 	this->functionType = functionType;
 	output = Factory::newVector(size, outputType, implementationType);
-	thresholds = Factory::newConnection(output, implementationType);
+	thresholds = Factory::newThresholds(output, implementationType);
 }
 
 Layer::Layer(FILE* stream, ImplementationType implementationType)
@@ -31,7 +31,7 @@ Layer::Layer(FILE* stream, ImplementationType implementationType)
 	numberInputs = 0;
 	fread(&functionType, sizeof(FunctionType), 1, stream);
 	output = Factory::newVector(stream, implementationType);
-	thresholds = Factory::newConnection(output, implementationType);
+	thresholds = Factory::newThresholds(output, implementationType);
 }
 
 void Layer::save(FILE* stream)
@@ -47,22 +47,19 @@ Layer::~Layer()
 			delete(connections[i]);
 		}
 		mi_free(connections);
-		connections = NULL;
 	}
 	if (thresholds) {
 		delete(thresholds);
-		thresholds = NULL;
 	}
 	if (output) {
 		delete (output);
-		output = NULL;
 	}
 }
 
 void Layer::loadWeighs(FILE* stream)
 {
 	unsigned numInputs;
-	fread(&numberInputs, sizeof(unsigned), 1, stream);
+	fread(&numInputs, sizeof(unsigned), 1, stream);
 	if (numInputs != numberInputs){
 		std::string error = "Cannot load weighs: the layer doesn't have that numer of inputs.";
 		throw error;
@@ -145,39 +142,16 @@ void Layer::addInput(Vector* input)
 	++numberInputs;
 }
 
-void Layer::setInput(Vector* input, unsigned pos)
-{
-	if (pos >= numberInputs){
-		char buffer[100];
-		sprintf(buffer, "Cannot set the input in position %d: the layer just have %d inputs.", pos, numberInputs);
-		std::string error = buffer;
-		throw error;
-	}
-	switch (input->getVectorType()){
-	case BYTE:
-		{
-		std::string error = "Layer::setInput is not implemented for an input Vector of the VectorType BYTE";
-		throw error;
-		}
-	default:
-		break;
-	}
-	connections[pos]->setInput(input);
-}
-
 void Layer::randomWeighs(float range)
 {
-	Interface* aux = new Interface(output->getSize(), FLOAT);
-	aux->random(range);
-	thresholds->copyFromInterface(aux);
-	delete(aux);
-
 	for (unsigned i=0; i < numberInputs; i++){
-		aux = new Interface(connections[i]->getSize(), connections[i]->getVectorType());
-		aux->random(range);
-		connections[i]->copyFromInterface(aux);
-		delete(aux);
+		Interface aux(connections[i]->getSize(), connections[i]->getVectorType());
+		aux.random(range);
+		connections[i]->copyFromInterface(&aux);
 	}
+	Interface aux(output->getSize(), FLOAT);
+	aux.random(range);
+	thresholds->copyFromInterface(&aux);
 }
 
 void Layer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation)
@@ -241,6 +215,20 @@ float* Layer::getThresholdsPtr()
 
 Connection* Layer::getConnection(unsigned inputPos)
 {
+	if (inputPos > numberInputs){
+		char buffer[100];
+		sprintf(buffer, "Cannot access the Connection in position %d: the Layer has only %d inputs.",
+				inputPos, numberInputs);
+		std::string error = buffer;
+		throw error;
+	}
+	if (!connections){
+		char buffer[100];
+		sprintf(buffer, "Cannot access the Connection in position %d: the Layer has only %d inputs.",
+				inputPos, numberInputs);
+		std::string error = buffer;
+		throw error;
+	}
 	return connections[inputPos];
 }
 

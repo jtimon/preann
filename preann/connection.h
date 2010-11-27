@@ -14,7 +14,6 @@ public:
 	virtual ~Connection(){};
 
 	Vector* getInput();
-	void setInput(Vector* input);
 
 	virtual void calculateAndAddTo(Vector* results) = 0;
 	void mutate(unsigned pos, float mutation);
