@@ -20,53 +20,41 @@ class Population {
 	Individual** parents;
 	unsigned parentSize;
 	unsigned maxParents;
-
 	Interface* vectorUsedParents;
 	unsigned usedParents;
-
 	Individual** offSpring;
 	unsigned offSpringSize;
 	unsigned maxOffSpring;
 
+	unsigned numTruncation;
 	unsigned numRouletteWheel;
+	unsigned numTournament;
+	unsigned tournamentSize;
 	unsigned numRanking;
 	float rankingBase;
 	float rankingStep;
-	unsigned numTournament;
-	unsigned tourSize;
-	unsigned numTruncation;
 
-	unsigned numWeighUniform;
-	unsigned numNeuronUniform;
-	unsigned numLayerUniform;
-	unsigned numWeighMultipoint;
-	unsigned numNeuronMultipoint;
-	unsigned numLayerMultipoint;
-
-	float probabilityWeighUniform;
-	float probabilityNeuronUniform;
-	float probabilityLayerUniform;
-	unsigned numPointsWeighMultipoint;
-	unsigned numPointsNeuronMultipoint;
-	unsigned numPointsLayerMultipoint;
+	unsigned numCrossover[CROSSOVER_ALGORITHM_DIM][CROSSOVER_LEVEL_DIM];
+	float probabilityUniform[CROSSOVER_LEVEL_DIM];
+	unsigned numPointsMultipoint[CROSSOVER_LEVEL_DIM];
 
 	unsigned mutationsPerIndividual;
+	float mutationsPerIndividualRange;
 	float mutationProbability;
-	float mutationRange;
-
+	float mutationProbabilityRange;
 	float total_score;
-
 	void setDefaults();
-
 	void selection();
 	void selectRouletteWheel();
 	void selectRanking();
 	void selectTournament();
 	void selectTruncation();
-
+	void changeParentsSize(int incSize);
+    void changeOffspringSize(int incSize);
 	void crossover();
-	void oneCrossover(CrossoverType crossoverType);
-
+	void oneCrossover(CrossoverAlgorithm crossoverAlgorithm,
+			CrossoverLevel crossoverType);
+	void produceTwoOffsprings(unsigned & parentA, unsigned & parentB);
 	void mutation();
 public:
 	Population(Task* task);
@@ -76,16 +64,20 @@ public:
 	void save(FILE* stream);
 	void load(FILE* stream);
 
-	void addSelectionAlgorithm(SelectionType selectionType, unsigned number);
-	void addSelectionAlgorithm(SelectionType selectionType, unsigned number, unsigned tourSize);
-	void addSelectionAlgorithm(SelectionType selectionType, unsigned number, float base, float step);
+	void setSelectionRouletteWheel(unsigned number);
+	void setSelectionTruncation(unsigned number);
+	void setSelectionTournament(unsigned number, unsigned tourSize);
+	void setSelectionRanking(unsigned number, float base, float step);
 
-	void addCrossoverScheme(CrossoverType crossoverType, unsigned number, float probability);
-	void addCrossoverScheme(CrossoverType crossoverType, unsigned number, unsigned numPoints);
+	void setCrossoverUniformScheme(CrossoverLevel crossoverLevel,
+			unsigned number, float probability);
+	void setCrossoverProportionalScheme(CrossoverLevel crossoverLevel,
+			unsigned number);
+	void setCrossoverMultipointScheme(CrossoverLevel crossoverLevel,
+			unsigned number, unsigned numPoints);
 
-	void setMutationsPerIndividual(unsigned numMutations);
-	void setMutationProbability(float probability);
-	void setMutationRange(float range);
+	void setMutationsPerIndividual(unsigned numMutations, float range);
+	void setMutationProbability(float probability, float range);
 
 	void insertIndividual(Individual* individual);
 	void nextGeneration();

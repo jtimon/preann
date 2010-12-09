@@ -20,13 +20,11 @@ using namespace std;
 #define BITS_PER_BYTE (8)
 #define BITS_PER_UNSIGNED (sizeof(unsigned) * BITS_PER_BYTE)
 
-#define VECTOR_TYPE_DIM 4
-#define FUNCTION_TYPE_DIM 6
 
 typedef enum {FLOAT, BIT, SIGN, BYTE} VectorType;
+#define VECTOR_TYPE_DIM 4
 typedef enum {IDENTITY, BINARY_STEP, BIPOLAR_STEP, REAL, SIGMOID, BIPOLAR_SIGMOID, ANOTHER_FUNCTION} FunctionType;
-typedef enum {ROULETTE_WHEEL, RANKING, TOURNAMENT, TRUNCATION} SelectionType;
-typedef enum {WEIGH_UNIFORM, NEURON_UNIFORM, LAYER_UNIFORM, WEIGH_MULTIPOiNT, NEURON_MULTIPOiNT, LAYER_MULTIPOiNT} CrossoverType;
+#define FUNCTION_TYPE_DIM 6
 
 int randomInt(unsigned range);
 float randomFloat(float range);
@@ -48,7 +46,6 @@ c_typeTempl Function(float number, FunctionType functionType) {
 	switch (functionType) {
 
 	//TODO z add different activation functions
-	//break;
 	case BINARY_STEP:
 		if (number > 0) {
 			return 1;

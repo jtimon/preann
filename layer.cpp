@@ -86,6 +86,7 @@ void Layer::calculateOutput()
 		throw error;
 	}
 	//TODO B do not use clone on the thresholds, compare with them in activation (one write less)
+//	Vector* results = newVector(thresholds->getSize(), thresholds->getVectorType());
 	Vector* results = thresholds->clone();
 
 	for(unsigned i=0; i < numberInputs; i++){
@@ -93,6 +94,7 @@ void Layer::calculateOutput()
 	}
 
 	output->activation(results, functionType);
+//	output->activation(results, functionType, thresholds);
 	delete(results);
 }
 
