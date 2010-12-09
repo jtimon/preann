@@ -90,10 +90,6 @@ int main(int argc, char *argv[])
 	Chronometer total;
 	total.start();
 	//TODO AAA
-	for (unsigned i = 10; i <= 100; i+=10) {
-		printf("que le den por culo a marcos %d veces!!!\n", i);
-	}
-		printf("que le den por culo a marcos otra vez!!!\n");
 	try
 	{
 //		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++)
