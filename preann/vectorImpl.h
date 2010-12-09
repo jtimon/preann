@@ -13,8 +13,8 @@
 template <VectorType vectorTypeTempl, class c_typeTempl>
 class VectorImpl: virtual public Vector {
 protected:
-public:
 	VectorImpl() {};
+public:
 	virtual ~VectorImpl() {};
 
 	VectorType getVectorType()
