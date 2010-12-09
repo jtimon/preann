@@ -79,36 +79,6 @@ void Layer::saveWeighs(FILE* stream)
 	thresholds->save(stream);
 }
 
-void Layer::checkCompatibility(Layer* layer)
-{
-	if (this->getImplementationType() != layer->getImplementationType()){
-		std::string error = "The layers are incompatible: the implementation is different.";
-		throw error;
-	}
-	if (this->getOutput()->getSize() != layer->getOutput()->getSize()){
-		std::string error = "The layers are incompatible: the output size is different.";
-		throw error;
-	}
-	if (this->getOutput()->getVectorType() != layer->getOutput()->getVectorType()){
-		std::string error = "The layers are incompatible: the output type is different.";
-		throw error;
-	}
-	if (this->getNumberInputs() != layer->getNumberInputs()){
-		std::string error = "The layers are incompatible: the number of inputs is different.";
-		throw error;
-	}
-	for (unsigned i=0; i < numberInputs; i++){
-		if (this->getInput(i)->getSize() != layer->getInput(i)->getSize()){
-			std::string error = "The layers are incompatible: the size of an input is different.";
-			throw error;
-		}
-		if (this->getInput(i)->getVectorType() != layer->getInput(i)->getVectorType()){
-			std::string error = "The layers are incompatible: the type of an input is different.";
-			throw error;
-		}
-	}
-}
-
 void Layer::calculateOutput()
 {
 	if (!output) {
@@ -128,7 +98,6 @@ void Layer::calculateOutput()
 
 void Layer::addInput(Vector* input)
 {
-	//TODO T probar qué sucede con varios tipos de entrada
 	Connection* newConnection = Factory::newConnection(input, output->getSize(), getImplementationType());
 	Connection** newConnections = (Connection**) mi_malloc(sizeof(Connection*) * (numberInputs + 1));
 
@@ -154,45 +123,6 @@ void Layer::randomWeighs(float range)
 	thresholds->copyFromInterface(&aux);
 }
 
-void Layer::mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation)
-{
-	if (outputPos > output->getSize()) {
-		std::string error = "Cannot mutate that output: the Layer hasn't so many neurons.";
-		throw error;
-	}
-	if (inputLayer > numberInputs) {
-		std::string error = "Cannot mutate that input: the Layer hasn't so many inputs.";
-		throw error;
-	}
-	if (inputPos > connections[inputLayer]->getInput()->getSize()) {
-		std::string error = "Cannot mutate that input: the input hasn't so many neurons.";
-		throw error;
-	}
-	unsigned weighPos = (outputPos * connections[inputLayer]->getInput()->getSize()) + inputPos;
-	connections[inputLayer]->mutate(weighPos, mutation);
-}
-
-void Layer::mutateThreshold(unsigned outputPos, float mutation)
-{
-	if (outputPos > output->getSize()) {
-		std::string error = "Cannot mutate that Threshold: the Layer hasn't so many neurons.";
-		throw error;
-	}
-	thresholds->mutate(outputPos, mutation);
-	//TODO L Layer::crossoverThreshold
-}
-
-void Layer::swapWeighs(Layer* layer)
-{
-	checkCompatibility(layer);
-
-	unsigned size = numberInputs * sizeof(Vector*);
-	Vector** temp = (Vector**) mi_malloc(size);
-	memcpy(temp, connections, size);
-	memcpy(connections, layer->connections, size);
-	memcpy(layer->connections, temp, size);
-}
-
 unsigned Layer::getNumberInputs()
 {
 	return numberInputs;
@@ -208,9 +138,9 @@ Vector* Layer::getOutput()
 	return output;
 }
 
-float* Layer::getThresholdsPtr()
+Connection* Layer::getThresholds()
 {
-	return (float*)thresholds->getDataPointer();
+	return thresholds;
 }
 
 Connection* Layer::getConnection(unsigned inputPos)
@@ -223,10 +153,7 @@ Connection* Layer::getConnection(unsigned inputPos)
 		throw error;
 	}
 	if (!connections){
-		char buffer[100];
-		sprintf(buffer, "Cannot access the Connection in position %d: the Layer has only %d inputs.",
-				inputPos, numberInputs);
-		std::string error = buffer;
+		std::string error = "The layer has no connections.";
 		throw error;
 	}
 	return connections[inputPos];
@@ -237,93 +164,23 @@ FunctionType Layer::getFunctionType()
    return functionType;
 }
 
-
 void Layer::copyWeighs(Layer* other)
 {
-	//TODO L implementar metodo
-	std::string error = "CudaLayer::copyWeighs is not implemented.";
-	throw error;
-//	memcpy(thresholds, other->getThresholdsPtr(), output->getSize() * sizeof(float));
-//	unsigned size;
-//	if (inputType == FLOAT){
-//		size = output->getSize() * totalWeighsPerOutput * sizeof(float);
-//	} else {
-//		size = output->getSize() * totalWeighsPerOutput * sizeof(unsigned char);
-//	}
-//	memcpy(weighs, other->getWeighsPtr(), size);
-}
-
-void Layer::mutateWeigh(float mutationRange)
-{
-	unsigned chosenInput = randomUnsigned(this->numberInputs);
-	unsigned chosenOutput = randomUnsigned(output->getSize());
-	unsigned chosenInputPos = randomUnsigned(connections[chosenInput]->getInput()->getSize());
-
-	mutateWeigh(chosenOutput, chosenInput, chosenInputPos, randomFloat(mutationRange));
-}
-
-void Layer::mutateWeighs(float probability, float mutationRange)
-{
-	for (unsigned i=0; i < output->getSize(); i++){
-		for (unsigned j=0; j < numberInputs; j++){
-			for (unsigned k=0; k < connections[j]->getInput()->getSize(); k++){
-				if (randomPositiveFloat(1) < probability) {
-					mutateWeigh(i, j, k, randomFloat(mutationRange));
-				}
-			}
-		}
-		if (randomPositiveFloat(1) < probability) {
-			mutateThreshold(i, randomFloat(mutationRange));
-		}
+	if(numberInputs != other->getNumberInputs()){
+		char buffer[100];
+		sprintf(buffer, "Cannot copyWeighs from a layer with %d connections to a layer with %d.",
+				other->getNumberInputs(), numberInputs);
+		std::string error = buffer;
+		throw error;
 	}
-}
-
-void Layer::crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector)
-{
-	connections[inputLayer]->crossover(other->getConnection(inputLayer), bitVector);
-}
-
-void Layer::crossoverInput(Layer *other, unsigned  inputLayer, Interface *bitVector)
-{
-	checkCompatibility(other);
-
-	unsigned inputSize = connections[inputLayer]->getInput()->getSize();
-	unsigned outputSize = output->getSize();
-	Interface* inputBitVector = new Interface(inputSize * outputSize, BIT);
-
-	for (unsigned i=0; i < inputSize; i++){
-		if (bitVector->getElement(i)){
-			for (unsigned j=0; j < outputSize; j++){
-				unsigned offset = j * inputSize;
-				inputBitVector->setElement(offset + i, 1);
-			}
-		}
+	if (this->getImplementationType() != other->getImplementationType()){
+		std::string error = "The layers are incompatible: the implementation is different.";
+		throw error;
 	}
-	crossoverWeighs(other, inputLayer, inputBitVector);
-	delete bitVector;
-}
-
-void Layer::crossoverNeurons(Layer *other, Interface *bitVector)
-{
-	//TODO D comprobar esto en un nivel superior (o no comprobarlo) (o comprobarlo opcionalmente)
-	checkCompatibility(other);
-
-	unsigned outputSize = output->getSize();
-
-	for (unsigned i=0; i < numberInputs; i++){
-
-		unsigned inputSize = connections[i]->getInput()->getSize();
-		Interface* inputBitVector = new Interface(inputSize * outputSize, BIT);
-
-		for (unsigned j=0; j < outputSize; j++){
-			if (bitVector->getElement(j)){
-				unsigned offset = j * inputSize;
-				for (unsigned k=0; k < inputSize; k++){
-					inputBitVector->setElement(offset + k, 1);
-				}
-			}
-		}
-		crossoverWeighs(other, i, inputBitVector);
+	//TODO L implementar metodo Vector::copyFast restringido a vectores con el mismo tipo de implementacion
+	for(int i=0; i < numberInputs; i++){
+		connections[i]->copyFrom(other->getConnection(i));
 	}
-	delete bitVector;
+	thresholds->copyFrom(other->getThresholds());
 }
+

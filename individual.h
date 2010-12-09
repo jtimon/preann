@@ -13,6 +13,7 @@
 class Individual: public NeuralNet {
 protected:
 	float fitness;
+    void crossoverNeuronsByOutput(Layer* thisLayer, Layer *otherLayer, Interface& outputsBitVector);
 public:
 	Individual(ImplementationType implementationType = C);
 	virtual ~Individual();
@@ -22,9 +23,11 @@ public:
 	void mutate(float probability, float mutationRange);
 	void uniformCrossoverWeighs(Individual* other, float probability);
 	void uniformCrossoverNeurons(Individual* other, float probability);
+	void uniformCrossoverNeuronsInverted(Individual *other, float probability);
 	void uniformCrossoverLayers(Individual* other, float probability);
 	void multipointCrossoverWeighs(Individual* other, unsigned numPoints);
 	void multipointCrossoverNeurons(Individual* other, unsigned numPoints);
+	void multipointCrossoverNeuronsInverted(Individual *other, unsigned numPoints);
 	void multipointCrossoverLayers(Individual* other, unsigned numPoints);
 	void crossoverLayers(Individual *other, Interface* bitVector);
 

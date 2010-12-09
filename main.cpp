@@ -16,7 +16,7 @@ float testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType,
 		unsigned times) {
 
 	Chronometer chrono;
-	nn->createInput(inputSize, vectorType);
+	nn->addInputLayer(inputSize, vectorType);
 
 	FILE* stream = fopen(PATH, "r+b");
 	nn->load(stream);
@@ -85,12 +85,11 @@ int main(int argc, char *argv[]) {
 				cout << "size: " << size << endl;
 				nn = new NeuralNet();
 
-				nn->createInput(size, inputType);
 				mem_printTotalAllocated();
 				mem_printTotalPointers();
-				//nn->createFeedForwardNet(numlayers, size, inputType, functionType);
+				//nn->createFeedForwardNet(size, inputType, numlayers, size, inputType, functionType);
 				//TODO TCC petaba con 16 < numlayers <=30 y size 512 (en Desktop)
-				nn->createFullyConnectedNet(numlayers, size, inputType,
+				nn->createFullyConnectedNet(size, inputType, numlayers, size, inputType,
 						functionType);
 
 				nn->randomWeighs(rangeWeighs);

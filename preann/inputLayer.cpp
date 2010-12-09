@@ -1,0 +1,47 @@
+
+#include "inputLayer.h"
+#include "factory.h"
+
+InputLayer::InputLayer(unsigned size, VectorType vectorType, ImplementationType implementationType)
+{
+	tInput = new Interface(size, vectorType);
+	output = Factory::newVector(size, vectorType, implementationType);
+
+	//TODO Z preprocesar entradas??
+	thresholds = Factory::newThresholds(output, implementationType);
+	functionType = IDENTITY;
+
+	connections = NULL;
+	numberInputs = 0;
+}
+
+InputLayer::~InputLayer()
+{
+	if (tInput){
+		delete(tInput);
+	}
+	if(output){
+		delete(output);
+	}
+	if(thresholds){
+		delete(thresholds);
+	}
+}
+
+void InputLayer::addInput(Vector *input)
+{
+	std::string error = "addInput method does not work for InputLayer.";
+	throw error;
+}
+
+void InputLayer::calculateOutput()
+{
+	output->copyFromInterface(tInput);
+}
+
+Interface* InputLayer::getInputInterface()
+{
+	return tInput;
+}
+
+

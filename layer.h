@@ -3,22 +3,15 @@
 
 #include "connection.h"
 
-class Layer
-{
-private:
-	Layer() {};
+class Layer {
 protected:
+	Layer() {};
 	Connection** connections;
 	unsigned numberInputs;
 
 	Connection* thresholds;
 	Vector* output;
-
 	FunctionType functionType;
-
-	void mutateWeigh(unsigned outputPos, unsigned inputLayer, unsigned inputPos, float mutation);
-	void mutateThreshold(unsigned outputPos, float mutation);
-
 	ImplementationType getImplementationType();
 	Vector* newVector(FILE* stream);
 	Vector* newVector(unsigned size, VectorType vectorType);
@@ -27,32 +20,21 @@ public:
 	Layer(FILE* stream, ImplementationType implementationType);
 	virtual ~Layer();
 
-	void crossoverWeighs(Layer* other, unsigned inputLayer, Interface* bitVector);
-
-	void save(FILE* stream);
-	void saveWeighs(FILE* stream);
-	void loadWeighs(FILE* stream);
-	void checkCompatibility(Layer* layer);
-	void calculateOutput();
 	void addInput(Vector* input);
-	void setInput(Vector* input, unsigned pos);
+	void calculateOutput();
 
-	void copyWeighs(Layer* sourceLayer);
 	void randomWeighs(float range);
+	void copyWeighs(Layer* sourceLayer);
+	void loadWeighs(FILE* stream);
+	void saveWeighs(FILE* stream);
+	void save(FILE* stream);
 
-	void swapWeighs(Layer* layer);
 	unsigned getNumberInputs();
 	Vector* getInput(unsigned pos);
-	Vector* getOutput();
-	float* getThresholdsPtr();
 	Connection* getConnection(unsigned inputPos);
+	Vector* getOutput();
+	Connection* getThresholds();
 	FunctionType getFunctionType();
-
-	void mutateWeigh(float mutationRange);
-	void mutateWeighs(float probability, float mutationRange);
-	void crossoverNeurons(Layer* other, Interface* bitVector);
-	void crossoverInput(Layer* other, unsigned inputLayer, Interface* bitVector);
-
 };
 
 #endif /*ABSTRACTLAYER_H_*/

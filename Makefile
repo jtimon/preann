@@ -9,9 +9,11 @@ NVCC_LINK = /usr/local/cuda/bin/nvcc -L/usr/local/cuda/lib -lcudart
 NVCC_COMPILE = /usr/local/cuda/bin/nvcc -g -G -c -arch sm_11 --device-emulation
 NASM = nasm -f elf
 
-CLASSIFCATON_OBJ = classificationTask.o
-GA_OBJ = population.o task.o individual.o
-NETS_OBJ = sse2_code.o cuda_code.o chronometer.o util.o vector.o layer.o neuralNet.o factory.o interface.o connection.o
+CLASSIFCATON_OBJ = $(GA_OBJ) classificationTask.o
+GA_OBJ = $(NETS_OBJ) population.o task.o individual.o
+NETS_OBJ = $(FACTORY_OBJ) neuralNet.o outputLayer.o inputLayer.o layer.o
+#TODO S separar más
+FACTORY_OBJ = sse2_code.o cuda_code.o chronometer.o util.o vector.o factory.o interface.o connection.o
 
 TESTS = ./bin/testMemoryLosses ./bin/testVectors ./bin/testLayers ./bin/testNeuralNets 
 
@@ -20,7 +22,7 @@ PROGRAMS = $(TESTS) ./bin/preann
 all: $(PROGRAMS)
 # --------------- LINKED PROGRAMS ---------------------
 
-./bin/testVectors: $(NETS_OBJ) testVectors.o
+./bin/testVectors: $(FACTORY_OBJ) testVectors.o
 	$(NVCC_LINK) $^ -o $@ 
 	./bin/testVectors > ./testResults/testVectors.log
 ./bin/testLayers: $(NETS_OBJ) testLayers.o
@@ -31,7 +33,7 @@ all: $(PROGRAMS)
 #	./bin/testMemoryLosses > ./testResults/testMemoryLosses.log
 ./bin/testNeuralNets: $(NETS_OBJ) testNeuralNets.o
 	$(NVCC_LINK) $^ -o $@ 
-./bin/preann: $(NETS_OBJ) $(GA_OBJ) $(CLASSIFCATON_OBJ) main.o
+./bin/preann: $(CLASSIFCATON_OBJ) main.o
 	$(NVCC_LINK) $^ -o $@ 
 
 # --------------- MAIN OBJECTS ---------------------
@@ -56,7 +58,11 @@ task.o : task.cpp task.h individual.o
 	$(CXX) $<
 individual.o : individual.cpp individual.h neuralNet.o
 	$(CXX) $<
-neuralNet.o : neuralNet.cpp neuralNet.h layer.o
+neuralNet.o : neuralNet.cpp neuralNet.h outputLayer.o inputLayer.o
+	$(CXX) $<
+inputLayer.o : inputLayer.cpp inputLayer.h layer.o
+	$(CXX) $<
+outputLayer.o : outputLayer.cpp outputLayer.h layer.o
 	$(CXX) $<
 layer.o : layer.cpp layer.h factory.o
 	$(CXX) $<

@@ -2,10 +2,10 @@
 #define NEURALNET_H_
 
 #include "factory.h"
-#include "layer.h"
+#include "inputLayer.h"
+#include "outputLayer.h"
 
-class NeuralNet
-{
+class NeuralNet {
 	void loadGraphs(FILE* stream);
 	void stablishConnections();
 protected:
@@ -15,12 +15,9 @@ protected:
 	unsigned char* layerConnectionsGraph;
 	unsigned numberLayers;
 
-	Vector** inputs;
-	Interface** inputInterfaces;
-	unsigned char* inputsToLayersGraph;
+	unsigned* inputLayers;
 	unsigned numberInputs;
 
-	Interface** outputs;
 	unsigned* outputLayers;
 	unsigned numberOutputs;
 
@@ -35,28 +32,33 @@ public:
 	NeuralNet(ImplementationType implementationType = C);
 	virtual ~NeuralNet();
 
-	Interface* createInput(unsigned size, VectorType vectorType);
-	Interface* getInput(unsigned pos);
-	void setInput(unsigned pos, Interface* input);
+	void addInputLayer(unsigned size, VectorType vectorType);
+	Interface* getInput(unsigned inputPos);
+	unsigned char isInputLayer(unsigned layerPos);
 	unsigned getNumInputs();
 
-	Interface* createOutput(unsigned layerPos);
+	void addOutputLayer(unsigned size, VectorType destinationType, FunctionType functiontype);
 	Interface* getOutput(unsigned outputPos);
+	unsigned char isOutputLayer(unsigned layerPos);
 	unsigned getNumOutputs();
 
-	void addLayer(unsigned size, VectorType destinationType = FLOAT, FunctionType functiontype = IDENTITY);
+	void addLayer(unsigned size, VectorType destinationType = FLOAT,
+			FunctionType functiontype = IDENTITY);
 
-	void addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos);
-	void addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos);
+	void addLayersConnection(unsigned sourceLayerPos,
+			unsigned destinationLayerPos);
 
 	virtual void calculateOutput();
 	void randomWeighs(float range);
 	void save(FILE* stream);
 	void load(FILE* stream);
-	void resetConnections();
 
-	void createFeedForwardNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype = IDENTITY);
-	void createFullyConnectedNet(unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType, FunctionType functiontype = IDENTITY);
+	void createFeedForwardNet(unsigned inputSize, VectorType inputType,
+			unsigned numLayers, unsigned sizeLayers,
+			VectorType hiddenLayersType, FunctionType functiontype = IDENTITY);
+	void createFullyConnectedNet(unsigned inputSize, VectorType inputType,
+			unsigned numLayers, unsigned sizeLayers,
+			VectorType hiddenLayersType, FunctionType functiontype = IDENTITY);
 
 };
 

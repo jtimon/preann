@@ -226,6 +226,19 @@ void Interface::print()
 	printf("\n----------------\n", 1);
 }
 
+void Interface::copyFrom(Interface *other)
+{
+	if (size != other->getSize()){
+		std::string error = "The sizes of the interfaces are different.";
+		throw error;
+	}
+	if (vectorType != other->getVectorType()){
+		std::string error = "The Types of the Interfaces are different.";
+		throw error;
+	}
+	memcpy(data, other->getDataPointer(), getByteSize());
+}
+
 void Interface::transposeMatrix(unsigned width)
 {
 	if (size % width != 0) {

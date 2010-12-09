@@ -31,6 +31,7 @@ public:
 	float getElement(unsigned pos);
 	void setElement(unsigned pos, float value);
 
+	void copyFrom(Interface* other);
 	void print();
 	float compareTo(Interface* other);
 	void random(float range);

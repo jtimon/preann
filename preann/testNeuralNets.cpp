@@ -88,7 +88,7 @@ void assertEquals(Interface* expected, Interface* actual)
 
 Interface* testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType, unsigned times, Chronometer& chrono) {
 
-	nn->createInput(inputSize, vectorType);
+	nn->addInputLayer(inputSize, vectorType);
 
 	FILE* stream = fopen(PATH, "r+b");
 	nn->load(stream);
