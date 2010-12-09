@@ -20,12 +20,6 @@ InputLayer::~InputLayer()
 	if (tInput){
 		delete(tInput);
 	}
-	if(output){
-		delete(output);
-	}
-	if(thresholds){
-		delete(thresholds);
-	}
 }
 
 void InputLayer::addInput(Vector *input)
