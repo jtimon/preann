@@ -280,7 +280,7 @@ void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned out
 			result += sdata[i] * weighs[weighsOffset + i];
 			//printf(" peso %f ", weighs[weighsOffset + i]);
 		}
-		/////TODO R OTRA OPCION
+		/////TODO TR OTRA OPCION
 	/*	if (blockDim.x <= input_size){
 			unsigned pos = tid;
 			while (pos < input_size){
