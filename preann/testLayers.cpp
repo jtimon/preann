@@ -130,7 +130,6 @@ void testLayer(unsigned size, VectorType vectorType)
 	    if (differences != 0)
 	    	printf("Errors on outputs: %d \n", differences);
 
-
 		//test Weighs
 	    for(unsigned i = 0; i < NUM_INPUTS; i++){
 	        Connection* expectedWeighs = controlLayer->getConnection(i);
@@ -165,7 +164,6 @@ int main(int argc, char *argv[]) {
 					testLayer(size, (VectorType) vectType);
 			}
 		}
-
 		printf("Exit success.\n");
 		mem_printTotalAllocated();
 		mem_printTotalPointers();
