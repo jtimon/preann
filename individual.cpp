@@ -578,9 +578,38 @@ float Individual::getFitness()
 
 char Individual::checkCompatibility(Individual *other)
 {
-	//TODO A Individual::checkCompatibility
-	//if(numberLayers != other->get)
+	if (numberLayers != other->getNumLayers() || numberInputs
+			!= other->getNumInputs() || numberOutputs != other->getNumOutputs()
+			|| getImplementationType() != other->getImplementationType())
+	{
+		return 0;
+	}
+	for (unsigned i = 0; i < numberLayers; ++i)
+	{
+		Layer* tLayer = layers[i];
+		Layer* otherLayer = other->getLayer(i);
 
+		if (tLayer->getOutput()->getSize()
+				!= otherLayer->getOutput()->getSize()
+				|| tLayer->getOutput()->getVectorType()
+						!= otherLayer->getOutput()->getVectorType()
+				|| tLayer->getNumberInputs() != otherLayer->getNumberInputs())
+		{
+			return 0;
+		}
+		for (unsigned j = 0; j < tLayer->getNumberInputs(); ++j)
+		{
+			Connection* tConnection = tLayer->getConnection(j);
+			Connection* otherConnection = otherLayer->getConnection(j);
+
+			if (tConnection->getSize() != otherConnection->getSize()
+					|| tConnection->getVectorType()
+							!= otherConnection->getVectorType())
+			{
+				return 0;
+			}
+		}
+	}
 	return 1;
 }
 

@@ -27,6 +27,7 @@ protected:
 	void increaseMaxOuputs();
 	unsigned getPosInGraph(unsigned source, unsigned destination);
 	Layer* getLayer(unsigned pos);
+	ImplementationType getImplementationType();
 public:
 
 	NeuralNet(ImplementationType implementationType = C);
@@ -44,6 +45,7 @@ public:
 
 	void addLayer(unsigned size, VectorType destinationType = FLOAT,
 			FunctionType functiontype = IDENTITY);
+	unsigned getNumLayers();
 
 	void addLayersConnection(unsigned sourceLayerPos,
 			unsigned destinationLayerPos);

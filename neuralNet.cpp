@@ -215,6 +215,11 @@ unsigned NeuralNet::getNumOutputs()
 	return numberOutputs;
 }
 
+unsigned NeuralNet::getNumLayers()
+{
+	return numberLayers;
+}
+
 void NeuralNet::randomWeighs(float range)
 {
 	for (unsigned i = 0; i < numberLayers; i++)
@@ -254,6 +259,11 @@ void NeuralNet::createFeedForwardNet(unsigned inputSize, VectorType inputType,
 	}
 	addOutputLayer(sizeLayers, hiddenLayersType, functiontype);
 	addLayersConnection(numLayers - 1, numLayers);
+}
+
+ImplementationType NeuralNet::getImplementationType()
+{
+	return implementationType;
 }
 
 void NeuralNet::createFullyConnectedNet(unsigned inputSize,
