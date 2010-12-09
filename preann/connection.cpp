@@ -15,7 +15,7 @@ void Connection::mutate(unsigned pos, float mutation)
 	mutateImpl(pos, mutation);
 }
 
-void Connection::crossover(Vector* other, Interface* bitVector)
+void Connection::crossover(Connection* other, Interface* bitVector)
 {
 	if (getSize() != other->getSize()){
 		std::string error = "The Vectors must have the same size to crossover them.";
