@@ -7,19 +7,13 @@
 
 #include "taskXor.h"
 
-TaskXor::TaskXor(unsigned size, unsigned numTests, VectorType vectorType)
+TaskXor::TaskXor(unsigned size, unsigned numTests)
 {
-	if (tInput1->getVectorType() != BIT && tInput1->getVectorType() != FLOAT)
-	{
-		std::string error =
-				"TaskXor can be of the Vecor types BIT and FLOAT only.";
-		throw error;
-	}
 	tSize = size;
 	tNumTests = numTests;
-	tInput1 = new Interface(size, vectorType);
-	tInput2 = new Interface(size, vectorType);
-	tOutput = new Interface(size, vectorType);
+	tInput1 = new Interface(size, BIT);
+	tInput2 = new Interface(size, BIT);
+	tOutput = new Interface(size, BIT);
 }
 
 TaskXor::~TaskXor()
@@ -40,31 +34,33 @@ TaskXor::~TaskXor()
 
 void TaskXor::test(Individual *individual)
 {
-	individual->getInput(0)->copyFrom(tInput1);
-	individual->getInput(1)->copyFrom(tInput2);
-	doXor();
-
-	individual->calculateOutput();
-
-	float differences = individual->getOutput(0)->compareTo(tOutput);
-	individual->setFitness(differences);
+	float differences = 0;
+	for (unsigned i = 0; i < tNumTests; ++i)
+	{
+		tInput1->random(1);
+		tInput2->random(1);
+		individual->getInput(0)->copyFrom(tInput1);
+		individual->getInput(1)->copyFrom(tInput2);
+		doXor();
+		individual->calculateOutput();
+		differences += individual->getOutput(0)->compareTo(tOutput);
+	}
+	individual->setFitness(-differences);
 }
 
 void TaskXor::doXor()
 {
-	char element;
 	for (unsigned i = 0; i < tInput1->getSize(); ++i)
 	{
 		if ((tInput1->getElement(i) && tInput2->getElement(i))
 				|| (!tInput1->getElement(i) && !tInput2->getElement(i)))
 		{
-			element = 0;
+			tOutput->setElement(i, 0);
 		}
 		else
 		{
-			element = 1;
+			tOutput->setElement(i, 1);
 		}
-		tOutput->setElement(i, element);
 	}
 }
 

@@ -18,7 +18,7 @@ protected:
 	Interface* tInput2;
 	Interface* tOutput;
 public:
-	TaskXor(unsigned size, unsigned numTests, VectorType vectorType);
+	TaskXor(unsigned size, unsigned numTests);
 	virtual ~TaskXor();
 
 	virtual void test(Individual* individual);

@@ -53,7 +53,7 @@ Individual* Individual::newCopy()
 	{
 		copy->getLayer(i)->copyWeighs(layers[i]);
 	}
-
+	return copy;
 }
 
 void Individual::mutate(unsigned numMutations, float mutationRange)

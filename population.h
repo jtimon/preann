@@ -12,6 +12,8 @@
 #include "individual.h"
 
 class Population {
+
+	unsigned generation;
 	Task* task;
 	Individual** individualList;
 	unsigned size;
@@ -20,8 +22,6 @@ class Population {
 	Individual** parents;
 	unsigned parentSize;
 	unsigned maxParents;
-	Interface* vectorUsedParents;
-	unsigned usedParents;
 	Individual** offSpring;
 	unsigned offSpringSize;
 	unsigned maxOffSpring;
@@ -52,9 +52,10 @@ class Population {
 	void changeParentsSize(int incSize);
     void changeOffspringSize(int incSize);
 	void crossover();
+    unsigned choseParent(Interface &vectorUsedParents, unsigned  &usedParents);
 	void oneCrossover(CrossoverAlgorithm crossoverAlgorithm,
-			CrossoverLevel crossoverType);
-	void produceTwoOffsprings(unsigned & parentA, unsigned & parentB);
+			CrossoverLevel crossoverType, Interface &vectorUsedParents, unsigned &usedParents);
+	void produceTwoOffsprings(unsigned & parentA, unsigned & parentB, Interface &vectorUsedParents, unsigned &usedParents);
 	void mutation();
 public:
 	Population(Task* task);
@@ -80,8 +81,9 @@ public:
 	void setMutationProbability(float probability, float range);
 
 	void insertIndividual(Individual* individual);
-	void nextGeneration();
+	unsigned nextGeneration();
 
+	unsigned getGeneration();
 	Individual* getBestIndividual();
 	float getBestIndividualScore();
 	float getAverageScore();

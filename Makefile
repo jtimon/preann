@@ -40,7 +40,7 @@ all: $(PROGRAMS)
 	./bin/testNeuralNets > ./testResults/testNeuralNets.log
 ./bin/chronoPopulationXor: $(CLASSIFCATON_OBJ) chronoPopulationXor.o
 	$(NVCC_LINK) $^ -o $@ 
-	./bin/chronoPopulationXor > ./testResults/chronoPopulationXor.log
+#	./bin/chronoPopulationXor > ./testResults/chronoPopulationXor.log
 ./bin/preann: $(CLASSIFCATON_OBJ) main.o
 	$(NVCC_LINK) $^ -o $@ 
 
@@ -88,7 +88,7 @@ vector.o : vector.cpp vector.h interface.o
 	$(CXX) $<
 interface.o : interface.cpp interface.h util.o
 	$(CXX) $<
-util.o : util.c util.h
+util.o : util.cpp util.h
 	$(CXX) $<
 chronometer.o : chronometer.cpp chronometer.h
 	$(CXX) $<

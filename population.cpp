@@ -18,7 +18,7 @@ Population::Population(Task* task)
 	setDefaults();
 }
 
-Population::Population(Task *task, Individual *example, unsigned size,
+Population::Population(Task* task, Individual* example, unsigned size,
 		float range)
 {
 	this->task = task;
@@ -33,19 +33,15 @@ Population::Population(Task *task, Individual *example, unsigned size,
 		newIndividual->randomWeighs(range);
 		insertIndividual(newIndividual);
 	}
-	delete (example);
-
 	setDefaults();
 }
 
 void Population::setDefaults()
 {
+	generation = 0;
 	parents = NULL;
 	parentSize = 0;
 	maxParents = 0;
-
-	vectorUsedParents = NULL;
-	usedParents = 0;
 
 	offSpring = NULL;
 	offSpringSize = 0;
@@ -65,7 +61,7 @@ void Population::setDefaults()
 		numPointsMultipoint[crossLevel] = 0;
 		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
 		{
-			numCrossover[crossAlg][crossLevel];
+			numCrossover[crossAlg][crossLevel] = 0;
 		}
 	}
 
@@ -173,7 +169,7 @@ void Population::insertIndividual(Individual *individual)
 
 	if (this->size == 0)
 	{
-		individualList[this->size++];
+		individualList[this->size++] = individual;
 	}
 	else
 	{
@@ -181,7 +177,6 @@ void Population::insertIndividual(Individual *individual)
 		float fitness = individual->getFitness();
 		if (fitness > individualList[vectorPos]->getFitness())
 		{
-
 			if (this->size < this->maxSize)
 			{
 				individualList[this->size++] = individualList[vectorPos];
@@ -191,8 +186,8 @@ void Population::insertIndividual(Individual *individual)
 				delete (individualList[vectorPos]);
 			}
 
-			while (fitness > individualList[vectorPos - 1]->getFitness()
-					&& vectorPos > 1)
+			while (vectorPos > 1 && fitness
+					> individualList[vectorPos - 1]->getFitness())
 			{
 				individualList[vectorPos] = individualList[vectorPos - 1];
 				--vectorPos;
@@ -261,18 +256,24 @@ void Population::changeParentsSize(int incSize)
 
 void Population::changeOffspringSize(int incSize)
 {
-    maxOffSpring += incSize;
-    if(offSpring){
-        mi_free(offSpring);
-    }
-    offSpring = (Individual**)(mi_malloc(maxOffSpring * sizeof (Individual*)));
+	maxOffSpring += incSize;
+	if (offSpring)
+	{
+		mi_free(offSpring);
+	}
+	offSpring = (Individual**)(mi_malloc(maxOffSpring * sizeof(Individual*)));
 }
 
 void Population::setCrossoverMultipointScheme(CrossoverLevel crossoverLevel,
 		unsigned number, unsigned numPoints)
 {
+	if (number % 2 != 0)
+	{
+		std::string error = "the number of crossover must be even.";
+		throw error;
+	}
 	int incSize = number - numCrossover[MULTIPOINT][crossoverLevel];
-    changeOffspringSize(incSize);
+	changeOffspringSize(incSize);
 	numCrossover[MULTIPOINT][crossoverLevel] = number;
 	numPointsMultipoint[crossoverLevel] = numPoints;
 }
@@ -280,16 +281,26 @@ void Population::setCrossoverMultipointScheme(CrossoverLevel crossoverLevel,
 void Population::setCrossoverProportionalScheme(CrossoverLevel crossoverLevel,
 		unsigned number)
 {
+	if (number % 2 != 0)
+	{
+		std::string error = "the number of crossover must be even.";
+		throw error;
+	}
 	int incSize = number - numCrossover[PROPORTIONAL][crossoverLevel];
-    changeOffspringSize(incSize);
+	changeOffspringSize(incSize);
 	numCrossover[PROPORTIONAL][crossoverLevel] = number;
 }
 
 void Population::setCrossoverUniformScheme(CrossoverLevel crossoverLevel,
 		unsigned number, float probability)
 {
+	if (number % 2 != 0)
+	{
+		std::string error = "the number of crossover must be even.";
+		throw error;
+	}
 	int incSize = number - numCrossover[UNIFORM][crossoverLevel];
-    changeOffspringSize(incSize);
+	changeOffspringSize(incSize);
 	numCrossover[UNIFORM][crossoverLevel] = number;
 	probabilityUniform[crossoverLevel] = probability;
 }
@@ -325,7 +336,7 @@ void Population::mutation()
 	}
 }
 
-void Population::nextGeneration()
+unsigned Population::nextGeneration()
 {
 	selection();
 	crossover();
@@ -335,6 +346,12 @@ void Population::nextGeneration()
 		this->insertIndividual(offSpring[i]);
 	}
 	offSpringSize = 0;
+	return ++generation;
+}
+
+unsigned Population::getGeneration()
+{
+	return generation;
 }
 
 float Population::getBestIndividualScore()
@@ -382,23 +399,24 @@ void Population::crossover()
 	//TODO F reescribir de forma más legible y practica
 	if (parentSize < 2)
 	{
-		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg) {
-			for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; ++crossLevel) {
-
-		if (numCrossover[crossAlg][crossLevel])
+		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
 		{
-			std::string error =
-					"The number of parents must be grater than 2 to do crossover.";
-			throw error;
-		}
+			for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; ++crossLevel)
+			{
+
+				if (numCrossover[crossAlg][crossLevel])
+				{
+					std::string error =
+							"The number of parents must be grater than 2 to do crossover.";
+					throw error;
+				}
 			}
 		}
 	}
 	else
 	{
-		vectorUsedParents = new Interface(parentSize, BIT);
-		usedParents = 0;
-		unsigned numCurrentScheme;
+		Interface vectorUsedParents(parentSize, BIT);
+		unsigned usedParents = 0;
 
 		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
 		{
@@ -408,18 +426,21 @@ void Population::crossover()
 			{
 				CrossoverLevel crossoverLevel = (CrossoverLevel)crossLevel;
 
-				unsigned numCurrentScheme = numCrossover[crossoverAlgorithm][crossoverLevel];
+				unsigned numCurrentScheme =
+						numCrossover[crossoverAlgorithm][crossoverLevel];
 				unsigned numGenerated = 0;
 				if (numCurrentScheme & 1)
 				{
-					oneCrossover(crossoverAlgorithm, crossoverLevel);
+					oneCrossover(crossoverAlgorithm, crossoverLevel,
+							vectorUsedParents, usedParents);
 					delete (offSpring[offSpringSize - 1]);
 					--offSpringSize;
 					++numGenerated;
 				}
 				while (numGenerated < numCurrentScheme)
 				{
-					oneCrossover(crossoverAlgorithm, crossoverLevel);
+					oneCrossover(crossoverAlgorithm, crossoverLevel,
+							vectorUsedParents, usedParents);
 					numGenerated += 2;
 				}
 			}
@@ -427,52 +448,33 @@ void Population::crossover()
 	}
 }
 
-void Population::produceTwoOffsprings(unsigned &parentA, unsigned &parentB)
+unsigned Population::choseParent(Interface &vectorUsedParents,
+		unsigned &usedParents)
 {
-	unsigned numChosenParents = 0;
-	while (numChosenParents < 2)
+	unsigned chosenPoint;
+	do
 	{
-		unsigned chosenPoint = randomUnsigned(parentSize);
-		if (!vectorUsedParents->getElement(chosenPoint))
-		{
-			vectorUsedParents->setElement(chosenPoint, 1);
-			if (numChosenParents == 0)
-			{
-				parentA = chosenPoint;
-			}
-			else
-			{
-				parentB = chosenPoint;
-			}
-			++numChosenParents;
-		}
-
+		chosenPoint = randomUnsigned(parentSize);
+	} while (!vectorUsedParents.getElement(chosenPoint));
+	vectorUsedParents.setElement(chosenPoint, 1);
+	if (++usedParents == vectorUsedParents.getSize())
+	{
+		vectorUsedParents.reset();
+		usedParents = 0;
+		printf(
+				"Warning: there's not enough unused parents too do crossover. Some of them will be used again.\n");
 	}
-	usedParents += 2;
-	offSpring[offSpringSize++] = parents[parentA]->newCopy();
-	offSpring[offSpringSize++] = parents[parentB]->newCopy();
+	return chosenPoint;
 }
 
 void Population::oneCrossover(CrossoverAlgorithm crossoverAlgorithm,
-		CrossoverLevel crossoverLevel)
+		CrossoverLevel crossoverLevel, Interface &vectorUsedParents,
+		unsigned &usedParents)
 {
-	if (usedParents + 2 > parentSize)
-	{
-		cout
-				<< "Warning: there's not enough unused parents too do crossover. Some of them will be used again."
-				<< endl;
-		if (vectorUsedParents)
-			delete vectorUsedParents;
-		vectorUsedParents = NULL;
-	}
-	if (vectorUsedParents == NULL)
-	{
-		vectorUsedParents = new Interface(parentSize, BIT);
-		usedParents = 0;
-	}
-
-	unsigned parentA, parentB;
-	produceTwoOffsprings(parentA, parentB);
+	offSpring[offSpringSize++] = parents[choseParent(vectorUsedParents,
+			usedParents)]->newCopy();
+	offSpring[offSpringSize++] = parents[choseParent(vectorUsedParents,
+			usedParents)]->newCopy();
 
 	Individual* offSpringA = offSpring[offSpringSize - 2];
 	Individual* offSpringB = offSpring[offSpringSize - 1];

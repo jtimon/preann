@@ -3,7 +3,8 @@
 
 using namespace std;
 
-#include "neuralNet.h"
+#include "taskXor.h"
+#include "population.h"
 #include "chronometer.h"
 
 #define PATH "/home/timon/test.nn"
@@ -63,27 +64,34 @@ unsigned char areEqual(float expected, float actual, VectorType vectorType)
 
 unsigned assertEqualsInterfaces(Interface* expected, Interface* actual)
 {
-    if(expected->getVectorType() != actual->getVectorType()){
-        throw "The interfaces are not even of the same type!";
-    }
-    if(expected->getSize() != actual->getSize()){
-        throw "The interfaces are not even of the same size!";
-    }
+	if (expected->getVectorType() != actual->getVectorType())
+	{
+		throw "The interfaces are not even of the same type!";
+	}
+	if (expected->getSize() != actual->getSize())
+	{
+		throw "The interfaces are not even of the same size!";
+	}
 	unsigned differencesCounter = 0;
 
-    for(unsigned i = 0;i < expected->getSize();i++){
-        if(!areEqual(expected->getElement(i), actual->getElement(i), expected->getVectorType())){
-            printf("The interfaces are not equal at the position %d (expected = %f actual %f).\n", i, expected->getElement(i), actual->getElement(i));
-            ++differencesCounter;
-        }
-    }
+	for (unsigned i = 0; i < expected->getSize(); i++)
+	{
+		if (!areEqual(expected->getElement(i), actual->getElement(i),
+				expected->getVectorType()))
+		{
+			printf(
+					"The interfaces are not equal at the position %d (expected = %f actual %f).\n",
+					i, expected->getElement(i), actual->getElement(i));
+			++differencesCounter;
+		}
+	}
 	return differencesCounter;
 }
 
 #define SIZE_MIN 5
 #define SIZE_MAX 5
 #define SIZE_INC 5
-#define NUM_LAYERS 2
+#define NUM_TRIES 2
 
 int main(int argc, char *argv[])
 {
@@ -92,51 +100,74 @@ int main(int argc, char *argv[])
 	//TODO AAA
 	try
 	{
-//		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++)
-//		{
-//			VectorType vectorType = (VectorType)vectType;
-//			if (vectorType != BYTE)
-//			{
-//				for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
-//						+= SIZE_INC)
-//				{
-//					NeuralNet controlNeuralNet(C);
-//					controlNeuralNet.createFeedForwardNet(size, vectorType,
-//							NUM_LAYERS, size, vectorType, IDENTITY);
-////					controlNeuralNet.createFullyConnectedNet(size, vectorType,
-////							NUM_LAYERS, size, vectorType, IDENTITY);
-//					controlNeuralNet.randomWeighs(INITIAL_WEIGHS_RANGE);
-//
-//					FILE* stream = fopen(PATH, "w+b");
-//					controlNeuralNet.save(stream);
-//					fclose(stream);
-//
-//					controlNeuralNet.calculateOutput();
-//
-//					for (unsigned implType = 0; implType
-//							< IMPLEMENTATION_TYPE_DIM; implType++)
-//					{
-//						ImplementationType implementationType =
-//								(ImplementationType)((implType));
-//						printTestParams(implementationType, vectorType, size);
-//
-//						NeuralNet nn(implementationType);
-//						stream = fopen(PATH, "r+b");
-//						nn.load(stream);
-//						fclose(stream);
-//						nn.getInput(0)->copyFrom(controlNeuralNet.getInput(0));
-//
-//						//test calculation
-//						nn.calculateOutput();
-//						unsigned differences =
-//								assertEqualsInterfaces(controlNeuralNet.getOutput(0),
-//										nn.getOutput(0));
-//						if (differences != 0)
-//							printf("Errors on outputs: %d \n", differences);
-//					}
-//				}
-//			}
-//		}
+		for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_INC)
+		{
+			Task* xorTask = new TaskXor(size, NUM_TRIES);
+			Individual example(SSE2);
+			example.addInputLayer(size, BIT);
+			example.addInputLayer(size, BIT);
+			example.addLayer(size * 2, BIT, BINARY_STEP);
+			example.addLayersConnection(0, 2);
+			example.addLayersConnection(1, 2);
+			example.addOutputLayer(size, BIT, BINARY_STEP);
+			example.addLayersConnection(2, 3);
+
+			Population pop(xorTask, &example, 100, 20);
+			pop.setSelectionRanking(2, 5, 1);
+			pop.setCrossoverUniformScheme(NEURON, 2, 0.9);
+			pop.setMutationsPerIndividual(1, 0.5);
+
+			while (pop.getBestIndividualScore() < 0 && pop.nextGeneration()< 1000){
+				printf("Generation %d BestIndividualScore %f AverageScore %f\n", pop.getGeneration(), pop.getAverageScore(), pop.getBestIndividualScore());
+			}
+			delete (xorTask);
+		}
+
+		//		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++)
+		//		{
+		//			VectorType vectorType = (VectorType)vectType;
+		//			if (vectorType != BYTE)
+		//			{
+		//				for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
+		//						+= SIZE_INC)
+		//				{
+		//					NeuralNet controlNeuralNet(C);
+		//					controlNeuralNet.createFeedForwardNet(size, vectorType,
+		//							NUM_LAYERS, size, vectorType, IDENTITY);
+		////					controlNeuralNet.createFullyConnectedNet(size, vectorType,
+		////							NUM_LAYERS, size, vectorType, IDENTITY);
+		//					controlNeuralNet.randomWeighs(INITIAL_WEIGHS_RANGE);
+		//
+		//					FILE* stream = fopen(PATH, "w+b");
+		//					controlNeuralNet.save(stream);
+		//					fclose(stream);
+		//
+		//					controlNeuralNet.calculateOutput();
+		//
+		//					for (unsigned implType = 0; implType
+		//							< IMPLEMENTATION_TYPE_DIM; implType++)
+		//					{
+		//						ImplementationType implementationType =
+		//								(ImplementationType)((implType));
+		//						printTestParams(implementationType, vectorType, size);
+		//
+		//						NeuralNet nn(implementationType);
+		//						stream = fopen(PATH, "r+b");
+		//						nn.load(stream);
+		//						fclose(stream);
+		//						nn.getInput(0)->copyFrom(controlNeuralNet.getInput(0));
+		//
+		//						//test calculation
+		//						nn.calculateOutput();
+		//						unsigned differences =
+		//								assertEqualsInterfaces(controlNeuralNet.getOutput(0),
+		//										nn.getOutput(0));
+		//						if (differences != 0)
+		//							printf("Errors on outputs: %d \n", differences);
+		//					}
+		//				}
+		//			}
+		//		}
 		printf("Exit success.\n");
 		mem_printTotalAllocated();
 		mem_printTotalPointers();

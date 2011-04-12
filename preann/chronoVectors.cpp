@@ -12,38 +12,37 @@ using namespace std;
 void printTestParams(ImplementationType implementationType,
 		VectorType vectorType)
 {
-	printf("\n");
 	switch (vectorType)
 	{
 	case FLOAT:
-		printf(" FLOAT ");
+		printf("FLOAT;");
 		break;
 	case BIT:
-		printf(" BIT   ");
+		printf("BIT;");
 		break;
 	case SIGN:
-		printf(" SIGN  ");
+		printf("SIGN;");
 		break;
 	case BYTE:
-		printf(" BYTE  ");
+		printf("BYTE;");
 		break;
 	}
 	switch (implementationType)
 	{
 	case C:
-		printf(" C        ");
+		printf("C;");
 		break;
 	case SSE2:
-		printf(" SSE2     ");
+		printf("SSE2;");
 		break;
 	case CUDA:
-		printf(" CUDA     ");
+		printf("CUDA;");
 		break;
 	case CUDA2:
-		printf(" CUDA2    ");
+		printf("CUDA2;");
 		break;
 	case CUDA_INV:
-		printf(" CUDA_INV ");
+		printf("CUDA_INV;");
 		break;
 	}
 }

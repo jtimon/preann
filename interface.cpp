@@ -15,6 +15,24 @@ Interface::Interface(FILE* stream)
 	fread(data, byteSize, 1, stream);
 }
 
+void Interface::reset()
+{
+    switch (vectorType){
+        case FLOAT:
+            for(unsigned i = 0;i < size;i++){
+                ((float*)(data))[i] = 0;
+        }
+        break;
+    case BYTE:
+    case BIT:
+    case SIGN:
+        for(unsigned i = 0;i < getByteSize();i++){
+            ((unsigned char*)(data))[i] = 0;
+    }
+}
+
+}
+
 Interface::Interface(unsigned size, VectorType vectorType)
 {
 	this->size = size;
@@ -22,25 +40,7 @@ Interface::Interface(unsigned size, VectorType vectorType)
 
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
-
-	switch (vectorType)
-	{
-	case BYTE:
-		for (unsigned i = 0; i < byteSize; i++) {
-			((unsigned char*)data)[i] = 128;
-		}
-		break;
-	case FLOAT:
-		for (unsigned i = 0; i < size; i++) {
-			((float*)data)[i] = 0;
-		}
-		break;
-	case BIT:
-	case SIGN:
-		for (unsigned i = 0; i < byteSize; i++) {
-			((unsigned char*)data)[i] = 0;
-		}
-	}
+    reset();
 }
 
 Interface::Interface(Interface* toCopy)
@@ -89,7 +89,8 @@ unsigned Interface::getSize()
 
 float Interface::getElement(unsigned pos)
 {
-	if (pos >= size) {
+	if (pos >= size)
+	{
 		char buffer[100];
 		sprintf(
 				buffer,
@@ -108,10 +109,12 @@ float Interface::getElement(unsigned pos)
 	case SIGN:
 		unsigned mask = 0x80000000 >> (pos % BITS_PER_UNSIGNED);
 
-		if (((unsigned*)data)[pos / BITS_PER_UNSIGNED] & mask) {
+		if (((unsigned*)data)[pos / BITS_PER_UNSIGNED] & mask)
+		{
 			return 1;
 		}
-		if (vectorType == BIT) {
+		if (vectorType == BIT)
+		{
 			return 0;
 		}
 		return -1;
@@ -120,7 +123,8 @@ float Interface::getElement(unsigned pos)
 
 void Interface::setElement(unsigned pos, float value)
 {
-	if (pos >= size) {
+	if (pos >= size)
+	{
 		char buffer[100];
 		sprintf(
 				buffer,
@@ -141,10 +145,12 @@ void Interface::setElement(unsigned pos, float value)
 	case SIGN:
 		unsigned mask = 0x80000000 >> (pos % BITS_PER_UNSIGNED);
 
-		if (value > 0) {
+		if (value > 0)
+		{
 			((unsigned*)data)[pos / BITS_PER_UNSIGNED] |= mask;
 		}
-		else {
+		else
+		{
 			((unsigned*)data)[pos / BITS_PER_UNSIGNED] &= ~mask;
 		}
 	}
@@ -153,12 +159,15 @@ void Interface::setElement(unsigned pos, float value)
 float Interface::compareTo(Interface *other)
 {
 	float accumulator = 0;
-	for (unsigned i = 0; i < this->size; i++) {
+	for (unsigned i = 0; i < this->size; i++)
+	{
 		float difference = this->getElement(i) - other->getElement(i);
-		if (difference > 0) {
+		if (difference > 0)
+		{
 			accumulator += difference;
 		}
-		else {
+		else
+		{
 			accumulator -= difference;
 		}
 	}
@@ -171,24 +180,29 @@ void Interface::random(float range)
 	{
 	case BYTE:
 		unsigned charRange;
-		if (range >= 128) {
+		if (range >= 128)
+		{
 			charRange = 127;
 		}
-		else {
+		else
+		{
 			charRange = (unsigned)range;
 		}
-		for (unsigned i = 0; i < size; i++) {
+		for (unsigned i = 0; i < size; i++)
+		{
 			setElement(i, 128 + (unsigned char)randomInt(charRange));
 		}
 		break;
 	case FLOAT:
-		for (unsigned i = 0; i < size; i++) {
+		for (unsigned i = 0; i < size; i++)
+		{
 			setElement(i, randomFloat(range));
 		}
 		break;
 	case BIT:
 	case SIGN:
-		for (unsigned i = 0; i < size; i++) {
+		for (unsigned i = 0; i < size; i++)
+		{
 			setElement(i, randomUnsigned(2));
 		}
 		break;
@@ -209,12 +223,14 @@ void Interface::load(FILE* stream)
 	fread(&size2, sizeof(unsigned), 1, stream);
 	fread(&vectorType2, sizeof(VectorType), 1, stream);
 
-	if (size2 != size) {
+	if (size2 != size)
+	{
 		std::string error =
 				"The size of the Interface is different than the size to load.";
 		throw error;
 	}
-	if (vectorType2 != vectorType) {
+	if (vectorType2 != vectorType)
+	{
 		std::string error =
 				"The Type of the Interface is different than the Vector Type to load.";
 		throw error;
@@ -225,7 +241,8 @@ void Interface::load(FILE* stream)
 void Interface::print()
 {
 	printf("----------------\n", 1);
-	for (unsigned i = 0; i < size; i++) {
+	for (unsigned i = 0; i < size; i++)
+	{
 		switch (vectorType)
 		{
 		case BYTE:
@@ -242,22 +259,38 @@ void Interface::print()
 	printf("\n----------------\n", 1);
 }
 
-void Interface::copyFrom(Interface *other)
+void Interface::copyFromFast(Interface *other)
 {
-	if (size != other->getSize()) {
+	if (size != other->getSize())
+	{
 		std::string error = "The sizes of the interfaces are different.";
 		throw error;
 	}
-	if (vectorType != other->getVectorType()) {
+	if (vectorType != other->getVectorType())
+	{
 		std::string error = "The Types of the Interfaces are different.";
 		throw error;
 	}
 	memcpy(data, other->getDataPointer(), getByteSize());
 }
 
+void Interface::copyFrom(Interface *other)
+{
+	if (size != other->getSize())
+	{
+		std::string error = "The sizes of the interfaces are different.";
+		throw error;
+	}
+	for (unsigned i = 0; i < size; ++i)
+	{
+		setElement(i, other->getElement(i));
+	}
+}
+
 void Interface::transposeMatrix(unsigned width)
 {
-	if (size % width != 0) {
+	if (size % width != 0)
+	{
 		char buffer[100];
 		sprintf(
 				buffer,
@@ -270,8 +303,10 @@ void Interface::transposeMatrix(unsigned width)
 	Interface aux(this);
 
 	unsigned height = size / width;
-	for (unsigned i = 0; i < width; i++) {
-		for (unsigned j = 0; j < height; j++) {
+	for (unsigned i = 0; i < width; i++)
+	{
+		for (unsigned j = 0; j < height; j++)
+		{
 			setElement((i * height) + j, aux.getElement(i + (j * width)));
 		}
 	}

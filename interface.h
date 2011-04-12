@@ -31,10 +31,12 @@ public:
 	float getElement(unsigned pos);
 	void setElement(unsigned pos, float value);
 
+	void copyFromFast(Interface* other);
 	void copyFrom(Interface* other);
 	void print();
 	float compareTo(Interface* other);
 	void random(float range);
+    void reset();
 	void save(FILE* stream);
 	void load(FILE* stream);
 	void transposeMatrix(unsigned width);

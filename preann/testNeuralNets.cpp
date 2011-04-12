@@ -83,7 +83,7 @@ unsigned assertEqualsInterfaces(Interface* expected, Interface* actual)
 #define SIZE_MIN 5
 #define SIZE_MAX 5
 #define SIZE_INC 5
-#define NUM_LAYERS 2
+#define NUM_TRIES 2
 
 int main(int argc, char *argv[])
 {
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 				{
 					NeuralNet controlNeuralNet(C);
 					controlNeuralNet.createFeedForwardNet(size, vectorType,
-							NUM_LAYERS, size, vectorType, IDENTITY);
+							NUM_TRIES, size, vectorType, IDENTITY);
 //					controlNeuralNet.createFullyConnectedNet(size, vectorType,
 //							NUM_LAYERS, size, vectorType, IDENTITY);
 					controlNeuralNet.randomWeighs(INITIAL_WEIGHS_RANGE);
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 						stream = fopen(PATH, "r+b");
 						nn.load(stream);
 						fclose(stream);
-						nn.getInput(0)->copyFrom(controlNeuralNet.getInput(0));
+						nn.getInput(0)->copyFromFast(controlNeuralNet.getInput(0));
 
 						//test calculation
 						nn.calculateOutput();
