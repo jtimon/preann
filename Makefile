@@ -32,7 +32,7 @@ NASM = nasm -f elf
 .SECONDARY:
 
 all: checkdirs $(EXE)
-#	shell/testAll.sh
+	./testAll.sh
 
 checkdirs: $(BUILD_DIR)
 
