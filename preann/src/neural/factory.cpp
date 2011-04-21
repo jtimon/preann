@@ -1,10 +1,10 @@
 #include "factory.h"
 
 //TODO Z implementar diferentes veces para decidir en el makefile
-#include "cppConnection.h"
-#include "xmmConnection.h"
-#include "cuda2Connection.h"
-#include "cudaInvertedConnection.h"
+#include "template/cppConnection.h"
+#include "template/xmmConnection.h"
+#include "template/cuda2Connection.h"
+#include "template/cudaInvertedConnection.h"
 
 Vector* Factory::newVector(FILE* stream, ImplementationType implementationType)
 {
