@@ -32,7 +32,7 @@ NASM = nasm -f elf
 .SECONDARY:
 
 all: checkdirs $(EXE)
-	./testAll.sh
+#	./testAll.sh
 
 checkdirs: $(BUILD_DIR)
 
@@ -41,12 +41,12 @@ $(BUILD_DIR):
 
 bin/%.exe: build/test/%.o $(OBJ)
 	$(NVCC_LINK) $^ -o $@
-#build/test%.o: src/test%.cpp
-#	$(CXX) -c $< $(INCLUDES) -o $@
-#build/%.o: src/%.cpp include/%.h
-#	$(CXX) -c $< $(INCLUDES) -o $@
-build/%.o: src/%.cpp
+build/test%.o: src/test%.cpp
 	$(CXX) -c $< $(INCLUDES) -o $@
+build/%.o: src/%.cpp include/%.h
+	$(CXX) -c $< $(INCLUDES) -o $@
+#build/%.o: src/%.cpp
+#	$(CXX) -c $< $(INCLUDES) -o $@
 
 build/neural/factory.o: src/neural/factory.cpp include/neural/factory.h include/template/*.h build/optimization/cuda_code.o build/optimization/sse2_code.o
 	$(NVCC_COMPILE) $< $(INCLUDES) -o $@
