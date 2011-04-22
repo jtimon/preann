@@ -7,11 +7,12 @@
 
 #ifndef CPPVECTOR_H_
 #define CPPVECTOR_H_
+#ifdef CPP_IMPL
 
-#include "vectorImpl.h"
+#include "vector.h"
 
 template <VectorType vectorTypeTempl, class c_typeTempl>
-class CppVector: virtual public Vector, virtual public VectorImpl<vectorTypeTempl, c_typeTempl> {
+class CppVector: virtual public Vector{
 protected:
 	unsigned getByteSize()
 	{
@@ -38,6 +39,12 @@ public:
 	virtual ImplementationType getImplementationType() {
 		return C;
 	};
+
+	virtual VectorType getVectorType()
+	{
+		return vectorTypeTempl;
+	};
+
 	CppVector(){};
 
 	CppVector(unsigned size)
@@ -113,4 +120,5 @@ public:
 
 };
 
+#endif
 #endif /* CPPVECTOR_H_ */

@@ -94,7 +94,7 @@ unsigned assertEqualsInterfaces(Interface* expected, Interface* actual)
 #define NUM_TRIES 2
 
 int main(int argc, char *argv[])
-{
+{/*
 	Chronometer total;
 	total.start();
 	//TODO AAA
@@ -180,6 +180,6 @@ int main(int argc, char *argv[])
 
 	//mem_printListOfPointers();
 	total.stop();
-	printf("Total time spent: %f \n", total.getSeconds());
+	printf("Total time spent: %f \n", total.getSeconds());*/
 	return EXIT_SUCCESS;
 }

@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 	Chronometer total;
 	total.start();
 	unsigned errorCount = 0;
-
+/*
 	try {
 		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
 			VectorType vectorType = (VectorType)((vectType));
@@ -265,6 +265,6 @@ int main(int argc, char *argv[])
 
 	//mem_printListOfPointers();
 	total.stop();
-	printf("Total time spent: %f \n", total.getSeconds());
+	printf("Total time spent: %f \n", total.getSeconds());*/
 	return EXIT_SUCCESS;
 }

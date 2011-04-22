@@ -10,9 +10,6 @@
 
 #include "interface.h"
 
-#define IMPLEMENTATION_TYPE_DIM 5
-typedef enum {C, SSE2, CUDA, CUDA2, CUDA_INV} ImplementationType;
-
 class Vector {
 protected:
 	unsigned tSize;

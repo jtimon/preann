@@ -8,12 +8,11 @@
 #ifndef XMMVECTOR_H_
 #define XMMVECTOR_H_
 
-#include "vectorImpl.h"
+#include "vector.h"
 #include "sse2_code.h"
 
 template<VectorType vectorTypeTempl, class c_typeTempl>
-	class XmmVector : virtual public Vector, virtual public VectorImpl<
-			vectorTypeTempl, c_typeTempl> {
+	class XmmVector : virtual public Vector {
 	protected:
 		static unsigned getByteSize(unsigned size, VectorType vectorType)
 		{
@@ -129,7 +128,12 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 		virtual ImplementationType getImplementationType()
 		{
 			return SSE2;
-		}
+		};
+
+		virtual VectorType getVectorType()
+		{
+			return vectorTypeTempl;
+		};
 
 		XmmVector()
 		{

@@ -1,5 +1,4 @@
 #include "layer.h"
-#include "factory.h"
 
 ImplementationType Layer::getImplementationType()
 {

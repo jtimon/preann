@@ -9,6 +9,7 @@
 
 #include "connection.h"
 
+
 class Factory {
 protected:
 	static VectorType weighForInput(VectorType inputType);

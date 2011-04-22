@@ -2,11 +2,11 @@
 #ifndef CUDAVECTOR_H_
 #define CUDAVECTOR_H_
 
-#include "vectorImpl.h"
+#include "vector.h"
 #include "cuda_code.h"
 
 template <VectorType vectorTypeTempl, class c_typeTempl>
-class CudaVector: virtual public Vector, virtual public VectorImpl<vectorTypeTempl, c_typeTempl> {
+class CudaVector: virtual public Vector {
 private:
 	CudaVector() {};
 protected:
@@ -37,6 +37,10 @@ public:
 
 	virtual ImplementationType getImplementationType() {
 		return CUDA;
+	};
+	virtual VectorType getVectorType()
+	{
+		return vectorTypeTempl;
 	};
 
 	CudaVector(unsigned size)

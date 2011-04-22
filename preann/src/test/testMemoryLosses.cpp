@@ -4,87 +4,68 @@
 
 using namespace std;
 
+#include "test.h"
 #include "population.h"
 #include "chronometer.h"
 #include "cuda_code.h"
 
 
-void printTestParams(ImplementationType implementationType, VectorType vectorType, unsigned size)
-{
-    switch (implementationType){
-        case C: 		printf(" C        "); 	break;
-        case SSE2: 		printf(" SSE2     ");	break;
-        case CUDA: 		printf(" CUDA     ");	break;
-        case CUDA2:		printf(" CUDA2    ");	break;
-        case CUDA_INV:	printf(" CUDA_INV ");	break;
-    }
-    switch (vectorType){
-        case FLOAT: printf(" FLOAT "); 	break;
-        case BIT: 	printf(" BIT   ");	break;
-        case SIGN: 	printf(" SIGN  ");	break;
-        case BYTE:	printf(" BYTE  ");	break;
-    }
-    printf(" size = %d \n", size);
-}
-
-#define SIZE_MIN 1
-#define SIZE_MAX 500
-#define SIZE_INC 100
-
 int main(int argc, char *argv[]) {
+
+	Test test;
 	Chronometer total;
+	unsigned memoryLosses = 0;
+
+	test.setMaxSize(500);
+	test.setIncSize(100);
+	test.printParameters();
+
 	total.start();
 	try {
 
-		for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_INC) {
-			for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
-				VectorType vectorType = (VectorType)((vectType));
-				for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
-					ImplementationType implementationType = (ImplementationType)((implType));
+		for (test.sizeToMin(); test.sizeIncrement(); ) {
+			for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
+				for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
 
-					printTestParams(implementationType, vectorType, size);
-					printf("-----------Vector-----------\n");
-					Vector* vector = Factory::newVector(size, vectorType, implementationType);
-
-					mem_printTotalAllocated();
-					mem_printTotalPointers();
-					printf("------------------\n");
+					Vector* vector = Factory::newVector(test.getSize(), test.getVectorType(), test.getImplementationType());
 					delete(vector);
 
 					if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
-						std::string error = "Memory loss detected testing class Vector.\n";
-						throw error;
-					}
-					if (vectorType != BYTE){
-						printf("-----------Connection-----------\n");
-						vector = Factory::newVector(size, vectorType, implementationType);
-						Connection* connection = Factory::newConnection(vector, size, implementationType);
-
+						cout << "Memory loss detected testing class Vector.\n" << endl;
+						test.printCurrentState();
 						mem_printTotalAllocated();
 						mem_printTotalPointers();
-						printf("------------------\n");
+						memoryLosses++;
+					}
+					if (test.getVectorType() != BYTE){
+
+						vector = Factory::newVector(test.getSize(), test.getVectorType(), test.getImplementationType());
+						Connection* connection = Factory::newConnection(vector, test.getSize(), test.getImplementationType());
+
 						delete(connection);
 						delete(vector);
 
 						if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
-							std::string error = "Memory loss detected testing class Connection.\n";
-							throw error;
+							cout << "Memory loss detected testing class Connection.\n" << endl;
+							test.printCurrentState();
+							mem_printTotalAllocated();
+							mem_printTotalPointers();
+							memoryLosses++;
 						}
 
-						printf("-----------Layer-----------\n");
-						Layer* layer = new Layer(size, vectorType, IDENTITY, implementationType);
+						Layer* layer = new Layer(test.getSize(), test.getVectorType(), IDENTITY, test.getImplementationType());
 						layer->addInput(layer->getOutput());
 						layer->addInput(layer->getOutput());
 						layer->addInput(layer->getOutput());
 
-						mem_printTotalAllocated();
-						mem_printTotalPointers();
-						printf("------------------\n");
 						delete(layer);
 
 						if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
-							std::string error = "Memory loss detected testing class Layer.\n";
-							throw error;
+							cout << "Memory loss detected testing class Layer.\n" << endl;
+							test.printCurrentState();
+							mem_printTotalAllocated();
+							mem_printTotalPointers();
+							memoryLosses++;
 						}
 					}
 				}
@@ -100,7 +81,9 @@ int main(int argc, char *argv[]) {
 		printf("An error was thrown.\n", 1);
 	}
 
+	cout << "Total memory losses: " << memoryLosses << endl;
 	mem_printListOfPointers();
+
 	total.stop();
 	printf("Total time spent: %f \n", total.getSeconds());
 	return EXIT_SUCCESS;

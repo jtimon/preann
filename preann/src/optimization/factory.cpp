@@ -1,10 +1,39 @@
+//#ifdef CPP_IMPL
+//	#ifdef SSE2_IMPL
+//		#ifdef CUDA_IMPL
+//			#include "fullFactory.h"
+//		#else
+//			#include "sse2Factory.h"
+//		#endif
+//	#else
+//		#ifdef CUDA_IMPL
+//			#include "cudaFactory.h"
+//		#else
+//			#include "cppFactory.h"
+//		#endif
+//	#endif
+//#else
+//	#error The CPP implementation shoud be always available.
+//#endif
+
 #include "factory.h"
 
-//TODO Z implementar diferentes veces para decidir en el makefile
-#include "template/cppConnection.h"
-#include "template/xmmConnection.h"
-#include "template/cuda2Connection.h"
-#include "template/cudaInvertedConnection.h"
+//#ifdef FULL_IMPL
+	#include "fullFactory.h"
+//#warning ----------------FULL
+//#endif
+//#ifdef CPP_IMPL
+//	#include <cppFactory.h>
+//#warning ----------------CPP
+//#endif
+//#ifdef SSE2_IMPL
+//	#include <sse2Factory.h>
+//#warning ----------------SSE2
+//#endif
+//#ifdef CUDA_IMPL
+//	#include "cudaFactory.h"
+//#warning ----------------CUDA
+//#endif
 
 Vector* Factory::newVector(FILE* stream, ImplementationType implementationType)
 {
@@ -28,18 +57,19 @@ Vector* Factory::newVector(Vector* vector, ImplementationType implementationType
     return toReturn;
 }
 
-template <VectorType vectorTypeTempl, class c_typeTempl>
-Vector* func_newVector(unsigned size, ImplementationType implementationType)
+VectorType Factory::weighForInput(VectorType inputType)
 {
-	switch(implementationType){
-		case C:
-			return new CppVector<vectorTypeTempl, c_typeTempl>(size);
-		case SSE2:
-			return new XmmVector<vectorTypeTempl, c_typeTempl>(size);
-		case CUDA:
-		case CUDA2:
-		case CUDA_INV:
-			return new CudaVector<vectorTypeTempl, c_typeTempl>(size);
+	switch (inputType){
+		case BYTE:
+			{
+			std::string error = "Connections are not implemented for an input Vector of the VectorType BYTE";
+			throw error;
+			}
+		case FLOAT:
+			return FLOAT;
+		case BIT:
+		case SIGN:
+			return BYTE;
 	}
 }
 
@@ -54,23 +84,6 @@ Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationT
 			return func_newVector<BIT, unsigned>(size, implementationType);
 		case SIGN:
 			return func_newVector<SIGN, unsigned>(size, implementationType);
-	}
-}
-
-template <VectorType vectorTypeTempl, class c_typeTempl>
-Connection* func_newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType)
-{
-	switch(implementationType){
-		case C:
-			return new CppConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
-		case SSE2:
-			return new XmmConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
-		case CUDA:
-			return new CudaConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
-		case CUDA2:
-			return new Cuda2Connection<vectorTypeTempl, c_typeTempl>(input, outputSize);
-		case CUDA_INV:
-			return new CudaInvertedConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
 	}
 }
 
@@ -92,21 +105,5 @@ Connection* Factory::newConnection(Vector* input, unsigned outputSize, Implement
 			return func_newConnection<BIT, unsigned>(input, outputSize, implementationType);
 		case SIGN:
 			return func_newConnection<SIGN, unsigned>(input, outputSize, implementationType);
-	}
-}
-
-VectorType Factory::weighForInput(VectorType inputType)
-{
-	switch (inputType){
-		case BYTE:
-			{
-			std::string error = "Connections are not implemented for an input Vector of the VectorType BYTE";
-			throw error;
-			}
-		case FLOAT:
-			return FLOAT;
-		case BIT:
-		case SIGN:
-			return BYTE;
 	}
 }

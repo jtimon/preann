@@ -5,85 +5,16 @@
 using namespace std;
 
 #include "chronometer.h"
+#include "test.h"
 #include "factory.h"
 
-#define INITIAL_WEIGHS_RANGE 20
-
-void printTestParams(ImplementationType implementationType, VectorType vectorType, unsigned size, unsigned weighsRange)
-{
-    switch (implementationType){
-        case C: 		printf(" C        "); 	break;
-        case SSE2: 		printf(" SSE2     ");	break;
-        case CUDA: 		printf(" CUDA     ");	break;
-        case CUDA2:		printf(" CUDA2    ");	break;
-        case CUDA_INV:	printf(" CUDA_INV ");	break;
-    }
-    switch (vectorType){
-        case FLOAT: printf(" FLOAT "); 	break;
-        case BIT: 	printf(" BIT   ");	break;
-        case SIGN: 	printf(" SIGN  ");	break;
-        case BYTE:	printf(" BYTE  ");	break;
-    }
-    printf(" size = %d weighsRange %d \n", size, INITIAL_WEIGHS_RANGE);
-}
-
-unsigned char areEqual(float expected, float actual, VectorType vectorType)
-{
-	if (vectorType == FLOAT){
-		return (expected - 1 < actual
-			 && expected + 1 > actual);
-	} else {
-		return expected == actual;
-	}
-}
-
-unsigned assertEqualsInterfaces(Interface* expected, Interface* actual)
-{
-    if(expected->getVectorType() != actual->getVectorType()){
-        throw "The interfaces are not even of the same type!";
-    }
-    if(expected->getSize() != actual->getSize()){
-        throw "The interfaces are not even of the same size!";
-    }
-	unsigned differencesCounter = 0;
-
-    for(unsigned i = 0;i < expected->getSize();i++){
-        if(!areEqual(expected->getElement(i), actual->getElement(i), expected->getVectorType())){
-            printf("The interfaces are not equal at the position %d (expected = %f actual %f).\n", i, expected->getElement(i), actual->getElement(i));
-            ++differencesCounter;
-        }
-    }
-	return differencesCounter;
-}
-
-unsigned assertEquals(Vector* expected, Vector* actual)
-{
-    if(expected->getVectorType() != actual->getVectorType()){
-        throw "The vectors are not even of the same type!";
-    }
-    if(expected->getSize() != actual->getSize()){
-        throw "The vectors are not even of the same size!";
-    }
-
-	unsigned differencesCounter = 0;
-	Interface* expectedInt = expected->toInterface();
-	Interface* actualInt = actual->toInterface();
-
-    for(unsigned i = 0;i < expectedInt->getSize();i++){
-        if(!areEqual(expectedInt->getElement(i), actualInt->getElement(i), expectedInt->getVectorType())){
-            printf("The vectors are not equal at the position %d (expected = %f actual %f).\n", i, expectedInt->getElement(i), actualInt->getElement(i));
-            ++differencesCounter;
-        }
-    }
-    delete(expectedInt);
-	delete(actualInt);
-	return differencesCounter;
-}
+Chronometer total;
+Test test;
 
 unsigned testClone(Vector* toTest)
 {
 	Vector* copy = toTest->clone();
-	unsigned differencesCounter = assertEquals(toTest, copy);
+	unsigned differencesCounter = test.assertEquals(toTest, copy);
 
 	if (toTest->getImplementationType() != copy->getImplementationType()){
 		printf("The vectors are not of the same implementation type.\n");
@@ -97,7 +28,7 @@ unsigned testClone(Vector* toTest)
 unsigned testCopyFrom(Vector* toTest)
 {
 	Interface interface = Interface(toTest->getSize(), toTest->getVectorType());
-	interface.random(INITIAL_WEIGHS_RANGE);
+	interface.random(test.getInitialWeighsRange());
 
 	unsigned differencesCounter = 0;
 	Vector* cVector = Factory::newVector(toTest, C);
@@ -105,7 +36,7 @@ unsigned testCopyFrom(Vector* toTest)
 	toTest->copyFromInterface(&interface);
 	cVector->copyFromInterface(&interface);
 
-	differencesCounter += assertEquals(cVector, toTest);
+	differencesCounter += test.assertEquals(cVector, toTest);
 
 	delete(cVector);
 	return differencesCounter;
@@ -121,7 +52,7 @@ unsigned testCopyTo(Vector* toTest)
 	toTest->copyToInterface(&interface);
 	cVector->copyToInterface(&cInterface);
 
-	unsigned differencesCounter = assertEqualsInterfaces(&cInterface, &interface);
+	unsigned differencesCounter = test.assertEqualsInterfaces(&cInterface, &interface);
 
 	delete(cVector);
 	return differencesCounter;
@@ -130,14 +61,14 @@ unsigned testCopyTo(Vector* toTest)
 unsigned testActivation(Vector* toTest, FunctionType functionType)
 {
 	Vector* results = Factory::newVector(toTest->getSize(), FLOAT, toTest->getImplementationType());
-	results->random(INITIAL_WEIGHS_RANGE);
+	results->random(test.getInitialWeighsRange());
 
 	Vector* cResults = Factory::newVector(results, C);
 	Vector* cVector = Factory::newVector(toTest->getSize(), toTest->getVectorType(), C);
 
 	toTest->activation(results, functionType);
 	cVector->activation(cResults, functionType);
-	unsigned differencesCounter = assertEquals(cVector, toTest);
+	unsigned differencesCounter = test.assertEquals(cVector, toTest);
 
 	delete(results);
 	delete(cVector);
@@ -160,7 +91,7 @@ unsigned testAddToResults(Connection* toTest)
 	toTest->calculateAndAddTo(results);
 	cConnection->calculateAndAddTo(cResults);
 
-	unsigned differencesCounter = assertEquals(cResults, results);
+	unsigned differencesCounter = test.assertEquals(cResults, results);
 
 	delete(results);
 	delete(cInput);
@@ -178,13 +109,13 @@ unsigned testMutate(Connection* toTest, unsigned times)
 	cConnection->copyFrom(toTest);
 
 	for(unsigned i=0; i < times; i++) {
-		float mutation = randomFloat(INITIAL_WEIGHS_RANGE);
+		float mutation = randomFloat(test.getInitialWeighsRange());
 		unsigned pos = randomUnsigned(toTest->getSize());
 		toTest->mutate(pos, mutation);
 		cConnection->mutate(pos, mutation);
 	}
 
-	unsigned differences = assertEquals(cConnection, toTest);
+	unsigned differences = test.assertEquals(cConnection, toTest);
 	delete(cInput);
 	delete(cConnection);
 	return differences;
@@ -195,7 +126,7 @@ unsigned testCrossover(Connection* toTest)
 	unsigned outputSize = toTest->getSize() / toTest->getInput()->getSize();
 
 	Connection* other = Factory::newConnection(toTest->getInput(), outputSize, toTest->getImplementationType());
-	other->random(INITIAL_WEIGHS_RANGE);
+	other->random(test.getInitialWeighsRange());
 
 	Vector* cInput = Factory::newVector(toTest->getInput(), C);
 	Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
@@ -209,8 +140,8 @@ unsigned testCrossover(Connection* toTest)
 	toTest->crossover(other, &bitVector);
 	cConnection->crossover(cOther, &bitVector);
 
-	unsigned differences = assertEquals(cConnection, toTest);
-	differences += assertEquals(cOther, other);
+	unsigned differences = test.assertEquals(cConnection, toTest);
+	differences += test.assertEquals(cOther, other);
 
 	delete(other);
 	delete(cInput);
@@ -219,9 +150,6 @@ unsigned testCrossover(Connection* toTest)
 	return differences;
 }
 
-#define SIZE_MIN 2
-#define SIZE_MAX 500
-#define SIZE_INC 100
 #define OUTPUT_SIZE_MIN 1
 #define OUTPUT_SIZE_MAX 3
 #define OUTPUT_SIZE_INC 2
@@ -230,67 +158,67 @@ unsigned testCrossover(Connection* toTest)
 #define PATH "/home/timon/layer.lay"
 
 int main(int argc, char *argv[]) {
-	Chronometer total;
-	total.start();
+
 	unsigned errorCount = 0;
+	total.start();
+
+	test.setMinSize(2);
+	test.setMaxSize(500);
+	test.setIncSize(100);
+	test.setInitialWeighsRange(20);
+	test.printParameters();
 
 	try {
-		for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_INC) {
-			for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
-				VectorType vectorType = (VectorType)((vectType));
-				FunctionType functionType = (FunctionType)(vectType);
-
-				for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
-					ImplementationType implementationType = (ImplementationType)((implType));
+		for (test.sizeToMin(); test.sizeIncrement(); ) {
+			for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
+				for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
 //					if (implementationType != C){
 					{
-					printf("----------------------------\n");
-					printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
 
-					Vector* vector = Factory::newVector(size, (VectorType)vectType, implementationType);
-					vector->random(INITIAL_WEIGHS_RANGE);
+					Vector* vector = Factory::newVector(test.getSize(), test.getVectorType(), test.getImplementationType());
+					vector->random(test.getInitialWeighsRange());
 
 					errorCount = testClone(vector);
 				    if (errorCount != 0){
-				    	printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+				    	test.printCurrentState();
 				    	printf("Errors on clone: %d \n", errorCount);
 				    }
 					errorCount = testCopyTo(vector);
 					if (errorCount != 0){
-						printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+						test.printCurrentState();
 						printf("Errors on copyTo: %d \n", errorCount);
 					}
 					errorCount = testCopyFrom(vector);
 					if (errorCount != 0){
-						printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+						test.printCurrentState();
 						printf("Errors on copyTo: %d \n", errorCount);
 					}
-					if (vectorType != BYTE) {
-						errorCount = testActivation(vector, functionType);
+					if (test.getVectorType() != BYTE) {
+						errorCount = testActivation(vector, IDENTITY);
 						if (errorCount != 0){
-							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+							test.printCurrentState();
 							printf("Errors on activation: %d \n", errorCount);
 						}
 					}
-					if (vectorType != BYTE)
+					if (test.getVectorType() != BYTE)
 					for (unsigned outputSize = OUTPUT_SIZE_MIN; outputSize <= OUTPUT_SIZE_MAX; outputSize += OUTPUT_SIZE_INC) {
 
-						Connection* connection = Factory::newConnection(vector, outputSize, implementationType);
-						connection->random(INITIAL_WEIGHS_RANGE);
+						Connection* connection = Factory::newConnection(vector, outputSize, test.getImplementationType());
+						connection->random(test.getInitialWeighsRange());
 
 						errorCount = testAddToResults(connection);
 						if (errorCount != 0){
-							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+							test.printCurrentState();
 							printf("Errors on Connection::addToResults: %d \n", errorCount);
 						}
 						errorCount = testMutate(connection, NUM_MUTATIONS);
 						if (errorCount != 0){
-							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+							test.printCurrentState();
 							printf("Errors on Connection::mutate: %d \n", errorCount);
 						}
 						errorCount = testCrossover(connection);
 						if (errorCount != 0){
-							printTestParams(implementationType, vectorType, size, INITIAL_WEIGHS_RANGE);
+							test.printCurrentState();
 							printf("Errors on Connection::crossover: %d \n", errorCount);
 						}
 						delete(connection);

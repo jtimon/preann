@@ -2,6 +2,7 @@
 #define ABSTRACTLAYER_H_
 
 #include "connection.h"
+#include "factory.h"
 
 class Layer {
 protected:

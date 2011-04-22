@@ -4,15 +4,20 @@
 
 SHELL = /bin/sh
 
-MODULES   = common optimization neural genetic tasks
+MODULES   = common neural genetic tasks optimization
+LIB_MODULES = $(MODULES) template  
 
 SRC_DIR   = $(addprefix src/,$(MODULES))  
-BUILD_DIR = $(addprefix build/,$(MODULES))
+BUILD_DIR = $(addprefix build/,$(MODULES)) build/test/
 
 SRC       = $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
-NON_CPP_OBJ = build/optimization/sse2_code.o build/optimization/cuda_code.o
-OBJ       = $(patsubst src/%.cpp,build/%.o,$(SRC)) $(NON_CPP_OBJ)
-INCLUDES  = $(addprefix -I , $(addprefix include/,$(MODULES))) -I include
+
+SSE2_OBJ = build/optimization/sse2_code.o
+CUDA_OBJ = build/optimization/cuda_code.o
+FULL_OBJ = $(SSE2_OBJ) $(CUDA_OBJ)
+
+OBJ       = $(patsubst src/%.cpp,build/%.o,$(SRC))
+INCLUDES  = $(addprefix -I , $(addprefix include/,$(LIB_MODULES))) -I include
 
 TEST = testMemoryLosses testVectors testLayers testNeuralNets
 CHRONO = chronoVectors chronoPopulationXor
@@ -20,18 +25,41 @@ CHRONO = chronoVectors chronoPopulationXor
 PROGRAMS = $(TEST) $(CHRONO)
 EXE = $(addsuffix .exe, $(addprefix bin/,$(PROGRAMS)))
 
-CXX = g++-4.3 -ggdb
-NVCC_LINK = /usr/local/cuda/bin/nvcc -L/usr/local/cuda/lib -lcudart 
-NVCC_COMPILE = /usr/local/cuda/bin/nvcc -g -G -c -arch sm_11 --device-emulation $(INCLUDES)
+CXX = g++-4.3 -ggdb $(INCLUDES) $(FACT_FLAGS)
+NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES) $(FACT_FLAGS)
+NVCC_LINK = $(NVCC) -L/usr/local/cuda/lib -lcudart 
+NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11 --device-emulation 
 NASM = nasm -f elf
+
+ifeq (all, $(MAKECMDGOALS))
+	FACT_OBJ = $(FULL_OBJ)
+	FACT_FLAGS += -DFULL_IMPL
+endif
+ifeq (cpp, $(MAKECMDGOALS))
+	NVCC_LINK = $(CXX)
+	NVCC_COMPILE = $(CXX)
+	FACT_FLAGS += -DCPP_IMPL
+endif
+ifeq (sse2, $(MAKECMDGOALS))
+	FACT_OBJ = $(SSE2_OBJ)
+	NVCC_LINK = $(CXX)
+	NVCC_COMPILE = $(CXX)
+	FACT_FLAGS += -DSSE2_IMPL
+endif
+ifeq (cuda, $(MAKECMDGOALS))
+	FACT_OBJ = $(CUDA_OBJ)
+	FACT_FLAGS += -DCUDA_IMPL
+endif
+
+OBJ += $(FACT_OBJ)
 
 #vpath %.cpp $(SRC_DIR)
 #vpath %.cpp $(addprefix include/,$(MODULES))
 
-.PHONY: all checkdirs clean
+.PHONY: all clean checkdirs cpp sse2 cuda
 .SECONDARY:
 
-all: checkdirs $(EXE)
+all cpp sse2 cuda: checkdirs $(EXE)
 #	./testAll.sh
 
 checkdirs: $(BUILD_DIR)
@@ -41,15 +69,16 @@ $(BUILD_DIR):
 
 bin/%.exe: build/test/%.o $(OBJ)
 	$(NVCC_LINK) $^ -o $@
+	./$@ > $(patsubst bin/%.exe,output/test/%.log,$@)
 build/test%.o: src/test%.cpp
-	$(CXX) -c $< $(INCLUDES) -o $@
+	$(CXX) -c $< -o $@
 build/%.o: src/%.cpp include/%.h
-	$(CXX) -c $< $(INCLUDES) -o $@
+	$(CXX) -c $< -o $@
 #build/%.o: src/%.cpp
-#	$(CXX) -c $< $(INCLUDES) -o $@
+#	$(CXX) -c $< -o $@
 
-build/neural/factory.o: src/neural/factory.cpp include/neural/factory.h include/template/*.h build/optimization/cuda_code.o build/optimization/sse2_code.o
-	$(NVCC_COMPILE) $< $(INCLUDES) -o $@
+build/optimization/factory.o: src/optimization/factory.cpp include/optimization/factory.h include/template/*.h $(FACT_OBJ)
+	$(NVCC_COMPILE) $< -o $@
 
 build/optimization/cuda_code.o : src/optimization/cuda_code.cu include/optimization/cuda_code.h include/common/util.h
 	$(NVCC_COMPILE) $< -o $@

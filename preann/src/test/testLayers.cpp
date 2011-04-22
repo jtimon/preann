@@ -153,7 +153,7 @@ void testLayer(unsigned size, VectorType vectorType)
 #define SIZE_MAX 50
 #define SIZE_INC 50
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {/*
 	Chronometer total;
 	total.start();
 
@@ -175,6 +175,6 @@ int main(int argc, char *argv[]) {
 
 	//mem_printListOfPointers();
 	total.stop();
-	printf("Total time spent: %f \n", total.getSeconds());
+	printf("Total time spent: %f \n", total.getSeconds());*/
 	return EXIT_SUCCESS;
 }

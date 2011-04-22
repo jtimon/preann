@@ -25,6 +25,8 @@ typedef enum {FLOAT, BIT, SIGN, BYTE} VectorType;
 #define VECTOR_TYPE_DIM 4
 typedef enum {IDENTITY, BINARY_STEP, BIPOLAR_STEP, REAL, SIGMOID, BIPOLAR_SIGMOID, ANOTHER_FUNCTION} FunctionType;
 #define FUNCTION_TYPE_DIM 6
+typedef enum {C, SSE2, CUDA, CUDA2, CUDA_INV} ImplementationType;
+#define IMPLEMENTATION_TYPE_DIM 5
 
 int randomInt(unsigned range);
 float randomFloat(float range);

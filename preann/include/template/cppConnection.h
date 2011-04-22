@@ -1,6 +1,7 @@
 
 #ifndef CPPCONNECTION_H_
 #define CPPCONNECTION_H_
+#ifdef CPP_IMPL
 
 #include "connection.h"
 #include "cppVector.h"
@@ -115,4 +116,5 @@ public:
 
 };
 
+#endif
 #endif /* CPPCONNECTION_H_ */
