@@ -9,8 +9,6 @@
 
 #include "connection.h"
 
-//TODO M intentar un solo archivo de configuracion para la factory (en vez de uno por target)
-
 class Factory {
 protected:
 	static VectorType weighForInput(VectorType inputType);

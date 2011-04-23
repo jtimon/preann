@@ -1,35 +1,5 @@
-//#ifdef CPP_IMPL
-//	#ifdef SSE2_IMPL
-//		#ifdef CUDA_IMPL
-//			#include "fullFactory.h"
-//		#else
-//			#include "sse2Factory.h"
-//		#endif
-//	#else
-//		#ifdef CUDA_IMPL
-//			#include "cudaFactory.h"
-//		#else
-//			#include "cppFactory.h"
-//		#endif
-//	#endif
-//#else
-//	#error The CPP implementation shoud be always available.
-//#endif
-
 #include "factory.h"
-
-#ifdef FULL_IMPL
-	#include "fullFactory.h"
-#endif
-#ifdef CPP_IMPL
-	#include "cppFactory.h"
-#endif
-#ifdef SSE2_IMPL
-	#include "sse2Factory.h"
-#endif
-#ifdef CUDA_IMPL
-	#include "cudaFactory.h"
-#endif
+#include "configFactory.h"
 
 Vector* Factory::newVector(FILE* stream, ImplementationType implementationType)
 {
@@ -53,22 +23,6 @@ Vector* Factory::newVector(Vector* vector, ImplementationType implementationType
     return toReturn;
 }
 
-VectorType Factory::weighForInput(VectorType inputType)
-{
-	switch (inputType){
-		case BYTE:
-			{
-			std::string error = "Connections are not implemented for an input Vector of the VectorType BYTE";
-			throw error;
-			}
-		case FLOAT:
-			return FLOAT;
-		case BIT:
-		case SIGN:
-			return BYTE;
-	}
-}
-
 Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType)
 {
 	switch(vectorType){
@@ -86,6 +40,22 @@ Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationT
 Connection* Factory::newThresholds(Vector* output, ImplementationType implementationType)
 {
 	return func_newConnection<FLOAT, float>(output, 1, implementationType);
+}
+
+VectorType Factory::weighForInput(VectorType inputType)
+{
+	switch (inputType){
+		case BYTE:
+			{
+			std::string error = "Connections are not implemented for an input Vector of the VectorType BYTE";
+			throw error;
+			}
+		case FLOAT:
+			return FLOAT;
+		case BIT:
+		case SIGN:
+			return BYTE;
+	}
 }
 
 Connection* Factory::newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType)
