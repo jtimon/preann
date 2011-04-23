@@ -8,24 +8,6 @@
 #ifndef CONFIGFACTORY_H_
 #define CONFIGFACTORY_H_
 
-#ifdef FULL_IMPL
-	#define CPP_IMPL
-	#define SSE2_IMPL
-	#define CUDA_IMPL
-#endif
-#ifdef CPP_BUILD
-	#define CPP_IMPL
-#endif
-#ifdef SSE2_BUILD
-	#define CPP_IMPL
-	#define SSE2_IMPL
-#endif
-#ifdef CUDA_BUILD
-	#define CPP_IMPL
-	#define CUDA_IMPL
-#endif
-/////////////////////////////////////////
-
 #ifdef CPP_IMPL
 	#include "cppConnection.h"
 #endif

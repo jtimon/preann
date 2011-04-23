@@ -34,20 +34,20 @@ NASM = nasm -f elf
 
 ifeq (all, $(MAKECMDGOALS))
 	FACT_OBJ = $(FULL_OBJ)
-	FACT_FLAGS += -DFULL_IMPL
+	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
 endif
 ifeq (cpp, $(MAKECMDGOALS))
 	NVCC_LINK = $(CXX_LINK)
-	FACT_FLAGS += -DCPP_BUILD
+	FACT_FLAGS += -DCPP_IMPL
 endif
 ifeq (sse2, $(MAKECMDGOALS))
-	FACT_OBJ = $(SSE2_OBJ)
 	NVCC_LINK = $(CXX_LINK)
-	FACT_FLAGS += -DSSE2_BUILD
+	FACT_OBJ = $(SSE2_OBJ)
+	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
 endif
 ifeq (cuda, $(MAKECMDGOALS))
 	FACT_OBJ = $(CUDA_OBJ)
-	FACT_FLAGS += -DCUDA_BUILD
+	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
 endif
 
 OBJ += $(FACT_OBJ)
@@ -58,7 +58,7 @@ OBJ += $(FACT_OBJ)
 .PHONY: all clean checkdirs cpp sse2 cuda
 .SECONDARY:
 
-all cpp sse2 cuda: checkdirs $(EXE)
+all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	./testAll.sh
 
 checkdirs: $(BUILD_DIR)
@@ -73,10 +73,8 @@ build/test%.o: src/test%.cpp
 	$(CXX) -c $< -o $@
 build/%.o: src/%.cpp include/%.h
 	$(CXX) -c $< -o $@
-#build/%.o: src/%.cpp
-#	$(CXX) -c $< -o $@
 
-build/optimization/factory.o: src/optimization/factory.cpp include/optimization/factory.h include/template/*.h $(FACT_OBJ)
+build/optimization/factory.o: src/optimization/factory.cpp include/optimization/factory.h include/optimization/configFactory.h include/template/*.h $(FACT_OBJ)
 	$(CXX) -c $< -o $@
 
 build/optimization/cuda_code.o : src/optimization/cuda_code.cu include/optimization/cuda_code.h include/common/util.h
