@@ -26,6 +26,7 @@ PROGRAMS = $(TEST) $(CHRONO)
 EXE = $(addsuffix .exe, $(addprefix bin/,$(PROGRAMS)))
 
 CXX = g++-4.3 -ggdb $(INCLUDES) $(FACT_FLAGS)
+CXX_LINK = g++-4.3 
 NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES) $(FACT_FLAGS)
 NVCC_LINK = $(NVCC) -L/usr/local/cuda/lib -lcudart 
 NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11 --device-emulation 
@@ -36,12 +37,12 @@ ifeq (all, $(MAKECMDGOALS))
 	FACT_FLAGS += -DFULL_IMPL
 endif
 ifeq (cpp, $(MAKECMDGOALS))
-#	NVCC_LINK = $(CXX)
+	NVCC_LINK = $(CXX_LINK)
 	FACT_FLAGS += -DCPP_IMPL
 endif
 ifeq (sse2, $(MAKECMDGOALS))
 	FACT_OBJ = $(SSE2_OBJ)
-#	NVCC_LINK = $(CXX)
+	NVCC_LINK = $(CXX_LINK)
 	FACT_FLAGS += -DSSE2_IMPL
 endif
 ifeq (cuda, $(MAKECMDGOALS))
