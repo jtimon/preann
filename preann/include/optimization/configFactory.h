@@ -52,6 +52,11 @@ Vector* func_newVector(unsigned size, ImplementationType implementationType)
 			throw error;
 			}
 #endif
+		default:
+			{
+			std::string error = "Unknown Implementation.";
+			throw error;
+			}
 	}
 }
 
@@ -85,11 +90,19 @@ Connection* func_newConnection(Vector* input, unsigned outputSize, Implementatio
 		case CUDA_INV:
 			return new CudaInvertedConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
 #else
+		case CUDA:
+		case CUDA2:
+		case CUDA_INV:
 			{
 			std::string error = "Implementation CUDA is not allowed.";
 			throw error;
 			}
 #endif
+		default:
+			{
+			std::string error = "Unknown Implementation.";
+			throw error;
+			}
 	}
 }
 
