@@ -18,22 +18,18 @@
 
 #include "factory.h"
 
-//#ifdef FULL_IMPL
+#ifdef FULL_IMPL
 	#include "fullFactory.h"
-//#warning ----------------FULL
-//#endif
-//#ifdef CPP_IMPL
-//	#include <cppFactory.h>
-//#warning ----------------CPP
-//#endif
-//#ifdef SSE2_IMPL
-//	#include <sse2Factory.h>
-//#warning ----------------SSE2
-//#endif
-//#ifdef CUDA_IMPL
-//	#include "cudaFactory.h"
-//#warning ----------------CUDA
-//#endif
+#endif
+#ifdef CPP_IMPL
+	#include "cppFactory.h"
+#endif
+#ifdef SSE2_IMPL
+	#include "sse2Factory.h"
+#endif
+#ifdef CUDA_IMPL
+	#include "cudaFactory.h"
+#endif
 
 Vector* Factory::newVector(FILE* stream, ImplementationType implementationType)
 {

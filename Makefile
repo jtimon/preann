@@ -36,14 +36,14 @@ ifeq (all, $(MAKECMDGOALS))
 	FACT_FLAGS += -DFULL_IMPL
 endif
 ifeq (cpp, $(MAKECMDGOALS))
-	NVCC_LINK = $(CXX)
-	NVCC_COMPILE = $(CXX)
+#	NVCC_LINK = $(CXX)
+#	NVCC_COMPILE = $(CXX)
 	FACT_FLAGS += -DCPP_IMPL
 endif
 ifeq (sse2, $(MAKECMDGOALS))
 	FACT_OBJ = $(SSE2_OBJ)
-	NVCC_LINK = $(CXX)
-	NVCC_COMPILE = $(CXX)
+#	NVCC_LINK = $(CXX)
+#	NVCC_COMPILE = $(CXX)
 	FACT_FLAGS += -DSSE2_IMPL
 endif
 ifeq (cuda, $(MAKECMDGOALS))

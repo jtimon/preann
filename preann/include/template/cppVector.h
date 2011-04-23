@@ -7,7 +7,6 @@
 
 #ifndef CPPVECTOR_H_
 #define CPPVECTOR_H_
-#ifdef CPP_IMPL
 
 #include "vector.h"
 
@@ -120,5 +119,4 @@ public:
 
 };
 
-#endif
 #endif /* CPPVECTOR_H_ */

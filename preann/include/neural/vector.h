@@ -41,6 +41,12 @@ public:
 	void print();
 	float compareTo(Vector* other);
 	void random(float range);
+
+	template <class vectorType>
+	vectorType* getDataPointer2()
+	{
+		return (vectorType*) data;
+	}
 protected:
 	template <class vectorType>
 	void SetValueToAnArray(void* array, unsigned size, vectorType value)

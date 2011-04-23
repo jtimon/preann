@@ -1,7 +1,6 @@
 
 #ifndef CPPCONNECTION_H_
 #define CPPCONNECTION_H_
-#ifdef CPP_IMPL
 
 #include "connection.h"
 #include "cppVector.h"
@@ -48,7 +47,8 @@ protected:
 				}
 			default:
 			{
-				c_typeTempl* otherWeighs = (c_typeTempl*)other->getDataPointer();
+				//TODO Z decidir cual mola mas
+				c_typeTempl* otherWeighs = other->getDataPointer2<c_typeTempl>();
 				c_typeTempl* thisWeighs = (c_typeTempl*)this->getDataPointer();
 				c_typeTempl auxWeigh;
 
@@ -116,5 +116,4 @@ public:
 
 };
 
-#endif
 #endif /* CPPCONNECTION_H_ */
