@@ -37,13 +37,11 @@ ifeq (all, $(MAKECMDGOALS))
 endif
 ifeq (cpp, $(MAKECMDGOALS))
 #	NVCC_LINK = $(CXX)
-#	NVCC_COMPILE = $(CXX)
 	FACT_FLAGS += -DCPP_IMPL
 endif
 ifeq (sse2, $(MAKECMDGOALS))
 	FACT_OBJ = $(SSE2_OBJ)
 #	NVCC_LINK = $(CXX)
-#	NVCC_COMPILE = $(CXX)
 	FACT_FLAGS += -DSSE2_IMPL
 endif
 ifeq (cuda, $(MAKECMDGOALS))
@@ -78,7 +76,7 @@ build/%.o: src/%.cpp include/%.h
 #	$(CXX) -c $< -o $@
 
 build/optimization/factory.o: src/optimization/factory.cpp include/optimization/factory.h include/template/*.h $(FACT_OBJ)
-	$(NVCC_COMPILE) $< -o $@
+	$(CXX) -c $< -o $@
 
 build/optimization/cuda_code.o : src/optimization/cuda_code.cu include/optimization/cuda_code.h include/common/util.h
 	$(NVCC_COMPILE) $< -o $@
