@@ -12,6 +12,7 @@ protected:
 
 	Connection* thresholds;
 	Vector* output;
+	Interface* tOuputInterface;
 	FunctionType functionType;
 	ImplementationType getImplementationType();
 	Vector* newVector(FILE* stream);
@@ -34,6 +35,7 @@ public:
 	Vector* getInput(unsigned pos);
 	Connection* getConnection(unsigned inputPos);
 	Vector* getOutput();
+	Interface* getOutputInterface();
 	Connection* getThresholds();
 	FunctionType getFunctionType();
 };

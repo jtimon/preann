@@ -3,7 +3,6 @@
 
 #include "factory.h"
 #include "inputLayer.h"
-#include "outputLayer.h"
 
 class NeuralNet {
 	void loadGraphs(FILE* stream);
@@ -18,13 +17,9 @@ protected:
 	unsigned* inputLayers;
 	unsigned numberInputs;
 
-	unsigned* outputLayers;
-	unsigned numberOutputs;
-
 	void addLayer(Layer* layer);
 	void increaseMaxInputs();
 	void increaseMaxLayers();
-	void increaseMaxOuputs();
 	unsigned getPosInGraph(unsigned source, unsigned destination);
 	Layer* getLayer(unsigned pos);
 	ImplementationType getImplementationType();
@@ -38,10 +33,7 @@ public:
 	unsigned char isInputLayer(unsigned layerPos);
 	unsigned getNumInputs();
 
-	void addOutputLayer(unsigned size, VectorType destinationType, FunctionType functiontype);
-	Interface* getOutput(unsigned outputPos);
-	unsigned char isOutputLayer(unsigned layerPos);
-	unsigned getNumOutputs();
+	Interface* getOutput(unsigned layerPos);
 
 	void addLayer(unsigned size, VectorType destinationType = FLOAT,
 			FunctionType functiontype = IDENTITY);

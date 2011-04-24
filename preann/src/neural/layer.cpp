@@ -78,6 +78,15 @@ void Layer::saveWeighs(FILE* stream)
 	thresholds->save(stream);
 }
 
+
+Interface *Layer::getOutputInterface()
+{
+	if (tOuputInterface == NULL){
+		tOuputInterface = new Interface(output->getSize(), output->getVectorType());
+	}
+	return tOuputInterface;
+}
+
 void Layer::calculateOutput()
 {
 	if (!output) {
@@ -94,6 +103,9 @@ void Layer::calculateOutput()
 
 	output->activation(results, functionType);
 //	output->activation(results, functionType, thresholds);
+	if (tOuputInterface != NULL){
+		output->copyToInterface(tOuputInterface);
+	}
 	delete(results);
 }
 

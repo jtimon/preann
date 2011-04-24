@@ -28,11 +28,6 @@ Individual* Individual::newCopy()
 			copy->addInputLayer(layerVector->getSize(),
 					layerVector->getVectorType());
 		}
-		else if (isOutputLayer(i))
-		{
-			copy->addOutputLayer(layerVector->getSize(),
-					layerVector->getVectorType(), layers[i]->getFunctionType());
-		}
 		else
 		{
 			copy->addLayer(layerVector->getSize(),
@@ -578,8 +573,7 @@ float Individual::getFitness()
 
 char Individual::checkCompatibility(Individual *other)
 {
-	if (numberLayers != other->getNumLayers() || numberInputs
-			!= other->getNumInputs() || numberOutputs != other->getNumOutputs()
+	if (numberLayers != other->getNumLayers() || numberInputs != other->getNumInputs()
 			|| getImplementationType() != other->getImplementationType())
 	{
 		return 0;
