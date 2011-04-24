@@ -9,12 +9,54 @@ using namespace std;
 #include "chronometer.h"
 #include "cuda_code.h"
 
+unsigned memoryLosses = 0;
+
+void checkAndPrintErrors(string testingClass, Test test)
+{
+    if(mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0){
+        cout << "Memory loss detected testing class " << testingClass << ".\n" << endl;
+        test.printCurrentState();
+        mem_printTotalAllocated();
+        mem_printTotalPointers();
+        memoryLosses++;
+    }
+}
+
+void testVector(Test test)
+{
+	Vector* vector = Factory::newVector(test.getSize(), test.getVectorType(), test.getImplementationType());
+	delete(vector);
+
+    checkAndPrintErrors("Vector", test);
+}
+
+void testConnection(Test test)
+{
+	Vector* vector = Factory::newVector(test.getSize(), test.getVectorType(), test.getImplementationType());
+	Connection* connection = Factory::newConnection(vector, test.getSize(), test.getImplementationType());
+
+	delete(connection);
+	delete(vector);
+
+    checkAndPrintErrors("Connection", test);
+}
+
+void testLayer(Test test)
+{
+    Layer *layer = new Layer(test.getSize(), test.getVectorType(), IDENTITY, test.getImplementationType());
+    layer->addInput(layer->getOutput());
+    layer->addInput(layer->getOutput());
+    layer->addInput(layer->getOutput());
+    delete (layer);
+
+    checkAndPrintErrors("Layer", test);
+}
+
 
 int main(int argc, char *argv[]) {
 
 	Test test;
 	Chronometer total;
-	unsigned memoryLosses = 0;
 
 	test.setMaxSize(500);
 	test.setIncSize(100);
@@ -24,50 +66,16 @@ int main(int argc, char *argv[]) {
 	try {
 
 		for (test.sizeToMin(); test.sizeIncrement(); ) {
-			for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
-				for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
+			for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
 
-					Vector* vector = Factory::newVector(test.getSize(), test.getVectorType(), test.getImplementationType());
-					delete(vector);
+				for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
+					testVector(test);
+				}
 
-					if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
-						cout << "Memory loss detected testing class Vector.\n" << endl;
-						test.printCurrentState();
-						mem_printTotalAllocated();
-						mem_printTotalPointers();
-						memoryLosses++;
-					}
-					if (test.getVectorType() != BYTE){
-
-						vector = Factory::newVector(test.getSize(), test.getVectorType(), test.getImplementationType());
-						Connection* connection = Factory::newConnection(vector, test.getSize(), test.getImplementationType());
-
-						delete(connection);
-						delete(vector);
-
-						if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
-							cout << "Memory loss detected testing class Connection.\n" << endl;
-							test.printCurrentState();
-							mem_printTotalAllocated();
-							mem_printTotalPointers();
-							memoryLosses++;
-						}
-
-						Layer* layer = new Layer(test.getSize(), test.getVectorType(), IDENTITY, test.getImplementationType());
-						layer->addInput(layer->getOutput());
-						layer->addInput(layer->getOutput());
-						layer->addInput(layer->getOutput());
-
-						delete(layer);
-
-						if (mem_getPtrCounter() > 0 || mem_getTotalAllocated() > 0 ){
-							cout << "Memory loss detected testing class Layer.\n" << endl;
-							test.printCurrentState();
-							mem_printTotalAllocated();
-							mem_printTotalPointers();
-							memoryLosses++;
-						}
-					}
+				test.disableVectorType(BYTE);
+				for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
+					testConnection(test);
+					testLayer(test);
 				}
 			}
 		}
