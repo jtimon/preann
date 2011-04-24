@@ -52,7 +52,6 @@ void testLayer(Test test)
     checkAndPrintErrors("Layer", test);
 }
 
-
 int main(int argc, char *argv[]) {
 
 	Test test;

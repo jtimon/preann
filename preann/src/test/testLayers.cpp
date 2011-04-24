@@ -7,28 +7,12 @@ using namespace std;
 #include "population.h"
 #include "chronometer.h"
 #include "cuda_code.h"
+#include "test.h"
+
 
 #define PATH "/home/timon/layer.lay"
 
-#define INITIAL_WEIGHS_RANGE 20
-
-void printTestParams(ImplementationType implementationType, VectorType vectorType, unsigned size)
-{
-    switch (implementationType){
-        case C: 		printf("    C     "); 	break;
-        case SSE2: 		printf("   SSE2   ");	break;
-        case CUDA: 		printf("   CUDA   ");	break;
-        case CUDA2:		printf("   CUDA2  ");	break;
-        case CUDA_INV:	printf(" CUDA_INV ");	break;
-    }
-    switch (vectorType){
-        case FLOAT: printf(" FLOAT "); 	break;
-        case BIT: 	printf(" BIT   ");	break;
-        case SIGN: 	printf(" SIGN  ");	break;
-        case BYTE:	printf(" BYTE  ");	break;
-    }
-    printf(" size = %d weighsRange %d \n", size, INITIAL_WEIGHS_RANGE);
-}
+Test test;
 
 unsigned char areEqual(float expected, float actual, VectorType vectorType)
 {
@@ -79,14 +63,14 @@ Layer* createAndLoadLayer(ImplementationType implementationType, Vector** inputV
     return layer;
 }
 
-Layer* createAndSaveLayer(unsigned& size, VectorType vectorType, Vector** controlInputs)
+Layer* createAndSaveLayer(unsigned size, VectorType vectorType, Vector** controlInputs)
 {
     Layer* controlLayer = new Layer(size, vectorType, IDENTITY, C);
 
     for (unsigned i = 0; i < NUM_INPUTS; i++){
 		controlLayer->addInput(controlInputs[i]);
 	}
-    controlLayer->randomWeighs(INITIAL_WEIGHS_RANGE);
+    controlLayer->randomWeighs(test.getInitialWeighsRange());
 
 	FILE* stream = fopen(PATH, "w+b");
 	controlLayer->save(stream);
@@ -95,73 +79,72 @@ Layer* createAndSaveLayer(unsigned& size, VectorType vectorType, Vector** contro
     return controlLayer;
 }
 
-void testLayer(unsigned size, VectorType vectorType)
-{
-	Vector* controlInputVectors[VECTOR_TYPE_DIM];
-	for (unsigned i = 0; i < NUM_INPUTS; i++) {
-		VectorType vectorTypeAux = BYTE;
-		while (vectorTypeAux == BYTE) {
-			vectorTypeAux = (VectorType)randomUnsigned(VECTOR_TYPE_DIM);
-		}
-		controlInputVectors[i] = Factory::newVector(size, vectorTypeAux, C);
-		controlInputVectors[i]->random(INITIAL_WEIGHS_RANGE);
-	}
-
-    Layer* controlLayer = createAndSaveLayer(size, vectorType, controlInputVectors);
-    controlLayer->calculateOutput();
-
-    for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
-		ImplementationType implementationType = (ImplementationType)((implType));
-
-		printTestParams(implementationType, vectorType, size);
-
-		Vector* inputVectors[VECTOR_TYPE_DIM];
-		for (unsigned i = 0; i < NUM_INPUTS; i++) {
-			inputVectors[i] = Factory::newVector(size, controlInputVectors[i]->getVectorType(), implementationType);
-			inputVectors[i]->copyFrom(controlInputVectors[i]);
-		}
-
-		Layer* layer = createAndLoadLayer(implementationType, inputVectors);
-
-	    //test calculation
-		layer->calculateOutput();
-
-	    unsigned differences = assertEquals(controlLayer->getOutput(), layer->getOutput());
-	    if (differences != 0)
-	    	printf("Errors on outputs: %d \n", differences);
-
-		//test Weighs
-	    for(unsigned i = 0; i < NUM_INPUTS; i++){
-	        Connection* expectedWeighs = controlLayer->getConnection(i);
-	        Connection* actualWeighs = layer->getConnection(i);
-	        differences = assertEquals(expectedWeighs, actualWeighs);
-	        if (differences != 0)
-	        	printf("Errors on weighs (input %d): %d \n", i, differences);
-	    }
-		delete (layer);
-		for (unsigned i = 0; i < NUM_INPUTS; i++) {
-			delete(inputVectors[i]);
-		}
-	}
-    delete (controlLayer);
-	for (unsigned i = 0; i < NUM_INPUTS; i++) {
-		delete(controlInputVectors[i]);
-	}
-}
-
 #define SIZE_MIN 1
 #define SIZE_MAX 50
 #define SIZE_INC 50
 
-int main(int argc, char *argv[]) {/*
+int main(int argc, char *argv[]) {
 	Chronometer total;
 	total.start();
 
+	test.setInitialWeighsRange(20);
+	test.setMaxSize(50);
+	test.setIncSize(50);
+	test.disableVectorType(BYTE);
+	test.printParameters();
+
 	try {
-		for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size += SIZE_INC) {
-			for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
-				if (vectType != BYTE)
-					testLayer(size, (VectorType) vectType);
+		for (test.sizeToMin(); test.sizeIncrement(); ) {
+			for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
+				Vector* controlInputVectors[VECTOR_TYPE_DIM];
+				for (unsigned i = 0; i < NUM_INPUTS; i++) {
+					VectorType vectorTypeAux = BYTE;
+					while (vectorTypeAux == BYTE) {
+						vectorTypeAux = (VectorType)randomUnsigned(VECTOR_TYPE_DIM);
+					}
+					controlInputVectors[i] = Factory::newVector(test.getSize(), vectorTypeAux, C);
+					controlInputVectors[i]->random(test.getInitialWeighsRange());
+				}
+
+			    Layer* controlLayer = createAndSaveLayer(test.getSize(), test.getVectorType(), controlInputVectors);
+			    controlLayer->calculateOutput();
+
+			    for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
+
+					test.printCurrentState();
+
+					Vector* inputVectors[VECTOR_TYPE_DIM];
+					for (unsigned i = 0; i < NUM_INPUTS; i++) {
+						inputVectors[i] = Factory::newVector(test.getSize(), controlInputVectors[i]->getVectorType(), test.getImplementationType());
+						inputVectors[i]->copyFrom(controlInputVectors[i]);
+					}
+
+					Layer* layer = createAndLoadLayer(test.getImplementationType(), inputVectors);
+
+				    //test calculation
+					layer->calculateOutput();
+
+				    unsigned differences = assertEquals(controlLayer->getOutput(), layer->getOutput());
+				    if (differences != 0)
+				    	printf("Errors on outputs: %d \n", differences);
+
+					//test Weighs
+				    for(unsigned i = 0; i < NUM_INPUTS; i++){
+				        Connection* expectedWeighs = controlLayer->getConnection(i);
+				        Connection* actualWeighs = layer->getConnection(i);
+				        differences = assertEquals(expectedWeighs, actualWeighs);
+				        if (differences != 0)
+				        	printf("Errors on weighs (input %d): %d \n", i, differences);
+				    }
+					delete (layer);
+					for (unsigned i = 0; i < NUM_INPUTS; i++) {
+						delete(inputVectors[i]);
+					}
+				}
+			    delete (controlLayer);
+				for (unsigned i = 0; i < NUM_INPUTS; i++) {
+					delete(controlInputVectors[i]);
+				}
 			}
 		}
 		printf("Exit success.\n");
@@ -175,6 +158,6 @@ int main(int argc, char *argv[]) {/*
 
 	//mem_printListOfPointers();
 	total.stop();
-	printf("Total time spent: %f \n", total.getSeconds());*/
+	printf("Total time spent: %f \n", total.getSeconds());
 	return EXIT_SUCCESS;
 }
