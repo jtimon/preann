@@ -4,6 +4,7 @@
 using namespace std;
 
 #include "chronometer.h"
+#include "test.h"
 #include "factory.h"
 
 #define INITIAL_WEIGHS_RANGE 20
@@ -77,6 +78,7 @@ float chronoCopyTo(Vector* toTest)
 	chrono.stop();
 	return chrono.getSeconds();
 }
+
 
 float chronoActivation(Vector* toTest, FunctionType functionType)
 {
@@ -152,37 +154,40 @@ float chronoCrossover(Connection* toTest)
 	return chrono.getSeconds();
 }
 
-#define SIZE_MIN 100
-#define SIZE_MAX 1000
-#define SIZE_INC 100
 #define OUTPUT_SIZE_MIN 5
 #define OUTPUT_SIZE_MAX 5
 #define OUTPUT_SIZE_INC 5
 #define NUM_MUTATIONS 100
 
-#define PATH "/home/timon/layer.lay"
+#define PATH "/home/timon/workspace/preann/layer.lay"
+
+Test test;
 
 int main(int argc, char *argv[])
 {
+	string path = "/home/timon/workspace/preann/";
+
+
 	Chronometer total;
 	total.start();
 	unsigned errorCount = 0;
-/*
-	try {
-		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++) {
-			VectorType vectorType = (VectorType)((vectType));
-			FunctionType functionType = (FunctionType)(vectType);
-			for (unsigned implType = 0; implType < IMPLEMENTATION_TYPE_DIM; implType++) {
-				ImplementationType implementationType =
-						(ImplementationType)((implType));
+	test.setMinSize(100);
+	test.setIncSize(100);
+	test.setMaxSize(1000);
+	test.printParameters();
 
-				printTestParams(implementationType, vectorType);
+	try {
+		for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
+			FunctionType functionType = (FunctionType)(test.getVectorType());
+			for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
+
+				test.printCurrentState();
 
 				//				printf("\n CopyFrom: ");
 				//				for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
 				//						+= SIZE_INC) {
 				//					Vector* vector = Factory::newVector(size,
-				//							(VectorType)vectType, implementationType);
+				//							test.getVectorType(), implementationType);
 				//					vector->random(INITIAL_WEIGHS_RANGE);
 				//					printf(" %f ", chronoCopyFrom(vector));
 				//					delete (vector);
@@ -191,34 +196,33 @@ int main(int argc, char *argv[])
 				//				for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
 				//						+= SIZE_INC) {
 				//					Vector* vector = Factory::newVector(size,
-				//							(VectorType)vectType, implementationType);
+				//							test.getVectorType(), test.getImplementationType());
 				//					vector->random(INITIAL_WEIGHS_RANGE);
 				//					printf(" %f ", chronoCopyTo(vector));
 				//					delete (vector);
 				//				}
-				if (vectorType != BYTE) {
-					printf("\n Activation: ");
-					for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
-							+= SIZE_INC) {
-						Vector* vector = Factory::newVector(size,
-								(VectorType)vectType, implementationType);
+				if (test.getVectorType() != BYTE) {
+					test.openFile("activation");
+					for (test.sizeToMin(); test.sizeIncrement(); ) {
+						Vector* vector = Factory::newVector(test.getSize(),
+								test.getVectorType(), test.getImplementationType());
 						vector->random(INITIAL_WEIGHS_RANGE);
-						printf(" %f ", chronoActivation(vector, functionType));
+						test.plotToFile(chronoActivation(vector, functionType));
 						delete (vector);
 					}
 
-					for (unsigned outputSize = OUTPUT_SIZE_MIN; outputSize
+					for (int outputSize = OUTPUT_SIZE_MIN; outputSize
 							<= OUTPUT_SIZE_MAX; outputSize += OUTPUT_SIZE_INC) {
 
-						printf("\n Connections outputSize %d: ", outputSize);
-						printf("\n addToResults: ");
-						for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
-								+= SIZE_INC) {
-							Vector* vector = Factory::newVector(size,
-									(VectorType)vectType, implementationType);
+						std::stringstream path;
+						path << "addToResults_outSize_" << outputSize;
+						test.openFile(path.str());
+						for (test.sizeToMin(); test.sizeIncrement(); ) {
+							Vector* vector = Factory::newVector(test.getSize(),
+									test.getVectorType(), test.getImplementationType());
 							vector->random(INITIAL_WEIGHS_RANGE);
 							Connection* connection = Factory::newConnection(
-									vector, outputSize, implementationType);
+									vector, outputSize, test.getImplementationType());
 							connection->random(INITIAL_WEIGHS_RANGE);
 							printf(" %f ", chronoAddToResults(connection));
 							delete (connection);
@@ -228,23 +232,22 @@ int main(int argc, char *argv[])
 						//						for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
 						//								+= SIZE_INC) {
 						//							Vector* vector = Factory::newVector(size,
-						//									(VectorType)vectType, implementationType);
+						//									test.getVectorType(), test.getImplementationType());
 						//							vector->random(INITIAL_WEIGHS_RANGE);
 						//							Connection* connection = Factory::newConnection(
-						//									vector, outputSize, implementationType);
+						//									vector, outputSize, test.getImplementationType());
 						//							connection->random(INITIAL_WEIGHS_RANGE);
 						//							printf(" %f ", chronoMutate(connection, NUM_MUTATIONS));
 						//							delete (connection);
 						//							delete (vector);
 						//						}
 						printf("\n crossover: ");
-						for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
-								+= SIZE_INC) {
-							Vector* vector = Factory::newVector(size,
-									(VectorType)vectType, implementationType);
+						for (test.sizeToMin(); test.sizeIncrement(); ) {
+							Vector* vector = Factory::newVector(test.getSize(),
+									test.getVectorType(), test.getImplementationType());
 							vector->random(INITIAL_WEIGHS_RANGE);
 							Connection* connection = Factory::newConnection(
-									vector, outputSize, implementationType);
+									vector, outputSize, test.getImplementationType());
 							connection->random(INITIAL_WEIGHS_RANGE);
 							printf(" %f ", chronoCrossover(connection));
 							delete (connection);
@@ -265,6 +268,6 @@ int main(int argc, char *argv[])
 
 	//mem_printListOfPointers();
 	total.stop();
-	printf("Total time spent: %f \n", total.getSeconds());*/
+	printf("Total time spent: %f \n", total.getSeconds());
 	return EXIT_SUCCESS;
 }

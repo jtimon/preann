@@ -23,6 +23,8 @@ class Test {
 
 	float initialWeighsRange;
 
+	FILE *file;
+
 public:
 	Test();
 	virtual ~Test();
@@ -59,6 +61,11 @@ public:
     float getInitialWeighsRange();
     void setInitialWeighsRange(float initialWeighsRange);
 
+    std::string vectorTypeToString();
+    std::string implementationTypeToString();
+    void openFile(string name);
+    void closeFile();
+    void plotToFile(float data);
 };
 
 #endif /* TEST_H_ */

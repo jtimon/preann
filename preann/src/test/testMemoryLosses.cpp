@@ -7,7 +7,6 @@ using namespace std;
 #include "test.h"
 #include "population.h"
 #include "chronometer.h"
-#include "cuda_code.h"
 
 unsigned memoryLosses = 0;
 

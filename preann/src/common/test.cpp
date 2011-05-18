@@ -289,3 +289,70 @@ void Test::setInitialWeighsRange(float initialWeighsRange)
 {
     this->initialWeighsRange = initialWeighsRange;
 }
+
+
+
+void Test::openFile(std::string name)
+{
+	if (file){
+		fclose(file);
+	}
+	std::string path = "/home/timon/workspace/preann/";
+	path += vectorTypeToString() + implementationTypeToString() + name + ".DAT";
+	if (!(file = fopen(path.data(), "w")))
+	{
+		string error = "Error opening " + path;
+		throw error;
+	}
+}
+
+void Test::closeFile()
+{
+	fclose(file);
+}
+
+void Test::plotToFile(float data)
+{
+	fprintf(file, "%d %f \n", size, data );
+}
+
+std::string Test::vectorTypeToString()
+{
+	std::string toReturn;
+	switch (vectorType){
+	case FLOAT:
+		toReturn = "FLOAT";
+		break;
+	case BYTE:
+		toReturn = "BYTE";
+		break;
+	case BIT:
+		toReturn = "BIT";
+		break;
+	case SIGN:
+		toReturn = "SIGN";
+		break;
+	}
+}
+
+std::string Test::implementationTypeToString()
+{
+	std::string toReturn;
+	switch (implementationType){
+	case C:
+		toReturn = "C";
+		break;
+	case SSE2:
+		toReturn = "SSE2";
+		break;
+	case CUDA:
+		toReturn = "CUDA";
+		break;
+	case CUDA2:
+		toReturn = "CUDA2";
+		break;
+	case CUDA_INV:
+		toReturn = "CUDA_INV";
+		break;
+	}
+}
