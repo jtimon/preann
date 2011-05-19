@@ -13,6 +13,7 @@ Test::Test()
 	enableAllVectorTypes();
 	enableAllImplementationTypes();
 	initialWeighsRange = 0;
+	file = NULL;
 }
 
 Test::~Test()
@@ -290,12 +291,11 @@ void Test::setInitialWeighsRange(float initialWeighsRange)
     this->initialWeighsRange = initialWeighsRange;
 }
 
-
-
 void Test::openFile(std::string name)
 {
 	if (file){
 		fclose(file);
+		file = NULL;
 	}
 	std::string path = "/home/timon/workspace/preann/";
 	path += vectorTypeToString() + implementationTypeToString() + name + ".DAT";
@@ -308,12 +308,20 @@ void Test::openFile(std::string name)
 
 void Test::closeFile()
 {
-	fclose(file);
+	if (file){
+		fclose(file);
+		file = NULL;
+	}
 }
 
 void Test::plotToFile(float data)
 {
-	fprintf(file, "%d %f \n", size, data );
+	if (file){
+		fprintf(file, "%d %f \n", size, data );
+	} else {
+		string error = "There is no opened file.";
+		throw error;
+	}
 }
 
 std::string Test::vectorTypeToString()
@@ -333,6 +341,7 @@ std::string Test::vectorTypeToString()
 		toReturn = "SIGN";
 		break;
 	}
+	return toReturn;
 }
 
 std::string Test::implementationTypeToString()
@@ -355,4 +364,5 @@ std::string Test::implementationTypeToString()
 		toReturn = "CUDA_INV";
 		break;
 	}
+	return toReturn;
 }
