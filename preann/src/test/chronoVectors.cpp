@@ -210,6 +210,7 @@ int main(int argc, char *argv[])
 						test.plotToFile(chronoActivation(vector, functionType));
 						delete (vector);
 					}
+					test.closeFile();
 
 					for (int outputSize = OUTPUT_SIZE_MIN; outputSize
 							<= OUTPUT_SIZE_MAX; outputSize += OUTPUT_SIZE_INC) {
@@ -228,6 +229,7 @@ int main(int argc, char *argv[])
 							delete (connection);
 							delete (vector);
 						}
+						test.closeFile();
 						//						printf("\n mutate: ");
 						//						for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
 						//								+= SIZE_INC) {
@@ -241,7 +243,9 @@ int main(int argc, char *argv[])
 						//							delete (connection);
 						//							delete (vector);
 						//						}
-						printf("\n crossover: ");
+						std::stringstream path2;
+						path << "crossover_outSize_" << outputSize;
+						test.openFile(path2.str());
 						for (test.sizeToMin(); test.sizeIncrement(); ) {
 							Vector* vector = Factory::newVector(test.getSize(),
 									test.getVectorType(), test.getImplementationType());
@@ -249,10 +253,11 @@ int main(int argc, char *argv[])
 							Connection* connection = Factory::newConnection(
 									vector, outputSize, test.getImplementationType());
 							connection->random(INITIAL_WEIGHS_RANGE);
-							printf(" %f ", chronoCrossover(connection));
+							test.plotToFile(chronoCrossover(connection));
 							delete (connection);
 							delete (vector);
 						}
+						test.closeFile();
 					}
 				}
 			}
