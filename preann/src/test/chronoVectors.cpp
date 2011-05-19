@@ -10,44 +10,6 @@ using namespace std;
 #define INITIAL_WEIGHS_RANGE 20
 #define REPETITION_TIMES 10
 
-void printTestParams(ImplementationType implementationType,
-		VectorType vectorType)
-{
-	switch (vectorType)
-	{
-	case FLOAT:
-		printf("FLOAT;");
-		break;
-	case BIT:
-		printf("BIT;");
-		break;
-	case SIGN:
-		printf("SIGN;");
-		break;
-	case BYTE:
-		printf("BYTE;");
-		break;
-	}
-	switch (implementationType)
-	{
-	case C:
-		printf("C;");
-		break;
-	case SSE2:
-		printf("SSE2;");
-		break;
-	case CUDA:
-		printf("CUDA;");
-		break;
-	case CUDA2:
-		printf("CUDA2;");
-		break;
-	case CUDA_INV:
-		printf("CUDA_INV;");
-		break;
-	}
-}
-
 float chronoCopyFrom(Vector* toTest)
 {
 	Interface interface = Interface(toTest->getSize(), toTest->getVectorType());
@@ -159,14 +121,11 @@ float chronoCrossover(Connection* toTest)
 #define OUTPUT_SIZE_INC 5
 #define NUM_MUTATIONS 100
 
-#define PATH "/home/timon/workspace/preann/layer.lay"
-
 Test test;
 
 int main(int argc, char *argv[])
 {
-	string path = "/home/timon/workspace/preann/";
-
+	string path = "/home/timon/workspace/preann/output/plotData/";
 
 	Chronometer total;
 	total.start();
