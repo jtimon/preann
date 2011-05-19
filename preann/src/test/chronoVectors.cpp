@@ -207,7 +207,9 @@ int main(int argc, char *argv[])
 						Vector* vector = Factory::newVector(test.getSize(),
 								test.getVectorType(), test.getImplementationType());
 						vector->random(INITIAL_WEIGHS_RANGE);
+
 						test.plotToFile(chronoActivation(vector, functionType));
+
 						delete (vector);
 					}
 					test.closeFile();
@@ -225,7 +227,9 @@ int main(int argc, char *argv[])
 							Connection* connection = Factory::newConnection(
 									vector, outputSize, test.getImplementationType());
 							connection->random(INITIAL_WEIGHS_RANGE);
-							printf(" %f ", chronoAddToResults(connection));
+
+							test.plotToFile(chronoAddToResults(connection));
+
 							delete (connection);
 							delete (vector);
 						}
@@ -253,7 +257,9 @@ int main(int argc, char *argv[])
 							Connection* connection = Factory::newConnection(
 									vector, outputSize, test.getImplementationType());
 							connection->random(INITIAL_WEIGHS_RANGE);
+
 							test.plotToFile(chronoCrossover(connection));
+
 							delete (connection);
 							delete (vector);
 						}
