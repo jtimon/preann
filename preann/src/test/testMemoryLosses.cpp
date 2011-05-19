@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 	Test test;
 	Chronometer total;
 
-	test.setMaxSize(500);
+	test.setMaxSize(100);
 	test.setIncSize(100);
 	test.printParameters();
 
