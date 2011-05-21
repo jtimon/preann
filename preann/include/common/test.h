@@ -1,20 +1,18 @@
-/*
- * test.h
- *
- *  Created on: Apr 22, 2011
- *      Author: timon
- */
+
+#include "vector.h"
 
 #ifndef TEST_H_
 #define TEST_H_
-
-#include "vector.h"
 
 class Test {
 	unsigned size;
 	unsigned minSize;
 	unsigned maxSize;
 	unsigned incSize;
+	unsigned outputSize;
+	unsigned minOutputSize;
+	unsigned maxOutputSize;
+	unsigned incOutputSize;
 
 	char implementationTypes[IMPLEMENTATION_TYPE_DIM];
 	ImplementationType implementationType;
@@ -34,9 +32,14 @@ public:
     unsigned getSize();
     void sizeToMin();
     int sizeIncrement();
-    void setIncSize(unsigned  incSize);
-    void setMaxSize(unsigned  maxSize);
-    void setMinSize(unsigned  minSize);
+    void setIncSize(unsigned incSize);
+    void setMaxSize(unsigned maxSize);
+    void setMinSize(unsigned minSize);
+    void fromToBySize(unsigned minSize, unsigned maxSize, unsigned incSize);
+    void fromToByOutputSize(unsigned minOutputSize, unsigned maxOutputSize, unsigned incOutputSize);
+    unsigned getOutputSize();
+    void outputSizeToMin();
+    int outputSizeIncrement();
     ImplementationType getImplementationType();
     void implementationTypeToMin();
     int implementationTypeIncrement();
@@ -61,11 +64,17 @@ public:
     float getInitialWeighsRange();
     void setInitialWeighsRange(float initialWeighsRange);
 
-    std::string vectorTypeToString();
-    std::string implementationTypeToString();
+    string vectorTypeToString();
+    string implementationTypeToString();
     void openFile(string name);
     void closeFile();
     void plotToFile(float data);
+
+    void withImplementationTypes(int howMany, ImplementationType* implementationTypes);
+    void withVectorTypes(int howMany, VectorType** vectorTypes);
+    void excludeImplementationTypes(int howMany, ImplementationType* implementationTypes);
+    void excludeTypes(int howMany, VectorType** vectorTypes);
+
 };
 
 #endif /* TEST_H_ */

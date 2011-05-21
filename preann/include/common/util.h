@@ -28,6 +28,16 @@ typedef enum {IDENTITY, BINARY_STEP, BIPOLAR_STEP, REAL, SIGMOID, BIPOLAR_SIGMOI
 #define FUNCTION_TYPE_DIM 6
 typedef enum {C, SSE2, CUDA, CUDA2, CUDA_INV} ImplementationType;
 #define IMPLEMENTATION_TYPE_DIM 5
+typedef enum {
+	VECTOR,
+	CONNECTION
+} ClassID;
+typedef enum {
+	ACTIVATION,
+	CALCULATEANDADDTO,
+	MUTATE,
+	CROSSOVER
+} Method;
 
 int randomInt(unsigned range);
 float randomFloat(float range);

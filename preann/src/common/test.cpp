@@ -168,7 +168,7 @@ void Test::disableAllVectorTypes()
 
 void Test::printCurrentState()
 {
-    printf("-Size = %d Implementation Type = ", size);
+    printf("-Implementation Type = ");
     switch (implementationType){
         case C: 		printf(" C        "); 	break;
         case SSE2: 		printf(" SSE2     ");	break;
@@ -183,8 +183,9 @@ void Test::printCurrentState()
         case SIGN: 	printf(" SIGN  ");	break;
         case BYTE:	printf(" BYTE  ");	break;
     }
+    printf("Size = %d ", size);
     if (initialWeighsRange != 0){
-		printf(" Weighs Range %f ", initialWeighsRange);
+		printf("Weighs Range %f ", initialWeighsRange);
     }
     printf("\n");
 }
@@ -314,6 +315,14 @@ void Test::closeFile()
 	}
 }
 
+void fromToByOutputSize(unsigned  minOutputSize, unsigned  maxOutputSize, unsigned  incOutputSize)
+{
+}
+
+unsigned getOutputSize()
+{
+}
+
 void Test::plotToFile(float data)
 {
 	if (file){
@@ -365,4 +374,29 @@ std::string Test::implementationTypeToString()
 		break;
 	}
 	return toReturn;
+}
+
+void Test::fromToByOutputSize(unsigned minOutputSize, unsigned maxOutputSize, unsigned incOutputSize)
+{
+	this->outputSize = minOutputSize;
+	this->minOutputSize = minOutputSize;
+	this->maxOutputSize = maxOutputSize;
+	this->incOutputSize = incSize;
+}
+
+unsigned Test::getOutputSize()
+{
+	return outputSize;
+}
+
+void Test::outputSizeToMin()
+{
+	outputSize = minOutputSize;
+}
+
+int Test::outputSizeIncrement()
+{
+    outputSize += incOutputSize;
+
+    return outputSize <= maxOutputSize;
 }

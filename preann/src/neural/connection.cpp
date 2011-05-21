@@ -28,4 +28,3 @@ void Connection::crossover(Connection* other, Interface* bitVector)
 	crossoverImpl(other, bitVector);
 }
 
-

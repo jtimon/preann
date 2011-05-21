@@ -1,9 +1,3 @@
-/*
- * vector.h
- *
- *  Created on: Nov 16, 2009
- *      Author: timon
- */
 
 #ifndef VECTOR_H_
 #define VECTOR_H_
@@ -56,6 +50,7 @@ protected:
 			castedArray[i] = value;
 		}
 	}
+
 };
 
 #endif /* VECTOR_H_ */
