@@ -71,9 +71,9 @@ public:
     void plotToFile(float data);
 
     void withImplementationTypes(int howMany, ImplementationType* implementationTypes);
-    void withVectorTypes(int howMany, VectorType** vectorTypes);
+    void withVectorTypes(int howMany, VectorType* vectorTypes);
     void excludeImplementationTypes(int howMany, ImplementationType* implementationTypes);
-    void excludeTypes(int howMany, VectorType** vectorTypes);
+    void excludeTypes(int howMany, VectorType* vectorTypes);
 
 };
 

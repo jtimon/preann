@@ -199,10 +199,10 @@ void Test::printParameters()
     	if (implementationTypes[i] == 1){
 
 			switch ((ImplementationType) i){
-				case C: 		printf(" C "); 			break;
-				case SSE2: 		printf(" SSE2 ");		break;
-				case CUDA: 		printf(" CUDA ");		break;
-				case CUDA2:		printf(" CUDA2 ");		break;
+				case C: 		printf(" C        "); 	break;
+				case SSE2: 		printf(" SSE2     ");	break;
+				case CUDA: 		printf(" CUDA     ");	break;
+				case CUDA2:		printf(" CUDA2    ");	break;
 				case CUDA_INV:	printf(" CUDA_INV ");	break;
 			}
     	}
@@ -214,9 +214,9 @@ void Test::printParameters()
 
 			switch ((VectorType) i){
 				case FLOAT: printf(" FLOAT "); 	break;
-				case BIT: 	printf(" BIT ");	break;
-				case SIGN: 	printf(" SIGN ");	break;
-				case BYTE:	printf(" BYTE ");	break;
+				case BIT: 	printf(" BIT   ");	break;
+				case SIGN: 	printf(" SIGN  ");	break;
+				case BYTE:	printf(" BYTE  ");	break;
 			}
     	}
     }
@@ -315,14 +315,6 @@ void Test::closeFile()
 	}
 }
 
-void fromToByOutputSize(unsigned  minOutputSize, unsigned  maxOutputSize, unsigned  incOutputSize)
-{
-}
-
-unsigned getOutputSize()
-{
-}
-
 void Test::plotToFile(float data)
 {
 	if (file){
@@ -376,7 +368,15 @@ std::string Test::implementationTypeToString()
 	return toReturn;
 }
 
-void Test::fromToByOutputSize(unsigned minOutputSize, unsigned maxOutputSize, unsigned incOutputSize)
+void Test::fromToBySize(unsigned minOutputSize, unsigned maxSize, unsigned incSize)
+{
+	this->outputSize = minOutputSize;
+	this->minOutputSize = minOutputSize;
+	this->maxOutputSize = maxOutputSize;
+	this->incOutputSize = incSize;
+}
+
+void Test::fromToByOutputSize(unsigned minSize, unsigned maxOutputSize, unsigned incOutputSize)
 {
 	this->outputSize = minOutputSize;
 	this->minOutputSize = minOutputSize;

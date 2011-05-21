@@ -12,7 +12,8 @@ public:
 	virtual ~Plot();
 
 	static void plot(string path, ClassID classID, Method method, Test test);
-	static string methodToString(ClassID classID, Method method);
+	static string methodToString(Method method);
+	static string classToString(ClassID classID);
 	static float doMethod(ClassID classID, Method method, Test test);
 	static float doMethod(Vector* vector, Method method);
 	static float doMethod(Connection* connection, Method method);

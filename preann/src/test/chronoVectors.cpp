@@ -4,7 +4,7 @@
 using namespace std;
 
 #include "chronometer.h"
-#include "test.h"
+#include "plot.h"
 #include "factory.h"
 
 #define INITIAL_WEIGHS_RANGE 20
@@ -131,12 +131,18 @@ int main(int argc, char *argv[])
 	Chronometer total;
 	total.start();
 	unsigned errorCount = 0;
-	test.setMinSize(100);
-	test.setIncSize(100);
-	test.setMaxSize(1000);
+	test.fromToBySize(100, 1000, 100);
+	test.fromToByOutputSize(100, 300, 100);
 	test.printParameters();
 
 	try {
+
+		test.disableVectorType(BYTE);
+		Plot::plot(path, VECTOR, ACTIVATION, test);
+		Plot::plot(path, CONNECTION, CALCULATEANDADDTO, test);
+		Plot::plot(path, CONNECTION, MUTATE, test);
+		Plot::plot(path, CONNECTION, CROSSOVER, test);
+		/*
 		for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
 			FunctionType functionType = (FunctionType)(test.getVectorType());
 			for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
@@ -227,7 +233,7 @@ int main(int argc, char *argv[])
 					}
 				}
 			}
-		}
+		}*/
 		printf("Exit success.\n");
 		mem_printTotalAllocated();
 		mem_printTotalPointers();

@@ -20,7 +20,8 @@ void Plot::plot(string path, ClassID classID, Method method, Test test)
 	for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
 		for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
 
-			test.openFile( methodToString(classID, method) );
+			string filename = path + "_" + classToString(classID) + "_" + methodToString(method);
+			test.openFile(filename);
 			for (test.sizeToMin(); test.sizeIncrement(); ) {
 				test.plotToFile( doMethod(classID, method, test) );
 			}
@@ -29,39 +30,32 @@ void Plot::plot(string path, ClassID classID, Method method, Test test)
 	}
 }
 
-string Plot::methodToString(ClassID classID, Method method)
+string Plot::classToString(ClassID classID)
 {
 	string toReturn;
 	switch (classID){
 
-		case VECTOR:
-			switch (method){
-			case ACTIVATION:
-				toReturn = "VECT_ACTIVATION";
-				break;
-			default:
-				goto THERES_NO;
-			}
-		break;
-		case CONNECTION:
-			switch (method){
-			case CALCULATEANDADDTO:
-				toReturn = "CON_CALCULATEANDADDTO";
-				break;
-			case MUTATE:
-				toReturn = "CON_MUTATE";
-				break;
-			case CROSSOVER:
-				toReturn = "CON_CROSSOVER";
-				break;
-			default:
-				goto THERES_NO;
-			}
-
-		break;
-THERES_NO:
+		case VECTOR: toReturn = "VECTOR";			break;
+		case CONNECTION: toReturn = "CONNECTION";	break;
 		default:
-			string error = "there's no such method to plot";
+			string error = "There's no such class to plot.";
+			throw error;
+
+	}
+	return toReturn;
+}
+
+string Plot::methodToString(Method method)
+{
+	string toReturn;
+	switch (method){
+
+		case ACTIVATION: 		toReturn = "ACTIVATION";		break;
+		case CALCULATEANDADDTO: toReturn = "CALCULATEANDADDTO";	break;
+		case MUTATE: 			toReturn = "MUTATE";			break;
+		case CROSSOVER: 		toReturn = "CROSSOVER";			break;
+		default:
+			string error = "There's no such class to plot.";
 			throw error;
 
 	}
@@ -144,8 +138,6 @@ float Plot::doMethod(Connection *connection, Method method)
 	}
 	return chrono.getSeconds();
 }
-
-
 
 float Plot::doMethod(Vector *vector, Method method)
 {
