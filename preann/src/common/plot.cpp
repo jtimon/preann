@@ -15,19 +15,23 @@ Plot::~Plot()
 {
 }
 
-void Plot::plot(string path, ClassID classID, Method method, Test test, unsigned repetitions)
+float Plot::plot(string path, ClassID classID, Method method, Test test, unsigned repetitions)
 {
+	float total = 0;
 	for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
 		for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
 
 			string filename = path + "_" + classToString(classID) + "_" + methodToString(method);
 			test.openFile(filename);
 			for (test.sizeToMin(); test.sizeIncrement(); ) {
-				test.plotToFile( doMethod(classID, method, test, repetitions) );
+				float part = doMethod(classID, method, test, repetitions);
+				test.plotToFile(part);
+				total += part;
 			}
 			test.closeFile();
 		}
 	}
+	return total;
 }
 
 string Plot::toString(ClassID classID, Method method)
@@ -78,14 +82,14 @@ float Plot::doMethod(ClassID classID, Method method, Test test, unsigned repetit
 	switch (method){
 
 		case VECTOR:
-			toReturn = doMethod(vector, method);
+			toReturn = doMethod(vector, method, repetitions);
 		break;
 		case CONNECTION:
 		{
 			Connection* connection = Factory::newConnection(vector, test.getOutputSize(), test.getImplementationType());
 			//TODO constante arbitraria
 			connection->random(20);
-			toReturn = doMethod(connection, method);
+			toReturn = doMethod(connection, method, repetitions);
 		}
 
 		break;
@@ -168,7 +172,7 @@ float Plot::doMethod(Vector* vector, Method method, unsigned repetitions)
 	break;
 	case COPYFROMINTERFACE:
 	{
-		Interface interface = Interface(toTest->getSize(), toTest->getVectorType());
+		Interface interface = Interface(vector->getSize(), vector->getVectorType());
 		chrono.start();
 		for (unsigned i = 0; i < repetitions; ++i) {
 			vector->copyFromInterface(&interface);
@@ -178,7 +182,7 @@ float Plot::doMethod(Vector* vector, Method method, unsigned repetitions)
 	break;
 	case COPYTOINTERFACE:
 	{
-		Interface interface = Interface(toTest->getSize(), toTest->getVectorType());
+		Interface interface = Interface(vector->getSize(), vector->getVectorType());
 		chrono.start();
 		for (unsigned i = 0; i < repetitions; ++i) {
 			vector->copyToInterface(&interface);
