@@ -15,7 +15,7 @@ Plot::~Plot()
 {
 }
 
-void Plot::plot(string path, ClassID classID, Method method, Test test)
+void Plot::plot(string path, ClassID classID, Method method, Test test, unsigned repetitions)
 {
 	for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
 		for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
@@ -23,11 +23,16 @@ void Plot::plot(string path, ClassID classID, Method method, Test test)
 			string filename = path + "_" + classToString(classID) + "_" + methodToString(method);
 			test.openFile(filename);
 			for (test.sizeToMin(); test.sizeIncrement(); ) {
-				test.plotToFile( doMethod(classID, method, test) );
+				test.plotToFile( doMethod(classID, method, test, repetitions) );
 			}
 			test.closeFile();
 		}
 	}
+}
+
+string Plot::toString(ClassID classID, Method method)
+{
+	return classToString(classID) + methodToString(method);
 }
 
 string Plot::classToString(ClassID classID)
@@ -62,7 +67,7 @@ string Plot::methodToString(Method method)
 	return toReturn;
 }
 
-float Plot::doMethod(ClassID classID, Method method, Test test)
+float Plot::doMethod(ClassID classID, Method method, Test test, unsigned repetitions)
 {
 	float toReturn;
 
@@ -92,7 +97,7 @@ float Plot::doMethod(ClassID classID, Method method, Test test)
 	return toReturn;
 }
 
-float Plot::doMethod(Connection *connection, Method method)
+float Plot::doMethod(Connection *connection, Method method, unsigned repetitions)
 {
 	Chronometer chrono;
 
@@ -105,7 +110,9 @@ float Plot::doMethod(Connection *connection, Method method)
 		Vector* results = Factory::newVector(outputSize, FLOAT, connection->getImplementationType());
 
 		chrono.start();
-		connection->calculateAndAddTo(results);
+		for (unsigned i = 0; i < repetitions; ++i) {
+			connection->calculateAndAddTo(results);
+		}
 		chrono.stop();
 	}
 	break;
@@ -115,7 +122,9 @@ float Plot::doMethod(Connection *connection, Method method)
 		//TODO constante arbitraria
 		float mutation = randomFloat(20);
 		chrono.start();
-		connection->mutate(pos, mutation);
+		for (unsigned i = 0; i < repetitions; ++i) {
+			connection->mutate(pos, mutation);
+		}
 		chrono.stop();
 	}
 	break;
@@ -127,7 +136,9 @@ float Plot::doMethod(Connection *connection, Method method)
 		Interface bitVector(connection->getSize(), BIT);
 		bitVector.random(2);
 		chrono.start();
-		connection->crossover(other, &bitVector);
+		for (unsigned i = 0; i < repetitions; ++i) {
+			connection->crossover(other, &bitVector);
+		}
 		chrono.stop();
 	}
 	break;
@@ -139,7 +150,7 @@ float Plot::doMethod(Connection *connection, Method method)
 	return chrono.getSeconds();
 }
 
-float Plot::doMethod(Vector *vector, Method method)
+float Plot::doMethod(Vector* vector, Method method, unsigned repetitions)
 {
 	Chronometer chrono;
 
@@ -149,7 +160,29 @@ float Plot::doMethod(Vector *vector, Method method)
 	{
 		Vector* results = Factory::newVector(vector->getSize(), FLOAT, vector->getImplementationType());
 		chrono.start();
-		vector->activation(results, IDENTITY);
+		for (unsigned i = 0; i < repetitions; ++i) {
+			vector->activation(results, IDENTITY);
+		}
+		chrono.stop();
+	}
+	break;
+	case COPYFROMINTERFACE:
+	{
+		Interface interface = Interface(toTest->getSize(), toTest->getVectorType());
+		chrono.start();
+		for (unsigned i = 0; i < repetitions; ++i) {
+			vector->copyFromInterface(&interface);
+		}
+		chrono.stop();
+	}
+	break;
+	case COPYTOINTERFACE:
+	{
+		Interface interface = Interface(toTest->getSize(), toTest->getVectorType());
+		chrono.start();
+		for (unsigned i = 0; i < repetitions; ++i) {
+			vector->copyToInterface(&interface);
+		}
 		chrono.stop();
 	}
 	break;
@@ -161,13 +194,3 @@ float Plot::doMethod(Vector *vector, Method method)
 	}
 	return chrono.getSeconds();
 }
-
-
-
-
-
-
-
-
-
-

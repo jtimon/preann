@@ -7,120 +7,6 @@ using namespace std;
 #include "plot.h"
 #include "factory.h"
 
-#define INITIAL_WEIGHS_RANGE 20
-#define REPETITION_TIMES 10
-
-float chronoCopyFrom(Vector* toTest)
-{
-	Interface interface = Interface(toTest->getSize(), toTest->getVectorType());
-	interface.random(INITIAL_WEIGHS_RANGE);
-
-	Chronometer chrono;
-	chrono.start();
-
-	for (unsigned i = 0; i < REPETITION_TIMES; ++i) {
-		toTest->copyFromInterface(&interface);
-	}
-
-	chrono.stop();
-	return chrono.getSeconds();
-}
-
-float chronoCopyTo(Vector* toTest)
-{
-	Interface interface = Interface(toTest->getSize(), toTest->getVectorType());
-
-	Chronometer chrono;
-	chrono.start();
-
-	for (unsigned i = 0; i < REPETITION_TIMES; ++i) {
-		toTest->copyToInterface(&interface);
-	}
-
-	chrono.stop();
-	return chrono.getSeconds();
-}
-
-
-float chronoActivation(Vector* toTest, FunctionType functionType)
-{
-	Vector* results = Factory::newVector(toTest->getSize(), FLOAT,
-			toTest->getImplementationType());
-	results->random(INITIAL_WEIGHS_RANGE);
-
-	Chronometer chrono;
-	chrono.start();
-
-	for (unsigned i = 0; i < REPETITION_TIMES; ++i) {
-		toTest->activation(results, functionType);
-	}
-
-	chrono.stop();
-
-	delete (results);
-	return chrono.getSeconds();
-}
-
-float chronoAddToResults(Connection* toTest)
-{
-	unsigned outputSize = toTest->getSize() / toTest->getInput()->getSize();
-	Vector* results = Factory::newVector(outputSize, FLOAT,
-			toTest->getImplementationType());
-
-	Chronometer chrono;
-	chrono.start();
-
-	for (unsigned i = 0; i < REPETITION_TIMES; ++i) {
-		toTest->calculateAndAddTo(results);
-	}
-
-	chrono.stop();
-	delete (results);
-	return chrono.getSeconds();
-}
-
-float chronoMutate(Connection* toTest, unsigned times)
-{
-	Chronometer chrono;
-	chrono.start();
-
-	for (unsigned i = 0; i < REPETITION_TIMES; ++i) {
-		for (unsigned i = 0; i < times; i++) {
-			float mutation = randomFloat(INITIAL_WEIGHS_RANGE);
-			unsigned pos = randomUnsigned(toTest->getSize());
-			toTest->mutate(pos, mutation);
-		}
-	}
-
-	chrono.stop();
-	return chrono.getSeconds();
-}
-
-float chronoCrossover(Connection* toTest)
-{
-	unsigned outputSize = toTest->getSize() / toTest->getInput()->getSize();
-	Connection* other = Factory::newConnection(toTest->getInput(), outputSize,
-			toTest->getImplementationType());
-	Interface bitVector = Interface(toTest->getSize(), BIT);
-	bitVector.random(1);
-
-	Chronometer chrono;
-	chrono.start();
-
-	for (unsigned i = 0; i < REPETITION_TIMES; ++i) {
-		toTest->crossover(other, &bitVector);
-	}
-
-	delete (other);
-	chrono.stop();
-	return chrono.getSeconds();
-}
-
-#define OUTPUT_SIZE_MIN 5
-#define OUTPUT_SIZE_MAX 5
-#define OUTPUT_SIZE_INC 5
-#define NUM_MUTATIONS 100
-
 Test test;
 
 int main(int argc, char *argv[])
@@ -138,10 +24,23 @@ int main(int argc, char *argv[])
 	try {
 
 		test.disableVectorType(BYTE);
-		Plot::plot(path, VECTOR, ACTIVATION, test);
-		Plot::plot(path, CONNECTION, CALCULATEANDADDTO, test);
-		Plot::plot(path, CONNECTION, MUTATE, test);
-		Plot::plot(path, CONNECTION, CROSSOVER, test);
+		cout << Plot::toString(VECTOR, COPYFROMINTERFACE) << " total: "
+			 << Plot::plot(path, VECTOR, COPYFROMINTERFACE, test, 1) << endl;
+
+		cout << Plot::toString(VECTOR, COPYTOINTERFACE) << " total: "
+		 	 << Plot::plot(path, VECTOR, COPYTOINTERFACE, test, 1) << endl;
+
+		cout << Plot::toString(VECTOR, ACTIVATION) << " total: "
+			 << Plot::plot(path, VECTOR, ACTIVATION, test, 10) << endl;
+
+		cout << Plot::toString(CONNECTION, CALCULATEANDADDTO) << " total: "
+			 << Plot::plot(path, CONNECTION, CALCULATEANDADDTO, test, 1) << endl;
+
+		cout << Plot::toString(CONNECTION, MUTATE) << " total: "
+			 << Plot::plot(path, CONNECTION, MUTATE, test, 100) << endl;
+
+		cout << Plot::toString(CONNECTION, CROSSOVER) << " total: "
+			 << Plot::plot(path, CONNECTION, CROSSOVER, test, 1) << endl;
 		/*
 		for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
 			FunctionType functionType = (FunctionType)(test.getVectorType());
