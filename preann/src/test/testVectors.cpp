@@ -14,7 +14,7 @@ Test test;
 unsigned testClone(Vector* toTest)
 {
 	Vector* copy = toTest->clone();
-	unsigned differencesCounter = test.assertEquals(toTest, copy);
+	unsigned differencesCounter = Test::assertEquals(toTest, copy);
 
 	if (toTest->getImplementationType() != copy->getImplementationType()){
 		printf("The vectors are not of the same implementation type.\n");
@@ -36,7 +36,7 @@ unsigned testCopyFrom(Vector* toTest)
 	toTest->copyFromInterface(&interface);
 	cVector->copyFromInterface(&interface);
 
-	differencesCounter += test.assertEquals(cVector, toTest);
+	differencesCounter += Test::assertEquals(cVector, toTest);
 
 	delete(cVector);
 	return differencesCounter;
@@ -52,7 +52,7 @@ unsigned testCopyTo(Vector* toTest)
 	toTest->copyToInterface(&interface);
 	cVector->copyToInterface(&cInterface);
 
-	unsigned differencesCounter = test.assertEqualsInterfaces(&cInterface, &interface);
+	unsigned differencesCounter = Test::assertEqualsInterfaces(&cInterface, &interface);
 
 	delete(cVector);
 	return differencesCounter;
@@ -68,7 +68,7 @@ unsigned testActivation(Vector* toTest, FunctionType functionType)
 
 	toTest->activation(results, functionType);
 	cVector->activation(cResults, functionType);
-	unsigned differencesCounter = test.assertEquals(cVector, toTest);
+	unsigned differencesCounter = Test::assertEquals(cVector, toTest);
 
 	delete(results);
 	delete(cVector);
@@ -91,7 +91,7 @@ unsigned testAddToResults(Connection* toTest)
 	toTest->calculateAndAddTo(results);
 	cConnection->calculateAndAddTo(cResults);
 
-	unsigned differencesCounter = test.assertEquals(cResults, results);
+	unsigned differencesCounter = Test::assertEquals(cResults, results);
 
 	delete(results);
 	delete(cInput);
@@ -115,7 +115,7 @@ unsigned testMutate(Connection* toTest, unsigned times)
 		cConnection->mutate(pos, mutation);
 	}
 
-	unsigned differences = test.assertEquals(cConnection, toTest);
+	unsigned differences = Test::assertEquals(cConnection, toTest);
 	delete(cInput);
 	delete(cConnection);
 	return differences;
@@ -140,8 +140,8 @@ unsigned testCrossover(Connection* toTest)
 	toTest->crossover(other, &bitVector);
 	cConnection->crossover(cOther, &bitVector);
 
-	unsigned differences = test.assertEquals(cConnection, toTest);
-	differences += test.assertEquals(cOther, other);
+	unsigned differences = Test::assertEquals(cConnection, toTest);
+	differences += Test::assertEquals(cOther, other);
 
 	delete(other);
 	delete(cInput);

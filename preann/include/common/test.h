@@ -57,9 +57,9 @@ public:
 
     void printCurrentState();
     void printParameters();
-    unsigned char areEqual(float expected, float actual, VectorType vectorType);
-    unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
-    unsigned assertEquals(Vector* expected, Vector* actual);
+    static unsigned char areEqual(float expected, float actual, VectorType vectorType);
+    static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
+    static unsigned assertEquals(Vector* expected, Vector* actual);
 
     float getInitialWeighsRange();
     void setInitialWeighsRange(float initialWeighsRange);

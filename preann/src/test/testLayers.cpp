@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 				    //test calculation
 					layer->calculateOutput();
 
-				    unsigned differences = assertEquals(controlLayer->getOutput(), layer->getOutput());
+				    unsigned differences = Test::assertEquals(controlLayer->getOutput(), layer->getOutput());
 				    if (differences != 0)
 				    	printf("Errors on outputs: %d \n", differences);
 
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 				    for(unsigned i = 0; i < NUM_INPUTS; i++){
 				        Connection* expectedWeighs = controlLayer->getConnection(i);
 				        Connection* actualWeighs = layer->getConnection(i);
-				        differences = assertEquals(expectedWeighs, actualWeighs);
+				        differences = Test::assertEquals(expectedWeighs, actualWeighs);
 				        if (differences != 0)
 				        	printf("Errors on weighs (input %d): %d \n", i, differences);
 				    }

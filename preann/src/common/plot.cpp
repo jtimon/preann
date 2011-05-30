@@ -15,22 +15,23 @@ Plot::~Plot()
 {
 }
 
-float Plot::plot(string path, ClassID classID, Method method, Test test, unsigned repetitions)
+float Plot::plot(string path, ClassID classID, Method method, unsigned repetitions)
 {
 	float total = 0;
-	for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
-		for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
+	for (implementationTypeToMin(); implementationTypeIncrement(); ) {
+		for (vectorTypeToMin(); vectorTypeIncrement(); ) {
 
 			string filename = path + "_" + classToString(classID) + "_" + methodToString(method);
-			test.openFile(filename);
-			for (test.sizeToMin(); test.sizeIncrement(); ) {
-				float part = doMethod(classID, method, test, repetitions);
-				test.plotToFile(part);
+			openFile(filename);
+			for (sizeToMin(); sizeIncrement(); ) {
+				float part = doMethod(classID, method, repetitions);
+				plotToFile(part);
 				total += part;
 			}
-			test.closeFile();
+			closeFile();
 		}
 	}
+	cout << Plot::toString(classID, method) << " total: " << total << " repetitions: " << repetitions << endl;
 	return total;
 }
 
@@ -71,11 +72,11 @@ string Plot::methodToString(Method method)
 	return toReturn;
 }
 
-float Plot::doMethod(ClassID classID, Method method, Test test, unsigned repetitions)
+float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
 {
 	float toReturn;
 
-	Vector* vector = Factory::newVector(test.getSize(), test.getVectorType(), test.getImplementationType());
+	Vector* vector = Factory::newVector(getSize(), getVectorType(), getImplementationType());
 	//TODO constante arbitraria
 	vector->random(20);
 
@@ -86,7 +87,7 @@ float Plot::doMethod(ClassID classID, Method method, Test test, unsigned repetit
 		break;
 		case CONNECTION:
 		{
-			Connection* connection = Factory::newConnection(vector, test.getOutputSize(), test.getImplementationType());
+			Connection* connection = Factory::newConnection(vector, getOutputSize(), getImplementationType());
 			//TODO constante arbitraria
 			connection->random(20);
 			toReturn = doMethod(connection, method, repetitions);

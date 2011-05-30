@@ -5,6 +5,7 @@ using namespace std;
 
 #include "neuralNet.h"
 #include "chronometer.h"
+#include "test.h"
 
 #define PATH "/home/timon/test.nn"
 
@@ -86,7 +87,7 @@ unsigned assertEqualsInterfaces(Interface* expected, Interface* actual)
 #define NUM_TRIES 2
 
 int main(int argc, char *argv[])
-{/*
+{
 	Chronometer total;
 	total.start();
 
@@ -129,7 +130,7 @@ int main(int argc, char *argv[])
 						//test calculation
 						nn.calculateOutput();
 						unsigned differences =
-								assertEqualsInterfaces(controlNeuralNet.getOutput(0),
+								Test::assertEqualsInterfaces(controlNeuralNet.getOutput(0),
 										nn.getOutput(0));
 						if (differences != 0)
 							printf("Errors on outputs: %d \n", differences);
@@ -149,6 +150,6 @@ int main(int argc, char *argv[])
 
 	//mem_printListOfPointers();
 	total.stop();
-	printf("Total time spent: %f \n", total.getSeconds());*/
+	printf("Total time spent: %f \n", total.getSeconds());
 	return EXIT_SUCCESS;
 }
