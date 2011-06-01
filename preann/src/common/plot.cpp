@@ -21,8 +21,9 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	for (implementationTypeToMin(); implementationTypeIncrement(); ) {
 		for (vectorTypeToMin(); vectorTypeIncrement(); ) {
 
-			string filename = path + "_" + classToString(classID) + "_" + methodToString(method);
-			openFile(filename);
+			//TODO jtimon getFileName que valga para test y para plot
+			string filename = "_" + classToString(classID) + "_" + methodToString(method);
+			openFile(path, filename);
 			for (sizeToMin(); sizeIncrement(); ) {
 				float part = doMethod(classID, method, repetitions);
 				plotToFile(part);
@@ -60,12 +61,14 @@ string Plot::methodToString(Method method)
 	string toReturn;
 	switch (method){
 
+		case COPYFROMINTERFACE: toReturn = "COPYFROMINTERFACE";	break;
+		case COPYTOINTERFACE: 	toReturn = "COPYTOINTERFACE";	break;
 		case ACTIVATION: 		toReturn = "ACTIVATION";		break;
 		case CALCULATEANDADDTO: toReturn = "CALCULATEANDADDTO";	break;
 		case MUTATE: 			toReturn = "MUTATE";			break;
 		case CROSSOVER: 		toReturn = "CROSSOVER";			break;
 		default:
-			string error = "There's no such class to plot.";
+			string error = "There's no such method to plot.";
 			throw error;
 
 	}
@@ -80,17 +83,17 @@ float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
 	//TODO constante arbitraria
 	vector->random(20);
 
-	switch (method){
+	switch (classID){
 
 		case VECTOR:
-			toReturn = doMethod(vector, method, repetitions);
+			toReturn = doMethodVector(vector, method, repetitions);
 		break;
 		case CONNECTION:
 		{
 			Connection* connection = Factory::newConnection(vector, getOutputSize(), getImplementationType());
 			//TODO constante arbitraria
 			connection->random(20);
-			toReturn = doMethod(connection, method, repetitions);
+			toReturn = doMethodConnection(connection, method, repetitions);
 		}
 
 		break;
@@ -102,7 +105,7 @@ float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
 	return toReturn;
 }
 
-float Plot::doMethod(Connection *connection, Method method, unsigned repetitions)
+float Plot::doMethodConnection(Connection *connection, Method method, unsigned repetitions)
 {
 	Chronometer chrono;
 
@@ -148,14 +151,14 @@ float Plot::doMethod(Connection *connection, Method method, unsigned repetitions
 	}
 	break;
 	default:
-		string error = "there's no such method to plot";
+		string error = "There's no such method defined to plot for Connection.";
 		throw error;
 
 	}
 	return chrono.getSeconds();
 }
 
-float Plot::doMethod(Vector* vector, Method method, unsigned repetitions)
+float Plot::doMethodVector(Vector* vector, Method method, unsigned repetitions)
 {
 	Chronometer chrono;
 
@@ -193,7 +196,7 @@ float Plot::doMethod(Vector* vector, Method method, unsigned repetitions)
 	break;
 
 	default:
-		string error = "There's no such method defined to plot for vector.";
+		string error = "There's no such method defined to plot for Vector.";
 		throw error;
 
 	}

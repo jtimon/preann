@@ -15,9 +15,9 @@ public:
 	static string classToString(ClassID classID);
 	static string toString(ClassID classID, Method method);
 	float plot(string path, ClassID classID, Method method, unsigned repetitions);
-	static float doMethod(ClassID classID, Method method, unsigned repetitions);
-	static float doMethod(Vector* vector, Method method, unsigned repetitions);
-	static float doMethod(Connection* connection, Method method, unsigned repetitions);
+	float doMethod(ClassID classID, Method method, unsigned repetitions);
+	float doMethodVector(Vector* vector, Method method, unsigned repetitions);
+	float doMethodConnection(Connection* connection, Method method, unsigned repetitions);
 
 };
 

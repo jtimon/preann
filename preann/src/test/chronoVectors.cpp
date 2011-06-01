@@ -16,18 +16,18 @@ int main(int argc, char *argv[])
 
 	Plot plot;
 	plot.fromToBySize(100, 1000, 100);
-	plot.fromToByOutputSize(100, 300, 100);
+	plot.fromToByOutputSize(100, 100, 100);
 	plot.disableVectorType(BYTE);
 	plot.printParameters();
 
 	try {
-		plot.plot(path, VECTOR, COPYFROMINTERFACE, 1) << endl;
-		plot.plot(path, VECTOR, COPYTOINTERFACE, 1) << endl;
-		plot.plot(path, VECTOR, ACTIVATION, 10) << endl;
-
-		plot.plot(path, CONNECTION, CALCULATEANDADDTO, 1) << endl;
-		plot.plot(path, CONNECTION, MUTATE, 100) << endl;
-		plot.plot(path, CONNECTION, CROSSOVER, 1) << endl;
+		plot.plot(path, VECTOR, COPYFROMINTERFACE, 1);
+//		plot.plot(path, VECTOR, COPYTOINTERFACE, 1);
+//		plot.plot(path, VECTOR, ACTIVATION, 10);
+//
+//		plot.plot(path, CONNECTION, CALCULATEANDADDTO, 1);
+//		plot.plot(path, CONNECTION, MUTATE, 100);
+//		plot.plot(path, CONNECTION, CROSSOVER, 1);
 
 		printf("Exit success.\n");
 		mem_printTotalAllocated();

@@ -292,13 +292,12 @@ void Test::setInitialWeighsRange(float initialWeighsRange)
     this->initialWeighsRange = initialWeighsRange;
 }
 
-void Test::openFile(std::string name)
+void Test::openFile(std::string path, std::string name)
 {
 	if (file){
 		fclose(file);
 		file = NULL;
 	}
-	std::string path = "/home/timon/workspace/preann/";
 	path += vectorTypeToString() + implementationTypeToString() + name + ".DAT";
 	if (!(file = fopen(path.data(), "w")))
 	{
@@ -368,20 +367,20 @@ std::string Test::implementationTypeToString()
 	return toReturn;
 }
 
-void Test::fromToBySize(unsigned minOutputSize, unsigned maxSize, unsigned incSize)
+void Test::fromToBySize(unsigned minSize, unsigned maxSize, unsigned incSize)
 {
-	this->outputSize = minOutputSize;
-	this->minOutputSize = minOutputSize;
-	this->maxOutputSize = maxOutputSize;
-	this->incOutputSize = incSize;
+	this->size = minSize;
+	this->minSize = minSize;
+	this->maxSize = maxSize;
+	this->incSize = incSize;
 }
 
-void Test::fromToByOutputSize(unsigned minSize, unsigned maxOutputSize, unsigned incOutputSize)
+void Test::fromToByOutputSize(unsigned minOutputSize, unsigned maxOutputSize, unsigned incOutputSize)
 {
 	this->outputSize = minOutputSize;
 	this->minOutputSize = minOutputSize;
 	this->maxOutputSize = maxOutputSize;
-	this->incOutputSize = incSize;
+	this->incOutputSize = incOutputSize;
 }
 
 unsigned Test::getOutputSize()
