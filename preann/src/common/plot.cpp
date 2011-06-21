@@ -21,9 +21,7 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	for (implementationTypeToMin(); implementationTypeIncrement(); ) {
 		for (vectorTypeToMin(); vectorTypeIncrement(); ) {
 
-			//TODO jtimon getFileName que valga para test y para plot
-			string filename = "_" + classToString(classID) + "_" + methodToString(method);
-			openFile(path, filename);
+			openFile(path, classID, method);
 			for (sizeToMin(); sizeIncrement(); ) {
 				float part = doMethod(classID, method, repetitions);
 				plotToFile(part);

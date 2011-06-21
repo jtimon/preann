@@ -292,13 +292,13 @@ void Test::setInitialWeighsRange(float initialWeighsRange)
     this->initialWeighsRange = initialWeighsRange;
 }
 
-void Test::openFile(std::string path, std::string name)
+void Test::openFile(string path, ClassID classID, Method method)
 {
 	if (file){
 		fclose(file);
 		file = NULL;
 	}
-	path += vectorTypeToString() + implementationTypeToString() + name + ".DAT";
+	path += getFileName(classID, method);
 	if (!(file = fopen(path.data(), "w")))
 	{
 		string error = "Error opening " + path;
@@ -399,3 +399,10 @@ int Test::outputSizeIncrement()
 
     return outputSize <= maxOutputSize;
 }
+
+string Test::getFileName(ClassID& classID, Method& method)
+{
+    return classToString(classID) + "_" + methodToString(method) + "_" +
+       vectorTypeToString() + "_" + implementationTypeToString() + ".DAT";
+}
+
