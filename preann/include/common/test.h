@@ -21,7 +21,7 @@ class Test {
 
 	float initialWeighsRange;
 
-	FILE *file;
+	FILE* file;
 
 public:
 	Test();
@@ -66,8 +66,8 @@ public:
 
     string vectorTypeToString();
     string implementationTypeToString();
-    void openFile(string path, ClassID classID, Method method);
-    void closeFile();
+    FILE* openFile(string path, ClassID classID, Method method);
+    void closeFile(FILE* file);
     void plotToFile(float data);
 
     void withImplementationTypes(int howMany, ImplementationType* implementationTypes);
