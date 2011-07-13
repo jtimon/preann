@@ -66,7 +66,7 @@ public:
 
     string vectorTypeToString();
     string implementationTypeToString();
-    void openFile(string path, , ClassID classID, Method method);
+    void openFile(string path, ClassID classID, Method method);
     void closeFile();
     void plotToFile(float data);
 
