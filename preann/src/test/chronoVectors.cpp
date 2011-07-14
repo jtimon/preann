@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 	plot.printParameters();
 
 	try {
-		plot.plot(path, VECTOR, COPYFROMINTERFACE, 1);
+		plot.plot(path, VECTOR, COPYFROMINTERFACE, 100);
 //		plot.plot(path, VECTOR, COPYTOINTERFACE, 1);
 //		plot.plot(path, VECTOR, ACTIVATION, 10);
 //
