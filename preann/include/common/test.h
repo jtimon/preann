@@ -21,7 +21,7 @@ class Test {
 
 	float initialWeighsRange;
 
-	FILE* file;
+	FILE *file;
 
 public:
 	Test();
@@ -31,7 +31,8 @@ public:
     unsigned getMinSize();
     unsigned getSize();
     void sizeToMin();
-    int sizeIncrement();
+    int hasNextSize();
+    void sizeIncrement();
     void setIncSize(unsigned incSize);
     void setMaxSize(unsigned maxSize);
     void setMinSize(unsigned minSize);
@@ -42,13 +43,15 @@ public:
     int outputSizeIncrement();
     ImplementationType getImplementationType();
     void implementationTypeToMin();
-    int implementationTypeIncrement();
+    int hasNextImplementationType();
+    void implementationTypeIncrement();
     void enableAllImplementationTypes();
     void disableAllImplementationTypes();
     void enableImplementationType(ImplementationType implementationType);
     void disableImplementationType(ImplementationType implementationType);
     void vectorTypeToMin();
-    int vectorTypeIncrement();
+    int hasNextVectorType();
+    void vectorTypeIncrement();
     void enableAllVectorTypes();
     void disableAllVectorTypes();
     void enableVectorType(VectorType vectorType);
@@ -66,8 +69,8 @@ public:
 
     string vectorTypeToString();
     string implementationTypeToString();
-    FILE* openFile(string path, ClassID classID, Method method);
-    void closeFile(FILE* file);
+    void openFile(string path, ClassID classID, Method method);
+    void closeFile();
     void plotToFile(float data);
 
     void withImplementationTypes(int howMany, ImplementationType* implementationTypes);
