@@ -63,15 +63,15 @@ int main(int argc, char *argv[]) {
 	total.start();
 	try {
 
-		for (test.sizeToMin(); test.sizeIncrement(); ) {
-			for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
+		for (test.sizeToMin(); test.hasNextSize(); test.sizeIncrement()) {
+			for (test.implementationTypeToMin(); test.hasNextImplementationType(); test.implementationTypeIncrement()) {
 
-				for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
+				for (test.vectorTypeToMin(); test.hasNextVectorType(); test.vectorTypeIncrement() ) {
 					testVector(test);
 				}
 
 				test.disableVectorType(BYTE);
-				for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
+				for (test.vectorTypeToMin(); test.hasNextVectorType(); test.vectorTypeIncrement() ) {
 					testConnection(test);
 					testLayer(test);
 				}

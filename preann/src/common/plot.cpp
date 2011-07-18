@@ -18,16 +18,15 @@ Plot::~Plot()
 float Plot::plot(string path, ClassID classID, Method method, unsigned repetitions)
 {
 	float total = 0;
-	openFile(path, classID, method);
-	
+
 	string dataPath = path + Plot::toString(classID, method) + ".DAT";
 	FILE* dataFile;
-	if (!(plotFile = fopen(dataPath.data(), "w")))
+	if (!(dataFile = fopen(dataPath.data(), "w")))
 	{
 		string error = "Error opening " + path;
 		throw error;
 	}
-	
+
 	FILE* plotFile;
 	string plotPath = path + Plot::toString(classID, method) + ".plt";
 	if (!(plotFile = fopen(plotPath.data(), "w")))
@@ -41,23 +40,25 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	fprintf(plotFile, "plot ");
 	fprintf(dataFile, "# Size ");
 	unsigned functionNum = 2;
-	for (vectorTypeToMin(); vectorTypeIncrement(); ) {
-		for (implementationTypeToMin(); implementationTypeIncrement(); ) {
+	for (vectorTypeToMin(); hasNextVectorType(); vectorTypeIncrement()) {
+		for (implementationTypeToMin(); hasNextImplementationType(); implementationTypeIncrement()) {
+			printf(" vectorTypeToString() %s getVectorType() %d \n", vectorTypeToString().data(), (unsigned)getVectorType());
+			printf(" implementationTypeToString() %s getImplementationType() %d \n", implementationTypeToString().data(), (unsigned)getImplementationType());
 			string functionName = vectorTypeToString() + "_" + implementationTypeToString();
-			if (functionNum > 2){
-				fprintf(plotFile, ",\\ \n");
-			}
-			fprintf(plotFile, "plot \"%s\" using 1:%d title \"%s\" with linespoints", outputPath.data(), functionNum, functionName.data());
 			fprintf(dataFile, " %s ", functionName.data());
+			if (functionNum > 2){
+				fprintf(plotFile, ", ");
+			}
+			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints", dataPath.data(), functionNum++, functionName.data());
 		}
 	}
 	fprintf(plotFile, "\n");
 	fprintf(dataFile, "\n");
-	
-	for (sizeToMin(); sizeIncrement(); ) {
+
+	for (sizeToMin(); hasNextSize(); sizeIncrement()) {
 		fprintf(dataFile, " %d ", getSize());
-		for (vectorTypeToMin(); vectorTypeIncrement(); ) {
-			for (implementationTypeToMin(); implementationTypeIncrement(); ) {
+		for (vectorTypeToMin(); hasNextVectorType(); vectorTypeIncrement()) {
+			for (implementationTypeToMin(); hasNextImplementationType(); implementationTypeIncrement()) {
 
 				float part = doMethod(classID, method, repetitions);
 				fprintf(dataFile, " %f ", part);

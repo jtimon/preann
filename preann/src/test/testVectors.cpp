@@ -163,15 +163,15 @@ int main(int argc, char *argv[]) {
 	total.start();
 
 	test.setMinSize(2);
-	test.setMaxSize(500);
-	test.setIncSize(100);
+	test.setMaxSize(10);
+	test.setIncSize(10);
 	test.setInitialWeighsRange(20);
 	test.printParameters();
 
 	try {
-		for (test.sizeToMin(); test.sizeIncrement(); ) {
-			for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
-				for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
+		for (test.sizeToMin(); test.hasNextSize(); test.sizeIncrement()) {
+			for (test.vectorTypeToMin(); test.hasNextVectorType(); test.vectorTypeIncrement() ) {
+				for (test.implementationTypeToMin(); test.hasNextImplementationType(); test.implementationTypeIncrement()) {
 //					if (implementationType != C){
 					{
 

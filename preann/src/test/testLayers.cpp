@@ -94,8 +94,8 @@ int main(int argc, char *argv[]) {
 	test.printParameters();
 
 	try {
-		for (test.sizeToMin(); test.sizeIncrement(); ) {
-			for (test.vectorTypeToMin(); test.vectorTypeIncrement(); ) {
+		for (test.sizeToMin(); test.hasNextSize(); test.sizeIncrement()) {
+			for (test.vectorTypeToMin(); test.hasNextVectorType(); test.vectorTypeIncrement() ) {
 				Vector* controlInputVectors[VECTOR_TYPE_DIM];
 				for (unsigned i = 0; i < NUM_INPUTS; i++) {
 					VectorType vectorTypeAux = BYTE;
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 			    Layer* controlLayer = createAndSaveLayer(test.getSize(), test.getVectorType(), controlInputVectors);
 			    controlLayer->calculateOutput();
 
-			    for (test.implementationTypeToMin(); test.implementationTypeIncrement(); ) {
+			    for (test.implementationTypeToMin(); test.hasNextImplementationType(); test.implementationTypeIncrement()) {
 
 					test.printCurrentState();
 

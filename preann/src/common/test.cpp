@@ -61,11 +61,14 @@ void Test::sizeToMin()
     size = minSize;
 }
 
-int Test::sizeIncrement()
+int Test::hasNextSize()
+{
+    return size + incSize <= maxSize;
+}
+
+void Test::sizeIncrement()
 {
     size += incSize;
-
-    return size <= maxSize;
 }
 
 ImplementationType Test::getImplementationType()
@@ -73,7 +76,7 @@ ImplementationType Test::getImplementationType()
     return implementationType;
 }
 
-int Test::implementationTypeIncrement()
+int Test::hasNextImplementationType()
 {
 	unsigned i = (unsigned)implementationType;
 	do{
@@ -82,8 +85,19 @@ int Test::implementationTypeIncrement()
 		}
 	} while (implementationTypes[i] == 0);
 
-	implementationType = (ImplementationType) i;
 	return 1;
+}
+
+void Test::implementationTypeIncrement()
+{
+	unsigned i = (unsigned)implementationType;
+	do{
+		if (++i >= IMPLEMENTATION_TYPE_DIM) {
+			return;
+		}
+	} while (implementationTypes[i] == 0);
+
+	implementationType = (ImplementationType) i;
 }
 
 void Test::enableAllImplementationTypes()
@@ -107,8 +121,6 @@ void Test::disableAllImplementationTypes()
 	}
 }
 
-
-
 void Test::disableImplementationType(ImplementationType implementationType)
 {
 	implementationTypes[ implementationType ] = 0;
@@ -129,7 +141,7 @@ void Test::vectorTypeToMin()
 	vectorType = (VectorType) 0;
 }
 
-int Test::vectorTypeIncrement()
+int Test::hasNextVectorType()
 {
 	unsigned i = (unsigned)vectorType;
 	do{
@@ -138,8 +150,19 @@ int Test::vectorTypeIncrement()
 		}
 	} while (vectorTypes[i] == 0);
 
-	vectorType = (VectorType) i;
 	return 1;
+}
+
+void Test::vectorTypeIncrement()
+{
+	unsigned i = (unsigned)vectorType;
+	do{
+		if (++i >= VECTOR_TYPE_DIM) {
+			return;
+		}
+	} while (vectorTypes[i] == 0);
+
+	vectorType = (VectorType) i;
 }
 
 void Test::enableVectorType(VectorType vectorType)
@@ -402,7 +425,8 @@ int Test::outputSizeIncrement()
 
 string Test::getFileName(ClassID& classID, Method& method)
 {
-    return classToString(classID) + "_" + methodToString(method) + "_" +
+    return
+//    classToString(classID) + "_" + methodToString(method) + "_" +
        vectorTypeToString() + "_" + implementationTypeToString() + ".DAT";
 }
 
