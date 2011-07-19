@@ -69,6 +69,7 @@ public:
 
     string vectorTypeToString();
     string implementationTypeToString();
+    FILE* openFile(string path);
     void openFile(string path, ClassID classID, Method method);
     void closeFile();
     void plotToFile(float data);
@@ -79,6 +80,9 @@ public:
     void excludeTypes(int howMany, VectorType* vectorTypes);
 
     string getFileName(ClassID& classID, Method& method);
+    
+    void test(ClassID classID, Method method);
+    unsigned doMethod(ClassID classID, Method method);
 };
 
 #endif /* TEST_H_ */

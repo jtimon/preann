@@ -21,6 +21,37 @@ Test::~Test()
 	// TODO Auto-generated destructor stub
 }
 
+void Test::test(ClassID classID, Method method)
+{
+	for (size = minSize; size <= maxSize; size += incSize) {
+		for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType++) if (vectorTypes[vectorType]){
+			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType++) if (implementationTypes[implementationType]) {
+				try {
+					unsigned differencesCounter = doMethod(classID, method);
+					if (differencesCounter > 0){
+						cout << differencesCounter << " differences in " 
+							 << Plot::toString(classID, method) <<" "<< vectorTypeToString() 
+							 <<" "<< implementationTypeToString() <<" size " << size << endl;  
+					}
+				} catch (string error) {
+					cout << "Error: " << error << endl;
+					cout << " While testing " 
+						 << Plot::toString(classID, method) <<" "<< vectorTypeToString() 
+						 <<" "<< implementationTypeToString() <<" size " << size << endl;  
+				}
+			}
+		}
+	}
+	cout << Plot::toString(classID, method) << " total: " << total << " repetitions: " << repetitions << endl;
+}
+
+unsigned Test::doMethod(ClassID classID, Method method)
+{
+	unsigned differencesCounter = 0;
+	// TODO Test::doMethod(ClassID classID, Method method)
+	return differencesCounter; 
+}
+
 unsigned Test::getIncSize()
 {
     return incSize;
@@ -313,6 +344,17 @@ float Test::getInitialWeighsRange()
 void Test::setInitialWeighsRange(float initialWeighsRange)
 {
     this->initialWeighsRange = initialWeighsRange;
+}
+
+FILE* Test::openFile(string path)
+{
+	FILE* dataFile;
+	if (!(dataFile = fopen(path.data(), "w")))
+	{
+		string error = "Error opening " + path;
+		throw error;
+	}
+	return dataFile;
 }
 
 void Test::openFile(string path, ClassID classID, Method method)

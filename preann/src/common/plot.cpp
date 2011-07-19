@@ -20,30 +20,20 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	float total = 0;
 
 	string dataPath = path + Plot::toString(classID, method) + ".DAT";
-	FILE* dataFile;
-	if (!(dataFile = fopen(dataPath.data(), "w")))
-	{
-		string error = "Error opening " + path;
-		throw error;
-	}
-
-	FILE* plotFile;
+	FILE* dataFile = openFile(dataPath);
 	string plotPath = path + Plot::toString(classID, method) + ".plt";
-	if (!(plotFile = fopen(plotPath.data(), "w")))
-	{
-		string error = "Error opening " + path;
-		throw error;
-	}
+	FILE* plotFile = openFile(plotPath);
+	
 	string outputPath = path + Plot::toString(classID, method) + ".png";
 	fprintf(plotFile, "set terminal png \n");
 	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
 	fprintf(plotFile, "plot ");
 	fprintf(dataFile, "# Size ");
 	unsigned functionNum = 2;
-	for (vectorTypeToMin(); hasNextVectorType(); vectorTypeIncrement()) {
-		for (implementationTypeToMin(); hasNextImplementationType(); implementationTypeIncrement()) {
-			printf(" vectorTypeToString() %s getVectorType() %d \n", vectorTypeToString().data(), (unsigned)getVectorType());
-			printf(" implementationTypeToString() %s getImplementationType() %d \n", implementationTypeToString().data(), (unsigned)getImplementationType());
+	for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType++) if (vectorTypes[vectorType]){
+		for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType++) if (implementationTypes[implementationType]) {
+			printf(" vectorTypeToString() %s vectorType %d \n", vectorTypeToString().data(), (unsigned)vectorType);
+			printf(" implementationTypeToString() %s implementationType %d \n", implementationTypeToString().data(), (unsigned)implementationType);
 			string functionName = vectorTypeToString() + "_" + implementationTypeToString();
 			fprintf(dataFile, " %s ", functionName.data());
 			if (functionNum > 2){
@@ -55,10 +45,10 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	fprintf(plotFile, "\n");
 	fprintf(dataFile, "\n");
 
-	for (sizeToMin(); hasNextSize(); sizeIncrement()) {
+	for (size = minSize; size <= maxSize; size += incSize) {
 		fprintf(dataFile, " %d ", getSize());
-		for (vectorTypeToMin(); hasNextVectorType(); vectorTypeIncrement()) {
-			for (implementationTypeToMin(); hasNextImplementationType(); implementationTypeIncrement()) {
+		for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType++) if (vectorTypes[vectorType]){
+			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType++) if (implementationTypes[implementationType]) {
 
 				float part = doMethod(classID, method, repetitions);
 				fprintf(dataFile, " %f ", part);
