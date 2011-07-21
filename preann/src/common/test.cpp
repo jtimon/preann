@@ -24,25 +24,25 @@ Test::~Test()
 void Test::test(ClassID classID, Method method)
 {
 	for (size = minSize; size <= maxSize; size += incSize) {
-		for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType++) if (vectorTypes[vectorType]){
-			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType++) if (implementationTypes[implementationType]) {
+		for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
+			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
 				try {
 					unsigned differencesCounter = doMethod(classID, method);
 					if (differencesCounter > 0){
-						cout << differencesCounter << " differences in " 
-							 << Plot::toString(classID, method) <<" "<< vectorTypeToString() 
-							 <<" "<< implementationTypeToString() <<" size " << size << endl;  
+						cout << differencesCounter << " differences in "
+							 << toString(classID, method) <<" "<< vectorTypeToString()
+							 <<" "<< implementationTypeToString() <<" size " << size << endl;
 					}
 				} catch (string error) {
 					cout << "Error: " << error << endl;
-					cout << " While testing " 
-						 << Plot::toString(classID, method) <<" "<< vectorTypeToString() 
-						 <<" "<< implementationTypeToString() <<" size " << size << endl;  
+					cout << " While testing "
+						 << toString(classID, method) <<" "<< vectorTypeToString()
+						 <<" "<< implementationTypeToString() <<" size " << size << endl;
 				}
 			}
 		}
 	}
-	cout << Plot::toString(classID, method) << " total: " << total << " repetitions: " << repetitions << endl;
+	cout << toString(classID, method) << endl;
 }
 
 unsigned Test::doMethod(ClassID classID, Method method)
@@ -79,6 +79,8 @@ unsigned Test::doMethod(ClassID classID, Method method)
 
 unsigned Test::doMethodConnection(Connection* connection, Method method)
 {
+	unsigned toReturn;
+
 	switch (method){
 
 	case CALCULATEANDADDTO:
@@ -105,7 +107,7 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 		Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
 		Interface bitVector(connection->getSize(), BIT);
 		bitVector.random(2);
-		
+
 		connection->crossover(other, &bitVector);
 		delete (other);
 	}
@@ -115,8 +117,8 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 		throw error;
 
 	}
-	
-	return chrono.getSeconds();
+
+	return toReturn;
 }
 
 unsigned Test::doMethodVector(Vector* vector, Method method)
@@ -128,18 +130,14 @@ unsigned Test::doMethodVector(Vector* vector, Method method)
 	{
 		FunctionType functionType = IDENTITY;
 		Vector* results = Factory::newVector(vector->getSize(), FLOAT, vector->getImplementationType());
-		vector->activation(results, IDENTITY);
-		delete (results);
-		
-		Vector* results = Factory::newVector(toTest->getSize(), FLOAT, toTest->getImplementationType());
-		results->random(test.getInitialWeighsRange());
+		results->random(getInitialWeighsRange());
 
 		Vector* cResults = Factory::newVector(results, C);
-		Vector* cVector = Factory::newVector(toTest->getSize(), toTest->getVectorType(), C);
+		Vector* cVector = Factory::newVector(vector->getSize(), vector->getVectorType(), C);
 
-		toTest->activation(results, functionType);
+		vector->activation(results, functionType);
 		cVector->activation(cResults, functionType);
-		unsigned differencesCounter = Test::assertEquals(cVector, toTest);
+		unsigned differencesCounter = Test::assertEquals(cVector, vector);
 
 		delete(results);
 		delete(cVector);
@@ -587,3 +585,41 @@ string Test::getFileName(ClassID& classID, Method& method)
        vectorTypeToString() + "_" + implementationTypeToString() + ".DAT";
 }
 
+string Test::toString(ClassID classID, Method method)
+{
+	return classToString(classID) + methodToString(method);
+}
+
+string Test::classToString(ClassID classID)
+{
+	string toReturn;
+	switch (classID){
+
+		case VECTOR: toReturn = "VECTOR";			break;
+		case CONNECTION: toReturn = "CONNECTION";	break;
+		default:
+			string error = "There's no such class to plot.";
+			throw error;
+
+	}
+	return toReturn;
+}
+
+string Test::methodToString(Method method)
+{
+	string toReturn;
+	switch (method){
+
+		case COPYFROMINTERFACE: toReturn = "COPYFROMINTERFACE";	break;
+		case COPYTOINTERFACE: 	toReturn = "COPYTOINTERFACE";	break;
+		case ACTIVATION: 		toReturn = "ACTIVATION";		break;
+		case CALCULATEANDADDTO: toReturn = "CALCULATEANDADDTO";	break;
+		case MUTATE: 			toReturn = "MUTATE";			break;
+		case CROSSOVER: 		toReturn = "CROSSOVER";			break;
+		default:
+			string error = "There's no such method to plot.";
+			throw error;
+
+	}
+	return toReturn;
+}

@@ -23,15 +23,15 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	FILE* dataFile = openFile(dataPath);
 	string plotPath = path + Plot::toString(classID, method) + ".plt";
 	FILE* plotFile = openFile(plotPath);
-	
+
 	string outputPath = path + Plot::toString(classID, method) + ".png";
 	fprintf(plotFile, "set terminal png \n");
 	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
 	fprintf(plotFile, "plot ");
 	fprintf(dataFile, "# Size ");
 	unsigned functionNum = 2;
-	for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType++) if (vectorTypes[vectorType]){
-		for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType++) if (implementationTypes[implementationType]) {
+	for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
+		for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
 			printf(" vectorTypeToString() %s vectorType %d \n", vectorTypeToString().data(), (unsigned)vectorType);
 			printf(" implementationTypeToString() %s implementationType %d \n", implementationTypeToString().data(), (unsigned)implementationType);
 			string functionName = vectorTypeToString() + "_" + implementationTypeToString();
@@ -47,8 +47,8 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 
 	for (size = minSize; size <= maxSize; size += incSize) {
 		fprintf(dataFile, " %d ", getSize());
-		for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType++) if (vectorTypes[vectorType]){
-			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType++) if (implementationTypes[implementationType]) {
+		for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
+			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
 
 				float part = doMethod(classID, method, repetitions);
 				fprintf(dataFile, " %f ", part);
@@ -61,45 +61,6 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	fclose(dataFile);
 	cout << Plot::toString(classID, method) << " total: " << total << " repetitions: " << repetitions << endl;
 	return total;
-}
-
-string Plot::toString(ClassID classID, Method method)
-{
-	return classToString(classID) + methodToString(method);
-}
-
-string Plot::classToString(ClassID classID)
-{
-	string toReturn;
-	switch (classID){
-
-		case VECTOR: toReturn = "VECTOR";			break;
-		case CONNECTION: toReturn = "CONNECTION";	break;
-		default:
-			string error = "There's no such class to plot.";
-			throw error;
-
-	}
-	return toReturn;
-}
-
-string Plot::methodToString(Method method)
-{
-	string toReturn;
-	switch (method){
-
-		case COPYFROMINTERFACE: toReturn = "COPYFROMINTERFACE";	break;
-		case COPYTOINTERFACE: 	toReturn = "COPYTOINTERFACE";	break;
-		case ACTIVATION: 		toReturn = "ACTIVATION";		break;
-		case CALCULATEANDADDTO: toReturn = "CALCULATEANDADDTO";	break;
-		case MUTATE: 			toReturn = "MUTATE";			break;
-		case CROSSOVER: 		toReturn = "CROSSOVER";			break;
-		default:
-			string error = "There's no such method to plot.";
-			throw error;
-
-	}
-	return toReturn;
 }
 
 float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
@@ -185,7 +146,7 @@ float Plot::doMethodConnection(Connection* connection, Method method, unsigned r
 		throw error;
 
 	}
-	
+
 	return chrono.getSeconds();
 }
 
