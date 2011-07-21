@@ -121,6 +121,7 @@ float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
 			//TODO constante arbitraria
 			connection->random(20);
 			toReturn = doMethodConnection(connection, method, repetitions);
+			delete(connection);
 		}
 
 		break;
@@ -129,10 +130,11 @@ float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
 			throw error;
 
 	}
+	delete(vector);
 	return toReturn;
 }
 
-float Plot::doMethodConnection(Connection *connection, Method method, unsigned repetitions)
+float Plot::doMethodConnection(Connection* connection, Method method, unsigned repetitions)
 {
 	Chronometer chrono;
 
@@ -175,6 +177,7 @@ float Plot::doMethodConnection(Connection *connection, Method method, unsigned r
 			connection->crossover(other, &bitVector);
 		}
 		chrono.stop();
+		delete (other);
 	}
 	break;
 	default:
@@ -182,6 +185,7 @@ float Plot::doMethodConnection(Connection *connection, Method method, unsigned r
 		throw error;
 
 	}
+	
 	return chrono.getSeconds();
 }
 
@@ -199,6 +203,7 @@ float Plot::doMethodVector(Vector* vector, Method method, unsigned repetitions)
 			vector->activation(results, IDENTITY);
 		}
 		chrono.stop();
+		delete (results);
 	}
 	break;
 	case COPYFROMINTERFACE:

@@ -47,10 +47,125 @@ void Test::test(ClassID classID, Method method)
 
 unsigned Test::doMethod(ClassID classID, Method method)
 {
-	unsigned differencesCounter = 0;
-	// TODO Test::doMethod(ClassID classID, Method method)
-	return differencesCounter; 
+	unsigned toReturn;
+
+	Vector* vector = Factory::newVector(getSize(), getVectorType(), getImplementationType());
+	//TODO constante arbitraria
+	vector->random(20);
+
+	switch (classID){
+
+		case VECTOR:
+			toReturn = doMethodVector(vector, method);
+		break;
+		case CONNECTION:
+		{
+			Connection* connection = Factory::newConnection(vector, getOutputSize(), getImplementationType());
+			//TODO constante arbitraria
+			connection->random(20);
+			toReturn = doMethodConnection(connection, method);
+			delete(connection);
+		}
+
+		break;
+		default:
+			string error = "there's no such method to plot";
+			throw error;
+
+	}
+	delete(vector);
+	return toReturn;
 }
+
+unsigned Test::doMethodConnection(Connection* connection, Method method)
+{
+	switch (method){
+
+	case CALCULATEANDADDTO:
+	{
+		unsigned inputSize = connection->getInput()->getSize();
+		unsigned outputSize = connection->getSize() / inputSize;
+		Vector* results = Factory::newVector(outputSize, FLOAT, connection->getImplementationType());
+
+		connection->calculateAndAddTo(results);
+	}
+	break;
+	case MUTATE:
+	{
+		unsigned pos = randomUnsigned(connection->getSize());
+		//TODO constante arbitraria
+		float mutation = randomFloat(20);
+		connection->mutate(pos, mutation);
+	}
+	break;
+	case CROSSOVER:
+	{
+		unsigned inputSize = connection->getInput()->getSize();
+		unsigned outputSize = connection->getSize() / inputSize;
+		Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
+		Interface bitVector(connection->getSize(), BIT);
+		bitVector.random(2);
+		
+		connection->crossover(other, &bitVector);
+		delete (other);
+	}
+	break;
+	default:
+		string error = "There's no such method defined to test for Connection.";
+		throw error;
+
+	}
+	
+	return chrono.getSeconds();
+}
+
+unsigned Test::doMethodVector(Vector* vector, Method method)
+{
+	unsigned differencesCounter;
+	switch (method){
+
+	case ACTIVATION:
+	{
+		FunctionType functionType = IDENTITY;
+		Vector* results = Factory::newVector(vector->getSize(), FLOAT, vector->getImplementationType());
+		vector->activation(results, IDENTITY);
+		delete (results);
+		
+		Vector* results = Factory::newVector(toTest->getSize(), FLOAT, toTest->getImplementationType());
+		results->random(test.getInitialWeighsRange());
+
+		Vector* cResults = Factory::newVector(results, C);
+		Vector* cVector = Factory::newVector(toTest->getSize(), toTest->getVectorType(), C);
+
+		toTest->activation(results, functionType);
+		cVector->activation(cResults, functionType);
+		unsigned differencesCounter = Test::assertEquals(cVector, toTest);
+
+		delete(results);
+		delete(cVector);
+		delete(cResults);
+	}
+	break;
+	case COPYFROMINTERFACE:
+	{
+		Interface interface = Interface(vector->getSize(), vector->getVectorType());
+		vector->copyFromInterface(&interface);
+	}
+	break;
+	case COPYTOINTERFACE:
+	{
+		Interface interface = Interface(vector->getSize(), vector->getVectorType());
+		vector->copyToInterface(&interface);
+	}
+	break;
+
+	default:
+		string error = "There's no such method defined to test for Vector.";
+		throw error;
+	}
+	return differencesCounter;
+}
+
 
 unsigned Test::getIncSize()
 {

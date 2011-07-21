@@ -83,6 +83,8 @@ public:
     
     void test(ClassID classID, Method method);
     unsigned doMethod(ClassID classID, Method method);
+    unsigned doMethodVector(Vector* vector, Method method);
+    unsigned doMethodConnection(Connection* connection, Method method);
 };
 
 #endif /* TEST_H_ */
