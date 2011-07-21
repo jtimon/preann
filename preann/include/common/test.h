@@ -1,10 +1,11 @@
 
-#include "vector.h"
+#include "factory.h"
 
 #ifndef TEST_H_
 #define TEST_H_
 
 class Test {
+protected:
 	unsigned size;
 	unsigned minSize;
 	unsigned maxSize;
@@ -80,11 +81,15 @@ public:
     void excludeTypes(int howMany, VectorType* vectorTypes);
 
     string getFileName(ClassID& classID, Method& method);
-    
+
     void test(ClassID classID, Method method);
     unsigned doMethod(ClassID classID, Method method);
     unsigned doMethodVector(Vector* vector, Method method);
     unsigned doMethodConnection(Connection* connection, Method method);
+
+    static string toString(ClassID classID, Method method);
+	static string methodToString(Method method);
+	static string classToString(ClassID classID);
 };
 
 #endif /* TEST_H_ */
