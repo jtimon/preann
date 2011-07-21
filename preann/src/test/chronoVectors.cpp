@@ -21,11 +21,11 @@ int main(int argc, char *argv[])
 	plot.printParameters();
 
 	try {
-		plot.plot(path, VECTOR, COPYFROMINTERFACE, 100000);
+		plot.plot(path, VECTOR, COPYFROMINTERFACE, 10000);
 //		plot.plot(path, VECTOR, COPYTOINTERFACE, 1);
-//		plot.plot(path, VECTOR, ACTIVATION, 10);
+		plot.plot(path, VECTOR, ACTIVATION, 10);
 //
-//		plot.plot(path, CONNECTION, CALCULATEANDADDTO, 1);
+		plot.plot(path, CONNECTION, CALCULATEANDADDTO, 10);
 //		plot.plot(path, CONNECTION, MUTATE, 100);
 //		plot.plot(path, CONNECTION, CROSSOVER, 1);
 
