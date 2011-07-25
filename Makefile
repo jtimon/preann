@@ -31,7 +31,6 @@ NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES) $(FACT_FLAGS)
 NVCC_LINK = $(NVCC) -L/usr/local/cuda/lib -lcudart 
 NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11 --device-emulation 
 NASM = nasm -f elf
-PLOT = gnuplot
 
 ifeq (all, $(MAKECMDGOALS))
 	FACT_OBJ = $(FULL_OBJ)
@@ -70,8 +69,6 @@ $(BUILD_DIR):
 bin/%.exe: build/test/%.o $(OBJ)
 	$(NVCC_LINK) $^ -o $@
 	./$@ > $(patsubst bin/%.exe,output/test/%.log,$@)
-output/plotData/%.png: output/images/%.plt
-	$(PLOT) $< 
 build/test%.o: src/test%.cpp
 	$(CXX) -c $< -o $@
 build/%.o: src/%.cpp include/%.h

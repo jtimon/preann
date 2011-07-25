@@ -60,6 +60,8 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	fclose(plotFile);
 	fclose(dataFile);
 	cout << Plot::toString(classID, method) << " total: " << total << " repetitions: " << repetitions << endl;
+	string syscommand = "gnuplot " + plotPath;
+	system(syscommand.data());
 	return total;
 }
 
