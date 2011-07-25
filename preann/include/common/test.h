@@ -4,6 +4,8 @@
 #ifndef TEST_H_
 #define TEST_H_
 
+#define NUM_MUTATIONS 10
+
 class Test {
 protected:
 	unsigned size;

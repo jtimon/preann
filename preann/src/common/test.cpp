@@ -29,15 +29,13 @@ void Test::test(ClassID classID, Method method)
 				try {
 					unsigned differencesCounter = doMethod(classID, method);
 					if (differencesCounter > 0){
-						cout << differencesCounter << " differences in "
-							 << toString(classID, method) <<" "<< vectorTypeToString()
-							 <<" "<< implementationTypeToString() <<" size " << size << endl;
+						printCurrentState();
+						cout << differencesCounter << " differences detected." << endl;
 					}
 				} catch (string error) {
 					cout << "Error: " << error << endl;
-					cout << " While testing "
-						 << toString(classID, method) <<" "<< vectorTypeToString()
-						 <<" "<< implementationTypeToString() <<" size " << size << endl;
+					cout << " While testing...";
+					printCurrentState();
 				}
 			}
 		}
@@ -59,7 +57,7 @@ unsigned Test::doMethod(ClassID classID, Method method)
 		break;
 		case CONNECTION:
 		{
-			Connection* connection = Factory::newConnection(vector, getOutputSize(), getImplementationType());
+			Connection* connection = Factory::newConnection(vector, outputSize, getImplementationType());
 			connection->random(getInitialWeighsRange());
 			toReturn = doMethodConnection(connection, method);
 			delete(connection);
@@ -77,17 +75,29 @@ unsigned Test::doMethod(ClassID classID, Method method)
 
 unsigned Test::doMethodConnection(Connection* connection, Method method)
 {
-	unsigned toReturn;
+	unsigned differencesCounter;
 
 	switch (method){
 
 	case CALCULATEANDADDTO:
 	{
-		unsigned inputSize = connection->getInput()->getSize();
-		unsigned outputSize = connection->getSize() / inputSize;
 		Vector* results = Factory::newVector(outputSize, FLOAT, connection->getImplementationType());
 
+		Vector* cInput = Factory::newVector(connection->getInput(), C);
+		Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
+		cConnection->copyFrom(connection);
+
+		Vector* cResults = Factory::newVector(outputSize, FLOAT, C);
+
 		connection->calculateAndAddTo(results);
+		cConnection->calculateAndAddTo(cResults);
+
+		differencesCounter = Test::assertEquals(cResults, results);
+
+		delete(results);
+		delete(cInput);
+		delete(cConnection);
+		delete(cResults);
 	}
 	break;
 	case MUTATE:
@@ -95,18 +105,48 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 		unsigned pos = randomUnsigned(connection->getSize());
 		float mutation = randomFloat(getInitialWeighsRange());
 		connection->mutate(pos, mutation);
+		
+		Vector* cInput = Factory::newVector(connection->getInput(), C);
+		Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
+		cConnection->copyFrom(connection);
+
+		for(unsigned i=0; i < NUM_MUTATIONS; i++) {
+			float mutation = randomFloat(getInitialWeighsRange());
+			unsigned pos = randomUnsigned(connection->getSize());
+			connection->mutate(pos, mutation);
+			cConnection->mutate(pos, mutation);
+		}
+
+		differencesCounter = Test::assertEquals(cConnection, connection);
+		delete(cInput);
+		delete(cConnection);
 	}
 	break;
 	case CROSSOVER:
 	{
-		unsigned inputSize = connection->getInput()->getSize();
-		unsigned outputSize = connection->getSize() / inputSize;
 		Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
-		Interface bitVector(connection->getSize(), BIT);
-		bitVector.random(2);
+		other->random(test.getInitialWeighsRange());
+
+		Vector* cInput = Factory::newVector(connection->getInput(), C);
+		Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
+		cConnection->copyFrom(connection);
+		Connection* cOther = Factory::newConnection(cInput, outputSize, C);
+		cOther->copyFrom(other);
+
+		Interface bitVector = Interface(connection->getSize(), BIT);
+		//TODO bitVector.random(2); ??
+		bitVector.random(1);
 
 		connection->crossover(other, &bitVector);
-		delete (other);
+		cConnection->crossover(cOther, &bitVector);
+
+		differencesCounter = Test::assertEquals(cConnection, connection);
+		differencesCounter += Test::assertEquals(cOther, other);
+
+		delete(other);
+		delete(cInput);
+		delete(cConnection);
+		delete(cOther);
 	}
 	break;
 	default:
@@ -115,7 +155,7 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 
 	}
 
-	return toReturn;
+	return differencesCounter;
 }
 
 unsigned Test::doMethodVector(Vector* vector, Method method)
@@ -134,7 +174,7 @@ unsigned Test::doMethodVector(Vector* vector, Method method)
 
 		vector->activation(results, functionType);
 		cVector->activation(cResults, functionType);
-		unsigned differencesCounter = Test::assertEquals(cVector, vector);
+		differencesCounter = Test::assertEquals(cVector, vector);
 
 		delete(results);
 		delete(cVector);
@@ -144,13 +184,43 @@ unsigned Test::doMethodVector(Vector* vector, Method method)
 	case COPYFROMINTERFACE:
 	{
 		Interface interface = Interface(vector->getSize(), vector->getVectorType());
+		interface.random(getInitialWeighsRange());
+
+		Vector* cVector = Factory::newVector(vector, C);
+
 		vector->copyFromInterface(&interface);
+		cVector->copyFromInterface(&interface);
+
+		differencesCounter = Test::assertEquals(cVector, vector);
+
+		delete(cVector);
 	}
 	break;
 	case COPYTOINTERFACE:
 	{
 		Interface interface = Interface(vector->getSize(), vector->getVectorType());
+
+		Vector* cVector = Factory::newVector(vector, C);
+		Interface cInterface = Interface(vector->getSize(), vector->getVectorType());
+
 		vector->copyToInterface(&interface);
+		cVector->copyToInterface(&cInterface);
+
+		differencesCounter = Test::assertEqualsInterfaces(&cInterface, &interface);
+
+		delete(cVector);
+	}
+	break;
+	case CLONE:
+	{
+		Vector* copy = vector->clone();
+		differencesCounter = Test::assertEquals(vector, copy);
+
+		if (vector->getImplementationType() != copy->getImplementationType()){
+			printf("The vectors are not of the same implementation type.\n");
+			++differencesCounter;
+		}
+		delete(copy);
 	}
 	break;
 

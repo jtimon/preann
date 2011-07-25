@@ -79,7 +79,7 @@ float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
 		break;
 		case CONNECTION:
 		{
-			Connection* connection = Factory::newConnection(vector, getOutputSize(), getImplementationType());
+			Connection* connection = Factory::newConnection(vector, outputSize, getImplementationType());
 			connection->random(getInitialWeighsRange());
 			toReturn = doMethodConnection(connection, method, repetitions);
 			delete(connection);
@@ -103,8 +103,6 @@ float Plot::doMethodConnection(Connection* connection, Method method, unsigned r
 
 	case CALCULATEANDADDTO:
 	{
-		unsigned inputSize = connection->getInput()->getSize();
-		unsigned outputSize = connection->getSize() / inputSize;
 		Vector* results = Factory::newVector(outputSize, FLOAT, connection->getImplementationType());
 
 		chrono.start();
@@ -127,8 +125,6 @@ float Plot::doMethodConnection(Connection* connection, Method method, unsigned r
 	break;
 	case CROSSOVER:
 	{
-		unsigned inputSize = connection->getInput()->getSize();
-		unsigned outputSize = connection->getSize() / inputSize;
 		Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
 		Interface bitVector(connection->getSize(), BIT);
 		bitVector.random(2);
