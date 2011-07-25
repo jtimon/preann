@@ -12,7 +12,6 @@ unsigned ptr_sizes[5000];
 unsigned ptr_counter = 0;
 unsigned totalAllocated = 0;
 
-//TODO z usar realloc en vez de free y malloc
 void* mi_malloc(unsigned size) {
 	if (size == 0) {
 		std::string error = "No se pueden reservar 0 bytes";

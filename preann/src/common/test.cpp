@@ -50,8 +50,7 @@ unsigned Test::doMethod(ClassID classID, Method method)
 	unsigned toReturn;
 
 	Vector* vector = Factory::newVector(getSize(), getVectorType(), getImplementationType());
-	//TODO constante arbitraria
-	vector->random(20);
+	vector->random(getInitialWeighsRange());
 
 	switch (classID){
 
@@ -61,15 +60,14 @@ unsigned Test::doMethod(ClassID classID, Method method)
 		case CONNECTION:
 		{
 			Connection* connection = Factory::newConnection(vector, getOutputSize(), getImplementationType());
-			//TODO constante arbitraria
-			connection->random(20);
+			connection->random(getInitialWeighsRange());
 			toReturn = doMethodConnection(connection, method);
 			delete(connection);
 		}
 
 		break;
 		default:
-			string error = "there's no such method to plot";
+			string error = "there's no such class to test";
 			throw error;
 
 	}
@@ -95,8 +93,7 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 	case MUTATE:
 	{
 		unsigned pos = randomUnsigned(connection->getSize());
-		//TODO constante arbitraria
-		float mutation = randomFloat(20);
+		float mutation = randomFloat(getInitialWeighsRange());
 		connection->mutate(pos, mutation);
 	}
 	break;

@@ -70,8 +70,7 @@ float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
 	float toReturn;
 
 	Vector* vector = Factory::newVector(getSize(), getVectorType(), getImplementationType());
-	//TODO constante arbitraria
-	vector->random(20);
+	vector->random(getInitialWeighsRange());
 
 	switch (classID){
 
@@ -81,8 +80,7 @@ float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
 		case CONNECTION:
 		{
 			Connection* connection = Factory::newConnection(vector, getOutputSize(), getImplementationType());
-			//TODO constante arbitraria
-			connection->random(20);
+			connection->random(getInitialWeighsRange());
 			toReturn = doMethodConnection(connection, method, repetitions);
 			delete(connection);
 		}
@@ -119,8 +117,7 @@ float Plot::doMethodConnection(Connection* connection, Method method, unsigned r
 	case MUTATE:
 	{
 		unsigned pos = randomUnsigned(connection->getSize());
-		//TODO constante arbitraria
-		float mutation = randomFloat(20);
+		float mutation = randomFloat(getInitialWeighsRange());
 		chrono.start();
 		for (unsigned i = 0; i < repetitions; ++i) {
 			connection->mutate(pos, mutation);

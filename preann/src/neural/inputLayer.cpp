@@ -7,8 +7,7 @@ InputLayer::InputLayer(unsigned size, VectorType vectorType, ImplementationType 
 	tInput = new Interface(size, vectorType);
 	output = Factory::newVector(size, vectorType, implementationType);
 
-	//TODO Z preprocesar entradas??
-	thresholds = Factory::newThresholds(output, implementationType);
+	thresholds = NULL;
 	functionType = IDENTITY;
 
 	connections = NULL;
