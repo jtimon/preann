@@ -17,7 +17,7 @@ CUDA_OBJ = build/optimization/cuda_code.o
 FULL_OBJ = $(SSE2_OBJ) $(CUDA_OBJ)
 
 OBJ       = $(patsubst src/%.cpp,build/%.o,$(SRC))
-INCLUDES  = $(addprefix -I , $(addprefix include/,$(LIB_MODULES))) -I include
+INCLUDES  = $(addprefix -I , $(addprefix src/,$(LIB_MODULES))) 
 
 TEST = testMemoryLosses testVectors testLayers testNeuralNets
 CHRONO = chronoVectors chronoPopulationXor
@@ -52,9 +52,6 @@ endif
 
 OBJ += $(FACT_OBJ)
 
-#vpath %.cpp $(SRC_DIR)
-#vpath %.cpp $(addprefix include/,$(MODULES))
-
 .PHONY: all clean checkdirs cpp sse2 cuda
 .SECONDARY:
 
@@ -71,15 +68,15 @@ bin/%.exe: build/test/%.o $(OBJ)
 	./$@ > $(patsubst bin/%.exe,output/test/%.log,$@)
 build/test%.o: src/test%.cpp
 	$(CXX) -c $< -o $@
-build/%.o: src/%.cpp include/%.h
+build/%.o: src/%.cpp src/%.h
 	$(CXX) -c $< -o $@
 
-build/optimization/factory.o: src/optimization/factory.cpp include/optimization/factory.h include/optimization/configFactory.h include/template/*.h $(FACT_OBJ)
+build/optimization/factory.o: src/optimization/factory.cpp src/optimization/factory.h src/optimization/configFactory.h src/template/*.h $(FACT_OBJ)
 	$(CXX) -c $< -o $@
 
-build/optimization/cuda_code.o : src/optimization/cuda_code.cu include/optimization/cuda_code.h include/common/util.h
+build/optimization/cuda_code.o : src/optimization/cuda_code.cu src/optimization/cuda_code.h src/common/util.h
 	$(NVCC_COMPILE) $< -o $@
-build/optimization/sse2_code.o : src/optimization/sse2_code.asm include/optimization/sse2_code.h 
+build/optimization/sse2_code.o : src/optimization/sse2_code.asm src/optimization/sse2_code.h 
 	$(NASM) $< -o $@
 
 clean: 
