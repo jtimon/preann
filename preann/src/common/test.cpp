@@ -48,7 +48,7 @@ unsigned Test::doMethod(ClassID classID, Method method)
 	unsigned toReturn;
 
 	Vector* vector = Factory::newVector(getSize(), getVectorType(), getImplementationType());
-	vector->random(getInitialWeighsRange());
+	vector->random(initialWeighsRange);
 
 	switch (classID){
 
@@ -58,7 +58,7 @@ unsigned Test::doMethod(ClassID classID, Method method)
 		case CONNECTION:
 		{
 			Connection* connection = Factory::newConnection(vector, outputSize, getImplementationType());
-			connection->random(getInitialWeighsRange());
+			connection->random(initialWeighsRange);
 			toReturn = doMethodConnection(connection, method);
 			delete(connection);
 		}
@@ -103,15 +103,15 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 	case MUTATE:
 	{
 		unsigned pos = randomUnsigned(connection->getSize());
-		float mutation = randomFloat(getInitialWeighsRange());
+		float mutation = randomFloat(initialWeighsRange);
 		connection->mutate(pos, mutation);
-		
+
 		Vector* cInput = Factory::newVector(connection->getInput(), C);
 		Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
 		cConnection->copyFrom(connection);
 
 		for(unsigned i=0; i < NUM_MUTATIONS; i++) {
-			float mutation = randomFloat(getInitialWeighsRange());
+			float mutation = randomFloat(initialWeighsRange);
 			unsigned pos = randomUnsigned(connection->getSize());
 			connection->mutate(pos, mutation);
 			cConnection->mutate(pos, mutation);
@@ -125,7 +125,7 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 	case CROSSOVER:
 	{
 		Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
-		other->random(test.getInitialWeighsRange());
+		other->random(initialWeighsRange);
 
 		Vector* cInput = Factory::newVector(connection->getInput(), C);
 		Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
@@ -167,7 +167,7 @@ unsigned Test::doMethodVector(Vector* vector, Method method)
 	{
 		FunctionType functionType = IDENTITY;
 		Vector* results = Factory::newVector(vector->getSize(), FLOAT, vector->getImplementationType());
-		results->random(getInitialWeighsRange());
+		results->random(initialWeighsRange);
 
 		Vector* cResults = Factory::newVector(results, C);
 		Vector* cVector = Factory::newVector(vector->getSize(), vector->getVectorType(), C);
@@ -184,7 +184,7 @@ unsigned Test::doMethodVector(Vector* vector, Method method)
 	case COPYFROMINTERFACE:
 	{
 		Interface interface = Interface(vector->getSize(), vector->getVectorType());
-		interface.random(getInitialWeighsRange());
+		interface.random(initialWeighsRange);
 
 		Vector* cVector = Factory::newVector(vector, C);
 

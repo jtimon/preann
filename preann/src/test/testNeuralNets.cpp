@@ -93,51 +93,52 @@ int main(int argc, char *argv[])
 
 	try
 	{
-		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++)
-		{
-			VectorType vectorType = (VectorType)vectType;
-			if (vectorType != BYTE)
-			{
-				for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
-						+= SIZE_INC)
-				{
-					NeuralNet controlNeuralNet(C);
-					controlNeuralNet.createFeedForwardNet(size, vectorType,
-							NUM_TRIES, size, vectorType, IDENTITY);
-//					controlNeuralNet.createFullyConnectedNet(size, vectorType,
-//							NUM_LAYERS, size, vectorType, IDENTITY);
-					controlNeuralNet.randomWeighs(INITIAL_WEIGHS_RANGE);
-
-					FILE* stream = fopen(PATH, "w+b");
-					controlNeuralNet.save(stream);
-					fclose(stream);
-
-					controlNeuralNet.calculateOutput();
-
-					for (unsigned implType = 0; implType
-							< IMPLEMENTATION_TYPE_DIM; implType++)
-					{
-						ImplementationType implementationType =
-								(ImplementationType)((implType));
-						printTestParams(implementationType, vectorType, size);
-
-						NeuralNet nn(implementationType);
-						stream = fopen(PATH, "r+b");
-						nn.load(stream);
-						fclose(stream);
-						nn.getInput(0)->copyFromFast(controlNeuralNet.getInput(0));
-
-						//test calculation
-						nn.calculateOutput();
-						unsigned differences =
-								Test::assertEqualsInterfaces(controlNeuralNet.getOutput(0),
-										nn.getOutput(0));
-						if (differences != 0)
-							printf("Errors on outputs: %d \n", differences);
-					}
-				}
-			}
-		}
+		//TODO AAAAAAAAAAAAAa
+//		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++)
+//		{
+//			VectorType vectorType = (VectorType)vectType;
+//			if (vectorType != BYTE)
+//			{
+//				for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
+//						+= SIZE_INC)
+//				{
+//					NeuralNet controlNeuralNet(C);
+//					controlNeuralNet.createFeedForwardNet(size, vectorType,
+//							NUM_TRIES, size, vectorType, IDENTITY);
+////					controlNeuralNet.createFullyConnectedNet(size, vectorType,
+////							NUM_LAYERS, size, vectorType, IDENTITY);
+//					controlNeuralNet.randomWeighs(INITIAL_WEIGHS_RANGE);
+//
+//					FILE* stream = fopen(PATH, "w+b");
+//					controlNeuralNet.save(stream);
+//					fclose(stream);
+//
+//					controlNeuralNet.calculateOutput();
+//
+//					for (unsigned implType = 0; implType
+//							< IMPLEMENTATION_TYPE_DIM; implType++)
+//					{
+//						ImplementationType implementationType =
+//								(ImplementationType)((implType));
+//						printTestParams(implementationType, vectorType, size);
+//
+//						NeuralNet nn(implementationType);
+//						stream = fopen(PATH, "r+b");
+//						nn.load(stream);
+//						fclose(stream);
+//						nn.getInput(0)->copyFromFast(controlNeuralNet.getInput(0));
+//
+//						//test calculation
+//						nn.calculateOutput();
+//						unsigned differences =
+//								Test::assertEqualsInterfaces(controlNeuralNet.getOutput(0),
+//										nn.getOutput(0));
+//						if (differences != 0)
+//							printf("Errors on outputs: %d \n", differences);
+//					}
+//				}
+//			}
+//		}
 		printf("Exit success.\n");
 		mem_printTotalAllocated();
 		mem_printTotalPointers();
