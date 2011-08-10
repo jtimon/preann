@@ -15,17 +15,17 @@ int main(int argc, char *argv[])
 	string path = "/home/timon/workspace/preann/output/plotData/";
 
 	Plot plot;
-	plot.fromToBySize(2000, 2000, 100);
+	plot.fromToBySize(100, 10000, 100);
 	plot.fromToByOutputSize(100, 100, 100);
 	plot.disableVectorType(BYTE);
 	plot.printParameters();
 
 	try {
-//		plot.plot(path, VECTOR, COPYFROMINTERFACE, 10000);
+		plot.plot(path, VECTOR, COPYFROMINTERFACE, 1000);
 //		plot.plot(path, VECTOR, COPYTOINTERFACE, 10000);
-		plot.plot(path, VECTOR, ACTIVATION, 1);
-
-		plot.plot(path, CONNECTION, CALCULATEANDADDTO, 1);
+//		plot.plot(path, VECTOR, ACTIVATION, 10);
+//
+//		plot.plot(path, CONNECTION, CALCULATEANDADDTO, 10);
 //		plot.plot(path, CONNECTION, MUTATE, 100);
 //		plot.plot(path, CONNECTION, CROSSOVER, 1);
 

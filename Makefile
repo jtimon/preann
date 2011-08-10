@@ -65,7 +65,7 @@ $(BUILD_DIR):
 
 bin/%.exe: build/test/%.o $(OBJ)
 	$(NVCC_LINK) $^ -o $@
-	./$@ > $(patsubst bin/%.exe,output/test/%.log,$@)
+	./$@ > $(patsubst bin/%.exe,output/log/%.log,$@)
 build/test%.o: src/test%.cpp
 	$(CXX) -c $< -o $@
 build/%.o: src/%.cpp src/%.h

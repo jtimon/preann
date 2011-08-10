@@ -15,6 +15,40 @@ Plot::~Plot()
 {
 }
 
+int vectorTypeToPointType(VectorType vectorType)
+{
+// pt gives a particular point type: 1=diamond 2=+ 3=square 4=X 5=triangle 6=*
+// postscipt: 1=+, 2=X, 3=*, 4=square, 5=filled square, 6=circle,
+//            7=filled circle, 8=triangle, 9=filled triangle, etc.
+	switch (vectorType){
+		case FLOAT:
+			return 2;
+		case BYTE:
+			return 6;
+		case BIT:
+			return 4;
+		case SIGN:
+			return 8;
+	}
+}
+
+int implTypeToLineType(ImplementationType implementationType)
+{
+// lt is for color of the points: -1=black 1=red 2=grn 3=blue 4=purple 5=aqua 6=brn 7=orange 8=light-brn
+	switch (implementationType){
+		case C:
+			return 1;
+		case SSE2:
+			return 2;
+		case CUDA:
+			return 3;
+		case CUDA2:
+			return 5;
+		case CUDA_INV:
+			return -1;
+	}
+}
+
 float Plot::plot(string path, ClassID classID, Method method, unsigned repetitions)
 {
 	float total = 0;
@@ -24,7 +58,7 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	string plotPath = path + Plot::toString(classID, method) + ".plt";
 	FILE* plotFile = openFile(plotPath);
 
-	string outputPath = path + Plot::toString(classID, method) + ".png";
+	string outputPath = path + "images/" + Plot::toString(classID, method) + ".png";
 	fprintf(plotFile, "set terminal png \n");
 	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
 	fprintf(plotFile, "plot ");
@@ -32,14 +66,14 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	unsigned functionNum = 2;
 	for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
 		for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
-			printf(" vectorTypeToString() %s vectorType %d \n", vectorTypeToString().data(), (unsigned)vectorType);
-			printf(" implementationTypeToString() %s implementationType %d \n", implementationTypeToString().data(), (unsigned)implementationType);
 			string functionName = vectorTypeToString() + "_" + implementationTypeToString();
 			fprintf(dataFile, " %s ", functionName.data());
 			if (functionNum > 2){
 				fprintf(plotFile, ", ");
 			}
-			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints", dataPath.data(), functionNum++, functionName.data());
+			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
+					dataPath.data(), functionNum++, functionName.data(),
+					implTypeToLineType(implementationType), vectorTypeToPointType(vectorType));
 		}
 	}
 	fprintf(plotFile, "\n");

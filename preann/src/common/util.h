@@ -33,6 +33,7 @@ typedef enum {
 	CONNECTION
 } ClassID;
 typedef enum {
+	MEM_LOSSES,
 	ACTIVATION,
 	COPYFROMINTERFACE,
 	COPYTOINTERFACE,

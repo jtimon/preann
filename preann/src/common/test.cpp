@@ -150,7 +150,7 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 	}
 	break;
 	default:
-		string error = "There's no such method defined to test for Connection.";
+		string error = "The method " + methodToString(method) + " is not defined to test for Connection.";
 		throw error;
 
 	}
@@ -225,7 +225,7 @@ unsigned Test::doMethodVector(Vector* vector, Method method)
 	break;
 
 	default:
-		string error = "There's no such method defined to test for Vector.";
+		string error = "The method " + methodToString(method) + " is not defined to test for Vector.";
 		throw error;
 	}
 	return differencesCounter;
@@ -665,7 +665,7 @@ string Test::classToString(ClassID classID)
 		case VECTOR: toReturn = "VECTOR";			break;
 		case CONNECTION: toReturn = "CONNECTION";	break;
 		default:
-			string error = "There's no such class to plot.";
+			string error = "There's no such class to test.";
 			throw error;
 
 	}
@@ -676,7 +676,9 @@ string Test::methodToString(Method method)
 {
 	string toReturn;
 	switch (method){
-
+		case COPYFROM: 			toReturn = "COPYFROM";			break;
+		case COPYTO: 			toReturn = "COPYTO";			break;
+		case CLONE: 			toReturn = "CLONE";				break;
 		case COPYFROMINTERFACE: toReturn = "COPYFROMINTERFACE";	break;
 		case COPYTOINTERFACE: 	toReturn = "COPYTOINTERFACE";	break;
 		case ACTIVATION: 		toReturn = "ACTIVATION";		break;
@@ -684,7 +686,7 @@ string Test::methodToString(Method method)
 		case MUTATE: 			toReturn = "MUTATE";			break;
 		case CROSSOVER: 		toReturn = "CROSSOVER";			break;
 		default:
-			string error = "There's no such method to plot.";
+			string error = "There's no such method to test.";
 			throw error;
 
 	}
