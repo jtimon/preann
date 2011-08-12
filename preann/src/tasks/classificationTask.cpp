@@ -34,3 +34,8 @@ void ClassificationTask::test(Individual* individual) {
 	}
 	individual->setFitness(-accumulation);
 }
+
+string ClassificationTask::toString()
+{
+	return "Classification";
+}

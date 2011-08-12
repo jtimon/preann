@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
 	Chronometer total;
 	total.start();
-	string path = "/home/timon/workspace/preann/output/plotData/";
+	string path = "/home/timon/workspace/preann/output/";
 
 	Plot plot;
 	plot.fromToBySize(100, 10000, 100);

@@ -64,3 +64,7 @@ void TaskXor::doXor()
 	}
 }
 
+string TaskXor::toString()
+{
+	return "XOR";
+}

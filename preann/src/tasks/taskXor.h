@@ -23,6 +23,7 @@ public:
 
 	virtual void test(Individual* individual);
 	virtual void doXor();
+	virtual string toString();
 
 };
 

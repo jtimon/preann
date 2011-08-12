@@ -20,6 +20,7 @@ public:
 	ClassificationTask(Interface** inputs, Interface** desiredOutputs, unsigned inputsDim);
 	virtual ~ClassificationTask();
 	virtual void test(Individual* individual);
+	virtual string toString();
 };
 
 #endif /* CLASSIFICATIONTASK_H_ */

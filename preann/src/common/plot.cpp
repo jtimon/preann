@@ -53,9 +53,9 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 {
 	float total = 0;
 
-	string dataPath = path + Plot::toString(classID, method) + ".DAT";
+	string dataPath = path + "data/" + Plot::toString(classID, method) + ".DAT";
 	FILE* dataFile = openFile(dataPath);
-	string plotPath = path + Plot::toString(classID, method) + ".plt";
+	string plotPath = path + "gnuplot/" + Plot::toString(classID, method) + ".plt";
 	FILE* plotFile = openFile(plotPath);
 
 	string outputPath = path + "images/" + Plot::toString(classID, method) + ".png";
@@ -224,3 +224,54 @@ float Plot::doMethodVector(Vector* vector, Method method, unsigned repetitions)
 	}
 	return chrono.getSeconds();
 }
+
+float Plot::plotTask(Task* task, Population* population)
+{
+	float total = 0;
+
+	string dataPath = path + task->toString() + ".DAT";
+	FILE* dataFile = openFile(dataPath);
+	string plotPath = path + task->toString() + ".plt";
+	FILE* plotFile = openFile(plotPath);
+
+	string outputPath = path + "images/" + Plot::toString(classID, method) + ".png";
+	fprintf(plotFile, "set terminal png \n");
+	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
+	fprintf(plotFile, "plot ");
+	fprintf(dataFile, "# Size ");
+	unsigned functionNum = 2;
+	for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
+		for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
+			string functionName = vectorTypeToString() + "_" + implementationTypeToString();
+			fprintf(dataFile, " %s ", functionName.data());
+			if (functionNum > 2){
+				fprintf(plotFile, ", ");
+			}
+			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
+					dataPath.data(), functionNum++, functionName.data(),
+					implTypeToLineType(implementationType), vectorTypeToPointType(vectorType));
+		}
+	}
+	fprintf(plotFile, "\n");
+	fprintf(dataFile, "\n");
+
+	for (size = minSize; size <= maxSize; size += incSize) {
+		fprintf(dataFile, " %d ", getSize());
+		for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
+			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
+
+				float part = doMethod(classID, method, repetitions);
+				fprintf(dataFile, " %f ", part);
+				total += part;
+			}
+		}
+		fprintf(dataFile, " \n ");
+	}
+	fclose(plotFile);
+	fclose(dataFile);
+	cout << Plot::toString(classID, method) << " total: " << total << " repetitions: " << repetitions << endl;
+	string syscommand = "gnuplot " + plotPath;
+	system(syscommand.data());
+	return total;	
+}
+
