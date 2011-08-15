@@ -39,8 +39,8 @@ void TaskXor::test(Individual *individual)
 	{
 		tInput1->random(1);
 		tInput2->random(1);
-		individual->getInput(0)->copyFrom(tInput1);
-		individual->getInput(1)->copyFrom(tInput2);
+		individual->updateInput(0, tInput1);
+		individual->updateInput(0, tInput2);
 		doXor();
 		individual->calculateOutput();
 		differences += individual->getOutput(0)->compareTo(tOutput);

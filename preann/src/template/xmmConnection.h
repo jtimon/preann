@@ -5,7 +5,7 @@
 #include "xmmVector.h"
 
 template <VectorType vectorTypeTempl, class c_typeTempl>
-class XmmConnection: virtual public Connection, public XmmVector<vectorTypeTempl, c_typeTempl> {
+class XmmConnection: virtual public FullConnection, public XmmVector<vectorTypeTempl, c_typeTempl> {
 protected:
 	virtual void copyFromImpl(Interface* interface)
 	{

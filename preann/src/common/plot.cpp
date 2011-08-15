@@ -225,16 +225,17 @@ float Plot::doMethodVector(Vector* vector, Method method, unsigned repetitions)
 	return chrono.getSeconds();
 }
 
-float Plot::plotTask(Task* task, Population* population)
+float Plot::plotTask(string path, Population* population)
 {
+	//TODO Plot::plotTask
 	float total = 0;
 
-	string dataPath = path + task->toString() + ".DAT";
+	string dataPath = path + population->getTask()->toString() + ".DAT";
 	FILE* dataFile = openFile(dataPath);
-	string plotPath = path + task->toString() + ".plt";
+	string plotPath = path + population->getTask()->toString() + ".plt";
 	FILE* plotFile = openFile(plotPath);
 
-	string outputPath = path + "images/" + Plot::toString(classID, method) + ".png";
+	string outputPath = path + "images/" + population->getTask()->toString() + ".png";
 	fprintf(plotFile, "set terminal png \n");
 	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
 	fprintf(plotFile, "plot ");
@@ -260,18 +261,18 @@ float Plot::plotTask(Task* task, Population* population)
 		for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
 			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
 
-				float part = doMethod(classID, method, repetitions);
-				fprintf(dataFile, " %f ", part);
-				total += part;
+//				float part = doMethod(classID, method, repetitions);
+//				fprintf(dataFile, " %f ", part);
+//				total += part;
 			}
 		}
 		fprintf(dataFile, " \n ");
 	}
 	fclose(plotFile);
 	fclose(dataFile);
-	cout << Plot::toString(classID, method) << " total: " << total << " repetitions: " << repetitions << endl;
+//	cout << population->getTask()->toString() << " total: " << total << " repetitions: " << repetitions << endl;
 	string syscommand = "gnuplot " + plotPath;
 	system(syscommand.data());
-	return total;	
+	return total;
 }
 

@@ -5,7 +5,7 @@
 #include "cudaVector.h"
 
 template <VectorType vectorTypeTempl, class c_typeTempl>
-class CudaInvertedConnection: public virtual Connection, public CudaVector<vectorTypeTempl, c_typeTempl> {
+class CudaInvertedConnection: public virtual FullConnection, public CudaVector<vectorTypeTempl, c_typeTempl> {
 protected:
 	//redefined from CudaVector
 	virtual void copyFromImpl(Interface* interface)

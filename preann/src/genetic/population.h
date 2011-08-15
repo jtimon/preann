@@ -88,6 +88,7 @@ public:
 	float getBestIndividualScore();
 	float getAverageScore();
 	float getWorstIndividualScore();
+	Task* getTask();
 };
 
 #endif /* POPULATION_H_ */

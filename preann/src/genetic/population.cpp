@@ -384,6 +384,11 @@ float Population::getAverageScore()
 	return total_score / size;
 }
 
+Task* Population::getTask()
+{
+	return task;
+}
+
 float Population::getWorstIndividualScore()
 {
 	if (size < 0)

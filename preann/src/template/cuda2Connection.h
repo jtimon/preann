@@ -11,7 +11,7 @@
 #include "cudaConnection.h"
 
 template <VectorType vectorTypeTempl, class c_typeTempl>
-class Cuda2Connection: virtual public Connection, public CudaConnection<vectorTypeTempl, c_typeTempl> {
+class Cuda2Connection: virtual public FullConnection, public CudaConnection<vectorTypeTempl, c_typeTempl> {
 public:
 	Cuda2Connection(Vector* input, unsigned outputSize)
 			: CudaConnection<vectorTypeTempl, c_typeTempl>(input, outputSize)

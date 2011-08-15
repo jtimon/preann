@@ -18,7 +18,7 @@ Individual::~Individual()
 
 Individual* Individual::newCopy()
 {
-	Individual* copy = new Individual(this->implementationType);
+	Individual* copy = new Individual(this->getImplementationType());
 
 	for (unsigned i = 0; i < numberLayers; i++)
 	{

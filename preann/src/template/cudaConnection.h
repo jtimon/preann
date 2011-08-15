@@ -12,7 +12,7 @@
 #include "cudaVector.h"
 
 template <VectorType vectorTypeTempl, class c_typeTempl>
-class CudaConnection: public virtual Connection, public CudaVector<vectorTypeTempl, c_typeTempl> {
+class CudaConnection: public virtual FullConnection, public CudaVector<vectorTypeTempl, c_typeTempl> {
 protected:
 	virtual void mutateImpl(unsigned pos, float mutation)
 	{

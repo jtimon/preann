@@ -28,7 +28,7 @@ void ClassificationTask::test(Individual* individual) {
 	float accumulation = 0;
 
 	for (unsigned i = 0; i < inputsDim; i++) {
-		individual->getInput(0)->copyFromFast(inputs[i]);
+		individual->updateInput(0, inputs[i]);
 		individual->calculateOutput();
 		accumulation += individual->getOutput(0)->compareTo(desiredOutputs[i]);
 	}

@@ -5,6 +5,7 @@
 #include "chronometer.h"
 #include "test.h"
 #include "factory.h"
+#include "population.h"
 #include "task.h"
 
 class Plot : public Test {
@@ -16,8 +17,8 @@ public:
 	float doMethod(ClassID classID, Method method, unsigned repetitions);
 	float doMethodVector(Vector* vector, Method method, unsigned repetitions);
 	float doMethodConnection(Connection* connection, Method method, unsigned repetitions);
-	float plotTask(Task* task, Population* population);
-	
+	float plotTask(string path, Population* population);
+
 };
 
 #endif /* PLOT_H_ */

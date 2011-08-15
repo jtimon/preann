@@ -86,7 +86,7 @@ void NeuralNet::addLayer(Layer* layer)
 void NeuralNet::addLayer(unsigned size, VectorType destinationType,
 		FunctionType functiontype)
 {
-	addLayer(new Layer(size, destinationType, functiontype, implementationType));
+	addLayer(new Layer(size, destinationType, functiontype, getImplementationType()));
 }
 
 void NeuralNet::addInputLayer(unsigned size, VectorType vectorType)
@@ -102,10 +102,10 @@ void NeuralNet::addInputLayer(unsigned size, VectorType vectorType)
 	inputLayers = newInputLayers;
 	inputLayers[numberInputs++] = numberLayers;
 
-	addLayer(new InputLayer(size, vectorType, implementationType));
+	addLayer(new InputLayer(size, vectorType, getImplementationType()));
 }
 
-Interface* NeuralNet::getInput(unsigned inputPos)
+void NeuralNet::updateInput(unsigned inputPos, Interface* input)
 {
 	if (inputPos > numberInputs)
 	{
@@ -117,7 +117,7 @@ Interface* NeuralNet::getInput(unsigned inputPos)
 		std::string error = buffer;
 		throw error;
 	}
-	return ((InputLayer*)(layers[inputLayers[inputPos]]))->getInputInterface();
+	return ((InputLayer*)(layers[inputLayers[inputPos]]))->getInputInterface()->copyFromFast(input);
 }
 
 unsigned NeuralNet::getNumInputs()
@@ -207,6 +207,11 @@ void NeuralNet::createFeedForwardNet(unsigned inputSize, VectorType inputType,
 
 ImplementationType NeuralNet::getImplementationType()
 {
+	if(numberLayers != 0){
+		return layers[0]->getImplementationType();
+	} else {
+
+	}
 	return implementationType;
 }
 
@@ -257,7 +262,7 @@ void NeuralNet::load(FILE* stream)
 	layers = (Layer**)((mi_malloc(sizeof(Layer*) * numberLayers)));
 	for (unsigned i = 0; i < numberLayers; i++)
 	{
-		layers[i] = new Layer(stream, implementationType);
+		layers[i] = new Layer(stream, getImplementationType());
 	}
 
 	loadGraphs(stream);
@@ -287,7 +292,7 @@ void NeuralNet::stablishConnections()
 		unsigned layerPos = inputLayers[i];
 		Vector* output = layers[layerPos]->getOutput();
 		Layer* inputLayer = new InputLayer(output->getSize(),
-				output->getVectorType(), implementationType);
+				output->getVectorType(), getImplementationType());
 		inputLayer->getOutput()->copyFrom(output);
 		delete (layers[layerPos]);
 		layers[layerPos] = inputLayer;

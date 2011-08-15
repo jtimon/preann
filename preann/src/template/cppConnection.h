@@ -2,11 +2,11 @@
 #ifndef CPPCONNECTION_H_
 #define CPPCONNECTION_H_
 
-#include "connection.h"
+#include "fullConnection.h"
 #include "cppVector.h"
 
 template <VectorType vectorTypeTempl, class c_typeTempl>
-class CppConnection: public virtual Connection, public CppVector<vectorTypeTempl, c_typeTempl> {
+class CppConnection: public virtual FullConnection, public CppVector<vectorTypeTempl, c_typeTempl> {
 protected:
 	virtual void mutateImpl(unsigned pos, float mutation)
 	{

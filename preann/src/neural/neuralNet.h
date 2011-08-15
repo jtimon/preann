@@ -29,7 +29,7 @@ public:
 	virtual ~NeuralNet();
 
 	void addInputLayer(unsigned size, VectorType vectorType);
-	Interface* getInput(unsigned inputPos);
+	void updateInput(unsigned inputPos, Interface* input);
 	unsigned char isInputLayer(unsigned layerPos);
 	unsigned getNumInputs();
 

@@ -14,7 +14,6 @@ protected:
 	Vector* output;
 	Interface* tOuputInterface;
 	FunctionType functionType;
-	ImplementationType getImplementationType();
 	Vector* newVector(FILE* stream);
 	Vector* newVector(unsigned size, VectorType vectorType);
 public:
@@ -38,6 +37,7 @@ public:
 	Interface* getOutputInterface();
 	Connection* getThresholds();
 	FunctionType getFunctionType();
+	ImplementationType getImplementationType();
 };
 
 #endif /*ABSTRACTLAYER_H_*/

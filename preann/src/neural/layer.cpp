@@ -102,7 +102,7 @@ void Layer::calculateOutput()
 	}
 
 	output->activation(results, functionType);
-//	output->activation(results, functionType, thresholds);
+//	thresholds->activation(results, functionType, output);
 	if (tOuputInterface != NULL){
 		output->copyToInterface(tOuputInterface);
 	}
