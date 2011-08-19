@@ -30,15 +30,15 @@ int main(int argc, char *argv[])
 //		plot.plot(path, CONNECTION, CROSSOVER, 1);
 
 		printf("Exit success.\n");
-		mem_printTotalAllocated();
-		mem_printTotalPointers();
+		MemoryManagement.printTotalAllocated();
+		MemoryManagement.printTotalPointers();
 	} catch (std::string error) {
 		cout << "Error: " << error << endl;
 		//	} catch (...) {
 		//		printf("An error was thrown.\n", 1);
 	}
 
-	//mem_printListOfPointers();
+	//MemoryManagement.mem_printListOfPointers();
 	total.stop();
 	printf("Total time spent: %f \n", total.getSeconds());
 	return EXIT_SUCCESS;

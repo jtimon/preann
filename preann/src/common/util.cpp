@@ -7,12 +7,7 @@
 
 #include "util.h"
 
-void* ptrs[5000];
-unsigned ptr_sizes[5000];
-unsigned ptr_counter = 0;
-unsigned totalAllocated = 0;
-
-void* mi_malloc(unsigned size) {
+void* MemoryManagement::malloc(unsigned size) {
 	if (size == 0) {
 		std::string error = "No se pueden reservar 0 bytes";
 		throw error;
@@ -33,7 +28,7 @@ void* mi_malloc(unsigned size) {
 	return toReturn;
 }
 
-void mi_free(void* ptr) {
+void MemoryManagement::free(void* ptr) {
 
 	char found = 0;
 	unsigned i = 0;
@@ -62,7 +57,7 @@ void mi_free(void* ptr) {
 	}
 }
 
-void mem_printTotalAllocated() {
+void MemoryManagement::printTotalAllocated() {
 	unsigned aux = totalAllocated;
 	unsigned mb, kb, b;
 	kb = aux / 1024;
@@ -77,37 +72,37 @@ void mem_printTotalAllocated() {
 			<< " Bytes allocated. ( total " <<totalAllocated<<" Bytes )"<<endl;
 }
 
-void mem_printTotalPointers() {
+void MemoryManagement::printTotalPointers() {
 	cout << "There are " << ptr_counter << " pointers allocated." << endl;
 }
 
-void mem_printListOfPointers(){
+void MemoryManagement::printListOfPointers(){
 	for (unsigned i = 0; i < ptr_counter; i++){
 		printf(" %d mem_address %d  size = %d \n", i, (unsigned)ptrs[i], ptr_sizes[i]);
 	}
 }
 
-unsigned mem_getPtrCounter(){
+unsigned MemoryManagement::getPtrCounter(){
 	return ptr_counter;
 }
 
-unsigned mem_getTotalAllocated(){
+unsigned MemoryManagement::getTotalAllocated(){
 	return totalAllocated;
 }
 
-int randomInt(unsigned range) {
+int Random::integer(unsigned range) {
 	return (rand() % (2 * range + 1)) - range;
 }
 
-float randomFloat(float range) {
+float Random::floatNum(float range) {
 	return ((rand() / (float) RAND_MAX) * (2 * range)) - range;
 }
 
-unsigned randomUnsigned(unsigned range) {
+unsigned Random::positiveInteger(unsigned range) {
 	return rand() % range;
 }
 
-float randomPositiveFloat(float range) {
+float Random::positiveFloat(float range) {
 	return (rand() / (float) RAND_MAX) * (range);
 }
 

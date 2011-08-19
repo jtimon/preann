@@ -168,7 +168,7 @@ public:
 
 		unsigned byteSize = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(input->getSize(), bufferTypeTempl);
 		byteSize *= outputSize;
-		data = mi_malloc(byteSize);
+		data = MemoryManagement.malloc(byteSize);
 
 		switch (bufferTypeTempl){
 

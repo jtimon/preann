@@ -17,10 +17,10 @@ using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 #define BITS_PER_BYTE (8)
 #define BITS_PER_UNSIGNED (sizeof(unsigned) * BITS_PER_BYTE)
-
 
 typedef enum {FLOAT, BIT, SIGN, BYTE} BufferType;
 #define BUFFER_TYPE_DIM 4
@@ -45,19 +45,28 @@ typedef enum {
 	CROSSOVER
 } Method;
 
-int randomInt(unsigned range);
-float randomFloat(float range);
-unsigned randomUnsigned(unsigned range);
-float randomPositiveFloat(float range);
+class Random {
+	static int integer(unsigned range);
+	static float floatNum(float range);
+	static unsigned positiveInteger(unsigned range);
+	static float positiveFloat(float range);
+};
 
-void* mi_malloc(unsigned size);
-void mi_free(void* ptr);
-void mem_printTotalAllocated();
-void mem_printTotalPointers();
-void mem_printListOfPointers();
-unsigned mem_getPtrCounter();
-unsigned mem_getTotalAllocated();
-
+class MemoryManagement {
+	//TODO cambiar estos atributos con la clase vector
+	static void* ptrs[5000];
+	static unsigned ptr_sizes[5000];
+	static unsigned ptr_counter = 0;
+	static unsigned totalAllocated = 0;
+	
+	static void* malloc(unsigned size);
+	static void free(void* ptr);
+	static void printTotalAllocated();
+	static void printTotalPointers();
+	static void printListOfPointers();
+	static unsigned getPtrCounter();
+	static unsigned getTotalAllocated();
+};
 
 template <class c_typeTempl>
 c_typeTempl Function(float number, FunctionType functionType) {

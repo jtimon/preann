@@ -31,8 +31,8 @@ float testNeuralNet(NeuralNet* nn, unsigned inputSize, BufferType bufferType,
 	nn->getOutput(0)->print();
 
 	delete (nn);
-	//mem_printTotalAllocated();
-	//mem_printTotalPointers();
+	//MemoryManagement.printTotalAllocated();
+	//MemoryManagement.mem_printTotalPointers();
 	return chrono.getSeconds();
 }
 
@@ -85,8 +85,8 @@ int main(int argc, char *argv[]) {
 				cout << "size: " << size << endl;
 				nn = new NeuralNet();
 
-				mem_printTotalAllocated();
-				mem_printTotalPointers();
+				MemoryManagement.printTotalAllocated();
+				MemoryManagement.printTotalPointers();
 				//nn->createFeedForwardNet(size, inputType, numlayers, size, inputType, functionType);
 				//TODO TCC petaba con 16 < numlayers <=30 y size 512 (en Desktop)
 				nn->createFullyConnectedNet(size, inputType, numlayers, size, inputType,
@@ -97,8 +97,8 @@ int main(int argc, char *argv[]) {
 				nn->save(stream);
 				fclose(stream);
 				delete (nn);
-				mem_printTotalAllocated();
-				mem_printTotalPointers();
+				MemoryManagement.printTotalAllocated();
+				MemoryManagement.printTotalPointers();
 
 				nn = new NeuralNet(C);
 				seconds = testNeuralNet(nn, size, inputType, times);
@@ -134,8 +134,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		printf("Exit success.\n", 1);
-		mem_printTotalAllocated();
-		mem_printTotalPointers();
+		MemoryManagement.printTotalAllocated();
+		MemoryManagement.printTotalPointers();
 	} catch (std::string error) {
 		cout << "Error: " << error << endl;
 	} catch (...) {

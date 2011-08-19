@@ -45,7 +45,7 @@ Layer::~Layer()
 		for (unsigned i=0; i < numberInputs; i++){
 			delete(connections[i]);
 		}
-		mi_free(connections);
+		MemoryManagement.free(connections);
 	}
 	if (thresholds) {
 		delete(thresholds);
@@ -112,11 +112,11 @@ void Layer::calculateOutput()
 void Layer::addInput(Buffer* input)
 {
 	Connection* newConnection = Factory::newConnection(input, output->getSize(), getImplementationType());
-	Connection** newConnections = (Connection**) mi_malloc(sizeof(Connection*) * (numberInputs + 1));
+	Connection** newConnections = (Connection**) MemoryManagement.malloc(sizeof(Connection*) * (numberInputs + 1));
 
 	if (connections) {
 		memcpy(newConnections, connections, numberInputs * sizeof(Connection*));
-		mi_free(connections);
+		MemoryManagement.free(connections);
 	}
 
 	connections = newConnections;

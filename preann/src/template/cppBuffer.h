@@ -51,7 +51,7 @@ public:
 		this->tSize = size;
 
 		size_t byteSize = getByteSize();
-		data = mi_malloc(byteSize);
+		data = MemoryManagement.malloc(byteSize);
 
 		switch (bufferTypeTempl){
 			case BYTE:
@@ -65,7 +65,7 @@ public:
 	~CppBuffer()
 	{
 		if (data) {
-			mi_free(data);
+			MemoryManagement.free(data);
 			data = NULL;
 		}
 	}

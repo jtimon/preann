@@ -11,7 +11,7 @@ Interface::Interface(FILE* stream)
 	fread(&size, sizeof(unsigned), 1, stream);
 	fread(&bufferType, sizeof(BufferType), 1, stream);
 	unsigned byteSize = getByteSize();
-	data = mi_malloc(byteSize);
+	data = MemoryManagement.malloc(byteSize);
 	fread(data, byteSize, 1, stream);
 }
 
@@ -39,7 +39,7 @@ Interface::Interface(unsigned size, BufferType bufferType)
 	this->bufferType = bufferType;
 
 	size_t byteSize = getByteSize();
-	data = mi_malloc(byteSize);
+	data = MemoryManagement.malloc(byteSize);
     reset();
 }
 
@@ -49,13 +49,13 @@ Interface::Interface(Interface* toCopy)
 	this->bufferType = toCopy->getBufferType();
 
 	size_t byteSize = getByteSize();
-	data = mi_malloc(byteSize);
+	data = MemoryManagement.malloc(byteSize);
 	memcpy(data, toCopy->getDataPointer(), byteSize);
 }
 
 Interface::~Interface()
 {
-	mi_free(data);
+	MemoryManagement.free(data);
 }
 
 void* Interface::getDataPointer()
@@ -190,20 +190,20 @@ void Interface::random(float range)
 		}
 		for (unsigned i = 0; i < size; i++)
 		{
-			setElement(i, 128 + (unsigned char)randomInt(charRange));
+			setElement(i, 128 + (unsigned char)Random.integer(charRange));
 		}
 		break;
 	case FLOAT:
 		for (unsigned i = 0; i < size; i++)
 		{
-			setElement(i, randomFloat(range));
+			setElement(i, Random.floatNum(range));
 		}
 		break;
 	case BIT:
 	case SIGN:
 		for (unsigned i = 0; i < size; i++)
 		{
-			setElement(i, randomUnsigned(2));
+			setElement(i, Random.positiveInteger(2));
 		}
 		break;
 	}
