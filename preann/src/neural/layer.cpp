@@ -5,22 +5,22 @@ ImplementationType Layer::getImplementationType()
 	return thresholds->getImplementationType();
 }
 
-Vector* Layer::newVector(FILE* stream)
+Buffer* Layer::newBuffer(FILE* stream)
 {
-	return  Factory::newVector(stream, getImplementationType());
+	return  Factory::newBuffer(stream, getImplementationType());
 }
 
-Vector* Layer::newVector(unsigned size, VectorType vectorType)
+Buffer* Layer::newBuffer(unsigned size, BufferType bufferType)
 {
-	return Factory::newVector(size, vectorType, getImplementationType());
+	return Factory::newBuffer(size, bufferType, getImplementationType());
 }
 
-Layer::Layer(unsigned size, VectorType outputType, FunctionType functionType, ImplementationType implementationType)
+Layer::Layer(unsigned size, BufferType outputType, FunctionType functionType, ImplementationType implementationType)
 {
 	connections = NULL;
 	numberInputs = 0;
 	this->functionType = functionType;
-	output = Factory::newVector(size, outputType, implementationType);
+	output = Factory::newBuffer(size, outputType, implementationType);
 	thresholds = Factory::newThresholds(output, implementationType);
 }
 
@@ -29,7 +29,7 @@ Layer::Layer(FILE* stream, ImplementationType implementationType)
 	connections = NULL;
 	numberInputs = 0;
 	fread(&functionType, sizeof(FunctionType), 1, stream);
-	output = Factory::newVector(stream, implementationType);
+	output = Factory::newBuffer(stream, implementationType);
 	thresholds = Factory::newThresholds(output, implementationType);
 }
 
@@ -82,7 +82,7 @@ void Layer::saveWeighs(FILE* stream)
 Interface *Layer::getOutputInterface()
 {
 	if (tOuputInterface == NULL){
-		tOuputInterface = new Interface(output->getSize(), output->getVectorType());
+		tOuputInterface = new Interface(output->getSize(), output->getBufferType());
 	}
 	return tOuputInterface;
 }
@@ -94,8 +94,8 @@ void Layer::calculateOutput()
 		throw error;
 	}
 	//TODO B do not use clone on the thresholds, compare with them in activation (one write less)
-//	Vector* results = newVector(thresholds->getSize(), thresholds->getVectorType());
-	Vector* results = thresholds->clone();
+//	Buffer* results = newBuffer(thresholds->getSize(), thresholds->getBufferType());
+	Buffer* results = thresholds->clone();
 
 	for(unsigned i=0; i < numberInputs; i++){
 		connections[i]->calculateAndAddTo(results);
@@ -109,7 +109,7 @@ void Layer::calculateOutput()
 	delete(results);
 }
 
-void Layer::addInput(Vector* input)
+void Layer::addInput(Buffer* input)
 {
 	Connection* newConnection = Factory::newConnection(input, output->getSize(), getImplementationType());
 	Connection** newConnections = (Connection**) mi_malloc(sizeof(Connection*) * (numberInputs + 1));
@@ -127,7 +127,7 @@ void Layer::addInput(Vector* input)
 void Layer::randomWeighs(float range)
 {
 	for (unsigned i=0; i < numberInputs; i++){
-		Interface aux(connections[i]->getSize(), connections[i]->getVectorType());
+		Interface aux(connections[i]->getSize(), connections[i]->getBufferType());
 		aux.random(range);
 		connections[i]->copyFromInterface(&aux);
 	}
@@ -141,12 +141,12 @@ unsigned Layer::getNumberInputs()
 	return numberInputs;
 }
 
-Vector* Layer::getInput(unsigned pos)
+Buffer* Layer::getInput(unsigned pos)
 {
 	return connections[pos]->getInput();
 }
 
-Vector* Layer::getOutput()
+Buffer* Layer::getOutput()
 {
 	return output;
 }
@@ -190,7 +190,7 @@ void Layer::copyWeighs(Layer* other)
 		std::string error = "The layers are incompatible: the implementation is different.";
 		throw error;
 	}
-	//TODO L implementar metodo Vector::copyFast restringido a vectores con el mismo tipo de implementacion
+	//TODO L implementar metodo Buffer::copyFast restringido a bufferes con el mismo tipo de implementacion
 	for(int i=0; i < numberInputs; i++){
 		connections[i]->copyFrom(other->getConnection(i));
 	}

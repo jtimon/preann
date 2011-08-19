@@ -1,91 +1,91 @@
 /*
- * vector.cpp
+ * buffer.cpp
  *
  *  Created on: Nov 16, 2009
  *      Author: timon
  */
 
-#include "vector.h"
+#include "buffer.h"
 
-void Vector::copyFromInterface(Interface* interface)
+void Buffer::copyFromInterface(Interface* interface)
 {
 	if (getSize() < interface->getSize()){
-		std::string error = "The Interface is greater than the Vector.";
+		std::string error = "The Interface is greater than the Buffer.";
 		throw error;
 	}
-	if (getVectorType() != interface->getVectorType()){
-		std::string error = "The Type of the Interface is different than the Vector Type.";
+	if (getBufferType() != interface->getBufferType()){
+		std::string error = "The Type of the Interface is different than the Buffer Type.";
 		throw error;
 	}
 	copyFromImpl(interface);
 }
 
-void Vector::copyToInterface(Interface* interface)
+void Buffer::copyToInterface(Interface* interface)
 {
 	if (interface->getSize() < getSize()){
-		std::string error = "The Vector is greater than the Interface.";
+		std::string error = "The Buffer is greater than the Interface.";
 		throw error;
 	}
-	if (getVectorType() != interface->getVectorType()){
-		std::string error = "The Type of the Interface is different than the Vector Type.";
+	if (getBufferType() != interface->getBufferType()){
+		std::string error = "The Type of the Interface is different than the Buffer Type.";
 		throw error;
 	}
 	copyToImpl(interface);
 }
 
-void* Vector::getDataPointer()
+void* Buffer::getDataPointer()
 {
 	return data;
 }
 
-unsigned Vector::getSize()
+unsigned Buffer::getSize()
 {
 	return tSize;
 }
 
-Interface* Vector::toInterface()
+Interface* Buffer::toInterface()
 {
-	Interface* toReturn = new Interface(getSize(), this->getVectorType());
+	Interface* toReturn = new Interface(getSize(), this->getBufferType());
 	this->copyToImpl(toReturn);
 	return toReturn;
 }
 
-void Vector::copyFrom(Vector* vector)
+void Buffer::copyFrom(Buffer* buffer)
 {
-	Interface* interface = vector->toInterface();
+	Interface* interface = buffer->toInterface();
 	this->copyFromInterface(interface);
 	delete(interface);
 }
 
-void Vector::copyTo(Vector* vector)
+void Buffer::copyTo(Buffer* buffer)
 {
 	Interface* interface = this->toInterface();
-	vector->copyFromInterface(interface);
+	buffer->copyFromInterface(interface);
 	delete(interface);
 }
 
-void Vector::save(FILE* stream)
+void Buffer::save(FILE* stream)
 {
 	Interface* interface = toInterface();
 	interface->save(stream);
 	delete(interface);
 }
 
-void Vector::load(FILE* stream)
+void Buffer::load(FILE* stream)
 {
-	Interface interface(tSize, getVectorType());
+	Interface interface(tSize, getBufferType());
 	interface.load(stream);
 	copyFromInterface(&interface);
 }
 
-void Vector::print()
+void Buffer::print()
 {
 	Interface* interface = toInterface();
 	interface->print();
 	delete(interface);
 }
 
-float Vector::compareTo(Vector* other)
+float Buffer::compareTo(Buffer* other)
 {
 	Interface* interface = toInterface();
 	Interface* otherInterface = other->toInterface();
@@ -97,7 +97,7 @@ float Vector::compareTo(Vector* other)
 	return toReturn;
 }
 
-void Vector::random(float range)
+void Buffer::random(float range)
 {
 	Interface* interface = this->toInterface();
 	interface->random(range);

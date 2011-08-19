@@ -9,38 +9,38 @@
 #define CUDACONNECTION_H_
 
 #include "connection.h"
-#include "cudaVector.h"
+#include "cudaBuffer.h"
 
-template <VectorType vectorTypeTempl, class c_typeTempl>
-class CudaConnection: public virtual FullConnection, public CudaVector<vectorTypeTempl, c_typeTempl> {
+template <BufferType bufferTypeTempl, class c_typeTempl>
+class CudaConnection: public virtual FullConnection, public CudaBuffer<bufferTypeTempl, c_typeTempl> {
 protected:
 	virtual void mutateImpl(unsigned pos, float mutation)
 	{
-		cuda_mutate(data, pos, mutation, vectorTypeTempl);
+		cuda_mutate(data, pos, mutation, bufferTypeTempl);
 	}
 
-	virtual void crossoverImpl(Vector* other, Interface* bitVector)
+	virtual void crossoverImpl(Buffer* other, Interface* bitBuffer)
 	{
-		CudaVector<vectorTypeTempl, c_typeTempl> cudaBitVector(bitVector, Cuda_Threads_Per_Block);
+		CudaBuffer<bufferTypeTempl, c_typeTempl> cudaBitBuffer(bitBuffer, Cuda_Threads_Per_Block);
 
-	    cuda_crossover(this->getDataPointer(), other->getDataPointer(), (unsigned*)cudaBitVector.getDataPointer(),
-							tSize, vectorTypeTempl, Cuda_Threads_Per_Block);
+	    cuda_crossover(this->getDataPointer(), other->getDataPointer(), (unsigned*)cudaBitBuffer.getDataPointer(),
+							tSize, bufferTypeTempl, Cuda_Threads_Per_Block);
 	}
 public:
-	CudaConnection(Vector* input, unsigned outputSize)
-		: CudaVector<vectorTypeTempl, c_typeTempl>(input->getSize() * outputSize)
+	CudaConnection(Buffer* input, unsigned outputSize)
+		: CudaBuffer<bufferTypeTempl, c_typeTempl>(input->getSize() * outputSize)
 	{
 		tInput = input;
 	}
 
 	virtual ~CudaConnection() {};
 
-	virtual void calculateAndAddTo(Vector* results)
+	virtual void calculateAndAddTo(Buffer* results)
 	{
 		void* inputWeighs = this->getDataPointer();
 		float* resultsPtr = (float*)results->getDataPointer();
 		// TODO TCC este método no funciona correctamente para SIGN
-		cuda_inputCalculation(tInput->getDataPointer(), tInput->getSize(), tInput->getVectorType(), results->getSize(), inputWeighs, resultsPtr, Cuda_Threads_Per_Block);
+		cuda_inputCalculation(tInput->getDataPointer(), tInput->getSize(), tInput->getBufferType(), results->getSize(), inputWeighs, resultsPtr, Cuda_Threads_Per_Block);
 	}
 
 };

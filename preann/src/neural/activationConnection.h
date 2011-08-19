@@ -12,7 +12,7 @@
 
 class ActivationConnection : public Connection {
 	FunctionType functionType;
-	Vector* thresholds;
+	Buffer* thresholds;
 public:
 	ActivationConnection();
 	virtual ~ActivationConnection();

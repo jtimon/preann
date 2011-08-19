@@ -3,14 +3,14 @@
 #define CPPCONNECTION_H_
 
 #include "fullConnection.h"
-#include "cppVector.h"
+#include "cppBuffer.h"
 
-template <VectorType vectorTypeTempl, class c_typeTempl>
-class CppConnection: public virtual FullConnection, public CppVector<vectorTypeTempl, c_typeTempl> {
+template <BufferType bufferTypeTempl, class c_typeTempl>
+class CppConnection: public virtual FullConnection, public CppBuffer<bufferTypeTempl, c_typeTempl> {
 protected:
 	virtual void mutateImpl(unsigned pos, float mutation)
 	{
-		switch (vectorTypeTempl){
+		switch (bufferTypeTempl){
 		case BYTE:{
 			c_typeTempl* weigh = &(((c_typeTempl*)data)[pos]);
 			int result = (int)mutation + *weigh;
@@ -36,13 +36,13 @@ protected:
 		}
 	}
 
-	virtual void crossoverImpl(Vector* other, Interface* bitVector)
+	virtual void crossoverImpl(Buffer* other, Interface* bitBuffer)
 	{
-		switch (vectorTypeTempl){
+		switch (bufferTypeTempl){
 			case BIT:
 			case SIGN:
 				{
-				std::string error = "CppVector::crossoverImpl is not implemented for VectorType BIT nor SIGN.";
+				std::string error = "CppBuffer::crossoverImpl is not implemented for BufferType BIT nor SIGN.";
 				throw error;
 				}
 			default:
@@ -53,7 +53,7 @@ protected:
 				c_typeTempl auxWeigh;
 
 				for (unsigned i=0; i < tSize; i++){
-					if (bitVector->getElement(i)){
+					if (bitBuffer->getElement(i)){
 						auxWeigh = thisWeighs[i];
 						thisWeighs[i] = otherWeighs[i];
 						otherWeighs[i] = auxWeigh;
@@ -66,20 +66,20 @@ protected:
 public:
 	virtual ~CppConnection() {};
 
-	CppConnection(Vector* input, unsigned outputSize): CppVector<vectorTypeTempl, c_typeTempl>(input->getSize() * outputSize)
+	CppConnection(Buffer* input, unsigned outputSize): CppBuffer<bufferTypeTempl, c_typeTempl>(input->getSize() * outputSize)
 	{
 		tInput = input;
 	}
 
-	virtual void calculateAndAddTo(Vector* resultsVect)
+	virtual void calculateAndAddTo(Buffer* resultsVect)
 	{
 		float* results = (float*)resultsVect->getDataPointer();
 		unsigned inputSize = tInput->getSize();
 
-		switch (tInput->getVectorType()){
+		switch (tInput->getBufferType()){
 		case BYTE:
 		{
-			std::string error = "CppConnection::inputCalculation is not implemented for VectorType BYTE as input.";
+			std::string error = "CppConnection::inputCalculation is not implemented for BufferType BYTE as input.";
 			throw error;
 		}
 		case FLOAT:
@@ -104,7 +104,7 @@ public:
 					unsigned weighPos = (j * inputSize) + k;
 					if ( inputPtr[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
 						results[j] += inputWeighs[weighPos] - 128;
-					} else if (tInput->getVectorType() == SIGN) {
+					} else if (tInput->getBufferType() == SIGN) {
 						results[j] -= inputWeighs[weighPos] - 128;
 					}
 				}

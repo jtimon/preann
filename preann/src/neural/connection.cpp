@@ -1,7 +1,7 @@
 
 #include "connection.h"
 
-Vector* Connection::getInput()
+Buffer* Connection::getInput()
 {
 	return tInput;
 }
@@ -9,22 +9,22 @@ Vector* Connection::getInput()
 void Connection::mutate(unsigned pos, float mutation)
 {
 	if (pos > getSize()){
-		std::string error = "The position being mutated is greater than the size of the vector.";
+		std::string error = "The position being mutated is greater than the size of the buffer.";
 		throw error;
 	}
 	mutateImpl(pos, mutation);
 }
 
-void Connection::crossover(Connection* other, Interface* bitVector)
+void Connection::crossover(Connection* other, Interface* bitBuffer)
 {
 	if (getSize() != other->getSize()){
-		std::string error = "The Vectors must have the same size to crossover them.";
+		std::string error = "The Buffers must have the same size to crossover them.";
 		throw error;
 	}
-	if (getVectorType() != other->getVectorType()){
-		std::string error = "The Vectors must have the same type to crossover them.";
+	if (getBufferType() != other->getBufferType()){
+		std::string error = "The Buffers must have the same type to crossover them.";
 		throw error;
 	}
-	crossoverImpl(other, bitVector);
+	crossoverImpl(other, bitBuffer);
 }
 

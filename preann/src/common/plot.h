@@ -15,7 +15,7 @@ public:
 
 	float plot(string path, ClassID classID, Method method, unsigned repetitions);
 	float doMethod(ClassID classID, Method method, unsigned repetitions);
-	float doMethodVector(Vector* vector, Method method, unsigned repetitions);
+	float doMethodBuffer(Buffer* buffer, Method method, unsigned repetitions);
 	float doMethodConnection(Connection* connection, Method method, unsigned repetitions);
 	float plotTask(string path, Population* population);
 

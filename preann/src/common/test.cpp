@@ -10,7 +10,7 @@
 Test::Test()
 {
 	size = minSize = maxSize = incSize = 1;
-	enableAllVectorTypes();
+	enableAllBufferTypes();
 	enableAllImplementationTypes();
 	initialWeighsRange = 0;
 	file = NULL;
@@ -24,7 +24,7 @@ Test::~Test()
 void Test::test(ClassID classID, Method method)
 {
 	for (size = minSize; size <= maxSize; size += incSize) {
-		for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
+		for (bufferType = (BufferType) 0; bufferType < BUFFER_TYPE_DIM; bufferType = (BufferType) ((unsigned)bufferType + 1) ) if (bufferTypes[bufferType]){
 			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
 				try {
 					unsigned differencesCounter = doMethod(classID, method);
@@ -47,17 +47,17 @@ unsigned Test::doMethod(ClassID classID, Method method)
 {
 	unsigned toReturn;
 
-	Vector* vector = Factory::newVector(getSize(), getVectorType(), getImplementationType());
-	vector->random(initialWeighsRange);
+	Buffer* buffer = Factory::newBuffer(getSize(), getBufferType(), getImplementationType());
+	buffer->random(initialWeighsRange);
 
 	switch (classID){
 
-		case VECTOR:
-			toReturn = doMethodVector(vector, method);
+		case BUFFER:
+			toReturn = doMethodBuffer(buffer, method);
 		break;
 		case CONNECTION:
 		{
-			Connection* connection = Factory::newConnection(vector, outputSize, getImplementationType());
+			Connection* connection = Factory::newConnection(buffer, outputSize, getImplementationType());
 			connection->random(initialWeighsRange);
 			toReturn = doMethodConnection(connection, method);
 			delete(connection);
@@ -69,7 +69,7 @@ unsigned Test::doMethod(ClassID classID, Method method)
 			throw error;
 
 	}
-	delete(vector);
+	delete(buffer);
 	return toReturn;
 }
 
@@ -81,13 +81,13 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 
 	case CALCULATEANDADDTO:
 	{
-		Vector* results = Factory::newVector(outputSize, FLOAT, connection->getImplementationType());
+		Buffer* results = Factory::newBuffer(outputSize, FLOAT, connection->getImplementationType());
 
-		Vector* cInput = Factory::newVector(connection->getInput(), C);
+		Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
 		Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
 		cConnection->copyFrom(connection);
 
-		Vector* cResults = Factory::newVector(outputSize, FLOAT, C);
+		Buffer* cResults = Factory::newBuffer(outputSize, FLOAT, C);
 
 		connection->calculateAndAddTo(results);
 		cConnection->calculateAndAddTo(cResults);
@@ -106,7 +106,7 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 		float mutation = randomFloat(initialWeighsRange);
 		connection->mutate(pos, mutation);
 
-		Vector* cInput = Factory::newVector(connection->getInput(), C);
+		Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
 		Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
 		cConnection->copyFrom(connection);
 
@@ -127,18 +127,18 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 		Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
 		other->random(initialWeighsRange);
 
-		Vector* cInput = Factory::newVector(connection->getInput(), C);
+		Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
 		Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
 		cConnection->copyFrom(connection);
 		Connection* cOther = Factory::newConnection(cInput, outputSize, C);
 		cOther->copyFrom(other);
 
-		Interface bitVector = Interface(connection->getSize(), BIT);
-		//TODO bitVector.random(2); ??
-		bitVector.random(1);
+		Interface bitBuffer = Interface(connection->getSize(), BIT);
+		//TODO bitBuffer.random(2); ??
+		bitBuffer.random(1);
 
-		connection->crossover(other, &bitVector);
-		cConnection->crossover(cOther, &bitVector);
+		connection->crossover(other, &bitBuffer);
+		cConnection->crossover(cOther, &bitBuffer);
 
 		differencesCounter = Test::assertEquals(cConnection, connection);
 		differencesCounter += Test::assertEquals(cOther, other);
@@ -158,7 +158,7 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 	return differencesCounter;
 }
 
-unsigned Test::doMethodVector(Vector* vector, Method method)
+unsigned Test::doMethodBuffer(Buffer* buffer, Method method)
 {
 	unsigned differencesCounter;
 	switch (method){
@@ -166,58 +166,58 @@ unsigned Test::doMethodVector(Vector* vector, Method method)
 	case ACTIVATION:
 	{
 		FunctionType functionType = IDENTITY;
-		Vector* results = Factory::newVector(vector->getSize(), FLOAT, vector->getImplementationType());
+		Buffer* results = Factory::newBuffer(buffer->getSize(), FLOAT, buffer->getImplementationType());
 		results->random(initialWeighsRange);
 
-		Vector* cResults = Factory::newVector(results, C);
-		Vector* cVector = Factory::newVector(vector->getSize(), vector->getVectorType(), C);
+		Buffer* cResults = Factory::newBuffer(results, C);
+		Buffer* cBuffer = Factory::newBuffer(buffer->getSize(), buffer->getBufferType(), C);
 
-		vector->activation(results, functionType);
-		cVector->activation(cResults, functionType);
-		differencesCounter = Test::assertEquals(cVector, vector);
+		buffer->activation(results, functionType);
+		cBuffer->activation(cResults, functionType);
+		differencesCounter = Test::assertEquals(cBuffer, buffer);
 
 		delete(results);
-		delete(cVector);
+		delete(cBuffer);
 		delete(cResults);
 	}
 	break;
 	case COPYFROMINTERFACE:
 	{
-		Interface interface = Interface(vector->getSize(), vector->getVectorType());
+		Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
 		interface.random(initialWeighsRange);
 
-		Vector* cVector = Factory::newVector(vector, C);
+		Buffer* cBuffer = Factory::newBuffer(buffer, C);
 
-		vector->copyFromInterface(&interface);
-		cVector->copyFromInterface(&interface);
+		buffer->copyFromInterface(&interface);
+		cBuffer->copyFromInterface(&interface);
 
-		differencesCounter = Test::assertEquals(cVector, vector);
+		differencesCounter = Test::assertEquals(cBuffer, buffer);
 
-		delete(cVector);
+		delete(cBuffer);
 	}
 	break;
 	case COPYTOINTERFACE:
 	{
-		Interface interface = Interface(vector->getSize(), vector->getVectorType());
+		Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
 
-		Vector* cVector = Factory::newVector(vector, C);
-		Interface cInterface = Interface(vector->getSize(), vector->getVectorType());
+		Buffer* cBuffer = Factory::newBuffer(buffer, C);
+		Interface cInterface = Interface(buffer->getSize(), buffer->getBufferType());
 
-		vector->copyToInterface(&interface);
-		cVector->copyToInterface(&cInterface);
+		buffer->copyToInterface(&interface);
+		cBuffer->copyToInterface(&cInterface);
 
 		differencesCounter = Test::assertEqualsInterfaces(&cInterface, &interface);
 
-		delete(cVector);
+		delete(cBuffer);
 	}
 	break;
 	case CLONE:
 	{
-		Vector* copy = vector->clone();
-		differencesCounter = Test::assertEquals(vector, copy);
+		Buffer* copy = buffer->clone();
+		differencesCounter = Test::assertEquals(buffer, copy);
 
-		if (vector->getImplementationType() != copy->getImplementationType()){
-			printf("The vectors are not of the same implementation type.\n");
+		if (buffer->getImplementationType() != copy->getImplementationType()){
+			printf("The buffers are not of the same implementation type.\n");
 			++differencesCounter;
 		}
 		delete(copy);
@@ -225,7 +225,7 @@ unsigned Test::doMethodVector(Vector* vector, Method method)
 	break;
 
 	default:
-		string error = "The method " + methodToString(method) + " is not defined to test for Vector.";
+		string error = "The method " + methodToString(method) + " is not defined to test for Buffer.";
 		throw error;
 	}
 	return differencesCounter;
@@ -342,61 +342,61 @@ void Test::enableImplementationType(ImplementationType implementationType)
 	implementationTypes[ implementationType ] = 1;
 }
 
-VectorType Test::getVectorType()
+BufferType Test::getBufferType()
 {
-	return vectorType;
+	return bufferType;
 }
 
-void Test::vectorTypeToMin()
+void Test::bufferTypeToMin()
 {
-	vectorType = (VectorType) 0;
+	bufferType = (BufferType) 0;
 }
 
-int Test::hasNextVectorType()
+int Test::hasNextBufferType()
 {
-	unsigned i = (unsigned)vectorType;
+	unsigned i = (unsigned)bufferType;
 	do{
-		if (++i >= VECTOR_TYPE_DIM) {
+		if (++i >= BUFFER_TYPE_DIM) {
 			return 0;
 		}
-	} while (vectorTypes[i] == 0);
+	} while (bufferTypes[i] == 0);
 
 	return 1;
 }
 
-void Test::vectorTypeIncrement()
+void Test::bufferTypeIncrement()
 {
-	unsigned i = (unsigned)vectorType;
+	unsigned i = (unsigned)bufferType;
 	do{
-		if (++i >= VECTOR_TYPE_DIM) {
+		if (++i >= BUFFER_TYPE_DIM) {
 			return;
 		}
-	} while (vectorTypes[i] == 0);
+	} while (bufferTypes[i] == 0);
 
-	vectorType = (VectorType) i;
+	bufferType = (BufferType) i;
 }
 
-void Test::enableVectorType(VectorType vectorType)
+void Test::enableBufferType(BufferType bufferType)
 {
-	vectorTypes[vectorType] = 1;
+	bufferTypes[bufferType] = 1;
 }
 
-void Test::disableVectorType(VectorType vectorType)
+void Test::disableBufferType(BufferType bufferType)
 {
-	vectorTypes[vectorType] = 0;
+	bufferTypes[bufferType] = 0;
 }
 
-void Test::enableAllVectorTypes()
+void Test::enableAllBufferTypes()
 {
-	for(int i=0; i < VECTOR_TYPE_DIM; i++){
-		vectorTypes[i] = 1;
+	for(int i=0; i < BUFFER_TYPE_DIM; i++){
+		bufferTypes[i] = 1;
 	}
 }
 
-void Test::disableAllVectorTypes()
+void Test::disableAllBufferTypes()
 {
-	for(int i=0; i < VECTOR_TYPE_DIM; i++){
-		vectorTypes[i] = 0;
+	for(int i=0; i < BUFFER_TYPE_DIM; i++){
+		bufferTypes[i] = 0;
 	}
 }
 
@@ -410,8 +410,8 @@ void Test::printCurrentState()
         case CUDA2:		printf(" CUDA2    ");	break;
         case CUDA_INV:	printf(" CUDA_INV ");	break;
     }
-    printf(" Vector Type = ");
-    switch (vectorType){
+    printf(" Buffer Type = ");
+    switch (bufferType){
         case FLOAT: printf(" FLOAT "); 	break;
         case BIT: 	printf(" BIT   ");	break;
         case SIGN: 	printf(" SIGN  ");	break;
@@ -442,11 +442,11 @@ void Test::printParameters()
     	}
     }
     printf("\n");
-    printf("-Vector Types: ");
-    for (int i=0; i < VECTOR_TYPE_DIM; i++){
-    	if (vectorTypes[i] == 1){
+    printf("-Buffer Types: ");
+    for (int i=0; i < BUFFER_TYPE_DIM; i++){
+    	if (bufferTypes[i] == 1){
 
-			switch ((VectorType) i){
+			switch ((BufferType) i){
 				case FLOAT: printf(" FLOAT "); 	break;
 				case BIT: 	printf(" BIT   ");	break;
 				case SIGN: 	printf(" SIGN  ");	break;
@@ -463,9 +463,9 @@ void Test::printParameters()
 }
 
 
-unsigned char Test::areEqual(float expected, float actual, VectorType vectorType)
+unsigned char Test::areEqual(float expected, float actual, BufferType bufferType)
 {
-	if (vectorType == FLOAT){
+	if (bufferType == FLOAT){
 		return (expected - 1 < actual
 			 && expected + 1 > actual);
 	} else {
@@ -475,7 +475,7 @@ unsigned char Test::areEqual(float expected, float actual, VectorType vectorType
 
 unsigned Test::assertEqualsInterfaces(Interface* expected, Interface* actual)
 {
-    if(expected->getVectorType() != actual->getVectorType()){
+    if(expected->getBufferType() != actual->getBufferType()){
         throw "The interfaces are not even of the same type!";
     }
     if(expected->getSize() != actual->getSize()){
@@ -484,7 +484,7 @@ unsigned Test::assertEqualsInterfaces(Interface* expected, Interface* actual)
 	unsigned differencesCounter = 0;
 
     for(unsigned i = 0;i < expected->getSize();i++){
-        if(!areEqual(expected->getElement(i), actual->getElement(i), expected->getVectorType())){
+        if(!areEqual(expected->getElement(i), actual->getElement(i), expected->getBufferType())){
             printf("The interfaces are not equal at the position %d (expected = %f actual %f).\n", i, expected->getElement(i), actual->getElement(i));
             ++differencesCounter;
         }
@@ -492,13 +492,13 @@ unsigned Test::assertEqualsInterfaces(Interface* expected, Interface* actual)
 	return differencesCounter;
 }
 
-unsigned Test::assertEquals(Vector* expected, Vector* actual)
+unsigned Test::assertEquals(Buffer* expected, Buffer* actual)
 {
-    if(expected->getVectorType() != actual->getVectorType()){
-        throw "The vectors are not even of the same type!";
+    if(expected->getBufferType() != actual->getBufferType()){
+        throw "The buffers are not even of the same type!";
     }
     if(expected->getSize() != actual->getSize()){
-        throw "The vectors are not even of the same size!";
+        throw "The buffers are not even of the same size!";
     }
 
 	unsigned differencesCounter = 0;
@@ -506,8 +506,8 @@ unsigned Test::assertEquals(Vector* expected, Vector* actual)
 	Interface* actualInt = actual->toInterface();
 
     for(unsigned i = 0;i < expectedInt->getSize();i++){
-        if(!areEqual(expectedInt->getElement(i), actualInt->getElement(i), expectedInt->getVectorType())){
-            printf("The vectors are not equal at the position %d (expected = %f actual %f).\n", i, expectedInt->getElement(i), actualInt->getElement(i));
+        if(!areEqual(expectedInt->getElement(i), actualInt->getElement(i), expectedInt->getBufferType())){
+            printf("The buffers are not equal at the position %d (expected = %f actual %f).\n", i, expectedInt->getElement(i), actualInt->getElement(i));
             ++differencesCounter;
         }
     }
@@ -569,10 +569,10 @@ void Test::plotToFile(float data)
 	}
 }
 
-std::string Test::vectorTypeToString()
+std::string Test::bufferTypeToString()
 {
 	std::string toReturn;
-	switch (vectorType){
+	switch (bufferType){
 	case FLOAT:
 		toReturn = "FLOAT";
 		break;
@@ -649,7 +649,7 @@ string Test::getFileName(ClassID& classID, Method& method)
 {
     return
 //    classToString(classID) + "_" + methodToString(method) + "_" +
-       vectorTypeToString() + "_" + implementationTypeToString() + ".DAT";
+       bufferTypeToString() + "_" + implementationTypeToString() + ".DAT";
 }
 
 string Test::toString(ClassID classID, Method method)
@@ -662,7 +662,7 @@ string Test::classToString(ClassID classID)
 	string toReturn;
 	switch (classID){
 
-		case VECTOR: toReturn = "VECTOR";			break;
+		case BUFFER: toReturn = "BUFFER";			break;
 		case CONNECTION: toReturn = "CONNECTION";	break;
 		default:
 			string error = "There's no such class to test.";

@@ -2,20 +2,20 @@
 #define XMMCONNECTION_H_
 
 #include "connection.h"
-#include "xmmVector.h"
+#include "xmmBuffer.h"
 
-template <VectorType vectorTypeTempl, class c_typeTempl>
-class XmmConnection: virtual public FullConnection, public XmmVector<vectorTypeTempl, c_typeTempl> {
+template <BufferType bufferTypeTempl, class c_typeTempl>
+class XmmConnection: virtual public FullConnection, public XmmBuffer<bufferTypeTempl, c_typeTempl> {
 protected:
 	virtual void copyFromImpl(Interface* interface)
 	{
-		unsigned offsetPerInput = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
+		unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), bufferTypeTempl);
 		unsigned offset = 0;
 		unsigned inputSize = tInput->getSize();
 		unsigned outputSize = tSize / inputSize;
 		unsigned elem = 0;
 
-		switch (vectorTypeTempl){
+		switch (bufferTypeTempl){
 			case BYTE:
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
@@ -36,7 +36,7 @@ protected:
 			case BIT:
 			case SIGN:
 			{
-				std::string error = "XmmConnection::copyFromImpl is not implemented for VectorType BIT nor SIGN.";
+				std::string error = "XmmConnection::copyFromImpl is not implemented for BufferType BIT nor SIGN.";
 				throw error;
 			}
 		}
@@ -44,13 +44,13 @@ protected:
 
 	virtual void copyToImpl(Interface* interface)
 	{
-		unsigned offsetPerInput = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
+		unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), bufferTypeTempl);
 		unsigned offset = 0;
 		unsigned inputSize = tInput->getSize();
 		unsigned outputSize = tSize / inputSize;
 		unsigned elem = 0;
 
-		switch (vectorTypeTempl){
+		switch (bufferTypeTempl){
 			case BYTE:
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
@@ -71,7 +71,7 @@ protected:
 			case BIT:
 			case SIGN:
 				{
-					std::string error = "XmmConnection::copyToImpl is not implemented for VectorType BIT nor SIGN.";
+					std::string error = "XmmConnection::copyToImpl is not implemented for BufferType BIT nor SIGN.";
 					throw error;
 				}
 		}
@@ -79,12 +79,12 @@ protected:
 
 	virtual void mutateImpl(unsigned pos, float mutation)
 	{
-		unsigned offsetPerInput = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
+		unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), bufferTypeTempl);
 		unsigned outputPos = pos / tInput->getSize();
 	    unsigned inputPos = pos % tInput->getSize();
 	    unsigned elem = (outputPos * offsetPerInput) + inputPos;
 
-	    switch (vectorTypeTempl){
+	    switch (bufferTypeTempl){
 	        case BYTE:
 	            {
 	                unsigned char *weigh = &(((unsigned char*)(data))[elem]);
@@ -107,29 +107,29 @@ protected:
 				break;
 		case BIT:
 		case SIGN:
-			std::string error = "XmmConnection::mutate is not implemented for VectorType BIT nor SIGN.";
+			std::string error = "XmmConnection::mutate is not implemented for BufferType BIT nor SIGN.";
 			throw error;
 		}
 	}
 
-	virtual void crossoverImpl(Vector* other, Interface* bitVector)
+	virtual void crossoverImpl(Buffer* other, Interface* bitBuffer)
 	{
 		void* otherWeighs = other->getDataPointer();
 
-		unsigned offsetPerInput = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
+		unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), bufferTypeTempl);
 		unsigned offset = 0;
 		unsigned inputSize = tInput->getSize();
 		unsigned outputSize = tSize / inputSize;
 		unsigned elem = 0;
 
-		switch (vectorTypeTempl){
+		switch (bufferTypeTempl){
 			case BYTE:
 				unsigned char auxChar;
 
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
 
-						if (bitVector->getElement(elem++)){
+						if (bitBuffer->getElement(elem++)){
 							auxChar = ((unsigned char*)(data) + offset)[i];
 							((unsigned char*)(data) + offset)[i] = ((unsigned char*)(otherWeighs) + offset)[i];
 							((unsigned char*)(otherWeighs) + offset)[i] = auxChar;
@@ -145,7 +145,7 @@ protected:
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
 
-						if (bitVector->getElement(elem++)){
+						if (bitBuffer->getElement(elem++)){
 							auxFloat = ((float*)(data) + offset)[i];
 							((float*)(data) + offset)[i] = ((float*)(otherWeighs) + offset)[i];
 							((float*)(otherWeighs) + offset)[i] = auxFloat;
@@ -156,21 +156,21 @@ protected:
 				break;
 			case BIT:
 			case SIGN:
-				std::string error = "XmmConnection::crossoverImpl is not implemented for VectorType BIT nor SIGN.";
+				std::string error = "XmmConnection::crossoverImpl is not implemented for BufferType BIT nor SIGN.";
 				throw error;
 		}
 	}
 public:
-	XmmConnection(Vector* input, unsigned outputSize)
+	XmmConnection(Buffer* input, unsigned outputSize)
 	{
 		tInput = input;
 		this->tSize = input->getSize() * outputSize;
 
-		unsigned byteSize = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(input->getSize(), vectorTypeTempl);
+		unsigned byteSize = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(input->getSize(), bufferTypeTempl);
 		byteSize *= outputSize;
 		data = mi_malloc(byteSize);
 
-		switch (vectorTypeTempl){
+		switch (bufferTypeTempl){
 
 		case BYTE:
 			SetValueToAnArray<unsigned char>(data, byteSize, 128);
@@ -187,18 +187,18 @@ public:
 
 	virtual ~XmmConnection() {};
 
-	virtual void calculateAndAddTo(Vector* resultsVect)
+	virtual void calculateAndAddTo(Buffer* resultsVect)
 	{
 		void* inputWeighs = this->getDataPointer();
 		float* results = (float*)resultsVect->getDataPointer();
 		void* inputPtr = tInput->getDataPointer();
 
 		unsigned numLoops;
-		unsigned offsetPerInput = XmmVector<vectorTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), vectorTypeTempl);
+		unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), bufferTypeTempl);
 		unsigned weighPos = 0;
 
 
-		switch (tInput->getVectorType()){
+		switch (tInput->getBufferType()){
 			case FLOAT:
 				offsetPerInput = offsetPerInput / sizeof(float);
 				numLoops = ((tInput->getSize()-1)/FLOATS_PER_BLOCK)+1;
@@ -227,7 +227,7 @@ public:
 				}
 				break;
 			case BYTE:
-				std::string error = "CppVector::inputCalculation is not implemented for VectorType BYTE as input.";
+				std::string error = "CppBuffer::inputCalculation is not implemented for BufferType BYTE as input.";
 				throw error;
 		}
 	}

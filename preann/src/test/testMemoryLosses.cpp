@@ -21,28 +21,28 @@ void checkAndPrintErrors(string testingClass, Test test)
     }
 }
 
-void testVector(Test test)
+void testBuffer(Test test)
 {
-	Vector* vector = Factory::newVector(test.getSize(), test.getVectorType(), test.getImplementationType());
-	delete(vector);
+	Buffer* buffer = Factory::newBuffer(test.getSize(), test.getBufferType(), test.getImplementationType());
+	delete(buffer);
 
-    checkAndPrintErrors("Vector", test);
+    checkAndPrintErrors("Buffer", test);
 }
 
 void testConnection(Test test)
 {
-	Vector* vector = Factory::newVector(test.getSize(), test.getVectorType(), test.getImplementationType());
-	Connection* connection = Factory::newConnection(vector, test.getSize(), test.getImplementationType());
+	Buffer* buffer = Factory::newBuffer(test.getSize(), test.getBufferType(), test.getImplementationType());
+	Connection* connection = Factory::newConnection(buffer, test.getSize(), test.getImplementationType());
 
 	delete(connection);
-	delete(vector);
+	delete(buffer);
 
     checkAndPrintErrors("Connection", test);
 }
 
 void testLayer(Test test)
 {
-    Layer *layer = new Layer(test.getSize(), test.getVectorType(), IDENTITY, test.getImplementationType());
+    Layer *layer = new Layer(test.getSize(), test.getBufferType(), IDENTITY, test.getImplementationType());
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
@@ -66,12 +66,12 @@ int main(int argc, char *argv[]) {
 		for (test.sizeToMin(); test.hasNextSize(); test.sizeIncrement()) {
 			for (test.implementationTypeToMin(); test.hasNextImplementationType(); test.implementationTypeIncrement()) {
 
-				for (test.vectorTypeToMin(); test.hasNextVectorType(); test.vectorTypeIncrement() ) {
-					testVector(test);
+				for (test.bufferTypeToMin(); test.hasNextBufferType(); test.bufferTypeIncrement() ) {
+					testBuffer(test);
 				}
 
-				test.disableVectorType(BYTE);
-				for (test.vectorTypeToMin(); test.hasNextVectorType(); test.vectorTypeIncrement() ) {
+				test.disableBufferType(BYTE);
+				for (test.bufferTypeToMin(); test.hasNextBufferType(); test.bufferTypeIncrement() ) {
 					testConnection(test);
 					testLayer(test);
 				}

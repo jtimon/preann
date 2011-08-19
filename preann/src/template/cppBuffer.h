@@ -1,21 +1,21 @@
 /*
- * cppVector.h
+ * cppBuffer.h
  *
  *  Created on: Nov 16, 2009
  *      Author: timon
  */
 
-#ifndef CPPVECTOR_H_
-#define CPPVECTOR_H_
+#ifndef CPPBUFFER_H_
+#define CPPBUFFER_H_
 
-#include "vector.h"
+#include "buffer.h"
 
-template <VectorType vectorTypeTempl, class c_typeTempl>
-class CppVector: virtual public Vector{
+template <BufferType bufferTypeTempl, class c_typeTempl>
+class CppBuffer: virtual public Buffer{
 protected:
 	unsigned getByteSize()
 	{
-		switch (vectorTypeTempl){
+		switch (bufferTypeTempl){
 			case BIT:
 			case SIGN:
 				return (((tSize-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
@@ -39,21 +39,21 @@ public:
 		return C;
 	};
 
-	virtual VectorType getVectorType()
+	virtual BufferType getBufferType()
 	{
-		return vectorTypeTempl;
+		return bufferTypeTempl;
 	};
 
-	CppVector(){};
+	CppBuffer(){};
 
-	CppVector(unsigned size)
+	CppBuffer(unsigned size)
 	{
 		this->tSize = size;
 
 		size_t byteSize = getByteSize();
 		data = mi_malloc(byteSize);
 
-		switch (vectorTypeTempl){
+		switch (bufferTypeTempl){
 			case BYTE:
 				SetValueToAnArray<c_typeTempl>(data, byteSize/sizeof(c_typeTempl), 128);
 				break;
@@ -62,7 +62,7 @@ public:
 		}
 	}
 
-	~CppVector()
+	~CppBuffer()
 	{
 		if (data) {
 			mi_free(data);
@@ -70,21 +70,21 @@ public:
 		}
 	}
 
-	virtual Vector* clone()
+	virtual Buffer* clone()
 	{
-		Vector* clone = new CppVector<vectorTypeTempl, c_typeTempl>(tSize);
+		Buffer* clone = new CppBuffer<bufferTypeTempl, c_typeTempl>(tSize);
 		copyTo(clone);
 		return clone;
 	}
 
-	virtual void activation(Vector* resultsVect, FunctionType functionType)
+	virtual void activation(Buffer* resultsVect, FunctionType functionType)
 	{
 		float* results = (float*)resultsVect->getDataPointer();
 
-		switch (vectorTypeTempl){
+		switch (bufferTypeTempl){
 		case BYTE:
 			{
-				std::string error = "CppVector::activation is not implemented for VectorType BYTE.";
+				std::string error = "CppBuffer::activation is not implemented for BufferType BYTE.";
 				throw error;
 			}break;
 		case FLOAT:
@@ -97,7 +97,7 @@ public:
 		case BIT:
 		case SIGN:
 			{
-				unsigned* vectorData = (unsigned*)data;
+				unsigned* bufferData = (unsigned*)data;
 				unsigned mask;
 				for (unsigned i=0; i < tSize; i++){
 
@@ -108,9 +108,9 @@ public:
 					}
 
 					if (results[i] > 0){
-						vectorData[i/BITS_PER_UNSIGNED] |= mask;
+						bufferData[i/BITS_PER_UNSIGNED] |= mask;
 					} else {
-						vectorData[i/BITS_PER_UNSIGNED] &= ~mask;
+						bufferData[i/BITS_PER_UNSIGNED] &= ~mask;
 					}
 				}
 			}
@@ -119,4 +119,4 @@ public:
 
 };
 
-#endif /* CPPVECTOR_H_ */
+#endif /* CPPBUFFER_H_ */

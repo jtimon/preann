@@ -10,11 +10,11 @@
 
 #include "cudaConnection.h"
 
-template <VectorType vectorTypeTempl, class c_typeTempl>
-class Cuda2Connection: virtual public FullConnection, public CudaConnection<vectorTypeTempl, c_typeTempl> {
+template <BufferType bufferTypeTempl, class c_typeTempl>
+class Cuda2Connection: virtual public FullConnection, public CudaConnection<bufferTypeTempl, c_typeTempl> {
 public:
-	Cuda2Connection(Vector* input, unsigned outputSize)
-			: CudaConnection<vectorTypeTempl, c_typeTempl>(input, outputSize)
+	Cuda2Connection(Buffer* input, unsigned outputSize)
+			: CudaConnection<bufferTypeTempl, c_typeTempl>(input, outputSize)
 	{
 	}
 
@@ -24,12 +24,12 @@ public:
 		return CUDA2;
 	};
 
-	virtual void calculateAndAddTo(Vector* results)
+	virtual void calculateAndAddTo(Buffer* results)
 	{
 		void* inputWeighs = this->getDataPointer();
 		float* resultsPtr = (float*)results->getDataPointer();
 		// TODO TCC este método no funciona correctamente para SIGN
-		cuda_inputCalculationReduction(tInput->getDataPointer(), tInput->getSize(), tInput->getVectorType(), results->getSize(), inputWeighs, resultsPtr, Cuda_Threads_Per_Block);
+		cuda_inputCalculationReduction(tInput->getDataPointer(), tInput->getSize(), tInput->getBufferType(), results->getSize(), inputWeighs, resultsPtr, Cuda_Threads_Per_Block);
 	}
 };
 

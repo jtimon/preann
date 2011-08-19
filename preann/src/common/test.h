@@ -19,8 +19,8 @@ protected:
 
 	char implementationTypes[IMPLEMENTATION_TYPE_DIM];
 	ImplementationType implementationType;
-	char vectorTypes[VECTOR_TYPE_DIM];
-	VectorType vectorType;
+	char bufferTypes[BUFFER_TYPE_DIM];
+	BufferType bufferType;
 
 	float initialWeighsRange;
 
@@ -52,25 +52,25 @@ public:
     void disableAllImplementationTypes();
     void enableImplementationType(ImplementationType implementationType);
     void disableImplementationType(ImplementationType implementationType);
-    void vectorTypeToMin();
-    int hasNextVectorType();
-    void vectorTypeIncrement();
-    void enableAllVectorTypes();
-    void disableAllVectorTypes();
-    void enableVectorType(VectorType vectorType);
-    void disableVectorType(VectorType vectorType);
-    VectorType getVectorType();
+    void bufferTypeToMin();
+    int hasNextBufferType();
+    void bufferTypeIncrement();
+    void enableAllBufferTypes();
+    void disableAllBufferTypes();
+    void enableBufferType(BufferType bufferType);
+    void disableBufferType(BufferType bufferType);
+    BufferType getBufferType();
 
     void printCurrentState();
     void printParameters();
-    static unsigned char areEqual(float expected, float actual, VectorType vectorType);
+    static unsigned char areEqual(float expected, float actual, BufferType bufferType);
     static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
-    static unsigned assertEquals(Vector* expected, Vector* actual);
+    static unsigned assertEquals(Buffer* expected, Buffer* actual);
 
     float getInitialWeighsRange();
     void setInitialWeighsRange(float initialWeighsRange);
 
-    string vectorTypeToString();
+    string bufferTypeToString();
     string implementationTypeToString();
     FILE* openFile(string path);
     void openFile(string path, ClassID classID, Method method);
@@ -78,15 +78,15 @@ public:
     void plotToFile(float data);
 
     void withImplementationTypes(int howMany, ImplementationType* implementationTypes);
-    void withVectorTypes(int howMany, VectorType* vectorTypes);
+    void withBufferTypes(int howMany, BufferType* bufferTypes);
     void excludeImplementationTypes(int howMany, ImplementationType* implementationTypes);
-    void excludeTypes(int howMany, VectorType* vectorTypes);
+    void excludeTypes(int howMany, BufferType* bufferTypes);
 
     string getFileName(ClassID& classID, Method& method);
 
     void test(ClassID classID, Method method);
     unsigned doMethod(ClassID classID, Method method);
-    unsigned doMethodVector(Vector* vector, Method method);
+    unsigned doMethodBuffer(Buffer* buffer, Method method);
     unsigned doMethodConnection(Connection* connection, Method method);
 
     static string toString(ClassID classID, Method method);

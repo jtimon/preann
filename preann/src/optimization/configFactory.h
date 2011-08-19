@@ -19,13 +19,13 @@
 	#include "cudaInvertedConnection.h"
 #endif
 
-template <VectorType vectorTypeTempl, class c_typeTempl>
-Vector* func_newVector(unsigned size, ImplementationType implementationType)
+template <BufferType bufferTypeTempl, class c_typeTempl>
+Buffer* func_newBuffer(unsigned size, ImplementationType implementationType)
 {
 	switch(implementationType){
 		case C:
 #ifdef CPP_IMPL
-			return new CppVector<vectorTypeTempl, c_typeTempl>(size);
+			return new CppBuffer<bufferTypeTempl, c_typeTempl>(size);
 #else
 			{
 			std::string error = "Implementation CPP is not allowed.";
@@ -34,7 +34,7 @@ Vector* func_newVector(unsigned size, ImplementationType implementationType)
 #endif
 		case SSE2:
 #ifdef SSE2_IMPL
-			return new XmmVector<vectorTypeTempl, c_typeTempl>(size);
+			return new XmmBuffer<bufferTypeTempl, c_typeTempl>(size);
 #else
 			{
 			std::string error = "Implementation SSE2 is not allowed.";
@@ -45,7 +45,7 @@ Vector* func_newVector(unsigned size, ImplementationType implementationType)
 		case CUDA2:
 		case CUDA_INV:
 #ifdef CUDA_IMPL
-			return new CudaVector<vectorTypeTempl, c_typeTempl>(size);
+			return new CudaBuffer<bufferTypeTempl, c_typeTempl>(size);
 #else
 			{
 			std::string error = "Implementation CUDA is not allowed.";
@@ -60,13 +60,13 @@ Vector* func_newVector(unsigned size, ImplementationType implementationType)
 	}
 }
 
-template <VectorType vectorTypeTempl, class c_typeTempl>
-Connection* func_newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType)
+template <BufferType bufferTypeTempl, class c_typeTempl>
+Connection* func_newConnection(Buffer* input, unsigned outputSize, ImplementationType implementationType)
 {
 	switch(implementationType){
 		case C:
 #ifdef CPP_IMPL
-			return new CppConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
+			return new CppConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
 			{
 			std::string error = "Implementation CPP is not allowed.";
@@ -75,7 +75,7 @@ Connection* func_newConnection(Vector* input, unsigned outputSize, Implementatio
 #endif
 		case SSE2:
 #ifdef SSE2_IMPL
-			return new XmmConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
+			return new XmmConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
 			{
 			std::string error = "Implementation SSE2 is not allowed.";
@@ -84,11 +84,11 @@ Connection* func_newConnection(Vector* input, unsigned outputSize, Implementatio
 #endif
 #ifdef CUDA_IMPL
 		case CUDA:
-			return new CudaConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
+			return new CudaConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 		case CUDA2:
-			return new Cuda2Connection<vectorTypeTempl, c_typeTempl>(input, outputSize);
+			return new Cuda2Connection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 		case CUDA_INV:
-			return new CudaInvertedConnection<vectorTypeTempl, c_typeTempl>(input, outputSize);
+			return new CudaInvertedConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
 		case CUDA:
 		case CUDA2:

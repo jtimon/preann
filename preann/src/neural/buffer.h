@@ -1,28 +1,28 @@
 
-#ifndef VECTOR_H_
-#define VECTOR_H_
+#ifndef BUFFER_H_
+#define BUFFER_H_
 
 #include "interface.h"
 
-class Vector {
+class Buffer {
 protected:
 	unsigned tSize;
 	void* data;
-	Vector() {};
+	Buffer() {};
 	virtual void copyFromImpl(Interface* interface) = 0;
 	virtual void copyToImpl(Interface* interface) = 0;
 public:
-	virtual ~Vector() {};
+	virtual ~Buffer() {};
 	virtual ImplementationType getImplementationType() = 0;
-	virtual VectorType getVectorType() = 0;
+	virtual BufferType getBufferType() = 0;
 
-	virtual Vector* clone() = 0;
-	virtual void activation(Vector* results, FunctionType functionType) = 0;
+	virtual Buffer* clone() = 0;
+	virtual void activation(Buffer* results, FunctionType functionType) = 0;
 
 	void copyFromInterface(Interface* interface);
 	void copyToInterface(Interface* interface);
-	void copyFrom(Vector* vector);
-	void copyTo(Vector* vector);
+	void copyFrom(Buffer* buffer);
+	void copyTo(Buffer* buffer);
 
 	void* getDataPointer();
 	unsigned getSize();
@@ -33,19 +33,19 @@ public:
 	void save(FILE* stream);
 	void load(FILE* stream);
 	void print();
-	float compareTo(Vector* other);
+	float compareTo(Buffer* other);
 	void random(float range);
 
-	template <class vectorType>
-	vectorType* getDataPointer2()
+	template <class bufferType>
+	bufferType* getDataPointer2()
 	{
-		return (vectorType*) data;
+		return (bufferType*) data;
 	}
 protected:
-	template <class vectorType>
-	void SetValueToAnArray(void* array, unsigned size, vectorType value)
+	template <class bufferType>
+	void SetValueToAnArray(void* array, unsigned size, bufferType value)
 	{
-		vectorType* castedArray = (vectorType*)array;
+		bufferType* castedArray = (bufferType*)array;
 		for(unsigned i=0; i < size; i++){
 			castedArray[i] = value;
 		}
@@ -53,4 +53,4 @@ protected:
 
 };
 
-#endif /* VECTOR_H_ */
+#endif /* BUFFER_H_ */

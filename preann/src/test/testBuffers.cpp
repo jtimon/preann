@@ -22,11 +22,11 @@ int main(int argc, char *argv[]) {
 	test.printParameters();
 
 	try {
-		test.test(VECTOR, CLONE);
-		test.test(VECTOR, COPYFROMINTERFACE);
-		test.test(VECTOR, COPYTOINTERFACE);
-		test.disableVectorType(BYTE);
-		test.test(VECTOR, ACTIVATION);
+		test.test(BUFFER, CLONE);
+		test.test(BUFFER, COPYFROMINTERFACE);
+		test.test(BUFFER, COPYTOINTERFACE);
+		test.disableBufferType(BYTE);
+		test.test(BUFFER, ACTIVATION);
 		
 		test.test(CONNECTION, CALCULATEANDADDTO);
 		test.test(CONNECTION, MUTATE);

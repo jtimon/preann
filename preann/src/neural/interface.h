@@ -14,12 +14,12 @@ class Interface {
 
 	unsigned size;
 	void* data;
-	VectorType vectorType;
+	BufferType bufferType;
 
 public:
 	Interface();
 	Interface(FILE* stream);
-	Interface(unsigned size, VectorType vectorType);
+	Interface(unsigned size, BufferType bufferType);
 	Interface(Interface* toCopy);
 	virtual ~Interface();
 
@@ -27,7 +27,7 @@ public:
 	virtual unsigned getByteSize();
 
 	unsigned getSize();
-	VectorType getVectorType();
+	BufferType getBufferType();
 	float getElement(unsigned pos);
 	void setElement(unsigned pos, float value);
 

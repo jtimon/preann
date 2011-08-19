@@ -15,10 +15,10 @@ class InputLayer: public Layer {
 protected:
 	ImplementationType getImplementationType();
 public:
-	InputLayer(unsigned size, VectorType vectorType, ImplementationType implementationType);
+	InputLayer(unsigned size, BufferType bufferType, ImplementationType implementationType);
 	virtual ~InputLayer();
 
-	void addInput(Vector* input);
+	void addInput(Buffer* input);
 	void calculateOutput();
 
 	Interface* getInputInterface();

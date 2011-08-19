@@ -83,13 +83,13 @@ void NeuralNet::addLayer(Layer* layer)
 	layers[numberLayers++] = layer;
 }
 
-void NeuralNet::addLayer(unsigned size, VectorType destinationType,
+void NeuralNet::addLayer(unsigned size, BufferType destinationType,
 		FunctionType functiontype)
 {
 	addLayer(new Layer(size, destinationType, functiontype, getImplementationType()));
 }
 
-void NeuralNet::addInputLayer(unsigned size, VectorType vectorType)
+void NeuralNet::addInputLayer(unsigned size, BufferType bufferType)
 {
 
 	unsigned* newInputLayers = (unsigned*)mi_malloc(sizeof(unsigned)
@@ -102,7 +102,7 @@ void NeuralNet::addInputLayer(unsigned size, VectorType vectorType)
 	inputLayers = newInputLayers;
 	inputLayers[numberInputs++] = numberLayers;
 
-	addLayer(new InputLayer(size, vectorType, getImplementationType()));
+	addLayer(new InputLayer(size, bufferType, getImplementationType()));
 }
 
 void NeuralNet::updateInput(unsigned inputPos, Interface* input)
@@ -193,8 +193,8 @@ void NeuralNet::addLayersConnection(unsigned sourceLayerPos,
 	layerConnectionsGraph[(sourceLayerPos * numberLayers) + destinationLayerPos] = 1;
 }
 
-void NeuralNet::createFeedForwardNet(unsigned inputSize, VectorType inputType,
-		unsigned numLayers, unsigned sizeLayers, VectorType hiddenLayersType,
+void NeuralNet::createFeedForwardNet(unsigned inputSize, BufferType inputType,
+		unsigned numLayers, unsigned sizeLayers, BufferType hiddenLayersType,
 		FunctionType functiontype)
 {
 	addInputLayer(inputSize, inputType);
@@ -216,8 +216,8 @@ ImplementationType NeuralNet::getImplementationType()
 }
 
 void NeuralNet::createFullyConnectedNet(unsigned inputSize,
-		VectorType inputType, unsigned numLayers, unsigned sizeLayers,
-		VectorType hiddenLayersType, FunctionType functiontype)
+		BufferType inputType, unsigned numLayers, unsigned sizeLayers,
+		BufferType hiddenLayersType, FunctionType functiontype)
 {
 	addInputLayer(inputSize, inputType);
 	for (unsigned i = 0; i < numLayers; i++)
@@ -290,9 +290,9 @@ void NeuralNet::stablishConnections()
 	for (unsigned i = 0; i < numberInputs; i++)
 	{
 		unsigned layerPos = inputLayers[i];
-		Vector* output = layers[layerPos]->getOutput();
+		Buffer* output = layers[layerPos]->getOutput();
 		Layer* inputLayer = new InputLayer(output->getSize(),
-				output->getVectorType(), getImplementationType());
+				output->getBufferType(), getImplementationType());
 		inputLayer->getOutput()->copyFrom(output);
 		delete (layers[layerPos]);
 		layers[layerPos] = inputLayer;

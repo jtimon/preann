@@ -28,14 +28,14 @@ public:
 	NeuralNet(ImplementationType implementationType = C);
 	virtual ~NeuralNet();
 
-	void addInputLayer(unsigned size, VectorType vectorType);
+	void addInputLayer(unsigned size, BufferType bufferType);
 	void updateInput(unsigned inputPos, Interface* input);
 	unsigned char isInputLayer(unsigned layerPos);
 	unsigned getNumInputs();
 
 	Interface* getOutput(unsigned layerPos);
 
-	void addLayer(unsigned size, VectorType destinationType = FLOAT,
+	void addLayer(unsigned size, BufferType destinationType = FLOAT,
 			FunctionType functiontype = IDENTITY);
 	unsigned getNumLayers();
 
@@ -47,12 +47,12 @@ public:
 	void save(FILE* stream);
 	void load(FILE* stream);
 
-	void createFeedForwardNet(unsigned inputSize, VectorType inputType,
+	void createFeedForwardNet(unsigned inputSize, BufferType inputType,
 			unsigned numLayers, unsigned sizeLayers,
-			VectorType hiddenLayersType, FunctionType functiontype = IDENTITY);
-	void createFullyConnectedNet(unsigned inputSize, VectorType inputType,
+			BufferType hiddenLayersType, FunctionType functiontype = IDENTITY);
+	void createFullyConnectedNet(unsigned inputSize, BufferType inputType,
 			unsigned numLayers, unsigned sizeLayers,
-			VectorType hiddenLayersType, FunctionType functiontype = IDENTITY);
+			BufferType hiddenLayersType, FunctionType functiontype = IDENTITY);
 
 };
 

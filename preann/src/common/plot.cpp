@@ -15,12 +15,12 @@ Plot::~Plot()
 {
 }
 
-int vectorTypeToPointType(VectorType vectorType)
+int bufferTypeToPointType(BufferType bufferType)
 {
 // pt gives a particular point type: 1=diamond 2=+ 3=square 4=X 5=triangle 6=*
 // postscipt: 1=+, 2=X, 3=*, 4=square, 5=filled square, 6=circle,
 //            7=filled circle, 8=triangle, 9=filled triangle, etc.
-	switch (vectorType){
+	switch (bufferType){
 		case FLOAT:
 			return 2;
 		case BYTE:
@@ -64,16 +64,16 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	fprintf(plotFile, "plot ");
 	fprintf(dataFile, "# Size ");
 	unsigned functionNum = 2;
-	for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
+	for (bufferType = (BufferType) 0; bufferType < BUFFER_TYPE_DIM; bufferType = (BufferType) ((unsigned)bufferType + 1) ) if (bufferTypes[bufferType]){
 		for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
-			string functionName = vectorTypeToString() + "_" + implementationTypeToString();
+			string functionName = bufferTypeToString() + "_" + implementationTypeToString();
 			fprintf(dataFile, " %s ", functionName.data());
 			if (functionNum > 2){
 				fprintf(plotFile, ", ");
 			}
 			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
 					dataPath.data(), functionNum++, functionName.data(),
-					implTypeToLineType(implementationType), vectorTypeToPointType(vectorType));
+					implTypeToLineType(implementationType), bufferTypeToPointType(bufferType));
 		}
 	}
 	fprintf(plotFile, "\n");
@@ -81,7 +81,7 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 
 	for (size = minSize; size <= maxSize; size += incSize) {
 		fprintf(dataFile, " %d ", getSize());
-		for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
+		for (bufferType = (BufferType) 0; bufferType < BUFFER_TYPE_DIM; bufferType = (BufferType) ((unsigned)bufferType + 1) ) if (bufferTypes[bufferType]){
 			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
 
 				float part = doMethod(classID, method, repetitions);
@@ -103,17 +103,17 @@ float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
 {
 	float toReturn;
 
-	Vector* vector = Factory::newVector(getSize(), getVectorType(), getImplementationType());
-	vector->random(getInitialWeighsRange());
+	Buffer* buffer = Factory::newBuffer(getSize(), getBufferType(), getImplementationType());
+	buffer->random(getInitialWeighsRange());
 
 	switch (classID){
 
-		case VECTOR:
-			toReturn = doMethodVector(vector, method, repetitions);
+		case BUFFER:
+			toReturn = doMethodBuffer(buffer, method, repetitions);
 		break;
 		case CONNECTION:
 		{
-			Connection* connection = Factory::newConnection(vector, outputSize, getImplementationType());
+			Connection* connection = Factory::newConnection(buffer, outputSize, getImplementationType());
 			connection->random(getInitialWeighsRange());
 			toReturn = doMethodConnection(connection, method, repetitions);
 			delete(connection);
@@ -125,7 +125,7 @@ float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
 			throw error;
 
 	}
-	delete(vector);
+	delete(buffer);
 	return toReturn;
 }
 
@@ -137,7 +137,7 @@ float Plot::doMethodConnection(Connection* connection, Method method, unsigned r
 
 	case CALCULATEANDADDTO:
 	{
-		Vector* results = Factory::newVector(outputSize, FLOAT, connection->getImplementationType());
+		Buffer* results = Factory::newBuffer(outputSize, FLOAT, connection->getImplementationType());
 
 		chrono.start();
 		for (unsigned i = 0; i < repetitions; ++i) {
@@ -160,11 +160,11 @@ float Plot::doMethodConnection(Connection* connection, Method method, unsigned r
 	case CROSSOVER:
 	{
 		Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
-		Interface bitVector(connection->getSize(), BIT);
-		bitVector.random(2);
+		Interface bitBuffer(connection->getSize(), BIT);
+		bitBuffer.random(2);
 		chrono.start();
 		for (unsigned i = 0; i < repetitions; ++i) {
-			connection->crossover(other, &bitVector);
+			connection->crossover(other, &bitBuffer);
 		}
 		chrono.stop();
 		delete (other);
@@ -179,7 +179,7 @@ float Plot::doMethodConnection(Connection* connection, Method method, unsigned r
 	return chrono.getSeconds();
 }
 
-float Plot::doMethodVector(Vector* vector, Method method, unsigned repetitions)
+float Plot::doMethodBuffer(Buffer* buffer, Method method, unsigned repetitions)
 {
 	Chronometer chrono;
 
@@ -187,10 +187,10 @@ float Plot::doMethodVector(Vector* vector, Method method, unsigned repetitions)
 
 	case ACTIVATION:
 	{
-		Vector* results = Factory::newVector(vector->getSize(), FLOAT, vector->getImplementationType());
+		Buffer* results = Factory::newBuffer(buffer->getSize(), FLOAT, buffer->getImplementationType());
 		chrono.start();
 		for (unsigned i = 0; i < repetitions; ++i) {
-			vector->activation(results, IDENTITY);
+			buffer->activation(results, IDENTITY);
 		}
 		chrono.stop();
 		delete (results);
@@ -198,27 +198,27 @@ float Plot::doMethodVector(Vector* vector, Method method, unsigned repetitions)
 	break;
 	case COPYFROMINTERFACE:
 	{
-		Interface interface = Interface(vector->getSize(), vector->getVectorType());
+		Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
 		chrono.start();
 		for (unsigned i = 0; i < repetitions; ++i) {
-			vector->copyFromInterface(&interface);
+			buffer->copyFromInterface(&interface);
 		}
 		chrono.stop();
 	}
 	break;
 	case COPYTOINTERFACE:
 	{
-		Interface interface = Interface(vector->getSize(), vector->getVectorType());
+		Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
 		chrono.start();
 		for (unsigned i = 0; i < repetitions; ++i) {
-			vector->copyToInterface(&interface);
+			buffer->copyToInterface(&interface);
 		}
 		chrono.stop();
 	}
 	break;
 
 	default:
-		string error = "There's no such method defined to plot for Vector.";
+		string error = "There's no such method defined to plot for Buffer.";
 		throw error;
 
 	}
@@ -241,16 +241,16 @@ float Plot::plotTask(string path, Population* population)
 	fprintf(plotFile, "plot ");
 	fprintf(dataFile, "# Size ");
 	unsigned functionNum = 2;
-	for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
+	for (bufferType = (BufferType) 0; bufferType < BUFFER_TYPE_DIM; bufferType = (BufferType) ((unsigned)bufferType + 1) ) if (bufferTypes[bufferType]){
 		for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
-			string functionName = vectorTypeToString() + "_" + implementationTypeToString();
+			string functionName = bufferTypeToString() + "_" + implementationTypeToString();
 			fprintf(dataFile, " %s ", functionName.data());
 			if (functionNum > 2){
 				fprintf(plotFile, ", ");
 			}
 			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
 					dataPath.data(), functionNum++, functionName.data(),
-					implTypeToLineType(implementationType), vectorTypeToPointType(vectorType));
+					implTypeToLineType(implementationType), bufferTypeToPointType(bufferType));
 		}
 	}
 	fprintf(plotFile, "\n");
@@ -258,7 +258,7 @@ float Plot::plotTask(string path, Population* population)
 
 	for (size = minSize; size <= maxSize; size += incSize) {
 		fprintf(dataFile, " %d ", getSize());
-		for (vectorType = (VectorType) 0; vectorType < VECTOR_TYPE_DIM; vectorType = (VectorType) ((unsigned)vectorType + 1) ) if (vectorTypes[vectorType]){
+		for (bufferType = (BufferType) 0; bufferType < BUFFER_TYPE_DIM; bufferType = (BufferType) ((unsigned)bufferType + 1) ) if (bufferTypes[bufferType]){
 			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
 
 //				float part = doMethod(classID, method, repetitions);

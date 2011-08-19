@@ -19,9 +19,9 @@ class Individual: public NeuralNet {
 protected:
 	float fitness;
 
-    void crossoverNeuronsByOutput(Layer* thisLayer, Layer *otherLayer, Interface& outputsBitVector);
-    void crossoverNeuronsByInput(Interface** inputsBitVectors, Individual *other);
-	void crossoverLayers(Individual *other, Interface* bitVector);
+    void crossoverNeuronsByOutput(Layer* thisLayer, Layer *otherLayer, Interface& outputsBitBuffer);
+    void crossoverNeuronsByInput(Interface** inputsBitBuffers, Individual *other);
+	void crossoverLayers(Individual *other, Interface* bitBuffer);
 
 	void uniformCrossoverWeighs(Individual* other, float probability);
 	void uniformCrossoverNeurons(Individual* other, float probability);

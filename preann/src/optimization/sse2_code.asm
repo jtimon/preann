@@ -22,9 +22,9 @@ XMMbinario2:
 	PXOR XMM0, XMM0      ;anulamos otro registro que usaremos cuando necesitemos
 	MOVDQU XMM6, [mascara];iniciamos la mascara para cuando la tengamos que usar
 
-bucleVector:
+bucleBuffer:
 
-	MOV ESI, [ESP+24]    ;vectorIndicesEntradas
+	MOV ESI, [ESP+24]    ;bufferIndicesEntradas
 	ADD ESI, EAX
 
 	MOV ECX, [ESI+4]     
@@ -69,9 +69,9 @@ noIniciarMascara:
 	DEC ECX
 	JNZ bucle
 
-	ADD EAX, 8            ;le sumamos a EAX el tamaño de una estructura de las que hay en el vector
+	ADD EAX, 8            ;le sumamos a EAX el tamaño de una estructura de las que hay en el buffer
 	DEC EDX
-	JNZ bucleVector
+	JNZ bucleBuffer
 
 	MOVD EAX, XMM3        ;copiamos la mitad baja del resultado
 	PSRLDQ XMM3, 8        ;desplazamos el registro 8 bytes a la derecha
@@ -106,9 +106,9 @@ XMMbipolar2:
 	PXOR XMM3, XMM3       ;anulamos XMM3 para acumular los sumatorios en él
 	PXOR XMM0, XMM0       ;anulamos XMM0 para cuando lo tengamos que usar
 
-bucleVector2:
+bucleBuffer2:
 
-	MOV ESI, [ESP+24]    ;vectorIndicesEntradas
+	MOV ESI, [ESP+24]    ;bufferIndicesEntradas
 	ADD ESI, EAX
 
 	MOV ECX, [ESI+4]     
@@ -164,9 +164,9 @@ noIniciarMascara2:
 	DEC ECX
 	JNZ bucle2
 
-	ADD EAX, 8            ;le sumamos a EAX el tamaño de una estructura de las que hay en el vector
+	ADD EAX, 8            ;le sumamos a EAX el tamaño de una estructura de las que hay en el buffer
 	DEC EDX
-	JNZ bucleVector2
+	JNZ bucleBuffer2
 
 	MOVD EAX, XMM3        ;copiamos la mitad baja del resultado
 	PSRLDQ XMM3, 8        ;desplazamos el registro 8 bytes a la derecha
@@ -182,7 +182,7 @@ noIniciarMascara2:
 
 	RET
 
-;extern "C" int XMMbinario (void* vectorEntrada, unsigned numeroBloques, unsigned char* pesos);
+;extern "C" int XMMbinario (void* bufferEntrada, unsigned numeroBloques, unsigned char* pesos);
 global XMMbinario
 XMMbinario: 
 
@@ -192,7 +192,7 @@ XMMbinario:
 	PUSH ESI
 	PUSH EDI
 
-	MOV ESI, [ESP + 20]  ;vector de entradas
+	MOV ESI, [ESP + 20]  ;buffer de entradas
 	MOV ECX, [ESP + 24]  ;numero de entradas
 	;SHR ECX, 4           ;dividimos entre 16 (el número de entradas que se procesan por vuelta del bucle)
 	MOV EDI, [ESP + 28]  ;pesos
@@ -260,7 +260,7 @@ XMMbipolar:
 	PUSH ESI
 	PUSH EDI
 
-	MOV ESI, [ESP + 20]  ;vector de entradas
+	MOV ESI, [ESP + 20]  ;buffer de entradas
 	MOV ECX, [ESP + 24]  ;numero de entradas
 	;SHR ECX, 4           ;dividimos entre 16 (el número de entradas que se procesan por vuelta del bucle)
 	MOV EDI, [ESP + 28]  ;pesos
@@ -338,7 +338,7 @@ XMMreal: ;PROC
 	PUSH ESI
 	PUSH EDI
 
-	MOV ESI, [ESP + 16]  ;vector de entradas
+	MOV ESI, [ESP + 16]  ;buffer de entradas
 	MOV ECX, [ESP + 20]  ;numero de entradas
 	;SHR ECX, 2           ;dividimos entre 4 (el número de entradas que se procesan por vuelta del bucle)
 	MOV EDI, [ESP + 24]  ;pesos
@@ -392,9 +392,9 @@ XMMreal2: ;PROC
 	PXOR XMM3, XMM3       ;anulamos XMM3 para acumular los sumatorios en él
 	MOV EAX, 0
 
-bucleVectorReal:
+bucleBufferReal:
 
-	MOV ESI, [ESP+20]    ;vectorIndicesEntradas
+	MOV ESI, [ESP+20]    ;bufferIndicesEntradas
 	ADD ESI, EAX
 
 	MOV ECX, [ESI+4]     
@@ -416,9 +416,9 @@ bucleReal2:
 	DEC ECX
 	JNZ bucleReal2  
 
-	ADD EAX, 8            ;le sumamos a EAX el tamaño de una estructura de las que hay en el vector
+	ADD EAX, 8            ;le sumamos a EAX el tamaño de una estructura de las que hay en el buffer
 	DEC EDX
-	JNZ bucleVectorReal
+	JNZ bucleBufferReal
 
 	MOVAPS XMM4, XMM3
 	SHUFPS XMM4, XMM4, 11101110b  ;copiamos los dos floats altos en ambas partes

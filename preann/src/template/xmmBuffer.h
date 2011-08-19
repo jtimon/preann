@@ -1,23 +1,23 @@
 /*
- * xmmVector.h
+ * xmmBuffer.h
  *
  *  Created on: Nov 17, 2009
  *      Author: timon
  */
 
-#ifndef XMMVECTOR_H_
-#define XMMVECTOR_H_
+#ifndef XMMBUFFER_H_
+#define XMMBUFFER_H_
 
-#include "vector.h"
+#include "buffer.h"
 #include "sse2_code.h"
 
-template<VectorType vectorTypeTempl, class c_typeTempl>
-	class XmmVector : virtual public Vector {
+template<BufferType bufferTypeTempl, class c_typeTempl>
+	class XmmBuffer : virtual public Buffer {
 	protected:
-		static unsigned getByteSize(unsigned size, VectorType vectorType)
+		static unsigned getByteSize(unsigned size, BufferType bufferType)
 		{
 			unsigned numBlocks;
-			switch (vectorType)
+			switch (bufferType)
 			{
 			case BYTE:
 				numBlocks = ((size - 1) / BYTES_PER_BLOCK) + 1;
@@ -33,28 +33,28 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 			return numBlocks * BYTES_PER_BLOCK;
 		}
 
-		void bitCopyFrom(unsigned char *vectorData, Interface *interface)
+		void bitCopyFrom(unsigned char *bufferData, Interface *interface)
 		{
 			unsigned blockOffset = 0;
 			unsigned bytePos = 0;
-			unsigned char vectorMask = 128;
+			unsigned char bufferMask = 128;
 			for (unsigned i = 0; i < tSize; i++) {
 
 				if (interface->getElement(i) > 0) {
-					vectorData[blockOffset + bytePos] |= vectorMask;
+					bufferData[blockOffset + bytePos] |= bufferMask;
 				}
 				else {
-					vectorData[blockOffset + bytePos] &= ~vectorMask;
+					bufferData[blockOffset + bytePos] &= ~bufferMask;
 				}
 
 				if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK - 1)) {
 					bytePos = 0;
 					if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK - 1)) {
 						blockOffset += BYTES_PER_BLOCK;
-						vectorMask = 128;
+						bufferMask = 128;
 					}
 					else {
-						vectorMask >>= 1;
+						bufferMask >>= 1;
 					}
 				}
 				else {
@@ -63,14 +63,14 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 			}
 		}
 
-		void bitCopyTo(unsigned char *vectorData, Interface *interface)
+		void bitCopyTo(unsigned char *bufferData, Interface *interface)
 		{
 			unsigned blockOffset = 0;
 			unsigned bytePos = 0;
-			unsigned char vectorMask = 128;
+			unsigned char bufferMask = 128;
 			for (unsigned i = 0; i < tSize; i++) {
 
-				if (vectorData[blockOffset + bytePos] & vectorMask) {
+				if (bufferData[blockOffset + bytePos] & bufferMask) {
 					interface->setElement(i, 1);
 				}
 				else {
@@ -81,10 +81,10 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 					bytePos = 0;
 					if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK - 1)) {
 						blockOffset += BYTES_PER_BLOCK;
-						vectorMask = 128;
+						bufferMask = 128;
 					}
 					else {
-						vectorMask >>= 1;
+						bufferMask >>= 1;
 					}
 				}
 				else {
@@ -95,7 +95,7 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 
 		virtual void copyFromImpl(Interface* interface)
 		{
-			switch (vectorTypeTempl)
+			switch (bufferTypeTempl)
 			{
 			default:
 				memcpy(data, interface->getDataPointer(),
@@ -103,14 +103,14 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 				break;
 			case BIT:
 			case SIGN:
-				unsigned char* vectorData = (unsigned char*)(data);
-				bitCopyFrom(vectorData, interface);
+				unsigned char* bufferData = (unsigned char*)(data);
+				bitCopyFrom(bufferData, interface);
 			}
 		}
 
 		virtual void copyToImpl(Interface* interface)
 		{
-			switch (vectorTypeTempl)
+			switch (bufferTypeTempl)
 			{
 			default:
 				memcpy(interface->getDataPointer(), data,
@@ -118,8 +118,8 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 				break;
 			case BIT:
 			case SIGN:
-				unsigned char* vectorData = (unsigned char*)(data);
-				bitCopyTo(vectorData, interface);
+				unsigned char* bufferData = (unsigned char*)(data);
+				bitCopyTo(bufferData, interface);
 				break;
 			}
 		}
@@ -130,24 +130,24 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 			return SSE2;
 		};
 
-		virtual VectorType getVectorType()
+		virtual BufferType getBufferType()
 		{
-			return vectorTypeTempl;
+			return bufferTypeTempl;
 		};
 
-		XmmVector()
+		XmmBuffer()
 		{
 		}
 		;
 
-		XmmVector(unsigned size)
+		XmmBuffer(unsigned size)
 		{
 			this->tSize = size;
 
-			size_t byteSize = getByteSize(size, vectorTypeTempl);
+			size_t byteSize = getByteSize(size, bufferTypeTempl);
 			data = mi_malloc(byteSize);
 
-			switch (vectorTypeTempl)
+			switch (bufferTypeTempl)
 			{
 
 			case BYTE:
@@ -163,7 +163,7 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 			}
 		}
 
-		~XmmVector()
+		~XmmBuffer()
 		{
 			if (data) {
 				mi_free(data);
@@ -171,23 +171,23 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 			}
 		}
 
-		virtual Vector* clone()
+		virtual Buffer* clone()
 		{
-			Vector* clone = new XmmVector<vectorTypeTempl, c_typeTempl> (tSize);
+			Buffer* clone = new XmmBuffer<bufferTypeTempl, c_typeTempl> (tSize);
 			copyTo(clone);
 			return clone;
 		}
 
-		virtual void activation(Vector* resultsVect, FunctionType functionType)
+		virtual void activation(Buffer* resultsVect, FunctionType functionType)
 		{
 			float* results = (float*)resultsVect->getDataPointer();
 
-			switch (vectorTypeTempl)
+			switch (bufferTypeTempl)
 			{
 			case BYTE:
 			{
 				std::string error =
-						"XmmVector::activation is not implemented for VectorType BYTE.";
+						"XmmBuffer::activation is not implemented for BufferType BYTE.";
 				throw error;
 			}
 				break;
@@ -202,29 +202,29 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 			case BIT:
 			case SIGN:
 			{
-				unsigned char* vectorData = (unsigned char*)data;
+				unsigned char* bufferData = (unsigned char*)data;
 
 				unsigned blockOffset = 0;
 				unsigned bytePos = 0;
-				unsigned char vectorMask = 128;
+				unsigned char bufferMask = 128;
 
 				for (unsigned i = 0; i < tSize; i++) {
 
 					if (results[i] > 0) {
-						vectorData[blockOffset + bytePos] |= vectorMask;
+						bufferData[blockOffset + bytePos] |= bufferMask;
 					}
 					else {
-						vectorData[blockOffset + bytePos] &= ~vectorMask;
+						bufferData[blockOffset + bytePos] &= ~bufferMask;
 					}
 
 					if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK - 1)) {
 						bytePos = 0;
 						if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK - 1)) {
 							blockOffset += BYTES_PER_BLOCK;
-							vectorMask = 128;
+							bufferMask = 128;
 						}
 						else {
-							vectorMask >>= 1;
+							bufferMask >>= 1;
 						}
 					}
 					else {
@@ -236,4 +236,4 @@ template<VectorType vectorTypeTempl, class c_typeTempl>
 		}
 	};
 
-#endif /* XMMVECTOR_H_ */
+#endif /* XMMBUFFER_H_ */

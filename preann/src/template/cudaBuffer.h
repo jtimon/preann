@@ -1,18 +1,18 @@
 
-#ifndef CUDAVECTOR_H_
-#define CUDAVECTOR_H_
+#ifndef CUDABUFFER_H_
+#define CUDABUFFER_H_
 
-#include "vector.h"
+#include "buffer.h"
 #include "cuda_code.h"
 
-template <VectorType vectorTypeTempl, class c_typeTempl>
-class CudaVector: virtual public Vector {
+template <BufferType bufferTypeTempl, class c_typeTempl>
+class CudaBuffer: virtual public Buffer {
 private:
-	CudaVector() {};
+	CudaBuffer() {};
 protected:
 	unsigned getByteSize()
 	{
-		switch (vectorTypeTempl){
+		switch (bufferTypeTempl){
 		case BYTE:
 			return tSize;
 			break;
@@ -38,43 +38,43 @@ public:
 	virtual ImplementationType getImplementationType() {
 		return CUDA;
 	};
-	virtual VectorType getVectorType()
+	virtual BufferType getBufferType()
 	{
-		return vectorTypeTempl;
+		return bufferTypeTempl;
 	};
 
-	CudaVector(unsigned size)
+	CudaBuffer(unsigned size)
 	{
 		this->tSize = size;
 
 		unsigned byte_sz = getByteSize();
 		data = cuda_malloc(byte_sz);
 
-		cuda_setZero(data, byte_sz, vectorTypeTempl, CUDA_THREADS_PER_BLOCK);
+		cuda_setZero(data, byte_sz, bufferTypeTempl, CUDA_THREADS_PER_BLOCK);
 	}
-	//special constructor for bit coalescing vectors
-	CudaVector(Interface* bitVector, unsigned block_size)
+	//special constructor for bit coalescing buffers
+	CudaBuffer(Interface* bitBuffer, unsigned block_size)
 	{
-		if (bitVector->getVectorType() != BIT){
-			std::string error = "The Vector type must be BIT to use a BitVector CudaVector constructor.";
+		if (bitBuffer->getBufferType() != BIT){
+			std::string error = "The Buffer type must be BIT to use a BitBuffer CudaBuffer constructor.";
 			throw error;
 		}
-		unsigned bitVectorSize = bitVector->getSize();
+		unsigned bitBufferSize = bitBuffer->getSize();
 		unsigned maxWeighsPerBlock = BITS_PER_UNSIGNED * block_size;
 
-		tSize = (bitVectorSize / maxWeighsPerBlock) * maxWeighsPerBlock;
-		tSize += min(bitVectorSize % maxWeighsPerBlock, block_size) * BITS_PER_UNSIGNED;
+		tSize = (bitBufferSize / maxWeighsPerBlock) * maxWeighsPerBlock;
+		tSize += min(bitBufferSize % maxWeighsPerBlock, block_size) * BITS_PER_UNSIGNED;
 
 		Interface interfaceOrderedByBlockSize = Interface(tSize, BIT);
 		unsigned byteSize = interfaceOrderedByBlockSize.getByteSize();
 		data = cuda_malloc(byteSize);
 
 		unsigned bit = 0, thread = 0, block_offset = 0;
-		for (unsigned i=0; i < bitVectorSize; i++){
+		for (unsigned i=0; i < bitBufferSize; i++){
 
 			unsigned weighPos = (thread * BITS_PER_UNSIGNED) + bit + block_offset;
 			thread++;
-			interfaceOrderedByBlockSize.setElement(weighPos, bitVector->getElement(i));
+			interfaceOrderedByBlockSize.setElement(weighPos, bitBuffer->getElement(i));
 
 			if (thread == block_size){
 				thread = 0;
@@ -87,7 +87,7 @@ public:
 		}
 		cuda_copyToDevice(data, interfaceOrderedByBlockSize.getDataPointer(), byteSize);
 	}
-	virtual ~CudaVector()
+	virtual ~CudaBuffer()
 	{
 		if (data) {
 			cuda_free(data);
@@ -95,19 +95,19 @@ public:
 		}
 	}
 
-	virtual Vector* clone()
+	virtual Buffer* clone()
 	{
-		Vector* clone = new CudaVector(tSize);
+		Buffer* clone = new CudaBuffer(tSize);
 		copyTo(clone);
 		return clone;
 	}
 
-	virtual void activation(Vector* resultsVect, FunctionType functionType)
+	virtual void activation(Buffer* resultsVect, FunctionType functionType)
 	{
 		float* results = (float*)resultsVect->getDataPointer();
-		cuda_activation(data, tSize, vectorTypeTempl, results, functionType, CUDA_THREADS_PER_BLOCK);
+		cuda_activation(data, tSize, bufferTypeTempl, results, functionType, CUDA_THREADS_PER_BLOCK);
 	}
 
 };
 
-#endif /* CUDAVECTOR_H_ */
+#endif /* CUDABUFFER_H_ */

@@ -2,10 +2,10 @@
 #include "inputLayer.h"
 #include "factory.h"
 
-InputLayer::InputLayer(unsigned size, VectorType vectorType, ImplementationType implementationType)
+InputLayer::InputLayer(unsigned size, BufferType bufferType, ImplementationType implementationType)
 {
-	tInput = new Interface(size, vectorType);
-	output = Factory::newVector(size, vectorType, implementationType);
+	tInput = new Interface(size, bufferType);
+	output = Factory::newBuffer(size, bufferType, implementationType);
 
 	thresholds = NULL;
 	functionType = IDENTITY;
@@ -21,7 +21,7 @@ InputLayer::~InputLayer()
 	}
 }
 
-void InputLayer::addInput(Vector *input)
+void InputLayer::addInput(Buffer *input)
 {
 	std::string error = "addInput method does not work for InputLayer.";
 	throw error;

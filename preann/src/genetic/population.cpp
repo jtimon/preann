@@ -173,26 +173,26 @@ void Population::insertIndividual(Individual *individual)
 	}
 	else
 	{
-		unsigned vectorPos = this->size - 1;
+		unsigned bufferPos = this->size - 1;
 		float fitness = individual->getFitness();
-		if (fitness > individualList[vectorPos]->getFitness())
+		if (fitness > individualList[bufferPos]->getFitness())
 		{
 			if (this->size < this->maxSize)
 			{
-				individualList[this->size++] = individualList[vectorPos];
+				individualList[this->size++] = individualList[bufferPos];
 			}
 			else
 			{
-				delete (individualList[vectorPos]);
+				delete (individualList[bufferPos]);
 			}
 
-			while (vectorPos > 1 && fitness
-					> individualList[vectorPos - 1]->getFitness())
+			while (bufferPos > 1 && fitness
+					> individualList[bufferPos - 1]->getFitness())
 			{
-				individualList[vectorPos] = individualList[vectorPos - 1];
-				--vectorPos;
+				individualList[bufferPos] = individualList[bufferPos - 1];
+				--bufferPos;
 			}
-			individualList[vectorPos] = individual;
+			individualList[bufferPos] = individual;
 		}
 		else if (this->size < this->maxSize)
 		{
@@ -420,7 +420,7 @@ void Population::crossover()
 	}
 	else
 	{
-		Interface vectorUsedParents(parentSize, BIT);
+		Interface bufferUsedParents(parentSize, BIT);
 		unsigned usedParents = 0;
 
 		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
@@ -437,7 +437,7 @@ void Population::crossover()
 				if (numCurrentScheme & 1)
 				{
 					oneCrossover(crossoverAlgorithm, crossoverLevel,
-							vectorUsedParents, usedParents);
+							bufferUsedParents, usedParents);
 					delete (offSpring[offSpringSize - 1]);
 					--offSpringSize;
 					++numGenerated;
@@ -445,7 +445,7 @@ void Population::crossover()
 				while (numGenerated < numCurrentScheme)
 				{
 					oneCrossover(crossoverAlgorithm, crossoverLevel,
-							vectorUsedParents, usedParents);
+							bufferUsedParents, usedParents);
 					numGenerated += 2;
 				}
 			}
@@ -453,18 +453,18 @@ void Population::crossover()
 	}
 }
 
-unsigned Population::choseParent(Interface &vectorUsedParents,
+unsigned Population::choseParent(Interface &bufferUsedParents,
 		unsigned &usedParents)
 {
 	unsigned chosenPoint;
 	do
 	{
 		chosenPoint = randomUnsigned(parentSize);
-	} while (!vectorUsedParents.getElement(chosenPoint));
-	vectorUsedParents.setElement(chosenPoint, 1);
-	if (++usedParents == vectorUsedParents.getSize())
+	} while (!bufferUsedParents.getElement(chosenPoint));
+	bufferUsedParents.setElement(chosenPoint, 1);
+	if (++usedParents == bufferUsedParents.getSize())
 	{
-		vectorUsedParents.reset();
+		bufferUsedParents.reset();
 		usedParents = 0;
 		printf(
 				"Warning: there's not enough unused parents too do crossover. Some of them will be used again.\n");
@@ -473,12 +473,12 @@ unsigned Population::choseParent(Interface &vectorUsedParents,
 }
 
 void Population::oneCrossover(CrossoverAlgorithm crossoverAlgorithm,
-		CrossoverLevel crossoverLevel, Interface &vectorUsedParents,
+		CrossoverLevel crossoverLevel, Interface &bufferUsedParents,
 		unsigned &usedParents)
 {
-	offSpring[offSpringSize++] = parents[choseParent(vectorUsedParents,
+	offSpring[offSpringSize++] = parents[choseParent(bufferUsedParents,
 			usedParents)]->newCopy();
-	offSpring[offSpringSize++] = parents[choseParent(vectorUsedParents,
+	offSpring[offSpringSize++] = parents[choseParent(bufferUsedParents,
 			usedParents)]->newCopy();
 
 	Individual* offSpringA = offSpring[offSpringSize - 2];

@@ -12,11 +12,11 @@ using namespace std;
 //TODO TCC esto peta con BIT inputType = BIT maxSize = 163840, 16258024
 //este to do estaba en CppLayer::randomweighs
 
-float testNeuralNet(NeuralNet* nn, unsigned inputSize, VectorType vectorType,
+float testNeuralNet(NeuralNet* nn, unsigned inputSize, BufferType bufferType,
 		unsigned times) {
 
 	Chronometer chrono;
-	nn->addInputLayer(inputSize, vectorType);
+	nn->addInputLayer(inputSize, bufferType);
 
 	FILE* stream = fopen(PATH, "r+b");
 	nn->load(stream);
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 		Population* population;
 
 		FILE* stream;
-		VectorType inputType;
+		BufferType inputType;
 		FunctionType functionType;
 		unsigned rangeWeighs = 20;
 		unsigned numlayers;

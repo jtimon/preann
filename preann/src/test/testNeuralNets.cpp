@@ -12,7 +12,7 @@ using namespace std;
 #define INITIAL_WEIGHS_RANGE 20
 
 void printTestParams(ImplementationType implementationType,
-		VectorType vectorType, unsigned size)
+		BufferType bufferType, unsigned size)
 {
 	switch (implementationType)
 	{
@@ -32,7 +32,7 @@ void printTestParams(ImplementationType implementationType,
 		printf(" CUDA_INV ");
 		break;
 	}
-	switch (vectorType)
+	switch (bufferType)
 	{
 	case FLOAT:
 		printf(" FLOAT ");
@@ -50,9 +50,9 @@ void printTestParams(ImplementationType implementationType,
 	printf(" size = %d weighsRange %d \n", size, INITIAL_WEIGHS_RANGE);
 }
 
-unsigned char areEqual(float expected, float actual, VectorType vectorType)
+unsigned char areEqual(float expected, float actual, BufferType bufferType)
 {
-	if (vectorType == FLOAT)
+	if (bufferType == FLOAT)
 	{
 		return (expected - 1 < actual && expected + 1 > actual);
 	}
@@ -64,7 +64,7 @@ unsigned char areEqual(float expected, float actual, VectorType vectorType)
 
 unsigned assertEqualsInterfaces(Interface* expected, Interface* actual)
 {
-    if(expected->getVectorType() != actual->getVectorType()){
+    if(expected->getBufferType() != actual->getBufferType()){
         throw "The interfaces are not even of the same type!";
     }
     if(expected->getSize() != actual->getSize()){
@@ -73,7 +73,7 @@ unsigned assertEqualsInterfaces(Interface* expected, Interface* actual)
 	unsigned differencesCounter = 0;
 
     for(unsigned i = 0;i < expected->getSize();i++){
-        if(!areEqual(expected->getElement(i), actual->getElement(i), expected->getVectorType())){
+        if(!areEqual(expected->getElement(i), actual->getElement(i), expected->getBufferType())){
             printf("The interfaces are not equal at the position %d (expected = %f actual %f).\n", i, expected->getElement(i), actual->getElement(i));
             ++differencesCounter;
         }
@@ -94,19 +94,19 @@ int main(int argc, char *argv[])
 	try
 	{
 		//TODO AAAAAAAAAAAAAa
-//		for (unsigned vectType = 0; vectType < VECTOR_TYPE_DIM; vectType++)
+//		for (unsigned vectType = 0; vectType < BUFFER_TYPE_DIM; vectType++)
 //		{
-//			VectorType vectorType = (VectorType)vectType;
-//			if (vectorType != BYTE)
+//			BufferType bufferType = (BufferType)vectType;
+//			if (bufferType != BYTE)
 //			{
 //				for (unsigned size = SIZE_MIN; size <= SIZE_MAX; size
 //						+= SIZE_INC)
 //				{
 //					NeuralNet controlNeuralNet(C);
-//					controlNeuralNet.createFeedForwardNet(size, vectorType,
-//							NUM_TRIES, size, vectorType, IDENTITY);
-////					controlNeuralNet.createFullyConnectedNet(size, vectorType,
-////							NUM_LAYERS, size, vectorType, IDENTITY);
+//					controlNeuralNet.createFeedForwardNet(size, bufferType,
+//							NUM_TRIES, size, bufferType, IDENTITY);
+////					controlNeuralNet.createFullyConnectedNet(size, bufferType,
+////							NUM_LAYERS, size, bufferType, IDENTITY);
 //					controlNeuralNet.randomWeighs(INITIAL_WEIGHS_RANGE);
 //
 //					FILE* stream = fopen(PATH, "w+b");
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 //					{
 //						ImplementationType implementationType =
 //								(ImplementationType)((implType));
-//						printTestParams(implementationType, vectorType, size);
+//						printTestParams(implementationType, bufferType, size);
 //
 //						NeuralNet nn(implementationType);
 //						stream = fopen(PATH, "r+b");

@@ -11,17 +11,17 @@ protected:
 	unsigned numberInputs;
 
 	Connection* thresholds;
-	Vector* output;
+	Buffer* output;
 	Interface* tOuputInterface;
 	FunctionType functionType;
-	Vector* newVector(FILE* stream);
-	Vector* newVector(unsigned size, VectorType vectorType);
+	Buffer* newBuffer(FILE* stream);
+	Buffer* newBuffer(unsigned size, BufferType bufferType);
 public:
-	Layer(unsigned size, VectorType outputType, FunctionType functionType, ImplementationType implementationType);
+	Layer(unsigned size, BufferType outputType, FunctionType functionType, ImplementationType implementationType);
 	Layer(FILE* stream, ImplementationType implementationType);
 	virtual ~Layer();
 
-	void addInput(Vector* input);
+	void addInput(Buffer* input);
 	void calculateOutput();
 
 	void randomWeighs(float range);
@@ -31,9 +31,9 @@ public:
 	void save(FILE* stream);
 
 	unsigned getNumberInputs();
-	Vector* getInput(unsigned pos);
+	Buffer* getInput(unsigned pos);
 	Connection* getConnection(unsigned inputPos);
-	Vector* getOutput();
+	Buffer* getOutput();
 	Interface* getOutputInterface();
 	Connection* getThresholds();
 	FunctionType getFunctionType();

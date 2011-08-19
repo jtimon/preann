@@ -9,7 +9,7 @@ Interface::Interface()
 Interface::Interface(FILE* stream)
 {
 	fread(&size, sizeof(unsigned), 1, stream);
-	fread(&vectorType, sizeof(VectorType), 1, stream);
+	fread(&bufferType, sizeof(BufferType), 1, stream);
 	unsigned byteSize = getByteSize();
 	data = mi_malloc(byteSize);
 	fread(data, byteSize, 1, stream);
@@ -17,7 +17,7 @@ Interface::Interface(FILE* stream)
 
 void Interface::reset()
 {
-    switch (vectorType){
+    switch (bufferType){
         case FLOAT:
             for(unsigned i = 0;i < size;i++){
                 ((float*)(data))[i] = 0;
@@ -33,10 +33,10 @@ void Interface::reset()
 
 }
 
-Interface::Interface(unsigned size, VectorType vectorType)
+Interface::Interface(unsigned size, BufferType bufferType)
 {
 	this->size = size;
-	this->vectorType = vectorType;
+	this->bufferType = bufferType;
 
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
@@ -46,7 +46,7 @@ Interface::Interface(unsigned size, VectorType vectorType)
 Interface::Interface(Interface* toCopy)
 {
 	this->size = toCopy->getSize();
-	this->vectorType = toCopy->getVectorType();
+	this->bufferType = toCopy->getBufferType();
 
 	size_t byteSize = getByteSize();
 	data = mi_malloc(byteSize);
@@ -65,7 +65,7 @@ void* Interface::getDataPointer()
 
 unsigned Interface::getByteSize()
 {
-	switch (vectorType)
+	switch (bufferType)
 	{
 	case BYTE:
 		return size;
@@ -77,9 +77,9 @@ unsigned Interface::getByteSize()
 	}
 }
 
-VectorType Interface::getVectorType()
+BufferType Interface::getBufferType()
 {
-	return vectorType;
+	return bufferType;
 }
 
 unsigned Interface::getSize()
@@ -94,12 +94,12 @@ float Interface::getElement(unsigned pos)
 		char buffer[100];
 		sprintf(
 				buffer,
-				"Cannot get the element in position %d: the size of the vector is %d.",
+				"Cannot get the element in position %d: the size of the buffer is %d.",
 				pos, size);
 		std::string error = buffer;
 		throw error;
 	}
-	switch (vectorType)
+	switch (bufferType)
 	{
 	case BYTE:
 		return ((unsigned char*)data)[pos];
@@ -113,7 +113,7 @@ float Interface::getElement(unsigned pos)
 		{
 			return 1;
 		}
-		if (vectorType == BIT)
+		if (bufferType == BIT)
 		{
 			return 0;
 		}
@@ -128,12 +128,12 @@ void Interface::setElement(unsigned pos, float value)
 		char buffer[100];
 		sprintf(
 				buffer,
-				"Cannot set the element in position %d: the size of the vector is %d.",
+				"Cannot set the element in position %d: the size of the buffer is %d.",
 				pos, size);
 		std::string error = buffer;
 		throw error;
 	}
-	switch (vectorType)
+	switch (bufferType)
 	{
 	case BYTE:
 		((unsigned char*)data)[pos] = (unsigned char)value;
@@ -176,7 +176,7 @@ float Interface::compareTo(Interface *other)
 
 void Interface::random(float range)
 {
-	switch (vectorType)
+	switch (bufferType)
 	{
 	case BYTE:
 		unsigned charRange;
@@ -212,16 +212,16 @@ void Interface::random(float range)
 void Interface::save(FILE* stream)
 {
 	fwrite(&size, sizeof(unsigned), 1, stream);
-	fwrite(&vectorType, sizeof(VectorType), 1, stream);
+	fwrite(&bufferType, sizeof(BufferType), 1, stream);
 	fwrite(data, getByteSize(), 1, stream);
 }
 
 void Interface::load(FILE* stream)
 {
 	unsigned size2;
-	VectorType vectorType2;
+	BufferType bufferType2;
 	fread(&size2, sizeof(unsigned), 1, stream);
-	fread(&vectorType2, sizeof(VectorType), 1, stream);
+	fread(&bufferType2, sizeof(BufferType), 1, stream);
 
 	if (size2 != size)
 	{
@@ -229,10 +229,10 @@ void Interface::load(FILE* stream)
 				"The size of the Interface is different than the size to load.";
 		throw error;
 	}
-	if (vectorType2 != vectorType)
+	if (bufferType2 != bufferType)
 	{
 		std::string error =
-				"The Type of the Interface is different than the Vector Type to load.";
+				"The Type of the Interface is different than the Buffer Type to load.";
 		throw error;
 	}
 	fread(data, getByteSize(), 1, stream);
@@ -243,7 +243,7 @@ void Interface::print()
 	printf("----------------\n", 1);
 	for (unsigned i = 0; i < size; i++)
 	{
-		switch (vectorType)
+		switch (bufferType)
 		{
 		case BYTE:
 			printf("%d ", (int)((unsigned char)getElement(i) - 128));
@@ -266,7 +266,7 @@ void Interface::copyFromFast(Interface *other)
 		std::string error = "The sizes of the interfaces are different.";
 		throw error;
 	}
-	if (vectorType != other->getVectorType())
+	if (bufferType != other->getBufferType())
 	{
 		std::string error = "The Types of the Interfaces are different.";
 		throw error;

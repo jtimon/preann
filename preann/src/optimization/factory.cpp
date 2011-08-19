@@ -1,53 +1,53 @@
 #include "factory.h"
 #include "configFactory.h"
 
-Vector* Factory::newVector(FILE* stream, ImplementationType implementationType)
+Buffer* Factory::newBuffer(FILE* stream, ImplementationType implementationType)
 {
 	Interface interface(stream);
-	Vector* vector = Factory::newVector(&interface, implementationType);
-	return vector;
+	Buffer* buffer = Factory::newBuffer(&interface, implementationType);
+	return buffer;
 }
 
-Vector* Factory::newVector(Interface* interface, ImplementationType implementationType)
+Buffer* Factory::newBuffer(Interface* interface, ImplementationType implementationType)
 {
-	Vector* toReturn = Factory::newVector(interface->getSize(), interface->getVectorType(), implementationType);
+	Buffer* toReturn = Factory::newBuffer(interface->getSize(), interface->getBufferType(), implementationType);
 	toReturn->copyFromInterface(interface);
 	return toReturn;
 }
 
-Vector* Factory::newVector(Vector* vector, ImplementationType implementationType)
+Buffer* Factory::newBuffer(Buffer* buffer, ImplementationType implementationType)
 {
-    Interface* interface = vector->toInterface();
-    Vector* toReturn = Factory::newVector(interface, implementationType);
+    Interface* interface = buffer->toInterface();
+    Buffer* toReturn = Factory::newBuffer(interface, implementationType);
     delete(interface);
     return toReturn;
 }
 
-Vector* Factory::newVector(unsigned size, VectorType vectorType, ImplementationType implementationType)
+Buffer* Factory::newBuffer(unsigned size, BufferType bufferType, ImplementationType implementationType)
 {
-	switch(vectorType){
+	switch(bufferType){
 		case FLOAT:
-			return func_newVector<FLOAT, float>(size, implementationType);
+			return func_newBuffer<FLOAT, float>(size, implementationType);
 		case BYTE:
-			return func_newVector<BYTE, unsigned char>(size, implementationType);
+			return func_newBuffer<BYTE, unsigned char>(size, implementationType);
 		case BIT:
-			return func_newVector<BIT, unsigned>(size, implementationType);
+			return func_newBuffer<BIT, unsigned>(size, implementationType);
 		case SIGN:
-			return func_newVector<SIGN, unsigned>(size, implementationType);
+			return func_newBuffer<SIGN, unsigned>(size, implementationType);
 	}
 }
 
-Connection* Factory::newThresholds(Vector* output, ImplementationType implementationType)
+Connection* Factory::newThresholds(Buffer* output, ImplementationType implementationType)
 {
 	return func_newConnection<FLOAT, float>(output, 1, implementationType);
 }
 
-VectorType Factory::weighForInput(VectorType inputType)
+BufferType Factory::weighForInput(BufferType inputType)
 {
 	switch (inputType){
 		case BYTE:
 			{
-			std::string error = "Connections are not implemented for an input Vector of the VectorType BYTE";
+			std::string error = "Connections are not implemented for an input Buffer of the BufferType BYTE";
 			throw error;
 			}
 		case FLOAT:
@@ -58,11 +58,11 @@ VectorType Factory::weighForInput(VectorType inputType)
 	}
 }
 
-Connection* Factory::newConnection(Vector* input, unsigned outputSize, ImplementationType implementationType)
+Connection* Factory::newConnection(Buffer* input, unsigned outputSize, ImplementationType implementationType)
 {
-	VectorType vectorType = Factory::weighForInput(input->getVectorType());
+	BufferType bufferType = Factory::weighForInput(input->getBufferType());
 
-	switch(vectorType){
+	switch(bufferType){
 		case FLOAT:
 			return func_newConnection<FLOAT, float>(input, outputSize, implementationType);
 		case BYTE:

@@ -14,9 +14,9 @@ using namespace std;
 
 Test test;
 
-unsigned char areEqual(float expected, float actual, VectorType vectorType)
+unsigned char areEqual(float expected, float actual, BufferType bufferType)
 {
-	if (vectorType == FLOAT){
+	if (bufferType == FLOAT){
 		return (expected - 1 < actual
 			 && expected + 1 > actual);
 	} else {
@@ -24,13 +24,13 @@ unsigned char areEqual(float expected, float actual, VectorType vectorType)
 	}
 }
 
-unsigned assertEquals(Vector* expected, Vector* actual)
+unsigned assertEquals(Buffer* expected, Buffer* actual)
 {
-    if(expected->getVectorType() != actual->getVectorType()){
-        throw "The vectors are not even of the same type!";
+    if(expected->getBufferType() != actual->getBufferType()){
+        throw "The buffers are not even of the same type!";
     }
     if(expected->getSize() != actual->getSize()){
-        throw "The vectors are not even of the same size!";
+        throw "The buffers are not even of the same size!";
     }
 
 	unsigned differencesCounter = 0;
@@ -38,8 +38,8 @@ unsigned assertEquals(Vector* expected, Vector* actual)
 	Interface* actualInt = actual->toInterface();
 
     for(unsigned i = 0;i < expectedInt->getSize();i++){
-        if(!areEqual(expectedInt->getElement(i), actualInt->getElement(i), expectedInt->getVectorType())){
-            printf("The vectors are not equal at the position %d (expected = %f actual %f).\n", i, expectedInt->getElement(i), actualInt->getElement(i));
+        if(!areEqual(expectedInt->getElement(i), actualInt->getElement(i), expectedInt->getBufferType())){
+            printf("The buffers are not equal at the position %d (expected = %f actual %f).\n", i, expectedInt->getElement(i), actualInt->getElement(i));
             ++differencesCounter;
         }
     }
@@ -50,22 +50,22 @@ unsigned assertEquals(Vector* expected, Vector* actual)
 
 #define NUM_INPUTS 3
 
-Layer* createAndLoadLayer(ImplementationType implementationType, Vector** inputVectors)
+Layer* createAndLoadLayer(ImplementationType implementationType, Buffer** inputBuffers)
 {
     FILE* stream = fopen(PATH, "r+b");
     Layer* layer = new Layer(stream, implementationType);
 
     for (unsigned i = 0; i < NUM_INPUTS; i++){
-		layer->addInput(inputVectors[i]);
+		layer->addInput(inputBuffers[i]);
 	}
     layer->loadWeighs(stream);
     fclose(stream);
     return layer;
 }
 
-Layer* createAndSaveLayer(unsigned size, VectorType vectorType, Vector** controlInputs)
+Layer* createAndSaveLayer(unsigned size, BufferType bufferType, Buffer** controlInputs)
 {
-    Layer* controlLayer = new Layer(size, vectorType, IDENTITY, C);
+    Layer* controlLayer = new Layer(size, bufferType, IDENTITY, C);
 
     for (unsigned i = 0; i < NUM_INPUTS; i++){
 		controlLayer->addInput(controlInputs[i]);
@@ -90,36 +90,36 @@ int main(int argc, char *argv[]) {
 	test.setInitialWeighsRange(20);
 	test.setMaxSize(50);
 	test.setIncSize(50);
-	test.disableVectorType(BYTE);
+	test.disableBufferType(BYTE);
 	test.printParameters();
 
 	try {
 		for (test.sizeToMin(); test.hasNextSize(); test.sizeIncrement()) {
-			for (test.vectorTypeToMin(); test.hasNextVectorType(); test.vectorTypeIncrement() ) {
-				Vector* controlInputVectors[VECTOR_TYPE_DIM];
+			for (test.bufferTypeToMin(); test.hasNextBufferType(); test.bufferTypeIncrement() ) {
+				Buffer* controlInputBuffers[BUFFER_TYPE_DIM];
 				for (unsigned i = 0; i < NUM_INPUTS; i++) {
-					VectorType vectorTypeAux = BYTE;
-					while (vectorTypeAux == BYTE) {
-						vectorTypeAux = (VectorType)randomUnsigned(VECTOR_TYPE_DIM);
+					BufferType bufferTypeAux = BYTE;
+					while (bufferTypeAux == BYTE) {
+						bufferTypeAux = (BufferType)randomUnsigned(BUFFER_TYPE_DIM);
 					}
-					controlInputVectors[i] = Factory::newVector(test.getSize(), vectorTypeAux, C);
-					controlInputVectors[i]->random(test.getInitialWeighsRange());
+					controlInputBuffers[i] = Factory::newBuffer(test.getSize(), bufferTypeAux, C);
+					controlInputBuffers[i]->random(test.getInitialWeighsRange());
 				}
 
-			    Layer* controlLayer = createAndSaveLayer(test.getSize(), test.getVectorType(), controlInputVectors);
+			    Layer* controlLayer = createAndSaveLayer(test.getSize(), test.getBufferType(), controlInputBuffers);
 			    controlLayer->calculateOutput();
 
 			    for (test.implementationTypeToMin(); test.hasNextImplementationType(); test.implementationTypeIncrement()) {
 
 					test.printCurrentState();
 
-					Vector* inputVectors[VECTOR_TYPE_DIM];
+					Buffer* inputBuffers[BUFFER_TYPE_DIM];
 					for (unsigned i = 0; i < NUM_INPUTS; i++) {
-						inputVectors[i] = Factory::newVector(test.getSize(), controlInputVectors[i]->getVectorType(), test.getImplementationType());
-						inputVectors[i]->copyFrom(controlInputVectors[i]);
+						inputBuffers[i] = Factory::newBuffer(test.getSize(), controlInputBuffers[i]->getBufferType(), test.getImplementationType());
+						inputBuffers[i]->copyFrom(controlInputBuffers[i]);
 					}
 
-					Layer* layer = createAndLoadLayer(test.getImplementationType(), inputVectors);
+					Layer* layer = createAndLoadLayer(test.getImplementationType(), inputBuffers);
 
 				    //test calculation
 					layer->calculateOutput();
@@ -138,12 +138,12 @@ int main(int argc, char *argv[]) {
 				    }
 					delete (layer);
 					for (unsigned i = 0; i < NUM_INPUTS; i++) {
-						delete(inputVectors[i]);
+						delete(inputBuffers[i]);
 					}
 				}
 			    delete (controlLayer);
 				for (unsigned i = 0; i < NUM_INPUTS; i++) {
-					delete(controlInputVectors[i]);
+					delete(controlInputBuffers[i]);
 				}
 			}
 		}

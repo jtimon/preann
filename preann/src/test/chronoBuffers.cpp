@@ -17,13 +17,13 @@ int main(int argc, char *argv[])
 	Plot plot;
 	plot.fromToBySize(100, 10000, 100);
 	plot.fromToByOutputSize(100, 100, 100);
-	plot.disableVectorType(BYTE);
+	plot.disableBufferType(BYTE);
 	plot.printParameters();
 
 	try {
-		plot.plot(path, VECTOR, COPYFROMINTERFACE, 1000);
-//		plot.plot(path, VECTOR, COPYTOINTERFACE, 10000);
-//		plot.plot(path, VECTOR, ACTIVATION, 10);
+		plot.plot(path, BUFFER, COPYFROMINTERFACE, 1000);
+//		plot.plot(path, BUFFER, COPYTOINTERFACE, 10000);
+//		plot.plot(path, BUFFER, ACTIVATION, 10);
 //
 //		plot.plot(path, CONNECTION, CALCULATEANDADDTO, 10);
 //		plot.plot(path, CONNECTION, MUTATE, 100);

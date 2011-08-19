@@ -52,10 +52,10 @@ class Population {
 	void changeParentsSize(int incSize);
     void changeOffspringSize(int incSize);
 	void crossover();
-    unsigned choseParent(Interface &vectorUsedParents, unsigned  &usedParents);
+    unsigned choseParent(Interface &bufferUsedParents, unsigned  &usedParents);
 	void oneCrossover(CrossoverAlgorithm crossoverAlgorithm,
-			CrossoverLevel crossoverType, Interface &vectorUsedParents, unsigned &usedParents);
-	void produceTwoOffsprings(unsigned & parentA, unsigned & parentB, Interface &vectorUsedParents, unsigned &usedParents);
+			CrossoverLevel crossoverType, Interface &bufferUsedParents, unsigned &usedParents);
+	void produceTwoOffsprings(unsigned & parentA, unsigned & parentB, Interface &bufferUsedParents, unsigned &usedParents);
 	void mutation();
 public:
 	Population(Task* task);
