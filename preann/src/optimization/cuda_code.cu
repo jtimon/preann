@@ -10,13 +10,11 @@ void checkCUDAError(const char *msg)
 }
 
 /// ACTIVATION
-
 __device__
 float Func(float number, FunctionType functionType)
 {
 	switch (functionType) {
 
-	//TODO z add different activation functions
 	case BINARY_STEP:
 		if (number > 0) {
 			return 1;
@@ -29,9 +27,12 @@ float Func(float number, FunctionType functionType)
 		} else {
 			return -1;
 		}
-		//case ANOTHER_FUNCTION:
-		//	return anotherFunction(number);
-
+	case SIGMOID:
+		return 1.0f / (1.0f - exp(-number));
+	case BIPOLAR_SIGMOID:
+		return -1.0f + (2.0f / (1.0f + exp(-number)));
+	case HYPERBOLIC_TANGENT:
+		return tanh(number);
 	case IDENTITY:
 	default:
 		return number;

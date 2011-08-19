@@ -98,4 +98,3 @@ unsigned Random::positiveInteger(unsigned range) {
 float Random::positiveFloat(float range) {
 	return (rand() / (float) RAND_MAX) * (range);
 }
-
