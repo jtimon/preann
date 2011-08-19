@@ -19,8 +19,8 @@ FULL_OBJ = $(SSE2_OBJ) $(CUDA_OBJ)
 OBJ       = $(patsubst src/%.cpp,build/%.o,$(SRC))
 INCLUDES  = $(addprefix -I , $(addprefix src/,$(LIB_MODULES))) 
 
-TEST = testMemoryLosses testVectors testLayers testNeuralNets
-CHRONO = chronoVectors chronoPopulationXor
+TEST = testMemoryLosses testBuffers testLayers testNeuralNets
+CHRONO = chronoBuffers chronoPopulationXor
 
 PROGRAMS = $(TEST) $(CHRONO)
 EXE = $(addsuffix .exe, $(addprefix bin/,$(PROGRAMS)))
