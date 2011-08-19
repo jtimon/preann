@@ -46,6 +46,7 @@ typedef enum {
 } Method;
 
 class Random {
+public:
 	static int integer(unsigned range);
 	static float floatNum(float range);
 	static unsigned positiveInteger(unsigned range);
@@ -53,12 +54,10 @@ class Random {
 };
 
 class MemoryManagement {
-	//TODO cambiar estos atributos con la clase vector
-	static void* ptrs[5000];
-	static unsigned ptr_sizes[5000];
-	static unsigned ptr_counter = 0;
-	static unsigned totalAllocated = 0;
-	
+	static vector<void*> ptrs;
+	static vector<unsigned> sizes;
+
+public:
 	static void* malloc(unsigned size);
 	static void free(void* ptr);
 	static void printTotalAllocated();

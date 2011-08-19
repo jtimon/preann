@@ -7,40 +7,33 @@
 
 #include "util.h"
 
-void* MemoryManagement::malloc(unsigned size) {
+vector<void*> MemoryManagement::ptrs;
+vector<unsigned> MemoryManagement::sizes;
+
+void* MemoryManagement::malloc(unsigned size)
+{
 	if (size == 0) {
-		std::string error = "No se pueden reservar 0 bytes";
-		throw error;
-	}
-	if (ptr_counter == 5000) {
-		std::string error = "No se pueden reservar más de 5000 punteros";
+		std::string error = "Cannot allocate 0 bytes";
 		throw error;
 	}
 	void* toReturn = malloc(size);
 
-	ptrs[ptr_counter] = toReturn;
-	ptr_sizes[ptr_counter] = size;
-	//printf("Se reserva el puntero en pos %d con tamaño %d y dirección %d\n", ptr_counter, ptr_sizes[ptr_counter], ptrs[ptr_counter]);
-
-	totalAllocated += size;
-	++ptr_counter;
+	ptrs.push_back(toReturn);
+	sizes.push_back(size);
 
 	return toReturn;
 }
 
-void MemoryManagement::free(void* ptr) {
-
+void MemoryManagement::free(void* ptr)
+{
 	char found = 0;
-	unsigned i = 0;
-	while (!found && i < ptr_counter) {
-		if (ptr == ptrs[i]) {
-			found = 1;
-			//printf("Se libera el puntero en pos %d con tamaño %d y dirección %d\n", i, ptr_sizes[i], ptrs[i]);
-			totalAllocated -= ptr_sizes[i];
-			ptr_counter--;
+	for(int i=0; i < ptrs.size(); i++){
+		if (ptrs[0] == ptr) {
+			ptrs.erase (ptrs.begin() + i);
+			sizes.erase (sizes.begin() + i);
 			free(ptr);
-		} else {
-			i++;
+			found = 1;
+			break;
 		}
 	}
 	if (!found) {
@@ -49,19 +42,16 @@ void MemoryManagement::free(void* ptr) {
 		throw error;
 		//free(ptr);
 	}
-
-	while (i < ptr_counter) {
-		ptrs[i] = ptrs[i + 1];
-		ptr_sizes[i] = ptr_sizes[i + 1];
-		i++;
-	}
 }
 
 void MemoryManagement::printTotalAllocated() {
-	unsigned aux = totalAllocated;
+	unsigned totalAllocated = 0;
+	for(int i=0; i<sizes.size(); i++){
+		totalAllocated += sizes[i];
+	}
 	unsigned mb, kb, b;
-	kb = aux / 1024;
-	b = aux % 1024;
+	kb = totalAllocated / 1024;
+	b = totalAllocated % 1024;
 	if (kb == 0) {
 		mb = 0;
 	} else {
@@ -73,20 +63,24 @@ void MemoryManagement::printTotalAllocated() {
 }
 
 void MemoryManagement::printTotalPointers() {
-	cout << "There are " << ptr_counter << " pointers allocated." << endl;
+	cout << "There are " << ptrs.size() << " pointers allocated." << endl;
 }
 
 void MemoryManagement::printListOfPointers(){
-	for (unsigned i = 0; i < ptr_counter; i++){
-		printf(" %d mem_address %d  size = %d \n", i, (unsigned)ptrs[i], ptr_sizes[i]);
+	for(int i=0; i < ptrs.size(); i++){
+		printf(" %d mem_address %d  size = %d \n", i, (unsigned)ptrs[i], sizes[i]);
 	}
 }
 
 unsigned MemoryManagement::getPtrCounter(){
-	return ptr_counter;
+	return ptrs.size();
 }
 
 unsigned MemoryManagement::getTotalAllocated(){
+	unsigned totalAllocated = 0;
+	for(int i=0; i<sizes.size(); i++){
+		totalAllocated += sizes[i];
+	}
 	return totalAllocated;
 }
 
