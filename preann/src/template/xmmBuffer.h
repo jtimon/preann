@@ -145,7 +145,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 			this->tSize = size;
 
 			size_t byteSize = getByteSize(size, bufferTypeTempl);
-			data = MemoryManagement.malloc(byteSize);
+			data = MemoryManagement::mmalloc(byteSize);
 
 			switch (bufferTypeTempl)
 			{
@@ -166,7 +166,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 		~XmmBuffer()
 		{
 			if (data) {
-				MemoryManagement.free(data);
+				MemoryManagement::ffree(data);
 				data = NULL;
 			}
 		}

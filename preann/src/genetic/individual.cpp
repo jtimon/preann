@@ -55,8 +55,8 @@ void Individual::mutate(unsigned numMutations, float mutationRange)
 {
 	for (unsigned i = 0; i < numMutations; i++)
 	{
-		unsigned chosenLayer = Random.positiveInteger(numberLayers);
-		unsigned chosenConnection = Random.positiveInteger(
+		unsigned chosenLayer = Random::positiveInteger(numberLayers);
+		unsigned chosenConnection = Random::positiveInteger(
 				layers[chosenLayer]->getNumberInputs() + 1);
 		Connection* connection;
 		if (chosenConnection == layers[chosenLayer]->getNumberInputs())
@@ -67,7 +67,7 @@ void Individual::mutate(unsigned numMutations, float mutationRange)
 		{
 			connection = layers[chosenLayer]->getConnection(chosenConnection);
 		}
-		connection->mutate(Random.positiveInteger(connection->getSize()), Random.floatNum(
+		connection->mutate(Random::positiveInteger(connection->getSize()), Random::floatNum(
 				mutationRange));
 	}
 }
@@ -82,18 +82,18 @@ void Individual::mutate(float probability, float mutationRange)
 			Connection* connection = layers[i]->getConnection(j);
 			for (unsigned k = 0; k < connection->getSize(); k++)
 			{
-				if (Random.positiveFloat(1) < probability)
+				if (Random::positiveFloat(1) < probability)
 				{
-					connection->mutate(k, Random.floatNum(mutationRange));
+					connection->mutate(k, Random::floatNum(mutationRange));
 				}
 			}
 		}
 		Connection* connection = layers[i]->getThresholds();
 		for (unsigned k = 0; k < connection->getSize(); k++)
 		{
-			if (Random.positiveFloat(1) < probability)
+			if (Random::positiveFloat(1) < probability)
 			{
-				connection->mutate(k, Random.floatNum(mutationRange));
+				connection->mutate(k, Random::floatNum(mutationRange));
 			}
 		}
 	}
@@ -182,7 +182,7 @@ void Individual::uniformCrossoverWeighs(Individual* other, float probability)
 
 			for (unsigned k = 0; k < connection->getSize(); k++)
 			{
-				if (Random.positiveFloat(1) < probability)
+				if (Random::positiveFloat(1) < probability)
 				{
 					bitBuffer.setElement(k, 1);
 				}
@@ -194,7 +194,7 @@ void Individual::uniformCrossoverWeighs(Individual* other, float probability)
 		Interface bitBuffer(connection->getSize(), BIT);
 		for (unsigned k = 0; k < connection->getSize(); k++)
 		{
-			if (Random.positiveFloat(1) < probability)
+			if (Random::positiveFloat(1) < probability)
 			{
 				bitBuffer.setElement(k, 1);
 			}
@@ -206,12 +206,12 @@ void Individual::uniformCrossoverWeighs(Individual* other, float probability)
 void Individual::multipointCrossoverWeighs(Individual *other,
 		unsigned numPoints)
 {
-	Interface*** bitBuffers = (Interface***)MemoryManagement.malloc(sizeof(Interface**)
+	Interface*** bitBuffers = (Interface***)MemoryManagement::mmalloc(sizeof(Interface**)
 			* numberLayers);
 	for (unsigned i = 0; i < numberLayers; i++)
 	{
 		//One more for the thresholds
-		bitBuffers[i] = (Interface**)MemoryManagement.malloc(sizeof(Interface*)
+		bitBuffers[i] = (Interface**)MemoryManagement::mmalloc(sizeof(Interface*)
 				* (layers[i]->getNumberInputs() + 1));
 		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++)
 		{
@@ -223,10 +223,10 @@ void Individual::multipointCrossoverWeighs(Individual *other,
 	}
 	while (numPoints >= 0)
 	{
-		unsigned chosenLayer = Random.positiveInteger(numberLayers);
-		unsigned chosenInput = Random.positiveInteger(
+		unsigned chosenLayer = Random::positiveInteger(numberLayers);
+		unsigned chosenInput = Random::positiveInteger(
 				layers[chosenLayer]->getNumberInputs() + 1);
-		unsigned chosenPoint = Random.positiveInteger(layers[chosenLayer]->getInput(
+		unsigned chosenPoint = Random::positiveInteger(layers[chosenLayer]->getInput(
 				chosenInput)->getSize());
 
 		if (!bitBuffers[chosenLayer][chosenInput]->getElement(chosenPoint))
@@ -264,19 +264,19 @@ void Individual::multipointCrossoverWeighs(Individual *other,
 		layers[i]->getThresholds()->crossover(
 				other->getLayer(i)->getThresholds(),
 				bitBuffers[i][layers[i]->getNumberInputs()]);
-		MemoryManagement.free(bitBuffers[i]);
+		MemoryManagement::ffree(bitBuffers[i]);
 	}
-	MemoryManagement.free(bitBuffers);
+	MemoryManagement::ffree(bitBuffers);
 }
 
 void Individual::crossoverNeuronsByInput(Interface** inputsBitBuffers,
 		Individual *other)
 {
-	Interface ***bitBuffers = (Interface***)((MemoryManagement.malloc(sizeof(Interface**)
+	Interface ***bitBuffers = (Interface***)((MemoryManagement::mmalloc(sizeof(Interface**)
 			* numberLayers)));
 	for (unsigned i = 0; i < numberLayers; i++)
 	{
-		bitBuffers[i] = (Interface**)((MemoryManagement.malloc(sizeof(Interface*)
+		bitBuffers[i] = (Interface**)((MemoryManagement::mmalloc(sizeof(Interface*)
 				* layers[i]->getNumberInputs())));
 		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++)
 		{
@@ -328,9 +328,9 @@ void Individual::crossoverNeuronsByInput(Interface** inputsBitBuffers,
 		layers[i]->getThresholds()->crossover(
 				other->getLayer(i)->getThresholds(),
 				bitBuffers[i][layers[i]->getNumberInputs()]);
-		MemoryManagement.free(bitBuffers[i]);
+		MemoryManagement::ffree(bitBuffers[i]);
 	}
-	MemoryManagement.free(bitBuffers);
+	MemoryManagement::ffree(bitBuffers);
 }
 
 void Individual::uniformCrossoverNeuronsInverted(Individual *other,
@@ -344,7 +344,7 @@ void Individual::uniformCrossoverNeuronsInverted(Individual *other,
 
 		for (unsigned j = 0; j < inputsBitBuffers[i]->getSize(); j++)
 		{
-			if (Random.positiveFloat(1) < probability)
+			if (Random::positiveFloat(1) < probability)
 			{
 				inputsBitBuffers[i]->setElement(j, 1);
 			}
@@ -370,8 +370,8 @@ void Individual::multipointCrossoverNeuronsInverted(Individual *other,
 	}
 	while (numPoints >= 0)
 	{
-		unsigned chosenLayer = Random.positiveInteger(numberLayers);
-		unsigned chosenPoint = Random.positiveInteger(
+		unsigned chosenLayer = Random::positiveInteger(numberLayers);
+		unsigned chosenPoint = Random::positiveInteger(
 				inputsBitBuffers[chosenLayer]->getSize());
 		if (!inputsBitBuffers[chosenLayer]->getElement(chosenPoint))
 		{
@@ -436,7 +436,7 @@ void Individual::uniformCrossoverNeurons(Individual *other, float probability)
 
 		for (unsigned j = 0; j < outputsBitBuffer.getSize(); j++)
 		{
-			if (Random.positiveFloat(1) < probability)
+			if (Random::positiveFloat(1) < probability)
 			{
 				outputsBitBuffer.setElement(j, 1);
 			}
@@ -453,7 +453,7 @@ void Individual::uniformCrossoverNeurons(Individual *other, float probability)
 void Individual::multipointCrossoverNeurons(Individual *other,
 		unsigned numPoints)
 {
-	Interface** bitBuffers = (Interface**)MemoryManagement.malloc(sizeof(Interface*)
+	Interface** bitBuffers = (Interface**)MemoryManagement::mmalloc(sizeof(Interface*)
 			* numberLayers);
 	for (unsigned i = 0; i < numberLayers; i++)
 	{
@@ -461,8 +461,8 @@ void Individual::multipointCrossoverNeurons(Individual *other,
 	}
 	while (numPoints >= 0)
 	{
-		unsigned chosenLayer = Random.positiveInteger(numberLayers);
-		unsigned chosenPoint = Random.positiveInteger(
+		unsigned chosenLayer = Random::positiveInteger(numberLayers);
+		unsigned chosenPoint = Random::positiveInteger(
 				bitBuffers[chosenLayer]->getSize());
 		if (!bitBuffers[chosenLayer]->getElement(chosenPoint))
 		{
@@ -488,7 +488,7 @@ void Individual::multipointCrossoverNeurons(Individual *other,
 				*(bitBuffers[i]));
 		delete (bitBuffers[i]);
 	}
-	MemoryManagement.free(bitBuffers);
+	MemoryManagement::ffree(bitBuffers);
 }
 
 void Individual::crossoverLayers(Individual *other, Interface* bitBuffer)
@@ -515,7 +515,7 @@ void Individual::uniformCrossoverLayers(Individual *other, float probability)
 	Interface* bitBuffer = new Interface(numberLayers, BIT);
 	for (unsigned i = 0; i < numberLayers; i++)
 	{
-		if (Random.positiveFloat(1) < probability)
+		if (Random::positiveFloat(1) < probability)
 		{
 			bitBuffer->setElement(i, 1);
 		}
@@ -539,7 +539,7 @@ void Individual::multipointCrossoverLayers(Individual *other,
 	Interface* bitBuffer = new Interface(numberLayers, BIT);
 	while (numPoints >= 0)
 	{
-		unsigned chosenPoint = Random.positiveInteger(numberLayers);
+		unsigned chosenPoint = Random::positiveInteger(numberLayers);
 		if (!bitBuffer->getElement(chosenPoint))
 		{
 			bitBuffer->setElement(chosenPoint, 1);

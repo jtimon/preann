@@ -23,7 +23,7 @@ Population::Population(Task* task, Individual* example, unsigned size,
 {
 	this->task = task;
 
-	individualList = (Individual**)MemoryManagement.malloc(sizeof(Individual*) * size);
+	individualList = (Individual**)MemoryManagement::mmalloc(sizeof(Individual*) * size);
 	this->size = 0;
 	this->maxSize = size;
 	Individual* newIndividual;
@@ -79,9 +79,9 @@ Population::~Population()
 	{
 		delete (individualList[i]);
 	}
-	MemoryManagement.free(individualList);
-	MemoryManagement.free(parents);
-	MemoryManagement.free(offSpring);
+	MemoryManagement::ffree(individualList);
+	MemoryManagement::ffree(parents);
+	MemoryManagement::ffree(offSpring);
 }
 
 void Population::load(FILE *stream)
@@ -112,7 +112,7 @@ void Population::load(FILE *stream)
 
 	fread(&size, sizeof(unsigned), 1, stream);
 	this->maxSize = size;
-	individualList = (Individual**)MemoryManagement.malloc(sizeof(Individual*) * size);
+	individualList = (Individual**)MemoryManagement::mmalloc(sizeof(Individual*) * size);
 	for (unsigned i = 0; i < this->size; i++)
 	{
 		individualList[i] = new Individual();
@@ -148,7 +148,7 @@ void Population::save(FILE *stream)
 
 	fwrite(&size, sizeof(unsigned), 1, stream);
 	this->maxSize = size;
-	individualList = (Individual**)MemoryManagement.malloc(sizeof(Individual*) * size);
+	individualList = (Individual**)MemoryManagement::mmalloc(sizeof(Individual*) * size);
 	for (unsigned i = 0; i < this->size; i++)
 	{
 		individualList[i] = new Individual();
@@ -248,10 +248,10 @@ void Population::changeParentsSize(int incSize)
 {
 	if (parents)
 	{
-		MemoryManagement.free(parents);
+		MemoryManagement::ffree(parents);
 	}
 	this->maxParents += incSize;
-	parents = (Individual**)MemoryManagement.malloc(this->maxParents * sizeof(Individual*));
+	parents = (Individual**)MemoryManagement::mmalloc(this->maxParents * sizeof(Individual*));
 }
 
 void Population::changeOffspringSize(int incSize)
@@ -259,9 +259,9 @@ void Population::changeOffspringSize(int incSize)
 	maxOffSpring += incSize;
 	if (offSpring)
 	{
-		MemoryManagement.free(offSpring);
+		MemoryManagement::ffree(offSpring);
 	}
-	offSpring = (Individual**)(MemoryManagement.malloc(maxOffSpring * sizeof(Individual*)));
+	offSpring = (Individual**)(MemoryManagement::mmalloc(maxOffSpring * sizeof(Individual*)));
 }
 
 void Population::setCrossoverMultipointScheme(CrossoverLevel crossoverLevel,
@@ -459,7 +459,7 @@ unsigned Population::choseParent(Interface &bufferUsedParents,
 	unsigned chosenPoint;
 	do
 	{
-		chosenPoint = Random.positiveInteger(parentSize);
+		chosenPoint = Random::positiveInteger(parentSize);
 	} while (!bufferUsedParents.getElement(chosenPoint));
 	bufferUsedParents.setElement(chosenPoint, 1);
 	if (++usedParents == bufferUsedParents.getSize())
@@ -503,7 +503,7 @@ void Population::selectRouletteWheel()
 	for (unsigned i = 0; i < numRouletteWheel; i++)
 	{
 		unsigned j = 0;
-		float chosen_point = Random.positiveFloat(total_score);
+		float chosen_point = Random::positiveFloat(total_score);
 		while (chosen_point)
 		{
 			if (individualList[j]->getFitness() > chosen_point)
@@ -531,7 +531,7 @@ void Population::selectRanking()
 	for (unsigned i = 0; i < numRanking; i++)
 	{
 		unsigned j = 0;
-		float chosen_point = Random.positiveFloat(total_base);
+		float chosen_point = Random::positiveFloat(total_base);
 		while (chosen_point)
 		{
 
@@ -560,7 +560,7 @@ void Population::selectTournament()
 		throw error;
 	}
 
-	unsigned* alreadyChosen = (unsigned*)MemoryManagement.malloc(sizeof(unsigned)
+	unsigned* alreadyChosen = (unsigned*)MemoryManagement::mmalloc(sizeof(unsigned)
 			* tournamentSize);
 	for (unsigned i = 0; i < numTournament; i++)
 	{
@@ -572,7 +572,7 @@ void Population::selectTournament()
 			while (!newChosen)
 			{
 				newChosen = 1;
-				chosen = Random.positiveInteger(size);
+				chosen = Random::positiveInteger(size);
 				for (unsigned k = 0; k < j; k++)
 				{
 					if (chosen == alreadyChosen[k])

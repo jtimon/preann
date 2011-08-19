@@ -54,12 +54,13 @@ public:
 };
 
 class MemoryManagement {
+	//TODO usar void * calloc ( size_t num, size_t size );
 	static vector<void*> ptrs;
 	static vector<unsigned> sizes;
 
 public:
-	static void* malloc(unsigned size);
-	static void free(void* ptr);
+	static void* mmalloc(unsigned size);
+	static void ffree(void* ptr);
 	static void printTotalAllocated();
 	static void printTotalPointers();
 	static void printListOfPointers();

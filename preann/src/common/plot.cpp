@@ -148,8 +148,8 @@ float Plot::doMethodConnection(Connection* connection, Method method, unsigned r
 	break;
 	case MUTATE:
 	{
-		unsigned pos = Random.positiveInteger(connection->getSize());
-		float mutation = Random.floatNum(getInitialWeighsRange());
+		unsigned pos = Random::positiveInteger(connection->getSize());
+		float mutation = Random::floatNum(getInitialWeighsRange());
 		chrono.start();
 		for (unsigned i = 0; i < repetitions; ++i) {
 			connection->mutate(pos, mutation);

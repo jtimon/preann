@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 				for (unsigned i = 0; i < NUM_INPUTS; i++) {
 					BufferType bufferTypeAux = BYTE;
 					while (bufferTypeAux == BYTE) {
-						bufferTypeAux = (BufferType)Random.positiveInteger(BUFFER_TYPE_DIM);
+						bufferTypeAux = (BufferType)Random::positiveInteger(BUFFER_TYPE_DIM);
 					}
 					controlInputBuffers[i] = Factory::newBuffer(test.getSize(), bufferTypeAux, C);
 					controlInputBuffers[i]->random(test.getInitialWeighsRange());
@@ -148,15 +148,15 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		printf("Exit success.\n");
-		MemoryManagement.printTotalAllocated();
-		MemoryManagement.printTotalPointers();
+		MemoryManagement::printTotalAllocated();
+		MemoryManagement::printTotalPointers();
 	} catch (std::string error) {
 		cout << "Error: " << error << endl;
 //	} catch (...) {
 //		printf("An error was thrown.\n", 1);
 	}
 
-	//MemoryManagement.mem_printListOfPointers();
+	//MemoryManagement::mem_printListOfPointers();
 	total.stop();
 	printf("Total time spent: %f \n", total.getSeconds());
 	return EXIT_SUCCESS;

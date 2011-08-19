@@ -19,11 +19,8 @@ FULL_OBJ = $(SSE2_OBJ) $(CUDA_OBJ)
 OBJ       = $(patsubst src/%.cpp,build/%.o,$(SRC))
 INCLUDES  = $(addprefix -I , $(addprefix src/,$(LIB_MODULES))) 
 
-TEST = testMemoryLosses testBuffers testLayers testNeuralNets
-CHRONO = chronoBuffers chronoPopulationXor
-
-PROGRAMS = $(TEST) $(CHRONO)
-EXE = $(addsuffix .exe, $(addprefix bin/,$(PROGRAMS)))
+PROGRAMS = $(wildcard src/test/*.cpp)
+EXE      = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,bin/%.exe,$(main)))
 
 CXX = g++-4.3 -ggdb $(INCLUDES) $(FACT_FLAGS)
 CXX_LINK = g++-4.3 

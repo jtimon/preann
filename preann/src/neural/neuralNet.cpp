@@ -20,15 +20,15 @@ NeuralNet::~NeuralNet()
 		{
 			delete (layers[i]);
 		}
-		MemoryManagement.free(layers);
+		MemoryManagement::ffree(layers);
 	}
 	if (layerConnectionsGraph)
 	{
-		MemoryManagement.free(layerConnectionsGraph);
+		MemoryManagement::ffree(layerConnectionsGraph);
 	}
 	if (inputLayers)
 	{
-		MemoryManagement.free(inputLayers);
+		MemoryManagement::ffree(inputLayers);
 	}
 }
 
@@ -49,15 +49,15 @@ void NeuralNet::addLayer(Layer* layer)
 {
 	unsigned newNumberLayers = numberLayers + 1;
 
-	Layer** newLayers = (Layer**)MemoryManagement.malloc(sizeof(Layer*) * newNumberLayers);
+	Layer** newLayers = (Layer**)MemoryManagement::mmalloc(sizeof(Layer*) * newNumberLayers);
 	if (layers)
 	{
 		memcpy(newLayers, layers, numberLayers * sizeof(Layer*));
-		MemoryManagement.free(layers);
+		MemoryManagement::ffree(layers);
 	}
 	layers = newLayers;
 
-	unsigned char* newLayerConnectionsGraph = (unsigned char*)MemoryManagement.malloc(
+	unsigned char* newLayerConnectionsGraph = (unsigned char*)MemoryManagement::mmalloc(
 			sizeof(unsigned char) * newNumberLayers * newNumberLayers);
 	for (unsigned i = 0; i < newNumberLayers; i++)
 	{
@@ -76,7 +76,7 @@ void NeuralNet::addLayer(Layer* layer)
 	}
 	if (layerConnectionsGraph)
 	{
-		MemoryManagement.free(layerConnectionsGraph);
+		MemoryManagement::ffree(layerConnectionsGraph);
 	}
 	layerConnectionsGraph = newLayerConnectionsGraph;
 
@@ -92,12 +92,12 @@ void NeuralNet::addLayer(unsigned size, BufferType destinationType,
 void NeuralNet::addInputLayer(unsigned size, BufferType bufferType)
 {
 
-	unsigned* newInputLayers = (unsigned*)MemoryManagement.malloc(sizeof(unsigned)
+	unsigned* newInputLayers = (unsigned*)MemoryManagement::mmalloc(sizeof(unsigned)
 			* (numberInputs + 1));
 	if (inputLayers)
 	{
 		memcpy(newInputLayers, inputLayers, numberInputs * sizeof(unsigned));
-		MemoryManagement.free(inputLayers);
+		MemoryManagement::ffree(inputLayers);
 	}
 	inputLayers = newInputLayers;
 	inputLayers[numberInputs++] = numberLayers;
@@ -259,7 +259,7 @@ void NeuralNet::load(FILE* stream)
 	fread(&numberInputs, sizeof(unsigned), 1, stream);
 	fread(&numberLayers, sizeof(unsigned), 1, stream);
 
-	layers = (Layer**)((MemoryManagement.malloc(sizeof(Layer*) * numberLayers)));
+	layers = (Layer**)((MemoryManagement::mmalloc(sizeof(Layer*) * numberLayers)));
 	for (unsigned i = 0; i < numberLayers; i++)
 	{
 		layers[i] = new Layer(stream, getImplementationType());
@@ -277,11 +277,11 @@ void NeuralNet::load(FILE* stream)
 void NeuralNet::loadGraphs(FILE* stream)
 {
 	size_t size = sizeof(unsigned) * numberInputs;
-	inputLayers = (unsigned*)(MemoryManagement.malloc(size));
+	inputLayers = (unsigned*)(MemoryManagement::mmalloc(size));
 	fread(inputLayers, size, 1, stream);
 
 	size = sizeof(unsigned char) * numberLayers * numberLayers;
-	layerConnectionsGraph = (unsigned char*)(MemoryManagement.malloc(size));
+	layerConnectionsGraph = (unsigned char*)(MemoryManagement::mmalloc(size));
 	fread(layerConnectionsGraph, size, 1, stream);
 }
 

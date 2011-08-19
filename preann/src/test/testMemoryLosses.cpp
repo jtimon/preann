@@ -12,11 +12,11 @@ unsigned memoryLosses = 0;
 
 void checkAndPrintErrors(string testingClass, Test test)
 {
-    if(MemoryManagement.getPtrCounter() > 0 || MemoryManagement.getTotalAllocated() > 0){
+    if(MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0){
         cout << "Memory loss detected testing class " << testingClass << ".\n" << endl;
         test.printCurrentState();
-        MemoryManagement.printTotalAllocated();
-        MemoryManagement.printTotalPointers();
+        MemoryManagement::printTotalAllocated();
+        MemoryManagement::printTotalPointers();
         memoryLosses++;
     }
 }
@@ -79,8 +79,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		printf("Exit success.\n", 1);
-		MemoryManagement.printTotalAllocated();
-		MemoryManagement.printTotalPointers();
+		MemoryManagement::printTotalAllocated();
+		MemoryManagement::printTotalPointers();
 	} catch (std::string error) {
 		cout << "Error: " << error << endl;
 	} catch (...) {
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	cout << "Total memory losses: " << memoryLosses << endl;
-	MemoryManagement.printListOfPointers();
+	MemoryManagement::printListOfPointers();
 
 	total.stop();
 	printf("Total time spent: %f \n", total.getSeconds());

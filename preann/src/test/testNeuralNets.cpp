@@ -140,8 +140,8 @@ int main(int argc, char *argv[])
 //			}
 //		}
 		printf("Exit success.\n");
-		MemoryManagement.printTotalAllocated();
-		MemoryManagement.printTotalPointers();
+		MemoryManagement::printTotalAllocated();
+		MemoryManagement::printTotalPointers();
 	} catch (std::string error)
 	{
 		cout << "Error: " << error << endl;
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 		//		printf("An error was thrown.\n", 1);
 	}
 
-	//MemoryManagement.mem_printListOfPointers();
+	//MemoryManagement::mem_printListOfPointers();
 	total.stop();
 	printf("Total time spent: %f \n", total.getSeconds());
 	return EXIT_SUCCESS;

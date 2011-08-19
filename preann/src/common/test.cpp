@@ -102,8 +102,8 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 	break;
 	case MUTATE:
 	{
-		unsigned pos = Random.positiveInteger(connection->getSize());
-		float mutation = Random.floatNum(initialWeighsRange);
+		unsigned pos = Random::positiveInteger(connection->getSize());
+		float mutation = Random::floatNum(initialWeighsRange);
 		connection->mutate(pos, mutation);
 
 		Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
@@ -111,8 +111,8 @@ unsigned Test::doMethodConnection(Connection* connection, Method method)
 		cConnection->copyFrom(connection);
 
 		for(unsigned i=0; i < NUM_MUTATIONS; i++) {
-			float mutation = Random.floatNum(initialWeighsRange);
-			unsigned pos = Random.positiveInteger(connection->getSize());
+			float mutation = Random::floatNum(initialWeighsRange);
+			unsigned pos = Random::positiveInteger(connection->getSize());
 			connection->mutate(pos, mutation);
 			cConnection->mutate(pos, mutation);
 		}
