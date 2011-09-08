@@ -28,9 +28,9 @@ int main(int argc, char *argv[])
 	try {
 //		plot.plot(path, BUFFER, COPYFROMINTERFACE, 1000);
 //		plot.plot(path, BUFFER, COPYTOINTERFACE, 10000);
-//		plot.plot(path, BUFFER, ACTIVATION, 10);
+		plot.plot(path, BUFFER, ACTIVATION, 10);
 //
-		plot.plot(path, CONNECTION, CALCULATEANDADDTO, 1);
+//		plot.plot(path, CONNECTION, CALCULATEANDADDTO, 1);
 //		plot.plot(path, CONNECTION, MUTATE, 100);
 //		plot.plot(path, CONNECTION, CROSSOVER, 1);
 

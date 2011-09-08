@@ -4,32 +4,22 @@ NeuralNet::NeuralNet(ImplementationType implementationType)
 {
 	this->implementationType = implementationType;
 
-	layers = NULL;
-	layerConnectionsGraph = NULL;
-	numberLayers = 0;
-
-	inputLayers = NULL;
-	numberInputs = 0;
+	connectionsGraph = NULL;
 }
 
 NeuralNet::~NeuralNet()
 {
-	if (layers)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
-		for (unsigned i = 0; i < numberLayers; i++)
-		{
-			delete (layers[i]);
-		}
-		MemoryManagement::ffree(layers);
+		delete (layers[i]);
 	}
-	if (layerConnectionsGraph)
+	layers.clear();
+
+	if (connectionsGraph)
 	{
-		MemoryManagement::ffree(layerConnectionsGraph);
+		MemoryManagement::ffree(connectionsGraph);
 	}
-	if (inputLayers)
-	{
-		MemoryManagement::ffree(inputLayers);
-	}
+	inputs.clear();
 }
 
 Layer* NeuralNet::getLayer(unsigned pos)
@@ -39,7 +29,7 @@ Layer* NeuralNet::getLayer(unsigned pos)
 
 void NeuralNet::calculateOutput()
 {
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		layers[i]->calculateOutput();
 	}
@@ -47,40 +37,31 @@ void NeuralNet::calculateOutput()
 
 void NeuralNet::addLayer(Layer* layer)
 {
-	unsigned newNumberLayers = numberLayers + 1;
-
-	Layer** newLayers = (Layer**)MemoryManagement::mmalloc(sizeof(Layer*) * newNumberLayers);
-	if (layers)
-	{
-		memcpy(newLayers, layers, numberLayers * sizeof(Layer*));
-		MemoryManagement::ffree(layers);
-	}
-	layers = newLayers;
-
-	unsigned char* newLayerConnectionsGraph = (unsigned char*)MemoryManagement::mmalloc(
-			sizeof(unsigned char) * newNumberLayers * newNumberLayers);
+	unsigned newNumberLayers = layers.size() + 1;
+	bool* newConnectionsGraph = (bool*)MemoryManagement::mmalloc(
+			sizeof(bool) * newNumberLayers * newNumberLayers);
 	for (unsigned i = 0; i < newNumberLayers; i++)
 	{
 		for (unsigned j = 0; j < newNumberLayers; j++)
 		{
-			if (i == numberLayers || j == numberLayers)
+			if (i == layers.size() || j == layers.size())
 			{
-				newLayerConnectionsGraph[(i * newNumberLayers) + j] = 0;
+				newConnectionsGraph[(i * newNumberLayers) + j] = false;
 			}
 			else
 			{
-				newLayerConnectionsGraph[(i * newNumberLayers) + j]
-						= layerConnectionsGraph[(i * numberLayers) + j];
+				newConnectionsGraph[(i * newNumberLayers) + j]
+						= connectionsGraph[(i * layers.size()) + j];
 			}
 		}
 	}
-	if (layerConnectionsGraph)
+	if (connectionsGraph)
 	{
-		MemoryManagement::ffree(layerConnectionsGraph);
+		MemoryManagement::ffree(connectionsGraph);
 	}
-	layerConnectionsGraph = newLayerConnectionsGraph;
+	connectionsGraph = newConnectionsGraph;
 
-	layers[numberLayers++] = layer;
+	layers.push_back(layer);
 }
 
 void NeuralNet::addLayer(unsigned size, BufferType destinationType,
@@ -91,55 +72,45 @@ void NeuralNet::addLayer(unsigned size, BufferType destinationType,
 
 void NeuralNet::addInputLayer(unsigned size, BufferType bufferType)
 {
-
-	unsigned* newInputLayers = (unsigned*)MemoryManagement::mmalloc(sizeof(unsigned)
-			* (numberInputs + 1));
-	if (inputLayers)
-	{
-		memcpy(newInputLayers, inputLayers, numberInputs * sizeof(unsigned));
-		MemoryManagement::ffree(inputLayers);
-	}
-	inputLayers = newInputLayers;
-	inputLayers[numberInputs++] = numberLayers;
-
+	inputs.push_back(layers.size());
 	addLayer(new InputLayer(size, bufferType, getImplementationType()));
 }
 
 void NeuralNet::updateInput(unsigned inputPos, Interface* input)
 {
-	if (inputPos > numberInputs)
+	if (inputPos > inputs.size())
 	{
 		char buffer[100];
 		sprintf(
 				buffer,
 				"Cannot get the Input in position %d: there are just %d Inputs.",
-				inputPos, numberInputs);
+				inputPos, inputs.size());
 		std::string error = buffer;
 		throw error;
 	}
-	return ((InputLayer*)(layers[inputLayers[inputPos]]))->getInputInterface()->copyFromFast(input);
+	return ((InputLayer*)(layers[inputs[inputPos]]))->getInputInterface()->copyFromFast(input);
 }
 
 unsigned NeuralNet::getNumInputs()
 {
-	return numberInputs;
+	return inputs.size();
 }
 
 unsigned char NeuralNet::isInputLayer(unsigned layerPos)
 {
-	if (layerPos >= numberLayers)
+	if (layerPos >= layers.size())
 	{
 		char buffer[100];
 		sprintf(
 				buffer,
 				"Cannot access the Layer in position %d: there are just %d layers.",
-				layerPos, numberLayers);
+				layerPos, layers.size());
 		std::string error = buffer;
 		throw error;
 	}
-	for (unsigned i = 0; i < numberInputs; ++i)
+	for (unsigned i = 0; i < inputs.size(); ++i)
 	{
-		if (inputLayers[i] == layerPos)
+		if (inputs[i] == layerPos)
 		{
 			return 1;
 		}
@@ -149,13 +120,13 @@ unsigned char NeuralNet::isInputLayer(unsigned layerPos)
 
 Interface* NeuralNet::getOutput(unsigned layerPos)
 {
-	if (layerPos >= numberLayers)
+	if (layerPos >= layers.size())
 	{
 		char buffer[100];
 		sprintf(
 				buffer,
 				"Cannot access the output in position %d: there are just %d layers.",
-				layerPos, numberLayers);
+				layerPos, layers.size());
 		std::string error = buffer;
 		throw error;
 	}
@@ -164,33 +135,32 @@ Interface* NeuralNet::getOutput(unsigned layerPos)
 
 unsigned NeuralNet::getNumLayers()
 {
-	return numberLayers;
+	return layers.size();
 }
 
 void NeuralNet::randomWeighs(float range)
 {
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		layers[i]->randomWeighs(range);
 	}
 }
 
-void NeuralNet::addLayersConnection(unsigned sourceLayerPos,
-		unsigned destinationLayerPos)
+void NeuralNet::addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos)
 {
-	if (sourceLayerPos >= numberLayers || destinationLayerPos >= numberLayers)
+	if (sourceLayerPos >= layers.size() || destinationLayerPos >= layers.size())
 	{
 		char buffer[100];
 		sprintf(
 				buffer,
 				"Cannot connect Layer in position %d with Layer in position %d: there are just %d Layers.",
-				sourceLayerPos, destinationLayerPos, numberLayers);
+				sourceLayerPos, destinationLayerPos, layers.size());
 		std::string error = buffer;
 		throw error;
 	}
 
 	layers[destinationLayerPos]->addInput(layers[sourceLayerPos]->getOutput());
-	layerConnectionsGraph[(sourceLayerPos * numberLayers) + destinationLayerPos] = 1;
+	connectionsGraph[(sourceLayerPos * layers.size()) + destinationLayerPos] = true;
 }
 
 void NeuralNet::createFeedForwardNet(unsigned inputSize, BufferType inputType,
@@ -207,7 +177,7 @@ void NeuralNet::createFeedForwardNet(unsigned inputSize, BufferType inputType,
 
 ImplementationType NeuralNet::getImplementationType()
 {
-	if(numberLayers != 0){
+	if(layers.size() != 0){
 		return layers[0]->getImplementationType();
 	} else {
 
@@ -236,19 +206,21 @@ void NeuralNet::createFullyConnectedNet(unsigned inputSize,
 
 void NeuralNet::save(FILE* stream)
 {
-	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
-	fwrite(&numberLayers, sizeof(unsigned), 1, stream);
+	unsigned inputsSize = inputs.size();
+	unsigned layersSize = layers.size();
+	fwrite(&inputsSize, sizeof(unsigned), 1, stream);
+	fwrite(&layersSize, sizeof(unsigned), 1, stream);
 
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		layers[i]->save(stream);
 	}
 
-	fwrite(inputLayers, sizeof(unsigned) * numberInputs, 1, stream);
-	fwrite(layerConnectionsGraph, sizeof(unsigned char) * numberLayers
-			* numberLayers, 1, stream);
+	fwrite(&inputs[0], sizeof(unsigned) * inputs.size(), 1, stream);
+	fwrite(connectionsGraph, sizeof(bool) * layers.size()
+			* layers.size(), 1, stream);
 
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		layers[i]->saveWeighs(stream);
 	}
@@ -256,40 +228,35 @@ void NeuralNet::save(FILE* stream)
 
 void NeuralNet::load(FILE* stream)
 {
-	fread(&numberInputs, sizeof(unsigned), 1, stream);
-	fread(&numberLayers, sizeof(unsigned), 1, stream);
+	unsigned inputsSize, layersSize;
+	fread(&inputsSize, sizeof(unsigned), 1, stream);
+	fread(&layersSize, sizeof(unsigned), 1, stream);
 
-	layers = (Layer**)((MemoryManagement::mmalloc(sizeof(Layer*) * numberLayers)));
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layersSize; i++)
 	{
-		layers[i] = new Layer(stream, getImplementationType());
+		layers.push_back( new Layer(stream, getImplementationType()) );
 	}
 
-	loadGraphs(stream);
+	inputs.resize(inputsSize);
+	fread(&inputs[0], sizeof(unsigned) * inputs.size(), 1, stream);
+
+	size_t graphSize = sizeof(bool) * layers.size() * layers.size();
+	connectionsGraph = (bool*)(MemoryManagement::mmalloc(graphSize));
+	fread(connectionsGraph, graphSize, 1, stream);
+
 	stablishConnections();
 
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		layers[i]->loadWeighs(stream);
 	}
 }
 
-void NeuralNet::loadGraphs(FILE* stream)
-{
-	size_t size = sizeof(unsigned) * numberInputs;
-	inputLayers = (unsigned*)(MemoryManagement::mmalloc(size));
-	fread(inputLayers, size, 1, stream);
-
-	size = sizeof(unsigned char) * numberLayers * numberLayers;
-	layerConnectionsGraph = (unsigned char*)(MemoryManagement::mmalloc(size));
-	fread(layerConnectionsGraph, size, 1, stream);
-}
-
 void NeuralNet::stablishConnections()
 {
-	for (unsigned i = 0; i < numberInputs; i++)
+	for (unsigned i = 0; i < inputs.size(); i++)
 	{
-		unsigned layerPos = inputLayers[i];
+		unsigned layerPos = inputs[i];
 		Buffer* output = layers[layerPos]->getOutput();
 		Layer* inputLayer = new InputLayer(output->getSize(),
 				output->getBufferType(), getImplementationType());
@@ -298,11 +265,11 @@ void NeuralNet::stablishConnections()
 		layers[layerPos] = inputLayer;
 	}
 
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
-		for (unsigned j = 0; j < numberLayers; j++)
+		for (unsigned j = 0; j < layers.size(); j++)
 		{
-			if (layerConnectionsGraph[(i * numberLayers) + j])
+			if (connectionsGraph[(i * layers.size()) + j])
 			{
 				addLayersConnection(i, j);
 			}

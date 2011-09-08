@@ -10,12 +10,9 @@ class NeuralNet {
 protected:
 	ImplementationType implementationType;
 
-	Layer** layers;
-	unsigned char* layerConnectionsGraph;
-	unsigned numberLayers;
-
-	unsigned* inputLayers;
-	unsigned numberInputs;
+	vector<Layer*> layers;
+	bool* connectionsGraph;
+	vector<unsigned> inputs;
 
 	void addLayer(Layer* layer);
 	void increaseMaxInputs();

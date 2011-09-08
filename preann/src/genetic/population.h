@@ -18,13 +18,8 @@ class Population {
 	Task* task;
 	unsigned maxSize;
 	list<Individual*> individuals;
-
-	Individual** parents;
-	unsigned parentSize;
-	unsigned maxParents;
-	Individual** offSpring;
-	unsigned offSpringSize;
-	unsigned maxOffSpring;
+	vector<Individual*> parents;
+	vector<Individual*> offSpring;
 
 	unsigned numTruncation;
 	unsigned numRouletteWheel;
@@ -53,8 +48,7 @@ class Population {
     void changeOffspringSize(int incSize);
 	void crossover();
     unsigned choseParent(Interface &bufferUsedParents, unsigned  &usedParents);
-	void oneCrossover(CrossoverAlgorithm crossoverAlgorithm,
-			CrossoverLevel crossoverType, Interface &bufferUsedParents, unsigned &usedParents);
+	void oneCrossover(Individual* offSpringA, Individual* offSpringB, CrossoverAlgorithm crossoverAlgorithm, CrossoverLevel crossoverLevel);
 	void produceTwoOffsprings(unsigned & parentA, unsigned & parentB, Interface &bufferUsedParents, unsigned &usedParents);
 	void mutation();
     void checkNotEmpty();

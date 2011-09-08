@@ -35,13 +35,6 @@ Population::Population(Task* task, Individual* example, unsigned size,
 void Population::setDefaults()
 {
 	generation = 0;
-	parents = NULL;
-	parentSize = 0;
-	maxParents = 0;
-
-	offSpring = NULL;
-	offSpringSize = 0;
-	maxOffSpring = 0;
 
 	numRouletteWheel = 0;
 	numRanking = 0;
@@ -75,8 +68,8 @@ Population::~Population()
 		delete(*it);
 	}
 	individuals.clear();
-	MemoryManagement::ffree(parents);
-	MemoryManagement::ffree(offSpring);
+	parents.clear();
+	offSpring.clear();
 }
 
 void Population::load(FILE *stream)
@@ -191,49 +184,25 @@ void Population::setMutationProbability(float probability, float range)
 
 void Population::setSelectionRouletteWheel(unsigned number)
 {
-	changeParentsSize(number - numRouletteWheel);
 	numRouletteWheel = number;
 }
 
 void Population::setSelectionTruncation(unsigned number)
 {
-	changeParentsSize(number - numTruncation);
 	numTruncation = number;
 }
 
 void Population::setSelectionTournament(unsigned number, unsigned tourSize)
 {
-	changeParentsSize(number - numTournament);
 	numTournament = number;
 	this->tournamentSize = tourSize;
 }
 
 void Population::setSelectionRanking(unsigned number, float base, float step)
 {
-	changeParentsSize(number - numRanking);
 	numRanking = number;
 	this->rankingBase = base;
 	this->rankingStep = step;
-}
-
-void Population::changeParentsSize(int incSize)
-{
-	if (parents)
-	{
-		MemoryManagement::ffree(parents);
-	}
-	this->maxParents += incSize;
-	parents = (Individual**)MemoryManagement::mmalloc(this->maxParents * sizeof(Individual*));
-}
-
-void Population::changeOffspringSize(int incSize)
-{
-	maxOffSpring += incSize;
-	if (offSpring)
-	{
-		MemoryManagement::ffree(offSpring);
-	}
-	offSpring = (Individual**)(MemoryManagement::mmalloc(maxOffSpring * sizeof(Individual*)));
 }
 
 void Population::setCrossoverMultipointScheme(CrossoverLevel crossoverLevel,
@@ -245,7 +214,6 @@ void Population::setCrossoverMultipointScheme(CrossoverLevel crossoverLevel,
 		throw error;
 	}
 	int incSize = number - numCrossover[MULTIPOINT][crossoverLevel];
-	changeOffspringSize(incSize);
 	numCrossover[MULTIPOINT][crossoverLevel] = number;
 	numPointsMultipoint[crossoverLevel] = numPoints;
 }
@@ -259,7 +227,6 @@ void Population::setCrossoverProportionalScheme(CrossoverLevel crossoverLevel,
 		throw error;
 	}
 	int incSize = number - numCrossover[PROPORTIONAL][crossoverLevel];
-	changeOffspringSize(incSize);
 	numCrossover[PROPORTIONAL][crossoverLevel] = number;
 }
 
@@ -272,7 +239,6 @@ void Population::setCrossoverUniformScheme(CrossoverLevel crossoverLevel,
 		throw error;
 	}
 	int incSize = number - numCrossover[UNIFORM][crossoverLevel];
-	changeOffspringSize(incSize);
 	numCrossover[UNIFORM][crossoverLevel] = number;
 	probabilityUniform[crossoverLevel] = probability;
 }
@@ -293,7 +259,7 @@ void Population::mutation()
 {
 	if (mutationsPerIndividual)
 	{
-		for (unsigned i = 0; i < parentSize; i++)
+		for (unsigned i = 0; i < parents.size(); i++)
 		{
 			offSpring[i]->mutate(mutationsPerIndividual,
 					mutationsPerIndividualRange);
@@ -301,7 +267,7 @@ void Population::mutation()
 	}
 	if (mutationProbability)
 	{
-		for (unsigned i = 0; i < parentSize; i++)
+		for (unsigned i = 0; i < parents.size(); i++)
 		{
 			offSpring[i]->mutate(mutationProbability, mutationProbabilityRange);
 		}
@@ -313,11 +279,11 @@ unsigned Population::nextGeneration()
 	selection();
 	crossover();
 	mutation();
-	for (unsigned i = 0; i < offSpringSize; i++)
+	for (unsigned i = 0; i < offSpring.size(); i++)
 	{
 		this->insertIndividual(offSpring[i]);
 	}
-	offSpringSize = 0;
+	offSpring.clear();
 	return ++generation;
 }
 
@@ -366,7 +332,7 @@ float Population::getWorstIndividualScore()
 void Population::crossover()
 {
 	//TODO F reescribir de forma más legible y practica
-	if (parentSize < 2)
+	if (parents.size() < 2)
 	{
 		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
 		{
@@ -384,7 +350,7 @@ void Population::crossover()
 	}
 	else
 	{
-		Interface bufferUsedParents(parentSize, BIT);
+		Interface bufferUsedParents(parents.size(), BIT);
 		unsigned usedParents = 0;
 
 		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
@@ -398,18 +364,15 @@ void Population::crossover()
 				unsigned numCurrentScheme =
 						numCrossover[crossoverAlgorithm][crossoverLevel];
 				unsigned numGenerated = 0;
-				if (numCurrentScheme & 1)
-				{
-					oneCrossover(crossoverAlgorithm, crossoverLevel,
-							bufferUsedParents, usedParents);
-					delete (offSpring[offSpringSize - 1]);
-					--offSpringSize;
-					++numGenerated;
-				}
 				while (numGenerated < numCurrentScheme)
 				{
-					oneCrossover(crossoverAlgorithm, crossoverLevel,
-							bufferUsedParents, usedParents);
+					Individual* indA = parents[choseParent(bufferUsedParents, usedParents)]->newCopy();
+					Individual* indB = parents[choseParent(bufferUsedParents, usedParents)]->newCopy();
+
+					oneCrossover(indA, indB, crossoverAlgorithm, crossoverLevel);
+
+					offSpring.push_back(indA);
+					offSpring.push_back(indB);
 					numGenerated += 2;
 				}
 			}
@@ -423,30 +386,20 @@ unsigned Population::choseParent(Interface &bufferUsedParents,
 	unsigned chosenPoint;
 	do
 	{
-		chosenPoint = Random::positiveInteger(parentSize);
+		chosenPoint = Random::positiveInteger(parents.size());
 	} while (!bufferUsedParents.getElement(chosenPoint));
 	bufferUsedParents.setElement(chosenPoint, 1);
 	if (++usedParents == bufferUsedParents.getSize())
 	{
 		bufferUsedParents.reset();
 		usedParents = 0;
-		printf(
-				"Warning: there's not enough unused parents too do crossover. Some of them will be used again.\n");
+		printf("Warning: there's not enough unused parents to do crossover. Some of them will be used again.\n");
 	}
 	return chosenPoint;
 }
 
-void Population::oneCrossover(CrossoverAlgorithm crossoverAlgorithm,
-		CrossoverLevel crossoverLevel, Interface &bufferUsedParents,
-		unsigned &usedParents)
+void Population::oneCrossover(Individual* offSpringA, Individual* offSpringB, CrossoverAlgorithm crossoverAlgorithm, CrossoverLevel crossoverLevel)
 {
-	offSpring[offSpringSize++] = parents[choseParent(bufferUsedParents,
-			usedParents)]->newCopy();
-	offSpring[offSpringSize++] = parents[choseParent(bufferUsedParents,
-			usedParents)]->newCopy();
-
-	Individual* offSpringA = offSpring[offSpringSize - 2];
-	Individual* offSpringB = offSpring[offSpringSize - 1];
 	switch (crossoverAlgorithm)
 	{
 	case UNIFORM:
@@ -473,7 +426,7 @@ void Population::selectRouletteWheel()
 			float fitness = (*it)->getFitness();
 			if (fitness > chosen_point)
 			{
-				parents[parentSize++] = (*it);
+				parents.push_back(*it);
 				chosen_point = 0;
 			}
 			else
@@ -505,7 +458,7 @@ void Population::selectRanking()
 					- j - 1));
 			if (individual_ranking_score > chosen_point)
 			{
-				parents[parentSize++] = (*it);
+				parents.push_back(*it);
 				chosen_point = 0;
 			}
 			else
@@ -560,7 +513,7 @@ void Population::selectTournament()
 		for (unsigned s=0; s < selected; ++s) {
 			++it;
 		}
-		parents[parentSize++] = (*it);
+		parents.push_back(*it);
 	}
 
 }
@@ -578,7 +531,7 @@ void Population::selectTruncation()
 	list<Individual*>::iterator it = individuals.begin();
 	for (unsigned i = 0; i < numTruncation; i++)
 	{
-		parents[parentSize++] = *it;
+		parents.push_back(*it);
 		++it;
 	}
 }

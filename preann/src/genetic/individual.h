@@ -44,7 +44,7 @@ public:
 
 	float getFitness();
 	void setFitness(float fitness);
-	char checkCompatibility(Individual* other);
+	bool checkCompatibility(Individual* other);
 };
 
 #endif /* INDIVIDUAL_H_ */

@@ -20,7 +20,7 @@ Individual* Individual::newCopy()
 {
 	Individual* copy = new Individual(this->getImplementationType());
 
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		Buffer* layerBuffer = layers[i]->getOutput();
 		if (isInputLayer(i))
@@ -34,17 +34,17 @@ Individual* Individual::newCopy()
 					layerBuffer->getBufferType(), layers[i]->getFunctionType());
 		}
 	}
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
-		for (unsigned j = 0; j < numberLayers; j++)
+		for (unsigned j = 0; j < layers.size(); j++)
 		{
-			if (layerConnectionsGraph[(i * numberLayers) + j])
+			if (connectionsGraph[(i * layers.size()) + j])
 			{
 				copy->addLayersConnection(i, j);
 			}
 		}
 	}
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		copy->getLayer(i)->copyWeighs(layers[i]);
 	}
@@ -55,7 +55,7 @@ void Individual::mutate(unsigned numMutations, float mutationRange)
 {
 	for (unsigned i = 0; i < numMutations; i++)
 	{
-		unsigned chosenLayer = Random::positiveInteger(numberLayers);
+		unsigned chosenLayer = Random::positiveInteger(layers.size());
 		unsigned chosenConnection = Random::positiveInteger(
 				layers[chosenLayer]->getNumberInputs() + 1);
 		Connection* connection;
@@ -74,7 +74,7 @@ void Individual::mutate(unsigned numMutations, float mutationRange)
 
 void Individual::mutate(float probability, float mutationRange)
 {
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++)
 		{
@@ -172,7 +172,7 @@ void Individual::multipointCrossover(CrossoverLevel crossoverLevel,
 
 void Individual::uniformCrossoverWeighs(Individual* other, float probability)
 {
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++)
 		{
@@ -207,8 +207,8 @@ void Individual::multipointCrossoverWeighs(Individual *other,
 		unsigned numPoints)
 {
 	Interface*** bitBuffers = (Interface***)MemoryManagement::mmalloc(sizeof(Interface**)
-			* numberLayers);
-	for (unsigned i = 0; i < numberLayers; i++)
+			* layers.size());
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		//One more for the thresholds
 		bitBuffers[i] = (Interface**)MemoryManagement::mmalloc(sizeof(Interface*)
@@ -223,7 +223,7 @@ void Individual::multipointCrossoverWeighs(Individual *other,
 	}
 	while (numPoints >= 0)
 	{
-		unsigned chosenLayer = Random::positiveInteger(numberLayers);
+		unsigned chosenLayer = Random::positiveInteger(layers.size());
 		unsigned chosenInput = Random::positiveInteger(
 				layers[chosenLayer]->getNumberInputs() + 1);
 		unsigned chosenPoint = Random::positiveInteger(layers[chosenLayer]->getInput(
@@ -236,7 +236,7 @@ void Individual::multipointCrossoverWeighs(Individual *other,
 		}
 	}
 	unsigned progenitor = 0;
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		for (unsigned j = 0; j < layers[i]->getNumberInputs() + 1; j++)
 		{
@@ -253,7 +253,7 @@ void Individual::multipointCrossoverWeighs(Individual *other,
 			}
 		}
 	}
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++)
 		{
@@ -273,8 +273,8 @@ void Individual::crossoverNeuronsByInput(Interface** inputsBitBuffers,
 		Individual *other)
 {
 	Interface ***bitBuffers = (Interface***)((MemoryManagement::mmalloc(sizeof(Interface**)
-			* numberLayers)));
-	for (unsigned i = 0; i < numberLayers; i++)
+			* layers.size())));
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		bitBuffers[i] = (Interface**)((MemoryManagement::mmalloc(sizeof(Interface*)
 				* layers[i]->getNumberInputs())));
@@ -285,10 +285,10 @@ void Individual::crossoverNeuronsByInput(Interface** inputsBitBuffers,
 		}
 	}
 
-	for (unsigned inputLay = 0; inputLay < numberLayers; inputLay++)
+	for (unsigned inputLay = 0; inputLay < layers.size(); inputLay++)
 	{
 		Buffer *input = layers[inputLay]->getOutput();
-		for (unsigned outputLay = 0; outputLay < numberLayers; outputLay++)
+		for (unsigned outputLay = 0; outputLay < layers.size(); outputLay++)
 		{
 			for (unsigned k = 0; k < layers[outputLay]->getNumberInputs(); k++)
 			{
@@ -317,7 +317,7 @@ void Individual::crossoverNeuronsByInput(Interface** inputsBitBuffers,
 		}
 		delete (inputsBitBuffers[inputLay]);
 	}
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++)
 		{
@@ -333,11 +333,10 @@ void Individual::crossoverNeuronsByInput(Interface** inputsBitBuffers,
 	MemoryManagement::ffree(bitBuffers);
 }
 
-void Individual::uniformCrossoverNeuronsInverted(Individual *other,
-		float probability)
+void Individual::uniformCrossoverNeuronsInverted(Individual *other, float probability)
 {
-	Interface* inputsBitBuffers[numberLayers];
-	for (unsigned i = 0; i < numberLayers; i++)
+	Interface* inputsBitBuffers[layers.size()];
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		inputsBitBuffers[i] = new Interface(layers[i]->getOutput()->getSize(),
 				BIT);
@@ -362,15 +361,15 @@ void Individual::uniformCrossoverNeuronsInverted(Individual *other,
 void Individual::multipointCrossoverNeuronsInverted(Individual *other,
 		unsigned numPoints)
 {
-	Interface* inputsBitBuffers[numberLayers];
-	for (unsigned i = 0; i < numberLayers; i++)
+	Interface* inputsBitBuffers[layers.size()];
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		inputsBitBuffers[i] = new Interface(layers[i]->getOutput()->getSize(),
 				BIT);
 	}
 	while (numPoints >= 0)
 	{
-		unsigned chosenLayer = Random::positiveInteger(numberLayers);
+		unsigned chosenLayer = Random::positiveInteger(layers.size());
 		unsigned chosenPoint = Random::positiveInteger(
 				inputsBitBuffers[chosenLayer]->getSize());
 		if (!inputsBitBuffers[chosenLayer]->getElement(chosenPoint))
@@ -380,7 +379,7 @@ void Individual::multipointCrossoverNeuronsInverted(Individual *other,
 		}
 	}
 	unsigned progenitor = 1;
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		for (unsigned j = 0; j < inputsBitBuffers[i]->getSize(); j++)
 		{
@@ -430,7 +429,7 @@ void Individual::crossoverNeuronsByOutput(Layer* thisLayer, Layer *otherLayer,
 
 void Individual::uniformCrossoverNeurons(Individual *other, float probability)
 {
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		Interface outputsBitBuffer(layers[i]->getOutput()->getSize(), BIT);
 
@@ -454,14 +453,14 @@ void Individual::multipointCrossoverNeurons(Individual *other,
 		unsigned numPoints)
 {
 	Interface** bitBuffers = (Interface**)MemoryManagement::mmalloc(sizeof(Interface*)
-			* numberLayers);
-	for (unsigned i = 0; i < numberLayers; i++)
+			* layers.size());
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		bitBuffers[i] = new Interface(layers[i]->getOutput()->getSize(), BIT);
 	}
 	while (numPoints >= 0)
 	{
-		unsigned chosenLayer = Random::positiveInteger(numberLayers);
+		unsigned chosenLayer = Random::positiveInteger(layers.size());
 		unsigned chosenPoint = Random::positiveInteger(
 				bitBuffers[chosenLayer]->getSize());
 		if (!bitBuffers[chosenLayer]->getElement(chosenPoint))
@@ -471,7 +470,7 @@ void Individual::multipointCrossoverNeurons(Individual *other,
 		}
 	}
 	unsigned progenitor = 1;
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		for (unsigned j = 0; j < bitBuffers[i]->getSize(); j++)
 		{
@@ -493,13 +492,13 @@ void Individual::multipointCrossoverNeurons(Individual *other,
 
 void Individual::crossoverLayers(Individual *other, Interface* bitBuffer)
 {
-	if (bitBuffer->getSize() != numberLayers)
+	if (bitBuffer->getSize() != layers.size())
 	{
 		std::string error =
 				"The number of layers must be equal to the size of the bitBuffer.";
 		throw error;
 	}
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 
 		if (!bitBuffer->getElement(i))
@@ -512,8 +511,8 @@ void Individual::crossoverLayers(Individual *other, Interface* bitBuffer)
 
 void Individual::uniformCrossoverLayers(Individual *other, float probability)
 {
-	Interface* bitBuffer = new Interface(numberLayers, BIT);
-	for (unsigned i = 0; i < numberLayers; i++)
+	Interface* bitBuffer = new Interface(layers.size(), BIT);
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		if (Random::positiveFloat(1) < probability)
 		{
@@ -530,16 +529,16 @@ void Individual::uniformCrossoverLayers(Individual *other, float probability)
 void Individual::multipointCrossoverLayers(Individual *other,
 		unsigned numPoints)
 {
-	if (numPoints > numberLayers)
+	if (numPoints > layers.size())
 	{
 		std::string error =
 				"In multipointCrossoverLayers: there have to be more layers than points.";
 		throw error;
 	}
-	Interface* bitBuffer = new Interface(numberLayers, BIT);
+	Interface* bitBuffer = new Interface(layers.size(), BIT);
 	while (numPoints >= 0)
 	{
-		unsigned chosenPoint = Random::positiveInteger(numberLayers);
+		unsigned chosenPoint = Random::positiveInteger(layers.size());
 		if (!bitBuffer->getElement(chosenPoint))
 		{
 			bitBuffer->setElement(chosenPoint, 1);
@@ -547,7 +546,7 @@ void Individual::multipointCrossoverLayers(Individual *other,
 		}
 	}
 	unsigned progenitor = 1;
-	for (unsigned i = 0; i < numberLayers; i++)
+	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		if (bitBuffer->getElement(i))
 		{
@@ -571,14 +570,14 @@ float Individual::getFitness()
 	return fitness;
 }
 
-char Individual::checkCompatibility(Individual *other)
+bool Individual::checkCompatibility(Individual *other)
 {
-	if (numberLayers != other->getNumLayers() || numberInputs != other->getNumInputs()
+	if (layers.size() != other->getNumLayers() || inputs.size() != other->getNumInputs()
 			|| getImplementationType() != other->getImplementationType())
 	{
-		return 0;
+		return false;
 	}
-	for (unsigned i = 0; i < numberLayers; ++i)
+	for (unsigned i = 0; i < layers.size(); ++i)
 	{
 		Layer* tLayer = layers[i];
 		Layer* otherLayer = other->getLayer(i);
@@ -589,7 +588,7 @@ char Individual::checkCompatibility(Individual *other)
 						!= otherLayer->getOutput()->getBufferType()
 				|| tLayer->getNumberInputs() != otherLayer->getNumberInputs())
 		{
-			return 0;
+			return false;
 		}
 		for (unsigned j = 0; j < tLayer->getNumberInputs(); ++j)
 		{
@@ -600,10 +599,10 @@ char Individual::checkCompatibility(Individual *other)
 					|| tConnection->getBufferType()
 							!= otherConnection->getBufferType())
 			{
-				return 0;
+				return false;
 			}
 		}
 	}
-	return 1;
+	return true;
 }
 
