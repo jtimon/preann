@@ -28,7 +28,7 @@ void MemoryManagement::ffree(void* ptr)
 {
 	char found = 0;
 	for(int i=0; i < ptrs.size(); i++){
-		if (ptrs[0] == ptr) {
+		if (ptrs[i] == ptr) {
 			ptrs.erase (ptrs.begin() + i);
 			sizes.erase (sizes.begin() + i);
 			free(ptr);
