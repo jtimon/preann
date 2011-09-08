@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
 	total.start();
 	try {
 
+		//TODO usar Test para esto (sin el bucle este aqui fuera) o eliminar el fichero
 		for (test.sizeToMin(); test.hasNextSize(); test.sizeIncrement()) {
 			for (test.implementationTypeToMin(); test.hasNextImplementationType(); test.implementationTypeIncrement()) {
 

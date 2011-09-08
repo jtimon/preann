@@ -25,8 +25,8 @@ void printTestParams(ImplementationType implementationType,
 	case CUDA:
 		printf("   CUDA   ");
 		break;
-	case CUDA2:
-		printf("   CUDA2  ");
+	case CUDA_REDUC:
+		printf("   CUDA_REDUC  ");
 		break;
 	case CUDA_INV:
 		printf(" CUDA_INV ");

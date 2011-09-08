@@ -121,10 +121,10 @@ int main(int argc, char *argv[]) {
 //				//				printf("\n", 1);
 //				//			}
 //
-//				printf("CUDA2 ", 1);
+//				printf("CUDA_REDUC ", 1);
 //				for (unsigned blockSize = 512; blockSize <= 512; blockSize *= 2) {
 //					Cuda_Threads_Per_Block = blockSize;
-//					nn = new NeuralNet(CUDA2);
+//					nn = new NeuralNet(CUDA_REDUC);
 //					seconds = testNeuralNet(nn, size, inputType, times);
 //					printf("(%d) %f ", blockSize, seconds);
 //				}

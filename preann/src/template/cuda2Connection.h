@@ -5,8 +5,8 @@
  *      Author: timon
  */
 
-#ifndef CUDA2CONNECTION_H_
-#define CUDA2CONNECTION_H_
+#ifndef CUDA_REDUCCONNECTION_H_
+#define CUDA_REDUCCONNECTION_H_
 
 #include "cudaConnection.h"
 
@@ -21,7 +21,7 @@ public:
 	virtual ~Cuda2Connection() {};
 
 	virtual ImplementationType getImplementationType() {
-		return CUDA2;
+		return CUDA_REDUC;
 	};
 
 	virtual void calculateAndAddTo(Buffer* results)
@@ -33,4 +33,4 @@ public:
 	}
 };
 
-#endif /* CUDA2CONNECTION_H_ */
+#endif /* CUDA_REDUCCONNECTION_H_ */

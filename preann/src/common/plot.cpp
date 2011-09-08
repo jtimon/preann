@@ -42,7 +42,7 @@ int implTypeToLineType(ImplementationType implementationType)
 			return 2;
 		case CUDA:
 			return 3;
-		case CUDA2:
+		case CUDA_REDUC:
 			return 5;
 		case CUDA_INV:
 			return -1;

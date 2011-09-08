@@ -11,13 +11,13 @@
 #include "task.h"
 #include "individual.h"
 
+//TODO usar clase vector
 class Population {
 
 	unsigned generation;
 	Task* task;
-	Individual** individualList;
-	unsigned size;
 	unsigned maxSize;
+	list<Individual*> individuals;
 
 	Individual** parents;
 	unsigned parentSize;
@@ -57,6 +57,7 @@ class Population {
 			CrossoverLevel crossoverType, Interface &bufferUsedParents, unsigned &usedParents);
 	void produceTwoOffsprings(unsigned & parentA, unsigned & parentB, Interface &bufferUsedParents, unsigned &usedParents);
 	void mutation();
+    void checkNotEmpty();
 public:
 	Population(Task* task);
 	Population(Task* task, Individual* example, unsigned size, float range);

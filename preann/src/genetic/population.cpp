@@ -11,8 +11,6 @@ Population::Population(Task* task)
 {
 	this->task = task;
 
-	individualList = NULL;
-	size = 0;
 	maxSize = 0;
 
 	setDefaults();
@@ -21,13 +19,11 @@ Population::Population(Task* task)
 Population::Population(Task* task, Individual* example, unsigned size,
 		float range)
 {
+	this->maxSize = size;
 	this->task = task;
 
-	individualList = (Individual**)MemoryManagement::mmalloc(sizeof(Individual*) * size);
-	this->size = 0;
-	this->maxSize = size;
 	Individual* newIndividual;
-	for (unsigned i = 0; i < this->maxSize; i++)
+	for (unsigned i = 0; i < maxSize; i++)
 	{
 		newIndividual = example->newCopy();
 		newIndividual->randomWeighs(range);
@@ -75,133 +71,109 @@ void Population::setDefaults()
 
 Population::~Population()
 {
-	for (unsigned i = 0; i < this->size; i++)
-	{
-		delete (individualList[i]);
+	for (list<Individual*>::iterator it = individuals.begin(); it != individuals.end(); it++) {
+		delete(*it);
 	}
-	MemoryManagement::ffree(individualList);
+	individuals.clear();
 	MemoryManagement::ffree(parents);
 	MemoryManagement::ffree(offSpring);
 }
 
 void Population::load(FILE *stream)
 {
-	fread(&numRouletteWheel, sizeof(unsigned), 1, stream);
-	fread(&numRanking, sizeof(unsigned), 1, stream);
-	fread(&rankingBase, sizeof(float), 1, stream);
-	fread(&rankingStep, sizeof(float), 1, stream);
-	fread(&numTournament, sizeof(unsigned), 1, stream);
-	fread(&tournamentSize, sizeof(unsigned), 1, stream);
-	fread(&numTruncation, sizeof(unsigned), 1, stream);
-
-	for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; crossLevel++)
-	{
-		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
-		{
-			fread(&(numCrossover[crossAlg][crossLevel]), sizeof(unsigned), 1,
-					stream);
-		}
-		fread(&probabilityUniform[crossLevel], sizeof(float), 1, stream);
-		fread(&numPointsMultipoint[crossLevel], sizeof(unsigned), 1, stream);
-	}
-
-	fread(&mutationsPerIndividual, sizeof(unsigned), 1, stream);
-	fread(&mutationsPerIndividualRange, sizeof(float), 1, stream);
-	fread(&mutationProbability, sizeof(float), 1, stream);
-	fread(&mutationProbabilityRange, sizeof(float), 1, stream);
-
-	fread(&size, sizeof(unsigned), 1, stream);
-	this->maxSize = size;
-	individualList = (Individual**)MemoryManagement::mmalloc(sizeof(Individual*) * size);
-	for (unsigned i = 0; i < this->size; i++)
-	{
-		individualList[i] = new Individual();
-		individualList[i]->load(stream);
-	}
+	//TODO rehacer Population::load
+//	fread(&numRouletteWheel, sizeof(unsigned), 1, stream);
+//	fread(&numRanking, sizeof(unsigned), 1, stream);
+//	fread(&rankingBase, sizeof(float), 1, stream);
+//	fread(&rankingStep, sizeof(float), 1, stream);
+//	fread(&numTournament, sizeof(unsigned), 1, stream);
+//	fread(&tournamentSize, sizeof(unsigned), 1, stream);
+//	fread(&numTruncation, sizeof(unsigned), 1, stream);
+//
+//	for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; crossLevel++)
+//	{
+//		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
+//		{
+//			fread(&(numCrossover[crossAlg][crossLevel]), sizeof(unsigned), 1,
+//					stream);
+//		}
+//		fread(&probabilityUniform[crossLevel], sizeof(float), 1, stream);
+//		fread(&numPointsMultipoint[crossLevel], sizeof(unsigned), 1, stream);
+//	}
+//
+//	fread(&mutationsPerIndividual, sizeof(unsigned), 1, stream);
+//	fread(&mutationsPerIndividualRange, sizeof(float), 1, stream);
+//	fread(&mutationProbability, sizeof(float), 1, stream);
+//	fread(&mutationProbabilityRange, sizeof(float), 1, stream);
+//
+//	fread(&size, sizeof(unsigned), 1, stream);
+//	this->maxSize = size;
+//	individualList = (Individual**)MemoryManagement::mmalloc(sizeof(Individual*) * size);
+//	for (unsigned i = 0; i < this->size; i++)
+//	{
+//		individualList[i] = new Individual();
+//		individualList[i]->load(stream);
+//	}
 }
 
 void Population::save(FILE *stream)
 {
-	fwrite(&numRouletteWheel, sizeof(unsigned), 1, stream);
-	fwrite(&numRanking, sizeof(unsigned), 1, stream);
-	fwrite(&rankingBase, sizeof(float), 1, stream);
-	fwrite(&rankingStep, sizeof(float), 1, stream);
-	fwrite(&numTournament, sizeof(unsigned), 1, stream);
-	fwrite(&tournamentSize, sizeof(unsigned), 1, stream);
-	fwrite(&numTruncation, sizeof(unsigned), 1, stream);
-
-	for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; crossLevel++)
-	{
-		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
-		{
-			fwrite(&(numCrossover[crossAlg][crossLevel]), sizeof(unsigned), 1,
-					stream);
-		}
-		fwrite(&probabilityUniform[crossLevel], sizeof(float), 1, stream);
-		fwrite(&numPointsMultipoint[crossLevel], sizeof(unsigned), 1, stream);
-	}
-
-	fwrite(&mutationsPerIndividual, sizeof(unsigned), 1, stream);
-	fwrite(&mutationsPerIndividualRange, sizeof(float), 1, stream);
-	fwrite(&mutationProbability, sizeof(float), 1, stream);
-	fwrite(&mutationProbabilityRange, sizeof(float), 1, stream);
-
-	fwrite(&size, sizeof(unsigned), 1, stream);
-	this->maxSize = size;
-	individualList = (Individual**)MemoryManagement::mmalloc(sizeof(Individual*) * size);
-	for (unsigned i = 0; i < this->size; i++)
-	{
-		individualList[i] = new Individual();
-		individualList[i]->save(stream);
-	}
+	//TODO rehacer Population::save
+//	fwrite(&numRouletteWheel, sizeof(unsigned), 1, stream);
+//	fwrite(&numRanking, sizeof(unsigned), 1, stream);
+//	fwrite(&rankingBase, sizeof(float), 1, stream);
+//	fwrite(&rankingStep, sizeof(float), 1, stream);
+//	fwrite(&numTournament, sizeof(unsigned), 1, stream);
+//	fwrite(&tournamentSize, sizeof(unsigned), 1, stream);
+//	fwrite(&numTruncation, sizeof(unsigned), 1, stream);
+//
+//	for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; crossLevel++)
+//	{
+//		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
+//		{
+//			fwrite(&(numCrossover[crossAlg][crossLevel]), sizeof(unsigned), 1,
+//					stream);
+//		}
+//		fwrite(&probabilityUniform[crossLevel], sizeof(float), 1, stream);
+//		fwrite(&numPointsMultipoint[crossLevel], sizeof(unsigned), 1, stream);
+//	}
+//
+//	fwrite(&mutationsPerIndividual, sizeof(unsigned), 1, stream);
+//	fwrite(&mutationsPerIndividualRange, sizeof(float), 1, stream);
+//	fwrite(&mutationProbability, sizeof(float), 1, stream);
+//	fwrite(&mutationProbabilityRange, sizeof(float), 1, stream);
+//
+//	fwrite(&size, sizeof(unsigned), 1, stream);
+//	this->maxSize = size;
+//	individualList = (Individual**)MemoryManagement::mmalloc(sizeof(Individual*) * size);
+//	for (unsigned i = 0; i < this->size; i++)
+//	{
+//		individualList[i] = new Individual();
+//		individualList[i]->save(stream);
+//	}
 }
 
 void Population::insertIndividual(Individual *individual)
 {
-	if (individualList == NULL)
-	{
-		std::string error =
-				"No population was load nor an example individual was given.";
-		throw error;
-	}
+	//TODO pensar si hay que sustituir
+//	if (individualList == NULL)
+//	{
+//		std::string error =
+//				"No population was load nor an example individual was given.";
+//		throw error;
+//	}
 
 	task->test(individual);
 
-	if (this->size == 0)
-	{
-		individualList[this->size++] = individual;
+    float fitness = individual->getFitness();
+	for (list<Individual*>::iterator it = individuals.begin(); it != individuals.end(); it++) {
+		if(fitness > (*it)->getFitness()) {
+			individuals.insert(it, individual);
+		}
 	}
-	else
-	{
-		unsigned bufferPos = this->size - 1;
-		float fitness = individual->getFitness();
-		if (fitness > individualList[bufferPos]->getFitness())
-		{
-			if (this->size < this->maxSize)
-			{
-				individualList[this->size++] = individualList[bufferPos];
-			}
-			else
-			{
-				delete (individualList[bufferPos]);
-			}
-
-			while (bufferPos > 1 && fitness
-					> individualList[bufferPos - 1]->getFitness())
-			{
-				individualList[bufferPos] = individualList[bufferPos - 1];
-				--bufferPos;
-			}
-			individualList[bufferPos] = individual;
-		}
-		else if (this->size < this->maxSize)
-		{
-			individualList[this->size++] = individual;
-		}
-		else
-		{
-			delete (individual);
-		}
+	if (individuals.size() > this->maxSize){
+		delete(individuals.back());
+		individuals.pop_back();
 	}
 }
 
@@ -356,32 +328,28 @@ unsigned Population::getGeneration()
 
 float Population::getBestIndividualScore()
 {
-	if (size < 0)
-	{
-		std::string error = "The population is empty.";
-		throw error;
-	}
-	return individualList[0]->getFitness();
+    checkNotEmpty();
+	return individuals.front()->getFitness();
 }
 
 Individual *Population::getBestIndividual()
 {
-	if (size < 0)
-	{
-		std::string error = "The population is empty.";
-		throw error;
-	}
-	return individualList[0];
+    checkNotEmpty();
+	return individuals.front();
+}
+
+void Population::checkNotEmpty()
+{
+    if(individuals.size() <= 0){
+        std::string error = "The population is empty.";
+        throw error;
+    }
 }
 
 float Population::getAverageScore()
 {
-	if (size < 0)
-	{
-		std::string error = "The population is empty.";
-		throw error;
-	}
-	return total_score / size;
+    checkNotEmpty();
+	return total_score / individuals.size();
 }
 
 Task* Population::getTask()
@@ -391,12 +359,8 @@ Task* Population::getTask()
 
 float Population::getWorstIndividualScore()
 {
-	if (size < 0)
-	{
-		std::string error = "The population is empty.";
-		throw error;
-	}
-	return individualList[size - 1]->getFitness();
+	checkNotEmpty();
+	return individuals.back()->getFitness();
 }
 
 void Population::crossover()
@@ -502,19 +466,20 @@ void Population::selectRouletteWheel()
 {
 	for (unsigned i = 0; i < numRouletteWheel; i++)
 	{
-		unsigned j = 0;
+		list<Individual*>::iterator it = individuals.begin();
 		float chosen_point = Random::positiveFloat(total_score);
 		while (chosen_point)
 		{
-			if (individualList[j]->getFitness() > chosen_point)
+			float fitness = (*it)->getFitness();
+			if (fitness > chosen_point)
 			{
-				parents[parentSize++] = individualList[j];
+				parents[parentSize++] = (*it);
 				chosen_point = 0;
 			}
 			else
 			{
-				chosen_point -= individualList[j]->getFitness();
-				j++;
+			    chosen_point -= fitness;
+				++it;
 			}
 		}
 	}
@@ -522,8 +487,8 @@ void Population::selectRouletteWheel()
 
 void Population::selectRanking()
 {
-	float total_base = rankingBase * size;
-	for (unsigned i = 0; i < size; i++)
+	float total_base = rankingBase * individuals.size();
+	for (unsigned i = 0; i < individuals.size(); i++)
 	{
 		total_base += i * rankingStep;
 	}
@@ -531,21 +496,23 @@ void Population::selectRanking()
 	for (unsigned i = 0; i < numRanking; i++)
 	{
 		unsigned j = 0;
+		list<Individual*>::iterator it = individuals.begin();
 		float chosen_point = Random::positiveFloat(total_base);
 		while (chosen_point)
 		{
 
-			float individual_ranking_score = rankingBase + (rankingStep * (size
+			float individual_ranking_score = rankingBase + (rankingStep * (individuals.size()
 					- j - 1));
 			if (individual_ranking_score > chosen_point)
 			{
-				parents[parentSize++] = individualList[j];
+				parents[parentSize++] = (*it);
 				chosen_point = 0;
 			}
 			else
 			{
 				chosen_point -= individual_ranking_score;
-				j++;
+				++j;
+				++it;
 			}
 		}
 	}
@@ -553,7 +520,7 @@ void Population::selectRanking()
 
 void Population::selectTournament()
 {
-	if (tournamentSize > size)
+	if (tournamentSize > individuals.size())
 	{
 		std::string error =
 				"The tournament size cannot be grater than the population size.";
@@ -572,7 +539,7 @@ void Population::selectTournament()
 			while (!newChosen)
 			{
 				newChosen = 1;
-				chosen = Random::positiveInteger(size);
+				chosen = Random::positiveInteger(individuals.size());
 				for (unsigned k = 0; k < j; k++)
 				{
 					if (chosen == alreadyChosen[k])
@@ -589,13 +556,18 @@ void Population::selectTournament()
 				selected = chosen;
 			}
 		}
-		parents[parentSize++] = individualList[selected];
+		list<Individual*>::iterator it = individuals.begin();
+		for (unsigned s=0; s < selected; ++s) {
+			++it;
+		}
+		parents[parentSize++] = (*it);
 	}
+
 }
 
 void Population::selectTruncation()
 {
-	if (numTruncation > size)
+	if (numTruncation > individuals.size())
 	{
 		std::string
 				error =
@@ -603,8 +575,10 @@ void Population::selectTruncation()
 		throw error;
 	}
 
+	list<Individual*>::iterator it = individuals.begin();
 	for (unsigned i = 0; i < numTruncation; i++)
 	{
-		parents[parentSize++] = individualList[i];
+		parents[parentSize++] = *it;
+		++it;
 	}
 }

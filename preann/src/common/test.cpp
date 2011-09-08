@@ -407,7 +407,7 @@ void Test::printCurrentState()
         case C: 		printf(" C        "); 	break;
         case SSE2: 		printf(" SSE2     ");	break;
         case CUDA: 		printf(" CUDA     ");	break;
-        case CUDA2:		printf(" CUDA2    ");	break;
+        case CUDA_REDUC:		printf(" CUDA_REDUC    ");	break;
         case CUDA_INV:	printf(" CUDA_INV ");	break;
     }
     printf(" Buffer Type = ");
@@ -436,7 +436,7 @@ void Test::printParameters()
 				case C: 		printf(" C        "); 	break;
 				case SSE2: 		printf(" SSE2     ");	break;
 				case CUDA: 		printf(" CUDA     ");	break;
-				case CUDA2:		printf(" CUDA2    ");	break;
+				case CUDA_REDUC:		printf(" CUDA_REDUC    ");	break;
 				case CUDA_INV:	printf(" CUDA_INV ");	break;
 			}
     	}
@@ -602,8 +602,8 @@ std::string Test::implementationTypeToString()
 	case CUDA:
 		toReturn = "CUDA";
 		break;
-	case CUDA2:
-		toReturn = "CUDA2";
+	case CUDA_REDUC:
+		toReturn = "CUDA_REDUC";
 		break;
 	case CUDA_INV:
 		toReturn = "CUDA_INV";

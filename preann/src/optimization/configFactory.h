@@ -42,7 +42,7 @@ Buffer* func_newBuffer(unsigned size, ImplementationType implementationType)
 			}
 #endif
 		case CUDA:
-		case CUDA2:
+		case CUDA_REDUC:
 		case CUDA_INV:
 #ifdef CUDA_IMPL
 			return new CudaBuffer<bufferTypeTempl, c_typeTempl>(size);
@@ -85,13 +85,13 @@ Connection* func_newConnection(Buffer* input, unsigned outputSize, Implementatio
 #ifdef CUDA_IMPL
 		case CUDA:
 			return new CudaConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
-		case CUDA2:
+		case CUDA_REDUC:
 			return new Cuda2Connection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 		case CUDA_INV:
 			return new CudaInvertedConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
 		case CUDA:
-		case CUDA2:
+		case CUDA_REDUC:
 		case CUDA_INV:
 			{
 			std::string error = "Implementation CUDA is not allowed.";

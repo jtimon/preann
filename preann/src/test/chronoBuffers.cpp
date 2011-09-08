@@ -15,17 +15,22 @@ int main(int argc, char *argv[])
 	string path = "/home/timon/workspace/preann/output/";
 
 	Plot plot;
-	plot.fromToBySize(100, 10000, 100);
+	plot.fromToBySize(10000, 10000, 10000);
 	plot.fromToByOutputSize(100, 100, 100);
 	plot.disableBufferType(BYTE);
+//	plot.disableAllImplementationTypes();
+//	plot.enableImplementationType(C);
+//	plot.enableImplementationType(SSE2);
+	plot.disableImplementationType(CUDA);
 	plot.printParameters();
 
+
 	try {
-		plot.plot(path, BUFFER, COPYFROMINTERFACE, 1000);
+//		plot.plot(path, BUFFER, COPYFROMINTERFACE, 1000);
 //		plot.plot(path, BUFFER, COPYTOINTERFACE, 10000);
 //		plot.plot(path, BUFFER, ACTIVATION, 10);
 //
-//		plot.plot(path, CONNECTION, CALCULATEANDADDTO, 10);
+		plot.plot(path, CONNECTION, CALCULATEANDADDTO, 1);
 //		plot.plot(path, CONNECTION, MUTATE, 100);
 //		plot.plot(path, CONNECTION, CROSSOVER, 1);
 

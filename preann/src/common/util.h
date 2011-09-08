@@ -18,6 +18,7 @@ using namespace std;
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
+#include <list>
 #include <math.h>
 
 #define BITS_PER_BYTE (8)
@@ -27,7 +28,7 @@ typedef enum {FLOAT, BIT, SIGN, BYTE} BufferType;
 #define BUFFER_TYPE_DIM 4
 typedef enum {IDENTITY, BINARY_STEP, BIPOLAR_STEP, SIGMOID, BIPOLAR_SIGMOID, HYPERBOLIC_TANGENT} FunctionType;
 #define FUNCTION_TYPE_DIM 6
-typedef enum {C, SSE2, CUDA, CUDA2, CUDA_INV} ImplementationType;
+typedef enum {C, SSE2, CUDA, CUDA_REDUC, CUDA_INV} ImplementationType;
 #define IMPLEMENTATION_TYPE_DIM 5
 typedef enum {
 	BUFFER,

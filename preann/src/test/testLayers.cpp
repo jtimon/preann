@@ -83,6 +83,8 @@ Layer* createAndSaveLayer(unsigned size, BufferType bufferType, Buffer** control
 #define SIZE_MAX 50
 #define SIZE_INC 50
 
+//TODO usar Test para esto o eliminar el fichero
+
 int main(int argc, char *argv[]) {
 	Chronometer total;
 	total.start();
