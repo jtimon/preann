@@ -79,10 +79,6 @@ Layer* createAndSaveLayer(unsigned size, BufferType bufferType, Buffer** control
     return controlLayer;
 }
 
-#define SIZE_MIN 1
-#define SIZE_MAX 50
-#define SIZE_INC 50
-
 //TODO usar Test para esto o eliminar el fichero
 
 int main(int argc, char *argv[]) {
@@ -90,9 +86,9 @@ int main(int argc, char *argv[]) {
 	total.start();
 
 	test.setInitialWeighsRange(20);
-	test.setMaxSize(50);
-	test.setIncSize(50);
-	test.disableBufferType(BYTE);
+	test.fromToBySize(1, 50, 49);
+	ENUM_VECTOR(bufferTypes, BYTE);
+	test.excludeBufferTypes(bufferTypes);
 	test.printParameters();
 
 	try {

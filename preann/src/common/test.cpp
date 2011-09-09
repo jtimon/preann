@@ -10,8 +10,8 @@
 Test::Test()
 {
 	size = minSize = maxSize = incSize = 1;
-	enableAllBufferTypes();
-	enableAllImplementationTypes();
+	withAllBufferTypes();
+	withAllImplementationTypes();
 	initialWeighsRange = 0;
 	file = NULL;
 }
@@ -23,7 +23,7 @@ Test::~Test()
 
 BufferType Test::getBufferType()
 {
-	return *itBufferType;
+	return (BufferType)*itBufferType;
 }
 ImplementationType Test::getImplementationType()
 {
@@ -94,42 +94,7 @@ unsigned Test::getSize()
     return size;
 }
 
-void Test::setIncSize(unsigned  incSize)
-{
-    this->incSize = incSize;
-}
-
-void Test::setMaxSize(unsigned  maxSize)
-{
-    this->maxSize = maxSize;
-}
-
-void Test::setMinSize(unsigned  minSize)
-{
-    this->minSize = minSize;
-}
-
-void Test::withImplementationTypes(vector<ImplementationType> implementationTypes)
-{
-	//TODO Test::withImplementationTypes
-}
-
-void Test::withBufferTypes(vector<BufferType> bufferTypes)
-{
-	//TODO Test::withBufferTypes
-}
-
-void Test::excludeImplementationTypes(vector<ImplementationType> implementationTypes)
-{
-	//TODO Test::excludeImplementationType
-}
-
-void Test::excludeBufferTypes(vector<BufferType> bufferTypes)
-{
-	//TODO Test::excludeBufferTypes
-}
-
-void Test::enableAllImplementationTypes()
+void Test::withAllImplementationTypes()
 {
 	implementationTypes.clear();
 	for(unsigned i=0; i < IMPLEMENTATION_TYPE_DIM; i++){
@@ -137,58 +102,26 @@ void Test::enableAllImplementationTypes()
 	}
 }
 
-void Test::disableAllImplementationTypes()
+void Test::withImplementationTypes(vector<ImplementationType> implTypes)
 {
 	implementationTypes.clear();
+	implementationTypes.insert(implementationTypes.end(), implTypes.begin(), implTypes.end());
 }
 
-void Test::disableImplementationType(ImplementationType implementationType)
+void Test::excludeImplementationTypes(vector<ImplementationType> implTypes)
 {
-	for (vector<ImplementationType>::iterator it = implementationTypes.begin(); it != implementationTypes.end(); ++it) {
-		if (*it == implementationType){
-			implementationTypes.erase(it);
-			break;
+	for (vector<ImplementationType>::iterator itExt = implTypes.begin(); itExt != implTypes.end(); ++itExt) {
+	    ImplementationType implementationType = *itExt;
+		for (vector<ImplementationType>::iterator it = implementationTypes.begin(); it != implementationTypes.end(); ++it) {
+			if (*it == implementationType){
+				implementationTypes.erase(it);
+				break;
+			}
 		}
 	}
 }
 
-void Test::enableImplementationType(ImplementationType implementationType)
-{
-	bool found = false;
-	for (unsigned i = 0; i < implementationTypes.size(); ++i) {
-		if (implementationTypes[i] == implementationType){
-			found = true;
-		}
-	}
-	if (!found) {
-		implementationTypes.push_back(implementationType);
-	}
-}
-
-void Test::enableBufferType(BufferType bufferType)
-{
-	bool found = false;
-	for (unsigned i = 0; i < bufferTypes.size(); ++i) {
-		if (bufferTypes[i] == bufferType){
-			found = true;
-		}
-	}
-	if (!found) {
-		bufferTypes.push_back(bufferType);
-	}
-}
-
-void Test::disableBufferType(BufferType bufferType)
-{
-	for (vector<BufferType>::iterator it = bufferTypes.begin(); it != bufferTypes.end(); ++it) {
-		if (*it == bufferType){
-			bufferTypes.erase(it);
-			break;
-		}
-	}
-}
-
-void Test::enableAllBufferTypes()
+void Test::withAllBufferTypes()
 {
 	bufferTypes.clear();
 	for(unsigned i=0; i < BUFFER_TYPE_DIM; ++i){
@@ -196,9 +129,26 @@ void Test::enableAllBufferTypes()
 	}
 }
 
-void Test::disableAllBufferTypes()
+void Test::withBufferTypes(vector<unsigned> buffTypes)
 {
 	bufferTypes.clear();
+	std::vector<unsigned>::iterator it;
+	FOR_EACH(it, buffTypes){
+		bufferTypes.push_back((BufferType)(*it));
+	}
+}
+
+void Test::excludeBufferTypes(vector<unsigned> buffTypes)
+{
+	vector<unsigned>::iterator i, j;
+	FOR_EACH(i, buffTypes) {
+		FOR_EACH(j, bufferTypes) {
+			if (*i == *j){
+				bufferTypes.erase(j);
+				break;
+			}
+		}
+	}
 }
 
 void Test::printCurrentState()
@@ -230,30 +180,28 @@ void Test::printParameters()
     printf("-Size paramenters: min size = %d max size = %d increment = %d \n", minSize, maxSize, incSize);
 
     printf("-Implementations: ");
-    for (int i=0; i < IMPLEMENTATION_TYPE_DIM; i++){
-    	if (implementationTypes[i] == 1){
+    std::vector<ImplementationType>::iterator it;
+    FOR_EACH(it, implementationTypes) {
 
-			switch ((ImplementationType) i){
-				case C: 		printf(" C        "); 	break;
-				case SSE2: 		printf(" SSE2     ");	break;
-				case CUDA: 		printf(" CUDA     ");	break;
-				case CUDA_REDUC:		printf(" CUDA_REDUC    ");	break;
-				case CUDA_INV:	printf(" CUDA_INV ");	break;
-			}
-    	}
+		switch (*it){
+			case C: 			printf(" C        "); 	break;
+			case SSE2: 			printf(" SSE2     ");	break;
+			case CUDA: 			printf(" CUDA     ");	break;
+			case CUDA_REDUC:	printf(" CUDA_REDUC    ");	break;
+			case CUDA_INV:		printf(" CUDA_INV ");	break;
+		}
     }
     printf("\n");
     printf("-Buffer Types: ");
-    for (int i=0; i < BUFFER_TYPE_DIM; i++){
-    	if (bufferTypes[i] == 1){
+    std::vector<unsigned>::iterator it2;
+    FOR_EACH(it2, bufferTypes) {
 
-			switch ((BufferType) i){
-				case FLOAT: printf(" FLOAT "); 	break;
-				case BIT: 	printf(" BIT   ");	break;
-				case SIGN: 	printf(" SIGN  ");	break;
-				case BYTE:	printf(" BYTE  ");	break;
-			}
-    	}
+		switch (*it2){
+			case FLOAT: printf(" FLOAT "); 	break;
+			case BIT: 	printf(" BIT   ");	break;
+			case SIGN: 	printf(" SIGN  ");	break;
+			case BYTE:	printf(" BYTE  ");	break;
+		}
     }
     printf("\n");
     if (initialWeighsRange != 0){
@@ -432,18 +380,6 @@ void Test::fromToByOutputSize(unsigned minOutputSize, unsigned maxOutputSize, un
 unsigned Test::getOutputSize()
 {
 	return outputSize;
-}
-
-void Test::outputSizeToMin()
-{
-	outputSize = minOutputSize;
-}
-
-int Test::outputSizeIncrement()
-{
-    outputSize += incOutputSize;
-
-    return outputSize <= maxOutputSize;
 }
 
 string Test::getFileName(ClassID& classID, Method& method)

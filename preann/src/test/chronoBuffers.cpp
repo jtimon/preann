@@ -17,11 +17,12 @@ int main(int argc, char *argv[])
 	Plot plot;
 	plot.fromToBySize(10000, 10000, 10000);
 	plot.fromToByOutputSize(100, 100, 100);
-	plot.disableBufferType(BYTE);
-//	plot.disableAllImplementationTypes();
-//	plot.enableImplementationType(C);
-//	plot.enableImplementationType(SSE2);
-	plot.disableImplementationType(CUDA);
+	ENUM_VECTOR(bufferTypes, BYTE);
+	plot.excludeBufferTypes(bufferTypes);
+
+	std::vector<ImplementationType> ImplementationTypes ( CUDA );
+	plot.excludeImplementationTypes(ImplementationTypes);
+
 	plot.printParameters();
 
 

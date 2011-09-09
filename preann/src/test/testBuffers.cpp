@@ -101,7 +101,9 @@ int main(int argc, char *argv[]) {
 		test.test(testClone, "Buffer::clone");
 		test.test(testCopyFromInterface, "Buffer::copyFromInterface");
 		test.test(testCopyToInterface, "Buffer::copyToInterface");
-		test.disableBufferType(BYTE);
+
+		ENUM_VECTOR(bufferTypes, BYTE);
+		test.excludeBufferTypes(bufferTypes);
 		test.test(testActivation, "Buffer::activation");
 
 		printf("Exit success.\n");

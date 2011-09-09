@@ -58,12 +58,15 @@ int main(int argc, char *argv[]) {
 	total.start();
 	try {
 
-		test.setMaxSize(100);
-		test.setIncSize(100);
+		test.fromToBySize(100, 100, 100);
 		test.printParameters();
 
 		test.testFunction(testBuffer, "Buffer::memory");
-		test.disableBufferType(BYTE);
+
+		ENUM_VECTOR(bufferTypes, BYTE);
+		test.excludeBufferTypes(bufferTypes);
+		test.printParameters();
+
 		test.testFunction(testConnection, "Connection::memory");
 		test.testFunction(testLayer, "Layer::memory");
 
