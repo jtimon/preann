@@ -17,21 +17,21 @@ protected:
 	unsigned maxOutputSize;
 	unsigned incOutputSize;
 
-	char implementationTypes[IMPLEMENTATION_TYPE_DIM];
-	ImplementationType implementationType;
-	char bufferTypes[BUFFER_TYPE_DIM];
-	BufferType bufferType;
+	vector<BufferType> bufferTypes;
+	vector<BufferType>::iterator itBufferType;
+	vector<ImplementationType> implementationTypes;
+	vector<ImplementationType>::iterator itImplemType;
 
 	float initialWeighsRange;
 
 	FILE *file;
 
 public:
+	BufferType getBufferType();
+	ImplementationType getImplementationType();
+	FunctionType getFunctionType();
 	Test();
 	virtual ~Test();
-    unsigned getIncSize();
-    unsigned getMaxSize();
-    unsigned getMinSize();
     unsigned getSize();
     void sizeToMin();
     int hasNextSize();
@@ -44,24 +44,15 @@ public:
     unsigned getOutputSize();
     void outputSizeToMin();
     int outputSizeIncrement();
-    ImplementationType getImplementationType();
-    void implementationTypeToMin();
-    int hasNextImplementationType();
-    void implementationTypeIncrement();
     void enableAllImplementationTypes();
     void disableAllImplementationTypes();
     void enableImplementationType(ImplementationType implementationType);
     void disableImplementationType(ImplementationType implementationType);
-    void bufferTypeToMin();
-    int hasNextBufferType();
-    void bufferTypeIncrement();
     void enableAllBufferTypes();
     void disableAllBufferTypes();
     void enableBufferType(BufferType bufferType);
     void disableBufferType(BufferType bufferType);
-    BufferType getBufferType();
 
-    void printCurrentState();
     void printParameters();
     static unsigned char areEqual(float expected, float actual, BufferType bufferType);
     static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
@@ -77,21 +68,28 @@ public:
     void closeFile();
     void plotToFile(float data);
 
-    void withImplementationTypes(int howMany, ImplementationType* implementationTypes);
-    void withBufferTypes(int howMany, BufferType* bufferTypes);
-    void excludeImplementationTypes(int howMany, ImplementationType* implementationTypes);
-    void excludeTypes(int howMany, BufferType* bufferTypes);
+    void withImplementationTypes(vector<ImplementationType> implementationTypes);
+    void withBufferTypes(vector<BufferType> bufferTypes);
+    void excludeImplementationTypes(vector<ImplementationType> implementationTypes);
+    void excludeBufferTypes(vector<BufferType> bufferTypes);
 
     string getFileName(ClassID& classID, Method& method);
 
-    void test(ClassID classID, Method method);
-    unsigned doMethod(ClassID classID, Method method);
-    unsigned doMethodBuffer(Buffer* buffer, Method method);
-    unsigned doMethodConnection(Connection* connection, Method method);
+    void testFunction( void (*f)(Test*), string testedMethod );
+    void test ( unsigned (*f)(Test*), string testedMethod );
+    Buffer* buildBuffer();
+    Connection* buildConnection(Buffer* buffer);
 
     static string toString(ClassID classID, Method method);
 	static string methodToString(Method method);
 	static string classToString(ClassID classID);
+
+    void printCurrentState();
+    unsigned doTest();
+protected:
+    unsigned doMethod(ClassID classID, Method method);
+    unsigned doMethodBuffer(Buffer* buffer, Method method);
+    unsigned doMethodConnection(Connection* connection, Method method);
 };
 
 #endif /* TEST_H_ */

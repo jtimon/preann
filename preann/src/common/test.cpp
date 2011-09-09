@@ -21,230 +21,72 @@ Test::~Test()
 	// TODO Auto-generated destructor stub
 }
 
-void Test::test(ClassID classID, Method method)
+BufferType Test::getBufferType()
+{
+	return *itBufferType;
+}
+ImplementationType Test::getImplementationType()
+{
+	return *itImplemType;
+}
+
+Buffer* Test::buildBuffer()
+{
+	Buffer* buffer = Factory::newBuffer(getSize(), getBufferType(), getImplementationType());
+	buffer->random(initialWeighsRange);
+	return buffer;
+}
+
+Connection* Test::buildConnection(Buffer* buffer)
+{
+	Connection* connection = Factory::newConnection(buffer, outputSize, getImplementationType());
+	connection->random(initialWeighsRange);
+	return connection;
+}
+
+FunctionType Test::getFunctionType()
+{
+	//TODO hacer bucle para esto también
+	return IDENTITY;
+}
+
+void Test::test ( unsigned (*f)(Test*), string testedMethod )
 {
 	for (size = minSize; size <= maxSize; size += incSize) {
-		for (bufferType = (BufferType) 0; bufferType < BUFFER_TYPE_DIM; bufferType = (BufferType) ((unsigned)bufferType + 1) ) if (bufferTypes[bufferType]){
-			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
+		FOR_EACH(itBufferType, bufferTypes){
+			FOR_EACH(itImplemType, implementationTypes){
 				try {
-					unsigned differencesCounter = doMethod(classID, method);
+					unsigned differencesCounter = f(this);
 					if (differencesCounter > 0){
 						printCurrentState();
 						cout << differencesCounter << " differences detected." << endl;
 					}
 				} catch (string error) {
 					cout << "Error: " << error << endl;
-					cout << " While testing...";
+					cout << " While testing "<< testedMethod << endl;
 					printCurrentState();
 				}
 			}
 		}
 	}
-	cout << toString(classID, method) << endl;
+	cout << testedMethod << endl;
 }
 
-unsigned Test::doMethod(ClassID classID, Method method)
+void Test::testFunction( void (*f)(Test*), string testedMethod )
 {
-	unsigned toReturn;
-
-	Buffer* buffer = Factory::newBuffer(getSize(), getBufferType(), getImplementationType());
-	buffer->random(initialWeighsRange);
-
-	switch (classID){
-
-		case BUFFER:
-			toReturn = doMethodBuffer(buffer, method);
-		break;
-		case CONNECTION:
-		{
-			Connection* connection = Factory::newConnection(buffer, outputSize, getImplementationType());
-			connection->random(initialWeighsRange);
-			toReturn = doMethodConnection(connection, method);
-			delete(connection);
+	for (size = minSize; size <= maxSize; size += incSize) {
+		FOR_EACH(itBufferType, bufferTypes){
+			FOR_EACH(itImplemType, implementationTypes){
+				try {
+					(*f)(this);
+				} catch (string error) {
+					cout << "Error: " << error << endl;
+					cout << " While testing "<< testedMethod << endl;
+					printCurrentState();
+				}
+			}
 		}
-
-		break;
-		default:
-			string error = "there's no such class to test";
-			throw error;
-
 	}
-	delete(buffer);
-	return toReturn;
-}
-
-unsigned Test::doMethodConnection(Connection* connection, Method method)
-{
-	unsigned differencesCounter;
-
-	switch (method){
-
-	case CALCULATEANDADDTO:
-	{
-		Buffer* results = Factory::newBuffer(outputSize, FLOAT, connection->getImplementationType());
-
-		Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
-		Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
-		cConnection->copyFrom(connection);
-
-		Buffer* cResults = Factory::newBuffer(outputSize, FLOAT, C);
-
-		connection->calculateAndAddTo(results);
-		cConnection->calculateAndAddTo(cResults);
-
-		differencesCounter = Test::assertEquals(cResults, results);
-
-		delete(results);
-		delete(cInput);
-		delete(cConnection);
-		delete(cResults);
-	}
-	break;
-	case MUTATE:
-	{
-		unsigned pos = Random::positiveInteger(connection->getSize());
-		float mutation = Random::floatNum(initialWeighsRange);
-		connection->mutate(pos, mutation);
-
-		Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
-		Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
-		cConnection->copyFrom(connection);
-
-		for(unsigned i=0; i < NUM_MUTATIONS; i++) {
-			float mutation = Random::floatNum(initialWeighsRange);
-			unsigned pos = Random::positiveInteger(connection->getSize());
-			connection->mutate(pos, mutation);
-			cConnection->mutate(pos, mutation);
-		}
-
-		differencesCounter = Test::assertEquals(cConnection, connection);
-		delete(cInput);
-		delete(cConnection);
-	}
-	break;
-	case CROSSOVER:
-	{
-		Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
-		other->random(initialWeighsRange);
-
-		Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
-		Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
-		cConnection->copyFrom(connection);
-		Connection* cOther = Factory::newConnection(cInput, outputSize, C);
-		cOther->copyFrom(other);
-
-		Interface bitBuffer = Interface(connection->getSize(), BIT);
-		//TODO bitBuffer.random(2); ??
-		bitBuffer.random(1);
-
-		connection->crossover(other, &bitBuffer);
-		cConnection->crossover(cOther, &bitBuffer);
-
-		differencesCounter = Test::assertEquals(cConnection, connection);
-		differencesCounter += Test::assertEquals(cOther, other);
-
-		delete(other);
-		delete(cInput);
-		delete(cConnection);
-		delete(cOther);
-	}
-	break;
-	default:
-		string error = "The method " + methodToString(method) + " is not defined to test for Connection.";
-		throw error;
-
-	}
-
-	return differencesCounter;
-}
-
-unsigned Test::doMethodBuffer(Buffer* buffer, Method method)
-{
-	unsigned differencesCounter;
-	switch (method){
-
-	case ACTIVATION:
-	{
-		FunctionType functionType = IDENTITY;
-		Buffer* results = Factory::newBuffer(buffer->getSize(), FLOAT, buffer->getImplementationType());
-		results->random(initialWeighsRange);
-
-		Buffer* cResults = Factory::newBuffer(results, C);
-		Buffer* cBuffer = Factory::newBuffer(buffer->getSize(), buffer->getBufferType(), C);
-
-		buffer->activation(results, functionType);
-		cBuffer->activation(cResults, functionType);
-		differencesCounter = Test::assertEquals(cBuffer, buffer);
-
-		delete(results);
-		delete(cBuffer);
-		delete(cResults);
-	}
-	break;
-	case COPYFROMINTERFACE:
-	{
-		Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
-		interface.random(initialWeighsRange);
-
-		Buffer* cBuffer = Factory::newBuffer(buffer, C);
-
-		buffer->copyFromInterface(&interface);
-		cBuffer->copyFromInterface(&interface);
-
-		differencesCounter = Test::assertEquals(cBuffer, buffer);
-
-		delete(cBuffer);
-	}
-	break;
-	case COPYTOINTERFACE:
-	{
-		Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
-
-		Buffer* cBuffer = Factory::newBuffer(buffer, C);
-		Interface cInterface = Interface(buffer->getSize(), buffer->getBufferType());
-
-		buffer->copyToInterface(&interface);
-		cBuffer->copyToInterface(&cInterface);
-
-		differencesCounter = Test::assertEqualsInterfaces(&cInterface, &interface);
-
-		delete(cBuffer);
-	}
-	break;
-	case CLONE:
-	{
-		Buffer* copy = buffer->clone();
-		differencesCounter = Test::assertEquals(buffer, copy);
-
-		if (buffer->getImplementationType() != copy->getImplementationType()){
-			printf("The buffers are not of the same implementation type.\n");
-			++differencesCounter;
-		}
-		delete(copy);
-	}
-	break;
-
-	default:
-		string error = "The method " + methodToString(method) + " is not defined to test for Buffer.";
-		throw error;
-	}
-	return differencesCounter;
-}
-
-
-unsigned Test::getIncSize()
-{
-    return incSize;
-}
-
-unsigned Test::getMaxSize()
-{
-    return maxSize;
-}
-
-unsigned Test::getMinSize()
-{
-    return minSize;
 }
 
 unsigned Test::getSize()
@@ -267,143 +109,102 @@ void Test::setMinSize(unsigned  minSize)
     this->minSize = minSize;
 }
 
-void Test::sizeToMin()
+void Test::withImplementationTypes(vector<ImplementationType> implementationTypes)
 {
-    size = minSize;
+	//TODO Test::withImplementationTypes
 }
 
-int Test::hasNextSize()
+void Test::withBufferTypes(vector<BufferType> bufferTypes)
 {
-    return size + incSize <= maxSize;
+	//TODO Test::withBufferTypes
 }
 
-void Test::sizeIncrement()
+void Test::excludeImplementationTypes(vector<ImplementationType> implementationTypes)
 {
-    size += incSize;
+	//TODO Test::excludeImplementationType
 }
 
-ImplementationType Test::getImplementationType()
+void Test::excludeBufferTypes(vector<BufferType> bufferTypes)
 {
-    return implementationType;
-}
-
-int Test::hasNextImplementationType()
-{
-	unsigned i = (unsigned)implementationType;
-	do{
-		if (++i >= IMPLEMENTATION_TYPE_DIM) {
-			return 0;
-		}
-	} while (implementationTypes[i] == 0);
-
-	return 1;
-}
-
-void Test::implementationTypeIncrement()
-{
-	unsigned i = (unsigned)implementationType;
-	do{
-		if (++i >= IMPLEMENTATION_TYPE_DIM) {
-			return;
-		}
-	} while (implementationTypes[i] == 0);
-
-	implementationType = (ImplementationType) i;
+	//TODO Test::excludeBufferTypes
 }
 
 void Test::enableAllImplementationTypes()
 {
-	for(int i=0; i < IMPLEMENTATION_TYPE_DIM; i++){
-		implementationTypes[i] = 1;
+	implementationTypes.clear();
+	for(unsigned i=0; i < IMPLEMENTATION_TYPE_DIM; i++){
+		implementationTypes.push_back( (ImplementationType) i);
 	}
 }
-
-void Test::implementationTypeToMin()
-{
-	implementationType = (ImplementationType) 0;
-}
-
-
 
 void Test::disableAllImplementationTypes()
 {
-	for(int i=0; i < IMPLEMENTATION_TYPE_DIM; i++){
-		implementationTypes[i] = 0;
-	}
+	implementationTypes.clear();
 }
 
 void Test::disableImplementationType(ImplementationType implementationType)
 {
-	implementationTypes[ implementationType ] = 0;
+	for (vector<ImplementationType>::iterator it = implementationTypes.begin(); it != implementationTypes.end(); ++it) {
+		if (*it == implementationType){
+			implementationTypes.erase(it);
+			break;
+		}
+	}
 }
 
 void Test::enableImplementationType(ImplementationType implementationType)
 {
-	implementationTypes[ implementationType ] = 1;
-}
-
-BufferType Test::getBufferType()
-{
-	return bufferType;
-}
-
-void Test::bufferTypeToMin()
-{
-	bufferType = (BufferType) 0;
-}
-
-int Test::hasNextBufferType()
-{
-	unsigned i = (unsigned)bufferType;
-	do{
-		if (++i >= BUFFER_TYPE_DIM) {
-			return 0;
+	bool found = false;
+	for (unsigned i = 0; i < implementationTypes.size(); ++i) {
+		if (implementationTypes[i] == implementationType){
+			found = true;
 		}
-	} while (bufferTypes[i] == 0);
-
-	return 1;
-}
-
-void Test::bufferTypeIncrement()
-{
-	unsigned i = (unsigned)bufferType;
-	do{
-		if (++i >= BUFFER_TYPE_DIM) {
-			return;
-		}
-	} while (bufferTypes[i] == 0);
-
-	bufferType = (BufferType) i;
+	}
+	if (!found) {
+		implementationTypes.push_back(implementationType);
+	}
 }
 
 void Test::enableBufferType(BufferType bufferType)
 {
-	bufferTypes[bufferType] = 1;
+	bool found = false;
+	for (unsigned i = 0; i < bufferTypes.size(); ++i) {
+		if (bufferTypes[i] == bufferType){
+			found = true;
+		}
+	}
+	if (!found) {
+		bufferTypes.push_back(bufferType);
+	}
 }
 
 void Test::disableBufferType(BufferType bufferType)
 {
-	bufferTypes[bufferType] = 0;
+	for (vector<BufferType>::iterator it = bufferTypes.begin(); it != bufferTypes.end(); ++it) {
+		if (*it == bufferType){
+			bufferTypes.erase(it);
+			break;
+		}
+	}
 }
 
 void Test::enableAllBufferTypes()
 {
-	for(int i=0; i < BUFFER_TYPE_DIM; i++){
-		bufferTypes[i] = 1;
+	bufferTypes.clear();
+	for(unsigned i=0; i < BUFFER_TYPE_DIM; ++i){
+		bufferTypes.push_back( (BufferType) i);
 	}
 }
 
 void Test::disableAllBufferTypes()
 {
-	for(int i=0; i < BUFFER_TYPE_DIM; i++){
-		bufferTypes[i] = 0;
-	}
+	bufferTypes.clear();
 }
 
 void Test::printCurrentState()
 {
     printf("-Implementation Type = ");
-    switch (implementationType){
+    switch (getImplementationType()){
         case C: 		printf(" C        "); 	break;
         case SSE2: 		printf(" SSE2     ");	break;
         case CUDA: 		printf(" CUDA     ");	break;
@@ -411,7 +212,7 @@ void Test::printCurrentState()
         case CUDA_INV:	printf(" CUDA_INV ");	break;
     }
     printf(" Buffer Type = ");
-    switch (bufferType){
+    switch (getBufferType()){
         case FLOAT: printf(" FLOAT "); 	break;
         case BIT: 	printf(" BIT   ");	break;
         case SIGN: 	printf(" SIGN  ");	break;
@@ -572,7 +373,7 @@ void Test::plotToFile(float data)
 std::string Test::bufferTypeToString()
 {
 	std::string toReturn;
-	switch (bufferType){
+	switch (getBufferType()){
 	case FLOAT:
 		toReturn = "FLOAT";
 		break;
@@ -592,7 +393,7 @@ std::string Test::bufferTypeToString()
 std::string Test::implementationTypeToString()
 {
 	std::string toReturn;
-	switch (implementationType){
+	switch (getImplementationType()){
 	case C:
 		toReturn = "C";
 		break;

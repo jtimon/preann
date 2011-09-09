@@ -64,8 +64,8 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	fprintf(plotFile, "plot ");
 	fprintf(dataFile, "# Size ");
 	unsigned functionNum = 2;
-	for (bufferType = (BufferType) 0; bufferType < BUFFER_TYPE_DIM; bufferType = (BufferType) ((unsigned)bufferType + 1) ) if (bufferTypes[bufferType]){
-		for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
+	FOR_EACH(itBufferType, bufferTypes) {
+		FOR_EACH(itImplemType, implementationTypes) {
 			string functionName = bufferTypeToString() + "_" + implementationTypeToString();
 			fprintf(dataFile, " %s ", functionName.data());
 			if (functionNum > 2){
@@ -73,7 +73,7 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 			}
 			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
 					dataPath.data(), functionNum++, functionName.data(),
-					implTypeToLineType(implementationType), bufferTypeToPointType(bufferType));
+					implTypeToLineType(getImplementationType()), bufferTypeToPointType(getBufferType()));
 		}
 	}
 	fprintf(plotFile, "\n");
@@ -81,8 +81,8 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 
 	for (size = minSize; size <= maxSize; size += incSize) {
 		fprintf(dataFile, " %d ", getSize());
-		for (bufferType = (BufferType) 0; bufferType < BUFFER_TYPE_DIM; bufferType = (BufferType) ((unsigned)bufferType + 1) ) if (bufferTypes[bufferType]){
-			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
+		FOR_EACH(itBufferType, bufferTypes) {
+			FOR_EACH(itImplemType, implementationTypes) {
 
 				float part = doMethod(classID, method, repetitions);
 				fprintf(dataFile, " %f ", part);
@@ -241,8 +241,8 @@ float Plot::plotTask(string path, Population* population)
 	fprintf(plotFile, "plot ");
 	fprintf(dataFile, "# Size ");
 	unsigned functionNum = 2;
-	for (bufferType = (BufferType) 0; bufferType < BUFFER_TYPE_DIM; bufferType = (BufferType) ((unsigned)bufferType + 1) ) if (bufferTypes[bufferType]){
-		for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
+	FOR_EACH(itBufferType, bufferTypes) {
+		FOR_EACH(itImplemType, implementationTypes) {
 			string functionName = bufferTypeToString() + "_" + implementationTypeToString();
 			fprintf(dataFile, " %s ", functionName.data());
 			if (functionNum > 2){
@@ -250,7 +250,7 @@ float Plot::plotTask(string path, Population* population)
 			}
 			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
 					dataPath.data(), functionNum++, functionName.data(),
-					implTypeToLineType(implementationType), bufferTypeToPointType(bufferType));
+					implTypeToLineType(getImplementationType()), bufferTypeToPointType(getBufferType()));
 		}
 	}
 	fprintf(plotFile, "\n");
@@ -258,8 +258,8 @@ float Plot::plotTask(string path, Population* population)
 
 	for (size = minSize; size <= maxSize; size += incSize) {
 		fprintf(dataFile, " %d ", getSize());
-		for (bufferType = (BufferType) 0; bufferType < BUFFER_TYPE_DIM; bufferType = (BufferType) ((unsigned)bufferType + 1) ) if (bufferTypes[bufferType]){
-			for (implementationType = (ImplementationType) 0; implementationType < IMPLEMENTATION_TYPE_DIM; implementationType = (ImplementationType) ((unsigned)implementationType + 1)) if (implementationTypes[implementationType]) {
+		FOR_EACH(itBufferType, bufferTypes) {
+			FOR_EACH(itImplemType, implementationTypes) {
 
 //				float part = doMethod(classID, method, repetitions);
 //				fprintf(dataFile, " %f ", part);

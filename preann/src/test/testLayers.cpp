@@ -96,59 +96,59 @@ int main(int argc, char *argv[]) {
 	test.printParameters();
 
 	try {
-		for (test.sizeToMin(); test.hasNextSize(); test.sizeIncrement()) {
-			for (test.bufferTypeToMin(); test.hasNextBufferType(); test.bufferTypeIncrement() ) {
-				Buffer* controlInputBuffers[BUFFER_TYPE_DIM];
-				for (unsigned i = 0; i < NUM_INPUTS; i++) {
-					BufferType bufferTypeAux = BYTE;
-					while (bufferTypeAux == BYTE) {
-						bufferTypeAux = (BufferType)Random::positiveInteger(BUFFER_TYPE_DIM);
-					}
-					controlInputBuffers[i] = Factory::newBuffer(test.getSize(), bufferTypeAux, C);
-					controlInputBuffers[i]->random(test.getInitialWeighsRange());
-				}
-
-			    Layer* controlLayer = createAndSaveLayer(test.getSize(), test.getBufferType(), controlInputBuffers);
-			    controlLayer->calculateOutput();
-
-			    for (test.implementationTypeToMin(); test.hasNextImplementationType(); test.implementationTypeIncrement()) {
-
-					test.printCurrentState();
-
-					Buffer* inputBuffers[BUFFER_TYPE_DIM];
-					for (unsigned i = 0; i < NUM_INPUTS; i++) {
-						inputBuffers[i] = Factory::newBuffer(test.getSize(), controlInputBuffers[i]->getBufferType(), test.getImplementationType());
-						inputBuffers[i]->copyFrom(controlInputBuffers[i]);
-					}
-
-					Layer* layer = createAndLoadLayer(test.getImplementationType(), inputBuffers);
-
-				    //test calculation
-					layer->calculateOutput();
-
-				    unsigned differences = Test::assertEquals(controlLayer->getOutput(), layer->getOutput());
-				    if (differences != 0)
-				    	printf("Errors on outputs: %d \n", differences);
-
-					//test Weighs
-				    for(unsigned i = 0; i < NUM_INPUTS; i++){
-				        Connection* expectedWeighs = controlLayer->getConnection(i);
-				        Connection* actualWeighs = layer->getConnection(i);
-				        differences = Test::assertEquals(expectedWeighs, actualWeighs);
-				        if (differences != 0)
-				        	printf("Errors on weighs (input %d): %d \n", i, differences);
-				    }
-					delete (layer);
-					for (unsigned i = 0; i < NUM_INPUTS; i++) {
-						delete(inputBuffers[i]);
-					}
-				}
-			    delete (controlLayer);
-				for (unsigned i = 0; i < NUM_INPUTS; i++) {
-					delete(controlInputBuffers[i]);
-				}
-			}
-		}
+//		for (test.sizeToMin(); test.hasNextSize(); test.sizeIncrement()) {
+//			for (test.bufferTypeToMin(); test.hasNextBufferType(); test.bufferTypeIncrement() ) {
+//				Buffer* controlInputBuffers[BUFFER_TYPE_DIM];
+//				for (unsigned i = 0; i < NUM_INPUTS; i++) {
+//					BufferType bufferTypeAux = BYTE;
+//					while (bufferTypeAux == BYTE) {
+//						bufferTypeAux = (BufferType)Random::positiveInteger(BUFFER_TYPE_DIM);
+//					}
+//					controlInputBuffers[i] = Factory::newBuffer(test.getSize(), bufferTypeAux, C);
+//					controlInputBuffers[i]->random(test.getInitialWeighsRange());
+//				}
+//
+//			    Layer* controlLayer = createAndSaveLayer(test.getSize(), test.getBufferType(), controlInputBuffers);
+//			    controlLayer->calculateOutput();
+//
+//			    for (test.implementationTypeToMin(); test.hasNextImplementationType(); test.implementationTypeIncrement()) {
+//
+//					test.printCurrentState();
+//
+//					Buffer* inputBuffers[BUFFER_TYPE_DIM];
+//					for (unsigned i = 0; i < NUM_INPUTS; i++) {
+//						inputBuffers[i] = Factory::newBuffer(test.getSize(), controlInputBuffers[i]->getBufferType(), test.getImplementationType());
+//						inputBuffers[i]->copyFrom(controlInputBuffers[i]);
+//					}
+//
+//					Layer* layer = createAndLoadLayer(test.getImplementationType(), inputBuffers);
+//
+//				    //test calculation
+//					layer->calculateOutput();
+//
+//				    unsigned differences = Test::assertEquals(controlLayer->getOutput(), layer->getOutput());
+//				    if (differences != 0)
+//				    	printf("Errors on outputs: %d \n", differences);
+//
+//					//test Weighs
+//				    for(unsigned i = 0; i < NUM_INPUTS; i++){
+//				        Connection* expectedWeighs = controlLayer->getConnection(i);
+//				        Connection* actualWeighs = layer->getConnection(i);
+//				        differences = Test::assertEquals(expectedWeighs, actualWeighs);
+//				        if (differences != 0)
+//				        	printf("Errors on weighs (input %d): %d \n", i, differences);
+//				    }
+//					delete (layer);
+//					for (unsigned i = 0; i < NUM_INPUTS; i++) {
+//						delete(inputBuffers[i]);
+//					}
+//				}
+//			    delete (controlLayer);
+//				for (unsigned i = 0; i < NUM_INPUTS; i++) {
+//					delete(controlInputBuffers[i]);
+//				}
+//			}
+//		}
 		printf("Exit success.\n");
 		MemoryManagement::printTotalAllocated();
 		MemoryManagement::printTotalPointers();

@@ -21,6 +21,9 @@ using namespace std;
 #include <list>
 #include <math.h>
 
+#define FOR_EACH(_iter,_coll) for (_iter = _coll.begin(); _iter != _coll.end(); ++_iter)
+//#define FOR_EACH(_type,_iter,_coll) for (_type::iterator _iter = _coll.begin(); _iter != _coll.end(); ++_iter)
+
 #define BITS_PER_BYTE (8)
 #define BITS_PER_UNSIGNED (sizeof(unsigned) * BITS_PER_BYTE)
 
