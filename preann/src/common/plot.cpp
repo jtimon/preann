@@ -49,24 +49,25 @@ int implTypeToLineType(ImplementationType implementationType)
 	}
 }
 
-float Plot::plot(string path, ClassID classID, Method method, unsigned repetitions)
+float Plot::plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
 {
 	float total = 0;
 
-	string dataPath = path + "data/" + Plot::toString(classID, method) + ".DAT";
+	string dataPath = path + "data/" + testedMethod + ".DAT";
 	FILE* dataFile = openFile(dataPath);
-	string plotPath = path + "gnuplot/" + Plot::toString(classID, method) + ".plt";
+	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
 	FILE* plotFile = openFile(plotPath);
 
-	string outputPath = path + "images/" + Plot::toString(classID, method) + ".png";
+	string outputPath = path + "images/" + testedMethod + ".png";
 	fprintf(plotFile, "set terminal png \n");
 	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
 	fprintf(plotFile, "plot ");
 	fprintf(dataFile, "# Size ");
 	unsigned functionNum = 2;
-	FOR_EACH(itBufferType, bufferTypes) {
-		FOR_EACH(itImplemType, implementationTypes) {
-			string functionName = bufferTypeToString() + "_" + implementationTypeToString();
+	FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]) {
+		FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]) {
+			string functionName = Print::toString(ET_BUFFER, getBufferType())
+						  + "_" + Print::toString(ET_IMPLEMENTATION, getImplementationType());
 			fprintf(dataFile, " %s ", functionName.data());
 			if (functionNum > 2){
 				fprintf(plotFile, ", ");
@@ -81,11 +82,11 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 
 	for (size = minSize; size <= maxSize; size += incSize) {
 		fprintf(dataFile, " %d ", getSize());
-		FOR_EACH(itBufferType, bufferTypes) {
-			FOR_EACH(itImplemType, implementationTypes) {
+		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]) {
+			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]) {
 
-				float part = doMethod(classID, method, repetitions);
-				fprintf(dataFile, " %f ", part);
+				float part = f(this, repetitions);
+				fprintf(dataFile, " %f ", part/repetitions);
 				total += part;
 			}
 		}
@@ -93,136 +94,10 @@ float Plot::plot(string path, ClassID classID, Method method, unsigned repetitio
 	}
 	fclose(plotFile);
 	fclose(dataFile);
-	cout << Plot::toString(classID, method) << " total: " << total << " repetitions: " << repetitions << endl;
+	cout << testedMethod << " repetitions: " << repetitions << " total: " << total << endl;
 	string syscommand = "gnuplot " + plotPath;
 	system(syscommand.data());
 	return total;
-}
-
-float Plot::doMethod(ClassID classID, Method method, unsigned repetitions)
-{
-	float toReturn;
-
-	Buffer* buffer = Factory::newBuffer(getSize(), getBufferType(), getImplementationType());
-	buffer->random(getInitialWeighsRange());
-
-	switch (classID){
-
-		case BUFFER:
-			toReturn = doMethodBuffer(buffer, method, repetitions);
-		break;
-		case CONNECTION:
-		{
-			Connection* connection = Factory::newConnection(buffer, outputSize, getImplementationType());
-			connection->random(getInitialWeighsRange());
-			toReturn = doMethodConnection(connection, method, repetitions);
-			delete(connection);
-		}
-
-		break;
-		default:
-			string error = "there's no such method to plot";
-			throw error;
-
-	}
-	delete(buffer);
-	return toReturn;
-}
-
-float Plot::doMethodConnection(Connection* connection, Method method, unsigned repetitions)
-{
-	Chronometer chrono;
-
-	switch (method){
-
-	case CALCULATEANDADDTO:
-	{
-		Buffer* results = Factory::newBuffer(outputSize, FLOAT, connection->getImplementationType());
-
-		chrono.start();
-		for (unsigned i = 0; i < repetitions; ++i) {
-			connection->calculateAndAddTo(results);
-		}
-		chrono.stop();
-	}
-	break;
-	case MUTATE:
-	{
-		unsigned pos = Random::positiveInteger(connection->getSize());
-		float mutation = Random::floatNum(getInitialWeighsRange());
-		chrono.start();
-		for (unsigned i = 0; i < repetitions; ++i) {
-			connection->mutate(pos, mutation);
-		}
-		chrono.stop();
-	}
-	break;
-	case CROSSOVER:
-	{
-		Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
-		Interface bitBuffer(connection->getSize(), BIT);
-		bitBuffer.random(2);
-		chrono.start();
-		for (unsigned i = 0; i < repetitions; ++i) {
-			connection->crossover(other, &bitBuffer);
-		}
-		chrono.stop();
-		delete (other);
-	}
-	break;
-	default:
-		string error = "There's no such method defined to plot for Connection.";
-		throw error;
-
-	}
-
-	return chrono.getSeconds();
-}
-
-float Plot::doMethodBuffer(Buffer* buffer, Method method, unsigned repetitions)
-{
-	Chronometer chrono;
-
-	switch (method){
-
-	case ACTIVATION:
-	{
-		Buffer* results = Factory::newBuffer(buffer->getSize(), FLOAT, buffer->getImplementationType());
-		chrono.start();
-		for (unsigned i = 0; i < repetitions; ++i) {
-			buffer->activation(results, IDENTITY);
-		}
-		chrono.stop();
-		delete (results);
-	}
-	break;
-	case COPYFROMINTERFACE:
-	{
-		Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
-		chrono.start();
-		for (unsigned i = 0; i < repetitions; ++i) {
-			buffer->copyFromInterface(&interface);
-		}
-		chrono.stop();
-	}
-	break;
-	case COPYTOINTERFACE:
-	{
-		Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
-		chrono.start();
-		for (unsigned i = 0; i < repetitions; ++i) {
-			buffer->copyToInterface(&interface);
-		}
-		chrono.stop();
-	}
-	break;
-
-	default:
-		string error = "There's no such method defined to plot for Buffer.";
-		throw error;
-
-	}
-	return chrono.getSeconds();
 }
 
 float Plot::plotTask(string path, Population* population)
@@ -241,9 +116,10 @@ float Plot::plotTask(string path, Population* population)
 	fprintf(plotFile, "plot ");
 	fprintf(dataFile, "# Size ");
 	unsigned functionNum = 2;
-	FOR_EACH(itBufferType, bufferTypes) {
-		FOR_EACH(itImplemType, implementationTypes) {
-			string functionName = bufferTypeToString() + "_" + implementationTypeToString();
+	FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]) {
+		FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]) {
+			string functionName = Print::toString(ET_BUFFER, getBufferType())
+						  + "_" + Print::toString(ET_IMPLEMENTATION, getImplementationType());
 			fprintf(dataFile, " %s ", functionName.data());
 			if (functionNum > 2){
 				fprintf(plotFile, ", ");
@@ -258,8 +134,8 @@ float Plot::plotTask(string path, Population* population)
 
 	for (size = minSize; size <= maxSize; size += incSize) {
 		fprintf(dataFile, " %d ", getSize());
-		FOR_EACH(itBufferType, bufferTypes) {
-			FOR_EACH(itImplemType, implementationTypes) {
+		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]) {
+			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]) {
 
 //				float part = doMethod(classID, method, repetitions);
 //				fprintf(dataFile, " %f ", part);

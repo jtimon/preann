@@ -8,50 +8,62 @@ using namespace std;
 #include "factory.h"
 
 
-float chronoCopyToInterface(Test* test, unsigned repetitions)
+float chronoCalculateAndAddTo(Test* test, unsigned repetitions)
 {
 	Chronometer chrono;
 	Buffer* buffer = test->buildBuffer();
+	Connection* connection = test->buildConnection(buffer);
 
-	Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
+	Buffer* results = Factory::newBuffer(test->getOutputSize(), FLOAT, connection->getImplementationType());
+
 	chrono.start();
 	for (unsigned i = 0; i < repetitions; ++i) {
-		buffer->copyToInterface(&interface);
+		connection->calculateAndAddTo(results);
 	}
 	chrono.stop();
+	delete(results);
 
-	delete(buffer);
-	return chrono.getSeconds();
-}
-float chronoCopyFromInterface(Test* test, unsigned repetitions)
-{
-	Chronometer chrono;
-	Buffer* buffer = test->buildBuffer();
-
-	Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
-	chrono.start();
-	for (unsigned i = 0; i < repetitions; ++i) {
-		buffer->copyFromInterface(&interface);
-	}
-	chrono.stop();
-
+	delete(connection);
 	delete(buffer);
 	return chrono.getSeconds();
 }
 
-float chronoActivation(Test* test, unsigned repetitions)
+float chronoMutate(Test* test, unsigned repetitions)
 {
 	Chronometer chrono;
 	Buffer* buffer = test->buildBuffer();
+	Connection* connection = test->buildConnection(buffer);
 
-	Buffer* results = Factory::newBuffer(buffer->getSize(), FLOAT, buffer->getImplementationType());
+	unsigned pos = Random::positiveInteger(connection->getSize());
+	float mutation = Random::floatNum(test->getInitialWeighsRange());
 	chrono.start();
 	for (unsigned i = 0; i < repetitions; ++i) {
-		buffer->activation(results, IDENTITY);
+		connection->mutate(pos, mutation);
 	}
 	chrono.stop();
-	delete (results);
 
+	delete(connection);
+	delete(buffer);
+	return chrono.getSeconds();
+}
+
+float chronoCrossover(Test* test, unsigned repetitions)
+{
+	Chronometer chrono;
+	Buffer* buffer = test->buildBuffer();
+	Connection* connection = test->buildConnection(buffer);
+
+	Connection* other = Factory::newConnection(connection->getInput(), test->getOutputSize(), connection->getImplementationType());
+	Interface bitVector(connection->getSize(), BIT);
+	bitVector.random(2);
+	chrono.start();
+	for (unsigned i = 0; i < repetitions; ++i) {
+		connection->crossover(other, &bitVector);
+	}
+	chrono.stop();
+	delete (other);
+
+	delete(connection);
 	delete(buffer);
 	return chrono.getSeconds();
 }
@@ -70,11 +82,10 @@ int main(int argc, char *argv[])
 
 	plot.printParameters();
 
-
 	try {
-		plot.plot(path, chronoActivation, 1000, "BUFFER_ACTIVATION");
-//		plot.plot(path, chronoCopyFromInterface, 1000, "BUFFER_COPYFROMINTERFACE");
-//		plot.plot(path, chronoCopyToInterface, 1000, "BUFFER_COPYTOINTERFACE");
+//		plot.plot(path, chronoCalculateAndAddTo, 10, "CONNECTION_CALCULATEANDADDTO");
+//		plot.plot(path, chronoMutate, 100, "CONNECTION_MUTATE");
+//		plot.plot(path, chronoCrossover, 10, "CONNECTION_CROSSOVER");
 
 		printf("Exit success.\n");
 		MemoryManagement::printTotalAllocated();

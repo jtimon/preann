@@ -102,8 +102,7 @@ int main(int argc, char *argv[]) {
 		test.test(testCopyFromInterface, "Buffer::copyFromInterface");
 		test.test(testCopyToInterface, "Buffer::copyToInterface");
 
-		ENUM_VECTOR(bufferTypes, BYTE);
-		test.excludeBufferTypes(bufferTypes);
+		test.exclude(ET_BUFFER, 1, BYTE);
 		test.test(testActivation, "Buffer::activation");
 
 		printf("Exit success.\n");

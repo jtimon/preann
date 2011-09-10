@@ -87,8 +87,7 @@ int main(int argc, char *argv[]) {
 
 	test.setInitialWeighsRange(20);
 	test.fromToBySize(1, 50, 49);
-	ENUM_VECTOR(bufferTypes, BYTE);
-	test.excludeBufferTypes(bufferTypes);
+	test.exclude(ET_BUFFER, 1, BYTE);
 	test.printParameters();
 
 	try {

@@ -112,8 +112,7 @@ int main(int argc, char *argv[]) {
 	test.fromToBySize(2, 10, 10);
 	test.fromToByOutputSize(1, 3, 2);
 	test.setInitialWeighsRange(20);
-	ENUM_VECTOR(bufferTypes, BYTE);
-	test.excludeBufferTypes(bufferTypes);
+	test.exclude(ET_BUFFER, 1, BYTE);
 	test.printParameters();
 
 	try {

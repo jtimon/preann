@@ -17,9 +17,8 @@ protected:
 	unsigned maxOutputSize;
 	unsigned incOutputSize;
 
-	vector<unsigned> bufferTypes;
-	vector<unsigned>::iterator itBufferType;
-	vector<ImplementationType> implementationTypes;
+	vector<unsigned> enumTypes[ENUM_TYPE_DIM];
+	vector<unsigned>::iterator itEnumType[ENUM_TYPE_DIM];
 	vector<ImplementationType>::iterator itImplemType;
 
 	float initialWeighsRange;
@@ -40,16 +39,12 @@ public:
     void setInitialWeighsRange(float initialWeighsRange);
 
 	BufferType getBufferType();
-    void withAllBufferTypes();
-    void withBufferTypes(vector<unsigned> bufferTypes);
-    void excludeBufferTypes(vector<unsigned> bufferTypes);
-
 	ImplementationType getImplementationType();
-    void withAllImplementationTypes();
-    void withImplementationTypes(vector<ImplementationType> implementationTypes);
-    void excludeImplementationTypes(vector<ImplementationType> implementationTypes);
-
 	FunctionType getFunctionType();
+
+    void withAll(EnumType enumType);
+    void with(EnumType enumType, unsigned count, ...);
+    void exclude(EnumType enumType, unsigned count, ...);
 
     void printParameters();
     void printCurrentState();
@@ -57,24 +52,12 @@ public:
     static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
     static unsigned assertEquals(Buffer* expected, Buffer* actual);
 
-
-    string bufferTypeToString();
-    string implementationTypeToString();
     FILE* openFile(string path);
-    void openFile(string path, ClassID classID, Method method);
-    void closeFile();
-    void plotToFile(float data);
-
-    string getFileName(ClassID& classID, Method& method);
 
     void testFunction( void (*f)(Test*), string testedMethod );
     void test ( unsigned (*f)(Test*), string testedMethod );
     Buffer* buildBuffer();
     Connection* buildConnection(Buffer* buffer);
-
-    static string toString(ClassID classID, Method method);
-	static string methodToString(Method method);
-	static string classToString(ClassID classID);
 
 };
 

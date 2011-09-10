@@ -10,9 +10,10 @@
 Test::Test()
 {
 	size = minSize = maxSize = incSize = 1;
-	withAllBufferTypes();
-	withAllImplementationTypes();
-	initialWeighsRange = 0;
+	withAll(ET_BUFFER);
+	withAll(ET_IMPLEMENTATION);
+	with(ET_FUNCTION, 1, IDENTITY);
+	initialWeighsRange = 10;
 	file = NULL;
 }
 
@@ -23,11 +24,11 @@ Test::~Test()
 
 BufferType Test::getBufferType()
 {
-	return (BufferType)*itBufferType;
+	return (BufferType)*itEnumType[ET_BUFFER];
 }
 ImplementationType Test::getImplementationType()
 {
-	return *itImplemType;
+	return (ImplementationType)*itEnumType[ET_IMPLEMENTATION];
 }
 
 Buffer* Test::buildBuffer()
@@ -53,8 +54,8 @@ FunctionType Test::getFunctionType()
 void Test::test ( unsigned (*f)(Test*), string testedMethod )
 {
 	for (size = minSize; size <= maxSize; size += incSize) {
-		FOR_EACH(itBufferType, bufferTypes){
-			FOR_EACH(itImplemType, implementationTypes){
+		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]){
+			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]){
 				try {
 					unsigned differencesCounter = f(this);
 					if (differencesCounter > 0){
@@ -75,8 +76,8 @@ void Test::test ( unsigned (*f)(Test*), string testedMethod )
 void Test::testFunction( void (*f)(Test*), string testedMethod )
 {
 	for (size = minSize; size <= maxSize; size += incSize) {
-		FOR_EACH(itBufferType, bufferTypes){
-			FOR_EACH(itImplemType, implementationTypes){
+		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]){
+			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]){
 				try {
 					(*f)(this);
 				} catch (string error) {
@@ -94,61 +95,45 @@ unsigned Test::getSize()
     return size;
 }
 
-void Test::withAllImplementationTypes()
+void Test::withAll(EnumType enumType)
 {
-	implementationTypes.clear();
-	for(unsigned i=0; i < IMPLEMENTATION_TYPE_DIM; i++){
-		implementationTypes.push_back( (ImplementationType) i);
+	enumTypes[enumType].clear();
+	unsigned dim = enumTypeDim(enumType);
+	for(unsigned i=0; i < dim; i++){
+		enumTypes[enumType].push_back( i);
 	}
 }
 
-void Test::withImplementationTypes(vector<ImplementationType> implTypes)
+void Test::with(EnumType enumType, unsigned count, ...)
 {
-	implementationTypes.clear();
-	implementationTypes.insert(implementationTypes.end(), implTypes.begin(), implTypes.end());
+	enumTypes[enumType].clear();
+	va_list ap;
+	va_start (ap, count);
+
+	for (unsigned i = 0; i < count; i++){
+		unsigned arg = va_arg (ap, unsigned);
+		enumTypes[enumType].push_back(arg);
+	}
+	va_end (ap);
 }
 
-void Test::excludeImplementationTypes(vector<ImplementationType> implTypes)
+void Test::exclude(EnumType enumType, unsigned count, ...)
 {
-	for (vector<ImplementationType>::iterator itExt = implTypes.begin(); itExt != implTypes.end(); ++itExt) {
-	    ImplementationType implementationType = *itExt;
-		for (vector<ImplementationType>::iterator it = implementationTypes.begin(); it != implementationTypes.end(); ++it) {
-			if (*it == implementationType){
-				implementationTypes.erase(it);
+	withAll(enumType);
+	va_list ap;
+	va_start (ap, count);
+
+	for (unsigned i = 0; i < count; i++){
+		unsigned arg = va_arg (ap, unsigned);
+		vector<unsigned>::iterator j;
+		FOR_EACH(j, enumTypes[enumType]) {
+			if (*j == arg){
+				enumTypes[enumType].erase(j);
 				break;
 			}
 		}
 	}
-}
-
-void Test::withAllBufferTypes()
-{
-	bufferTypes.clear();
-	for(unsigned i=0; i < BUFFER_TYPE_DIM; ++i){
-		bufferTypes.push_back( (BufferType) i);
-	}
-}
-
-void Test::withBufferTypes(vector<unsigned> buffTypes)
-{
-	bufferTypes.clear();
-	std::vector<unsigned>::iterator it;
-	FOR_EACH(it, buffTypes){
-		bufferTypes.push_back((BufferType)(*it));
-	}
-}
-
-void Test::excludeBufferTypes(vector<unsigned> buffTypes)
-{
-	vector<unsigned>::iterator i, j;
-	FOR_EACH(i, buffTypes) {
-		FOR_EACH(j, bufferTypes) {
-			if (*i == *j){
-				bufferTypes.erase(j);
-				break;
-			}
-		}
-	}
+	va_end (ap);
 }
 
 void Test::printCurrentState()
@@ -177,13 +162,13 @@ void Test::printCurrentState()
 
 void Test::printParameters()
 {
+    std::vector<unsigned>::iterator it;
     printf("-Size paramenters: min size = %d max size = %d increment = %d \n", minSize, maxSize, incSize);
 
     printf("-Implementations: ");
-    std::vector<ImplementationType>::iterator it;
-    FOR_EACH(it, implementationTypes) {
+    FOR_EACH(it, enumTypes[ET_IMPLEMENTATION]) {
 
-		switch (*it){
+		switch ((ImplementationType)*it){
 			case C: 			printf(" C        "); 	break;
 			case SSE2: 			printf(" SSE2     ");	break;
 			case CUDA: 			printf(" CUDA     ");	break;
@@ -194,9 +179,9 @@ void Test::printParameters()
     printf("\n");
     printf("-Buffer Types: ");
     std::vector<unsigned>::iterator it2;
-    FOR_EACH(it2, bufferTypes) {
+    FOR_EACH(it, enumTypes[ET_BUFFER]) {
 
-		switch (*it2){
+		switch ((BufferType)*it){
 			case FLOAT: printf(" FLOAT "); 	break;
 			case BIT: 	printf(" BIT   ");	break;
 			case SIGN: 	printf(" SIGN  ");	break;
@@ -286,81 +271,6 @@ FILE* Test::openFile(string path)
 	return dataFile;
 }
 
-void Test::openFile(string path, ClassID classID, Method method)
-{
-	if (file){
-		fclose(file);
-		file = NULL;
-	}
-	path += getFileName(classID, method);
-	if (!(file = fopen(path.data(), "w")))
-	{
-		string error = "Error opening " + path;
-		throw error;
-	}
-}
-
-void Test::closeFile()
-{
-	if (file){
-		fclose(file);
-		file = NULL;
-	}
-}
-
-void Test::plotToFile(float data)
-{
-	if (file){
-		fprintf(file, "%d %f \n", size, data );
-	} else {
-		string error = "There is no opened file.";
-		throw error;
-	}
-}
-
-std::string Test::bufferTypeToString()
-{
-	std::string toReturn;
-	switch (getBufferType()){
-	case FLOAT:
-		toReturn = "FLOAT";
-		break;
-	case BYTE:
-		toReturn = "BYTE";
-		break;
-	case BIT:
-		toReturn = "BIT";
-		break;
-	case SIGN:
-		toReturn = "SIGN";
-		break;
-	}
-	return toReturn;
-}
-
-std::string Test::implementationTypeToString()
-{
-	std::string toReturn;
-	switch (getImplementationType()){
-	case C:
-		toReturn = "C";
-		break;
-	case SSE2:
-		toReturn = "SSE2";
-		break;
-	case CUDA:
-		toReturn = "CUDA";
-		break;
-	case CUDA_REDUC:
-		toReturn = "CUDA_REDUC";
-		break;
-	case CUDA_INV:
-		toReturn = "CUDA_INV";
-		break;
-	}
-	return toReturn;
-}
-
 void Test::fromToBySize(unsigned minSize, unsigned maxSize, unsigned incSize)
 {
 	this->size = minSize;
@@ -380,52 +290,4 @@ void Test::fromToByOutputSize(unsigned minOutputSize, unsigned maxOutputSize, un
 unsigned Test::getOutputSize()
 {
 	return outputSize;
-}
-
-string Test::getFileName(ClassID& classID, Method& method)
-{
-    return
-//    classToString(classID) + "_" + methodToString(method) + "_" +
-       bufferTypeToString() + "_" + implementationTypeToString() + ".DAT";
-}
-
-string Test::toString(ClassID classID, Method method)
-{
-	return classToString(classID) + methodToString(method);
-}
-
-string Test::classToString(ClassID classID)
-{
-	string toReturn;
-	switch (classID){
-
-		case BUFFER: toReturn = "BUFFER";			break;
-		case CONNECTION: toReturn = "CONNECTION";	break;
-		default:
-			string error = "There's no such class to test.";
-			throw error;
-
-	}
-	return toReturn;
-}
-
-string Test::methodToString(Method method)
-{
-	string toReturn;
-	switch (method){
-		case COPYFROM: 			toReturn = "COPYFROM";			break;
-		case COPYTO: 			toReturn = "COPYTO";			break;
-		case CLONE: 			toReturn = "CLONE";				break;
-		case COPYFROMINTERFACE: toReturn = "COPYFROMINTERFACE";	break;
-		case COPYTOINTERFACE: 	toReturn = "COPYTOINTERFACE";	break;
-		case ACTIVATION: 		toReturn = "ACTIVATION";		break;
-		case CALCULATEANDADDTO: toReturn = "CALCULATEANDADDTO";	break;
-		case MUTATE: 			toReturn = "MUTATE";			break;
-		case CROSSOVER: 		toReturn = "CROSSOVER";			break;
-		default:
-			string error = "There's no such method to test.";
-			throw error;
-
-	}
-	return toReturn;
 }

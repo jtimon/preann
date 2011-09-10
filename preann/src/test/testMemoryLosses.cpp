@@ -63,8 +63,7 @@ int main(int argc, char *argv[]) {
 
 		test.testFunction(testBuffer, "Buffer::memory");
 
-		ENUM_VECTOR(bufferTypes, BYTE);
-		test.excludeBufferTypes(bufferTypes);
+		test.exclude(ET_BUFFER, 1, BYTE);
 		test.printParameters();
 
 		test.testFunction(testConnection, "Connection::memory");

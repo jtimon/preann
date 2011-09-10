@@ -10,6 +10,7 @@
 
 using namespace std;
 
+#include <stdarg.h>
 #include <cstdlib>
 #include <iostream>
 #include <cstdlib>
@@ -22,7 +23,8 @@ using namespace std;
 #include <math.h>
 
 #define FOR_EACH(_iter,_coll) for (_iter = _coll.begin(); _iter != _coll.end(); ++_iter)
-#define ENUM_VECTOR(_vector, _values...) unsigned array[] = {_values}; std::vector<unsigned> _vector; _vector.insert(_vector.end(), array, array + (sizeof(array) / sizeof(array[0])))
+#define ENUM_VECTOR2(_vector, _array, _values...) unsigned _array[] = {_values}; std::vector<unsigned> _vector; _vector.insert(_vector.end(), _array, _array + (sizeof(_array) / sizeof(_array[0])))
+#define ENUM_VECTOR(_vector, _values...) unsigned _array[] = {_values}; std::vector<unsigned> _vector; _vector.insert(_vector.end(), _array, _array + (sizeof(_array) / sizeof(_array[0])))
 //#define FOR_EACH(_type,_iter,_coll) for (_type::iterator _iter = _coll.begin(); _iter != _coll.end(); ++_iter)
 
 #define BITS_PER_BYTE (8)
@@ -35,11 +37,10 @@ typedef enum {IDENTITY, BINARY_STEP, BIPOLAR_STEP, SIGMOID, BIPOLAR_SIGMOID, HYP
 typedef enum {C, SSE2, CUDA, CUDA_REDUC, CUDA_INV} ImplementationType;
 #define IMPLEMENTATION_TYPE_DIM 5
 
-typedef enum { BUFFER, CONNECTION } ClassID;
-typedef enum { MEM_LOSSES, ACTIVATION, COPYFROMINTERFACE, COPYTOINTERFACE, COPYFROM, COPYTO, CLONE, CALCULATEANDADDTO, MUTATE, CROSSOVER } Method;
+typedef enum {ET_BUFFER, ET_IMPLEMENTATION, ET_FUNCTION} EnumType;
+#define ENUM_TYPE_DIM 3
 
-typedef enum {ET_BUFFER, ET_FUNCTION, ET_, ET_IMPLEMENTATION, ET_CLASS, ET_METHOD} EnumType;
-#define ENUM_TYPE_DIM 5
+unsigned enumTypeDim(EnumType enumType);
 
 class Print {
 public:
@@ -47,14 +48,10 @@ static std::string toString(EnumType enumType, unsigned enumValue){
 	switch(enumType){
 	case ET_BUFFER:
 		return bufferTypeToString((BufferType)enumValue);
-	case ET_FUNCTION:
-		return "ET_FUNCTION";
 	case ET_IMPLEMENTATION:
 		return implementationToString((ImplementationType)enumValue);
-	case ET_CLASS:
-		return "ET_CLASS";
-	case ET_METHOD:
-		return "ET_METHOD";
+	case ET_FUNCTION:
+		return "ET_FUNCTION";
 	}
 	return "NOT_FOUND";
 }

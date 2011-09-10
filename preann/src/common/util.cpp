@@ -7,6 +7,18 @@
 
 #include "util.h"
 
+unsigned enumTypeDim(EnumType enumType){
+	switch(enumType){
+	case ET_BUFFER:
+		return BUFFER_TYPE_DIM;
+	case ET_IMPLEMENTATION:
+		return IMPLEMENTATION_TYPE_DIM;
+	case ET_FUNCTION:
+		return FUNCTION_TYPE_DIM;
+	}
+	return 0;
+}
+
 vector<void*> MemoryManagement::ptrs;
 vector<unsigned> MemoryManagement::sizes;
 

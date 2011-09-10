@@ -13,10 +13,7 @@ public:
 	Plot();
 	virtual ~Plot();
 
-	float plot(string path, ClassID classID, Method method, unsigned repetitions);
-	float doMethod(ClassID classID, Method method, unsigned repetitions);
-	float doMethodBuffer(Buffer* buffer, Method method, unsigned repetitions);
-	float doMethodConnection(Connection* connection, Method method, unsigned repetitions);
+	float plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
 	float plotTask(string path, Population* population);
 
 };
