@@ -8,7 +8,7 @@
 #ifndef XMM_DEFINITIONS_H_
 #define XMM_DEFINITIONS_H_
 
-#include "util.h"
+#include "enumerations.h"
 
 #define BITS_PER_BLOCK (128)
 #define BYTES_PER_BLOCK (BITS_PER_BLOCK/8)

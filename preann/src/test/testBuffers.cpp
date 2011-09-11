@@ -73,10 +73,7 @@ unsigned testCopyToInterface(Test* test)
 
 unsigned testClone(Test* test)
 {
-//	START_BUFFER_TEST
-	START_TEST
-	Buffer* buffer = Factory::newBuffer(size, test->getBufferType(), test->getImplementationType());
-	buffer->random(initialWeighsRange);
+	START_BUFFER_TEST
 
 	Buffer* copy = buffer->clone();
 	differencesCounter += Test::assertEquals(buffer, copy);
@@ -91,7 +88,7 @@ int main(int argc, char *argv[]) {
 	total.start();
 
 	Test test;
-	test.with(ET_BUFFER, 1, BIT);
+	test.withAll(ET_BUFFER);
 	test.withAll(ET_IMPLEMENTATION);
 	test.addIterator(&size, 10, 10, 10);
 	test.printParameters();
@@ -102,6 +99,7 @@ int main(int argc, char *argv[]) {
 		test.test(testCopyToInterface, "Buffer::copyToInterface");
 
 		test.exclude(ET_BUFFER, 1, BYTE);
+		test.printParameters();
 		test.test(testActivation, "Buffer::activation");
 
 		printf("Exit success.\n");

@@ -9,8 +9,10 @@
 
 Test::Test()
 {
+	printCurrentState();
 	for(int i=0; i < ENUM_TYPE_DIM; ++i){
-		with((EnumType)i, 1, 0);
+		enumTypes[i].push_back(0);
+		itEnumType[i] = enumTypes[i].begin();
 	}
 	int baseIterator;
 	addIterator(&baseIterator, 1, 1, 1);
@@ -35,36 +37,27 @@ FunctionType Test::getFunctionType()
 	return (FunctionType)*itEnumType[ET_FUNCTION];
 }
 
-void Test::test ( unsigned (*f)(Test*), string testedMethod )
+void testAction(unsigned (*g)(Test*), Test* test)
 {
-	FOR_ALL_ITERATORS
-		FOR_ALL_ENUMERATIONS {
-			try {
-				unsigned differencesCounter = f(this);
-				if (differencesCounter > 0){
-					printCurrentState();
-					cout << differencesCounter << " differences detected." << endl;
-				}
-			} catch (string error) {
-				cout << "Error: " << error << endl;
-				cout << " While testing "<< testedMethod << endl;
-				printCurrentState();
-			}
-		}
+	unsigned differencesCounter = g(test);
+	if (differencesCounter > 0){
+		test->printCurrentState();
+		cout << differencesCounter << " differences detected." << endl;
+	}
+}
+void Test::test( unsigned (*f)(Test*), string testedMethod )
+{
+	loopFunction( testAction, f, testedMethod );
 	cout << testedMethod << endl;
 }
 
-void Test::testFunction( void (*f)(Test*), string testedMethod )
+void simpleAction(void (*g)(Test*), Test* test)
 {
-	FOR_ALL_ITERATORS
-		FOR_ALL_ENUMERATIONS {
-			try {
-				(*f)(this);
-			} catch (string error) {
-				cout << "Error: " << error << endl;
-				cout << " While testing "<< testedMethod << " State: " << getCurrentState() << endl;
-			}
-		}
+	g(test);
+}
+void Test::simpleTest( void (*f)(Test*), string testedMethod )
+{
+	loopFunction( simpleAction, f, testedMethod );
 	cout << testedMethod << endl;
 }
 
@@ -72,6 +65,7 @@ void Test::addIterator(int* variable, unsigned min, unsigned max, unsigned incre
 {
 	IteratorConfig iterator;
 	iterator.variable = variable;
+	*iterator.variable = min;
 	iterator.min = min;
 	iterator.max = max;
 	iterator.increment = increment;
@@ -81,10 +75,11 @@ void Test::addIterator(int* variable, unsigned min, unsigned max, unsigned incre
 void Test::withAll(EnumType enumType)
 {
 	enumTypes[enumType].clear();
-	unsigned dim = enumTypeDim(enumType);
+	unsigned dim = Enumerations::enumTypeDim(enumType);
 	for(unsigned i=0; i < dim; i++){
 		enumTypes[enumType].push_back( i);
 	}
+	itEnumType[enumType] = enumTypes[enumType].begin();
 }
 
 void Test::with(EnumType enumType, unsigned count, ...)
@@ -121,18 +116,16 @@ void Test::exclude(EnumType enumType, unsigned count, ...)
 
 std::string Test::getCurrentState()
 {
-	//TODO esto esta abierto
 	string state;
 	for(int i=0; i < ENUM_TYPE_DIM; ++i) {
 		if (enumTypes[i].size() > 1)  {
-//			state += "_" + Print::toString((EnumType)i, *(itEnumType[i]));
-			state += "_" ;
-			state += Print::toString((EnumType)i, *(itEnumType[i]));
+			unsigned value = *(itEnumType[i]);
+			state += "_" + Enumerations::toString((EnumType)i, value);
 		}
 	}
 	for(int i=0; i < iterators.size(); ++i){
 		if (iterators[i].min != iterators[i].max){
-			state += "_" + *iterators[i].variable;
+			state += "_" + to_string(*iterators[i].variable);
 		}
 	}
 	if (state.length() > 1) {
@@ -143,27 +136,12 @@ std::string Test::getCurrentState()
 
 void Test::printCurrentState()
 {
-//    printf("-Implementation Type = ");
-//    switch (getImplementationType()){
-//        case C: 		printf(" C        "); 	break;
-//        case SSE2: 		printf(" SSE2     ");	break;
-//        case CUDA: 		printf(" CUDA     ");	break;
-//        case CUDA_REDUC:		printf(" CUDA_REDUC    ");	break;
-//        case CUDA_INV:	printf(" CUDA_INV ");	break;
-//    }
-//    printf(" Buffer Type = ");
-//    switch (getBufferType()){
-//        case FLOAT: printf(" FLOAT "); 	break;
-//        case BIT: 	printf(" BIT   ");	break;
-//        case SIGN: 	printf(" SIGN  ");	break;
-//        case BYTE:	printf(" BYTE  ");	break;
-//    }
-    //TODO mostrar los iteradores
-//    for(unsigned i=0; i < PARAMS_DIM; ++i){
-//		printf("%s = %d ", Print::paramToString(params[i].param).data(), params[i].currentState);
-//    }
 	string state = getCurrentState();
-    printf("%s \n", state.data());
+	if (state.length() > 0) {
+		printf("%s \n", state.data());
+	} else {
+		printf("There's no bucles defined for the test.\n", state.data());
+	}
 }
 
 void Test::printParameters()
@@ -171,7 +149,7 @@ void Test::printParameters()
     std::vector<unsigned>::iterator it;
     //TODO imprimir iteradores
 //    for (int i=0; i < PARAMS_DIM; ++i){
-//		printf("-param %s: min = %d max = %d increment = %d \n", Print::paramToString(params[i].param).data(), params[i].min, params[i].max, params[i].increment);
+//		printf("-param %s: min = %d max = %d increment = %d \n", Enumerations::paramToString(params[i].param).data(), params[i].min, params[i].max, params[i].increment);
 //    }
 
     printf("-Implementations: ");

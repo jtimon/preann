@@ -4,6 +4,35 @@
 
 #include "interface.h"
 
+template <class c_typeTempl>
+c_typeTempl Function(float number, FunctionType functionType)
+{
+	switch (functionType) {
+
+	case BINARY_STEP:
+		if (number > 0) {
+			return 1;
+		} else {
+			return 0;
+		}
+	case BIPOLAR_STEP:
+		if (number > 0) {
+			return 1;
+		} else {
+			return -1;
+		}
+	case SIGMOID:
+		return 1.0f / (1.0f - exp(-number));
+	case BIPOLAR_SIGMOID:
+		return -1.0f + (2.0f / (1.0f + exp(-number)));
+	case HYPERBOLIC_TANGENT:
+		return tanh(number);
+	case IDENTITY:
+	default:
+		return number;
+	}
+}
+
 class Buffer {
 protected:
 	unsigned tSize;

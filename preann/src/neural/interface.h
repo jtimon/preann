@@ -8,7 +8,7 @@
 #ifndef INTERFACE_H_
 #define INTERFACE_H_
 
-#include "util.h"
+#include "enumerations.h"
 
 class Interface {
 

@@ -19,6 +19,8 @@
 #define START_CONNECTION_TEST START_TEST START_CONNECTION
 #define END_CONNECTION_TEST  END_CONNECTION END_TEST
 
+#define FOR_ITER(_iterPos) for ((*iterators[_iterPos].variable) = iterators[_iterPos].min; (*iterators[_iterPos].variable) <= iterators[_iterPos].max; (*iterators[_iterPos].variable) += iterators[_iterPos].increment)
+
 #define FOR_ALL_ITERATORS for(int _ite=0; _ite < iterators.size(); ++_ite)             \
 							  (*iterators[_ite].variable) = iterators[_ite].min;       \
 						  for(int _ite=0; _ite < iterators.size(); ++_ite)             \
@@ -26,7 +28,9 @@
 #define FOR_ALL_ENUMERATIONS for(int _enu=0; _enu < ENUM_TYPE_DIM; ++_enu)             \
 								 itEnumType[_enu] = enumTypes[_enu].begin();           \
 							 for(int _enu=0; _enu < ENUM_TYPE_DIM; ++_enu)             \
-								 FOR_EACH (itEnumType[_enu], enumTypes[_enu])
+								 for (itEnumType[_enu] = enumTypes[_enu].begin(); itEnumType[_enu] != enumTypes[_enu].end(); ++itEnumType[_enu])
+//								 FOR_EACH (itEnumType[_enu], enumTypes[_enu])
+
 
 class Test {
 protected:
@@ -63,9 +67,57 @@ public:
 
     FILE* openFile(string path);
 
-    void testFunction( void (*f)(Test*), string testedMethod );
-    void test ( unsigned (*f)(Test*), string testedMethod );
+    void simpleTest( void (*f)(Test*), string testedMethod);
+    void test( unsigned (*f)(Test*), string testedMethod);
 
+    template <class classTempl>
+    void loopFunction( void action(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), string testedMethod )
+    {
+    	try {
+    		forEnumsIters(action, f, 0);
+    	} catch (string error) {
+    		cout << "Error: " << error << endl;
+    		cout << " While looping "<< testedMethod << " State: " << getCurrentState() << endl;
+    	}
+    }
+
+    template <class classTempl>
+    void forEnumsIters (void action(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
+    {
+    	if (enu == ENUM_TYPE_DIM){
+    		forIters(action, f, 0);
+    	} else {
+    		FOR_EACH(itEnumType[enu], enumTypes[enu]) {
+    			forEnumsIters(action, f, enu + 1);
+    		}
+    	}
+    }
+
+    template <class classTempl>
+    void forEnums (void action(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
+    {
+    	if (enu == ENUM_TYPE_DIM){
+    		(*action)(f, this);
+    	} else {
+    		FOR_EACH(itEnumType[enu], enumTypes[enu]) {
+    			forEnums(action, f, enu + 1);
+    		}
+    	}
+    }
+
+    template <class classTempl>
+    void forIters (void action(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned iter)
+    {
+    	if (iter == iterators.size()){
+    		(*action)(f, this);
+    	} else {
+    		FOR_ITER(iter) {
+    			forIters(action, f, iter + 1);
+    		}
+    	}
+    }
 };
+
+
 
 #endif /* TEST_H_ */

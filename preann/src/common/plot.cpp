@@ -93,7 +93,7 @@ FILE* Plot::preparePlotAndDataFile(string path, string testedMethod)
 	fprintf(dataFile, "# Iterator ");
 	unsigned functionNum = 2;
 
-//	FOR_ALL_ITERATORS
+	FOR_ALL_ITERATORS
 		FOR_ALL_ENUMERATIONS {
 			string functionName = getCurrentState();
 			fprintf(dataFile, " %s ", functionName.data());
@@ -151,6 +151,26 @@ std::string Plot::createPlotScript(string path, string testedMethod)
 	fclose(plotFile);
 
 	return plotPath;
+}
+
+void plotAction(float (*g)(Test*), Test* test)
+{
+	unsigned differencesCounter = g(test);
+	if (differencesCounter > 0){
+		test->printCurrentState();
+		cout << differencesCounter << " differences detected." << endl;
+	}
+
+
+	string functionName = getCurrentState();
+	string dataPath = path + "data/" + testedMethod + functionName + ".DAT";
+	FILE* dataFile = openFile(dataPath);
+	fprintf(dataFile, "# Iterator %s \n", functionName.data());
+	FOR_PLOT_ITERATOR {
+		float total = f(this, repetitions);
+		fprintf(dataFile, " %d %f \n", *plotIterator.variable, total/repetitions);
+	}
+	fclose(dataFile);
 }
 
 void Plot::plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)

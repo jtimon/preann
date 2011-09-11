@@ -53,25 +53,42 @@ void testLayer(Test* test)
     checkAndPrintErrors("Layer", test);
 }
 
+//int a, b, c, d;
+//unsigned miFuncioncita(Test* test){
+//	test->printCurrentState();
+//	return Random::positiveInteger(2);
+//}
+
 int main(int argc, char *argv[]) {
 
 	Test test;
 	Chronometer total;
 	total.start();
 	try {
+//		test.withAll(ET_BUFFER);
+//		test.withAll(ET_IMPLEMENTATION);
+//		test.withAll(ET_CROSS_ALG);
+//		test.withAll(ET_CROSS_LEVEL);
+//		test.withAll(ET_MUTATION_ALG);
+//		test.withAll(ET_FUNCTION);
+//		test.addIterator(&a, 1, 2, 1);
+//		test.addIterator(&b, 1, 2, 1);
+//		test.addIterator(&c, 1, 2, 1);
+//		test.addIterator(&d, 1, 2, 1);
+//		test.test(miFuncioncita, "afdgfdgd");
 
 		test.addIterator(&size, 100, 100, 100);
 		test.withAll(ET_BUFFER);
 		test.withAll(ET_IMPLEMENTATION);
 		test.printParameters();
 
-		test.testFunction(testBuffer, "Buffer::memory");
+		test.simpleTest(testBuffer, "Buffer::memory");
 
 		test.exclude(ET_BUFFER, 1, BYTE);
 		test.printParameters();
 
-		test.testFunction(testConnection, "Connection::memory");
-		test.testFunction(testLayer, "Layer::memory");
+		test.simpleTest(testConnection, "Connection::memory");
+		test.simpleTest(testLayer, "Layer::memory");
 
 		printf("Exit success.\n", 1);
 		MemoryManagement::printTotalAllocated();

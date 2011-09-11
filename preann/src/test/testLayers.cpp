@@ -93,13 +93,13 @@ int main(int argc, char *argv[]) {
 	total.start();
 
 	test.addIterator(&size, 1, 50, 49);
-	test.with(ET_IMPLEMENTATION, 1, SSE2);
+	test.withAll(ET_IMPLEMENTATION);
 	test.exclude(ET_BUFFER, 1, BYTE);
 	test.printParameters();
 
 	try {
 		//TODO arreglar
-//		test.test(testCalculateOutput, "Layer::calculateOutput");
+		test.test(testCalculateOutput, "Layer::calculateOutput");
 
 		printf("Exit success.\n");
 		MemoryManagement::printTotalAllocated();
