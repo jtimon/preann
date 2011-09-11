@@ -1,6 +1,11 @@
 #include "factory.h"
 #include "configFactory.h"
 
+#define FLOAT_STORAGE float
+#define BYTE_STORAGE unsigned char
+#define BIT_STORAGE unsigned
+#define SIGN_STORAGE BIT_STORAGE
+
 Buffer* Factory::newBuffer(FILE* stream, ImplementationType implementationType)
 {
 	Interface interface(stream);
@@ -27,19 +32,19 @@ Buffer* Factory::newBuffer(unsigned size, BufferType bufferType, ImplementationT
 {
 	switch(bufferType){
 		case FLOAT:
-			return func_newBuffer<FLOAT, float>(size, implementationType);
+			return func_newBuffer<FLOAT, FLOAT_STORAGE>(size, implementationType);
 		case BYTE:
-			return func_newBuffer<BYTE, unsigned char>(size, implementationType);
+			return func_newBuffer<BYTE, BYTE_STORAGE>(size, implementationType);
 		case BIT:
-			return func_newBuffer<BIT, unsigned>(size, implementationType);
+			return func_newBuffer<BIT, BIT_STORAGE>(size, implementationType);
 		case SIGN:
-			return func_newBuffer<SIGN, unsigned>(size, implementationType);
+			return func_newBuffer<SIGN, SIGN_STORAGE>(size, implementationType);
 	}
 }
 
 Connection* Factory::newThresholds(Buffer* output, ImplementationType implementationType)
 {
-	return func_newConnection<FLOAT, float>(output, 1, implementationType);
+	return func_newConnection<FLOAT, FLOAT_STORAGE>(output, 1, implementationType);
 }
 
 BufferType Factory::weighForInput(BufferType inputType)
@@ -64,12 +69,12 @@ Connection* Factory::newConnection(Buffer* input, unsigned outputSize, Implement
 
 	switch(bufferType){
 		case FLOAT:
-			return func_newConnection<FLOAT, float>(input, outputSize, implementationType);
+			return func_newConnection<FLOAT, FLOAT_STORAGE>(input, outputSize, implementationType);
 		case BYTE:
-			return func_newConnection<BYTE, unsigned char>(input, outputSize, implementationType);
+			return func_newConnection<BYTE, BYTE_STORAGE>(input, outputSize, implementationType);
 		case BIT:
-			return func_newConnection<BIT, unsigned>(input, outputSize, implementationType);
+			return func_newConnection<BIT, BIT_STORAGE>(input, outputSize, implementationType);
 		case SIGN:
-			return func_newConnection<SIGN, unsigned>(input, outputSize, implementationType);
+			return func_newConnection<SIGN, SIGN_STORAGE>(input, outputSize, implementationType);
 	}
 }

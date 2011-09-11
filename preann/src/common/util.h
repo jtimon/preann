@@ -36,9 +36,15 @@ typedef enum {IDENTITY, BINARY_STEP, BIPOLAR_STEP, SIGMOID, BIPOLAR_SIGMOID, HYP
 #define FUNCTION_TYPE_DIM 6
 typedef enum {C, SSE2, CUDA, CUDA_REDUC, CUDA_INV} ImplementationType;
 #define IMPLEMENTATION_TYPE_DIM 5
+typedef enum {WEIGH, NEURON, NEURON_INVERTED, LAYER} CrossoverLevel;
+#define CROSSOVER_LEVEL_DIM 4
+typedef enum {UNIFORM, PROPORTIONAL, MULTIPOINT} CrossoverAlgorithm;
+#define CROSSOVER_ALGORITHM_DIM 3
+typedef enum {MA_PER_INDIVIDUAL, MA_PROBABILISTIC} MutationAlgorithm;
+#define MUTATION_ALGORITHM_DIM 2
 
-typedef enum {ET_BUFFER, ET_IMPLEMENTATION, ET_FUNCTION} EnumType;
-#define ENUM_TYPE_DIM 3
+typedef enum {ET_BUFFER, ET_IMPLEMENTATION, ET_FUNCTION, ET_CROSS_LEVEL, ET_CROSS_ALG, ET_MUTATION_ALG} EnumType;
+#define ENUM_TYPE_DIM 6
 
 unsigned enumTypeDim(EnumType enumType);
 
@@ -47,16 +53,62 @@ public:
 static std::string toString(EnumType enumType, unsigned enumValue){
 	switch(enumType){
 	case ET_BUFFER:
-		return bufferTypeToString((BufferType)enumValue);
+		return bufferTypeToString(enumValue);
 	case ET_IMPLEMENTATION:
-		return implementationToString((ImplementationType)enumValue);
+		return implementationToString(enumValue);
 	case ET_FUNCTION:
 		return "ET_FUNCTION";
+	case ET_CROSS_LEVEL:
+		return crossoverLevelToString(enumValue);
+	case ET_CROSS_ALG:
+		return crossoverAlgorithmToString(enumValue);
+	case ET_MUTATION_ALG:
+		return mutationAlgorithmToString(enumValue);
 	}
 	return "NOT_FOUND";
 }
 
-static std::string bufferTypeToString(unsigned bufferType){
+static std::string crossoverLevelToString(unsigned bufferType)
+{
+	switch((CrossoverLevel)bufferType){
+	case WEIGH:
+		return "WEIGH";
+	case NEURON:
+		return "NEURON";
+	case NEURON_INVERTED:
+		return "NEURON_INVERTED";
+	case LAYER:
+		return "LAYER";
+	}
+	return "NOT_FOUND";
+}
+
+static std::string crossoverAlgorithmToString(unsigned bufferType)
+{
+	switch((CrossoverAlgorithm)bufferType){
+	case UNIFORM:
+		return "UNIFORM";
+	case PROPORTIONAL:
+		return "PROPORTIONAL";
+	case MULTIPOINT:
+		return "MULTIPOINT";
+	}
+	return "NOT_FOUND";
+}
+
+static std::string mutationAlgorithmToString(unsigned bufferType)
+{
+	switch((MutationAlgorithm)bufferType){
+	case MA_PER_INDIVIDUAL:
+		return "PER_INDIVIDUAL";
+	case MA_PROBABILISTIC:
+		return "PROBABILISTIC";
+	}
+	return "NOT_FOUND";
+}
+
+static std::string bufferTypeToString(unsigned bufferType)
+{
 	switch((BufferType)bufferType){
 	case FLOAT:
 		return "FLOAT";
@@ -70,8 +122,8 @@ static std::string bufferTypeToString(unsigned bufferType){
 	return "NOT_FOUND";
 }
 
-static std::string implementationToString(ImplementationType implementationType){
-	switch(implementationType){
+static std::string implementationToString(unsigned implementationType){
+	switch((ImplementationType)implementationType){
 	case C:
 		return "C";
 	case SSE2:

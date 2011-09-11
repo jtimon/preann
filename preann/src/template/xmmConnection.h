@@ -19,13 +19,13 @@ protected:
 			case BYTE:
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
-						((unsigned char*)(data) + offset)[i] = interface->getElement(elem++);
+						((c_typeTempl*)(data) + offset)[i] = interface->getElement(elem++);
 					}
 					offset += offsetPerInput;
 				}
 				break;
 			case FLOAT:
-				offsetPerInput = offsetPerInput / sizeof(float);
+				offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
 						((float*)(data) + offset)[i] = interface->getElement(elem++);
@@ -54,16 +54,16 @@ protected:
 			case BYTE:
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
-						interface->setElement(elem++, ((unsigned char*)(data) + offset)[i]);
+						interface->setElement(elem++, ((c_typeTempl*)(data) + offset)[i]);
 					}
 					offset += offsetPerInput;
 				}
 				break;
 			case FLOAT:
-				offsetPerInput = offsetPerInput / sizeof(float);
+				offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
-						interface->setElement(elem++, ((float*)(data) + offset)[i]);
+						interface->setElement(elem++, ((c_typeTempl*)(data) + offset)[i]);
 					}
 					offset += offsetPerInput;
 				}
@@ -87,7 +87,7 @@ protected:
 	    switch (bufferTypeTempl){
 	        case BYTE:
 	            {
-	                unsigned char *weigh = &(((unsigned char*)(data))[elem]);
+	            	c_typeTempl *weigh = &(((c_typeTempl*)(data))[elem]);
 	                int result = (int)(mutation) + *weigh;
 	                if(result <= 0){
 	                    *weigh = 0;
@@ -101,9 +101,9 @@ protected:
 	        }
 	        break;
 	    case FLOAT:
-	    	offsetPerInput = offsetPerInput / sizeof(float);
+	    	offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
 	    	elem = (outputPos * offsetPerInput) + inputPos;
-	        ((float*)(data))[elem] += mutation;
+	        ((c_typeTempl*)(data))[elem] += mutation;
 				break;
 		case BIT:
 		case SIGN:
@@ -180,7 +180,7 @@ public:
 			break;
 		case BIT:
 		case SIGN:
-			SetValueToAnArray<unsigned char>(data, byteSize, 0);
+			SetValueToAnArray<unsigned>(data, byteSize, 0);
 			break;
 		}
 	}

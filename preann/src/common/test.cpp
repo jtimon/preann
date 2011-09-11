@@ -9,12 +9,9 @@
 
 Test::Test()
 {
-	size = minSize = maxSize = incSize = 1;
-	withAll(ET_BUFFER);
-	withAll(ET_IMPLEMENTATION);
+	with(ET_BUFFER, 1, FLOAT);
+	with(ET_IMPLEMENTATION, 1, C);
 	with(ET_FUNCTION, 1, IDENTITY);
-	initialWeighsRange = 10;
-	file = NULL;
 }
 
 Test::~Test()
@@ -31,20 +28,6 @@ ImplementationType Test::getImplementationType()
 	return (ImplementationType)*itEnumType[ET_IMPLEMENTATION];
 }
 
-Buffer* Test::buildBuffer()
-{
-	Buffer* buffer = Factory::newBuffer(getSize(), getBufferType(), getImplementationType());
-	buffer->random(initialWeighsRange);
-	return buffer;
-}
-
-Connection* Test::buildConnection(Buffer* buffer)
-{
-	Connection* connection = Factory::newConnection(buffer, outputSize, getImplementationType());
-	connection->random(initialWeighsRange);
-	return connection;
-}
-
 FunctionType Test::getFunctionType()
 {
 	//TODO hacer bucle para esto también
@@ -53,8 +36,8 @@ FunctionType Test::getFunctionType()
 
 void Test::test ( unsigned (*f)(Test*), string testedMethod )
 {
-	for (size = minSize; size <= maxSize; size += incSize) {
-		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]){
+	FOR_ALL_ITERATORS
+		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER])
 			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]){
 				try {
 					unsigned differencesCounter = f(this);
@@ -68,15 +51,13 @@ void Test::test ( unsigned (*f)(Test*), string testedMethod )
 					printCurrentState();
 				}
 			}
-		}
-	}
 	cout << testedMethod << endl;
 }
 
 void Test::testFunction( void (*f)(Test*), string testedMethod )
 {
-	for (size = minSize; size <= maxSize; size += incSize) {
-		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]){
+	FOR_ALL_ITERATORS
+		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER])
 			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]){
 				try {
 					(*f)(this);
@@ -86,13 +67,16 @@ void Test::testFunction( void (*f)(Test*), string testedMethod )
 					printCurrentState();
 				}
 			}
-		}
-	}
 }
 
-unsigned Test::getSize()
+void Test::addIterator(int* variable, unsigned min, unsigned max, unsigned increment)
 {
-    return size;
+	IteratorConfig iterator;
+	iterator.variable = variable;
+	iterator.min = min;
+	iterator.max = max;
+	iterator.increment = increment;
+	iterators.push_back(iterator);
 }
 
 void Test::withAll(EnumType enumType)
@@ -153,17 +137,20 @@ void Test::printCurrentState()
         case SIGN: 	printf(" SIGN  ");	break;
         case BYTE:	printf(" BYTE  ");	break;
     }
-    printf("Size = %d ", size);
-    if (initialWeighsRange != 0){
-		printf("Weighs Range %f ", initialWeighsRange);
-    }
+    //TODO mostrar los iteradores
+//    for(unsigned i=0; i < PARAMS_DIM; ++i){
+//		printf("%s = %d ", Print::paramToString(params[i].param).data(), params[i].currentState);
+//    }
     printf("\n");
 }
 
 void Test::printParameters()
 {
     std::vector<unsigned>::iterator it;
-    printf("-Size paramenters: min size = %d max size = %d increment = %d \n", minSize, maxSize, incSize);
+    //TODO imprimir iteradores
+//    for (int i=0; i < PARAMS_DIM; ++i){
+//		printf("-param %s: min = %d max = %d increment = %d \n", Print::paramToString(params[i].param).data(), params[i].min, params[i].max, params[i].increment);
+//    }
 
     printf("-Implementations: ");
     FOR_EACH(it, enumTypes[ET_IMPLEMENTATION]) {
@@ -189,13 +176,7 @@ void Test::printParameters()
 		}
     }
     printf("\n");
-    if (initialWeighsRange != 0){
-		printf("-Weighs Range %f \n", initialWeighsRange);
-		printf("\n");
-    }
-    printf("\n");
 }
-
 
 unsigned char Test::areEqual(float expected, float actual, BufferType bufferType)
 {
@@ -250,16 +231,6 @@ unsigned Test::assertEquals(Buffer* expected, Buffer* actual)
 	return differencesCounter;
 }
 
-float Test::getInitialWeighsRange()
-{
-    return initialWeighsRange;
-}
-
-void Test::setInitialWeighsRange(float initialWeighsRange)
-{
-    this->initialWeighsRange = initialWeighsRange;
-}
-
 FILE* Test::openFile(string path)
 {
 	FILE* dataFile;
@@ -269,25 +240,4 @@ FILE* Test::openFile(string path)
 		throw error;
 	}
 	return dataFile;
-}
-
-void Test::fromToBySize(unsigned minSize, unsigned maxSize, unsigned incSize)
-{
-	this->size = minSize;
-	this->minSize = minSize;
-	this->maxSize = maxSize;
-	this->incSize = incSize;
-}
-
-void Test::fromToByOutputSize(unsigned minOutputSize, unsigned maxOutputSize, unsigned incOutputSize)
-{
-	this->outputSize = minOutputSize;
-	this->minOutputSize = minOutputSize;
-	this->maxOutputSize = maxOutputSize;
-	this->incOutputSize = incOutputSize;
-}
-
-unsigned Test::getOutputSize()
-{
-	return outputSize;
 }

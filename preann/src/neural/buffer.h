@@ -36,16 +36,16 @@ public:
 	float compareTo(Buffer* other);
 	void random(float range);
 
-	template <class bufferType>
-	bufferType* getDataPointer2()
+	template <class c_typeTempl>
+	c_typeTempl* getDataPointer2()
 	{
-		return (bufferType*) data;
+		return (c_typeTempl*) data;
 	}
 protected:
-	template <class bufferType>
-	void SetValueToAnArray(void* array, unsigned size, bufferType value)
+	template <class c_typeTempl>
+	void SetValueToAnArray(void* array, unsigned size, c_typeTempl value)
 	{
-		bufferType* castedArray = (bufferType*)array;
+		c_typeTempl* castedArray = (c_typeTempl*)array;
 		for(unsigned i=0; i < size; i++){
 			castedArray[i] = value;
 		}

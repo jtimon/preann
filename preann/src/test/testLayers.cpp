@@ -9,45 +9,11 @@ using namespace std;
 #include "cuda_code.h"
 #include "test.h"
 
+int size;
+unsigned outputSize = 100;
+float initialWeighsRange = 20;
 
 #define PATH "/home/timon/layer.lay"
-
-Test test;
-
-unsigned char areEqual(float expected, float actual, BufferType bufferType)
-{
-	if (bufferType == FLOAT){
-		return (expected - 1 < actual
-			 && expected + 1 > actual);
-	} else {
-		return expected == actual;
-	}
-}
-
-unsigned assertEquals(Buffer* expected, Buffer* actual)
-{
-    if(expected->getBufferType() != actual->getBufferType()){
-        throw "The buffers are not even of the same type!";
-    }
-    if(expected->getSize() != actual->getSize()){
-        throw "The buffers are not even of the same size!";
-    }
-
-	unsigned differencesCounter = 0;
-	Interface* expectedInt = expected->toInterface();
-	Interface* actualInt = actual->toInterface();
-
-    for(unsigned i = 0;i < expectedInt->getSize();i++){
-        if(!areEqual(expectedInt->getElement(i), actualInt->getElement(i), expectedInt->getBufferType())){
-            printf("The buffers are not equal at the position %d (expected = %f actual %f).\n", i, expectedInt->getElement(i), actualInt->getElement(i));
-            ++differencesCounter;
-        }
-    }
-    delete(expectedInt);
-	delete(actualInt);
-	return differencesCounter;
-}
-
 #define NUM_INPUTS 3
 
 Layer* createAndLoadLayer(ImplementationType implementationType, Buffer** inputBuffers)
@@ -63,14 +29,14 @@ Layer* createAndLoadLayer(ImplementationType implementationType, Buffer** inputB
     return layer;
 }
 
-Layer* createAndSaveLayer(unsigned size, BufferType bufferType, Buffer** controlInputs)
+Layer* createAndSaveLayer(Test* test, Buffer** controlInputs)
 {
-    Layer* controlLayer = new Layer(size, bufferType, IDENTITY, C);
+    Layer* controlLayer = new Layer(size, test->getBufferType(), IDENTITY, C);
 
     for (unsigned i = 0; i < NUM_INPUTS; i++){
 		controlLayer->addInput(controlInputs[i]);
 	}
-    controlLayer->randomWeighs(test.getInitialWeighsRange());
+    controlLayer->randomWeighs(initialWeighsRange);
 
 	FILE* stream = fopen(PATH, "w+b");
 	controlLayer->save(stream);
@@ -79,71 +45,62 @@ Layer* createAndSaveLayer(unsigned size, BufferType bufferType, Buffer** control
     return controlLayer;
 }
 
-//TODO usar Test para esto o eliminar el fichero
+unsigned testCalculateOutput(Test* test)
+{
+	START_TEST
+
+	Buffer* controlInputBuffers[NUM_INPUTS];
+	for (unsigned i = 0; i < NUM_INPUTS; i++) {
+		BufferType bufferTypeAux = BYTE;
+		while (bufferTypeAux == BYTE) {
+			bufferTypeAux = (BufferType)Random::positiveInteger(BUFFER_TYPE_DIM);
+		}
+		controlInputBuffers[i] = Factory::newBuffer(size, bufferTypeAux, C);
+		controlInputBuffers[i]->random(initialWeighsRange);
+	}
+
+	Layer* controlLayer = createAndSaveLayer(test, controlInputBuffers);
+	controlLayer->calculateOutput();
+
+	Buffer* inputBuffers[NUM_INPUTS];
+	for (unsigned i = 0; i < NUM_INPUTS; i++) {
+		inputBuffers[i] = Factory::newBuffer(size, controlInputBuffers[i]->getBufferType(), test->getImplementationType());
+		inputBuffers[i]->copyFrom(controlInputBuffers[i]);
+	}
+
+	Layer* layer = createAndLoadLayer(test->getImplementationType(), inputBuffers);
+
+    //test calculation
+	layer->calculateOutput();
+
+    differencesCounter += Test::assertEquals(controlLayer->getOutput(), layer->getOutput());
+
+	delete (layer);
+	for (unsigned i = 0; i < NUM_INPUTS; i++) {
+		delete(inputBuffers[i]);
+	}
+	delete (controlLayer);
+	for (unsigned i = 0; i < NUM_INPUTS; i++) {
+		delete(controlInputBuffers[i]);
+	}
+
+	END_TEST
+}
 
 int main(int argc, char *argv[]) {
 	Chronometer total;
+	Test test;
 	total.start();
 
-	test.setInitialWeighsRange(20);
-	test.fromToBySize(1, 50, 49);
+	test.addIterator(&size, 1, 50, 49);
+	test.with(ET_IMPLEMENTATION, 1, SSE2);
 	test.exclude(ET_BUFFER, 1, BYTE);
 	test.printParameters();
 
 	try {
-//		for (test.sizeToMin(); test.hasNextSize(); test.sizeIncrement()) {
-//			for (test.bufferTypeToMin(); test.hasNextBufferType(); test.bufferTypeIncrement() ) {
-//				Buffer* controlInputBuffers[BUFFER_TYPE_DIM];
-//				for (unsigned i = 0; i < NUM_INPUTS; i++) {
-//					BufferType bufferTypeAux = BYTE;
-//					while (bufferTypeAux == BYTE) {
-//						bufferTypeAux = (BufferType)Random::positiveInteger(BUFFER_TYPE_DIM);
-//					}
-//					controlInputBuffers[i] = Factory::newBuffer(test.getSize(), bufferTypeAux, C);
-//					controlInputBuffers[i]->random(test.getInitialWeighsRange());
-//				}
-//
-//			    Layer* controlLayer = createAndSaveLayer(test.getSize(), test.getBufferType(), controlInputBuffers);
-//			    controlLayer->calculateOutput();
-//
-//			    for (test.implementationTypeToMin(); test.hasNextImplementationType(); test.implementationTypeIncrement()) {
-//
-//					test.printCurrentState();
-//
-//					Buffer* inputBuffers[BUFFER_TYPE_DIM];
-//					for (unsigned i = 0; i < NUM_INPUTS; i++) {
-//						inputBuffers[i] = Factory::newBuffer(test.getSize(), controlInputBuffers[i]->getBufferType(), test.getImplementationType());
-//						inputBuffers[i]->copyFrom(controlInputBuffers[i]);
-//					}
-//
-//					Layer* layer = createAndLoadLayer(test.getImplementationType(), inputBuffers);
-//
-//				    //test calculation
-//					layer->calculateOutput();
-//
-//				    unsigned differences = Test::assertEquals(controlLayer->getOutput(), layer->getOutput());
-//				    if (differences != 0)
-//				    	printf("Errors on outputs: %d \n", differences);
-//
-//					//test Weighs
-//				    for(unsigned i = 0; i < NUM_INPUTS; i++){
-//				        Connection* expectedWeighs = controlLayer->getConnection(i);
-//				        Connection* actualWeighs = layer->getConnection(i);
-//				        differences = Test::assertEquals(expectedWeighs, actualWeighs);
-//				        if (differences != 0)
-//				        	printf("Errors on weighs (input %d): %d \n", i, differences);
-//				    }
-//					delete (layer);
-//					for (unsigned i = 0; i < NUM_INPUTS; i++) {
-//						delete(inputBuffers[i]);
-//					}
-//				}
-//			    delete (controlLayer);
-//				for (unsigned i = 0; i < NUM_INPUTS; i++) {
-//					delete(controlInputBuffers[i]);
-//				}
-//			}
-//		}
+		//TODO arreglar
+//		test.test(testCalculateOutput, "Layer::calculateOutput");
+
 		printf("Exit success.\n");
 		MemoryManagement::printTotalAllocated();
 		MemoryManagement::printTotalPointers();

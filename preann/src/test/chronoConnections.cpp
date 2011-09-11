@@ -7,14 +7,15 @@ using namespace std;
 #include "plot.h"
 #include "factory.h"
 
+int size;
+unsigned outputSize = 100;
+float initialWeighsRange = 20;
 
 float chronoCalculateAndAddTo(Test* test, unsigned repetitions)
 {
-	Chronometer chrono;
-	Buffer* buffer = test->buildBuffer();
-	Connection* connection = test->buildConnection(buffer);
+	START_CONNECTION_PLOT
 
-	Buffer* results = Factory::newBuffer(test->getOutputSize(), FLOAT, connection->getImplementationType());
+	Buffer* results = Factory::newBuffer(outputSize, FLOAT, connection->getImplementationType());
 
 	chrono.start();
 	for (unsigned i = 0; i < repetitions; ++i) {
@@ -23,37 +24,29 @@ float chronoCalculateAndAddTo(Test* test, unsigned repetitions)
 	chrono.stop();
 	delete(results);
 
-	delete(connection);
-	delete(buffer);
-	return chrono.getSeconds();
+	END_CONNECTION_PLOT
 }
 
 float chronoMutate(Test* test, unsigned repetitions)
 {
-	Chronometer chrono;
-	Buffer* buffer = test->buildBuffer();
-	Connection* connection = test->buildConnection(buffer);
+	START_CONNECTION_PLOT
 
 	unsigned pos = Random::positiveInteger(connection->getSize());
-	float mutation = Random::floatNum(test->getInitialWeighsRange());
+	float mutation = Random::floatNum(initialWeighsRange);
 	chrono.start();
 	for (unsigned i = 0; i < repetitions; ++i) {
 		connection->mutate(pos, mutation);
 	}
 	chrono.stop();
 
-	delete(connection);
-	delete(buffer);
-	return chrono.getSeconds();
+	END_CONNECTION_PLOT
 }
 
 float chronoCrossover(Test* test, unsigned repetitions)
 {
-	Chronometer chrono;
-	Buffer* buffer = test->buildBuffer();
-	Connection* connection = test->buildConnection(buffer);
+	START_CONNECTION_PLOT
 
-	Connection* other = Factory::newConnection(connection->getInput(), test->getOutputSize(), connection->getImplementationType());
+	Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
 	Interface bitVector(connection->getSize(), BIT);
 	bitVector.random(2);
 	chrono.start();
@@ -63,9 +56,7 @@ float chronoCrossover(Test* test, unsigned repetitions)
 	chrono.stop();
 	delete (other);
 
-	delete(connection);
-	delete(buffer);
-	return chrono.getSeconds();
+	END_CONNECTION_PLOT
 }
 
 int main(int argc, char *argv[])
@@ -75,16 +66,15 @@ int main(int argc, char *argv[])
 	string path = "/home/timon/workspace/preann/output/";
 
 	Plot plot;
-	plot.fromToBySize(1000, 10000, 1000);
-	plot.fromToByOutputSize(100, 100, 100);
+	plot.addPlotIterator(&size, 1000, 10000, 1000);
 	plot.exclude(ET_BUFFER, 1, BYTE);
 	plot.exclude(ET_IMPLEMENTATION, 1, CUDA);
 
 	plot.printParameters();
 
 	try {
-//		plot.plot(path, chronoCalculateAndAddTo, 10, "CONNECTION_CALCULATEANDADDTO");
-//		plot.plot(path, chronoMutate, 100, "CONNECTION_MUTATE");
+//		plot.plot(path, chronoCalculateAndAddTo, 20, "CONNECTION_CALCULATEANDADDTO");
+//		plot.plot(path, chronoMutate, 1000, "CONNECTION_MUTATE");
 //		plot.plot(path, chronoCrossover, 10, "CONNECTION_CROSSOVER");
 
 		printf("Exit success.\n");

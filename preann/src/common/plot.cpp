@@ -9,43 +9,72 @@
 
 Plot::Plot()
 {
+	colorEnum = ET_IMPLEMENTATION;
+	pointEnum = ET_BUFFER;
 }
 
 Plot::~Plot()
 {
 }
 
-int bufferTypeToPointType(BufferType bufferType)
+void Plot::setColorEnum(EnumType colorEnum)
 {
-// pt gives a particular point type: 1=diamond 2=+ 3=square 4=X 5=triangle 6=*
-// postscipt: 1=+, 2=X, 3=*, 4=square, 5=filled square, 6=circle,
+	this->colorEnum = colorEnum;
+}
+
+void Plot::setPointEnum(EnumType pointEnum)
+{
+	this->pointEnum = pointEnum;
+}
+
+void Plot::addPlotIterator(int* variable, unsigned min, unsigned max, unsigned increment)
+{
+	plotIterator.variable = variable;
+	plotIterator.min = min;
+	plotIterator.max = max;
+	plotIterator.increment = increment;
+}
+
+int Plot::getPointType()
+{
+// pt : 1=+, 2=X, 3=*, 4=square, 5=filled square, 6=circle,
 //            7=filled circle, 8=triangle, 9=filled triangle, etc.
-	switch (bufferType){
-		case FLOAT:
+	switch (*itEnumType[pointEnum]){
+		case 0:
 			return 2;
-		case BYTE:
+		case 1:
 			return 6;
-		case BIT:
+		case 2:
 			return 4;
-		case SIGN:
+		case 3:
 			return 8;
+		default:
+		case 4:
+			return 1;
+		case 5:
+			return 3;
 	}
 }
 
-int implTypeToLineType(ImplementationType implementationType)
+int Plot::getLineColor()
 {
 // lt is for color of the points: -1=black 1=red 2=grn 3=blue 4=purple 5=aqua 6=brn 7=orange 8=light-brn
-	switch (implementationType){
-		case C:
+	switch (*itEnumType[colorEnum]){
+		case 0:
 			return 1;
-		case SSE2:
+		case 1:
 			return 2;
-		case CUDA:
+		case 2:
 			return 3;
-		case CUDA_REDUC:
+		case 3:
 			return 5;
-		case CUDA_INV:
+		default:
+		case 4:
 			return -1;
+		case 5:
+			return 7;
+		case 6:
+			return 4;
 	}
 }
 
@@ -74,22 +103,21 @@ float Plot::plot(string path, float (*f)(Test*, unsigned), unsigned repetitions,
 			}
 			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
 					dataPath.data(), functionNum++, functionName.data(),
-					implTypeToLineType(getImplementationType()), bufferTypeToPointType(getBufferType()));
+					getLineColor(), getPointType());
 		}
 	}
 	fprintf(plotFile, "\n");
 	fprintf(dataFile, "\n");
 
-	for (size = minSize; size <= maxSize; size += incSize) {
-		fprintf(dataFile, " %d ", getSize());
-		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]) {
+	FOR_PLOT_ITERATOR {
+		fprintf(dataFile, " %d ", *plotIterator.variable);
+		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER])
 			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]) {
 
 				float part = f(this, repetitions);
 				fprintf(dataFile, " %f ", part/repetitions);
 				total += part;
 			}
-		}
 		fprintf(dataFile, " \n ");
 	}
 	fclose(plotFile);
@@ -126,14 +154,14 @@ float Plot::plotTask(string path, Population* population)
 			}
 			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
 					dataPath.data(), functionNum++, functionName.data(),
-					implTypeToLineType(getImplementationType()), bufferTypeToPointType(getBufferType()));
+					getLineColor(), getPointType());
 		}
 	}
 	fprintf(plotFile, "\n");
 	fprintf(dataFile, "\n");
 
-	for (size = minSize; size <= maxSize; size += incSize) {
-		fprintf(dataFile, " %d ", getSize());
+	FOR_PLOT_ITERATOR {
+		fprintf(dataFile, " %d ", *plotIterator.variable);
 		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]) {
 			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]) {
 

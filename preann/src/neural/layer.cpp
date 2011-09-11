@@ -17,8 +17,6 @@ Buffer* Layer::newBuffer(unsigned size, BufferType bufferType)
 
 Layer::Layer(unsigned size, BufferType outputType, FunctionType functionType, ImplementationType implementationType)
 {
-	connections = NULL;
-	numberInputs = 0;
 	this->functionType = functionType;
 	output = Factory::newBuffer(size, outputType, implementationType);
 	thresholds = Factory::newThresholds(output, implementationType);
@@ -26,8 +24,6 @@ Layer::Layer(unsigned size, BufferType outputType, FunctionType functionType, Im
 
 Layer::Layer(FILE* stream, ImplementationType implementationType)
 {
-	connections = NULL;
-	numberInputs = 0;
 	fread(&functionType, sizeof(FunctionType), 1, stream);
 	output = Factory::newBuffer(stream, implementationType);
 	thresholds = Factory::newThresholds(output, implementationType);
@@ -41,12 +37,10 @@ void Layer::save(FILE* stream)
 
 Layer::~Layer()
 {
-	if (connections) {
-		for (unsigned i=0; i < numberInputs; i++){
-			delete(connections[i]);
-		}
-		MemoryManagement::ffree(connections);
+	for (unsigned i=0; i < connections.size(); i++){
+		delete(connections[i]);
 	}
+	connections.clear();
 	if (thresholds) {
 		delete(thresholds);
 	}
@@ -59,11 +53,11 @@ void Layer::loadWeighs(FILE* stream)
 {
 	unsigned numInputs;
 	fread(&numInputs, sizeof(unsigned), 1, stream);
-	if (numInputs != numberInputs){
+	if (numInputs != connections.size()){
 		std::string error = "Cannot load weighs: the layer doesn't have that numer of inputs.";
 		throw error;
 	}
-	for(unsigned i=0; i < numberInputs; i++){
+	for(unsigned i=0; i < connections.size(); i++){
 		connections[i]->load(stream);
 	}
 	thresholds->load(stream);
@@ -71,8 +65,9 @@ void Layer::loadWeighs(FILE* stream)
 
 void Layer::saveWeighs(FILE* stream)
 {
+	unsigned numberInputs = connections.size();
 	fwrite(&numberInputs, sizeof(unsigned), 1, stream);
-	for(unsigned i=0; i < numberInputs; i++){
+	for(unsigned i=0; i < connections.size(); i++){
 		connections[i]->save(stream);
 	}
 	thresholds->save(stream);
@@ -97,13 +92,15 @@ void Layer::calculateOutput()
 //	Buffer* results = newBuffer(thresholds->getSize(), thresholds->getBufferType());
 	Buffer* results = thresholds->clone();
 
-	for(unsigned i=0; i < numberInputs; i++){
+	for(unsigned i=0; i < connections.size(); i++){
 		connections[i]->calculateAndAddTo(results);
 	}
 
 	output->activation(results, functionType);
 //	thresholds->activation(results, functionType, output);
 	if (tOuputInterface != NULL){
+		//TODO peta aqui
+		//tOuputInterface->getSize()
 		output->copyToInterface(tOuputInterface);
 	}
 	delete(results);
@@ -112,21 +109,12 @@ void Layer::calculateOutput()
 void Layer::addInput(Buffer* input)
 {
 	Connection* newConnection = Factory::newConnection(input, output->getSize(), getImplementationType());
-	Connection** newConnections = (Connection**) MemoryManagement::mmalloc(sizeof(Connection*) * (numberInputs + 1));
-
-	if (connections) {
-		memcpy(newConnections, connections, numberInputs * sizeof(Connection*));
-		MemoryManagement::ffree(connections);
-	}
-
-	connections = newConnections;
-	connections[numberInputs] = newConnection;
-	++numberInputs;
+	connections.push_back(newConnection);
 }
 
 void Layer::randomWeighs(float range)
 {
-	for (unsigned i=0; i < numberInputs; i++){
+	for (unsigned i=0; i < connections.size(); i++){
 		Interface aux(connections[i]->getSize(), connections[i]->getBufferType());
 		aux.random(range);
 		connections[i]->copyFromInterface(&aux);
@@ -138,7 +126,7 @@ void Layer::randomWeighs(float range)
 
 unsigned Layer::getNumberInputs()
 {
-	return numberInputs;
+	return connections.size();
 }
 
 Buffer* Layer::getInput(unsigned pos)
@@ -158,15 +146,11 @@ Connection* Layer::getThresholds()
 
 Connection* Layer::getConnection(unsigned inputPos)
 {
-	if (inputPos > numberInputs){
+	if (inputPos > connections.size()){
 		char buffer[100];
 		sprintf(buffer, "Cannot access the Connection in position %d: the Layer has only %d inputs.",
-				inputPos, numberInputs);
+				inputPos, connections.size());
 		std::string error = buffer;
-		throw error;
-	}
-	if (!connections){
-		std::string error = "The layer has no connections.";
 		throw error;
 	}
 	return connections[inputPos];
@@ -179,10 +163,10 @@ FunctionType Layer::getFunctionType()
 
 void Layer::copyWeighs(Layer* other)
 {
-	if(numberInputs != other->getNumberInputs()){
+	if(connections.size() != other->getNumberInputs()){
 		char buffer[100];
 		sprintf(buffer, "Cannot copyWeighs from a layer with %d connections to a layer with %d.",
-				other->getNumberInputs(), numberInputs);
+				other->getNumberInputs(), connections.size());
 		std::string error = buffer;
 		throw error;
 	}
@@ -191,7 +175,7 @@ void Layer::copyWeighs(Layer* other)
 		throw error;
 	}
 	//TODO L implementar metodo Buffer::copyFast restringido a bufferes con el mismo tipo de implementacion
-	for(int i=0; i < numberInputs; i++){
+	for(int i=0; i < connections.size(); i++){
 		connections[i]->copyFrom(other->getConnection(i));
 	}
 	thresholds->copyFrom(other->getThresholds());

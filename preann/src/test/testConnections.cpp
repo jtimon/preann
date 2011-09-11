@@ -8,19 +8,23 @@ using namespace std;
 #include "test.h"
 #include "factory.h"
 
+#define NUM_MUTATIONS 10
+
+int size;
+int outputSize = 100;
+float initialWeighsRange = 20;
+
 unsigned testCalculateAndAddTo(Test* test)
 {
-	Buffer* buffer = test->buildBuffer();
-	Connection* connection = test->buildConnection(buffer);
-	unsigned differencesCounter = 0;
+	START_CONNECTION_TEST
 
-	Buffer* results = Factory::newBuffer(test->getOutputSize(), FLOAT, connection->getImplementationType());
+	Buffer* results = Factory::newBuffer(outputSize, FLOAT, connection->getImplementationType());
 
 	Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
-	Connection* cConnection = Factory::newConnection(cInput, test->getOutputSize(), C);
+	Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
 	cConnection->copyFrom(connection);
 
-	Buffer* cResults = Factory::newBuffer(test->getOutputSize(), FLOAT, C);
+	Buffer* cResults = Factory::newBuffer(outputSize, FLOAT, C);
 
 	connection->calculateAndAddTo(results);
 	cConnection->calculateAndAddTo(cResults);
@@ -32,27 +36,23 @@ unsigned testCalculateAndAddTo(Test* test)
 	delete(cConnection);
 	delete(cResults);
 
-	delete(connection);
-	delete(buffer);
-	return differencesCounter;
+	END_CONNECTION_TEST
 }
 
 unsigned testMutate(Test* test)
 {
-	Buffer* buffer = test->buildBuffer();
-	Connection* connection = test->buildConnection(buffer);
-	unsigned differencesCounter = 0;
+	START_CONNECTION_TEST
 
 	unsigned pos = Random::positiveInteger(connection->getSize());
-	float mutation = Random::floatNum(test->getInitialWeighsRange());
+	float mutation = Random::floatNum(initialWeighsRange);
 	connection->mutate(pos, mutation);
 
 	Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
-	Connection* cConnection = Factory::newConnection(cInput, test->getOutputSize(), C);
+	Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
 	cConnection->copyFrom(connection);
 
 	for(unsigned i=0; i < NUM_MUTATIONS; i++) {
-		float mutation = Random::floatNum(test->getInitialWeighsRange());
+		float mutation = Random::floatNum(initialWeighsRange);
 		unsigned pos = Random::positiveInteger(connection->getSize());
 		connection->mutate(pos, mutation);
 		cConnection->mutate(pos, mutation);
@@ -62,24 +62,20 @@ unsigned testMutate(Test* test)
 	delete(cInput);
 	delete(cConnection);
 
-	delete(connection);
-	delete(buffer);
-	return differencesCounter;
+	END_CONNECTION_TEST
 }
 
 unsigned testCrossover(Test* test)
 {
-	Buffer* buffer = test->buildBuffer();
-	Connection* connection = test->buildConnection(buffer);
-	unsigned differencesCounter = 0;
+	START_CONNECTION_TEST
 
-	Connection* other = Factory::newConnection(connection->getInput(), test->getOutputSize(), connection->getImplementationType());
-	other->random(test->getInitialWeighsRange());
+	Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
+	other->random(initialWeighsRange);
 
 	Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
-	Connection* cConnection = Factory::newConnection(cInput, test->getOutputSize(), C);
+	Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
 	cConnection->copyFrom(connection);
-	Connection* cOther = Factory::newConnection(cInput, test->getOutputSize(), C);
+	Connection* cOther = Factory::newConnection(cInput, outputSize, C);
 	cOther->copyFrom(other);
 
 	Interface bitBuffer = Interface(connection->getSize(), BIT);
@@ -97,9 +93,7 @@ unsigned testCrossover(Test* test)
 	delete(cConnection);
 	delete(cOther);
 
-	delete(connection);
-	delete(buffer);
-	return differencesCounter;
+	END_CONNECTION_TEST
 }
 
 int main(int argc, char *argv[]) {
@@ -109,10 +103,10 @@ int main(int argc, char *argv[]) {
 
 	Test test;
 
-	test.fromToBySize(2, 10, 10);
-	test.fromToByOutputSize(1, 3, 2);
-	test.setInitialWeighsRange(20);
+	test.addIterator(&size, 2, 12, 10);
+	test.addIterator(&outputSize, 1, 3, 2);
 	test.exclude(ET_BUFFER, 1, BYTE);
+	test.withAll(ET_IMPLEMENTATION);
 	test.printParameters();
 
 	try {

@@ -9,6 +9,8 @@ using namespace std;
 #include "chronometer.h"
 
 unsigned memoryLosses = 0;
+int size;
+unsigned ouputSize = 100;
 
 void checkAndPrintErrors(string testingClass, Test* test)
 {
@@ -23,7 +25,7 @@ void checkAndPrintErrors(string testingClass, Test* test)
 
 void testBuffer(Test* test)
 {
-	Buffer* buffer = Factory::newBuffer(test->getSize(), test->getBufferType(), test->getImplementationType());
+	Buffer* buffer = Factory::newBuffer(size, test->getBufferType(), test->getImplementationType());
 	delete(buffer);
 
     checkAndPrintErrors("Buffer", test);
@@ -31,8 +33,8 @@ void testBuffer(Test* test)
 
 void testConnection(Test* test)
 {
-	Buffer* buffer = Factory::newBuffer(test->getSize(), test->getBufferType(), test->getImplementationType());
-	Connection* connection = Factory::newConnection(buffer, test->getSize(), test->getImplementationType());
+	Buffer* buffer = Factory::newBuffer(size, test->getBufferType(), test->getImplementationType());
+	Connection* connection = Factory::newConnection(buffer, size, test->getImplementationType());
 
 	delete(connection);
 	delete(buffer);
@@ -42,7 +44,7 @@ void testConnection(Test* test)
 
 void testLayer(Test* test)
 {
-    Layer *layer = new Layer(test->getSize(), test->getBufferType(), IDENTITY, test->getImplementationType());
+    Layer *layer = new Layer(size, test->getBufferType(), IDENTITY, test->getImplementationType());
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
@@ -58,7 +60,8 @@ int main(int argc, char *argv[]) {
 	total.start();
 	try {
 
-		test.fromToBySize(100, 100, 100);
+		test.addIterator(&size, 100, 100, 100);
+		test.withAll(ET_IMPLEMENTATION);
 		test.printParameters();
 
 		test.testFunction(testBuffer, "Buffer::memory");
@@ -68,22 +71,6 @@ int main(int argc, char *argv[]) {
 
 		test.testFunction(testConnection, "Connection::memory");
 		test.testFunction(testLayer, "Layer::memory");
-
-		//TODO usar Test para esto (sin el bucle este aqui fuera) o eliminar el fichero
-//		for (test.sizeToMin(); test.hasNextSize(); test.sizeIncrement()) {
-//			for (test.implementationTypeToMin(); test.hasNextImplementationType(); test.implementationTypeIncrement()) {
-//
-//				for (test.bufferTypeToMin(); test.hasNextBufferType(); test.bufferTypeIncrement() ) {
-//					testBuffer(test);
-//				}
-//
-//				test.disableBufferType(BYTE);
-//				for (test.bufferTypeToMin(); test.hasNextBufferType(); test.bufferTypeIncrement() ) {
-//					testConnection(test);
-//					testLayer(test);
-//				}
-//			}
-//		}
 
 		printf("Exit success.\n", 1);
 		MemoryManagement::printTotalAllocated();

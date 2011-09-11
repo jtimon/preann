@@ -10,11 +10,6 @@
 
 #include "neuralNet.h"
 
-typedef enum {WEIGH, NEURON, NEURON_INVERTED, LAYER} CrossoverLevel;
-#define CROSSOVER_LEVEL_DIM 4
-typedef enum {UNIFORM, PROPORTIONAL, MULTIPOINT} CrossoverAlgorithm;
-#define CROSSOVER_ALGORITHM_DIM 3
-
 class Individual: public NeuralNet {
 protected:
 	float fitness;

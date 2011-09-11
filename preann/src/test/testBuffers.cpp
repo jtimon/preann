@@ -8,14 +8,16 @@ using namespace std;
 #include "test.h"
 #include "factory.h"
 
+int size;
+float initialWeighsRange = 20;
+
 unsigned testActivation(Test* test)
 {
-	Buffer* buffer = test->buildBuffer();
-	FunctionType functionType = test->getFunctionType();
-	unsigned differencesCounter = 0;
+	START_BUFFER_TEST
 
+	FunctionType functionType = test->getFunctionType();
 	Buffer* results = Factory::newBuffer(buffer->getSize(), FLOAT, buffer->getImplementationType());
-	results->random(test->getInitialWeighsRange());
+	results->random(initialWeighsRange);
 
 	Buffer* cResults = Factory::newBuffer(results, C);
 	Buffer* cBuffer = Factory::newBuffer(buffer->getSize(), buffer->getBufferType(), C);
@@ -25,20 +27,18 @@ unsigned testActivation(Test* test)
 	differencesCounter += Test::assertEquals(cBuffer, buffer);
 
 	delete(results);
-	delete(buffer);
 	delete(cBuffer);
 	delete(cResults);
 
-	return differencesCounter;
+	END_BUFFER_TEST
 }
 
 unsigned testCopyFromInterface(Test* test)
 {
-	Buffer* buffer = test->buildBuffer();
-	unsigned differencesCounter = 0;
+	START_BUFFER_TEST
 
 	Interface interface(buffer->getSize(), buffer->getBufferType());
-	interface.random(test->getInitialWeighsRange());
+	interface.random(initialWeighsRange);
 
 	Buffer* cBuffer = Factory::newBuffer(buffer, C);
 
@@ -48,15 +48,13 @@ unsigned testCopyFromInterface(Test* test)
 	differencesCounter += Test::assertEquals(cBuffer, buffer);
 
 	delete(cBuffer);
-	delete(buffer);
 
-	return differencesCounter;
+	END_BUFFER_TEST
 }
 
 unsigned testCopyToInterface(Test* test)
 {
-	Buffer* buffer = test->buildBuffer();
-	unsigned differencesCounter = 0;
+	START_BUFFER_TEST
 
 	Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
 
@@ -69,20 +67,19 @@ unsigned testCopyToInterface(Test* test)
 	differencesCounter = Test::assertEqualsInterfaces(&cInterface, &interface);
 
 	delete(cBuffer);
-	delete(buffer);
 
-	return differencesCounter;
+	END_BUFFER_TEST
 }
 
 unsigned testClone(Test* test)
 {
-	Buffer* buffer = test->buildBuffer();
-	unsigned differencesCounter = 0;
+	START_BUFFER_TEST
+
 	Buffer* copy = buffer->clone();
 	differencesCounter += Test::assertEquals(buffer, copy);
 	delete(copy);
-	delete(buffer);
-	return differencesCounter;
+
+	END_BUFFER_TEST
 }
 
 int main(int argc, char *argv[]) {
@@ -91,10 +88,8 @@ int main(int argc, char *argv[]) {
 	total.start();
 
 	Test test;
-
-	test.fromToBySize(2, 10, 10);
-	test.fromToByOutputSize(1, 3, 2);
-	test.setInitialWeighsRange(20);
+	test.withAll(ET_IMPLEMENTATION);
+	test.addIterator(&size, 10, 10, 10);
 	test.printParameters();
 
 	try {
