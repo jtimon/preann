@@ -50,7 +50,8 @@ unsigned enumTypeDim(EnumType enumType);
 
 class Print {
 public:
-static std::string toString(EnumType enumType, unsigned enumValue){
+static std::string toString(EnumType enumType, unsigned enumValue)
+{
 	switch(enumType){
 	case ET_BUFFER:
 		return Print::bufferTypeToString(enumValue);
@@ -65,7 +66,8 @@ static std::string toString(EnumType enumType, unsigned enumValue){
 	case ET_MUTATION_ALG:
 		return Print::mutationAlgorithmToString(enumValue);
 	}
-	return "NOT_FOUND";
+	string error = " Print::toString EnumType not found";
+	throw error;
 }
 
 static std::string crossoverLevelToString(unsigned bufferType)
@@ -80,7 +82,8 @@ static std::string crossoverLevelToString(unsigned bufferType)
 	case LAYER:
 		return "LAYER";
 	}
-	return "NOT_FOUND";
+	string error = " Print::crossoverLevelToString CrossoverLevel not found";
+	throw error;
 }
 
 static std::string crossoverAlgorithmToString(unsigned bufferType)
@@ -93,7 +96,8 @@ static std::string crossoverAlgorithmToString(unsigned bufferType)
 	case MULTIPOINT:
 		return "MULTIPOINT";
 	}
-	return "NOT_FOUND";
+	string error = " Print::crossoverAlgorithmToString CrossoverAlgorithm not found";
+	throw error;
 }
 
 static std::string mutationAlgorithmToString(unsigned bufferType)
@@ -104,7 +108,8 @@ static std::string mutationAlgorithmToString(unsigned bufferType)
 	case MA_PROBABILISTIC:
 		return "PROBABILISTIC";
 	}
-	return "NOT_FOUND";
+	string error = " Print::mutationAlgorithmToString MutationAlgorithm not found";
+	throw error;
 }
 
 static std::string bufferTypeToString(unsigned bufferType)
@@ -119,10 +124,12 @@ static std::string bufferTypeToString(unsigned bufferType)
 	case BYTE:
 		return "BYTE";
 	}
-	return "NOT_FOUND";
+	string error = " Print::bufferTypeToString BufferType not found";
+	throw error;
 }
 
-static std::string implementationToString(unsigned implementationType){
+static std::string implementationToString(unsigned implementationType)
+{
 	switch((ImplementationType)implementationType){
 	case C:
 		return "C";
@@ -135,7 +142,8 @@ static std::string implementationToString(unsigned implementationType){
 	case CUDA_INV:
 		return "CUDA_INV";
 	}
-	return "NOT_FOUND";
+	string error = " Print::implementationToString ImplementationType not found";
+	throw error;
 }
 };
 

@@ -11,8 +11,9 @@ Test::Test()
 {
 	for(int i=0; i < ENUM_TYPE_DIM; ++i){
 		with((EnumType)i, 1, 0);
-		itEnumType[i] = enumTypes[i].begin();
 	}
+	int baseIterator;
+	addIterator(&baseIterator, 1, 1, 1);
 }
 
 Test::~Test()
@@ -31,8 +32,7 @@ ImplementationType Test::getImplementationType()
 
 FunctionType Test::getFunctionType()
 {
-	//TODO hacer bucle para esto también
-	return IDENTITY;
+	return (FunctionType)*itEnumType[ET_FUNCTION];
 }
 
 void Test::test ( unsigned (*f)(Test*), string testedMethod )
@@ -62,8 +62,7 @@ void Test::testFunction( void (*f)(Test*), string testedMethod )
 				(*f)(this);
 			} catch (string error) {
 				cout << "Error: " << error << endl;
-				cout << " While testing "<< testedMethod << endl;
-				printCurrentState();
+				cout << " While testing "<< testedMethod << " State: " << getCurrentState() << endl;
 			}
 		}
 	cout << testedMethod << endl;
@@ -122,15 +121,24 @@ void Test::exclude(EnumType enumType, unsigned count, ...)
 
 std::string Test::getCurrentState()
 {
-	string strBuff;
-	for(int enu=0; enu < ENUM_TYPE_DIM; ++enu) {
-		strBuff = Print::toString((EnumType)enu, *itEnumType[enu]) + "_";
-		printf(" %s ", strBuff.data());
+	//TODO esto esta abierto
+	string state;
+	for(int i=0; i < ENUM_TYPE_DIM; ++i) {
+		if (enumTypes[i].size() > 1)  {
+//			state += "_" + Print::toString((EnumType)i, *(itEnumType[i]));
+			state += "_" ;
+			state += Print::toString((EnumType)i, *(itEnumType[i]));
+		}
 	}
-	for(int ite=0; ite < iterators.size(); ++ite){
-		strBuff += *iterators[ite].variable + "_";
+	for(int i=0; i < iterators.size(); ++i){
+		if (iterators[i].min != iterators[i].max){
+			state += "_" + *iterators[i].variable;
+		}
 	}
-	return strBuff;
+	if (state.length() > 1) {
+		state.erase(0, 1);
+	}
+	return state;
 }
 
 void Test::printCurrentState()
@@ -154,7 +162,8 @@ void Test::printCurrentState()
 //    for(unsigned i=0; i < PARAMS_DIM; ++i){
 //		printf("%s = %d ", Print::paramToString(params[i].param).data(), params[i].currentState);
 //    }
-    printf("%s \n", getCurrentState().data());
+	string state = getCurrentState();
+    printf("%s \n", state.data());
 }
 
 void Test::printParameters()

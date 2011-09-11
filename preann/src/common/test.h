@@ -19,8 +19,14 @@
 #define START_CONNECTION_TEST START_TEST START_CONNECTION
 #define END_CONNECTION_TEST  END_CONNECTION END_TEST
 
-#define FOR_ALL_ITERATORS for(int _ite=0; _ite < iterators.size(); ++_ite) for ((*iterators[_ite].variable) = iterators[_ite].min; (*iterators[_ite].variable) <= iterators[_ite].max; (*iterators[_ite].variable) += iterators[_ite].increment)
-#define FOR_ALL_ENUMERATIONS for(int _enu=0; _enu < ENUM_TYPE_DIM; ++_enu) FOR_EACH (itEnumType[_enu], enumTypes[_enu])
+#define FOR_ALL_ITERATORS for(int _ite=0; _ite < iterators.size(); ++_ite)             \
+							  (*iterators[_ite].variable) = iterators[_ite].min;       \
+						  for(int _ite=0; _ite < iterators.size(); ++_ite)             \
+							  for ((*iterators[_ite].variable) = iterators[_ite].min; (*iterators[_ite].variable) <= iterators[_ite].max; (*iterators[_ite].variable) += iterators[_ite].increment)
+#define FOR_ALL_ENUMERATIONS for(int _enu=0; _enu < ENUM_TYPE_DIM; ++_enu)             \
+								 itEnumType[_enu] = enumTypes[_enu].begin();           \
+							 for(int _enu=0; _enu < ENUM_TYPE_DIM; ++_enu)             \
+								 FOR_EACH (itEnumType[_enu], enumTypes[_enu])
 
 class Test {
 protected:

@@ -16,9 +16,9 @@ Individual::~Individual()
 {
 }
 
-Individual* Individual::newCopy()
+Individual* Individual::newCopy(ImplementationType implementationType)
 {
-	Individual* copy = new Individual(this->getImplementationType());
+	Individual* copy = new Individual(implementationType);
 
 	for (unsigned i = 0; i < layers.size(); i++)
 	{
@@ -49,6 +49,11 @@ Individual* Individual::newCopy()
 		copy->getLayer(i)->copyWeighs(layers[i]);
 	}
 	return copy;
+}
+
+Individual* Individual::newCopy()
+{
+	return newCopy(this->getImplementationType());
 }
 
 void Individual::mutate(unsigned numMutations, float mutationRange)

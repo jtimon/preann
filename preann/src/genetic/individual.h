@@ -31,6 +31,7 @@ public:
 	virtual ~Individual();
 
 	Individual* newCopy();
+	Individual* newCopy(ImplementationType implementationType);
 	void mutate(unsigned numMutations, float mutationRange);
 	void mutate(float probability, float mutationRange);
 	void uniformCrossover(CrossoverLevel crossoverLevel, Individual* other, float probability);

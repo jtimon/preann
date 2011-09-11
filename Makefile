@@ -53,7 +53,12 @@ OBJ += $(FACT_OBJ)
 .SECONDARY:
 
 all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
-#	./testAll.sh
+	./bin/testMemoryLosses.exe > ./output/log/testMemoryLosses.log
+	./bin/testBuffers.exe > ./output/log/testBuffers.log
+	./bin/testConnections.exe > ./output/log/testConnections.log
+	./bin/testLayers.exe > ./output/log/testLayers.log
+	./bin/chronoBuffers.exe > ./output/log/chronoBuffers.log
+	./bin/chronoConnections.exe > ./output/log/chronoConnections.log
 
 checkdirs: $(BUILD_DIR)
 
@@ -62,7 +67,7 @@ $(BUILD_DIR):
 
 bin/%.exe: build/test/%.o $(OBJ)
 	$(NVCC_LINK) $^ -o $@
-	./$@ > $(patsubst bin/%.exe,output/log/%.log,$@)
+#	./$@ > $(patsubst bin/%.exe,output/log/%.log,$@)
 build/test%.o: src/test%.cpp
 	$(CXX) -c $< -o $@
 build/%.o: src/%.cpp src/%.h

@@ -30,6 +30,8 @@ protected:
 	int getLineColor();
 	FILE* preparePlotAndDataFile(string path, string testedMethod);
 	void plotDataFile(string path, string testedMethod);
+	std::string createPlotScript(string path, string testedMethod);
+	void plotDataFile(string plotPath);
 public:
 	Plot();
 	virtual ~Plot();
@@ -38,8 +40,9 @@ public:
 	void setPointEnum(EnumType pointEnum);
 	void addPlotIterator(int* variable, unsigned min, unsigned max, unsigned increment);
 
-	float plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
-	float plotTask(string path, Population* population);
+	void plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
+	void plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
+//	void plotTask(string path, Population* population);
 
 };
 

@@ -90,19 +90,20 @@ FILE* Plot::preparePlotAndDataFile(string path, string testedMethod)
 	fprintf(plotFile, "set terminal png \n");
 	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
 	fprintf(plotFile, "plot ");
-	fprintf(dataFile, "# Size ");
+	fprintf(dataFile, "# Iterator ");
 	unsigned functionNum = 2;
 
-	FOR_ALL_ENUMERATIONS {
-		string functionName = getCurrentState();
-		fprintf(dataFile, " %s ", functionName.data());
-		if (functionNum > 2){
-			fprintf(plotFile, ", ");
+//	FOR_ALL_ITERATORS
+		FOR_ALL_ENUMERATIONS {
+			string functionName = getCurrentState();
+			fprintf(dataFile, " %s ", functionName.data());
+			if (functionNum > 2){
+				fprintf(plotFile, ", ");
+			}
+			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
+					dataPath.data(), functionNum++, functionName.data(),
+					getLineColor(), getPointType());
 		}
-		fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
-				dataPath.data(), functionNum++, functionName.data(),
-				getLineColor(), getPointType());
-	}
 	fprintf(dataFile, "\n");
 	fprintf(plotFile, "\n");
 	fclose(plotFile);
@@ -117,29 +118,109 @@ void Plot::plotDataFile(string path, string testedMethod)
 	system(syscommand.data());
 }
 
-float Plot::plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
+void Plot::plotDataFile(string plotPath)
 {
-	float total = 0;
+	string syscommand = "gnuplot " + plotPath;
+	system(syscommand.data());
+}
 
+std::string Plot::createPlotScript(string path, string testedMethod)
+{
+	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
+	string outputPath = path + "images/" + testedMethod + ".png";
+
+	FILE* plotFile = openFile(plotPath);
+
+	fprintf(plotFile, "set terminal png \n");
+	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
+	fprintf(plotFile, "plot ");
+	unsigned functionNum = 0;
+
+	FOR_ALL_ITERATORS
+		FOR_ALL_ENUMERATIONS {
+			if (functionNum++ > 0){
+				fprintf(plotFile, " , ");
+			}
+			string functionName = getCurrentState();
+			string dataPath = path + "data/" + testedMethod + functionName + ".DAT";
+			fprintf(plotFile, "     \"%s\" using 1:2 title \"%s\" with linespoints lt %d pt %d",
+					dataPath.data(), functionName.data(),
+					getLineColor(), getPointType());
+		}
+	fprintf(plotFile, "\n");
+	fclose(plotFile);
+
+	return plotPath;
+}
+
+void Plot::plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
+{
+	std::string plotPath = createPlotScript(path, testedMethod);
+
+	FOR_ALL_ITERATORS
+		FOR_ALL_ENUMERATIONS {
+			string functionName = getCurrentState();
+			string dataPath = path + "data/" + testedMethod + functionName + ".DAT";
+			FILE* dataFile = openFile(dataPath);
+			fprintf(dataFile, "# Iterator %s \n", functionName.data());
+			FOR_PLOT_ITERATOR {
+				float total = f(this, repetitions);
+				fprintf(dataFile, " %d %f \n", *plotIterator.variable, total/repetitions);
+			}
+			fclose(dataFile);
+		}
+	plotDataFile(plotPath);
+}
+
+void Plot::plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
+{
 	FILE* dataFile = preparePlotAndDataFile(path, testedMethod);
 
 	FOR_PLOT_ITERATOR {
 		fprintf(dataFile, " %d ", *plotIterator.variable);
-		FOR_ALL_ENUMERATIONS {
+		FOR_ALL_ITERATORS
+			FOR_ALL_ENUMERATIONS {
 
-			float part = f(this, repetitions);
-			fprintf(dataFile, " %f ", part/repetitions);
-			total += part;
-		}
+				float total = f(this, repetitions);
+				fprintf(dataFile, " %f ", total/repetitions);
+			}
 		fprintf(dataFile, " \n ");
 	}
 	fclose(dataFile);
-	cout << testedMethod << " repetitions: " << repetitions << " total: " << total << endl;
 	plotDataFile(path, testedMethod);
-	return total;
 }
 
-float Plot::plotTask(string path, Population* population)
-{
-}
+//void Plot::plotTask(string path, Task* task, unsigned maxGenerations, Individual* example, unsigned size, float range)
+//{
+//	float total = 0;
+//
+//	string fileName = task->toString() +
+//	FILE* dataFile = preparePlotAndDataFile(path, fileName);
+//
+//
+//
+//	std::vector<Population*> populations;
+//	FOR_ALL_ITERATORS
+//		FOR_ALL_ENUMERATIONS {
+//
+//			populations
+//		}
+//
+//	for(unsigned generation = 0; generation < maxGenerations; ++generation) {
+//		fprintf(dataFile, " %d ", *plotIterator.variable);
+//		FOR_ALL_ITERATORS
+//			FOR_ALL_ENUMERATIONS {
+//
+//				Individual* concreteExample = example->newCopy(*itEnumType[ET_IMPLEMENTATION]);
+//				Population
+//				float part = f(this, repetitions);
+//				fprintf(dataFile, " %f ", part/repetitions);
+//				total += part;
+//			}
+//		fprintf(dataFile, " \n ");
+//	}
+//	fclose(dataFile);
+//	plotDataFile(path, fileName);
+//	return total;
+//}
 
