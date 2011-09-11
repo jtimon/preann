@@ -9,9 +9,10 @@
 
 Test::Test()
 {
-	with(ET_BUFFER, 1, FLOAT);
-	with(ET_IMPLEMENTATION, 1, C);
-	with(ET_FUNCTION, 1, IDENTITY);
+	for(int i=0; i < ENUM_TYPE_DIM; ++i){
+		with((EnumType)i, 1, 0);
+		itEnumType[i] = enumTypes[i].begin();
+	}
 }
 
 Test::~Test()
@@ -37,36 +38,35 @@ FunctionType Test::getFunctionType()
 void Test::test ( unsigned (*f)(Test*), string testedMethod )
 {
 	FOR_ALL_ITERATORS
-		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER])
-			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]){
-				try {
-					unsigned differencesCounter = f(this);
-					if (differencesCounter > 0){
-						printCurrentState();
-						cout << differencesCounter << " differences detected." << endl;
-					}
-				} catch (string error) {
-					cout << "Error: " << error << endl;
-					cout << " While testing "<< testedMethod << endl;
+		FOR_ALL_ENUMERATIONS {
+			try {
+				unsigned differencesCounter = f(this);
+				if (differencesCounter > 0){
 					printCurrentState();
+					cout << differencesCounter << " differences detected." << endl;
 				}
+			} catch (string error) {
+				cout << "Error: " << error << endl;
+				cout << " While testing "<< testedMethod << endl;
+				printCurrentState();
 			}
+		}
 	cout << testedMethod << endl;
 }
 
 void Test::testFunction( void (*f)(Test*), string testedMethod )
 {
 	FOR_ALL_ITERATORS
-		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER])
-			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]){
-				try {
-					(*f)(this);
-				} catch (string error) {
-					cout << "Error: " << error << endl;
-					cout << " While testing "<< testedMethod << endl;
-					printCurrentState();
-				}
+		FOR_ALL_ENUMERATIONS {
+			try {
+				(*f)(this);
+			} catch (string error) {
+				cout << "Error: " << error << endl;
+				cout << " While testing "<< testedMethod << endl;
+				printCurrentState();
 			}
+		}
+	cout << testedMethod << endl;
 }
 
 void Test::addIterator(int* variable, unsigned min, unsigned max, unsigned increment)
@@ -120,28 +120,41 @@ void Test::exclude(EnumType enumType, unsigned count, ...)
 	va_end (ap);
 }
 
+std::string Test::getCurrentState()
+{
+	string strBuff;
+	for(int enu=0; enu < ENUM_TYPE_DIM; ++enu) {
+		strBuff = Print::toString((EnumType)enu, *itEnumType[enu]) + "_";
+		printf(" %s ", strBuff.data());
+	}
+	for(int ite=0; ite < iterators.size(); ++ite){
+		strBuff += *iterators[ite].variable + "_";
+	}
+	return strBuff;
+}
+
 void Test::printCurrentState()
 {
-    printf("-Implementation Type = ");
-    switch (getImplementationType()){
-        case C: 		printf(" C        "); 	break;
-        case SSE2: 		printf(" SSE2     ");	break;
-        case CUDA: 		printf(" CUDA     ");	break;
-        case CUDA_REDUC:		printf(" CUDA_REDUC    ");	break;
-        case CUDA_INV:	printf(" CUDA_INV ");	break;
-    }
-    printf(" Buffer Type = ");
-    switch (getBufferType()){
-        case FLOAT: printf(" FLOAT "); 	break;
-        case BIT: 	printf(" BIT   ");	break;
-        case SIGN: 	printf(" SIGN  ");	break;
-        case BYTE:	printf(" BYTE  ");	break;
-    }
+//    printf("-Implementation Type = ");
+//    switch (getImplementationType()){
+//        case C: 		printf(" C        "); 	break;
+//        case SSE2: 		printf(" SSE2     ");	break;
+//        case CUDA: 		printf(" CUDA     ");	break;
+//        case CUDA_REDUC:		printf(" CUDA_REDUC    ");	break;
+//        case CUDA_INV:	printf(" CUDA_INV ");	break;
+//    }
+//    printf(" Buffer Type = ");
+//    switch (getBufferType()){
+//        case FLOAT: printf(" FLOAT "); 	break;
+//        case BIT: 	printf(" BIT   ");	break;
+//        case SIGN: 	printf(" SIGN  ");	break;
+//        case BYTE:	printf(" BYTE  ");	break;
+//    }
     //TODO mostrar los iteradores
 //    for(unsigned i=0; i < PARAMS_DIM; ++i){
 //		printf("%s = %d ", Print::paramToString(params[i].param).data(), params[i].currentState);
 //    }
-    printf("\n");
+    printf("%s \n", getCurrentState().data());
 }
 
 void Test::printParameters()

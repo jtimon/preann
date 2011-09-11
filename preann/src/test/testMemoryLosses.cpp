@@ -61,6 +61,7 @@ int main(int argc, char *argv[]) {
 	try {
 
 		test.addIterator(&size, 100, 100, 100);
+		test.withAll(ET_BUFFER);
 		test.withAll(ET_IMPLEMENTATION);
 		test.printParameters();
 

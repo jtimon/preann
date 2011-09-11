@@ -20,6 +20,7 @@
 #define END_CONNECTION_TEST  END_CONNECTION END_TEST
 
 #define FOR_ALL_ITERATORS for(int _ite=0; _ite < iterators.size(); ++_ite) for ((*iterators[_ite].variable) = iterators[_ite].min; (*iterators[_ite].variable) <= iterators[_ite].max; (*iterators[_ite].variable) += iterators[_ite].increment)
+#define FOR_ALL_ENUMERATIONS for(int _enu=0; _enu < ENUM_TYPE_DIM; ++_enu) FOR_EACH (itEnumType[_enu], enumTypes[_enu])
 
 class Test {
 protected:
@@ -47,6 +48,7 @@ public:
 	ImplementationType getImplementationType();
 	FunctionType getFunctionType();
 
+	std::string getCurrentState();
     void printParameters();
     void printCurrentState();
     static unsigned char areEqual(float expected, float actual, BufferType bufferType);

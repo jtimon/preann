@@ -98,8 +98,7 @@ int main(int argc, char *argv[]) {
 	test.printParameters();
 
 	try {
-		//TODO arreglar
-//		test.test(testCalculateOutput, "Layer::calculateOutput");
+		test.test(testCalculateOutput, "Layer::calculateOutput");
 
 		printf("Exit success.\n");
 		MemoryManagement::printTotalAllocated();

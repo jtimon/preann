@@ -78,105 +78,68 @@ int Plot::getLineColor()
 	}
 }
 
-float Plot::plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
+FILE* Plot::preparePlotAndDataFile(string path, string testedMethod)
 {
-	float total = 0;
-
-	string dataPath = path + "data/" + testedMethod + ".DAT";
-	FILE* dataFile = openFile(dataPath);
 	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
+	string dataPath = path + "data/" + testedMethod + ".DAT";
+	string outputPath = path + "images/" + testedMethod + ".png";
+
+	FILE* dataFile = openFile(dataPath);
 	FILE* plotFile = openFile(plotPath);
 
-	string outputPath = path + "images/" + testedMethod + ".png";
 	fprintf(plotFile, "set terminal png \n");
 	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
 	fprintf(plotFile, "plot ");
 	fprintf(dataFile, "# Size ");
 	unsigned functionNum = 2;
-	FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]) {
-		FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]) {
-			string functionName = Print::toString(ET_BUFFER, getBufferType())
-						  + "_" + Print::toString(ET_IMPLEMENTATION, getImplementationType());
-			fprintf(dataFile, " %s ", functionName.data());
-			if (functionNum > 2){
-				fprintf(plotFile, ", ");
-			}
-			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
-					dataPath.data(), functionNum++, functionName.data(),
-					getLineColor(), getPointType());
+
+	FOR_ALL_ENUMERATIONS {
+		string functionName = getCurrentState();
+		fprintf(dataFile, " %s ", functionName.data());
+		if (functionNum > 2){
+			fprintf(plotFile, ", ");
 		}
+		fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
+				dataPath.data(), functionNum++, functionName.data(),
+				getLineColor(), getPointType());
 	}
-	fprintf(plotFile, "\n");
 	fprintf(dataFile, "\n");
+	fprintf(plotFile, "\n");
+	fclose(plotFile);
+
+	return dataFile;
+}
+
+void Plot::plotDataFile(string path, string testedMethod)
+{
+	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
+	string syscommand = "gnuplot " + plotPath;
+	system(syscommand.data());
+}
+
+float Plot::plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
+{
+	float total = 0;
+
+	FILE* dataFile = preparePlotAndDataFile(path, testedMethod);
 
 	FOR_PLOT_ITERATOR {
 		fprintf(dataFile, " %d ", *plotIterator.variable);
-		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER])
-			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]) {
+		FOR_ALL_ENUMERATIONS {
 
-				float part = f(this, repetitions);
-				fprintf(dataFile, " %f ", part/repetitions);
-				total += part;
-			}
+			float part = f(this, repetitions);
+			fprintf(dataFile, " %f ", part/repetitions);
+			total += part;
+		}
 		fprintf(dataFile, " \n ");
 	}
-	fclose(plotFile);
 	fclose(dataFile);
 	cout << testedMethod << " repetitions: " << repetitions << " total: " << total << endl;
-	string syscommand = "gnuplot " + plotPath;
-	system(syscommand.data());
+	plotDataFile(path, testedMethod);
 	return total;
 }
 
 float Plot::plotTask(string path, Population* population)
 {
-	//TODO Plot::plotTask
-	float total = 0;
-
-	string dataPath = path + population->getTask()->toString() + ".DAT";
-	FILE* dataFile = openFile(dataPath);
-	string plotPath = path + population->getTask()->toString() + ".plt";
-	FILE* plotFile = openFile(plotPath);
-
-	string outputPath = path + "images/" + population->getTask()->toString() + ".png";
-	fprintf(plotFile, "set terminal png \n");
-	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
-	fprintf(plotFile, "plot ");
-	fprintf(dataFile, "# Size ");
-	unsigned functionNum = 2;
-	FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]) {
-		FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]) {
-			string functionName = Print::toString(ET_BUFFER, getBufferType())
-						  + "_" + Print::toString(ET_IMPLEMENTATION, getImplementationType());
-			fprintf(dataFile, " %s ", functionName.data());
-			if (functionNum > 2){
-				fprintf(plotFile, ", ");
-			}
-			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
-					dataPath.data(), functionNum++, functionName.data(),
-					getLineColor(), getPointType());
-		}
-	}
-	fprintf(plotFile, "\n");
-	fprintf(dataFile, "\n");
-
-	FOR_PLOT_ITERATOR {
-		fprintf(dataFile, " %d ", *plotIterator.variable);
-		FOR_EACH(itEnumType[ET_BUFFER], enumTypes[ET_BUFFER]) {
-			FOR_EACH(itEnumType[ET_IMPLEMENTATION], enumTypes[ET_IMPLEMENTATION]) {
-
-//				float part = doMethod(classID, method, repetitions);
-//				fprintf(dataFile, " %f ", part);
-//				total += part;
-			}
-		}
-		fprintf(dataFile, " \n ");
-	}
-	fclose(plotFile);
-	fclose(dataFile);
-//	cout << population->getTask()->toString() << " total: " << total << " repetitions: " << repetitions << endl;
-	string syscommand = "gnuplot " + plotPath;
-	system(syscommand.data());
-	return total;
 }
 

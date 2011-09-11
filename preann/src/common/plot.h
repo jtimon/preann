@@ -25,8 +25,11 @@ protected:
 
 	EnumType colorEnum;
 	EnumType pointEnum;
+
 	int getPointType();
 	int getLineColor();
+	FILE* preparePlotAndDataFile(string path, string testedMethod);
+	void plotDataFile(string path, string testedMethod);
 public:
 	Plot();
 	virtual ~Plot();
@@ -34,6 +37,7 @@ public:
 	void setColorEnum(EnumType colorEnum);
 	void setPointEnum(EnumType pointEnum);
 	void addPlotIterator(int* variable, unsigned min, unsigned max, unsigned increment);
+
 	float plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
 	float plotTask(string path, Population* population);
 

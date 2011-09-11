@@ -9,9 +9,6 @@ InputLayer::InputLayer(unsigned size, BufferType bufferType, ImplementationType 
 
 	thresholds = NULL;
 	functionType = IDENTITY;
-
-	connections = NULL;
-	numberInputs = 0;
 }
 
 InputLayer::~InputLayer()

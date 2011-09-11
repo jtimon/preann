@@ -53,17 +53,17 @@ public:
 static std::string toString(EnumType enumType, unsigned enumValue){
 	switch(enumType){
 	case ET_BUFFER:
-		return bufferTypeToString(enumValue);
+		return Print::bufferTypeToString(enumValue);
 	case ET_IMPLEMENTATION:
-		return implementationToString(enumValue);
+		return Print::implementationToString(enumValue);
 	case ET_FUNCTION:
 		return "ET_FUNCTION";
 	case ET_CROSS_LEVEL:
-		return crossoverLevelToString(enumValue);
+		return Print::crossoverLevelToString(enumValue);
 	case ET_CROSS_ALG:
-		return crossoverAlgorithmToString(enumValue);
+		return Print::crossoverAlgorithmToString(enumValue);
 	case ET_MUTATION_ALG:
-		return mutationAlgorithmToString(enumValue);
+		return Print::mutationAlgorithmToString(enumValue);
 	}
 	return "NOT_FOUND";
 }
