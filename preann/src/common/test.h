@@ -31,15 +31,17 @@
 								 for (itEnumType[_enu] = enumTypes[_enu].begin(); itEnumType[_enu] != enumTypes[_enu].end(); ++itEnumType[_enu])
 //								 FOR_EACH (itEnumType[_enu], enumTypes[_enu])
 
+struct IteratorConfig{
+	int* variable;
+	int min;
+	int max;
+	int increment;
+};
+
+#define FOR_ITER_CONFIG(_iter) for(*_iter.variable = _iter.min; *_iter.variable <= _iter.max; *_iter.variable += _iter.increment)
 
 class Test {
 protected:
-	struct IteratorConfig{
-		int* variable;
-		int min;
-		int max;
-		int increment;
-	};
 	std::vector<IteratorConfig> iterators;
 
 	std::vector<unsigned> enumTypes[ENUM_TYPE_DIM];
@@ -49,6 +51,8 @@ public:
 	Test();
 	virtual ~Test();
 
+	void addVariable(void* variable, std::string name);
+	void* getVariable(std::string name);
 	void addIterator(int* variable, unsigned min, unsigned max, unsigned increment);
     void withAll(EnumType enumType);
     void with(EnumType enumType, unsigned count, ...);

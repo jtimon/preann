@@ -39,9 +39,11 @@ public:
 	void setColorEnum(EnumType colorEnum);
 	void setPointEnum(EnumType pointEnum);
 	void addPlotIterator(int* variable, unsigned min, unsigned max, unsigned increment);
+	IteratorConfig getPlotIterator();
 
 	void plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
 	void plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
+	void plot3(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
 //	void plotTask(string path, Population* population);
 
 };

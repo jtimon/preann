@@ -35,6 +35,11 @@ void Plot::addPlotIterator(int* variable, unsigned min, unsigned max, unsigned i
 	plotIterator.increment = increment;
 }
 
+IteratorConfig Plot::getPlotIterator()
+{
+	return plotIterator;
+}
+
 int Plot::getPointType()
 {
 // pt : 1=+, 2=X, 3=*, 4=square, 5=filled square, 6=circle,
@@ -153,24 +158,28 @@ std::string Plot::createPlotScript(string path, string testedMethod)
 	return plotPath;
 }
 
-void plotAction(float (*g)(Test*), Test* test)
+void plotAction(unsigned (*g)(Test*), Test* test)
 {
-	unsigned differencesCounter = g(test);
-	if (differencesCounter > 0){
-		test->printCurrentState();
-		cout << differencesCounter << " differences detected." << endl;
-	}
-
-
-	string functionName = getCurrentState();
+	string functionName = test->getCurrentState();
 	string dataPath = path + "data/" + testedMethod + functionName + ".DAT";
 	FILE* dataFile = openFile(dataPath);
 	fprintf(dataFile, "# Iterator %s \n", functionName.data());
-	FOR_PLOT_ITERATOR {
-		float total = f(this, repetitions);
+	IteratorConfig plotIter = test->getPlotIterator();
+	FOR_ITER_CONFIG(plotIter){
+		float total = g(this);
 		fprintf(dataFile, " %d %f \n", *plotIterator.variable, total/repetitions);
 	}
 	fclose(dataFile);
+}
+
+void Plot::plot3(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
+{
+	std::string plotPath = createPlotScript(path, testedMethod);
+
+	loopFunction( plotAction, f, testedMethod );
+	cout << testedMethod << endl;
+	
+	plotDataFile(plotPath);
 }
 
 void Plot::plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
