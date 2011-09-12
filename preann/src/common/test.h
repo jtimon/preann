@@ -71,11 +71,13 @@ public:
 
     FILE* openFile(string path);
 
+    void simpleAction(void (*g)(Test*), Test* test);
     void simpleTest( void (*f)(Test*), string testedMethod);
+    void testAction(unsigned (*g)(Test*), Test* test);
     void test( unsigned (*f)(Test*), string testedMethod);
 
     template <class classTempl>
-    void loopFunction( void action(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), string testedMethod )
+    void loopFunction( void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), string testedMethod )
     {
     	try {
     		forEnumsIters(action, f, 0);
@@ -86,7 +88,7 @@ public:
     }
 
     template <class classTempl>
-    void forEnumsIters (void action(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
+    void forEnumsIters (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
     {
     	if (enu == ENUM_TYPE_DIM){
     		forIters(action, f, 0);
@@ -98,7 +100,7 @@ public:
     }
 
     template <class classTempl>
-    void forEnums (void action(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
+    void forEnums (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
     {
     	if (enu == ENUM_TYPE_DIM){
     		(*action)(f, this);
@@ -110,7 +112,7 @@ public:
     }
 
     template <class classTempl>
-    void forIters (void action(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned iter)
+    void forIters (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned iter)
     {
     	if (iter == iterators.size()){
     		(*action)(f, this);
