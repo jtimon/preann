@@ -37,6 +37,7 @@ FunctionType Test::getFunctionType()
 	return (FunctionType)*itEnumType[ET_FUNCTION];
 }
 
+
 void testAction(unsigned (*g)(Test*), Test* test)
 {
 	unsigned differencesCounter = g(test);
@@ -70,6 +71,25 @@ void Test::addIterator(int* variable, unsigned min, unsigned max, unsigned incre
 	iterator.max = max;
 	iterator.increment = increment;
 	iterators.push_back(iterator);
+}
+
+void Test::addVariable(void* variable, std::string name)
+{
+	Variable newVar;
+	newVar.ptr = variable;
+	newVar.name = name;
+	variables.push_back(newVar);
+}
+
+void* Test::getVariable(std::string name)
+{
+	for(int i=0; i < variables.size(); ++i){
+		if (variables[i].name == name){
+			return variables[i].ptr; 
+		}
+	}
+	string error = "Variable " + name + " not found";
+	throw error;
 }
 
 void Test::withAll(EnumType enumType)

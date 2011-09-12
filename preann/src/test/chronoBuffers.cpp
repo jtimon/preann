@@ -10,13 +10,13 @@ using namespace std;
 int size;
 float initialWeighsRange = 20;
 
-float chronoCopyToInterface(Test* test, unsigned repetitions)
+float chronoCopyToInterface(Test* test)
 {
 	START_BUFFER_PLOT
 
 	Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
 	chrono.start();
-	for (unsigned i = 0; i < repetitions; ++i) {
+	for (unsigned i = 0; i < (*repetitions); ++i) {
 		buffer->copyToInterface(&interface);
 	}
 	chrono.stop();
@@ -24,13 +24,13 @@ float chronoCopyToInterface(Test* test, unsigned repetitions)
 	END_BUFFER_PLOT
 }
 
-float chronoCopyFromInterface(Test* test, unsigned repetitions)
+float chronoCopyFromInterface(Test* test)
 {
 	START_BUFFER_PLOT
 
 	Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
 	chrono.start();
-	for (unsigned i = 0; i < repetitions; ++i) {
+	for (unsigned i = 0; i < (*repetitions); ++i) {
 		buffer->copyFromInterface(&interface);
 	}
 	chrono.stop();
@@ -38,13 +38,13 @@ float chronoCopyFromInterface(Test* test, unsigned repetitions)
 	END_BUFFER_PLOT
 }
 
-float chronoActivation(Test* test, unsigned repetitions)
+float chronoActivation(Test* test)
 {
 	START_BUFFER_PLOT
 
 	Buffer* results = Factory::newBuffer(buffer->getSize(), FLOAT, buffer->getImplementationType());
 	chrono.start();
-	for (unsigned i = 0; i < repetitions; ++i) {
+	for (unsigned i = 0; i < (*repetitions); ++i) {
 		buffer->activation(results, IDENTITY);
 	}
 	chrono.stop();
@@ -69,10 +69,10 @@ int main(int argc, char *argv[])
 	plot.printCurrentState();
 
 	try {
-//		plot.plot(path, chronoActivation, 1000, "BUFFER_ACTIVATION");
-//		plot.plot(path, chronoCopyFromInterface, 1000, "BUFFER_COPYFROMINTERFACE");
-		plot.plot(path, chronoCopyToInterface, 1000, "BUFFER_COPYTOINTERFACE");
-//		plot.plot2(path, chronoCopyToInterface, 1000, "BUFFER_COPYTOINTERFACE");
+		plot.plot(chronoActivation, path, 1000, "BUFFER_ACTIVATION");
+		plot.plot(chronoCopyFromInterface, path, 1000, "BUFFER_COPYFROMINTERFACE");
+		plot.plot(chronoCopyToInterface, path, 1000, "BUFFER_COPYTOINTERFACE");
+		plot.plot(chronoCopyToInterface, path, 1000, "BUFFER_COPYTOINTERFACE");
 
 		printf("Exit success.\n");
 		MemoryManagement::printTotalAllocated();

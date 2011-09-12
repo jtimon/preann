@@ -83,52 +83,95 @@ int Plot::getLineColor()
 	}
 }
 
-FILE* Plot::preparePlotAndDataFile(string path, string testedMethod)
+//FILE* Plot::preparePlotAndDataFile(string path, string testedMethod)
+//{
+//	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
+//	string dataPath = path + "data/" + testedMethod + ".DAT";
+//	string outputPath = path + "images/" + testedMethod + ".png";
+//
+//	FILE* dataFile = openFile(dataPath);
+//	FILE* plotFile = openFile(plotPath);
+//
+//	fprintf(plotFile, "set terminal png \n");
+//	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
+//	fprintf(plotFile, "plot ");
+//	fprintf(dataFile, "# Iterator ");
+//	unsigned functionNum = 2;
+//
+//	FOR_ALL_ITERATORS
+//		FOR_ALL_ENUMERATIONS {
+//			string functionName = getCurrentState();
+//			fprintf(dataFile, " %s ", functionName.data());
+//			if (functionNum > 2){
+//				fprintf(plotFile, ", ");
+//			}
+//			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
+//					dataPath.data(), functionNum++, functionName.data(),
+//					getLineColor(), getPointType());
+//		}
+//	fprintf(dataFile, "\n");
+//	fprintf(plotFile, "\n");
+//	fclose(plotFile);
+//
+//	return dataFile;
+//}
+
+//void Plot::plotDataFile(string path, string testedMethod)
+//{
+//	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
+//	string syscommand = "gnuplot " + plotPath;
+//	system(syscommand.data());
+//}
+
+void Plot::plotFile(string plotPath)
 {
-	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
-	string dataPath = path + "data/" + testedMethod + ".DAT";
-	string outputPath = path + "images/" + testedMethod + ".png";
-
-	FILE* dataFile = openFile(dataPath);
-	FILE* plotFile = openFile(plotPath);
-
-	fprintf(plotFile, "set terminal png \n");
-	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
-	fprintf(plotFile, "plot ");
-	fprintf(dataFile, "# Iterator ");
-	unsigned functionNum = 2;
-
-	FOR_ALL_ITERATORS
-		FOR_ALL_ENUMERATIONS {
-			string functionName = getCurrentState();
-			fprintf(dataFile, " %s ", functionName.data());
-			if (functionNum > 2){
-				fprintf(plotFile, ", ");
-			}
-			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
-					dataPath.data(), functionNum++, functionName.data(),
-					getLineColor(), getPointType());
-		}
-	fprintf(dataFile, "\n");
-	fprintf(plotFile, "\n");
-	fclose(plotFile);
-
-	return dataFile;
-}
-
-void Plot::plotDataFile(string path, string testedMethod)
-{
-	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
 	string syscommand = "gnuplot " + plotPath;
 	system(syscommand.data());
 }
 
-void Plot::plotDataFile(string plotPath)
-{
-	string syscommand = "gnuplot " + plotPath;
-	system(syscommand.data());
-}
+//std::string Plot::createPlotScript(string path, string testedMethod)
+//{
+//	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
+//	string outputPath = path + "images/" + testedMethod + ".png";
+//
+//	FILE* plotFile = openFile(plotPath);
+//
+//	fprintf(plotFile, "set terminal png \n");
+//	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
+//	fprintf(plotFile, "plot ");
+//	unsigned functionNum = 0;
+//
+//	FOR_ALL_ITERATORS
+//		FOR_ALL_ENUMERATIONS {
+//			if (functionNum++ > 0){
+//				fprintf(plotFile, " , ");
+//			}
+//			string functionName = getCurrentState();
+//			string dataPath = path + "data/" + testedMethod + functionName + ".DAT";
+//			fprintf(plotFile, "     \"%s\" using 1:2 title \"%s\" with linespoints lt %d pt %d",
+//					dataPath.data(), functionName.data(),
+//					getLineColor(), getPointType());
+//		}
+//	fprintf(plotFile, "\n");
+//	fclose(plotFile);
+//
+//	return plotPath;
+//}
 
+void preparePlotFunction(Test* test)
+{
+	string* subPath = (string*)getVariable("subPath");
+	FILE* plotFile = (FILE*)getVariable("plotFile");
+	unsigned* count = (unsigned*)getVariable("count");
+	string functionName = test->getCurrentState();
+	
+	if ((*count)++ > 0){
+		fprintf(plotFile, " , ");
+	}
+	string dataPath = (*subPath) + functionName + ".DAT";
+	fprintf(plotFile, " \"%s\" using 1:2 title \"%s\" with linespoints lt %d pt %d",
+		dataPath.data(), functionName.data(), test->getLineColor(), test->getPointType());
+}
 std::string Plot::createPlotScript(string path, string testedMethod)
 {
 	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
@@ -139,19 +182,16 @@ std::string Plot::createPlotScript(string path, string testedMethod)
 	fprintf(plotFile, "set terminal png \n");
 	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
 	fprintf(plotFile, "plot ");
-	unsigned functionNum = 0;
+	
+	unsigned count = 0;
+	string subPath = path + "data/" + testedMethod;
+	
+	addVariable(&subPath, "subPath");
+	addVariable(plotFile, "plotFile");
+	addVariable(&count, "count");
 
-	FOR_ALL_ITERATORS
-		FOR_ALL_ENUMERATIONS {
-			if (functionNum++ > 0){
-				fprintf(plotFile, " , ");
-			}
-			string functionName = getCurrentState();
-			string dataPath = path + "data/" + testedMethod + functionName + ".DAT";
-			fprintf(plotFile, "     \"%s\" using 1:2 title \"%s\" with linespoints lt %d pt %d",
-					dataPath.data(), functionName.data(),
-					getLineColor(), getPointType());
-		}
+	loopFunction(simpleAction, preparePlotFunction, "preparePlotFunction");
+	
 	fprintf(plotFile, "\n");
 	fclose(plotFile);
 
@@ -160,64 +200,71 @@ std::string Plot::createPlotScript(string path, string testedMethod)
 
 void plotAction(unsigned (*g)(Test*), Test* test)
 {
+	string* path = (string*)getVariable("path");
+	unsigned* repetitions = (unsigned*)getVariable("repetitions");
+	string* testedMethod = (string*)getVariable("testedMethod");
 	string functionName = test->getCurrentState();
-	string dataPath = path + "data/" + testedMethod + functionName + ".DAT";
+	
+	string dataPath = (*path) + "data/" + (*testedMethod) + functionName + ".DAT";
 	FILE* dataFile = openFile(dataPath);
 	fprintf(dataFile, "# Iterator %s \n", functionName.data());
 	IteratorConfig plotIter = test->getPlotIterator();
-	FOR_ITER_CONFIG(plotIter){
+	FOR_ITER_CONF(plotIter){
 		float total = g(this);
-		fprintf(dataFile, " %d %f \n", *plotIterator.variable, total/repetitions);
+		fprintf(dataFile, " %d %f \n", *plotIterator.variable, total/(*repetitions));
 	}
 	fclose(dataFile);
 }
-
-void Plot::plot3(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
+void Plot::plot(float (*f)(Test*, unsigned), string path, unsigned repetitions, string testedMethod)
 {
 	std::string plotPath = createPlotScript(path, testedMethod);
 
+	addVariable(&path, "path");
+	addVariable(&repetitions, "repetitions");
+	addVariable(&testedMethod, "testedMethod");
+	
 	loopFunction( plotAction, f, testedMethod );
 	cout << testedMethod << endl;
 	
 	plotDataFile(plotPath);
 }
 
-void Plot::plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
-{
-	std::string plotPath = createPlotScript(path, testedMethod);
-
-	FOR_ALL_ITERATORS
-		FOR_ALL_ENUMERATIONS {
-			string functionName = getCurrentState();
-			string dataPath = path + "data/" + testedMethod + functionName + ".DAT";
-			FILE* dataFile = openFile(dataPath);
-			fprintf(dataFile, "# Iterator %s \n", functionName.data());
-			FOR_PLOT_ITERATOR {
-				float total = f(this, repetitions);
-				fprintf(dataFile, " %d %f \n", *plotIterator.variable, total/repetitions);
-			}
-			fclose(dataFile);
-		}
-	plotDataFile(plotPath);
-}
-
-void Plot::plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
-{
-	FILE* dataFile = preparePlotAndDataFile(path, testedMethod);
-
-	FOR_PLOT_ITERATOR {
-		fprintf(dataFile, " %d ", *plotIterator.variable);
-		FOR_ALL_ITERATORS
-			FOR_ALL_ENUMERATIONS {
-
-				float total = f(this, repetitions);
-				fprintf(dataFile, " %f ", total/repetitions);
-			}
-		fprintf(dataFile, " \n ");
-	}
-	fclose(dataFile);
-	plotDataFile(path, testedMethod);
-}
+//void Plot::plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
+//{
+//	std::string plotPath = createPlotScript(path, testedMethod);
+//
+//	FOR_ALL_ITERATORS
+//		FOR_ALL_ENUMERATIONS {
+//			string functionName = getCurrentState();
+//			string dataPath = path + "data/" + testedMethod + functionName + ".DAT";
+//			FILE* dataFile = openFile(dataPath);
+//			fprintf(dataFile, "# Iterator %s \n", functionName.data());
+//			FOR_PLOT_ITERATOR {
+//				float total = f(this, repetitions);
+//				fprintf(dataFile, " %d %f \n", *plotIterator.variable, total/repetitions);
+//			}
+//			fclose(dataFile);
+//		}
+//	plotDataFile(plotPath);
+//}
+//
+//void Plot::plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
+//{
+//	FILE* dataFile = preparePlotAndDataFile(path, testedMethod);
+//
+//	FOR_PLOT_ITERATOR {
+//		fprintf(dataFile, " %d ", *plotIterator.variable);
+//		FOR_ALL_ITERATORS
+//			FOR_ALL_ENUMERATIONS {
+//
+//				float total = f(this, repetitions);
+//				fprintf(dataFile, " %f ", total/repetitions);
+//			}
+//		fprintf(dataFile, " \n ");
+//	}
+//	fclose(dataFile);
+//	plotDataFile(path, testedMethod);
+//}
 
 //void Plot::plotTask(string path, Task* task, unsigned maxGenerations, Individual* example, unsigned size, float range)
 //{

@@ -19,8 +19,6 @@
 #define START_CONNECTION_TEST START_TEST START_CONNECTION
 #define END_CONNECTION_TEST  END_CONNECTION END_TEST
 
-#define FOR_ITER(_iterPos) for ((*iterators[_iterPos].variable) = iterators[_iterPos].min; (*iterators[_iterPos].variable) <= iterators[_iterPos].max; (*iterators[_iterPos].variable) += iterators[_iterPos].increment)
-
 #define FOR_ALL_ITERATORS for(int _ite=0; _ite < iterators.size(); ++_ite)             \
 							  (*iterators[_ite].variable) = iterators[_ite].min;       \
 						  for(int _ite=0; _ite < iterators.size(); ++_ite)             \
@@ -38,11 +36,20 @@ struct IteratorConfig{
 	int increment;
 };
 
-#define FOR_ITER_CONFIG(_iter) for(*_iter.variable = _iter.min; *_iter.variable <= _iter.max; *_iter.variable += _iter.increment)
+#define FOR_ITER_CONF(_iter) for(*_iter.variable = _iter.min; *_iter.variable <= _iter.max; *_iter.variable += _iter.increment)
+
+void testAction(unsigned (*g)(Test*), Test* test);
+void simpleAction(void (*g)(Test*), Test* test);
 
 class Test {
+	
+struct Variable{
+	void* ptr;
+	std::string name;
+};
 protected:
 	std::vector<IteratorConfig> iterators;
+	std::vector<void*> variables;
 
 	std::vector<unsigned> enumTypes[ENUM_TYPE_DIM];
 	std::vector<unsigned>::iterator itEnumType[ENUM_TYPE_DIM];
@@ -117,7 +124,7 @@ public:
     	if (iter == iterators.size()){
     		(*action)(f, this);
     	} else {
-    		FOR_ITER(iter) {
+    		FOR_ITER_CONF(iterators[iter]){
     			forIters(action, f, iter + 1);
     		}
     	}
