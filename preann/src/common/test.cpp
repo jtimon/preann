@@ -23,7 +23,7 @@ Test::~Test()
 	// TODO Auto-generated destructor stub
 }
 
-unsigned getEnum(EnumType enumType)
+unsigned Test::getEnum(EnumType enumType)
 {
 	return *itEnumType[enumType];
 }
@@ -90,7 +90,7 @@ void* Test::getVariable(std::string name)
 {
 	for(int i=0; i < variables.size(); ++i){
 		if (variables[i].name == name){
-			return variables[i].ptr; 
+			return variables[i].ptr;
 		}
 	}
 	string error = "Variable " + name + " not found";

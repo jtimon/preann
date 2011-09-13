@@ -160,17 +160,17 @@ void Plot::plotFile(string plotPath)
 
 void preparePlotFunction(Test* test)
 {
-	string* subPath = (string*)getVariable("subPath");
-	FILE* plotFile = (FILE*)getVariable("plotFile");
-	unsigned* count = (unsigned*)getVariable("count");
+	string* subPath = (string*)test->getVariable("subPath");
+	FILE* plotFile = (FILE*)test->getVariable("plotFile");
+	unsigned* count = (unsigned*)test->getVariable("count");
 	string functionName = test->getCurrentState();
-	
+
 	if ((*count)++ > 0){
 		fprintf(plotFile, " , ");
 	}
 	string dataPath = (*subPath) + functionName + ".DAT";
 	fprintf(plotFile, " \"%s\" using 1:2 title \"%s\" with linespoints lt %d pt %d",
-		dataPath.data(), functionName.data(), test->getLineColor(), test->getPointType());
+		dataPath.data(), functionName.data(), ((Plot*)test)->getLineColor(), ((Plot*)test)->getPointType());
 }
 std::string Plot::createPlotScript(string path, string testedMethod)
 {
@@ -182,16 +182,17 @@ std::string Plot::createPlotScript(string path, string testedMethod)
 	fprintf(plotFile, "set terminal png \n");
 	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
 	fprintf(plotFile, "plot ");
-	
+
 	unsigned count = 0;
 	string subPath = path + "data/" + testedMethod;
-	
+
 	addVariable(&subPath, "subPath");
 	addVariable(plotFile, "plotFile");
 	addVariable(&count, "count");
 
-	loopFunction(simpleAction, preparePlotFunction, "preparePlotFunction");
-	
+	string functionName = "preparePlotFunction";
+	loopFunction(simpleAction, preparePlotFunction, functionName);
+
 	fprintf(plotFile, "\n");
 	fclose(plotFile);
 
@@ -200,33 +201,33 @@ std::string Plot::createPlotScript(string path, string testedMethod)
 
 void plotAction(float (*g)(Test*), Test* test)
 {
-	string* path = (string*)getVariable("path");
-	unsigned* repetitions = (unsigned*)getVariable("repetitions");
-	string* testedMethod = (string*)getVariable("testedMethod");
+	string* path = (string*)test->getVariable("path");
+	unsigned* repetitions = (unsigned*)test->getVariable("repetitions");
+	string* testedMethod = (string*)test->getVariable("testedMethod");
 	string functionName = test->getCurrentState();
-	
+
 	string dataPath = (*path) + "data/" + (*testedMethod) + functionName + ".DAT";
-	FILE* dataFile = openFile(dataPath);
+	FILE* dataFile = test->openFile(dataPath);
 	fprintf(dataFile, "# Iterator %s \n", functionName.data());
-	IteratorConfig plotIter = test->getPlotIterator();
+	IteratorConfig plotIter = ((Plot*)test)->getPlotIterator();
 	FOR_ITER_CONF(plotIter){
-		float total = g(this);
-		fprintf(dataFile, " %d %f \n", *plotIterator.variable, total/(*repetitions));
+		float total = g(test);
+		fprintf(dataFile, " %d %f \n", *plotIter.variable, total/(*repetitions));
 	}
 	fclose(dataFile);
 }
-void Plot::plot(float (*f)(Test*, unsigned), string path, unsigned repetitions, string testedMethod)
+void Plot::plot(float (*f)(Test*), string path, unsigned repetitions, string testedMethod)
 {
 	std::string plotPath = createPlotScript(path, testedMethod);
 
 	addVariable(&path, "path");
 	addVariable(&repetitions, "repetitions");
 	addVariable(&testedMethod, "testedMethod");
-	
+
 	loopFunction( plotAction, f, testedMethod );
 	cout << testedMethod << endl;
-	
-	plotDataFile(plotPath);
+
+	plotFile(plotPath);
 }
 
 //void Plot::plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
@@ -266,53 +267,54 @@ void Plot::plot(float (*f)(Test*, unsigned), string path, unsigned repetitions, 
 //	plotDataFile(path, testedMethod);
 //}
 
-void plotTaskFunction(unsigned (*g)(Test*), Test* test)
+//void plotTaskAction(unsigned (*g)(Test*), Test* test)
+void plotTaskFunction(Test* test)
 {
-	string* path = (string*)getVariable("path");
-	Task* task = (Task*)getVariable("task");
-	Individual* example = (Individual*)getVariable("example");
-	unsigned* populationSize = (unsigned*)getVariable("populationSize");
-	unsigned* maxGenerations = (unsigned*)getVariable("maxGenerations");
-	float* weighsRange = (float*)getVariable("weighsRange");
-	
-	
-	Population* population = new Population(task, example, populationSize, weighsRange);
-	MutationAlgorithm mutationAlgorithm = test->getEnum(ET_MUTATION_ALG);
+	string* path = (string*)test->getVariable("path");
+	Task* task = (Task*)test->getVariable("task");
+	Individual* example = (Individual*)test->getVariable("example");
+	unsigned* populationSize = (unsigned*)test->getVariable("populationSize");
+	unsigned* maxGenerations = (unsigned*)test->getVariable("maxGenerations");
+	float* weighsRange = (float*)test->getVariable("weighsRange");
+
+
+	Population* population = new Population(task, example, *populationSize, *weighsRange);
+	MutationAlgorithm mutationAlgorithm = (MutationAlgorithm)test->getEnum(ET_MUTATION_ALG);
 	if (mutationAlgorithm == MA_PER_INDIVIDUAL){
 		population->setMutationsPerIndividual(1, 5);
 	} else if (mutationAlgorithm == MA_PROBABILISTIC){
 		population->setMutationProbability(0.01, 5);
 	}
-	CrossoverAlgorithm crossoverAlgorithm = test->getEnum(ET_CROSS_ALG);
-	CrossoverLevel crossoverLevel = test->getEnum(ET_CROSS_LEVEL);
+	CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm)test->getEnum(ET_CROSS_ALG);
+	CrossoverLevel crossoverLevel = (CrossoverLevel)test->getEnum(ET_CROSS_LEVEL);
 	switch (crossoverAlgorithm){
 	case UNIFORM:
-		population->setCrossoverUniformScheme(crossoverLevel, populationSize/2, 0.5);
+		population->setCrossoverUniformScheme(crossoverLevel, *populationSize/2, 0.5);
 		break;
 	case PROPORTIONAL:
-		population->setCrossoverProportionalScheme(crossoverLevel, populationSize/2);
+		population->setCrossoverProportionalScheme(crossoverLevel, *populationSize/2);
 		break;
 	case MULTIPOINT:
-		population->setCrossoverMultipointScheme(crossoverLevel, populationSize/2, 5);
+		population->setCrossoverMultipointScheme(crossoverLevel, *populationSize/2, 5);
 		break;
-		
+
 	}
-	
+
 	string functionName = test->getCurrentState();
 	string dataPath = (*path) + "data/" + task->toString() + functionName + ".DAT";
-	FILE* dataFile = openFile(dataPath);
+	FILE* dataFile = test->openFile(dataPath);
 	fprintf(dataFile, "# Iterator %s \n", functionName.data());
-	for (unsigned generation = 0; generation < maxGenerations; ++generation) {
-		
+	for (unsigned generation = 0; generation < *maxGenerations; ++generation) {
+
 		float fitness = population->getBestIndividualScore();
-		fprintf(dataFile, " %d %f \n", *plotIterator.variable, fitness);
+		fprintf(dataFile, " %d %f \n", generation, fitness);
 		population->nextGeneration();
 	}
 	fclose(dataFile);
 }
 void Plot::plotTask(string path, Task* task, Individual* example, unsigned populationSize, unsigned maxGenerations,  float weighsRange)
 {
-    void testedTask = task->toString();
+    string testedTask = task->toString();
     std::string plotPath = createPlotScript(path, testedTask);
     addVariable(&path, "path");
     addVariable(task, "task");
@@ -322,7 +324,7 @@ void Plot::plotTask(string path, Task* task, Individual* example, unsigned popul
     addVariable(&weighsRange, "weighsRange");
     loopFunction(simpleAction, plotTaskFunction, testedTask);
     cout << testedTask << endl;
-    plotDataFile(plotPath);
+    plotFile(plotPath);
 //    ////////////////////////////////////////////
 //    string fileName = task->toString() + FILE * dataFile = preparePlotAndDataFile(path, fileName);
 //    std::vector<Population*> populations;

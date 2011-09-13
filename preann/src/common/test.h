@@ -46,7 +46,7 @@ struct Variable{
 };
 protected:
 	std::vector<IteratorConfig> iterators;
-	std::vector<void*> variables;
+	std::vector<Variable> variables;
 
 	std::vector<unsigned> enumTypes[ENUM_TYPE_DIM];
 	std::vector<unsigned>::iterator itEnumType[ENUM_TYPE_DIM];
@@ -76,9 +76,7 @@ public:
 
     FILE* openFile(string path);
 
-    void simpleAction(void (*g)(Test*), Test* test);
     void simpleTest( void (*f)(Test*), string testedMethod);
-    void testAction(unsigned (*g)(Test*), Test* test);
     void test( unsigned (*f)(Test*), string testedMethod);
 
     template <class classTempl>
@@ -130,6 +128,7 @@ public:
 };
 
 //TODO comprobar que esto es necesario
-void Test::loopFunction( void (*action)(float (*)(Test*), Test*), float (*f)(Test*), string testedMethod );
+void simpleAction(void (*g)(Test*), Test* test);
+void testAction(unsigned (*g)(Test*), Test* test);
 
 #endif /* TEST_H_ */

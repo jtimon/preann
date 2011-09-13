@@ -8,7 +8,7 @@
 #include "population.h"
 #include "task.h"
 
-#define START_PLOT Chronometer chrono; unsigned* repetitions = (unsigned*)getVariable("repetitions");
+#define START_PLOT Chronometer chrono; unsigned* repetitions = (unsigned*)test->getVariable("repetitions");
 #define END_PLOT return chrono.getSeconds();
 
 #define START_BUFFER_PLOT START_PLOT START_BUFFER
@@ -26,8 +26,6 @@ protected:
 	EnumType colorEnum;
 	EnumType pointEnum;
 
-	int getPointType();
-	int getLineColor();
 //	FILE* preparePlotAndDataFile(string path, string testedMethod);
 //	void plotDataFile(string path, string testedMethod);
 	std::string createPlotScript(string path, string testedMethod);
@@ -36,6 +34,10 @@ public:
 	Plot();
 	virtual ~Plot();
 
+	int getPointType();
+	int getLineColor();
+	void plotFile(string plotPath);
+
 	void setColorEnum(EnumType colorEnum);
 	void setPointEnum(EnumType pointEnum);
 	void addPlotIterator(int* variable, unsigned min, unsigned max, unsigned increment);
@@ -43,8 +45,8 @@ public:
 
 //	void plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
 //	void plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
-	void plot(float (*f)(Test*, unsigned), string path, unsigned repetitions, string testedMethod);
-	void plotTask(string path, Task* task, Individual* example, unsigned populationSize, unsigned maxGenerations,  float range, unsigned repetitions)
+	void plot(float (*f)(Test*), string path, unsigned repetitions, string testedMethod);
+	void plotTask(string path, Task* task, Individual* example, unsigned populationSize, unsigned maxGenerations,  float weighsRange);
 };
 
 #endif /* PLOT_H_ */
