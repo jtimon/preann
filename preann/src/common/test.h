@@ -38,11 +38,8 @@ struct IteratorConfig{
 
 #define FOR_ITER_CONF(_iter) for(*_iter.variable = _iter.min; *_iter.variable <= _iter.max; *_iter.variable += _iter.increment)
 
-void testAction(unsigned (*g)(Test*), Test* test);
-void simpleAction(void (*g)(Test*), Test* test);
-
 class Test {
-	
+
 struct Variable{
 	void* ptr;
 	std::string name;
