@@ -166,6 +166,7 @@ void preparePlotFunction(Test* test)
 	string functionName = test->getCurrentState();
 
 	if ((*count)++ > 0){
+		//TODO peta aqui
 		fprintf(plotFile, " , ");
 	}
 	string dataPath = (*subPath) + functionName + ".DAT";

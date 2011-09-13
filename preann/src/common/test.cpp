@@ -9,7 +9,6 @@
 
 Test::Test()
 {
-	printCurrentState();
 	for(int i=0; i < ENUM_TYPE_DIM; ++i){
 		enumTypes[i].push_back(0);
 		itEnumType[i] = enumTypes[i].begin();
@@ -20,7 +19,12 @@ Test::Test()
 
 Test::~Test()
 {
-	// TODO Auto-generated destructor stub
+	iterators.clear();
+	variables.clear();
+
+	for (unsigned i = 0; i < ENUM_TYPE_DIM; ++i) {
+		enumTypes[i].clear();
+	}
 }
 
 unsigned Test::getEnum(EnumType enumType)

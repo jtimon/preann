@@ -61,18 +61,19 @@ int main(int argc, char *argv[])
 
 	Plot plot;
 
-//	plot.addPlotIterator(&size, 1000, 10000, 1000);
-//	plot.exclude(ET_BUFFER, 1, BYTE);
-//	plot.exclude(ET_IMPLEMENTATION, 1, CUDA);
+	plot.addPlotIterator(&size, 1000, 10000, 1000);
+	plot.exclude(ET_BUFFER, 1, BYTE);
+	plot.exclude(ET_IMPLEMENTATION, 1, CUDA);
 
-//	plot.printParameters();
+	plot.printParameters();
 	plot.printCurrentState();
 
 	try {
-		plot.plot(chronoActivation, path, 1000, "BUFFER_ACTIVATION");
-		plot.plot(chronoCopyFromInterface, path, 1000, "BUFFER_COPYFROMINTERFACE");
-		plot.plot(chronoCopyToInterface, path, 1000, "BUFFER_COPYTOINTERFACE");
-		plot.plot(chronoCopyToInterface, path, 1000, "BUFFER_COPYTOINTERFACE");
+//		plot.plot(chronoActivation, path, 10, "BUFFER_ACTIVATION");
+		plot.plot(chronoCopyFromInterface, path, 10, "BUFFER_COPYFROMINTERFACE");
+		plot.plot(chronoCopyFromInterface, path, 10, "BUFFER_COPYFROMINTERFACE");
+		plot.plot(chronoCopyToInterface, path, 10, "BUFFER_COPYTOINTERFACE");
+		plot.plot(chronoCopyToInterface, path, 10, "BUFFER_COPYTOINTERFACE");
 
 		printf("Exit success.\n");
 		MemoryManagement::printTotalAllocated();

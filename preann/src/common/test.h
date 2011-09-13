@@ -106,6 +106,7 @@ public:
     void forEnums (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
     {
     	if (enu == ENUM_TYPE_DIM){
+    		printCurrentState();
     		(*action)(f, this);
     	} else {
     		FOR_EACH(itEnumType[enu], enumTypes[enu]) {
@@ -118,6 +119,7 @@ public:
     void forIters (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned iter)
     {
     	if (iter == iterators.size()){
+    		printCurrentState();
     		(*action)(f, this);
     	} else {
     		FOR_ITER_CONF(iterators[iter]){
