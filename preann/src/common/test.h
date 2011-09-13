@@ -65,6 +65,7 @@ public:
     void with(EnumType enumType, unsigned count, ...);
     void exclude(EnumType enumType, unsigned count, ...);
 
+    unsigned getEnum(EnumType enumType);
 	BufferType getBufferType();
 	ImplementationType getImplementationType();
 	FunctionType getFunctionType();
@@ -131,6 +132,7 @@ public:
     }
 };
 
-
+//TODO comprobar que esto es necesario
+void Test::loopFunction( void (*action)(float (*)(Test*), Test*), float (*f)(Test*), string testedMethod );
 
 #endif /* TEST_H_ */

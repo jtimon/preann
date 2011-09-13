@@ -23,6 +23,11 @@ Test::~Test()
 	// TODO Auto-generated destructor stub
 }
 
+unsigned getEnum(EnumType enumType)
+{
+	return *itEnumType[enumType];
+}
+
 BufferType Test::getBufferType()
 {
 	return (BufferType)*itEnumType[ET_BUFFER];

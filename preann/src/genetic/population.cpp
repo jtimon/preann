@@ -238,7 +238,6 @@ void Population::setCrossoverUniformScheme(CrossoverLevel crossoverLevel,
 		std::string error = "the number of crossover must be even.";
 		throw error;
 	}
-	int incSize = number - numCrossover[UNIFORM][crossoverLevel];
 	numCrossover[UNIFORM][crossoverLevel] = number;
 	probabilityUniform[crossoverLevel] = probability;
 }
