@@ -82,23 +82,15 @@ void Test::addIterator(int* variable, unsigned min, unsigned max, unsigned incre
 	iterators.push_back(iterator);
 }
 
-void Test::addVariable(void* variable, std::string name)
+void Test::putVariable(std::string key, void* variable)
 {
-	Variable newVar;
-	newVar.ptr = variable;
-	newVar.name = name;
-	variables.push_back(newVar);
+	variables.erase(key);
+	variables.insert( pair<string, void*>(key, variable) );
 }
 
-void* Test::getVariable(std::string name)
+void* Test::getVariable(std::string key)
 {
-	for(int i=0; i < variables.size(); ++i){
-		if (variables[i].name == name){
-			return variables[i].ptr;
-		}
-	}
-	string error = "Variable " + name + " not found";
-	throw error;
+	return variables[key];
 }
 
 void Test::withAll(EnumType enumType)

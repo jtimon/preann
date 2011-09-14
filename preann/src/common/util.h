@@ -22,6 +22,7 @@ using namespace std;
 #include <list>
 #include <math.h>
 #include <sstream>
+#include <map>
 
 #define FOR_EACH(_iter,_coll) for (_iter = _coll.begin(); _iter != _coll.end(); ++_iter)
 #define ENUM_VECTOR2(_vector, _array, _values...) unsigned _array[] = {_values}; std::vector<unsigned> _vector; _vector.insert(_vector.end(), _array, _array + (sizeof(_array) / sizeof(_array[0])))

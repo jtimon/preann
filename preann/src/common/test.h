@@ -39,35 +39,23 @@ struct IteratorConfig{
 #define FOR_ITER_CONF(_iter) for(*_iter.variable = _iter.min; *_iter.variable <= _iter.max; *_iter.variable += _iter.increment)
 
 class Test {
-
-struct Variable{
-	void* ptr;
-	std::string name;
-};
 protected:
+	std::map<string, void*> variables;
 	std::vector<IteratorConfig> iterators;
-	std::vector<Variable> variables;
 
 	std::vector<unsigned> enumTypes[ENUM_TYPE_DIM];
 	std::vector<unsigned>::iterator itEnumType[ENUM_TYPE_DIM];
 
-	//http://www.cplusplus.com/reference/stl/map/
-	std::map<string, IteratorConfig> iterators2;
-	std::map<string, void*> variables2;
-	std::map<EnumType, vector<unsigned>> enumTypes2;
-	std::map<EnumType, vector<unsigned>::iterator> itEnumType2;
-	
+//	std::map<string, IteratorConfig> iterators2;
+//	std::map<EnumType, vector<unsigned> > enumTypes2;
+//	std::map<EnumType, vector<unsigned>::iterator> itEnumType2;
+
 public:
 	Test();
 	virtual ~Test();
 
-	template <class classTempl>
-	void putVariable(std::string key, classTempl variable);
-	template <class classTempl>
-	classTempl& getVariable2(std::string key);
-	
-	void addVariable(void* variable, std::string name);
-	void* getVariable(std::string name);
+	void putVariable(std::string key, void* variable);
+	void* getVariable(std::string key);
 	void addIterator(int* variable, unsigned min, unsigned max, unsigned increment);
     void withAll(EnumType enumType);
     void with(EnumType enumType, unsigned count, ...);
@@ -117,7 +105,7 @@ public:
     void forEnums (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
     {
     	if (enu == ENUM_TYPE_DIM){
-    		printCurrentState();
+//    		printCurrentState();
     		(*action)(f, this);
     	} else {
     		FOR_EACH(itEnumType[enu], enumTypes[enu]) {
@@ -130,7 +118,7 @@ public:
     void forIters (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned iter)
     {
     	if (iter == iterators.size()){
-    		printCurrentState();
+//    		printCurrentState();
     		(*action)(f, this);
     	} else {
     		FOR_ITER_CONF(iterators[iter]){
@@ -141,9 +129,5 @@ public:
 };
 
 void simpleAction(void (*g)(Test*), Test* test);
-//void testAction(unsigned (*g)(Test*), Test* test);
-
-
-
 
 #endif /* TEST_H_ */

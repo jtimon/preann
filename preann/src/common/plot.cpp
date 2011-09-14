@@ -166,7 +166,6 @@ void preparePlotFunction(Test* test)
 	string functionName = test->getCurrentState();
 
 	if ((*count)++ > 0){
-		//TODO peta aqui
 		fprintf(plotFile, " , ");
 	}
 	string dataPath = (*subPath) + functionName + ".DAT";
@@ -187,12 +186,11 @@ std::string Plot::createPlotScript(string path, string testedMethod)
 	unsigned count = 0;
 	string subPath = path + "data/" + testedMethod;
 
-	addVariable(&subPath, "subPath");
-	addVariable(plotFile, "plotFile");
-	addVariable(&count, "count");
+	putVariable("subPath", &subPath);
+	putVariable("plotFile", plotFile);
+	putVariable("count", &count);
 
-	string functionName = "preparePlotFunction";
-	loopFunction(simpleAction, preparePlotFunction, functionName);
+	loopFunction(simpleAction, preparePlotFunction, "preparePlotFunction");
 
 	fprintf(plotFile, "\n");
 	fclose(plotFile);
@@ -221,9 +219,9 @@ void Plot::plot(float (*f)(Test*), string path, unsigned repetitions, string tes
 {
 	std::string plotPath = createPlotScript(path, testedMethod);
 
-	addVariable(&path, "path");
-	addVariable(&repetitions, "repetitions");
-	addVariable(&testedMethod, "testedMethod");
+	putVariable("path", &path);
+	putVariable("repetitions", &repetitions);
+	putVariable("testedMethod", &testedMethod);
 
 	loopFunction( plotAction, f, testedMethod );
 	cout << testedMethod << endl;
@@ -317,12 +315,12 @@ void Plot::plotTask(string path, Task* task, Individual* example, unsigned popul
 {
     string testedTask = task->toString();
     std::string plotPath = createPlotScript(path, testedTask);
-    addVariable(&path, "path");
-    addVariable(task, "task");
-    addVariable(example, "example");
-    addVariable(&populationSize, "populationSize");
-    addVariable(&maxGenerations, "maxGenerations");
-    addVariable(&weighsRange, "weighsRange");
+    putVariable("path", &path);
+    putVariable("task", task);
+    putVariable("example", example);
+    putVariable("populationSize", &populationSize);
+    putVariable("maxGenerations", &maxGenerations);
+    putVariable("weighsRange", &weighsRange);
     loopFunction(simpleAction, plotTaskFunction, testedTask);
     cout << testedTask << endl;
     plotFile(plotPath);
