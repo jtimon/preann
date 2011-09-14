@@ -51,10 +51,21 @@ protected:
 	std::vector<unsigned> enumTypes[ENUM_TYPE_DIM];
 	std::vector<unsigned>::iterator itEnumType[ENUM_TYPE_DIM];
 
+	//http://www.cplusplus.com/reference/stl/map/
+	std::map<string, IteratorConfig> iterators2;
+	std::map<string, void*> variables2;
+	std::map<EnumType, vector<unsigned>> enumTypes2;
+	std::map<EnumType, vector<unsigned>::iterator> itEnumType2;
+	
 public:
 	Test();
 	virtual ~Test();
 
+	template <class classTempl>
+	void putVariable(std::string key, classTempl variable);
+	template <class classTempl>
+	classTempl& getVariable2(std::string key);
+	
 	void addVariable(void* variable, std::string name);
 	void* getVariable(std::string name);
 	void addIterator(int* variable, unsigned min, unsigned max, unsigned increment);
@@ -129,8 +140,10 @@ public:
     }
 };
 
-//TODO comprobar que esto es necesario
 void simpleAction(void (*g)(Test*), Test* test);
-void testAction(unsigned (*g)(Test*), Test* test);
+//void testAction(unsigned (*g)(Test*), Test* test);
+
+
+
 
 #endif /* TEST_H_ */
