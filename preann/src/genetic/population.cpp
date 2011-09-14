@@ -159,12 +159,15 @@ void Population::insertIndividual(Individual *individual)
 	task->test(individual);
 
     float fitness = individual->getFitness();
-	for (list<Individual*>::iterator it = individuals.begin(); it != individuals.end(); it++) {
+    list<Individual*>::iterator it;
+    FOR_EACH(it, individuals){
 		if(fitness > (*it)->getFitness()) {
 			individuals.insert(it, individual);
+			total_score += fitness;
 		}
 	}
 	if (individuals.size() > this->maxSize){
+		total_score -= individuals.back()->getFitness();
 		delete(individuals.back());
 		individuals.pop_back();
 	}
