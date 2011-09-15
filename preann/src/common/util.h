@@ -32,6 +32,13 @@ using namespace std;
 #define BITS_PER_BYTE (8)
 #define BITS_PER_UNSIGNED (sizeof(unsigned) * BITS_PER_BYTE)
 
+// TODO explorar esta posibilidad en vez de user punteros a las variables
+template <class T>
+T& ptrToType(void* ptr)
+{
+	return *((T*)ptr);
+}
+
 template <class T>
 std::string to_string (const T& t)
 {
