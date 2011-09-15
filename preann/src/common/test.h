@@ -46,10 +46,6 @@ protected:
 	std::vector<unsigned> enumTypes[ENUM_TYPE_DIM];
 	std::vector<unsigned>::iterator itEnumType[ENUM_TYPE_DIM];
 
-//	std::map<string, IteratorConfig> iterators2;
-//	std::map<EnumType, vector<unsigned> > enumTypes2;
-//	std::map<EnumType, vector<unsigned>::iterator> itEnumType2;
-
 public:
 	Test();
 	virtual ~Test();
