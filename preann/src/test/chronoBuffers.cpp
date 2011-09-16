@@ -69,9 +69,10 @@ int main(int argc, char *argv[])
 	plot.printCurrentState();
 
 	try {
-		plot.plot(chronoActivation, path, 100, "BUFFER_ACTIVATION");
-		plot.plot(chronoCopyFromInterface, path, 1000, "BUFFER_COPYFROMINTERFACE");
-		plot.plot(chronoCopyToInterface, path, 1000, "BUFFER_COPYTOINTERFACE");
+//		plot.plot(chronoActivation, path, 100, "BUFFER_ACTIVATION");
+//		plot.plot(chronoCopyFromInterface, path, 1000, "BUFFER_COPYFROMINTERFACE");
+//		plot.plot(chronoCopyToInterface, path, 1000, "BUFFER_COPYTOINTERFACE");
+		plot.plot(chronoCopyToInterface, path, 100, "BUFFER_COPYTOINTERFACE");
 
 		printf("Exit success.\n");
 		MemoryManagement::printTotalAllocated();

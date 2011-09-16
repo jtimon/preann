@@ -17,13 +17,18 @@ protected:
 	Interface* tInput1;
 	Interface* tInput2;
 	Interface* tOutput;
+
+	bool bitVectorIncrement(Interface* bitVector);
 public:
 	TaskXor(unsigned size, unsigned numTests);
 	virtual ~TaskXor();
 
 	virtual void test(Individual* individual);
-	virtual void doXor();
+	virtual void doOperation();
+//	virtual void doOperation(BinaryOperation binaryOperation);
+//	virtual void doOperation(BinaryOperation binaryOperation, );
 	virtual string toString();
+
 
 };
 

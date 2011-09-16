@@ -83,80 +83,11 @@ int Plot::getLineColor()
 	}
 }
 
-//FILE* Plot::preparePlotAndDataFile(string path, string testedMethod)
-//{
-//	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
-//	string dataPath = path + "data/" + testedMethod + ".DAT";
-//	string outputPath = path + "images/" + testedMethod + ".png";
-//
-//	FILE* dataFile = openFile(dataPath);
-//	FILE* plotFile = openFile(plotPath);
-//
-//	fprintf(plotFile, "set terminal png \n");
-//	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
-//	fprintf(plotFile, "plot ");
-//	fprintf(dataFile, "# Iterator ");
-//	unsigned functionNum = 2;
-//
-//	FOR_ALL_ITERATORS
-//		FOR_ALL_ENUMERATIONS {
-//			string functionName = getCurrentState();
-//			fprintf(dataFile, " %s ", functionName.data());
-//			if (functionNum > 2){
-//				fprintf(plotFile, ", ");
-//			}
-//			fprintf(plotFile, "     \"%s\" using 1:%d title \"%s\" with linespoints lt %d pt %d",
-//					dataPath.data(), functionNum++, functionName.data(),
-//					getLineColor(), getPointType());
-//		}
-//	fprintf(dataFile, "\n");
-//	fprintf(plotFile, "\n");
-//	fclose(plotFile);
-//
-//	return dataFile;
-//}
-
-//void Plot::plotDataFile(string path, string testedMethod)
-//{
-//	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
-//	string syscommand = "gnuplot " + plotPath;
-//	system(syscommand.data());
-//}
-
 void Plot::plotFile(string plotPath)
 {
 	string syscommand = "gnuplot " + plotPath;
 	system(syscommand.data());
 }
-
-//std::string Plot::createPlotScript(string path, string testedMethod)
-//{
-//	string plotPath = path + "gnuplot/" + testedMethod + ".plt";
-//	string outputPath = path + "images/" + testedMethod + ".png";
-//
-//	FILE* plotFile = openFile(plotPath);
-//
-//	fprintf(plotFile, "set terminal png \n");
-//	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
-//	fprintf(plotFile, "plot ");
-//	unsigned functionNum = 0;
-//
-//	FOR_ALL_ITERATORS
-//		FOR_ALL_ENUMERATIONS {
-//			if (functionNum++ > 0){
-//				fprintf(plotFile, " , ");
-//			}
-//			string functionName = getCurrentState();
-//			string dataPath = path + "data/" + testedMethod + functionName + ".DAT";
-//			fprintf(plotFile, "     \"%s\" using 1:2 title \"%s\" with linespoints lt %d pt %d",
-//					dataPath.data(), functionName.data(),
-//					getLineColor(), getPointType());
-//		}
-//	fprintf(plotFile, "\n");
-//	fclose(plotFile);
-//
-//	return plotPath;
-//}
 
 void preparePlotFunction(Test* test)
 {
@@ -229,44 +160,6 @@ void Plot::plot(float (*f)(Test*), string path, unsigned repetitions, string tes
 	plotFile(plotPath);
 }
 
-//void Plot::plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
-//{
-//	std::string plotPath = createPlotScript(path, testedMethod);
-//
-//	FOR_ALL_ITERATORS
-//		FOR_ALL_ENUMERATIONS {
-//			string functionName = getCurrentState();
-//			string dataPath = path + "data/" + testedMethod + functionName + ".DAT";
-//			FILE* dataFile = openFile(dataPath);
-//			fprintf(dataFile, "# Iterator %s \n", functionName.data());
-//			FOR_PLOT_ITERATOR {
-//				float total = f(this, repetitions);
-//				fprintf(dataFile, " %d %f \n", *plotIterator.variable, total/repetitions);
-//			}
-//			fclose(dataFile);
-//		}
-//	plotDataFile(plotPath);
-//}
-//
-//void Plot::plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod)
-//{
-//	FILE* dataFile = preparePlotAndDataFile(path, testedMethod);
-//
-//	FOR_PLOT_ITERATOR {
-//		fprintf(dataFile, " %d ", *plotIterator.variable);
-//		FOR_ALL_ITERATORS
-//			FOR_ALL_ENUMERATIONS {
-//
-//				float total = f(this, repetitions);
-//				fprintf(dataFile, " %f ", total/repetitions);
-//			}
-//		fprintf(dataFile, " \n ");
-//	}
-//	fclose(dataFile);
-//	plotDataFile(path, testedMethod);
-//}
-
-//void plotTaskAction(unsigned (*g)(Test*), Test* test)
 void plotTaskFunction(Test* test)
 {
 	string* path = (string*)test->getVariable("path");
@@ -275,7 +168,6 @@ void plotTaskFunction(Test* test)
 	unsigned* populationSize = (unsigned*)test->getVariable("populationSize");
 	unsigned* maxGenerations = (unsigned*)test->getVariable("maxGenerations");
 	float* weighsRange = (float*)test->getVariable("weighsRange");
-
 
 	Population* population = new Population(task, example, *populationSize, *weighsRange);
 	MutationAlgorithm mutationAlgorithm = (MutationAlgorithm)test->getEnum(ET_MUTATION_ALG);
