@@ -20,10 +20,11 @@ protected:
 
 	bool bitVectorIncrement(Interface* bitVector);
 public:
-	TaskXor(unsigned size, unsigned numTests);
+	TaskXor(unsigned size);
 	virtual ~TaskXor();
 
 	virtual void test(Individual* individual);
+	virtual void setInputs(Individual* individual);
 	virtual void doOperation();
 //	virtual void doOperation(BinaryOperation binaryOperation);
 //	virtual void doOperation(BinaryOperation binaryOperation, );

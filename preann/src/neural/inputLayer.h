@@ -15,6 +15,7 @@ class InputLayer: public Layer {
 protected:
 	ImplementationType getImplementationType();
 public:
+	InputLayer(Interface* interface, ImplementationType implementationType);
 	InputLayer(unsigned size, BufferType bufferType, ImplementationType implementationType);
 	virtual ~InputLayer();
 

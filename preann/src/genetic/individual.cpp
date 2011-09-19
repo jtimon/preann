@@ -22,14 +22,14 @@ Individual* Individual::newCopy(ImplementationType implementationType)
 
 	for (unsigned i = 0; i < layers.size(); i++)
 	{
-		Buffer* layerBuffer = layers[i]->getOutput();
 		if (isInputLayer(i))
 		{
-			copy->addInputLayer(layerBuffer->getSize(),
-					layerBuffer->getBufferType());
+			InputLayer* inputLayer = ((InputLayer*)this->getLayer(i));
+			copy->addInputLayer(inputLayer->getInputInterface());
 		}
 		else
 		{
+			Buffer* layerBuffer = layers[i]->getOutput();
 			copy->addLayer(layerBuffer->getSize(),
 					layerBuffer->getBufferType(), layers[i]->getFunctionType());
 		}

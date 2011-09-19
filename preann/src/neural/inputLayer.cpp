@@ -2,8 +2,18 @@
 #include "inputLayer.h"
 #include "factory.h"
 
+InputLayer::InputLayer(Interface* interface, ImplementationType implementationType)
+{
+	tInput = interface;
+	output = Factory::newBuffer(interface->getSize(), interface->getBufferType(), implementationType);
+
+	thresholds = NULL;
+	functionType = IDENTITY;
+}
+
 InputLayer::InputLayer(unsigned size, BufferType bufferType, ImplementationType implementationType)
 {
+	//TODO quitar esto
 	tInput = new Interface(size, bufferType);
 	output = Factory::newBuffer(size, bufferType, implementationType);
 
@@ -13,9 +23,10 @@ InputLayer::InputLayer(unsigned size, BufferType bufferType, ImplementationType 
 
 InputLayer::~InputLayer()
 {
-	if (tInput){
-		delete(tInput);
-	}
+	//TODO quitar esto
+//	if (tInput){
+//		delete(tInput);
+//	}
 }
 
 void InputLayer::addInput(Buffer *input)

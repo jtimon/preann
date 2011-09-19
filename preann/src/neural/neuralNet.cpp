@@ -72,8 +72,15 @@ void NeuralNet::addLayer(unsigned size, BufferType destinationType,
 
 void NeuralNet::addInputLayer(unsigned size, BufferType bufferType)
 {
+	//TODO quitar esto
 	inputs.push_back(layers.size());
 	addLayer(new InputLayer(size, bufferType, getImplementationType()));
+}
+
+void NeuralNet::addInputLayer(Interface* interface)
+{
+	inputs.push_back(layers.size());
+	addLayer(new InputLayer(interface, getImplementationType()));
 }
 
 void NeuralNet::updateInput(unsigned inputPos, Interface* input)
@@ -177,12 +184,11 @@ void NeuralNet::createFeedForwardNet(unsigned inputSize, BufferType inputType,
 
 ImplementationType NeuralNet::getImplementationType()
 {
-	if(layers.size() != 0){
+	if(layers.size() > 0){
 		return layers[0]->getImplementationType();
 	} else {
-
+		return implementationType;
 	}
-	return implementationType;
 }
 
 void NeuralNet::createFullyConnectedNet(unsigned inputSize,

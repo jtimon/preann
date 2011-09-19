@@ -7,10 +7,9 @@
 
 #include "taskXor.h"
 
-TaskXor::TaskXor(unsigned size, unsigned numTests)
+TaskXor::TaskXor(unsigned size)
 {
 	tSize = size;
-	tNumTests = numTests;
 	tInput1 = new Interface(size, BIT);
 	tInput2 = new Interface(size, BIT);
 	tOutput = new Interface(size, BIT);
@@ -34,16 +33,22 @@ TaskXor::~TaskXor()
 
 bool TaskXor::bitVectorIncrement(Interface* bitVector)
 {
-	for (unsigned i = 0; i < bitVector->getSize(); ++i) {
+    unsigned size = bitVector->getSize();
+    for(unsigned i = 0;i < size; ++i) {
 		if (bitVector->getElement(i) == 0){
 			bitVector->setElement(i, 1);
-			for (unsigned j = i-1; j >= 0; --j) {
-				bitVector->setElement(j, 0);
-			}
 			return true;
+		} else {
+			bitVector->setElement(i, 0);
 		}
 	}
 	return false;
+}
+
+void TaskXor::setInputs(Individual* individual)
+{
+	individual->addInputLayer(tInput1);
+	individual->addInputLayer(tInput2);
 }
 
 void TaskXor::test(Individual *individual)
@@ -53,11 +58,11 @@ void TaskXor::test(Individual *individual)
 	while(bitVectorIncrement(tInput1)){
 		tInput2->reset();
 		while(bitVectorIncrement(tInput2)){
-			individual->updateInput(0, tInput1);
-			individual->updateInput(0, tInput2);
+//			individual->updateInput(0, tInput1);
+//			individual->updateInput(0, tInput2);
 			doOperation();
 			individual->calculateOutput();
-			differences += individual->getOutput(0)->compareTo(tOutput);
+			differences += individual->getOutput(individual->getNumLayers()-1)->compareTo(tOutput);
 		}
 	}
 
@@ -93,5 +98,6 @@ void TaskXor::doOperation()
 
 string TaskXor::toString()
 {
-	return "XOR";
+    string toReturn = "XOR";
+    return toReturn;
 }

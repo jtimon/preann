@@ -205,41 +205,23 @@ void plotTaskFunction(Test* test)
 }
 void Plot::plotTask(string path, Task* task, Individual* example, unsigned populationSize, unsigned maxGenerations,  float weighsRange)
 {
-    string testedTask = task->toString();
-    std::string plotPath = createPlotScript(path, testedTask);
-    putVariable("path", &path);
-    putVariable("task", task);
-    putVariable("example", example);
-    putVariable("populationSize", &populationSize);
-    putVariable("maxGenerations", &maxGenerations);
-    putVariable("weighsRange", &weighsRange);
-    loopFunction(simpleAction, plotTaskFunction, testedTask);
-    cout << testedTask << endl;
-    plotFile(plotPath);
-//    ////////////////////////////////////////////
-//    string fileName = task->toString() + FILE * dataFile = preparePlotAndDataFile(path, fileName);
-//    std::vector<Population*> populations;
-//    FOR_ALL_ITERATORSFOR_ALL_ITERATORS
-//		FOR_ALL_ENUMERATIONS
-//		FOR_ALL_ENUMERATIONS {
-//
-//			populations
-//		}
-//
-//	for(unsigned generation = 0; generation < maxGenerations; ++generation) {
-//		fprintf(dataFile, " %d ", *plotIterator.variable);
-//		FOR_ALL_ITERATORS
-//			FOR_ALL_ENUMERATIONS {
-//
-//				Individual* concreteExample = example->newCopy(*itEnumType[ET_IMPLEMENTATION]);
-//				Population
-//				float part = f(this, repetitions);
-//				fprintf(dataFile, " %f ", part/repetitions);
-//				total += part;
-//			}
-//		fprintf(dataFile, " \n ");
-//	}
-//	fclose(dataFile);
-//	plotDataFile(path, fileName);
+    if (task != NULL && example != NULL &&
+		example->getNumLayers() > 0 && populationSize > 0 && maxGenerations > 0 && weighsRange > 0) {
+
+		string testedTask = task->toString();
+		std::string plotPath = createPlotScript(path, testedTask);
+		putVariable("path", &path);
+		putVariable("task", task);
+		putVariable("example", example);
+		putVariable("populationSize", &populationSize);
+		putVariable("maxGenerations", &maxGenerations);
+		putVariable("weighsRange", &weighsRange);
+		loopFunction(simpleAction, plotTaskFunction, testedTask);
+		cout << testedTask << endl;
+		plotFile(plotPath);
+    } else {
+    	string error = "Plot::plotTask wrong parameters.";
+    	throw error;
+    }
 }
 

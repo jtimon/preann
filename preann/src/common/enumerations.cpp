@@ -34,15 +34,31 @@ std::string Enumerations::toString(EnumType enumType, unsigned enumValue)
 	case ET_IMPLEMENTATION:
 		return Enumerations::implementationToString(enumValue);
 	case ET_FUNCTION:
-		return "ET_FUNCTION";
+		return Enumerations::functionTypeToString(enumValue);
 	case ET_CROSS_LEVEL:
 		return Enumerations::crossoverLevelToString(enumValue);
 	case ET_CROSS_ALG:
 		return Enumerations::crossoverAlgorithmToString(enumValue);
 	case ET_MUTATION_ALG:
 		return Enumerations::mutationAlgorithmToString(enumValue);
+	case ET_BINARY_OPERATION:
+		return Enumerations::binaryOperationToString(enumValue);
 	}
 	string error = " Enumerations::toString EnumType not found";
+	throw error;
+}
+
+std::string Enumerations::binaryOperationToString(unsigned binaryOperation)
+{
+	switch((BinaryOperation)binaryOperation){
+	case BO_AND:
+		return "AND";
+	case BO_OR:
+		return "OR";
+	case BO_XOR:
+		return "XOR";
+	}
+	string error = " Enumerations::binaryOperationToString BinaryOperation not found";
 	throw error;
 }
 
@@ -119,5 +135,47 @@ std::string Enumerations::implementationToString(unsigned implementationType)
 		return "CUDA_INV";
 	}
 	string error = " Enumerations::implementationToString ImplementationType not found";
+	throw error;
+}
+
+std::string Enumerations::functionTypeToString(unsigned functionType)
+{
+	switch((FunctionType)functionType){
+	case IDENTITY:
+		return "IDENTITY";
+	case BINARY_STEP:
+		return "BINARY_STEP";
+	case BIPOLAR_STEP:
+		return "BIPOLAR_STEP";
+	case SIGMOID:
+		return "SIGMOID";
+	case BIPOLAR_SIGMOID:
+		return "BIPOLAR_SIGMOID";
+	case HYPERBOLIC_TANGENT:
+		return "HYPERBOLIC_TANGENT";
+	}
+	string error = " Enumerations::functionTypeToString FunctionType not found";
+	throw error;
+}
+
+std::string Enumerations::enumTypeToString(unsigned enumType)
+{
+	switch((EnumType)enumType){
+	case ET_BINARY_OPERATION:
+		return "Binary_operation";
+	case ET_BUFFER:
+		return "Buffer_type";
+	case ET_CROSS_ALG:
+		return "Crossover_algorithm";
+	case ET_CROSS_LEVEL:
+		return "Crossover_level";
+	case ET_FUNCTION:
+		return "Function_type";
+	case ET_IMPLEMENTATION:
+		return "Implementation_type";
+	case ET_MUTATION_ALG:
+		return "Mutation_algorithm";
+	}
+	string error = " Enumerations::enumTypeToString EnumType not found";
 	throw error;
 }

@@ -25,6 +25,7 @@ public:
 	NeuralNet(ImplementationType implementationType = C);
 	virtual ~NeuralNet();
 
+	void addInputLayer(Interface* interface);
 	void addInputLayer(unsigned size, BufferType bufferType);
 	void updateInput(unsigned inputPos, Interface* input);
 	unsigned char isInputLayer(unsigned layerPos);

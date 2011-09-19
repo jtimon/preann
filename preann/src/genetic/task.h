@@ -19,7 +19,8 @@ public:
 	virtual ~Task();
 
 	virtual void test(Individual* individual) = 0;
-	virtual string toString() = 0; 
+	virtual void setInputs(Individual* individual) = 0;
+	virtual string toString() = 0;
 	//virtual float test(neuralNet* net, unsigned episodes);
 
 };

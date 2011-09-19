@@ -19,16 +19,6 @@
 #define START_CONNECTION_TEST START_TEST START_CONNECTION
 #define END_CONNECTION_TEST  END_CONNECTION END_TEST
 
-#define FOR_ALL_ITERATORS for(int _ite=0; _ite < iterators.size(); ++_ite)             \
-							  (*iterators[_ite].variable) = iterators[_ite].min;       \
-						  for(int _ite=0; _ite < iterators.size(); ++_ite)             \
-							  for ((*iterators[_ite].variable) = iterators[_ite].min; (*iterators[_ite].variable) <= iterators[_ite].max; (*iterators[_ite].variable) += iterators[_ite].increment)
-#define FOR_ALL_ENUMERATIONS for(int _enu=0; _enu < ENUM_TYPE_DIM; ++_enu)             \
-								 itEnumType[_enu] = enumTypes[_enu].begin();           \
-							 for(int _enu=0; _enu < ENUM_TYPE_DIM; ++_enu)             \
-								 for (itEnumType[_enu] = enumTypes[_enu].begin(); itEnumType[_enu] != enumTypes[_enu].end(); ++itEnumType[_enu])
-//								 FOR_EACH (itEnumType[_enu], enumTypes[_enu])
-
 struct IteratorConfig{
 	int* variable;
 	int min;
@@ -43,8 +33,8 @@ protected:
 	std::map<string, void*> variables;
 	std::vector<IteratorConfig> iterators;
 
-	std::vector<unsigned> enumTypes[ENUM_TYPE_DIM];
-	std::vector<unsigned>::iterator itEnumType[ENUM_TYPE_DIM];
+	map<EnumType, std::vector<unsigned> > enumTypes;
+	map<EnumType, std::vector<unsigned>::iterator > itEnumType;
 
 public:
 	Test();
@@ -88,10 +78,10 @@ public:
     template <class classTempl>
     void forEnumsIters (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
     {
-    	if (enu == ENUM_TYPE_DIM){
+    	if (enu == enumTypes.size()){
     		forIters(action, f, 0);
     	} else {
-    		FOR_EACH(itEnumType[enu], enumTypes[enu]) {
+    		FOR_EACH(itEnumType[(EnumType)enu], enumTypes[(EnumType)enu]) {
     			forEnumsIters(action, f, enu + 1);
     		}
     	}
@@ -100,11 +90,11 @@ public:
     template <class classTempl>
     void forEnums (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
     {
-    	if (enu == ENUM_TYPE_DIM){
+    	if (enu == enumTypes.size()){
 //    		printCurrentState();
     		(*action)(f, this);
     	} else {
-    		FOR_EACH(itEnumType[enu], enumTypes[enu]) {
+    		FOR_EACH(itEnumType[(EnumType)enu], enumTypes[(EnumType)enu]) {
     			forEnums(action, f, enu + 1);
     		}
     	}

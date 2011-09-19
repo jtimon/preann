@@ -2,7 +2,7 @@
 
 ImplementationType Layer::getImplementationType()
 {
-	return thresholds->getImplementationType();
+	return output->getImplementationType();
 }
 
 Buffer* Layer::newBuffer(FILE* stream)

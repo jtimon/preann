@@ -9,10 +9,10 @@
 
 Test::Test()
 {
-	for(int i=0; i < ENUM_TYPE_DIM; ++i){
-		enumTypes[i].push_back(0);
-		itEnumType[i] = enumTypes[i].begin();
-	}
+//	for(int i=0; i < ENUM_TYPE_DIM; ++i){
+//		enumTypes[i].push_back(0);
+//		itEnumType[i] = enumTypes[i].begin();
+//	}
 	int baseIterator;
 	addIterator(&baseIterator, 1, 1, 1);
 }
@@ -22,9 +22,11 @@ Test::~Test()
 	iterators.clear();
 	variables.clear();
 
-	for (unsigned i = 0; i < ENUM_TYPE_DIM; ++i) {
-		enumTypes[i].clear();
+	map<EnumType, std::vector<unsigned> >::iterator it;
+	FOR_EACH(it, enumTypes){
+		(*it).second.clear();
 	}
+	enumTypes.clear();
 }
 
 unsigned Test::getEnum(EnumType enumType)
@@ -45,7 +47,6 @@ FunctionType Test::getFunctionType()
 {
 	return (FunctionType)*itEnumType[ET_FUNCTION];
 }
-
 
 void testAction(unsigned (*g)(Test*), Test* test)
 {
@@ -96,6 +97,10 @@ void* Test::getVariable(std::string key)
 void Test::withAll(EnumType enumType)
 {
 	enumTypes[enumType].clear();
+	enumTypes.erase(enumType);
+	vector<unsigned> new_vector;
+	enumTypes.insert( pair<EnumType, vector<unsigned> >(enumType, new_vector) );
+
 	unsigned dim = Enumerations::enumTypeDim(enumType);
 	for(unsigned i=0; i < dim; i++){
 		enumTypes[enumType].push_back( i);
@@ -138,13 +143,14 @@ void Test::exclude(EnumType enumType, unsigned count, ...)
 std::string Test::getCurrentState()
 {
 	string state;
-	for(int i=0; i < ENUM_TYPE_DIM; ++i) {
-		if (enumTypes[i].size() > 1)  {
-			unsigned value = *(itEnumType[i]);
+	for(unsigned i=0; i < enumTypes.size(); ++i) {
+
+//		if (enumTypes[(EnumType)i].size() > 1)  {
+			unsigned value = *(itEnumType[(EnumType)i]);
 			state += "_" + Enumerations::toString((EnumType)i, value);
-		}
+//		}
 	}
-	for(int i=0; i < iterators.size(); ++i){
+	for(unsigned i=0; i < iterators.size(); ++i){
 		if (iterators[i].min != iterators[i].max){
 			state += "_" + to_string(*iterators[i].variable);
 		}
@@ -172,31 +178,15 @@ void Test::printParameters()
 //    for (int i=0; i < PARAMS_DIM; ++i){
 //		printf("-param %s: min = %d max = %d increment = %d \n", Enumerations::paramToString(params[i].param).data(), params[i].min, params[i].max, params[i].increment);
 //    }
-
-    printf("-Implementations: ");
-    FOR_EACH(it, enumTypes[ET_IMPLEMENTATION]) {
-
-		switch ((ImplementationType)*it){
-			case C: 			printf(" C        "); 	break;
-			case SSE2: 			printf(" SSE2     ");	break;
-			case CUDA: 			printf(" CUDA     ");	break;
-			case CUDA_REDUC:	printf(" CUDA_REDUC    ");	break;
-			case CUDA_INV:		printf(" CUDA_INV ");	break;
+    for(unsigned i=0; i < enumTypes.size(); ++i) {
+		string str = Enumerations::enumTypeToString(i);
+		printf(" %s : ", str.data());
+		FOR_EACH(it, enumTypes[(EnumType)i]) {
+			str = Enumerations::toString((EnumType)i, *it);
+			printf(" %s ", str.data());
 		}
+		printf("\n");
     }
-    printf("\n");
-    printf("-Buffer Types: ");
-    std::vector<unsigned>::iterator it2;
-    FOR_EACH(it, enumTypes[ET_BUFFER]) {
-
-		switch ((BufferType)*it){
-			case FLOAT: printf(" FLOAT "); 	break;
-			case BIT: 	printf(" BIT   ");	break;
-			case SIGN: 	printf(" SIGN  ");	break;
-			case BYTE:	printf(" BYTE  ");	break;
-		}
-    }
-    printf("\n");
 }
 
 unsigned char Test::areEqual(float expected, float actual, BufferType bufferType)

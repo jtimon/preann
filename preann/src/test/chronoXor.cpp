@@ -8,6 +8,7 @@ using namespace std;
 #include "population.h"
 #include "taskXor.h"
 
+#define VECTORS_SIZE 2
 
 int main(int argc, char *argv[])
 {
@@ -23,8 +24,12 @@ int main(int argc, char *argv[])
 	plot.printParameters();
 
 	try {
-		Task* task = new TaskXor(2, 4);
+		Task* task = new TaskXor(VECTORS_SIZE);
 		Individual* example = new Individual(SSE2);
+		task->setInputs(example);
+		example->addLayer(VECTORS_SIZE, BIT, IDENTITY);
+		example->addLayer(VECTORS_SIZE, BIT, IDENTITY);
+
 		plot.plotTask(path, task, example, 100, 100, 20);
 
 		printf("Exit success.\n");
