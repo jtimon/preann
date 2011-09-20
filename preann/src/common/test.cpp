@@ -11,7 +11,7 @@ Test::Test()
 {
 //	for(int i=0; i < ENUM_TYPE_DIM; ++i){
 //		enumTypes[i].push_back(0);
-//		itEnumType[i] = enumTypes[i].begin();
+//		enumTypeIters[i] = enumTypes[i].begin();
 //	}
 	int baseIterator;
 	addIterator(&baseIterator, 1, 1, 1);
@@ -22,30 +22,32 @@ Test::~Test()
 	iterators.clear();
 	variables.clear();
 
-	map<EnumType, std::vector<unsigned> >::iterator it;
-	FOR_EACH(it, enumTypes){
-		(*it).second.clear();
+	for (unsigned i = 0; i < enumTypes.size(); ++i) {
+		enumTypes[i].clear();
 	}
 	enumTypes.clear();
+	enumTypeIters.clear();
+	enumTypePos.clear();
+
 }
 
 unsigned Test::getEnum(EnumType enumType)
 {
-	return *itEnumType[enumType];
+	return *enumTypeIters[enumType];
 }
 
 BufferType Test::getBufferType()
 {
-	return (BufferType)*itEnumType[ET_BUFFER];
+	return (BufferType)*enumTypeIters[ET_BUFFER];
 }
 ImplementationType Test::getImplementationType()
 {
-	return (ImplementationType)*itEnumType[ET_IMPLEMENTATION];
+	return (ImplementationType)*enumTypeIters[ET_IMPLEMENTATION];
 }
 
 FunctionType Test::getFunctionType()
 {
-	return (FunctionType)*itEnumType[ET_FUNCTION];
+	return (FunctionType)*enumTypeIters[ET_FUNCTION];
 }
 
 void testAction(unsigned (*g)(Test*), Test* test)
@@ -94,50 +96,77 @@ void* Test::getVariable(std::string key)
 	return variables[key];
 }
 
+EnumType Test::enumTypeInPos(unsigned pos)
+{
+	map<EnumType, unsigned>::iterator it;
+	FOR_EACH(it, enumTypePos){
+		if ((*it).second == pos){
+			return (*it).first;
+		}
+	}
+	string error = "[Test::enumTypeInPos] There's no enumeration type at pos " + to_string(pos) + ".";
+	throw error;
+}
+
+void Test::initEnumType(EnumType enumType)
+{
+	if (!enumTypePos.count(enumType)){
+		enumTypePos[enumType] = enumTypes.size();
+		vector<unsigned> new_vector;
+		vector<unsigned>::iterator new_it;
+		enumTypes.push_back(new_vector);
+		enumTypeIters.push_back(new_it);
+	}
+}
+
 void Test::withAll(EnumType enumType)
 {
-	enumTypes[enumType].clear();
-	enumTypes.erase(enumType);
-	vector<unsigned> new_vector;
-	enumTypes.insert( pair<EnumType, vector<unsigned> >(enumType, new_vector) );
+	initEnumType(enumType);
+	unsigned etPos = enumTypePos[enumType];
+	enumTypes[etPos].clear();
 
 	unsigned dim = Enumerations::enumTypeDim(enumType);
 	for(unsigned i=0; i < dim; i++){
-		enumTypes[enumType].push_back( i);
+		enumTypes[etPos].push_back( i);
 	}
-	itEnumType[enumType] = enumTypes[enumType].begin();
+	enumTypeIters[etPos] = enumTypes[etPos].begin();
 }
 
 void Test::with(EnumType enumType, unsigned count, ...)
 {
-	enumTypes[enumType].clear();
+	initEnumType(enumType);
+	unsigned etPos = enumTypePos[enumType];
+	enumTypes[etPos].clear();
+
 	va_list ap;
 	va_start (ap, count);
 
 	for (unsigned i = 0; i < count; i++){
 		unsigned arg = va_arg (ap, unsigned);
-		enumTypes[enumType].push_back(arg);
+		enumTypes[etPos].push_back(arg);
 	}
 	va_end (ap);
+	enumTypeIters[etPos] = enumTypes[etPos].begin();
 }
 
 void Test::exclude(EnumType enumType, unsigned count, ...)
 {
 	withAll(enumType);
+	unsigned etPos = enumTypePos[enumType];
 	va_list ap;
 	va_start (ap, count);
 
 	for (unsigned i = 0; i < count; i++){
 		unsigned arg = va_arg (ap, unsigned);
-		vector<unsigned>::iterator j;
-		FOR_EACH(j, enumTypes[enumType]) {
-			if (*j == arg){
-				enumTypes[enumType].erase(j);
+		FOR_EACH(enumTypeIters[etPos], enumTypes[etPos]) {
+			if (*enumTypeIters[etPos] == arg){
+				enumTypes[etPos].erase(enumTypeIters[etPos]);
 				break;
 			}
 		}
 	}
 	va_end (ap);
+	enumTypeIters[etPos] = enumTypes[etPos].begin();
 }
 
 std::string Test::getCurrentState()
@@ -145,10 +174,8 @@ std::string Test::getCurrentState()
 	string state;
 	for(unsigned i=0; i < enumTypes.size(); ++i) {
 
-//		if (enumTypes[(EnumType)i].size() > 1)  {
-			unsigned value = *(itEnumType[(EnumType)i]);
-			state += "_" + Enumerations::toString((EnumType)i, value);
-//		}
+		unsigned value = *(enumTypeIters[i]);
+		state += "_" + Enumerations::toString(enumTypeInPos(i), value);
 	}
 	for(unsigned i=0; i < iterators.size(); ++i){
 		if (iterators[i].min != iterators[i].max){
@@ -179,9 +206,9 @@ void Test::printParameters()
 //		printf("-param %s: min = %d max = %d increment = %d \n", Enumerations::paramToString(params[i].param).data(), params[i].min, params[i].max, params[i].increment);
 //    }
     for(unsigned i=0; i < enumTypes.size(); ++i) {
-		string str = Enumerations::enumTypeToString(i);
+		string str = Enumerations::enumTypeToString(enumTypeInPos(i));
 		printf(" %s : ", str.data());
-		FOR_EACH(it, enumTypes[(EnumType)i]) {
+		FOR_EACH(it, enumTypes[i]) {
 			str = Enumerations::toString((EnumType)i, *it);
 			printf(" %s ", str.data());
 		}

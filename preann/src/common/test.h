@@ -33,9 +33,12 @@ protected:
 	std::map<string, void*> variables;
 	std::vector<IteratorConfig> iterators;
 
-	map<EnumType, std::vector<unsigned> > enumTypes;
-	map<EnumType, std::vector<unsigned>::iterator > itEnumType;
+	map<EnumType, unsigned> enumTypePos;
+	vector< vector<unsigned> > enumTypes;
+	vector< vector<unsigned>::iterator > enumTypeIters;
 
+	void initEnumType(EnumType enumType);
+	EnumType enumTypeInPos(unsigned pos);
 public:
 	Test();
 	virtual ~Test();
@@ -81,7 +84,7 @@ public:
     	if (enu == enumTypes.size()){
     		forIters(action, f, 0);
     	} else {
-    		FOR_EACH(itEnumType[(EnumType)enu], enumTypes[(EnumType)enu]) {
+    		FOR_EACH(enumTypeIters[enu], enumTypes[enu]) {
     			forEnumsIters(action, f, enu + 1);
     		}
     	}
@@ -94,7 +97,7 @@ public:
 //    		printCurrentState();
     		(*action)(f, this);
     	} else {
-    		FOR_EACH(itEnumType[(EnumType)enu], enumTypes[(EnumType)enu]) {
+    		FOR_EACH(enumTypeIters[enu], enumTypes[enu]) {
     			forEnums(action, f, enu + 1);
     		}
     	}

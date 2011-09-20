@@ -44,7 +44,7 @@ int Plot::getPointType()
 {
 // pt : 1=+, 2=X, 3=*, 4=square, 5=filled square, 6=circle,
 //            7=filled circle, 8=triangle, 9=filled triangle, etc.
-	switch (*itEnumType[pointEnum]){
+	switch (*enumTypeIters[pointEnum]){
 		case 0:
 			return 2;
 		case 1:
@@ -64,7 +64,7 @@ int Plot::getPointType()
 int Plot::getLineColor()
 {
 // lt is for color of the points: -1=black 1=red 2=grn 3=blue 4=purple 5=aqua 6=brn 7=orange 8=light-brn
-	switch (*itEnumType[colorEnum]){
+	switch (*enumTypeIters[colorEnum]){
 		case 0:
 			return 1;
 		case 1:
