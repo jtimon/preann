@@ -121,7 +121,8 @@ std::string Plot::createPlotScript(string path, string testedMethod)
 	putVariable("plotFile", plotFile);
 	putVariable("count", &count);
 
-	loopFunction(simpleAction, preparePlotFunction, "preparePlotFunction");
+    string functionName = "preparePlotFunction";
+    loopFunction(simpleAction, preparePlotFunction, functionName);
 
 	fprintf(plotFile, "\n");
 	fclose(plotFile);

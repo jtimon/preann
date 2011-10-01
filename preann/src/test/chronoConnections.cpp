@@ -68,14 +68,17 @@ int main(int argc, char *argv[])
 	Plot plot;
 	plot.addPlotIterator(&size, 1000, 10000, 1000);
 	plot.exclude(ET_BUFFER, 1, BYTE);
-	plot.exclude(ET_IMPLEMENTATION, 1, CUDA);
+	plot.withAll(ET_IMPLEMENTATION);
 
 	plot.printParameters();
 
 	try {
-		plot.plot(chronoCalculateAndAddTo, path, 20, "CONNECTION_CALCULATEANDADDTO");
 		plot.plot(chronoMutate, path, 1000, "CONNECTION_MUTATE");
 		plot.plot(chronoCrossover, path, 10, "CONNECTION_CROSSOVER");
+
+		//TODO todas las implementaciones cuda tienen maximo ??
+		plot.exclude(ET_IMPLEMENTATION, 3, CUDA, CUDA_REDUC, CUDA_INV);
+		plot.plot(chronoCalculateAndAddTo, path, 20, "CONNECTION_CALCULATEANDADDTO");
 
 		printf("Exit success.\n");
 		MemoryManagement::printTotalAllocated();

@@ -68,7 +68,7 @@ public:
     void test( unsigned (*f)(Test*), string testedMethod);
 
     template <class classTempl>
-    void loopFunction( void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), string testedMethod )
+    void loopFunction( void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), string& testedMethod )
     {
     	try {
     		forEnumsIters(action, f, 0);
@@ -82,6 +82,7 @@ public:
     void forEnumsIters (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
     {
     	if (enu == enumTypes.size()){
+//    		printCurrentState();
     		forIters(action, f, 0);
     	} else {
     		FOR_EACH(enumTypeIters[enu], enumTypes[enu]) {

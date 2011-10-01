@@ -25,7 +25,6 @@ void checkAndPrintErrors(string testingClass, Test* test)
 
 void testBuffer(Test* test)
 {
-	test->printCurrentState();
 	Buffer* buffer = Factory::newBuffer(size, test->getBufferType(), test->getImplementationType());
 	delete(buffer);
 
@@ -82,7 +81,6 @@ int main(int argc, char *argv[]) {
 		test.withAll(ET_BUFFER);
 		test.withAll(ET_IMPLEMENTATION);
 		test.printParameters();
-		test.printCurrentState();
 
 		test.simpleTest(testBuffer, "Buffer::memory");
 
