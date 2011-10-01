@@ -51,7 +51,7 @@ public:
 		this->tSize = size;
 
 		size_t byteSize = getByteSize();
-		data = MemoryManagement::mmalloc(byteSize);
+		data = MemoryManagement::malloc(byteSize);
 
 		switch (bufferTypeTempl){
 			case BYTE:
@@ -65,7 +65,7 @@ public:
 	~CppBuffer()
 	{
 		if (data) {
-			MemoryManagement::ffree(data);
+			MemoryManagement::free(data);
 			data = NULL;
 		}
 	}
@@ -118,5 +118,80 @@ public:
 	}
 
 };
+
+//TODO template specialization for BYTE, BIT and SIGN
+//template <class c_typeTempl>
+//class CppBuffer<BYTE, c_typeTempl>: virtual public Buffer{
+//
+//	void activation(Buffer* resultsVect, FunctionType functionType)
+//	{
+//		std::string error = "CppBuffer::activation is not implemented for BufferType BYTE.";
+//		throw error;
+//	}
+//};
+//
+////TODO juntar esto y lo siguiente (que es igual)
+//template <class c_typeTempl>
+//class CppBuffer<BIT, c_typeTempl>: virtual public Buffer{
+//
+//	void activation(Buffer* resultsVect, FunctionType functionType)
+//	{
+//		float* results = (float*)resultsVect->getDataPointer();
+//		unsigned const bits_per_type = sizeof (c_typeTempl) * BITS_PER_BYTE;
+//
+//		c_typeTempl* bufferData = (c_typeTempl*)data;
+//		c_typeTempl mask;
+//		for (unsigned i=0; i < tSize; i++){
+//			if (i % bits_per_type == 0){
+//				//TODO quitar constante
+//				mask = 0x80000000;
+//			} else {
+//				mask >>= 1;
+//			}
+//
+//			if (results[i] > 0){
+//				bufferData[i/bits_per_type] |= mask;
+//			} else {
+//				bufferData[i/bits_per_type] &= ~mask;
+//			}
+//		}
+//	}
+//
+//	unsigned getByteSize()
+//	{
+//		return (((tSize-1)/(sizeof (c_typeTempl) * BITS_PER_BYTE))+1) * sizeof(c_typeTempl);
+//	}
+//};
+//template <class c_typeTempl>
+//class CppBuffer<SIGN, c_typeTempl>: virtual public Buffer{
+//
+//	void activation(Buffer* resultsVect, FunctionType functionType)
+//	{
+//		float* results = (float*)resultsVect->getDataPointer();
+//		unsigned const bits_per_type = sizeof (c_typeTempl) * BITS_PER_BYTE;
+//
+//		c_typeTempl* bufferData = (c_typeTempl*)data;
+//		c_typeTempl mask;
+//		for (unsigned i=0; i < tSize; i++){
+//			if (i % bits_per_type == 0){
+//				//TODO quitar constante
+//				mask = 0x80000000;
+//			} else {
+//				mask >>= 1;
+//			}
+//
+//			if (results[i] > 0){
+//				bufferData[i/bits_per_type] |= mask;
+//			} else {
+//				bufferData[i/bits_per_type] &= ~mask;
+//			}
+//		}
+//	}
+//
+//	unsigned getByteSize()
+//	{
+//		return (((tSize-1)/(sizeof (c_typeTempl) * BITS_PER_BYTE))+1) * sizeof(c_typeTempl);
+//	}
+//};
 
 #endif /* CPPBUFFER_H_ */

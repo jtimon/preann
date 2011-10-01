@@ -101,7 +101,7 @@ void Population::load(FILE *stream)
 //
 //	fread(&size, sizeof(unsigned), 1, stream);
 //	this->maxSize = size;
-//	individualList = (Individual**)MemoryManagement::mmalloc(sizeof(Individual*) * size);
+//	individualList = (Individual**)MemoryManagement::malloc(sizeof(Individual*) * size);
 //	for (unsigned i = 0; i < this->size; i++)
 //	{
 //		individualList[i] = new Individual();
@@ -138,7 +138,7 @@ void Population::save(FILE *stream)
 //
 //	fwrite(&size, sizeof(unsigned), 1, stream);
 //	this->maxSize = size;
-//	individualList = (Individual**)MemoryManagement::mmalloc(sizeof(Individual*) * size);
+//	individualList = (Individual**)MemoryManagement::malloc(sizeof(Individual*) * size);
 //	for (unsigned i = 0; i < this->size; i++)
 //	{
 //		individualList[i] = new Individual();
@@ -482,7 +482,7 @@ void Population::selectTournament()
 		throw error;
 	}
 
-	unsigned* alreadyChosen = (unsigned*)MemoryManagement::mmalloc(sizeof(unsigned)
+	unsigned* alreadyChosen = (unsigned*)MemoryManagement::malloc(sizeof(unsigned)
 			* tournamentSize);
 	for (unsigned i = 0; i < numTournament; i++)
 	{

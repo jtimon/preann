@@ -211,12 +211,12 @@ void Individual::uniformCrossoverWeighs(Individual* other, float probability)
 void Individual::multipointCrossoverWeighs(Individual *other,
 		unsigned numPoints)
 {
-	Interface*** bitBuffers = (Interface***)MemoryManagement::mmalloc(sizeof(Interface**)
+	Interface*** bitBuffers = (Interface***)MemoryManagement::malloc(sizeof(Interface**)
 			* layers.size());
 	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		//One more for the thresholds
-		bitBuffers[i] = (Interface**)MemoryManagement::mmalloc(sizeof(Interface*)
+		bitBuffers[i] = (Interface**)MemoryManagement::malloc(sizeof(Interface*)
 				* (layers[i]->getNumberInputs() + 1));
 		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++)
 		{
@@ -269,19 +269,19 @@ void Individual::multipointCrossoverWeighs(Individual *other,
 		layers[i]->getThresholds()->crossover(
 				other->getLayer(i)->getThresholds(),
 				bitBuffers[i][layers[i]->getNumberInputs()]);
-		MemoryManagement::ffree(bitBuffers[i]);
+		MemoryManagement::free(bitBuffers[i]);
 	}
-	MemoryManagement::ffree(bitBuffers);
+	MemoryManagement::free(bitBuffers);
 }
 
 void Individual::crossoverNeuronsByInput(Interface** inputsBitBuffers,
 		Individual *other)
 {
-	Interface ***bitBuffers = (Interface***)((MemoryManagement::mmalloc(sizeof(Interface**)
+	Interface ***bitBuffers = (Interface***)((MemoryManagement::malloc(sizeof(Interface**)
 			* layers.size())));
 	for (unsigned i = 0; i < layers.size(); i++)
 	{
-		bitBuffers[i] = (Interface**)((MemoryManagement::mmalloc(sizeof(Interface*)
+		bitBuffers[i] = (Interface**)((MemoryManagement::malloc(sizeof(Interface*)
 				* layers[i]->getNumberInputs())));
 		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++)
 		{
@@ -333,9 +333,9 @@ void Individual::crossoverNeuronsByInput(Interface** inputsBitBuffers,
 		layers[i]->getThresholds()->crossover(
 				other->getLayer(i)->getThresholds(),
 				bitBuffers[i][layers[i]->getNumberInputs()]);
-		MemoryManagement::ffree(bitBuffers[i]);
+		MemoryManagement::free(bitBuffers[i]);
 	}
-	MemoryManagement::ffree(bitBuffers);
+	MemoryManagement::free(bitBuffers);
 }
 
 void Individual::uniformCrossoverNeuronsInverted(Individual *other, float probability)
@@ -457,7 +457,7 @@ void Individual::uniformCrossoverNeurons(Individual *other, float probability)
 void Individual::multipointCrossoverNeurons(Individual *other,
 		unsigned numPoints)
 {
-	Interface** bitBuffers = (Interface**)MemoryManagement::mmalloc(sizeof(Interface*)
+	Interface** bitBuffers = (Interface**)MemoryManagement::malloc(sizeof(Interface*)
 			* layers.size());
 	for (unsigned i = 0; i < layers.size(); i++)
 	{
@@ -492,7 +492,7 @@ void Individual::multipointCrossoverNeurons(Individual *other,
 				*(bitBuffers[i]));
 		delete (bitBuffers[i]);
 	}
-	MemoryManagement::ffree(bitBuffers);
+	MemoryManagement::free(bitBuffers);
 }
 
 void Individual::crossoverLayers(Individual *other, Interface* bitBuffer)

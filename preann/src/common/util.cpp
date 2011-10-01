@@ -10,13 +10,13 @@
 vector<void*> MemoryManagement::ptrs;
 vector<unsigned> MemoryManagement::sizes;
 
-void* MemoryManagement::mmalloc(unsigned size)
+void* MemoryManagement::malloc(unsigned size)
 {
 	if (size == 0) {
 		std::string error = "Cannot allocate 0 bytes";
 		throw error;
 	}
-	void* toReturn = malloc(size);
+	void* toReturn = std::malloc(size);
 
 	ptrs.push_back(toReturn);
 	sizes.push_back(size);
@@ -24,14 +24,14 @@ void* MemoryManagement::mmalloc(unsigned size)
 	return toReturn;
 }
 
-void MemoryManagement::ffree(void* ptr)
+void MemoryManagement::free(void* ptr)
 {
 	char found = 0;
 	for(int i=0; i < ptrs.size(); i++){
 		if (ptrs[i] == ptr) {
 			ptrs.erase (ptrs.begin() + i);
 			sizes.erase (sizes.begin() + i);
-			free(ptr);
+			std::free(ptr);
 			found = 1;
 			break;
 		}

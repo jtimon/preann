@@ -17,7 +17,7 @@ NeuralNet::~NeuralNet()
 
 	if (connectionsGraph)
 	{
-		MemoryManagement::ffree(connectionsGraph);
+		MemoryManagement::free(connectionsGraph);
 	}
 	inputs.clear();
 }
@@ -38,7 +38,7 @@ void NeuralNet::calculateOutput()
 void NeuralNet::addLayer(Layer* layer)
 {
 	unsigned newNumberLayers = layers.size() + 1;
-	bool* newConnectionsGraph = (bool*)MemoryManagement::mmalloc(
+	bool* newConnectionsGraph = (bool*)MemoryManagement::malloc(
 			sizeof(bool) * newNumberLayers * newNumberLayers);
 	for (unsigned i = 0; i < newNumberLayers; i++)
 	{
@@ -57,7 +57,7 @@ void NeuralNet::addLayer(Layer* layer)
 	}
 	if (connectionsGraph)
 	{
-		MemoryManagement::ffree(connectionsGraph);
+		MemoryManagement::free(connectionsGraph);
 	}
 	connectionsGraph = newConnectionsGraph;
 
@@ -247,7 +247,7 @@ void NeuralNet::load(FILE* stream)
 	fread(&inputs[0], sizeof(unsigned) * inputs.size(), 1, stream);
 
 	size_t graphSize = sizeof(bool) * layers.size() * layers.size();
-	connectionsGraph = (bool*)(MemoryManagement::mmalloc(graphSize));
+	connectionsGraph = (bool*)(MemoryManagement::malloc(graphSize));
 	fread(connectionsGraph, graphSize, 1, stream);
 
 	stablishConnections();

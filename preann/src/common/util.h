@@ -61,8 +61,8 @@ class MemoryManagement {
 	static vector<unsigned> sizes;
 
 public:
-	static void* mmalloc(unsigned size);
-	static void ffree(void* ptr);
+	static void* malloc(unsigned size);
+	static void free(void* ptr);
 	static void printTotalAllocated();
 	static void printTotalPointers();
 	static void printListOfPointers();

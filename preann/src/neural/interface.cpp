@@ -11,7 +11,7 @@ Interface::Interface(FILE* stream)
 	fread(&size, sizeof(unsigned), 1, stream);
 	fread(&bufferType, sizeof(BufferType), 1, stream);
 	unsigned byteSize = getByteSize();
-	data = MemoryManagement::mmalloc(byteSize);
+	data = MemoryManagement::malloc(byteSize);
 	fread(data, byteSize, 1, stream);
 }
 
@@ -39,7 +39,7 @@ Interface::Interface(unsigned size, BufferType bufferType)
 	this->bufferType = bufferType;
 
 	size_t byteSize = getByteSize();
-	data = MemoryManagement::mmalloc(byteSize);
+	data = MemoryManagement::malloc(byteSize);
     reset();
 }
 
@@ -49,13 +49,13 @@ Interface::Interface(Interface* toCopy)
 	this->bufferType = toCopy->getBufferType();
 
 	size_t byteSize = getByteSize();
-	data = MemoryManagement::mmalloc(byteSize);
+	data = MemoryManagement::malloc(byteSize);
 	memcpy(data, toCopy->getDataPointer(), byteSize);
 }
 
 Interface::~Interface()
 {
-	MemoryManagement::ffree(data);
+	MemoryManagement::free(data);
 }
 
 void* Interface::getDataPointer()
