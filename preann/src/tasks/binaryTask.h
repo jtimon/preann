@@ -1,36 +1,36 @@
 /*
- * taskXor.h
+ * binaryTask.h
  *
  *  Created on: Dec 7, 2010
  *      Author: timon
  */
 
-#ifndef TASKXOR_H_
-#define TASKXOR_H_
+#ifndef BINARYTASK_H_
+#define BINARYTASK_H_
 
 #include "task.h"
 
-class TaskXor : public Task {
+class BinaryTask : public Task {
 protected:
+	BinaryOperation tBinaryOperation;
 	unsigned tSize;
 	unsigned tNumTests;
 	Interface* tInput1;
 	Interface* tInput2;
 	Interface* tOutput;
 
+	virtual void doOperation(unsigned pos);
 	bool bitVectorIncrement(Interface* bitVector);
 public:
-	TaskXor(unsigned size);
-	virtual ~TaskXor();
+	BinaryTask(BinaryOperation binaryOperation, unsigned size);
+	BinaryTask(BinaryOperation binaryOperation, unsigned size, unsigned numTests);
+	virtual ~BinaryTask();
 
 	virtual void test(Individual* individual);
 	virtual void setInputs(Individual* individual);
 	virtual void doOperation();
-//	virtual void doOperation(BinaryOperation binaryOperation);
-//	virtual void doOperation(BinaryOperation binaryOperation, );
 	virtual string toString();
-
 
 };
 
-#endif /* TASKXOR_H_ */
+#endif /* BINARYTASK_H_ */

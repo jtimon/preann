@@ -6,7 +6,7 @@ using namespace std;
 #include "chronometer.h"
 #include "plot.h"
 #include "population.h"
-#include "taskXor.h"
+#include "binaryTask.h"
 
 #define VECTORS_SIZE 2
 
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	plot.printParameters();
 
 	try {
-		Task* task = new TaskXor(VECTORS_SIZE);
+		Task* task = new BinaryTask(BO_XOR, VECTORS_SIZE);
 		Individual* example = new Individual(SSE2);
 		task->setInputs(example);
 		example->addLayer(VECTORS_SIZE, BIT, IDENTITY);
