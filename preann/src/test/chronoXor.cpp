@@ -14,21 +14,27 @@ int main(int argc, char *argv[])
 {
 	Chronometer total;
 	total.start();
-	string path = "/home/timon/workspace/preann/output/";
-
-	Plot plot;
-	plot.withAll(ET_CROSS_ALG);
-	plot.withAll(ET_CROSS_LEVEL);
-	plot.withAll(ET_MUTATION_ALG);
-
-	plot.printParameters();
-
 	try {
+		string path = "/home/timon/workspace/preann/output/";
+
+		Plot plot;
+		plot.withAll(ET_CROSS_ALG);
+		plot.withAll(ET_CROSS_LEVEL);
+	//	plot.withAll(ET_MUTATION_ALG);
+
+		plot.setColorEnum(ET_CROSS_ALG);
+		plot.setPointEnum(ET_CROSS_LEVEL);
+
+		plot.printParameters();
+
 		Task* task = new BinaryTask(BO_XOR, VECTORS_SIZE);
 		Individual* example = new Individual(SSE2);
 		task->setInputs(example);
+		example->addLayer(VECTORS_SIZE * 2, BIT, IDENTITY);
 		example->addLayer(VECTORS_SIZE, BIT, IDENTITY);
-		example->addLayer(VECTORS_SIZE, BIT, IDENTITY);
+		example->addLayersConnection(0, 2);
+		example->addLayersConnection(1, 2);
+		example->addLayersConnection(2, 3);
 
 		plot.plotTask(path, task, example, 100, 100, 20);
 

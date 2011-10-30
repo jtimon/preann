@@ -25,7 +25,7 @@ void checkAndPrintErrors(string testingClass, Test* test)
 
 void testBuffer(Test* test)
 {
-	Buffer* buffer = Factory::newBuffer(size, test->getBufferType(), test->getImplementationType());
+	Buffer* buffer = Factory::newBuffer(size, (BufferType)test->getEnum(ET_BUFFER), (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
 	delete(buffer);
 
     checkAndPrintErrors("Buffer", test);
@@ -33,8 +33,8 @@ void testBuffer(Test* test)
 
 void testConnection(Test* test)
 {
-	Buffer* buffer = Factory::newBuffer(size, test->getBufferType(), test->getImplementationType());
-	Connection* connection = Factory::newConnection(buffer, size, test->getImplementationType());
+	Buffer* buffer = Factory::newBuffer(size, (BufferType)test->getEnum(ET_BUFFER), (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
+	Connection* connection = Factory::newConnection(buffer, size, (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
 
 	delete(connection);
 	delete(buffer);
@@ -44,7 +44,7 @@ void testConnection(Test* test)
 
 void testLayer(Test* test)
 {
-    Layer *layer = new Layer(size, test->getBufferType(), IDENTITY, test->getImplementationType());
+    Layer *layer = new Layer(size, (BufferType)test->getEnum(ET_BUFFER), IDENTITY, (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());

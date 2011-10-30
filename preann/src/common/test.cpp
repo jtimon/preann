@@ -9,12 +9,6 @@
 
 Test::Test()
 {
-//	for(int i=0; i < ENUM_TYPE_DIM; ++i){
-//		enumTypes[i].push_back(0);
-//		enumTypeIters[i] = enumTypes[i].begin();
-//	}
-	int baseIterator;
-	addIterator(&baseIterator, 1, 1, 1);
 }
 
 Test::~Test()
@@ -22,32 +16,65 @@ Test::~Test()
 	iterators.clear();
 	variables.clear();
 
-	for (unsigned i = 0; i < enumTypes.size(); ++i) {
-		enumTypes[i].clear();
+	for (unsigned i = 0; i < enumerations.size(); ++i) {
+		enumerations[i]->valueVector.clear();
+		delete(enumerations[i]);
 	}
-	enumTypes.clear();
-	enumTypeIters.clear();
-	enumTypePos.clear();
+	enumerations.clear();
+	enumMap.clear();
+}
 
+EnumType Test::enumTypeAtPos(unsigned pos)
+{
+	std::map<EnumType, unsigned >::iterator it;
+	FOR_EACH(it, enumMap){
+		if(it->second == pos){
+			return it->first;
+		}
+	}
+    if (pos >= enumerations.size()){
+		string error = "Test::enumTypeAtPos : cannot access the pos " + to_string(pos) +
+				" there's only " + to_string(enumerations.size()) + " enumerations.";
+		throw error;
+    }
+	string error = "Test::enumTypeAtPos : No enum defined at pos " + pos;
+	throw error;
+}
+
+EnumIterConfig* Test::getEnumConfig(EnumType enumType)
+{
+	if (!enumMap.count(enumType)){
+		string error = "Test::getEnumConfig : The test has no defined vector for enum " + Enumerations::enumTypeToString(enumType);
+		throw error;
+	}
+	return getEnumConfigAtPos( enumMap[enumType] );
+}
+
+EnumIterConfig* Test::getEnumConfigAtPos(unsigned pos)
+{
+    if (pos >= enumerations.size()){
+		string error = "Test::getEnumConfigAtPos : cannot access the pos " + to_string(pos) +
+				" there's only " + to_string(enumerations.size()) + " enumerations.";
+		throw error;
+    }
+    return enumerations[pos];
 }
 
 unsigned Test::getEnum(EnumType enumType)
 {
-	return *enumTypeIters[enumType];
-}
-
-BufferType Test::getBufferType()
-{
-	return (BufferType)*enumTypeIters[ET_BUFFER];
-}
-ImplementationType Test::getImplementationType()
-{
-	return (ImplementationType)*enumTypeIters[ET_IMPLEMENTATION];
-}
-
-FunctionType Test::getFunctionType()
-{
-	return (FunctionType)*enumTypeIters[ET_FUNCTION];
+	if (!enumMap.count(enumType)){
+		string error = "Test::getEnum : The test has no defined vector for enum " + Enumerations::enumTypeToString(enumType);
+		throw error;
+	}
+	EnumIterConfig* enumConfig = getEnumConfig(enumType);
+	unsigned index = enumConfig->index;
+    unsigned vectorSize = enumConfig->valueVector.size();
+    if(index >= vectorSize) {
+		string error = "Test::getEnum : The index points to " + to_string(index) +
+				" but the vector has only " + to_string(vectorSize) + " values.";
+		throw error;
+	}
+	return enumConfig->valueVector[ index ];
 }
 
 void testAction(unsigned (*g)(Test*), Test* test)
@@ -74,7 +101,7 @@ void Test::simpleTest( void (*f)(Test*), string testedMethod )
 	cout << testedMethod << endl;
 }
 
-void Test::addIterator(int* variable, unsigned min, unsigned max, unsigned increment)
+void Test::addIterator(int* variable, int min, int max, int increment)
 {
 	IteratorConfig iterator;
 	iterator.variable = variable;
@@ -96,87 +123,79 @@ void* Test::getVariable(std::string key)
 	return variables[key];
 }
 
-EnumType Test::enumTypeInPos(unsigned pos)
-{
-	map<EnumType, unsigned>::iterator it;
-	FOR_EACH(it, enumTypePos){
-		if ((*it).second == pos){
-			return (*it).first;
-		}
-	}
-	string error = "[Test::enumTypeInPos] There's no enumeration type at pos " + to_string(pos) + ".";
-	throw error;
-}
-
 void Test::initEnumType(EnumType enumType)
 {
-	if (!enumTypePos.count(enumType)){
-		enumTypePos[enumType] = enumTypes.size();
-		vector<unsigned> new_vector;
-		vector<unsigned>::iterator new_it;
-		enumTypes.push_back(new_vector);
-		enumTypeIters.push_back(new_it);
+	if (!enumMap.count(enumType)){
+		EnumIterConfig* config = new EnumIterConfig();
+		config->valueVector.clear();
+		config->index = 0;
+		enumMap[enumType] = enumerations.size();
+		enumerations.push_back(config);
 	}
 }
 
 void Test::withAll(EnumType enumType)
 {
 	initEnumType(enumType);
-	unsigned etPos = enumTypePos[enumType];
-	enumTypes[etPos].clear();
+	EnumIterConfig* enumConfig = getEnumConfig(enumType);
+	enumConfig->valueVector.clear();
 
 	unsigned dim = Enumerations::enumTypeDim(enumType);
 	for(unsigned i=0; i < dim; i++){
-		enumTypes[etPos].push_back( i);
+		enumConfig->valueVector.push_back( i);
 	}
-	enumTypeIters[etPos] = enumTypes[etPos].begin();
 }
 
 void Test::with(EnumType enumType, unsigned count, ...)
 {
 	initEnumType(enumType);
-	unsigned etPos = enumTypePos[enumType];
-	enumTypes[etPos].clear();
+	EnumIterConfig* enumConfig = getEnumConfig(enumType);
+	enumConfig->valueVector.clear();
 
 	va_list ap;
 	va_start (ap, count);
 
+	unsigned dim = Enumerations::enumTypeDim(enumType);
 	for (unsigned i = 0; i < count; i++){
 		unsigned arg = va_arg (ap, unsigned);
-		enumTypes[etPos].push_back(arg);
+		if (arg < dim){
+			enumConfig->valueVector.push_back(arg);
+		}
 	}
 	va_end (ap);
-	enumTypeIters[etPos] = enumTypes[etPos].begin();
 }
 
 void Test::exclude(EnumType enumType, unsigned count, ...)
 {
 	withAll(enumType);
-	unsigned etPos = enumTypePos[enumType];
+	EnumIterConfig* enumConfig = getEnumConfig(enumType);
+
 	va_list ap;
 	va_start (ap, count);
 
 	for (unsigned i = 0; i < count; i++){
 		unsigned arg = va_arg (ap, unsigned);
-		FOR_EACH(enumTypeIters[etPos], enumTypes[etPos]) {
-			if (*enumTypeIters[etPos] == arg){
-				enumTypes[etPos].erase(enumTypeIters[etPos]);
+
+		vector<unsigned>::iterator it;
+		FOR_EACH(it, enumConfig->valueVector) {
+			if (*it == arg){
+				enumConfig->valueVector.erase(it);
 				break;
 			}
 		}
 	}
 	va_end (ap);
-	enumTypeIters[etPos] = enumTypes[etPos].begin();
 }
 
 std::string Test::getCurrentState()
 {
 	string state;
-	for(unsigned i=0; i < enumTypes.size(); ++i) {
 
-		unsigned value = *(enumTypeIters[i]);
-		state += "_" + Enumerations::toString(enumTypeInPos(i), value);
+    map<EnumType, unsigned>::iterator it;
+	FOR_EACH(it, enumMap){
+		state += "_" + Enumerations::toString(it->first, getEnum(it->first));
 	}
+
 	for(unsigned i=0; i < iterators.size(); ++i){
 		if (iterators[i].min != iterators[i].max){
 			state += "_" + to_string(*iterators[i].variable);
@@ -200,20 +219,21 @@ void Test::printCurrentState()
 
 void Test::printParameters()
 {
-    std::vector<unsigned>::iterator it;
     //TODO imprimir iteradores
 //    for (int i=0; i < PARAMS_DIM; ++i){
 //		printf("-param %s: min = %d max = %d increment = %d \n", Enumerations::paramToString(params[i].param).data(), params[i].min, params[i].max, params[i].increment);
 //    }
-    for(unsigned i=0; i < enumTypes.size(); ++i) {
-		string str = Enumerations::enumTypeToString(enumTypeInPos(i));
-		printf(" %s : ", str.data());
-		FOR_EACH(it, enumTypes[i]) {
-			str = Enumerations::toString((EnumType)i, *it);
-			printf(" %s ", str.data());
+	for (unsigned i = 0; i < enumerations.size(); ++i) {
+		EnumType enumType = enumTypeAtPos(i);
+
+		string str = Enumerations::enumTypeToString(enumType) + " : ";
+
+		vector<unsigned> enumVect = enumerations[i]->valueVector;
+		for (unsigned i = 0; i < enumVect.size(); ++i) {
+			str += Enumerations::toString(enumType, enumVect[i]) + " ";
 		}
-		printf("\n");
-    }
+		printf(" %s \n", str.data());
+	}
 }
 
 unsigned char Test::areEqual(float expected, float actual, BufferType bufferType)
@@ -277,5 +297,6 @@ FILE* Test::openFile(string path)
 		string error = "Error opening " + path;
 		throw error;
 	}
+//	printf(" opening file \"%s\"\n", path.data());
 	return dataFile;
 }

@@ -15,7 +15,7 @@ unsigned testActivation(Test* test)
 {
 	START_BUFFER_TEST
 
-	FunctionType functionType = test->getFunctionType();
+	FunctionType functionType = (FunctionType)test->getEnum(ET_FUNCTION);
 	Buffer* results = Factory::newBuffer(buffer->getSize(), FLOAT, buffer->getImplementationType());
 	results->random(initialWeighsRange);
 

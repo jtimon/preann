@@ -57,18 +57,20 @@ int main(int argc, char *argv[])
 {
 	Chronometer total;
 	total.start();
-	string path = "/home/timon/workspace/preann/output/";
-
-	Plot plot;
-
-	plot.addPlotIterator(&size, 1000, 10000, 1000);
-	plot.exclude(ET_BUFFER, 1, BYTE);
-	plot.exclude(ET_IMPLEMENTATION, 1, CUDA);
-
-	plot.printParameters();
-	plot.printCurrentState();
-
 	try {
+		string path = "/home/timon/workspace/preann/output/";
+
+		Plot plot;
+		plot.addPlotIterator(&size, 1000, 10000, 1000);
+		plot.exclude(ET_BUFFER, 1, BYTE);
+		plot.exclude(ET_IMPLEMENTATION, 1, CUDA);
+
+		plot.setColorEnum(ET_IMPLEMENTATION);
+		plot.setPointEnum(ET_BUFFER);
+
+		plot.printParameters();
+		plot.printCurrentState();
+
 //		plot.plot(chronoActivation, path, 100, "BUFFER_ACTIVATION");
 //		plot.plot(chronoCopyFromInterface, path, 1000, "BUFFER_COPYFROMINTERFACE");
 //		plot.plot(chronoCopyToInterface, path, 1000, "BUFFER_COPYTOINTERFACE");

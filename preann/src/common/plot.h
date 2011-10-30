@@ -28,15 +28,15 @@ protected:
 
 //	FILE* preparePlotAndDataFile(string path, string testedMethod);
 //	void plotDataFile(string path, string testedMethod);
-	std::string createPlotScript(string path, string testedMethod);
-	void plotDataFile(string plotPath);
+	string getPlotPath(string path, string testedMethod);
+	void createPlotScript(string path, string testedMethod);
+	void plotFile(string path, string testedMethod);
 public:
 	Plot();
 	virtual ~Plot();
 
 	int getPointType();
 	int getLineColor();
-	void plotFile(string plotPath);
 
 	void setColorEnum(EnumType colorEnum);
 	void setPointEnum(EnumType pointEnum);

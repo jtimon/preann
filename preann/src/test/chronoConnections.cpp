@@ -70,6 +70,9 @@ int main(int argc, char *argv[])
 	plot.exclude(ET_BUFFER, 1, BYTE);
 	plot.withAll(ET_IMPLEMENTATION);
 
+	plot.setColorEnum(ET_IMPLEMENTATION);
+	plot.setPointEnum(ET_BUFFER);
+
 	plot.printParameters();
 
 	try {

@@ -7,7 +7,7 @@
 #define START_TEST unsigned differencesCounter = 0;
 #define END_TEST return differencesCounter;
 
-#define START_BUFFER Buffer* buffer = Factory::newBuffer(size, test->getBufferType(), test->getImplementationType()); buffer->random(initialWeighsRange);
+#define START_BUFFER Buffer* buffer = Factory::newBuffer(size, (BufferType)test->getEnum(ET_BUFFER), (ImplementationType)test->getEnum(ET_IMPLEMENTATION)); buffer->random(initialWeighsRange);
 #define END_BUFFER delete(buffer);
 
 #define START_BUFFER_TEST START_TEST START_BUFFER
@@ -26,26 +26,36 @@ struct IteratorConfig{
 	int increment;
 };
 
+struct EnumIterConfig{
+	vector<unsigned> valueVector;
+	unsigned index;
+};
+
+
 #define FOR_ITER_CONF(_iter) for(*_iter.variable = _iter.min; *_iter.variable <= _iter.max; *_iter.variable += _iter.increment)
 
 class Test {
 protected:
 	std::map<string, void*> variables;
 	std::vector<IteratorConfig> iterators;
+	std::vector<EnumIterConfig*> enumerations;
+	std::map<EnumType, unsigned > enumMap;
 
-	map<EnumType, unsigned> enumTypePos;
-	vector< vector<unsigned> > enumTypes;
-	vector< vector<unsigned>::iterator > enumTypeIters;
+//	map<EnumType, unsigned> enumTypePos;
+//	vector< vector<unsigned> > enumTypes;
+//	vector< vector<unsigned>::iterator > enumTypeIters;
 
 	void initEnumType(EnumType enumType);
-	EnumType enumTypeInPos(unsigned pos);
+	EnumType enumTypeAtPos(unsigned pos);
+	EnumIterConfig* getEnumConfig(EnumType enumType);
+	EnumIterConfig* getEnumConfigAtPos(unsigned pos);
 public:
 	Test();
 	virtual ~Test();
 
 	void putVariable(std::string key, void* variable);
 	void* getVariable(std::string key);
-	void addIterator(int* variable, unsigned min, unsigned max, unsigned increment);
+	void addIterator(int* variable, int min, int max, int increment);
     void withAll(EnumType enumType);
     void with(EnumType enumType, unsigned count, ...);
     void exclude(EnumType enumType, unsigned count, ...);
@@ -81,26 +91,28 @@ public:
     template <class classTempl>
     void forEnumsIters (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
     {
-    	if (enu == enumTypes.size()){
+    	if (enu == enumerations.size()){
 //    		printCurrentState();
     		forIters(action, f, 0);
     	} else {
-    		FOR_EACH(enumTypeIters[enu], enumTypes[enu]) {
+    		EnumIterConfig* enumConfig = getEnumConfigAtPos(enu);
+    		for (enumConfig->index = 0; enumConfig->index < enumConfig->valueVector.size(); ++enumConfig->index) {
     			forEnumsIters(action, f, enu + 1);
-    		}
+			}
     	}
     }
 
     template <class classTempl>
     void forEnums (void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), unsigned enu)
     {
-    	if (enu == enumTypes.size()){
+    	if (enu == enumerations.size()){
 //    		printCurrentState();
     		(*action)(f, this);
     	} else {
-    		FOR_EACH(enumTypeIters[enu], enumTypes[enu]) {
+    		EnumIterConfig* enumConfig = getEnumConfigAtPos(enu);
+    		for (enumConfig->index = 0; enumConfig->index < enumConfig->valueVector.size(); ++enumConfig->index) {
     			forEnums(action, f, enu + 1);
-    		}
+			}
     	}
     }
 

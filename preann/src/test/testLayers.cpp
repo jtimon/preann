@@ -31,7 +31,7 @@ Layer* createAndLoadLayer(ImplementationType implementationType, Buffer** inputB
 
 Layer* createAndSaveLayer(Test* test, Buffer** controlInputs)
 {
-    Layer* controlLayer = new Layer(size, test->getBufferType(), IDENTITY, C);
+    Layer* controlLayer = new Layer(size, (BufferType)test->getEnum(ET_BUFFER), IDENTITY, C);
 
     for (unsigned i = 0; i < NUM_INPUTS; i++){
 		controlLayer->addInput(controlInputs[i]);
@@ -64,11 +64,11 @@ unsigned testCalculateOutput(Test* test)
 
 	Buffer* inputBuffers[NUM_INPUTS];
 	for (unsigned i = 0; i < NUM_INPUTS; i++) {
-		inputBuffers[i] = Factory::newBuffer(size, controlInputBuffers[i]->getBufferType(), test->getImplementationType());
+		inputBuffers[i] = Factory::newBuffer(size, controlInputBuffers[i]->getBufferType(), (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
 		inputBuffers[i]->copyFrom(controlInputBuffers[i]);
 	}
 
-	Layer* layer = createAndLoadLayer(test->getImplementationType(), inputBuffers);
+	Layer* layer = createAndLoadLayer((ImplementationType)test->getEnum(ET_IMPLEMENTATION), inputBuffers);
 
     //test calculation
 	layer->calculateOutput();
