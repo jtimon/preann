@@ -578,7 +578,7 @@ float Individual::getFitness()
 bool Individual::checkCompatibility(Individual *other)
 {
 	if (layers.size() != other->getNumLayers() || inputs.size() != other->getNumInputs()
-			|| getImplementationType() != other->getImplementationType())
+			|| this->getImplementationType() != other->getImplementationType())
 	{
 		return false;
 	}
