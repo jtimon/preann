@@ -158,9 +158,9 @@ std::string Enumerations::functionTypeToString(unsigned functionType)
 	throw error;
 }
 
-std::string Enumerations::enumTypeToString(unsigned enumType)
+std::string Enumerations::enumTypeToString(EnumType enumType)
 {
-	switch((EnumType)enumType){
+	switch(enumType){
 	case ET_BINARY_OPERATION:
 		return "Binary_operation";
 	case ET_BUFFER:

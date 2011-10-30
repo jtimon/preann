@@ -40,7 +40,7 @@ public:
 	static std::string mutationAlgorithmToString(unsigned bufferType);
 	static std::string bufferTypeToString(unsigned bufferType);
 	static std::string implementationToString(unsigned implementationType);
-	static std::string enumTypeToString(unsigned enumType);
+	static std::string enumTypeToString(EnumType enumType);
 	static std::string functionTypeToString(unsigned functionType);
 	static std::string binaryOperationToString(unsigned binaryOperation);
 };
