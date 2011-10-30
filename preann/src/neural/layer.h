@@ -26,7 +26,7 @@ public:
 	void calculateOutput();
 
 	void randomWeighs(float range);
-	void copyWeighs(Layer* sourceLayer);
+	virtual void copyWeighs(Layer* sourceLayer);
 	void loadWeighs(FILE* stream);
 	void saveWeighs(FILE* stream);
 	void save(FILE* stream);

@@ -161,23 +161,23 @@ FunctionType Layer::getFunctionType()
    return functionType;
 }
 
-void Layer::copyWeighs(Layer* other)
+void Layer::copyWeighs(Layer* sourceLayer)
 {
-	if(connections.size() != other->getNumberInputs()){
-		char buffer[100];
-		sprintf(buffer, "Cannot copyWeighs from a layer with %d connections to a layer with %d.",
-				other->getNumberInputs(), connections.size());
-		std::string error = buffer;
+	if(connections.size() != sourceLayer->getNumberInputs()){
+		//TODO quitar sprintf(
+		std::string error = "Layer::copyWeighs : Cannot copyWeighs from a layer with " +
+			to_string(sourceLayer->getNumberInputs()) + " connections to a layer with " +
+			to_string(connections.size());
 		throw error;
 	}
-	if (this->getImplementationType() != other->getImplementationType()){
-		std::string error = "The layers are incompatible: the implementation is different.";
+	if (this->getImplementationType() != sourceLayer->getImplementationType()){
+		std::string error = "Layer::copyWeighs : The layers are incompatible: the implementation is different.";
 		throw error;
 	}
 	//TODO L implementar metodo Buffer::copyFast restringido a bufferes con el mismo tipo de implementacion
 	for(int i=0; i < connections.size(); i++){
-		connections[i]->copyFrom(other->getConnection(i));
+		connections[i]->copyFrom(sourceLayer->getConnection(i));
 	}
-	thresholds->copyFrom(other->getThresholds());
+	thresholds->copyFrom(sourceLayer->getThresholds());
 }
 

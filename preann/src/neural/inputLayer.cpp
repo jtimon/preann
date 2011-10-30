@@ -29,6 +29,11 @@ InputLayer::~InputLayer()
 //	}
 }
 
+ImplementationType InputLayer::getImplementationType()
+{
+	output->getImplementationType();
+}
+
 void InputLayer::addInput(Buffer *input)
 {
 	std::string error = "addInput method does not work for InputLayer.";
@@ -38,6 +43,25 @@ void InputLayer::addInput(Buffer *input)
 void InputLayer::calculateOutput()
 {
 	output->copyFromInterface(tInput);
+}
+
+void InputLayer::copyWeighs(Layer* sourceLayer)
+{
+	if(connections.size() != sourceLayer->getNumberInputs()){
+		//TODO quitar sprintf(
+		std::string error = "InputLayer::copyWeighs : Cannot copyWeighs from a layer with " +
+			to_string(sourceLayer->getNumberInputs()) + " connections to a layer with " +
+			to_string(connections.size());
+		throw error;
+	}
+	if (this->getImplementationType() != sourceLayer->getImplementationType()){
+		std::string error = "InputLayer::copyWeighs : The layers are incompatible: the implementation is different.";
+		throw error;
+	}
+	if (sourceLayer->getThresholds() != NULL){
+		std::string error = "InputLayer::copyWeighs : trying to copy from a non input layer";
+		throw error;
+	}
 }
 
 Interface* InputLayer::getInputInterface()

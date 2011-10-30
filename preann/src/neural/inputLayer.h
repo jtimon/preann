@@ -19,10 +19,12 @@ public:
 	InputLayer(unsigned size, BufferType bufferType, ImplementationType implementationType);
 	virtual ~InputLayer();
 
-	void addInput(Buffer* input);
-	void calculateOutput();
+	virtual void addInput(Buffer* input);
+	virtual void calculateOutput();
+	virtual void copyWeighs(Layer* sourceLayer);
 
 	Interface* getInputInterface();
+
 };
 
 #endif /* INPUTLAYER_H_ */
