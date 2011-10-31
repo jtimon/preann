@@ -65,8 +65,11 @@ void BinaryTask::setInputs(Individual* individual)
 
 void BinaryTask::test(Individual *individual)
 {
+	float maxPoints;
 	float differences = 0;
 	if (tNumTests == 0){
+
+		maxPoints = pow(2, tInput1->getSize()) * pow(2, tInput2->getSize()) * tOutput->getSize();
 
 		tInput1->reset();
 		while(bitVectorIncrement(tInput1)){
@@ -78,6 +81,8 @@ void BinaryTask::test(Individual *individual)
 			}
 		}
 	} else {
+		maxPoints = tOutput->getSize() * tNumTests;
+
 		for (unsigned i = 0; i < tNumTests; ++i)
 		{
 			tInput1->random(1);
@@ -87,7 +92,7 @@ void BinaryTask::test(Individual *individual)
 			differences += individual->getOutput(0)->compareTo(tOutput);
 		}
 	}
-	individual->setFitness(-differences);
+	individual->setFitness(maxPoints-differences);
 }
 
 void BinaryTask::doOperation(unsigned pos)
