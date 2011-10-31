@@ -63,7 +63,8 @@ void Population::setDefaults()
 
 Population::~Population()
 {
-	for (list<Individual*>::iterator it = individuals.begin(); it != individuals.end(); it++) {
+	list<Individual*>::iterator it;
+	FOR_EACH(it, individuals){
 		delete(*it);
 	}
 	individuals.clear();
@@ -148,6 +149,7 @@ void Population::save(FILE *stream)
 void Population::insertIndividual(Individual *individual)
 {
 	task->test(individual);
+	bool inserted = false;
 
     float fitness = individual->getFitness();
     list<Individual*>::iterator it;
@@ -155,8 +157,14 @@ void Population::insertIndividual(Individual *individual)
 		if(fitness > (*it)->getFitness()) {
 			individuals.insert(it, individual);
 			total_score += fitness;
+			inserted = true;
+			break;
 		}
 	}
+    if (!inserted){
+    	individuals.push_back(individual);
+		total_score += fitness;
+    }
 	if (individuals.size() > this->maxSize){
 		total_score -= individuals.back()->getFitness();
 		delete(individuals.back());
