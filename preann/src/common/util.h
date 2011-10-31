@@ -23,6 +23,7 @@ using namespace std;
 #include <math.h>
 #include <sstream>
 #include <map>
+#include <algorithm>
 
 #define FOR_EACH(_iter,_coll) for (_iter = _coll.begin(); _iter != _coll.end(); ++_iter)
 #define ENUM_VECTOR2(_vector, _array, _values...) unsigned _array[] = {_values}; std::vector<unsigned> _vector; _vector.insert(_vector.end(), _array, _array + (sizeof(_array) / sizeof(_array[0])))
@@ -68,6 +69,21 @@ public:
 	static void printListOfPointers();
 	static unsigned getPtrCounter();
 	static unsigned getTotalAllocated();
+};
+
+typedef std::vector< std::pair<unsigned, unsigned> > pair_vect;
+typedef std::vector< std::pair<unsigned, unsigned> >::iterator pair_vect_iterator;
+
+class SimpleGraph {
+	std::vector< std::pair<unsigned, unsigned> > graph;
+public:
+	void addConnection(unsigned source, unsigned destination);
+	bool removeConnection(unsigned source, unsigned destination);
+	bool checkConnection(unsigned source, unsigned destination);
+	std::vector< std::pair<unsigned, unsigned> >::iterator getIterator();
+	std::vector< std::pair<unsigned, unsigned> >::iterator getEnd();
+	void save(FILE* stream);
+	void load(FILE* stream);
 };
 
 #endif /* UTIL_H_ */
