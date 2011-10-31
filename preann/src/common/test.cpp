@@ -193,7 +193,9 @@ std::string Test::getCurrentState()
 
     map<EnumType, unsigned>::iterator it;
 	FOR_EACH(it, enumMap){
-		state += "_" + Enumerations::toString(it->first, getEnum(it->first));
+		if(getEnumConfigAtPos(it->second)->valueVector.size() > 1) {
+			state += "_" + Enumerations::toString(it->first, getEnum(it->first));
+		}
 	}
 
 	for(unsigned i=0; i < iterators.size(); ++i){
