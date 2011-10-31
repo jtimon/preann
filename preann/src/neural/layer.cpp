@@ -147,10 +147,8 @@ Connection* Layer::getThresholds()
 Connection* Layer::getConnection(unsigned inputPos)
 {
 	if (inputPos > connections.size()){
-		char buffer[100];
-		sprintf(buffer, "Cannot access the Connection in position %d: the Layer has only %d inputs.",
-				inputPos, connections.size());
-		std::string error = buffer;
+		string error = "Cannot access the Connection in position " + to_string(inputPos) +
+			": the Layer has only " + to_string(connections.size()) + " inputs.";
 		throw error;
 	}
 	return connections[inputPos];
@@ -164,7 +162,6 @@ FunctionType Layer::getFunctionType()
 void Layer::copyWeighs(Layer* sourceLayer)
 {
 	if(connections.size() != sourceLayer->getNumberInputs()){
-		//TODO quitar sprintf(
 		std::string error = "Layer::copyWeighs : Cannot copyWeighs from a layer with " +
 			to_string(sourceLayer->getNumberInputs()) + " connections to a layer with " +
 			to_string(connections.size());

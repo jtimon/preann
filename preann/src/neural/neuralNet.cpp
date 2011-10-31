@@ -87,12 +87,8 @@ void NeuralNet::updateInput(unsigned inputPos, Interface* input)
 {
 	if (inputPos > inputs.size())
 	{
-		char buffer[100];
-		sprintf(
-				buffer,
-				"Cannot get the Input in position %d: there are just %d Inputs.",
-				inputPos, inputs.size());
-		std::string error = buffer;
+		std::string error = "Cannot get the Input in position " + to_string(inputPos) +
+				": there are just " + to_string(inputs.size()) + " Inputs.";
 		throw error;
 	}
 	return ((InputLayer*)(layers[inputs[inputPos]]))->getInputInterface()->copyFromFast(input);
@@ -107,12 +103,8 @@ unsigned char NeuralNet::isInputLayer(unsigned layerPos)
 {
 	if (layerPos >= layers.size())
 	{
-		char buffer[100];
-		sprintf(
-				buffer,
-				"Cannot access the Layer in position %d: there are just %d layers.",
-				layerPos, layers.size());
-		std::string error = buffer;
+		std::string error = "Cannot access the Layer in position " + to_string(layerPos) +
+				": there are just " + to_string(layers.size()) + " layers.";
 		throw error;
 	}
 	for (unsigned i = 0; i < inputs.size(); ++i)
@@ -129,12 +121,8 @@ Interface* NeuralNet::getOutput(unsigned layerPos)
 {
 	if (layerPos >= layers.size())
 	{
-		char buffer[100];
-		sprintf(
-				buffer,
-				"Cannot access the output in position %d: there are just %d layers.",
-				layerPos, layers.size());
-		std::string error = buffer;
+		std::string error = "Cannot access the output in position " + to_string(layerPos) +
+				": there are just " + to_string(layers.size()) + " layers.";
 		throw error;
 	}
 	return layers[ layerPos ]->getOutputInterface();
@@ -157,12 +145,9 @@ void NeuralNet::addLayersConnection(unsigned sourceLayerPos, unsigned destinatio
 {
 	if (sourceLayerPos >= layers.size() || destinationLayerPos >= layers.size())
 	{
-		char buffer[100];
-		sprintf(
-				buffer,
-				"Cannot connect Layer in position %d with Layer in position %d: there are just %d Layers.",
-				sourceLayerPos, destinationLayerPos, layers.size());
-		std::string error = buffer;
+		std::string error = "Cannot connect Layer in position " + to_string(sourceLayerPos) +
+				" with Layer in position " + to_string(destinationLayerPos) +
+				": there are just " + to_string(layers.size()) + " Layers.";
 		throw error;
 	}
 

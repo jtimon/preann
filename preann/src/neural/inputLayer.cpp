@@ -48,7 +48,6 @@ void InputLayer::calculateOutput()
 void InputLayer::copyWeighs(Layer* sourceLayer)
 {
 	if(connections.size() != sourceLayer->getNumberInputs()){
-		//TODO quitar sprintf(
 		std::string error = "InputLayer::copyWeighs : Cannot copyWeighs from a layer with " +
 			to_string(sourceLayer->getNumberInputs()) + " connections to a layer with " +
 			to_string(connections.size());

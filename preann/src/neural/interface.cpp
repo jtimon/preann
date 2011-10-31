@@ -91,12 +91,8 @@ float Interface::getElement(unsigned pos)
 {
 	if (pos >= size)
 	{
-		char buffer[100];
-		sprintf(
-				buffer,
-				"Cannot get the element in position %d: the size of the buffer is %d.",
-				pos, size);
-		std::string error = buffer;
+		std::string error = "Cannot get the element in position " + to_string(pos) +
+			": the size of the buffer is " + to_string(size) + ".";
 		throw error;
 	}
 	switch (bufferType)
@@ -125,12 +121,8 @@ void Interface::setElement(unsigned pos, float value)
 {
 	if (pos >= size)
 	{
-		char buffer[100];
-		sprintf(
-				buffer,
-				"Cannot set the element in position %d: the size of the buffer is %d.",
-				pos, size);
-		std::string error = buffer;
+		std::string error = "Cannot set the element in position " + to_string(pos) +
+				": the size of the buffer is " + to_string(size) + ".";
 		throw error;
 	}
 	switch (bufferType)
@@ -291,12 +283,8 @@ void Interface::transposeMatrix(unsigned width)
 {
 	if (size % width != 0)
 	{
-		char buffer[100];
-		sprintf(
-				buffer,
-				"The interface cannot be a matrix of witdth %d, it have size %d.",
-				width, size);
-		std::string error = buffer;
+		std::string error = "The interface cannot be a matrix of witdth " + to_string(width) +
+				", it have size " + to_string(size) + ".";
 		throw error;
 	}
 
