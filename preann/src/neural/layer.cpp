@@ -20,6 +20,7 @@ Layer::Layer(unsigned size, BufferType outputType, FunctionType functionType, Im
 	this->functionType = functionType;
 	output = Factory::newBuffer(size, outputType, implementationType);
 	thresholds = Factory::newThresholds(output, implementationType);
+	tOuputInterface = NULL;
 }
 
 Layer::Layer(FILE* stream, ImplementationType implementationType)
@@ -33,6 +34,7 @@ void Layer::save(FILE* stream)
 {
 	fwrite(&functionType, sizeof(FunctionType), 1, stream);
 	output->save(stream);
+	tOuputInterface = NULL;
 }
 
 Layer::~Layer()
@@ -74,10 +76,11 @@ void Layer::saveWeighs(FILE* stream)
 }
 
 
-Interface *Layer::getOutputInterface()
+Interface* Layer::getOutputInterface()
 {
 	if (tOuputInterface == NULL){
 		tOuputInterface = new Interface(output->getSize(), output->getBufferType());
+		output->copyToInterface(tOuputInterface);
 	}
 	return tOuputInterface;
 }
@@ -99,8 +102,6 @@ void Layer::calculateOutput()
 	output->activation(results, functionType);
 //	thresholds->activation(results, functionType, output);
 	if (tOuputInterface != NULL){
-		//TODO peta aqui
-		//tOuputInterface->getSize()
 		output->copyToInterface(tOuputInterface);
 	}
 	delete(results);
