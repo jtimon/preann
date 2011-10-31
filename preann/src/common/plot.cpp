@@ -201,16 +201,17 @@ void plotTaskFunction(Test* test)
 	}
 
 	string functionName = test->getCurrentState();
-	string dataPath = (*path) + "data/" + task->toString() + functionName + ".DAT";
+	string dataPath = (*path) + "data/" + task->toString() + "_" + functionName + ".DAT";
 	FILE* dataFile = test->openFile(dataPath);
 	fprintf(dataFile, "# Iterator %s \n", functionName.data());
-	for (unsigned generation = 0; generation < *maxGenerations; ++generation) {
+	for (unsigned generation = 1; generation <= *maxGenerations; ++generation) {
 
 		float fitness = population->getBestIndividualScore();
 		fprintf(dataFile, " %d %f \n", generation, fitness);
 		population->nextGeneration();
 	}
 	fclose(dataFile);
+	delete(population);
 }
 void Plot::plotTask(string path, Task* task, Individual* example, unsigned populationSize, unsigned maxGenerations,  float weighsRange)
 {
