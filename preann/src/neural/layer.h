@@ -22,11 +22,12 @@ public:
 	Layer(FILE* stream, ImplementationType implementationType);
 	virtual ~Layer();
 
-	void addInput(Buffer* input);
-	void calculateOutput();
+	virtual void addInput(Buffer* input);
+	virtual void calculateOutput();
 
-	void randomWeighs(float range);
+	virtual void randomWeighs(float range);
 	virtual void copyWeighs(Layer* sourceLayer);
+
 	void loadWeighs(FILE* stream);
 	void saveWeighs(FILE* stream);
 	void save(FILE* stream);

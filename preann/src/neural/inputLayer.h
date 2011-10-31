@@ -21,6 +21,8 @@ public:
 
 	virtual void addInput(Buffer* input);
 	virtual void calculateOutput();
+
+	virtual void randomWeighs(float range);
 	virtual void copyWeighs(Layer* sourceLayer);
 
 	Interface* getInputInterface();

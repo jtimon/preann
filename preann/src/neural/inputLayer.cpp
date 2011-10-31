@@ -45,6 +45,11 @@ void InputLayer::calculateOutput()
 	output->copyFromInterface(tInput);
 }
 
+void InputLayer::randomWeighs(float range)
+{
+	//do nothing
+}
+
 void InputLayer::copyWeighs(Layer* sourceLayer)
 {
 	if(connections.size() != sourceLayer->getNumberInputs()){
