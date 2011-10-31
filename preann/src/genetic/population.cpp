@@ -16,8 +16,7 @@ Population::Population(Task* task)
 	setDefaults();
 }
 
-Population::Population(Task* task, Individual* example, unsigned size,
-		float range)
+Population::Population(Task* task, Individual* example, unsigned size, float range)
 {
 	this->maxSize = size;
 	this->task = task;
@@ -25,7 +24,7 @@ Population::Population(Task* task, Individual* example, unsigned size,
 	Individual* newIndividual;
 	for (unsigned i = 0; i < maxSize; i++)
 	{
-		newIndividual = example->newCopy();
+		newIndividual = example->newCopy(false);
 		newIndividual->randomWeighs(range);
 		insertIndividual(newIndividual);
 	}
@@ -148,14 +147,6 @@ void Population::save(FILE *stream)
 
 void Population::insertIndividual(Individual *individual)
 {
-	//TODO pensar si hay que sustituir
-//	if (individualList == NULL)
-//	{
-//		std::string error =
-//				"No population was load nor an example individual was given.";
-//		throw error;
-//	}
-
 	task->test(individual);
 
     float fitness = individual->getFitness();
@@ -368,8 +359,8 @@ void Population::crossover()
 				unsigned numGenerated = 0;
 				while (numGenerated < numCurrentScheme)
 				{
-					Individual* indA = parents[choseParent(bufferUsedParents, usedParents)]->newCopy();
-					Individual* indB = parents[choseParent(bufferUsedParents, usedParents)]->newCopy();
+					Individual* indA = parents[choseParent(bufferUsedParents, usedParents)]->newCopy(true);
+					Individual* indB = parents[choseParent(bufferUsedParents, usedParents)]->newCopy(true);
 
 					oneCrossover(indA, indB, crossoverAlgorithm, crossoverLevel);
 

@@ -30,8 +30,8 @@ public:
 	Individual(ImplementationType implementationType = C);
 	virtual ~Individual();
 
-	Individual* newCopy();
-	Individual* newCopy(ImplementationType implementationType);
+	Individual* newCopy(bool copyWeighs);
+	Individual* newCopy(ImplementationType implementationType, bool copyWeighs);
 	void mutate(unsigned numMutations, float mutationRange);
 	void mutate(float probability, float mutationRange);
 	void uniformCrossover(CrossoverLevel crossoverLevel, Individual* other, float probability);
