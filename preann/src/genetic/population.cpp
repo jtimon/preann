@@ -260,7 +260,7 @@ void Population::mutation()
 {
 	if (mutationsPerIndividual)
 	{
-		for (unsigned i = 0; i < parents.size(); i++)
+		for (unsigned i = 0; i < offSpring.size(); i++)
 		{
 			offSpring[i]->mutate(mutationsPerIndividual,
 					mutationsPerIndividualRange);
@@ -268,7 +268,7 @@ void Population::mutation()
 	}
 	if (mutationProbability)
 	{
-		for (unsigned i = 0; i < parents.size(); i++)
+		for (unsigned i = 0; i < offSpring.size(); i++)
 		{
 			offSpring[i]->mutate(mutationProbability, mutationProbabilityRange);
 		}
@@ -379,6 +379,7 @@ void Population::crossover()
 			}
 		}
 	}
+	parents.clear();
 }
 
 unsigned Population::choseParent(Interface &usedParentsBitmap, unsigned &usedParents)
@@ -517,7 +518,6 @@ void Population::selectTournament()
 		}
 		parents.push_back(*it);
 	}
-
 }
 
 void Population::selectTruncation()
