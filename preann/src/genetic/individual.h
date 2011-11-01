@@ -14,18 +14,25 @@ class Individual: public NeuralNet {
 protected:
 	float fitness;
 
-    void crossoverNeuronsByOutput(Layer* thisLayer, Layer *otherLayer, Interface& outputsBitBuffer);
-    void crossoverNeuronsByInput(Interface** inputsBitBuffers, Individual *other);
-	void crossoverLayers(Individual *other, Interface* bitBuffer);
+	void checkCrossoverCompatibility(Individual* other);
 
-	void uniformCrossoverWeighs(Individual* other, float probability);
-	void uniformCrossoverNeurons(Individual* other, float probability);
-	void uniformCrossoverNeuronsInverted(Individual *other, float probability);
-	void uniformCrossoverLayers(Individual* other, float probability);
-	void multipointCrossoverWeighs(Individual* other, unsigned numPoints);
-	void multipointCrossoverNeurons(Individual* other, unsigned numPoints);
-	void multipointCrossoverNeuronsInverted(Individual *other, unsigned numPoints);
-	void multipointCrossoverLayers(Individual* other, unsigned numPoints);
+	vector<Interface*> prepareCrossover(CrossoverLevel crossoverLevel);
+	vector<Interface*> prepareCrossoverWeighs();
+	vector<Interface*> prepareCrossoverNeurons();
+	vector<Interface*> prepareCrossoverNeuronsInverted();
+	vector<Interface*> prepareCrossoverLayers();
+
+	void applyUniform(vector<Interface*> bitmaps, float probability);
+	void applyMultipoint(vector<Interface*> bitmaps, unsigned numPoints);
+
+	void crossover(CrossoverLevel crossoverLevel, Individual* other, vector<Interface*> bitmaps);
+	void crossoverWeighs(Individual* other, vector<Interface*> bitmaps);
+	void crossoverNeurons(Individual* other, vector<Interface*> bitmaps);
+	void crossoverNeuronsInverted(Individual* other, vector<Interface*> bitmaps);
+	void crossoverLayers(Individual* other, vector<Interface*> bitmaps);
+
+	void freeBitmaps(vector<Interface*> bitmaps);
+
 public:
 	Individual(ImplementationType implementationType = C);
 	virtual ~Individual();
@@ -40,7 +47,6 @@ public:
 
 	float getFitness();
 	void setFitness(float fitness);
-	bool checkCompatibility(Individual* other);
 };
 
 #endif /* INDIVIDUAL_H_ */
