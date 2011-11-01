@@ -10,14 +10,12 @@ class NeuralNet {
 protected:
 	ImplementationType implementationType;
 
+	vector<InputLayer*> inputs;
 	vector<Layer*> layers;
-	bool* connectionsGraph;
-	vector<unsigned> inputs;
 
-	void addLayer(Layer* layer);
-	void increaseMaxInputs();
-	void increaseMaxLayers();
-	unsigned getPosInGraph(unsigned source, unsigned destination);
+	SimpleGraph inputConnectionsGraph;
+	SimpleGraph connectionsGraph;
+
 	Layer* getLayer(unsigned pos);
 	ImplementationType getImplementationType();
 public:
@@ -28,7 +26,6 @@ public:
 	void addInputLayer(Interface* interface);
 	void addInputLayer(unsigned size, BufferType bufferType);
 	void updateInput(unsigned inputPos, Interface* input);
-	unsigned char isInputLayer(unsigned layerPos);
 	unsigned getNumInputs();
 
 	Interface* getOutput(unsigned layerPos);
@@ -37,8 +34,8 @@ public:
 			FunctionType functiontype = IDENTITY);
 	unsigned getNumLayers();
 
-	void addLayersConnection(unsigned sourceLayerPos,
-			unsigned destinationLayerPos);
+	void addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos);
+	void addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos);
 
 	virtual void calculateOutput();
 	void randomWeighs(float range);

@@ -3,8 +3,6 @@
 NeuralNet::NeuralNet(ImplementationType implementationType)
 {
 	this->implementationType = implementationType;
-
-	connectionsGraph = NULL;
 }
 
 NeuralNet::~NeuralNet()
@@ -14,11 +12,6 @@ NeuralNet::~NeuralNet()
 		delete (layers[i]);
 	}
 	layers.clear();
-
-	if (connectionsGraph)
-	{
-		MemoryManagement::free(connectionsGraph);
-	}
 	inputs.clear();
 }
 
@@ -35,52 +28,23 @@ void NeuralNet::calculateOutput()
 	}
 }
 
-void NeuralNet::addLayer(Layer* layer)
+void NeuralNet::addLayer(unsigned size, BufferType destinationType, FunctionType functiontype)
 {
-	unsigned newNumberLayers = layers.size() + 1;
-	bool* newConnectionsGraph = (bool*)MemoryManagement::malloc(
-			sizeof(bool) * newNumberLayers * newNumberLayers);
-	for (unsigned i = 0; i < newNumberLayers; i++)
-	{
-		for (unsigned j = 0; j < newNumberLayers; j++)
-		{
-			if (i == layers.size() || j == layers.size())
-			{
-				newConnectionsGraph[(i * newNumberLayers) + j] = false;
-			}
-			else
-			{
-				newConnectionsGraph[(i * newNumberLayers) + j]
-						= connectionsGraph[(i * layers.size()) + j];
-			}
-		}
-	}
-	if (connectionsGraph)
-	{
-		MemoryManagement::free(connectionsGraph);
-	}
-	connectionsGraph = newConnectionsGraph;
-
-	layers.push_back(layer);
-}
-
-void NeuralNet::addLayer(unsigned size, BufferType destinationType,
-		FunctionType functiontype)
-{
-	addLayer(new Layer(size, destinationType, functiontype, getImplementationType()));
+	layers.push_back(new Layer(size, destinationType, functiontype, getImplementationType()));
 }
 
 void NeuralNet::addInputLayer(unsigned size, BufferType bufferType)
 {
+	std::string error = "NeuralNet::addInputLayer(unsigned size, BufferType bufferType) not implemented.";
+	throw error;
 	//TODO quitar esto
-	inputs.push_back(layers.size());
-	addLayer(new InputLayer(size, bufferType, getImplementationType()));
+//	inputs.push_back(layers.size());
+//	addLayer(new InputLayer(size, bufferType, getImplementationType()));
 }
 
 void NeuralNet::addInputLayer(Interface* interface)
 {
-	inputs.push_back(layers.size());
-	addLayer(new InputLayer(interface, getImplementationType()));
+	inputs.push_back(new InputLayer(interface, getImplementationType()));
 }
 
 void NeuralNet::updateInput(unsigned inputPos, Interface* input)
@@ -91,30 +55,12 @@ void NeuralNet::updateInput(unsigned inputPos, Interface* input)
 				": there are just " + to_string(inputs.size()) + " Inputs.";
 		throw error;
 	}
-	return ((InputLayer*)(layers[inputs[inputPos]]))->getInputInterface()->copyFromFast(input);
+	inputs[inputPos]->getOutput()->copyFromInterface(input);
 }
 
 unsigned NeuralNet::getNumInputs()
 {
 	return inputs.size();
-}
-
-unsigned char NeuralNet::isInputLayer(unsigned layerPos)
-{
-	if (layerPos >= layers.size())
-	{
-		std::string error = "Cannot access the Layer in position " + to_string(layerPos) +
-				": there are just " + to_string(layers.size()) + " layers.";
-		throw error;
-	}
-	for (unsigned i = 0; i < inputs.size(); ++i)
-	{
-		if (inputs[i] == layerPos)
-		{
-			return 1;
-		}
-	}
-	return 0;
 }
 
 Interface* NeuralNet::getOutput(unsigned layerPos)
@@ -141,18 +87,37 @@ void NeuralNet::randomWeighs(float range)
 	}
 }
 
+void NeuralNet::addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos)
+{
+	if (sourceInputPos >= inputs.size())
+	{
+		std::string error = "NeuralNet::addInputConnection : Cannot connect Input in position " + to_string(sourceInputPos) +
+				": there are just " + to_string(inputs.size()) + " Inputs.";
+		throw error;
+	}
+	if (destinationLayerPos >= layers.size())
+	{
+		std::string error = "NeuralNet::addInputConnection : Cannot connect Layer in position " + to_string(destinationLayerPos) +
+				": there are just " + to_string(layers.size()) + " Layers.";
+		throw error;
+	}
+
+	layers[destinationLayerPos]->addInput(inputs[sourceInputPos]->getOutput());
+	inputConnectionsGraph.addConnection(sourceInputPos, destinationLayerPos);
+}
+
 void NeuralNet::addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos)
 {
 	if (sourceLayerPos >= layers.size() || destinationLayerPos >= layers.size())
 	{
-		std::string error = "Cannot connect Layer in position " + to_string(sourceLayerPos) +
+		std::string error = "NeuralNet::addLayersConnection : Cannot connect Layer in position " + to_string(sourceLayerPos) +
 				" with Layer in position " + to_string(destinationLayerPos) +
 				": there are just " + to_string(layers.size()) + " Layers.";
 		throw error;
 	}
 
 	layers[destinationLayerPos]->addInput(layers[sourceLayerPos]->getOutput());
-	connectionsGraph[(sourceLayerPos * layers.size()) + destinationLayerPos] = true;
+	connectionsGraph.addConnection(sourceLayerPos, destinationLayerPos);
 }
 
 void NeuralNet::createFeedForwardNet(unsigned inputSize, BufferType inputType,
@@ -197,21 +162,24 @@ void NeuralNet::createFullyConnectedNet(unsigned inputSize,
 
 void NeuralNet::save(FILE* stream)
 {
-	unsigned inputsSize = inputs.size();
-	unsigned layersSize = layers.size();
-	fwrite(&inputsSize, sizeof(unsigned), 1, stream);
-	fwrite(&layersSize, sizeof(unsigned), 1, stream);
+	unsigned numInputs = inputs.size();
+	unsigned numLayers = layers.size();
+	fwrite(&numInputs, sizeof(unsigned), 1, stream);
+	fwrite(&numLayers, sizeof(unsigned), 1, stream);
 
-	for (unsigned i = 0; i < layers.size(); i++)
+	for (unsigned i = 0; i < numInputs; i++)
+	{
+		inputs[i]->save(stream);
+	}
+	for (unsigned i = 0; i < numLayers; i++)
 	{
 		layers[i]->save(stream);
 	}
 
-	fwrite(&inputs[0], sizeof(unsigned) * inputs.size(), 1, stream);
-	fwrite(connectionsGraph, sizeof(bool) * layers.size()
-			* layers.size(), 1, stream);
+	inputConnectionsGraph.save(stream);
+	connectionsGraph.save(stream);
 
-	for (unsigned i = 0; i < layers.size(); i++)
+	for (unsigned i = 0; i < numLayers; i++)
 	{
 		layers[i]->saveWeighs(stream);
 	}
@@ -219,21 +187,21 @@ void NeuralNet::save(FILE* stream)
 
 void NeuralNet::load(FILE* stream)
 {
-	unsigned inputsSize, layersSize;
-	fread(&inputsSize, sizeof(unsigned), 1, stream);
-	fread(&layersSize, sizeof(unsigned), 1, stream);
+	unsigned numInputs, numLayers;
+	fread(&numInputs, sizeof(unsigned), 1, stream);
+	fread(&numLayers, sizeof(unsigned), 1, stream);
 
-	for (unsigned i = 0; i < layersSize; i++)
+	for (unsigned i = 0; i < numInputs; i++)
+	{
+		inputs.push_back( new InputLayer(stream, getImplementationType()) );
+	}
+	for (unsigned i = 0; i < numLayers; i++)
 	{
 		layers.push_back( new Layer(stream, getImplementationType()) );
 	}
 
-	inputs.resize(inputsSize);
-	fread(&inputs[0], sizeof(unsigned) * inputs.size(), 1, stream);
-
-	size_t graphSize = sizeof(bool) * layers.size() * layers.size();
-	connectionsGraph = (bool*)(MemoryManagement::malloc(graphSize));
-	fread(connectionsGraph, graphSize, 1, stream);
+	inputConnectionsGraph.load(stream);
+	connectionsGraph.load(stream);
 
 	stablishConnections();
 
@@ -245,25 +213,11 @@ void NeuralNet::load(FILE* stream)
 
 void NeuralNet::stablishConnections()
 {
-	for (unsigned i = 0; i < inputs.size(); i++)
-	{
-		unsigned layerPos = inputs[i];
-		Buffer* output = layers[layerPos]->getOutput();
-		Layer* inputLayer = new InputLayer(output->getSize(),
-				output->getBufferType(), getImplementationType());
-		inputLayer->getOutput()->copyFrom(output);
-		delete (layers[layerPos]);
-		layers[layerPos] = inputLayer;
+	std::vector< std::pair<unsigned, unsigned> >::iterator it;
+	for(it = inputConnectionsGraph.getIterator(); it != inputConnectionsGraph.getEnd(); ++it){
+		addInputConnection(it->first, it->second);
 	}
-
-	for (unsigned i = 0; i < layers.size(); i++)
-	{
-		for (unsigned j = 0; j < layers.size(); j++)
-		{
-			if (connectionsGraph[(i * layers.size()) + j])
-			{
-				addLayersConnection(i, j);
-			}
-		}
+	for(it = connectionsGraph.getIterator(); it != connectionsGraph.getEnd(); ++it){
+		addLayersConnection(it->first, it->second);
 	}
 }
