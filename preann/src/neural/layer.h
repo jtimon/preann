@@ -30,7 +30,7 @@ public:
 
 	void loadWeighs(FILE* stream);
 	void saveWeighs(FILE* stream);
-	void save(FILE* stream);
+	virtual void save(FILE* stream);
 
 	unsigned getNumberInputs();
 	Buffer* getInput(unsigned pos);

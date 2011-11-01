@@ -16,7 +16,8 @@ protected:
 	ImplementationType getImplementationType();
 public:
 	InputLayer(Interface* interface, ImplementationType implementationType);
-	InputLayer(unsigned size, BufferType bufferType, ImplementationType implementationType);
+	InputLayer(FILE* stream, ImplementationType implementationType);
+	virtual void save(FILE* stream);
 	virtual ~InputLayer();
 
 	virtual void addInput(Buffer* input);

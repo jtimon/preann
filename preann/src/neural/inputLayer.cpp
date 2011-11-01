@@ -11,22 +11,24 @@ InputLayer::InputLayer(Interface* interface, ImplementationType implementationTy
 	functionType = IDENTITY;
 }
 
-InputLayer::InputLayer(unsigned size, BufferType bufferType, ImplementationType implementationType)
+InputLayer::InputLayer(FILE* stream, ImplementationType implementationType)
 {
-	//TODO quitar esto
-	tInput = new Interface(size, bufferType);
-	output = Factory::newBuffer(size, bufferType, implementationType);
-
+	output = Factory::newBuffer(stream, implementationType);
+	tInput = new Interface(output->getSize(), output->getBufferType());
 	thresholds = NULL;
 	functionType = IDENTITY;
 }
 
+void InputLayer::save(FILE* stream)
+{
+	output->save(stream);
+}
+
 InputLayer::~InputLayer()
 {
-	//TODO quitar esto
-//	if (tInput){
-//		delete(tInput);
-//	}
+	if (output){
+		delete(output);
+	}
 }
 
 ImplementationType InputLayer::getImplementationType()
