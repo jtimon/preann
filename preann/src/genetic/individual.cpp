@@ -58,10 +58,10 @@ void Individual::mutate(unsigned numMutations, float mutationRange)
 	for (unsigned i = 0; i < numMutations; i++)
 	{
 		unsigned chosenLayer = Random::positiveInteger(layers.size());
-		unsigned chosenConnection = Random::positiveInteger(
-				layers[chosenLayer]->getNumberInputs() + 1);
+	    unsigned numInputs = layers[chosenLayer]->getNumberInputs();
+	    unsigned chosenConnection = Random::positiveInteger(numInputs + 1);
 		Connection* connection;
-		if (chosenConnection == layers[chosenLayer]->getNumberInputs())
+		if (chosenConnection == numInputs)
 		{
 			connection = layers[chosenLayer]->getThresholds();
 		}
@@ -69,8 +69,8 @@ void Individual::mutate(unsigned numMutations, float mutationRange)
 		{
 			connection = layers[chosenLayer]->getConnection(chosenConnection);
 		}
-		connection->mutate(Random::positiveInteger(connection->getSize()), Random::floatNum(
-				mutationRange));
+		connection->mutate(Random::positiveInteger(connection->getSize()),
+				Random::floatNum(mutationRange));
 	}
 }
 
