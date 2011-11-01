@@ -20,6 +20,7 @@ Population::Population(Task* task, Individual* example, unsigned size, float ran
 {
 	this->maxSize = size;
 	this->task = task;
+	setDefaults();
 
 	Individual* newIndividual;
 	for (unsigned i = 0; i < maxSize; i++)
@@ -28,7 +29,6 @@ Population::Population(Task* task, Individual* example, unsigned size, float ran
 		newIndividual->randomWeighs(range);
 		insertIndividual(newIndividual);
 	}
-	setDefaults();
 }
 
 void Population::setDefaults()
@@ -381,18 +381,18 @@ void Population::crossover()
 	}
 }
 
-unsigned Population::choseParent(Interface &bufferUsedParents,
-		unsigned &usedParents)
+unsigned Population::choseParent(Interface &usedParentsBitmap, unsigned &usedParents)
 {
+	//TODO usar bitset
 	unsigned chosenPoint;
 	do
 	{
 		chosenPoint = Random::positiveInteger(parents.size());
-	} while (!bufferUsedParents.getElement(chosenPoint));
-	bufferUsedParents.setElement(chosenPoint, 1);
-	if (++usedParents == bufferUsedParents.getSize())
+	} while (usedParentsBitmap.getElement(chosenPoint));
+	usedParentsBitmap.setElement(chosenPoint, 1);
+	if (++usedParents == usedParentsBitmap.getSize())
 	{
-		bufferUsedParents.reset();
+		usedParentsBitmap.reset();
 		usedParents = 0;
 		printf("Warning: there's not enough unused parents to do crossover. Some of them will be used again.\n");
 	}
@@ -418,6 +418,7 @@ void Population::oneCrossover(Individual* offSpringA, Individual* offSpringB, Cr
 
 void Population::selectRouletteWheel()
 {
+	//TODO adaptar para fitness negativos
 	for (unsigned i = 0; i < numRouletteWheel; i++)
 	{
 		list<Individual*>::iterator it = individuals.begin();
