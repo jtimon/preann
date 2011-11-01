@@ -99,9 +99,18 @@ float Random::positiveFloat(float range) {
 	return (rand() / (float) RAND_MAX) * (range);
 }
 
+SimpleGraph::~SimpleGraph()
+{
+	graph.clear();
+}
+
 void SimpleGraph::addConnection(unsigned source, unsigned destination)
 {
-	graph.push_back(std::make_pair(source, destination));
+	std::pair<unsigned ,unsigned > m_pair = std::make_pair(source, destination);
+    std::vector<std::pair<unsigned ,unsigned > >::iterator iter = std::find(graph.begin(), graph.end(), m_pair);
+	if(iter == graph.end()){
+		graph.push_back(m_pair);
+	}
 }
 
 bool SimpleGraph::removeConnection(unsigned source, unsigned destination)
@@ -120,7 +129,7 @@ bool SimpleGraph::checkConnection(unsigned source, unsigned destination)
 	std::vector< std::pair<unsigned, unsigned> >::iterator iter =
 			std::find(graph.begin(), graph.end(), std::make_pair(source, destination));
 	if(iter != graph.end()){
-	  return true;
+		return true;
 	}
 	return false;
 }
@@ -138,22 +147,22 @@ std::vector< std::pair<unsigned, unsigned> >::iterator SimpleGraph::getEnd()
 void SimpleGraph::save(FILE* stream)
 {
 	unsigned size = graph.size();
-	fwrite(size, sizeof(unsigned), 1, stream);
+	fwrite(&size, sizeof(unsigned), 1, stream);
 
 	for (unsigned i = 0; i < size; ++i) {
-		fwrite(graph[i].first, sizeof(unsigned), 1, stream);
-		fwrite(graph[i].second, sizeof(unsigned), 1, stream);
+		fwrite(&graph[i].first, sizeof(unsigned), 1, stream);
+		fwrite(&graph[i].second, sizeof(unsigned), 1, stream);
 	}
 }
 
 void SimpleGraph::load(FILE* stream)
 {
 	unsigned size, source, destination;
-	fread(size, sizeof(unsigned), 1, stream);
+	fread(&size, sizeof(unsigned), 1, stream);
 
 	for (unsigned i = 0; i < size; ++i) {
-		fread(source, sizeof(unsigned), 1, stream);
-		fread(destination, sizeof(unsigned), 1, stream);
+		fread(&source, sizeof(unsigned), 1, stream);
+		fread(&destination, sizeof(unsigned), 1, stream);
 		graph.push_back(std::make_pair(source, destination));
 	}
 }

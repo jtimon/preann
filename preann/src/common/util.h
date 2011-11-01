@@ -77,6 +77,7 @@ typedef std::vector< std::pair<unsigned, unsigned> >::iterator pair_vect_iterato
 class SimpleGraph {
 	std::vector< std::pair<unsigned, unsigned> > graph;
 public:
+	virtual ~SimpleGraph();
 	void addConnection(unsigned source, unsigned destination);
 	bool removeConnection(unsigned source, unsigned destination);
 	bool checkConnection(unsigned source, unsigned destination);
