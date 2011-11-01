@@ -104,19 +104,39 @@ void Individual::mutate(float probability, float mutationRange)
 void Individual::proportionalCrossover(CrossoverLevel crossoverLevel, Individual* other)
 {
 	float otherFitness = other->getFitness();
-	if (fitness * otherFitness < 0)
+	float thisFitness = fitness;
+	float probability;
+
+	//TODO rewrite
+	if ((thisFitness < 0 && otherFitness > 0) || (thisFitness > 0 && otherFitness < 0))
 	{
 		std::string error =
-			"The fitness of the individuals have different sign or are equal to zero: cannot crossover them proportionally.";
+			"The fitness of the individuals have different sign: cannot crossover them proportionally.";
 		throw error;
 	}
-	float thisFitness = fitness;
-	if (fitness < 0)
-	{
-		otherFitness = -thisFitness;
-		thisFitness = -otherFitness;
+	else if (thisFitness == 0){
+		if (otherFitness > 0){
+			probability = 0;
+		} else if (otherFitness < 0){
+			probability = 1;
+		} else {
+			probability = 0.5;
+		}
+	} else if (otherFitness == 0){
+		if (thisFitness > 0){
+			probability = 1;
+		} else if (thisFitness < 0){
+			probability = 0;
+		}
+	} else {
+		if (thisFitness < 0)
+		{
+			otherFitness = -thisFitness;
+			thisFitness = -otherFitness;
+		}
+		probability = thisFitness / (thisFitness + otherFitness);
 	}
-	float probability = thisFitness / (thisFitness + otherFitness);
+
 	uniformCrossover(crossoverLevel, other, probability);
 }
 
@@ -136,6 +156,11 @@ void Individual::multipointCrossover(CrossoverLevel crossoverLevel, Individual* 
 
 	vector<Interface*> bitmaps = prepareCrossover(crossoverLevel);
 	applyMultipoint(bitmaps, numPoints);
+
+	//TODO arreglar layer multipoint
+	string aaa = Enumerations::crossoverLevelToString(crossoverLevel);
+	printf("%s\n", aaa.data());
+
 	crossover(crossoverLevel, other, bitmaps);
 	freeBitmaps(bitmaps);
 }
