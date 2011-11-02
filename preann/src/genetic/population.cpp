@@ -395,7 +395,7 @@ unsigned Population::choseParent(Interface &usedParentsBitmap, unsigned &usedPar
 	{
 		usedParentsBitmap.reset();
 		usedParents = 0;
-		printf("Warning: there's not enough unused parents to do crossover. Some of them will be used again.\n");
+//		printf("Warning: there's not enough unused parents to do crossover. Some of them will be used again.\n");
 	}
 	return chosenPoint;
 }

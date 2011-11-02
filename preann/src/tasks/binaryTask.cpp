@@ -93,41 +93,36 @@ void BinaryTask::test(Individual *individual)
 		}
 	}
 	individual->setFitness(maxPoints-differences);
+//	printf("-maxPoints %f differences %f \n", maxPoints, differences);
 }
-
-void BinaryTask::doOperation(unsigned pos)
-{
-	switch (tBinaryOperation) {
-		case BO_AND:
-			if (tInput1->getElement(pos) && tInput2->getElement(pos))
-				tOutput->setElement(pos, 1);
-			else
-				tOutput->setElement(pos, 0);
-			break;
-		case BO_OR:
-			if (tInput1->getElement(pos) || tInput2->getElement(pos))
-				tOutput->setElement(pos, 1);
-			else
-				tOutput->setElement(pos, 0);
-			break;
-		case BO_XOR:
-			if ((tInput1->getElement(pos) && tInput2->getElement(pos))
-					|| (!tInput1->getElement(pos) && !tInput2->getElement(pos)))
-				tOutput->setElement(pos, 0);
-			else
-				tOutput->setElement(pos, 1);
-			break;
-		default:
-			break;
-	}
-}
-
 
 void BinaryTask::doOperation()
 {
 	for (unsigned i = 0; i < tInput1->getSize(); ++i)
 	{
-		doOperation(i);
+		switch (tBinaryOperation) {
+			case BO_AND:
+				if (tInput1->getElement(i) && tInput2->getElement(i))
+					tOutput->setElement(i, 1);
+				else
+					tOutput->setElement(i, 0);
+				break;
+			case BO_OR:
+				if (tInput1->getElement(i) || tInput2->getElement(i))
+					tOutput->setElement(i, 1);
+				else
+					tOutput->setElement(i, 0);
+				break;
+			case BO_XOR:
+				if ((tInput1->getElement(i) && tInput2->getElement(i))
+						|| (!tInput1->getElement(i) && !tInput2->getElement(i)))
+					tOutput->setElement(i, 0);
+				else
+					tOutput->setElement(i, 1);
+				break;
+			default:
+				break;
+		}
 	}
 }
 

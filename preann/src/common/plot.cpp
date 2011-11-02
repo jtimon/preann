@@ -179,25 +179,33 @@ void plotTaskFunction(Test* test)
 	float* weighsRange = (float*)test->getVariable("weighsRange");
 
 	Population* population = new Population(task, example, *populationSize, *weighsRange);
-	MutationAlgorithm mutationAlgorithm = (MutationAlgorithm)test->getEnum(ET_MUTATION_ALG);
-	if (mutationAlgorithm == MA_PER_INDIVIDUAL){
-		population->setMutationsPerIndividual(1, 5);
-	} else if (mutationAlgorithm == MA_PROBABILISTIC){
-		population->setMutationProbability(0.01, 5);
-	}
+	//TODO hacer la selección parametrizable y un enumerado
+    unsigned numIndiv = *populationSize ;
+	population->setSelectionRouletteWheel(numIndiv);
 	CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm)test->getEnum(ET_CROSS_ALG);
 	CrossoverLevel crossoverLevel = (CrossoverLevel)test->getEnum(ET_CROSS_LEVEL);
+
+//	string aaa = Enumerations::crossoverAlgorithmToString(crossoverAlgorithm) + "  " +
+//			Enumerations::crossoverLevelToString(crossoverLevel);
+//	printf("%s\n", aaa);
+
 	switch (crossoverAlgorithm){
 	case UNIFORM:
-		population->setCrossoverUniformScheme(crossoverLevel, *populationSize/2, 0.5);
+		population->setCrossoverUniformScheme(crossoverLevel, numIndiv, 0.7);
 		break;
 	case PROPORTIONAL:
-		population->setCrossoverProportionalScheme(crossoverLevel, *populationSize/2);
+		population->setCrossoverProportionalScheme(crossoverLevel, numIndiv);
 		break;
 	case MULTIPOINT:
-		population->setCrossoverMultipointScheme(crossoverLevel, *populationSize/2, 5);
+		population->setCrossoverMultipointScheme(crossoverLevel, numIndiv, 3);
 		break;
 
+	}
+	MutationAlgorithm mutationAlgorithm = (MutationAlgorithm)test->getEnum(ET_MUTATION_ALG);
+	if (mutationAlgorithm == MA_PER_INDIVIDUAL){
+		population->setMutationsPerIndividual(4, 1);
+	} else if (mutationAlgorithm == MA_PROBABILISTIC){
+		population->setMutationProbability(0.01, 5);
 	}
 
 	string functionName = test->getCurrentState();
@@ -206,10 +214,12 @@ void plotTaskFunction(Test* test)
 	fprintf(dataFile, "# Iterator %s \n", functionName.data());
 	for (unsigned generation = 1; generation <= *maxGenerations; ++generation) {
 
-		float fitness = population->getBestIndividualScore();
+		float fitness = population->getAverageScore();
 		fprintf(dataFile, " %d %f \n", generation, fitness);
+//		printf(" %d %f %f %f\n", generation, fitness, population->getBestIndividualScore(), population->getWorstIndividualScore());
 		population->nextGeneration();
 	}
+//	test->printCurrentState();
 	fclose(dataFile);
 	delete(population);
 }

@@ -19,7 +19,6 @@ protected:
 	Interface* tInput2;
 	Interface* tOutput;
 
-	virtual void doOperation(unsigned pos);
 	bool bitVectorIncrement(Interface* bitVector);
 public:
 	BinaryTask(BinaryOperation binaryOperation, unsigned size);

@@ -58,7 +58,7 @@ all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	./bin/testBuffers.exe 
 #	./bin/testConnections.exe 
 #	./bin/testLayers.exe 
-	./bin/chronoBuffers.exe 
+#	./bin/chronoBuffers.exe 
 #	./bin/chronoConnections.exe 
 	./bin/chronoXor.exe
 #	./bin/testMemoryLosses.exe > ./output/log/testMemoryLosses.log

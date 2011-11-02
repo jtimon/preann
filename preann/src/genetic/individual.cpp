@@ -158,8 +158,8 @@ void Individual::multipointCrossover(CrossoverLevel crossoverLevel, Individual* 
 	applyMultipoint(bitmaps, numPoints);
 
 	//TODO arreglar layer multipoint
-	string aaa = Enumerations::crossoverLevelToString(crossoverLevel);
-	printf("%s\n", aaa.data());
+//	string aaa = Enumerations::crossoverLevelToString(crossoverLevel);
+//	printf("%s\n", aaa.data());
 
 	crossover(crossoverLevel, other, bitmaps);
 	freeBitmaps(bitmaps);

@@ -18,25 +18,33 @@ int main(int argc, char *argv[])
 		string path = "/home/timon/workspace/preann/output/";
 
 		Plot plot;
-		plot.withAll(ET_CROSS_ALG);
-		plot.withAll(ET_CROSS_LEVEL);
-	//	plot.withAll(ET_MUTATION_ALG);
+//		plot.withAll(ET_CROSS_ALG);
+//		plot.withAll(ET_CROSS_LEVEL);
+		//TODO quitar excludes
+		plot.exclude(ET_CROSS_ALG, 1, PROPORTIONAL);
+		plot.exclude(ET_CROSS_LEVEL, 1, LAYER);
+
+		plot.with(ET_MUTATION_ALG, 1, MA_PER_INDIVIDUAL);
 
 		plot.setColorEnum(ET_CROSS_ALG);
 		plot.setPointEnum(ET_CROSS_LEVEL);
 
 		plot.printParameters();
 
-		Task* task = new BinaryTask(BO_XOR, VECTORS_SIZE);
+		Task* task = new BinaryTask(BO_OR, VECTORS_SIZE);
 		Individual* example = new Individual(SSE2);
 		task->setInputs(example);
 		example->addLayer(VECTORS_SIZE * 2, BIT, IDENTITY);
 		example->addLayer(VECTORS_SIZE, BIT, IDENTITY);
-		example->addLayersConnection(0, 2);
-		example->addLayersConnection(1, 2);
-		example->addLayersConnection(2, 3);
+		example->addInputConnection(0, 0);
+		example->addInputConnection(1, 0);
+		//TODO bucle infinito con una sola capa
+		example->addLayersConnection(0, 1);
 
-		plot.plotTask(path, task, example, 100, 100, 20);
+		plot.plotTask(path, task, example, 8, 100, 5);
+
+		delete(example);
+		delete(task);
 
 		printf("Exit success.\n");
 		MemoryManagement::printTotalAllocated();
