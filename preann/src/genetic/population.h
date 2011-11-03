@@ -53,6 +53,7 @@ class Population {
 	void mutation();
     void checkNotEmpty();
 public:
+	Population(Population* other);
 	Population(Task* task);
 	Population(Task* task, Individual* example, unsigned size, float range);
 	virtual ~Population();
@@ -84,6 +85,8 @@ public:
 	float getAverageScore();
 	float getWorstIndividualScore();
 	Task* getTask();
+	unsigned getSize();
+	Individual* getIndividual(unsigned pos);
 };
 
 #endif /* POPULATION_H_ */

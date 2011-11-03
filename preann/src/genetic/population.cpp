@@ -7,6 +7,20 @@
 
 #include "population.h"
 
+Population::Population(Population* other)
+{
+	this->maxSize = other->getSize();
+	this->task = other->getTask();
+	setDefaults();
+	
+	Individual* newIndividual;
+	for (unsigned i = 0; i < maxSize; i++)
+	{
+		newIndividual = other->getIndividual(i)->newCopy(true);
+		insertIndividual(newIndividual);
+	}
+}
+
 Population::Population(Task* task)
 {
 	this->task = task;
@@ -299,10 +313,27 @@ float Population::getBestIndividualScore()
 	return individuals.front()->getFitness();
 }
 
-Individual *Population::getBestIndividual()
+Individual* Population::getBestIndividual()
 {
     checkNotEmpty();
 	return individuals.front();
+}
+
+unsigned Population::getSize()
+{
+	return individuals.size();
+}
+
+Individual* Population::getIndividual(unsigned pos)
+{
+	unsigned index = 0;
+	list<Individual*>::iterator it;
+	FOR_EACH(it, individuals){
+		if (index == pos){
+			return *it;
+		}
+		++index;
+	}
 }
 
 void Population::checkNotEmpty()
