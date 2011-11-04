@@ -21,6 +21,8 @@ public:
 	virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player);
 	virtual bool canMove(SquareState player);
 	virtual bool endGame();
+	virtual void computerTurn(SquareState turn);
+	unsigned getQuality(unsigned xPos, unsigned yPos, SquareState player);
 };
 
 #endif /* REVERSIBOARD_H_ */
