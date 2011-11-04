@@ -11,7 +11,6 @@
 #include "individual.h"
 
 class Task {
-
 protected:
 	//virtual float step(neuralNet* net);
 public:
