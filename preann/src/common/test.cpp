@@ -120,6 +120,10 @@ void Test::putVariable(std::string key, void* variable)
 
 void* Test::getVariable(std::string key)
 {
+	if(!variables.count(key)){
+		std::string error = " Test::getVariable : variable \"" + key + "\" not found.";
+		throw error;
+	}
 	return variables[key];
 }
 
