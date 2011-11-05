@@ -7,25 +7,25 @@
 
 #include "reversiTask.h"
 
-ReversiTask::ReversiTask(unsigned size, unsigned numTests) 
+ReversiTask::ReversiTask(unsigned size, unsigned numTests)
 {
 	board = new ReversiBoard(size);
 	tNumTests = numTests;
 }
 
-ReversiTask::~ReversiTask() 
+ReversiTask::~ReversiTask()
 {
 	// TODO Auto-generated destructor stub
 }
 
-virtual void ReversiTask::test(Individual* individual)
+void ReversiTask::test(Individual* individual)
 {
 	float fitness = 0;
 	for (unsigned i = 0; i < tNumTests; ++i) {
-		
+
 		SquareState turn = PLAYER_1;
 		board->initBoard();
-		
+
 		while(!board->endGame()){
 			if(board->canMove(turn)){
 				// this way the individual moves first half of the games
@@ -50,7 +50,7 @@ void ReversiTask::setInputs(Individual* individual)
 
 std::string ReversiTask::toString()
 {
-	return "REVERSI_" + to_string(board.size());
+	return "REVERSI_" + to_string(board->size());
 }
 
 void ReversiTask::individualTurn(SquareState turn, Individual* individual)
@@ -58,14 +58,14 @@ void ReversiTask::individualTurn(SquareState turn, Individual* individual)
 	//TODO ReversiTask::individualTurn modificar con lo que corresponda
 	float maxQuality = 0;
 	vector<Move> moves;
-	for (int x = 0; x < tSize; ++x) {
-		for (int y = 0; y < tSize; ++y) {
+	for (int x = 0; x < board->size(); ++x) {
+		for (int y = 0; y < board->size(); ++y) {
 			Move move;
 			move.xPos = x;
 			move.yPos = y;
-			move.quality = (float)getQuality(x, y, turn);
+			move.quality = (float)board->getQuality(x, y, turn);
 			if (move.quality >= maxQuality){
-				maxQuality = move.quality; 
+				maxQuality = move.quality;
 				moves.push_back(move);
 			}
 		}
@@ -78,7 +78,7 @@ void ReversiTask::individualTurn(SquareState turn, Individual* individual)
 	}
 	if (bestMoves.size() > 0){
 		Move chosenMove = bestMoves[ Random::positiveInteger(bestMoves.size()) ];
-		makeMove(chosenMove.xPos, chosenMove.yPos, turn);
+		board->makeMove(chosenMove.xPos, chosenMove.yPos, turn);
 	}
 }
 

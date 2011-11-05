@@ -7,7 +7,7 @@
 
 #include "reversiBoard.h"
 
-ReversiBoard::ReversiBoard(unsigned size) : Board(size) 
+ReversiBoard::ReversiBoard(unsigned size) : Board(size)
 {
 	std::string error;
 	if (size % 2 != 0){
@@ -20,7 +20,7 @@ ReversiBoard::ReversiBoard(unsigned size) : Board(size)
 	}
 }
 
-ReversiBoard::~ReversiBoard() 
+ReversiBoard::~ReversiBoard()
 {
 }
 
@@ -36,7 +36,7 @@ void ReversiBoard::initBoard()
 bool ReversiBoard::legalMove(unsigned xPos, unsigned yPos, SquareState player)
 {
 	if (xPos >= tSize || yPos >= tSize){
-		std::string error = "ReversiBoard::legalMove : The position (" + to_string(xpos) + ", " +
+		std::string error = "ReversiBoard::legalMove : The position (" + to_string(xPos) + ", " +
 				to_string(yPos) + ") is out of range. The size of the board is " + to_string(tSize);
 		throw error;
 	}
@@ -45,25 +45,25 @@ bool ReversiBoard::legalMove(unsigned xPos, unsigned yPos, SquareState player)
 		throw error;
 	}
 	if (tBoard[xPos][yPos] != EMPTY){
-		std::string error = "ReversiBoard::legalMove : the square at position (" + to_string(xpos) +
+		std::string error = "ReversiBoard::legalMove : the square at position (" + to_string(xPos) +
 				", " + to_string(yPos) + ") is already accupied";
 		throw error;
 	}
 	unsigned x=0, y=0;
-	
-	for (a=-1; a<2; a++){    //for each direction (left, right)
-		for(b=-1; b<2; b++){  // for each direction (up down)
+
+	for (int a=-1; a <= 1; a++){    //for each direction (left, right)
+		for(int b=-1; b <= 1; b++){  // for each direction (up down)
 			if (a==0 && b==0) {
 				break;
 			} else {
 				x = xPos + a;
-				y = yPos + b;     
+				y = yPos + b;
 			}
 			//at least one of the squares has to belong to the opponent
 			if (tBoard[x][y] == opponent(player)) {
 				//up to the borders
 				while (x >= 0 && y >= 0 && x < tSize && y < tSize) {
-				
+
 					if (tBoard[x][y] == opponent(player)) {
 						x+=a; y+=b;
 					} else if (tBoard[x][y] == player){
@@ -79,7 +79,7 @@ bool ReversiBoard::legalMove(unsigned xPos, unsigned yPos, SquareState player)
 void ReversiBoard::makeMove(unsigned xPos, unsigned yPos, SquareState player)
 {
 	if (xPos >= tSize || yPos >= tSize){
-		std::string error = "ReversiBoard::makeMove : The position (" + to_string(xpos) + ", " +
+		std::string error = "ReversiBoard::makeMove : The position (" + to_string(xPos) + ", " +
 				to_string(yPos) + ") is out of range. The size of the board is " + to_string(tSize);
 		throw error;
 	}
@@ -88,36 +88,36 @@ void ReversiBoard::makeMove(unsigned xPos, unsigned yPos, SquareState player)
 		throw error;
 	}
 	if (tBoard[xPos][yPos] != EMPTY){
-		std::string error = "ReversiBoard::makeMove : the square at position (" + to_string(xpos) +
+		std::string error = "ReversiBoard::makeMove : the square at position (" + to_string(xPos) +
 				", " + to_string(yPos) + ") is already accupied";
 		throw error;
 	}
 	unsigned x=0, y=0;
-	
-	for (a=-1; a<2; a++){    //for each direction (left, right)
-		for(b=-1; b<2; b++){  // for each direction (up down)
+
+	for (int a=-1; a <= 1; a++){    //for each direction (left, right)
+		for(int b=-1; b <= 1; b++){  // for each direction (up down)
 			if (a==0 && b==0) {
 				break;
 			} else {
 				x = xPos + a;
-				y = yPos + b;     
+				y = yPos + b;
 			}
 			//at least one of the squares has to belong to the opponent
 			if (tBoard[x][y] == opponent(player)) {
 				//up to the borders
 				while (x >= 0 && y >= 0 && x < tSize && y < tSize) {
-				
+
 					if (tBoard[x][y] == opponent(player)) {
-						x += a; 
+						x += a;
 						y += b;
 					} else if (tBoard[x][y] == player){
-						
-						x -= a; 
+
+						x -= a;
 						y -= b;
 						// set the squares inbetween to the player
 						while (x != xPos && y != yPos){
 							tBoard[x][y] = player;
-							x -= a; 
+							x -= a;
 							y -= b;
 						}
 						break;
@@ -136,7 +136,7 @@ bool ReversiBoard::canMove(SquareState player)
 	}
 	for (int x = 0; x < tSize; ++x) {
 		for (int y = 0; y < tSize; ++y) {
-			
+
 			if(legalMove(x, y, player)){
 				return true;
 			}
@@ -164,7 +164,7 @@ void ReversiBoard::computerTurn(SquareState turn)
 			move.yPos = y;
 			move.quality = (float)getQuality(x, y, turn);
 			if (move.quality >= maxQuality){
-				maxQuality = move.quality; 
+				maxQuality = move.quality;
 				moves.push_back(move);
 			}
 		}
@@ -184,7 +184,7 @@ void ReversiBoard::computerTurn(SquareState turn)
 unsigned ReversiBoard::getQuality(unsigned xPos, unsigned yPos, SquareState player)
 {
 	if (xPos >= tSize || yPos >= tSize){
-		std::string error = "ReversiBoard::legalMove : The position (" + to_string(xpos) + ", " +
+		std::string error = "ReversiBoard::legalMove : The position (" + to_string(xPos) + ", " +
 				to_string(yPos) + ") is out of range. The size of the board is " + to_string(tSize);
 		throw error;
 	}
@@ -193,35 +193,35 @@ unsigned ReversiBoard::getQuality(unsigned xPos, unsigned yPos, SquareState play
 		throw error;
 	}
 	if (tBoard[xPos][yPos] != EMPTY){
-		std::string error = "ReversiBoard::legalMove : the square at position (" + to_string(xpos) +
+		std::string error = "ReversiBoard::legalMove : the square at position (" + to_string(xPos) +
 				", " + to_string(yPos) + ") is already accupied";
 		throw error;
 	}
 	unsigned x=0, y=0;
 	unsigned quality = 0;
-	
-	for (a=-1; a<2; a++){    //for each direction (left, right)
-		for(b=-1; b<2; b++){  // for each direction (up down)
+
+	for (int a=-1; a <= 1; a++){    //for each direction (left, right)
+		for(int b=-1; b <= 1; b++){  // for each direction (up down)
 			if (a==0 && b==0) {
 				break;
 			} else {
 				x = xPos + a;
-				y = yPos + b;     
+				y = yPos + b;
 			}
 			//at least one of the squares has to belong to the opponent
 			if (tBoard[x][y] == opponent(player)) {
 				//up to the borders
 				while (x >= 0 && y >= 0 && x < tSize && y < tSize) {
-				
+
 					if (tBoard[x][y] == opponent(player)) {
 						x+=a; y+=b;
 					} else if (tBoard[x][y] == player){
-						x -= a; 
+						x -= a;
 						y -= b;
 						// count quality
 						while (x != xPos && y != yPos){
 							++quality;
-							x -= a; 
+							x -= a;
 							y -= b;
 						}
 						break;

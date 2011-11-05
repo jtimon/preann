@@ -28,7 +28,7 @@ unsigned Board::size()
 void Board::setSquare(unsigned xPos, unsigned yPos, SquareState squareState)
 {
 	if (xPos >= tSize || yPos >= tSize){
-		std::string error = "Board::setSquare : The position (" + to_string(xpos) + ", " +
+		std::string error = "Board::setSquare : The position (" + to_string(xPos) + ", " +
 				to_string(yPos) + ") is out of range. The size of the board is " + to_string(tSize);
 		throw error;
 	}
@@ -38,7 +38,7 @@ void Board::setSquare(unsigned xPos, unsigned yPos, SquareState squareState)
 SquareState Board::getSquare(unsigned xPos, unsigned yPos)
 {
 	if (xPos >= tSize || yPos >= tSize){
-		std::string error = "Board::getSquare : The position (" + to_string(xpos) + ", " +
+		std::string error = "Board::getSquare : The position (" + to_string(xPos) + ", " +
 				to_string(yPos) + ") is out of range. The size of the board is " + to_string(tSize);
 		throw error;
 	}

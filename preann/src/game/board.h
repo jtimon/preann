@@ -19,6 +19,7 @@ struct Move {
 };
 
 class Board {
+protected:
 	unsigned tSize;
 	SquareState** tBoard;
 	Interface* tInterface;
