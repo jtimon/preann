@@ -31,35 +31,35 @@ Buffer* Factory::newBuffer(Buffer* buffer, ImplementationType implementationType
 Buffer* Factory::newBuffer(unsigned size, BufferType bufferType, ImplementationType implementationType)
 {
 	switch(bufferType){
-		case FLOAT:
-			return func_newBuffer<FLOAT, FLOAT_STORAGE>(size, implementationType);
-		case BYTE:
-			return func_newBuffer<BYTE, BYTE_STORAGE>(size, implementationType);
-		case BIT:
-			return func_newBuffer<BIT, BIT_STORAGE>(size, implementationType);
-		case SIGN:
-			return func_newBuffer<SIGN, SIGN_STORAGE>(size, implementationType);
+		case BT_FLOAT:
+			return func_newBuffer<BT_FLOAT, FLOAT_STORAGE>(size, implementationType);
+		case BT_BYTE:
+			return func_newBuffer<BT_BYTE, BYTE_STORAGE>(size, implementationType);
+		case BT_BIT:
+			return func_newBuffer<BT_BIT, BIT_STORAGE>(size, implementationType);
+		case BT_SIGN:
+			return func_newBuffer<BT_SIGN, SIGN_STORAGE>(size, implementationType);
 	}
 }
 
 Connection* Factory::newThresholds(Buffer* output, ImplementationType implementationType)
 {
-	return func_newConnection<FLOAT, FLOAT_STORAGE>(output, 1, implementationType);
+	return func_newConnection<BT_FLOAT, FLOAT_STORAGE>(output, 1, implementationType);
 }
 
 BufferType Factory::weighForInput(BufferType inputType)
 {
 	switch (inputType){
-		case BYTE:
+		case BT_BYTE:
 			{
 			std::string error = "Connections are not implemented for an input Buffer of the BufferType BYTE";
 			throw error;
 			}
-		case FLOAT:
-			return FLOAT;
-		case BIT:
-		case SIGN:
-			return BYTE;
+		case BT_FLOAT:
+			return BT_FLOAT;
+		case BT_BIT:
+		case BT_SIGN:
+			return BT_BYTE;
 	}
 }
 
@@ -68,13 +68,13 @@ Connection* Factory::newConnection(Buffer* input, unsigned outputSize, Implement
 	BufferType bufferType = Factory::weighForInput(input->getBufferType());
 
 	switch(bufferType){
-		case FLOAT:
-			return func_newConnection<FLOAT, FLOAT_STORAGE>(input, outputSize, implementationType);
-		case BYTE:
-			return func_newConnection<BYTE, BYTE_STORAGE>(input, outputSize, implementationType);
-		case BIT:
-			return func_newConnection<BIT, BIT_STORAGE>(input, outputSize, implementationType);
-		case SIGN:
-			return func_newConnection<SIGN, SIGN_STORAGE>(input, outputSize, implementationType);
+		case BT_FLOAT:
+			return func_newConnection<BT_FLOAT, FLOAT_STORAGE>(input, outputSize, implementationType);
+		case BT_BYTE:
+			return func_newConnection<BT_BYTE, BYTE_STORAGE>(input, outputSize, implementationType);
+		case BT_BIT:
+			return func_newConnection<BT_BIT, BIT_STORAGE>(input, outputSize, implementationType);
+		case BT_SIGN:
+			return func_newConnection<BT_SIGN, SIGN_STORAGE>(input, outputSize, implementationType);
 	}
 }

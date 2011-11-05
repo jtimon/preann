@@ -219,12 +219,12 @@ vector<Interface*> Individual::prepareCrossover(CrossoverLevel crossoverLevel)
 {
 	switch (crossoverLevel)
 	{
-	case WEIGH:
+	case CL_WEIGH:
 		return prepareCrossoverWeighs();
-	case NEURON:
-	case NEURON_INVERTED:
+	case CL_NEURON:
+	case CL_NEURON_INVERTED:
 		return prepareCrossoverNeurons();
-	case LAYER:
+	case CL_LAYER:
 		return prepareCrossoverLayers();
 	}
 }
@@ -233,16 +233,16 @@ void Individual::crossover(CrossoverLevel crossoverLevel, Individual* other, vec
 {
 	switch (crossoverLevel)
 	{
-	case WEIGH:
+	case CL_WEIGH:
 		crossoverWeighs(other, bitmaps);
 		break;
-	case NEURON:
+	case CL_NEURON:
 		crossoverNeurons(other, bitmaps);
 		break;
-	case NEURON_INVERTED:
+	case CL_NEURON_INVERTED:
 		crossoverNeuronsInverted(other, bitmaps);
 		break;
-	case LAYER:
+	case CL_LAYER:
 		crossoverLayers(other, bitmaps);
 		break;
 	}
@@ -255,11 +255,11 @@ vector<Interface*> Individual::prepareCrossoverWeighs()
 		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++){
 
 			Connection* connection = layers[i]->getConnection(j);
-			Interface* bitmap = new Interface(connection->getSize(), BIT);
+			Interface* bitmap = new Interface(connection->getSize(), BT_BIT);
 			bitmaps.push_back(bitmap);
 		}
 		Connection* thresholds = layers[i]->getThresholds();
-		Interface* bitmap = new Interface(thresholds->getSize(), BIT);
+		Interface* bitmap = new Interface(thresholds->getSize(), BT_BIT);
 		bitmaps.push_back(bitmap);
 	}
 	return bitmaps;
@@ -270,7 +270,7 @@ vector<Interface*> Individual::prepareCrossoverNeurons()
 	vector<Interface*> bitmaps;
 	for (unsigned i = 0; i < layers.size(); i++){
 
-		Interface* bitmap = new Interface(layers[i]->getOutput()->getSize(), BIT);
+		Interface* bitmap = new Interface(layers[i]->getOutput()->getSize(), BT_BIT);
 		bitmaps.push_back(bitmap);
 	}
 	return bitmaps;
@@ -279,7 +279,7 @@ vector<Interface*> Individual::prepareCrossoverNeurons()
 vector<Interface*> Individual::prepareCrossoverLayers()
 {
 	vector<Interface*> bitmaps;
-	Interface* bitmap = new Interface(layers.size(), BIT);
+	Interface* bitmap = new Interface(layers.size(), BT_BIT);
 	bitmaps.push_back(bitmap);
 	return bitmaps;
 }

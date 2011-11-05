@@ -21,14 +21,14 @@ public:
 	virtual ~Cuda2Connection() {};
 
 	virtual ImplementationType getImplementationType() {
-		return CUDA_REDUC;
+		return IT_CUDA_REDUC;
 	};
 
 	virtual void calculateAndAddTo(Buffer* results)
 	{
 		void* inputWeighs = this->getDataPointer();
 		float* resultsPtr = (float*)results->getDataPointer();
-		// TODO TCC este método no funciona correctamente para SIGN
+		// TODO TCC este método no funciona correctamente para BT_SIGN
 		cuda_inputCalculationReduction(tInput->getDataPointer(), tInput->getSize(), tInput->getBufferType(), results->getSize(), inputWeighs, resultsPtr, Cuda_Threads_Per_Block);
 	}
 };

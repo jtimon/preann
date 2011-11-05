@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
 //		plot.withAll(ET_CROSS_ALG);
 //		plot.withAll(ET_CROSS_LEVEL);
 		//TODO quitar excludes
-		plot.exclude(ET_CROSS_ALG, 1, PROPORTIONAL);
-		plot.exclude(ET_CROSS_LEVEL, 1, LAYER);
+		plot.exclude(ET_CROSS_ALG, 1, CA_PROPORTIONAL);
+		plot.exclude(ET_CROSS_LEVEL, 1, CL_LAYER);
 
 		plot.with(ET_MUTATION_ALG, 1, MA_PER_INDIVIDUAL);
 
@@ -32,10 +32,10 @@ int main(int argc, char *argv[])
 		plot.printParameters();
 
 		Task* task = new BinaryTask(BO_OR, VECTORS_SIZE);
-		Individual* example = new Individual(SSE2);
+		Individual* example = new Individual(IT_SSE2);
 		task->setInputs(example);
-		example->addLayer(VECTORS_SIZE * 2, BIT, IDENTITY);
-		example->addLayer(VECTORS_SIZE, BIT, IDENTITY);
+		example->addLayer(VECTORS_SIZE * 2, BT_BIT, FT_IDENTITY);
+		example->addLayer(VECTORS_SIZE, BT_BIT, FT_IDENTITY);
 		example->addInputConnection(0, 0);
 		example->addInputConnection(1, 0);
 		//TODO bucle infinito con una sola capa

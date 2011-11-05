@@ -13,13 +13,13 @@ protected:
 	unsigned getByteSize()
 	{
 		switch (bufferTypeTempl){
-		case BYTE:
+		case BT_BYTE:
 			return tSize;
 			break;
-		case FLOAT:
+		case BT_FLOAT:
 			return tSize * sizeof(float);
-		case BIT:
-		case SIGN:
+		case BT_BIT:
+		case BT_SIGN:
 			return (((tSize-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
 		}
 	}
@@ -36,7 +36,7 @@ protected:
 public:
 
 	virtual ImplementationType getImplementationType() {
-		return CUDA;
+		return IT_CUDA;
 	};
 	virtual BufferType getBufferType()
 	{
@@ -55,7 +55,7 @@ public:
 	//special constructor for bit coalescing buffers
 	CudaBuffer(Interface* bitBuffer, unsigned block_size)
 	{
-		if (bitBuffer->getBufferType() != BIT){
+		if (bitBuffer->getBufferType() != BT_BIT){
 			std::string error = "The Buffer type must be BIT to use a BitBuffer CudaBuffer constructor.";
 			throw error;
 		}
@@ -65,7 +65,7 @@ public:
 		tSize = (bitBufferSize / maxWeighsPerBlock) * maxWeighsPerBlock;
 		tSize += min(bitBufferSize % maxWeighsPerBlock, block_size) * BITS_PER_UNSIGNED;
 
-		Interface interfaceOrderedByBlockSize = Interface(tSize, BIT);
+		Interface interfaceOrderedByBlockSize = Interface(tSize, BT_BIT);
 		unsigned byteSize = interfaceOrderedByBlockSize.getByteSize();
 		data = cuda_malloc(byteSize);
 

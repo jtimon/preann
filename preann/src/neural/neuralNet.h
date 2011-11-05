@@ -20,7 +20,7 @@ protected:
 	ImplementationType getImplementationType();
 public:
 
-	NeuralNet(ImplementationType implementationType = C);
+	NeuralNet(ImplementationType implementationType = IT_C);
 	virtual ~NeuralNet();
 
 	void addInputLayer(Interface* interface);
@@ -30,8 +30,8 @@ public:
 
 	Interface* getOutput(unsigned layerPos);
 
-	void addLayer(unsigned size, BufferType destinationType = FLOAT,
-			FunctionType functiontype = IDENTITY);
+	void addLayer(unsigned size, BufferType destinationType = BT_FLOAT,
+			FunctionType functiontype = FT_IDENTITY);
 	unsigned getNumLayers();
 
 	void addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos);
@@ -44,10 +44,10 @@ public:
 
 	void createFeedForwardNet(unsigned inputSize, BufferType inputType,
 			unsigned numLayers, unsigned sizeLayers,
-			BufferType hiddenLayersType, FunctionType functiontype = IDENTITY);
+			BufferType hiddenLayersType, FunctionType functiontype = FT_IDENTITY);
 	void createFullyConnectedNet(unsigned inputSize, BufferType inputType,
 			unsigned numLayers, unsigned sizeLayers,
-			BufferType hiddenLayersType, FunctionType functiontype = IDENTITY);
+			BufferType hiddenLayersType, FunctionType functiontype = FT_IDENTITY);
 
 };
 

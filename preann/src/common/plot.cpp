@@ -190,13 +190,13 @@ void plotTaskFunction(Test* test)
 //	printf("%s\n", aaa);
 
 	switch (crossoverAlgorithm){
-	case UNIFORM:
+	case CA_UNIFORM:
 		population->setCrossoverUniformScheme(crossoverLevel, numIndiv, 0.7);
 		break;
-	case PROPORTIONAL:
+	case CA_PROPORTIONAL:
 		population->setCrossoverProportionalScheme(crossoverLevel, numIndiv);
 		break;
-	case MULTIPOINT:
+	case CA_MULTIPOINT:
 		population->setCrossoverMultipointScheme(crossoverLevel, numIndiv, 3);
 		break;
 

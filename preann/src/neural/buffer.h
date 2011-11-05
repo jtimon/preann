@@ -9,13 +9,13 @@ c_typeTempl Function(float number, FunctionType functionType)
 {
 	switch (functionType) {
 
-	case BINARY_STEP:
+	case FT_BINARY_STEP:
 		if (number > 0) {
 			return 1;
 		} else {
 			return 0;
 		}
-	case BIPOLAR_STEP:
+	case FT_BIPOLAR_STEP:
 		if (number > 0) {
 			return 1;
 		} else {
@@ -23,11 +23,11 @@ c_typeTempl Function(float number, FunctionType functionType)
 		}
 	case SIGMOID:
 		return 1.0f / (1.0f - exp(-number));
-	case BIPOLAR_SIGMOID:
+	case FT_BIPOLAR_SIGMOID:
 		return -1.0f + (2.0f / (1.0f + exp(-number)));
-	case HYPERBOLIC_TANGENT:
+	case FT_HYPERBOLIC_TANGENT:
 		return tanh(number);
-	case IDENTITY:
+	case FT_IDENTITY:
 	default:
 		return number;
 	}

@@ -8,7 +8,7 @@ InputLayer::InputLayer(Interface* interface, ImplementationType implementationTy
 	output = Factory::newBuffer(interface->getSize(), interface->getBufferType(), implementationType);
 
 	thresholds = NULL;
-	functionType = IDENTITY;
+	functionType = FT_IDENTITY;
 }
 
 InputLayer::InputLayer(FILE* stream, ImplementationType implementationType)
@@ -16,7 +16,7 @@ InputLayer::InputLayer(FILE* stream, ImplementationType implementationType)
 	output = Factory::newBuffer(stream, implementationType);
 	tInput = new Interface(output->getSize(), output->getBufferType());
 	thresholds = NULL;
-	functionType = IDENTITY;
+	functionType = FT_IDENTITY;
 }
 
 void InputLayer::save(FILE* stream)

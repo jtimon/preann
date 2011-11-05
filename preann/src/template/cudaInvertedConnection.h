@@ -51,7 +51,7 @@ public:
 	virtual ~CudaInvertedConnection() {};
 
 	virtual ImplementationType getImplementationType() {
-		return CUDA_INV;
+		return IT_CUDA_INV;
 	};
 
 	virtual void calculateAndAddTo(Buffer* results)

@@ -34,7 +34,7 @@ protected:
 	void freeBitmaps(vector<Interface*> bitmaps);
 
 public:
-	Individual(ImplementationType implementationType = C);
+	Individual(ImplementationType implementationType = IT_C);
 	virtual ~Individual();
 
 	Individual* newCopy(bool copyWeighs);

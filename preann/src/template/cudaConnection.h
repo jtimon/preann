@@ -39,7 +39,7 @@ public:
 	{
 		void* inputWeighs = this->getDataPointer();
 		float* resultsPtr = (float*)results->getDataPointer();
-		// TODO TCC este método no funciona correctamente para SIGN
+		// TODO TCC este método no funciona correctamente para BT_SIGN
 		cuda_inputCalculation(tInput->getDataPointer(), tInput->getSize(), tInput->getBufferType(), results->getSize(), inputWeighs, resultsPtr, Cuda_Threads_Per_Block);
 	}
 

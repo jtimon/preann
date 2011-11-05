@@ -16,8 +16,8 @@ protected:
 	unsigned getByteSize()
 	{
 		switch (bufferTypeTempl){
-			case BIT:
-			case SIGN:
+			case BT_BIT:
+			case BT_SIGN:
 				return (((tSize-1)/BITS_PER_UNSIGNED)+1) * sizeof(unsigned);
 			default:
 				return tSize * sizeof(c_typeTempl);
@@ -36,7 +36,7 @@ protected:
 public:
 
 	virtual ImplementationType getImplementationType() {
-		return C;
+		return IT_C;
 	};
 
 	virtual BufferType getBufferType()
@@ -54,7 +54,7 @@ public:
 		data = MemoryManagement::malloc(byteSize);
 
 		switch (bufferTypeTempl){
-			case BYTE:
+			case BT_BYTE:
 				SetValueToAnArray<c_typeTempl>(data, byteSize/sizeof(c_typeTempl), 128);
 				break;
 			default:
@@ -82,20 +82,20 @@ public:
 		float* results = (float*)resultsVect->getDataPointer();
 
 		switch (bufferTypeTempl){
-		case BYTE:
+		case BT_BYTE:
 			{
 				std::string error = "CppBuffer::activation is not implemented for BufferType BYTE.";
 				throw error;
 			}break;
-		case FLOAT:
+		case BT_FLOAT:
 			{
 				for (unsigned i=0; i < tSize; i++){
 					((c_typeTempl*)data)[i] = Function<c_typeTempl>(results[i], functionType);
 				}
 			}
 			break;
-		case BIT:
-		case SIGN:
+		case BT_BIT:
+		case BT_SIGN:
 			{
 				unsigned* bufferData = (unsigned*)data;
 				unsigned mask;
@@ -119,20 +119,20 @@ public:
 
 };
 
-//TODO template specialization for BYTE, BIT and SIGN
+//TODO template specialization for BT_BYTE, BT_BIT and BT_SIGN
 //template <class c_typeTempl>
-//class CppBuffer<BYTE, c_typeTempl>: virtual public Buffer{
+//class CppBuffer<BT_BYTE, c_typeTempl>: virtual public Buffer{
 //
 //	void activation(Buffer* resultsVect, FunctionType functionType)
 //	{
-//		std::string error = "CppBuffer::activation is not implemented for BufferType BYTE.";
+//		std::string error = "CppBuffer::activation is not implemented for BufferType BT_BYTE.";
 //		throw error;
 //	}
 //};
 //
 ////TODO juntar esto y lo siguiente (que es igual)
 //template <class c_typeTempl>
-//class CppBuffer<BIT, c_typeTempl>: virtual public Buffer{
+//class CppBuffer<BT_BIT, c_typeTempl>: virtual public Buffer{
 //
 //	void activation(Buffer* resultsVect, FunctionType functionType)
 //	{
@@ -163,7 +163,7 @@ public:
 //	}
 //};
 //template <class c_typeTempl>
-//class CppBuffer<SIGN, c_typeTempl>: virtual public Buffer{
+//class CppBuffer<BT_SIGN, c_typeTempl>: virtual public Buffer{
 //
 //	void activation(Buffer* resultsVect, FunctionType functionType)
 //	{

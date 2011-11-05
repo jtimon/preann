@@ -31,7 +31,7 @@ Layer* createAndLoadLayer(ImplementationType implementationType, Buffer** inputB
 
 Layer* createAndSaveLayer(Test* test, Buffer** controlInputs)
 {
-    Layer* controlLayer = new Layer(size, (BufferType)test->getEnum(ET_BUFFER), IDENTITY, C);
+    Layer* controlLayer = new Layer(size, (BufferType)test->getEnum(ET_BUFFER), FT_IDENTITY, IT_C);
 
     for (unsigned i = 0; i < NUM_INPUTS; i++){
 		controlLayer->addInput(controlInputs[i]);
@@ -51,11 +51,11 @@ unsigned testCalculateOutput(Test* test)
 
 	Buffer* controlInputBuffers[NUM_INPUTS];
 	for (unsigned i = 0; i < NUM_INPUTS; i++) {
-		BufferType bufferTypeAux = BYTE;
-		while (bufferTypeAux == BYTE) {
+		BufferType bufferTypeAux = BT_BYTE;
+		while (bufferTypeAux == BT_BYTE) {
 			bufferTypeAux = (BufferType)Random::positiveInteger(BUFFER_TYPE_DIM);
 		}
-		controlInputBuffers[i] = Factory::newBuffer(size, bufferTypeAux, C);
+		controlInputBuffers[i] = Factory::newBuffer(size, bufferTypeAux, IT_C);
 		controlInputBuffers[i]->random(initialWeighsRange);
 	}
 
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 
 	test.addIterator(&size, 1, 50, 49);
 	test.withAll(ET_IMPLEMENTATION);
-	test.exclude(ET_BUFFER, 1, BYTE);
+	test.exclude(ET_BUFFER, 1, BT_BYTE);
 	test.printParameters();
 
 	try {

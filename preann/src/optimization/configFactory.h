@@ -23,7 +23,7 @@ template <BufferType bufferTypeTempl, class c_typeTempl>
 Buffer* func_newBuffer(unsigned size, ImplementationType implementationType)
 {
 	switch(implementationType){
-		case C:
+		case IT_C:
 #ifdef CPP_IMPL
 			return new CppBuffer<bufferTypeTempl, c_typeTempl>(size);
 #else
@@ -32,7 +32,7 @@ Buffer* func_newBuffer(unsigned size, ImplementationType implementationType)
 			throw error;
 			}
 #endif
-		case SSE2:
+		case IT_SSE2:
 #ifdef SSE2_IMPL
 			return new XmmBuffer<bufferTypeTempl, c_typeTempl>(size);
 #else
@@ -41,9 +41,9 @@ Buffer* func_newBuffer(unsigned size, ImplementationType implementationType)
 			throw error;
 			}
 #endif
-		case CUDA:
-		case CUDA_REDUC:
-		case CUDA_INV:
+		case IT_CUDA:
+		case IT_CUDA_REDUC:
+		case IT_CUDA_INV:
 #ifdef CUDA_IMPL
 			return new CudaBuffer<bufferTypeTempl, c_typeTempl>(size);
 #else
@@ -64,7 +64,7 @@ template <BufferType bufferTypeTempl, class c_typeTempl>
 Connection* func_newConnection(Buffer* input, unsigned outputSize, ImplementationType implementationType)
 {
 	switch(implementationType){
-		case C:
+		case IT_C:
 #ifdef CPP_IMPL
 			return new CppConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
@@ -73,7 +73,7 @@ Connection* func_newConnection(Buffer* input, unsigned outputSize, Implementatio
 			throw error;
 			}
 #endif
-		case SSE2:
+		case IT_SSE2:
 #ifdef SSE2_IMPL
 			return new XmmConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
@@ -83,16 +83,16 @@ Connection* func_newConnection(Buffer* input, unsigned outputSize, Implementatio
 			}
 #endif
 #ifdef CUDA_IMPL
-		case CUDA:
+		case IT_CUDA:
 			return new CudaConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
-		case CUDA_REDUC:
+		case IT_CUDA_REDUC:
 			return new Cuda2Connection<bufferTypeTempl, c_typeTempl>(input, outputSize);
-		case CUDA_INV:
+		case IT_CUDA_INV:
 			return new CudaInvertedConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
-		case CUDA:
-		case CUDA_REDUC:
-		case CUDA_INV:
+		case IT_CUDA:
+		case IT_CUDA_REDUC:
+		case IT_CUDA_INV:
 			{
 			std::string error = "Implementation CUDA is not allowed.";
 			throw error;

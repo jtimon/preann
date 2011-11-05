@@ -16,11 +16,11 @@ unsigned testActivation(Test* test)
 	START_BUFFER_TEST
 
 	FunctionType functionType = (FunctionType)test->getEnum(ET_FUNCTION);
-	Buffer* results = Factory::newBuffer(buffer->getSize(), FLOAT, buffer->getImplementationType());
+	Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT, buffer->getImplementationType());
 	results->random(initialWeighsRange);
 
-	Buffer* cResults = Factory::newBuffer(results, C);
-	Buffer* cBuffer = Factory::newBuffer(buffer->getSize(), buffer->getBufferType(), C);
+	Buffer* cResults = Factory::newBuffer(results, IT_C);
+	Buffer* cBuffer = Factory::newBuffer(buffer->getSize(), buffer->getBufferType(), IT_C);
 
 	buffer->activation(results, functionType);
 	cBuffer->activation(cResults, functionType);
@@ -40,7 +40,7 @@ unsigned testCopyFromInterface(Test* test)
 	Interface interface(buffer->getSize(), buffer->getBufferType());
 	interface.random(initialWeighsRange);
 
-	Buffer* cBuffer = Factory::newBuffer(buffer, C);
+	Buffer* cBuffer = Factory::newBuffer(buffer, IT_C);
 
 	buffer->copyFromInterface(&interface);
 	cBuffer->copyFromInterface(&interface);
@@ -58,7 +58,7 @@ unsigned testCopyToInterface(Test* test)
 
 	Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
 
-	Buffer* cBuffer = Factory::newBuffer(buffer, C);
+	Buffer* cBuffer = Factory::newBuffer(buffer, IT_C);
 	Interface cInterface = Interface(buffer->getSize(), buffer->getBufferType());
 
 	buffer->copyToInterface(&interface);
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
 		test.test(testCopyFromInterface, "Buffer::copyFromInterface");
 		test.test(testCopyToInterface, "Buffer::copyToInterface");
 
-		test.exclude(ET_BUFFER, 1, BYTE);
+		test.exclude(ET_BUFFER, 1, BT_BYTE);
 		test.printParameters();
 		test.test(testActivation, "Buffer::activation");
 

@@ -15,7 +15,7 @@ float chronoCalculateAndAddTo(Test* test)
 {
 	START_CONNECTION_PLOT
 
-	Buffer* results = Factory::newBuffer(outputSize, FLOAT, connection->getImplementationType());
+	Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT, connection->getImplementationType());
 
 	chrono.start();
 	for (unsigned i = 0; i < (*repetitions); ++i) {
@@ -47,7 +47,7 @@ float chronoCrossover(Test* test)
 	START_CONNECTION_PLOT
 
 	Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
-	Interface bitVector(connection->getSize(), BIT);
+	Interface bitVector(connection->getSize(), BT_BIT);
 	bitVector.random(2);
 	chrono.start();
 	for (unsigned i = 0; i < (*repetitions); ++i) {
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
 	Plot plot;
 	plot.addPlotIterator(&size, 1000, 10000, 1000);
-	plot.exclude(ET_BUFFER, 1, BYTE);
+	plot.exclude(ET_BUFFER, 1, BT_BYTE);
 	plot.withAll(ET_IMPLEMENTATION);
 
 	plot.setColorEnum(ET_IMPLEMENTATION);
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 		plot.plot(chronoCrossover, path, 10, "CONNECTION_CROSSOVER");
 
 		//TODO todas las implementaciones cuda tienen maximo ??
-		plot.exclude(ET_IMPLEMENTATION, 3, CUDA, CUDA_REDUC, CUDA_INV);
+		plot.exclude(ET_IMPLEMENTATION, 3, IT_CUDA, IT_CUDA_REDUC, IT_CUDA_INV);
 		plot.plot(chronoCalculateAndAddTo, path, 20, "CONNECTION_CALCULATEANDADDTO");
 
 		printf("Exit success.\n");

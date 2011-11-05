@@ -44,7 +44,7 @@ void testConnection(Test* test)
 
 void testLayer(Test* test)
 {
-    Layer *layer = new Layer(size, (BufferType)test->getEnum(ET_BUFFER), IDENTITY, (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
+    Layer *layer = new Layer(size, (BufferType)test->getEnum(ET_BUFFER), FT_IDENTITY, (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
 
 		test.simpleTest(testBuffer, "Buffer::memory");
 
-		test.exclude(ET_BUFFER, 1, BYTE);
+		test.exclude(ET_BUFFER, 1, BT_BYTE);
 		test.printParameters();
 
 		test.simpleTest(testConnection, "Connection::memory");

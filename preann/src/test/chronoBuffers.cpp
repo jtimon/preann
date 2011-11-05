@@ -42,10 +42,10 @@ float chronoActivation(Test* test)
 {
 	START_BUFFER_PLOT
 
-	Buffer* results = Factory::newBuffer(buffer->getSize(), FLOAT, buffer->getImplementationType());
+	Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT, buffer->getImplementationType());
 	chrono.start();
 	for (unsigned i = 0; i < (*repetitions); ++i) {
-		buffer->activation(results, IDENTITY);
+		buffer->activation(results, FT_IDENTITY);
 	}
 	chrono.stop();
 	delete (results);
@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
 
 		Plot plot;
 		plot.addPlotIterator(&size, 1000, 10000, 1000);
-		plot.exclude(ET_BUFFER, 1, BYTE);
-		plot.exclude(ET_IMPLEMENTATION, 1, CUDA);
+		plot.exclude(ET_BUFFER, 1, BT_BYTE);
+		plot.exclude(ET_IMPLEMENTATION, 1, IT_CUDA);
 
 		plot.setColorEnum(ET_IMPLEMENTATION);
 		plot.setPointEnum(ET_BUFFER);

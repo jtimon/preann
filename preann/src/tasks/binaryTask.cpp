@@ -12,9 +12,9 @@ BinaryTask::BinaryTask(BinaryOperation binaryOperation, unsigned size)
 	tBinaryOperation = binaryOperation;
 	tSize = size;
 	tNumTests = 0;
-	tInput1 = new Interface(size, BIT);
-	tInput2 = new Interface(size, BIT);
-	tOutput = new Interface(size, BIT);
+	tInput1 = new Interface(size, BT_BIT);
+	tInput2 = new Interface(size, BT_BIT);
+	tOutput = new Interface(size, BT_BIT);
 }
 
 BinaryTask::BinaryTask(BinaryOperation binaryOperation, unsigned size, unsigned numTests)
@@ -22,9 +22,9 @@ BinaryTask::BinaryTask(BinaryOperation binaryOperation, unsigned size, unsigned 
 	tBinaryOperation = binaryOperation;
 	tSize = size;
 	tNumTests = numTests;
-	tInput1 = new Interface(size, BIT);
-	tInput2 = new Interface(size, BIT);
-	tOutput = new Interface(size, BIT);
+	tInput1 = new Interface(size, BT_BIT);
+	tInput2 = new Interface(size, BT_BIT);
+	tOutput = new Interface(size, BT_BIT);
 }
 
 BinaryTask::~BinaryTask()

@@ -120,7 +120,7 @@ void Layer::randomWeighs(float range)
 		aux.random(range);
 		connections[i]->copyFromInterface(&aux);
 	}
-	Interface aux(output->getSize(), FLOAT);
+	Interface aux(output->getSize(), BT_FLOAT);
 	aux.random(range);
 	thresholds->copyFromInterface(&aux);
 }

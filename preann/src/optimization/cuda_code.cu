@@ -15,13 +15,13 @@ float Func(float number, FunctionType functionType)
 {
 	switch (functionType) {
 
-	case BINARY_STEP:
+	case FT_BINARY_STEP:
 		if (number > 0) {
 			return 1;
 		} else {
 			return 0;
 		}
-	case BIPOLAR_STEP:
+	case FT_BIPOLAR_STEP:
 		if (number > 0) {
 			return 1;
 		} else {
@@ -29,11 +29,11 @@ float Func(float number, FunctionType functionType)
 		}
 	case SIGMOID:
 		return 1.0f / (1.0f - exp(-number));
-	case BIPOLAR_SIGMOID:
+	case FT_BIPOLAR_SIGMOID:
 		return -1.0f + (2.0f / (1.0f + exp(-number)));
-	case HYPERBOLIC_TANGENT:
+	case FT_HYPERBOLIC_TANGENT:
 		return tanh(number);
-	case IDENTITY:
+	case FT_IDENTITY:
 	default:
 		return number;
 	}
@@ -77,19 +77,19 @@ extern "C" void cuda_activation(void* data, unsigned size, BufferType bufferType
 	unsigned grid_size;
 
 	switch (bufferType){
-	case BYTE:
+	case BT_BYTE:
 		{
 			std::string error = "cuda_activation is not implemented for BufferType BYTE.";
 			throw error;
 		}
-	case FLOAT:
+	case BT_FLOAT:
 		{
 			grid_size = ((size - 1) / block_size) + 1;
 			activation_float_kernel<<< grid_size, block_size >>>(results, (float*)data, size, functionType);
 		}
 		break;
-	case BIT:
-	case SIGN:
+	case BT_BIT:
+	case BT_SIGN:
 		{
 			grid_size = ((size - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
 			activation_bit_kernel<<< grid_size, block_size >>>(results, (unsigned*)data, size);
@@ -145,18 +145,18 @@ extern "C" void cuda_setZero(void* data, unsigned byteSize, BufferType bufferTyp
 	unsigned size;
 
 	switch (bufferType){
-	case BYTE:
+	case BT_BYTE:
 		size = byteSize / sizeof(unsigned char);
 		grid_size = ((size - 1) / block_size) + 1;
 		SetValueToAnArrayKernel<unsigned char><<< grid_size, block_size >>>((unsigned char*)data, size, (unsigned char)0);
 		break;
-	case FLOAT:
+	case BT_FLOAT:
 		size = byteSize / sizeof(float);
 		grid_size = ((size - 1) / block_size) + 1;
 		SetValueToAnArrayKernel<float><<< grid_size, block_size >>>((float*)data, size, 0);
 		break;
-	case BIT:
-	case SIGN:
+	case BT_BIT:
+	case BT_SIGN:
 		cudaMemset(data, 0, byteSize);
 		break;
 	}
@@ -194,17 +194,17 @@ void cuda_crossover(void* buffer1, void* buffer2, unsigned* bitBuffer, unsigned 
 	unsigned grid_size = ((size - 1)/(block_size * BITS_PER_UNSIGNED)) + 1;
 
 	switch (bufferType){
-        case BYTE:
+        case BT_BYTE:
 		crossoverKernel<unsigned char><<< grid_size, block_size >>>
 				((unsigned char*)buffer1, (unsigned char*)buffer2, (unsigned*)bitBuffer, size);
 
         break;
-    case FLOAT:
+    case BT_FLOAT:
     	crossoverKernel<float><<< grid_size, block_size >>>
 				((float*)buffer1, (float*)buffer2, (unsigned*)bitBuffer, size);
 		break;
-	case BIT:
-	case SIGN:
+	case BT_BIT:
+	case BT_SIGN:
 		{
 		std::string error = "cuda_crossover is not implemented for BufferType BIT nor SIGN.";
 		throw error;
@@ -240,14 +240,14 @@ void mutateByteKernel(unsigned char* buffer, unsigned pos, int mutation)
 extern "C" void cuda_mutate(void* buffer, unsigned pos, float mutation, BufferType bufferType)
 {
 	switch (bufferType){
-	case BYTE:
+	case BT_BYTE:
 		mutateByteKernel<<< 1, 8 >>>((unsigned char*)buffer, pos, (int)mutation);
 		break;
-	case FLOAT:
+	case BT_FLOAT:
 		mutateFloatKernel<<< 1, 8 >>>((float*)buffer, pos, mutation);
 		break;
-	case BIT:
-	case SIGN:
+	case BT_BIT:
+	case BT_SIGN:
 		{
 		std::string error = "cuda_mutate is not implemented for BufferType BIT nor SIGN.";
 		throw error;
@@ -255,7 +255,7 @@ extern "C" void cuda_mutate(void* buffer, unsigned pos, float mutation, BufferTy
 	}
 }
 
-// LAYER CALCULATION
+// CL_LAYER CALCULATION
 
 __global__
 void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned output_size, float* weighs, float* results)
@@ -339,7 +339,7 @@ void SumBitsConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned ou
 
 		for (unsigned i=0; i < input_blocks_to_read; i++) {
 
-			//TODO TCC check performance penalty (this is just for SIGN)
+			//TODO TCC check performance penalty (this is just for BT_SIGN)
 			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
 			unsigned input_block = shared_inputs[i];
@@ -349,7 +349,7 @@ void SumBitsConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned ou
 				if (input_block & mask) {
 					result += weighs[weighsOffset] - 128;
 				} else {
-					if (inputType == SIGN) {
+					if (inputType == BT_SIGN) {
 						result += 128 - weighs[weighsOffset];
 					}
 				}
@@ -414,7 +414,7 @@ void SumBitsInvertedConnectionsKernel(unsigned* inputs, unsigned input_size, uns
 
 		for (unsigned i=0; i < input_blocks_to_read; i++) {
 
-			//TODO TCC check performance penalty (this is just for SIGN)
+			//TODO TCC check performance penalty (this is just for BT_SIGN)
 			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
 			unsigned weighsOffset = (i * BITS_PER_UNSIGNED * output_size) + outputNeuron;
@@ -425,7 +425,7 @@ void SumBitsInvertedConnectionsKernel(unsigned* inputs, unsigned input_size, uns
 				if (input_block & mask) {
 					result += weighs[weighsOffset] - 128;
 				} else {
-					if (inputType == SIGN) {
+					if (inputType == BT_SIGN) {
 						result += 128 - weighs[weighsOffset];
 					}
 				}
@@ -444,11 +444,11 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size,
 	unsigned grid_size = ((output_size - 1) / block_size) + 1;
 	unsigned shared_mem_size;
 
-	if (inputType == BYTE) {
+	if (inputType == BT_BYTE) {
 		std::string error = "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
 		throw error;
 	}
-	else if (inputType == FLOAT) {
+	else if (inputType == BT_FLOAT) {
 		if (input_size > 4032) {
 			string error = "The maximum float input size is 4032.";
 			throw error;
@@ -464,10 +464,10 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size,
 			string error = "The maximum bit/sign input size is 129024.";
 			throw error;
 		}
-		if (inputType == BIT) {
-			SumBitsConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+		if (inputType == BT_BIT) {
+			SumBitsConnectionsKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
 		} else {
-			SumBitsConnectionsKernel<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+			SumBitsConnectionsKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
 		}
 	}
 }
@@ -479,11 +479,11 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
 	unsigned grid_size = ((output_size - 1) / block_size) + 1;
 	unsigned shared_mem_size;
 
-	if (inputType == BYTE) {
+	if (inputType == BT_BYTE) {
 		std::string error = "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
 		throw error;
 	}
-	else if (inputType == FLOAT) {
+	else if (inputType == BT_FLOAT) {
 		while (input_size > CUDA_MAX_SHARED_FLOATS) {
 
 			shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(float);
@@ -502,10 +502,10 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
 			shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(unsigned);
 			// TODO TCC probar sin emulación
 //			printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
-			if (inputType == BIT) {
-				SumBitsInvertedConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
+			if (inputType == BT_BIT) {
+				SumBitsInvertedConnectionsKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
 			} else {
-				SumBitsInvertedConnectionsKernel<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
+				SumBitsInvertedConnectionsKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
 			}
 			inputPtr = (void*)((float*)inputPtr + CUDA_MAX_SHARED_FLOATS);
 			weighs = (void*)((float*)weighs + (CUDA_MAX_SHARED_BITS * output_size));
@@ -514,10 +514,10 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
 		shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
 		// TODO TCC probar sin emulación
 		//printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
-		if (inputType == BIT) {
-			SumBitsInvertedConnectionsKernel<BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+		if (inputType == BT_BIT) {
+			SumBitsInvertedConnectionsKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
 		} else {
-			SumBitsInvertedConnectionsKernel<SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+			SumBitsInvertedConnectionsKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
 		}
 	}
 }
@@ -533,7 +533,7 @@ void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned output_s
 	float result = 0;
 	unsigned i = threadIdx.x;
 
-	if (inputType == FLOAT) {
+	if (inputType == BT_FLOAT) {
 		while (i < input_size) {
 			result += ((float*)inputPtr)[i] * ((float*)weighs)[weighsOffset + i];
 			i += blockDim.x;
@@ -544,7 +544,7 @@ void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned output_s
 		unsigned input_blocks_to_read = ((input_size - 1) / BITS_PER_UNSIGNED) + 1;
 		while (i < input_blocks_to_read) {
 
-			//TODO TCC check performance penalty (this is just for SIGN)
+			//TODO TCC check performance penalty (this is just for BT_SIGN)
 			unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
 			unsigned mask = 0x80000000;
@@ -555,7 +555,7 @@ void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned output_s
 				if (currentInput & mask) {
 					result += ((unsigned char*)weighs)[weighsOffset + j] - 128;
 				} else {
-					if (inputType == SIGN) {
+					if (inputType == BT_SIGN) {
 						result -= ((unsigned char*)weighs)[weighsOffset + j] - 128;
 					}
 				}
@@ -602,78 +602,78 @@ extern "C" void cuda_inputCalculationReduction(void* inputPtr, unsigned input_si
 	unsigned grid_size = output_size;
 	unsigned shared_mem_size = block_size * sizeof(float);
 
-	if (inputType == BYTE) {
+	if (inputType == BT_BYTE) {
 		std::string error = "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
 		throw error;
 	}
-	else if (inputType == FLOAT) {
+	else if (inputType == BT_FLOAT) {
 		switch (block_size) {
 		case 512:
-			SumConnectionsKernel<512, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel<512, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 256:
-			SumConnectionsKernel<256, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel<256, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 128:
-			SumConnectionsKernel<128, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel<128, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 64:
-			SumConnectionsKernel< 64, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 64, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 32:
-			SumConnectionsKernel< 32, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 32, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 16:
-			SumConnectionsKernel< 16, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 16, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 8:
-			SumConnectionsKernel< 8, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 8, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 4:
-			SumConnectionsKernel< 4, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 4, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 2:
-			SumConnectionsKernel< 2, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 2, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 1:
-			SumConnectionsKernel< 1, FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 1, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		}
-	} else if (inputType == BIT) {
+	} else if (inputType == BT_BIT) {
 		switch (block_size) {
 		case 512:
-			SumConnectionsKernel<512, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel<512, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 256:
-			SumConnectionsKernel<256, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel<256, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 128:
-			SumConnectionsKernel<128, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel<128, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 64:
-			SumConnectionsKernel< 64, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 64, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 32:
-			SumConnectionsKernel< 32, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 32, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 16:
-			SumConnectionsKernel< 16, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 16, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 8:
-			SumConnectionsKernel< 8, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 8, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 4:
-			SumConnectionsKernel< 4, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 4, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 2:
-			SumConnectionsKernel< 2, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 2, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 1:
-			SumConnectionsKernel< 1, BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 1, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		}
 	} else {
 		switch (block_size) {
 		case 512:
-			SumConnectionsKernel<512, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel<512, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 256:
-			SumConnectionsKernel<256, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel<256, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 128:
-			SumConnectionsKernel<128, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel<128, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 64:
-			SumConnectionsKernel< 64, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 64, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 32:
-			SumConnectionsKernel< 32, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 32, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 16:
-			SumConnectionsKernel< 16, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 16, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 8:
-			SumConnectionsKernel< 8, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 8, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 4:
-			SumConnectionsKernel< 4, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 4, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 2:
-			SumConnectionsKernel< 2, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 2, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		case 1:
-			SumConnectionsKernel< 1, SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+			SumConnectionsKernel< 1, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
 		}
 	}
 	checkCUDAError("cuda_inputCalculation2");

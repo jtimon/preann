@@ -240,7 +240,7 @@ void Test::printParameters()
 
 unsigned char Test::areEqual(float expected, float actual, BufferType bufferType)
 {
-	if (bufferType == FLOAT){
+	if (bufferType == BT_FLOAT){
 		return (expected - 1 < actual
 			 && expected + 1 > actual);
 	} else {

@@ -11,7 +11,7 @@ protected:
 	virtual void mutateImpl(unsigned pos, float mutation)
 	{
 		switch (bufferTypeTempl){
-		case BYTE:{
+		case BT_BYTE:{
 			c_typeTempl* weigh = &(((c_typeTempl*)data)[pos]);
 			int result = (int)mutation + *weigh;
 			if (result <= 0){
@@ -24,11 +24,11 @@ protected:
 				*weigh = result;
 			}
 			}break;
-		case FLOAT:
+		case BT_FLOAT:
 			((c_typeTempl*)data)[pos] += mutation;
 			break;
-		case BIT:
-		case SIGN:
+		case BT_BIT:
+		case BT_SIGN:
 			{
 			unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
 			((unsigned*)data)[pos / BITS_PER_UNSIGNED] ^= mask;
@@ -39,8 +39,8 @@ protected:
 	virtual void crossoverImpl(Buffer* other, Interface* bitBuffer)
 	{
 		switch (bufferTypeTempl){
-			case BIT:
-			case SIGN:
+			case BT_BIT:
+			case BT_SIGN:
 				{
 				std::string error = "CppBuffer::crossoverImpl is not implemented for BufferType BIT nor SIGN.";
 				throw error;
@@ -77,12 +77,12 @@ public:
 		unsigned inputSize = tInput->getSize();
 
 		switch (tInput->getBufferType()){
-		case BYTE:
+		case BT_BYTE:
 		{
 			std::string error = "CppConnection::inputCalculation is not implemented for BufferType BYTE as input.";
 			throw error;
 		}
-		case FLOAT:
+		case BT_FLOAT:
 		{
 			float* inputWeighs = (float*)this->getDataPointer();
 			float* inputPtr = (float*)tInput->getDataPointer();
@@ -93,8 +93,8 @@ public:
 			}
 		}
 		break;
-		case BIT:
-		case SIGN:
+		case BT_BIT:
+		case BT_SIGN:
 		{
 			unsigned char* inputWeighs = (unsigned char*)this->getDataPointer();
 			unsigned* inputPtr = (unsigned*)tInput->getDataPointer();
@@ -104,7 +104,7 @@ public:
 					unsigned weighPos = (j * inputSize) + k;
 					if ( inputPtr[k/BITS_PER_UNSIGNED] & (0x80000000>>(k % BITS_PER_UNSIGNED)) ) {
 						results[j] += inputWeighs[weighPos] - 128;
-					} else if (tInput->getBufferType() == SIGN) {
+					} else if (tInput->getBufferType() == BT_SIGN) {
 						results[j] -= inputWeighs[weighPos] - 128;
 					}
 				}

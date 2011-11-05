@@ -19,14 +19,14 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 			unsigned numBlocks;
 			switch (bufferType)
 			{
-			case BYTE:
+			case BT_BYTE:
 				numBlocks = ((size - 1) / BYTES_PER_BLOCK) + 1;
 				break;
-			case FLOAT:
+			case BT_FLOAT:
 				numBlocks = ((size - 1) / FLOATS_PER_BLOCK) + 1;
 				break;
-			case BIT:
-			case SIGN:
+			case BT_BIT:
+			case BT_SIGN:
 				numBlocks = ((size - 1) / BITS_PER_BLOCK) + 1;
 				break;
 			}
@@ -101,8 +101,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 				memcpy(data, interface->getDataPointer(),
 						interface->getByteSize());
 				break;
-			case BIT:
-			case SIGN:
+			case BT_BIT:
+			case BT_SIGN:
 				unsigned char* bufferData = (unsigned char*)(data);
 				bitCopyFrom(bufferData, interface);
 			}
@@ -116,8 +116,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 				memcpy(interface->getDataPointer(), data,
 						interface->getByteSize());
 				break;
-			case BIT:
-			case SIGN:
+			case BT_BIT:
+			case BT_SIGN:
 				unsigned char* bufferData = (unsigned char*)(data);
 				bitCopyTo(bufferData, interface);
 				break;
@@ -127,7 +127,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 	public:
 		virtual ImplementationType getImplementationType()
 		{
-			return SSE2;
+			return IT_SSE2;
 		};
 
 		virtual BufferType getBufferType()
@@ -150,14 +150,14 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 			switch (bufferTypeTempl)
 			{
 
-			case BYTE:
+			case BT_BYTE:
 				SetValueToAnArray<unsigned char> (data, byteSize, 128);
 				break;
-			case FLOAT:
+			case BT_FLOAT:
 				SetValueToAnArray<float> (data, byteSize / sizeof(float), 0);
 				break;
-			case BIT:
-			case SIGN:
+			case BT_BIT:
+			case BT_SIGN:
 				SetValueToAnArray<unsigned char> (data, byteSize, 0);
 				break;
 			}
@@ -184,14 +184,14 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
 			switch (bufferTypeTempl)
 			{
-			case BYTE:
+			case BT_BYTE:
 			{
 				std::string error =
 						"XmmBuffer::activation is not implemented for BufferType BYTE.";
 				throw error;
 			}
 				break;
-			case FLOAT:
+			case BT_FLOAT:
 			{
 				for (unsigned i = 0; i < tSize; i++) {
 					((c_typeTempl*)data)[i] = Function<c_typeTempl> (
@@ -199,8 +199,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 				}
 			}
 				break;
-			case BIT:
-			case SIGN:
+			case BT_BIT:
+			case BT_SIGN:
 			{
 				unsigned char* bufferData = (unsigned char*)data;
 

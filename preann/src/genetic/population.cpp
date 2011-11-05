@@ -229,8 +229,8 @@ void Population::setCrossoverMultipointScheme(CrossoverLevel crossoverLevel,
 		std::string error = "the number of crossover must be even.";
 		throw error;
 	}
-	int incSize = number - numCrossover[MULTIPOINT][crossoverLevel];
-	numCrossover[MULTIPOINT][crossoverLevel] = number;
+	int incSize = number - numCrossover[CA_MULTIPOINT][crossoverLevel];
+	numCrossover[CA_MULTIPOINT][crossoverLevel] = number;
 	numPointsMultipoint[crossoverLevel] = numPoints;
 }
 
@@ -242,8 +242,8 @@ void Population::setCrossoverProportionalScheme(CrossoverLevel crossoverLevel,
 		std::string error = "the number of crossover must be even.";
 		throw error;
 	}
-	int incSize = number - numCrossover[PROPORTIONAL][crossoverLevel];
-	numCrossover[PROPORTIONAL][crossoverLevel] = number;
+	int incSize = number - numCrossover[CA_PROPORTIONAL][crossoverLevel];
+	numCrossover[CA_PROPORTIONAL][crossoverLevel] = number;
 }
 
 void Population::setCrossoverUniformScheme(CrossoverLevel crossoverLevel,
@@ -254,7 +254,7 @@ void Population::setCrossoverUniformScheme(CrossoverLevel crossoverLevel,
 		std::string error = "the number of crossover must be even.";
 		throw error;
 	}
-	numCrossover[UNIFORM][crossoverLevel] = number;
+	numCrossover[CA_UNIFORM][crossoverLevel] = number;
 	probabilityUniform[crossoverLevel] = probability;
 }
 
@@ -382,7 +382,7 @@ void Population::crossover()
 	}
 	else
 	{
-		Interface bufferUsedParents(parents.size(), BIT);
+		Interface bufferUsedParents(parents.size(), BT_BIT);
 		unsigned usedParents = 0;
 
 		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
@@ -435,14 +435,14 @@ void Population::oneCrossover(Individual* offSpringA, Individual* offSpringB, Cr
 {
 	switch (crossoverAlgorithm)
 	{
-	case UNIFORM:
+	case CA_UNIFORM:
 		offSpringA->uniformCrossover(crossoverLevel, offSpringB,
 				probabilityUniform[crossoverLevel]);
 		break;
-	case PROPORTIONAL:
+	case CA_PROPORTIONAL:
 		offSpringA->proportionalCrossover(crossoverLevel, offSpringB);
 		break;
-	case MULTIPOINT:
+	case CA_MULTIPOINT:
 		offSpringA->multipointCrossover(crossoverLevel, offSpringB,
 				numPointsMultipoint[crossoverLevel]);
 	}

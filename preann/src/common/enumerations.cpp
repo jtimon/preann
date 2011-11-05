@@ -15,6 +15,8 @@ unsigned Enumerations::enumTypeDim(EnumType enumType){
 		return IMPLEMENTATION_TYPE_DIM;
 	case ET_FUNCTION:
 		return FUNCTION_TYPE_DIM;
+	case ET_SELECTION_ALGORITHM:
+		return SELECTION_ALGORITHM_DIM;
 	case ET_CROSS_ALG:
 		return CROSSOVER_ALGORITHM_DIM;
 	case ET_CROSS_LEVEL:
@@ -62,39 +64,39 @@ std::string Enumerations::binaryOperationToString(unsigned binaryOperation)
 	throw error;
 }
 
-std::string Enumerations::crossoverLevelToString(unsigned bufferType)
+std::string Enumerations::crossoverLevelToString(unsigned crossoverLevel)
 {
-	switch((CrossoverLevel)bufferType){
-	case WEIGH:
+	switch((CrossoverLevel)crossoverLevel){
+	case CL_WEIGH:
 		return "WEIGH";
-	case NEURON:
+	case CL_NEURON:
 		return "NEURON";
-	case NEURON_INVERTED:
+	case CL_NEURON_INVERTED:
 		return "NEURON_INVERTED";
-	case LAYER:
+	case CL_LAYER:
 		return "LAYER";
 	}
 	string error = " Enumerations::crossoverLevelToString CrossoverLevel not found";
 	throw error;
 }
 
-std::string Enumerations::crossoverAlgorithmToString(unsigned bufferType)
+std::string Enumerations::crossoverAlgorithmToString(unsigned crossoverAlgorithm)
 {
-	switch((CrossoverAlgorithm)bufferType){
-	case UNIFORM:
+	switch((CrossoverAlgorithm)crossoverAlgorithm){
+	case CA_UNIFORM:
 		return "UNIFORM";
-	case PROPORTIONAL:
+	case CA_PROPORTIONAL:
 		return "PROPORTIONAL";
-	case MULTIPOINT:
+	case CA_MULTIPOINT:
 		return "MULTIPOINT";
 	}
 	string error = " Enumerations::crossoverAlgorithmToString CrossoverAlgorithm not found";
 	throw error;
 }
 
-std::string Enumerations::mutationAlgorithmToString(unsigned bufferType)
+std::string Enumerations::mutationAlgorithmToString(unsigned mutationAlgorithm)
 {
-	switch((MutationAlgorithm)bufferType){
+	switch((MutationAlgorithm)mutationAlgorithm){
 	case MA_PER_INDIVIDUAL:
 		return "PER_INDIVIDUAL";
 	case MA_PROBABILISTIC:
@@ -107,13 +109,13 @@ std::string Enumerations::mutationAlgorithmToString(unsigned bufferType)
 std::string Enumerations::bufferTypeToString(unsigned bufferType)
 {
 	switch((BufferType)bufferType){
-	case FLOAT:
+	case BT_FLOAT:
 		return "FLOAT";
-	case BIT:
+	case BT_BIT:
 		return "BIT";
-	case SIGN:
+	case BT_SIGN:
 		return "SIGN";
-	case BYTE:
+	case BT_BYTE:
 		return "BYTE";
 	}
 	string error = " Enumerations::bufferTypeToString BufferType not found";
@@ -123,15 +125,15 @@ std::string Enumerations::bufferTypeToString(unsigned bufferType)
 std::string Enumerations::implementationToString(unsigned implementationType)
 {
 	switch((ImplementationType)implementationType){
-	case C:
+	case IT_C:
 		return "C";
-	case SSE2:
+	case IT_SSE2:
 		return "SSE2";
-	case CUDA:
+	case IT_CUDA:
 		return "CUDA";
-	case CUDA_REDUC:
+	case IT_CUDA_REDUC:
 		return "CUDA_REDUC";
-	case CUDA_INV:
+	case IT_CUDA_INV:
 		return "CUDA_INV";
 	}
 	string error = " Enumerations::implementationToString ImplementationType not found";
@@ -141,21 +143,38 @@ std::string Enumerations::implementationToString(unsigned implementationType)
 std::string Enumerations::functionTypeToString(unsigned functionType)
 {
 	switch((FunctionType)functionType){
-	case IDENTITY:
+	case FT_IDENTITY:
 		return "IDENTITY";
-	case BINARY_STEP:
+	case FT_BINARY_STEP:
 		return "BINARY_STEP";
-	case BIPOLAR_STEP:
+	case FT_BIPOLAR_STEP:
 		return "BIPOLAR_STEP";
 	case SIGMOID:
 		return "SIGMOID";
-	case BIPOLAR_SIGMOID:
+	case FT_BIPOLAR_SIGMOID:
 		return "BIPOLAR_SIGMOID";
-	case HYPERBOLIC_TANGENT:
+	case FT_HYPERBOLIC_TANGENT:
 		return "HYPERBOLIC_TANGENT";
 	}
 	string error = " Enumerations::functionTypeToString FunctionType not found";
 	throw error;
+}
+
+std::string Enumerations::selectionAlgorithmToString(unsigned selectionAlgorithm)
+{
+	switch((SelectionAlgorithm)selectionAlgorithm){
+	case SA_ROULETTE_WHEEL:
+		return "ROULETTE_WHEEL";
+	case SA_RANKING:
+		return "RANKING";
+	case SA_TOURNAMENT:
+		return "TOURNAMENT";
+	case SA_TRUNCATION:
+		return "TRUNCATION";
+	}
+	string error = " Enumerations::selectionAlgorithmToString SelectionAlgorithm not found";
+	throw error;
+
 }
 
 std::string Enumerations::enumTypeToString(EnumType enumType)
@@ -165,6 +184,8 @@ std::string Enumerations::enumTypeToString(EnumType enumType)
 		return "Binary_operation";
 	case ET_BUFFER:
 		return "Buffer_type";
+	case ET_SELECTION_ALGORITHM:
+		return "Selection_algorithm";
 	case ET_CROSS_ALG:
 		return "Crossover_algorithm";
 	case ET_CROSS_LEVEL:

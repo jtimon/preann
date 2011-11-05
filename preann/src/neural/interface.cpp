@@ -18,14 +18,14 @@ Interface::Interface(FILE* stream)
 void Interface::reset()
 {
     switch (bufferType){
-        case FLOAT:
+        case BT_FLOAT:
             for(unsigned i = 0;i < size;i++){
                 ((float*)(data))[i] = 0;
         }
         break;
-    case BYTE:
-    case BIT:
-    case SIGN:
+    case BT_BYTE:
+    case BT_BIT:
+    case BT_SIGN:
         for(unsigned i = 0;i < getByteSize();i++){
             ((unsigned char*)(data))[i] = 0;
     }
@@ -67,12 +67,12 @@ unsigned Interface::getByteSize()
 {
 	switch (bufferType)
 	{
-	case BYTE:
+	case BT_BYTE:
 		return size;
-	case FLOAT:
+	case BT_FLOAT:
 		return size * sizeof(float);
-	case BIT:
-	case SIGN:
+	case BT_BIT:
+	case BT_SIGN:
 		return (((size - 1) / BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
 	}
 }
@@ -97,19 +97,19 @@ float Interface::getElement(unsigned pos)
 	}
 	switch (bufferType)
 	{
-	case BYTE:
+	case BT_BYTE:
 		return ((unsigned char*)data)[pos];
-	case FLOAT:
+	case BT_FLOAT:
 		return ((float*)data)[pos];
-	case BIT:
-	case SIGN:
+	case BT_BIT:
+	case BT_SIGN:
 		unsigned mask = 0x80000000 >> (pos % BITS_PER_UNSIGNED);
 
 		if (((unsigned*)data)[pos / BITS_PER_UNSIGNED] & mask)
 		{
 			return 1;
 		}
-		if (bufferType == BIT)
+		if (bufferType == BT_BIT)
 		{
 			return 0;
 		}
@@ -127,14 +127,14 @@ void Interface::setElement(unsigned pos, float value)
 	}
 	switch (bufferType)
 	{
-	case BYTE:
+	case BT_BYTE:
 		((unsigned char*)data)[pos] = (unsigned char)value;
 		break;
-	case FLOAT:
+	case BT_FLOAT:
 		((float*)data)[pos] = value;
 		break;
-	case BIT:
-	case SIGN:
+	case BT_BIT:
+	case BT_SIGN:
 		unsigned mask = 0x80000000 >> (pos % BITS_PER_UNSIGNED);
 
 		if (value > 0)
@@ -170,7 +170,7 @@ void Interface::random(float range)
 {
 	switch (bufferType)
 	{
-	case BYTE:
+	case BT_BYTE:
 		unsigned charRange;
 		if (range >= 128)
 		{
@@ -185,14 +185,14 @@ void Interface::random(float range)
 			setElement(i, 128 + (unsigned char)Random::integer(charRange));
 		}
 		break;
-	case FLOAT:
+	case BT_FLOAT:
 		for (unsigned i = 0; i < size; i++)
 		{
 			setElement(i, Random::floatNum(range));
 		}
 		break;
-	case BIT:
-	case SIGN:
+	case BT_BIT:
+	case BT_SIGN:
 		for (unsigned i = 0; i < size; i++)
 		{
 			setElement(i, Random::positiveInteger(2));
@@ -237,14 +237,14 @@ void Interface::print()
 	{
 		switch (bufferType)
 		{
-		case BYTE:
+		case BT_BYTE:
 			printf("%d ", (int)((unsigned char)getElement(i) - 128));
 			break;
-		case FLOAT:
+		case BT_FLOAT:
 			printf("%f ", getElement(i));
 			break;
-		case BIT:
-		case SIGN:
+		case BT_BIT:
+		case BT_SIGN:
 			printf("%d ", (int)getElement(i));
 		}
 	}

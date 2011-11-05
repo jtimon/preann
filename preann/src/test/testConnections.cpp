@@ -18,13 +18,13 @@ unsigned testCalculateAndAddTo(Test* test)
 {
 	START_CONNECTION_TEST
 
-	Buffer* results = Factory::newBuffer(outputSize, FLOAT, connection->getImplementationType());
+	Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT, connection->getImplementationType());
 
-	Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
-	Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
+	Buffer* cInput = Factory::newBuffer(connection->getInput(), IT_C);
+	Connection* cConnection = Factory::newConnection(cInput, outputSize, IT_C);
 	cConnection->copyFrom(connection);
 
-	Buffer* cResults = Factory::newBuffer(outputSize, FLOAT, C);
+	Buffer* cResults = Factory::newBuffer(outputSize, BT_FLOAT, IT_C);
 
 	connection->calculateAndAddTo(results);
 	cConnection->calculateAndAddTo(cResults);
@@ -47,8 +47,8 @@ unsigned testMutate(Test* test)
 	float mutation = Random::floatNum(initialWeighsRange);
 	connection->mutate(pos, mutation);
 
-	Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
-	Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
+	Buffer* cInput = Factory::newBuffer(connection->getInput(), IT_C);
+	Connection* cConnection = Factory::newConnection(cInput, outputSize, IT_C);
 	cConnection->copyFrom(connection);
 
 	for(unsigned i=0; i < NUM_MUTATIONS; i++) {
@@ -72,13 +72,13 @@ unsigned testCrossover(Test* test)
 	Connection* other = Factory::newConnection(connection->getInput(), outputSize, connection->getImplementationType());
 	other->random(initialWeighsRange);
 
-	Buffer* cInput = Factory::newBuffer(connection->getInput(), C);
-	Connection* cConnection = Factory::newConnection(cInput, outputSize, C);
+	Buffer* cInput = Factory::newBuffer(connection->getInput(), IT_C);
+	Connection* cConnection = Factory::newConnection(cInput, outputSize, IT_C);
 	cConnection->copyFrom(connection);
-	Connection* cOther = Factory::newConnection(cInput, outputSize, C);
+	Connection* cOther = Factory::newConnection(cInput, outputSize, IT_C);
 	cOther->copyFrom(other);
 
-	Interface bitBuffer = Interface(connection->getSize(), BIT);
+	Interface bitBuffer = Interface(connection->getSize(), BT_BIT);
 	//TODO bitBuffer.random(2); ??
 	bitBuffer.random(1);
 
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 
 	test.addIterator(&size, 2, 12, 10);
 	test.addIterator(&outputSize, 1, 3, 2);
-	test.exclude(ET_BUFFER, 1, BYTE);
+	test.exclude(ET_BUFFER, 1, BT_BYTE);
 	test.withAll(ET_IMPLEMENTATION);
 	test.printParameters();
 

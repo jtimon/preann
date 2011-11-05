@@ -11,7 +11,7 @@ Board::Board(unsigned size)
 {
 	tSize = size;
 	tBoard = (SquareState**)MemoryManagement::malloc(sizeof(SquareState) * tSize * tSize);
-	tInterface = new Interface(tSize * tSize * 2, BIT);
+	tInterface = new Interface(tSize * tSize * 2, BT_BIT);
 }
 
 Board::~Board()

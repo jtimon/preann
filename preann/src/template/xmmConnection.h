@@ -16,7 +16,7 @@ protected:
 		unsigned elem = 0;
 
 		switch (bufferTypeTempl){
-			case BYTE:
+			case BT_BYTE:
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
 						((c_typeTempl*)(data) + offset)[i] = interface->getElement(elem++);
@@ -24,7 +24,7 @@ protected:
 					offset += offsetPerInput;
 				}
 				break;
-			case FLOAT:
+			case BT_FLOAT:
 				offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
@@ -33,8 +33,8 @@ protected:
 					offset += offsetPerInput;
 				}
 				break;
-			case BIT:
-			case SIGN:
+			case BT_BIT:
+			case BT_SIGN:
 			{
 				std::string error = "XmmConnection::copyFromImpl is not implemented for BufferType BIT nor SIGN.";
 				throw error;
@@ -51,7 +51,7 @@ protected:
 		unsigned elem = 0;
 
 		switch (bufferTypeTempl){
-			case BYTE:
+			case BT_BYTE:
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
 						interface->setElement(elem++, ((c_typeTempl*)(data) + offset)[i]);
@@ -59,7 +59,7 @@ protected:
 					offset += offsetPerInput;
 				}
 				break;
-			case FLOAT:
+			case BT_FLOAT:
 				offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
 				for (unsigned j=0; j < outputSize; j++){
 					for (unsigned i=0; i < inputSize; i++){
@@ -68,8 +68,8 @@ protected:
 					offset += offsetPerInput;
 				}
 				break;
-			case BIT:
-			case SIGN:
+			case BT_BIT:
+			case BT_SIGN:
 				{
 					std::string error = "XmmConnection::copyToImpl is not implemented for BufferType BIT nor SIGN.";
 					throw error;
@@ -85,7 +85,7 @@ protected:
 	    unsigned elem = (outputPos * offsetPerInput) + inputPos;
 
 	    switch (bufferTypeTempl){
-	        case BYTE:
+	        case BT_BYTE:
 	            {
 	            	c_typeTempl *weigh = &(((c_typeTempl*)(data))[elem]);
 	                int result = (int)(mutation) + *weigh;
@@ -100,13 +100,13 @@ protected:
 
 	        }
 	        break;
-	    case FLOAT:
+	    case BT_FLOAT:
 	    	offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
 	    	elem = (outputPos * offsetPerInput) + inputPos;
 	        ((c_typeTempl*)(data))[elem] += mutation;
 				break;
-		case BIT:
-		case SIGN:
+		case BT_BIT:
+		case BT_SIGN:
 			std::string error = "XmmConnection::mutate is not implemented for BufferType BIT nor SIGN.";
 			throw error;
 		}
@@ -123,7 +123,7 @@ protected:
 		unsigned elem = 0;
 
 		switch (bufferTypeTempl){
-			case BYTE:
+			case BT_BYTE:
 				unsigned char auxChar;
 
 				for (unsigned j=0; j < outputSize; j++){
@@ -138,7 +138,7 @@ protected:
 					offset += offsetPerInput;
 				}
 				break;
-			case FLOAT:
+			case BT_FLOAT:
 				float auxFloat;
 				offsetPerInput = offsetPerInput / sizeof(float);
 
@@ -154,8 +154,8 @@ protected:
 					offset += offsetPerInput;
 				}
 				break;
-			case BIT:
-			case SIGN:
+			case BT_BIT:
+			case BT_SIGN:
 				std::string error = "XmmConnection::crossoverImpl is not implemented for BufferType BIT nor SIGN.";
 				throw error;
 		}
@@ -172,14 +172,14 @@ public:
 
 		switch (bufferTypeTempl){
 
-		case BYTE:
+		case BT_BYTE:
 			SetValueToAnArray<unsigned char>(data, byteSize, 128);
 			break;
-		case FLOAT:
+		case BT_FLOAT:
 			SetValueToAnArray<float>(data, byteSize/sizeof(float), 0);
 			break;
-		case BIT:
-		case SIGN:
+		case BT_BIT:
+		case BT_SIGN:
 			SetValueToAnArray<unsigned>(data, byteSize, 0);
 			break;
 		}
@@ -199,7 +199,7 @@ public:
 
 
 		switch (tInput->getBufferType()){
-			case FLOAT:
+			case BT_FLOAT:
 				offsetPerInput = offsetPerInput / sizeof(float);
 				numLoops = ((tInput->getSize()-1)/FLOATS_PER_BLOCK)+1;
 				for (unsigned j=0; j < resultsVect->getSize(); j++){
@@ -210,7 +210,7 @@ public:
 					weighPos += offsetPerInput;
 				}
 				break;
-			case BIT:
+			case BT_BIT:
 				numLoops = ((tInput->getSize()-1)/BYTES_PER_BLOCK)+1;
 				for (unsigned j=0; j < resultsVect->getSize(); j++){
 					results[j] += XMMbinario(inputPtr, numLoops,
@@ -218,7 +218,7 @@ public:
 					weighPos += offsetPerInput;
 				}
 				break;
-			case SIGN:
+			case BT_SIGN:
 				numLoops = ((tInput->getSize()-1)/BYTES_PER_BLOCK)+1;
 				for (unsigned j=0; j < resultsVect->getSize(); j++){
 					results[j] += XMMbipolar(inputPtr, numLoops,
@@ -226,7 +226,7 @@ public:
 					weighPos += offsetPerInput;
 				}
 				break;
-			case BYTE:
+			case BT_BYTE:
 				std::string error = "CppBuffer::inputCalculation is not implemented for BufferType BYTE as input.";
 				throw error;
 		}
