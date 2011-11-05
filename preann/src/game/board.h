@@ -25,19 +25,19 @@ class Board {
 public:
 	Board(unsigned size);
 	virtual ~Board();
-	
+
 	virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player) = 0;
 	virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player) = 0;
 	virtual bool canMove(SquareState player) = 0;
 	virtual bool endGame() = 0;
 	virtual void computerTurn(SquareState turn) = 0;
-	
+
 	unsigned size();
 	void setSquare(unsigned xPos, unsigned yPos, SquareState squareState);
 	SquareState getSquare(unsigned xPos, unsigned yPos);
 	Interface* getInterface();
 	void updateInterface();
-	unsigned countSquares(SquareState squareState);
+	unsigned countPoints(SquareState player);
 	static SquareState opponent(SquareState player);
 };
 

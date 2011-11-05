@@ -14,7 +14,7 @@ Board::Board(unsigned size)
 	tInterface = new Interface(tSize * tSize * 2, BIT);
 }
 
-Board::~Board() 
+Board::~Board()
 {
 	MemoryManagement::free(tBoard);
 	delete(tInterface);
@@ -55,7 +55,7 @@ void Board::updateInterface()
 	unsigned index = 0;
 	for (int x = 0; x < tSize; ++x) {
 		for (int y = 0; y < tSize; ++y) {
-			
+
 			float play1=0, play2=0;
 			if(tBoard[x][y] == PLAYER_1){
 				play1 = 1;
@@ -68,17 +68,19 @@ void Board::updateInterface()
 	}
 }
 
-unsigned Board::countSquares(SquareState squareState)
+unsigned Board::countPoints(SquareState player)
 {
-	unsigned squares = 0;
+	unsigned points = 0;
 	for (int x = 0; x < tSize; ++x) {
 		for (int y = 0; y < tSize; ++y) {
-			if (tBoard[x][y] == squareState){
-				++squares;
+			if (tBoard[x][y] == player){
+				++points;
+			} else if (tBoard[x][y] == opponent(player)){
+				--points;
 			}
 		}
 	}
-	return squares;
+	return points;
 }
 
 SquareState Board::opponent(SquareState player)
