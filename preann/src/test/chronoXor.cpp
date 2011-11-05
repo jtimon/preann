@@ -19,10 +19,9 @@ int main(int argc, char *argv[])
 
 		Plot plot;
 //		plot.withAll(ET_CROSS_ALG);
-//		plot.withAll(ET_CROSS_LEVEL);
+		plot.withAll(ET_CROSS_LEVEL);
 		//TODO quitar excludes
 		plot.exclude(ET_CROSS_ALG, 1, CA_PROPORTIONAL);
-		plot.exclude(ET_CROSS_LEVEL, 1, CL_LAYER);
 
 		plot.with(ET_MUTATION_ALG, 1, MA_PER_INDIVIDUAL);
 
@@ -41,7 +40,7 @@ int main(int argc, char *argv[])
 		//TODO bucle infinito con una sola capa
 		example->addLayersConnection(0, 1);
 
-		plot.plotTask(path, task, example, 8, 100, 5);
+		plot.plotTask(path, task, example, 8, 10, 5);
 
 		delete(example);
 		delete(task);

@@ -16,22 +16,22 @@ protected:
 
 	void checkCrossoverCompatibility(Individual* other);
 
-	vector<Interface*> prepareCrossover(CrossoverLevel crossoverLevel);
-	vector<Interface*> prepareCrossoverWeighs();
-	vector<Interface*> prepareCrossoverNeurons();
-	vector<Interface*> prepareCrossoverNeuronsInverted();
-	vector<Interface*> prepareCrossoverLayers();
+	vector<Interface*>* prepareCrossover(CrossoverLevel crossoverLevel);
+	vector<Interface*>* prepareCrossoverWeighs();
+	vector<Interface*>* prepareCrossoverNeurons();
+	vector<Interface*>* prepareCrossoverNeuronsInverted();
+	vector<Interface*>* prepareCrossoverLayers();
 
-	void applyUniform(vector<Interface*> bitmaps, float probability);
-	void applyMultipoint(vector<Interface*> bitmaps, unsigned numPoints);
+	void applyUniform(vector<Interface*>* bitmaps, float probability);
+	void applyMultipoint(vector<Interface*>* bitmaps, unsigned numPoints);
 
-	void crossover(CrossoverLevel crossoverLevel, Individual* other, vector<Interface*> bitmaps);
-	void crossoverWeighs(Individual* other, vector<Interface*> bitmaps);
-	void crossoverNeurons(Individual* other, vector<Interface*> bitmaps);
-	void crossoverNeuronsInverted(Individual* other, vector<Interface*> bitmaps);
-	void crossoverLayers(Individual* other, vector<Interface*> bitmaps);
+	void crossover(CrossoverLevel crossoverLevel, Individual* other, vector<Interface*>* bitmaps);
+	void crossoverWeighs(Individual* other, vector<Interface*>* bitmaps);
+	void crossoverNeurons(Individual* other, vector<Interface*>* bitmaps);
+	void crossoverNeuronsInverted(Individual* other, vector<Interface*>* bitmaps);
+	void crossoverLayers(Individual* other, vector<Interface*>* bitmaps);
 
-	void freeBitmaps(vector<Interface*> bitmaps);
+	void freeBitmaps(vector<Interface*>* bitmaps);
 
 public:
 	Individual(ImplementationType implementationType = IT_C);

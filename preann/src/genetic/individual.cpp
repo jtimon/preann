@@ -144,7 +144,7 @@ void Individual::uniformCrossover(CrossoverLevel crossoverLevel, Individual* oth
 {
 	checkCrossoverCompatibility(other);
 
-	vector<Interface*> bitmaps = prepareCrossover(crossoverLevel);
+	vector<Interface*>* bitmaps = prepareCrossover(crossoverLevel);
 	applyUniform(bitmaps, probability);
 	crossover(crossoverLevel, other, bitmaps);
 	freeBitmaps(bitmaps);
@@ -154,68 +154,75 @@ void Individual::multipointCrossover(CrossoverLevel crossoverLevel, Individual* 
 {
 	checkCrossoverCompatibility(other);
 
-	vector<Interface*> bitmaps = prepareCrossover(crossoverLevel);
+	vector<Interface*>* bitmaps = prepareCrossover(crossoverLevel);
 	applyMultipoint(bitmaps, numPoints);
-
-	//TODO arreglar layer multipoint
-//	string aaa = Enumerations::crossoverLevelToString(crossoverLevel);
-//	printf("%s\n", aaa.data());
 
 	crossover(crossoverLevel, other, bitmaps);
 	freeBitmaps(bitmaps);
 }
 
-void Individual::freeBitmaps(vector<Interface*> bitmaps)
+void Individual::freeBitmaps(vector<Interface*>* bitmaps)
 {
-	for (unsigned i = 0; i < bitmaps.size(); ++i) {
-		delete(bitmaps[i]);
+	for (unsigned i = 0; i < bitmaps->size(); ++i) {
+		delete((*bitmaps)[i]);
 	}
-	bitmaps.clear();
+	bitmaps->clear();
+	delete(bitmaps);
 }
 
-void Individual::applyUniform(vector<Interface*> bitmaps, float probability)
+void Individual::applyUniform(vector<Interface*>* bitmaps, float probability)
 {
-	for (unsigned i = 0; i < bitmaps.size(); i++) {
-		for (unsigned j = 0; j < bitmaps[i]->getSize(); j++){
+	for (unsigned i = 0; i < bitmaps->size(); i++) {
+		for (unsigned j = 0; j < (*bitmaps)[i]->getSize(); j++){
 
 			if (Random::positiveFloat(1) < probability)
 			{
-				bitmaps[i]->setElement(j, 1);
+				(*bitmaps)[i]->setElement(j, 1);
 			}
 		}
 	}
 }
 
-void Individual::applyMultipoint(vector<Interface*> bitmaps, unsigned numPoints)
+void Individual::applyMultipoint(vector<Interface*>* bitmaps, unsigned numPoints)
 {
+	// to avoid infinite loops when there's less points than are supposed to be cut
+	unsigned totalPoints = 0;
+	for (unsigned i = 0; i < bitmaps->size(); ++i) {
+		totalPoints += (*bitmaps)[i]->getSize();
+	}
+	while(numPoints >= totalPoints){
+		numPoints = numPoints/2;
+	}
+	// a bit is set for each cutting point
 	while (numPoints > 0)
 	{
-		unsigned chosenConnection = Random::positiveInteger(bitmaps.size());
-		unsigned chosenPoint = Random::positiveInteger(bitmaps[chosenConnection]->getSize());
+		unsigned chosenConnection = Random::positiveInteger(bitmaps->size());
+		unsigned chosenPoint = Random::positiveInteger((*bitmaps)[chosenConnection]->getSize());
 
-		if (!bitmaps[chosenConnection]->getElement(chosenPoint))
+		if (!(*bitmaps)[chosenConnection]->getElement(chosenPoint))
 		{
-			bitmaps[chosenConnection]->setElement(chosenPoint, 1);
+			(*bitmaps)[chosenConnection]->setElement(chosenPoint, 1);
 			--numPoints;
 		}
 	}
+	// the bits are set to 1 or zero alternating with each cutting point
 	unsigned progenitor = 0;
-	for (unsigned i = 0; i < bitmaps.size(); i++){
-		for (unsigned j = 0; j < bitmaps[i]->getSize(); j++){
+	for (unsigned i = 0; i < bitmaps->size(); i++){
+		for (unsigned j = 0; j < (*bitmaps)[i]->getSize(); j++){
 
-			if (bitmaps[i]->getElement(j))
+			if ((*bitmaps)[i]->getElement(j))
 			{
 				if (progenitor == 1)
 					progenitor = 0;
 				else
 					progenitor = 1;
 			}
-			bitmaps[i]->setElement(j, progenitor);
+			(*bitmaps)[i]->setElement(j, progenitor);
 		}
 	}
 }
 
-vector<Interface*> Individual::prepareCrossover(CrossoverLevel crossoverLevel)
+vector<Interface*>* Individual::prepareCrossover(CrossoverLevel crossoverLevel)
 {
 	switch (crossoverLevel)
 	{
@@ -229,7 +236,7 @@ vector<Interface*> Individual::prepareCrossover(CrossoverLevel crossoverLevel)
 	}
 }
 
-void Individual::crossover(CrossoverLevel crossoverLevel, Individual* other, vector<Interface*> bitmaps)
+void Individual::crossover(CrossoverLevel crossoverLevel, Individual* other, vector<Interface*>* bitmaps)
 {
 	switch (crossoverLevel)
 	{
@@ -248,43 +255,43 @@ void Individual::crossover(CrossoverLevel crossoverLevel, Individual* other, vec
 	}
 }
 
-vector<Interface*> Individual::prepareCrossoverWeighs()
+vector<Interface*>* Individual::prepareCrossoverWeighs()
 {
-	vector<Interface*> bitmaps;
+	vector<Interface*>* bitmaps = new vector<Interface*>();
 	for (unsigned i = 0; i < layers.size(); i++){
 		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++){
 
 			Connection* connection = layers[i]->getConnection(j);
 			Interface* bitmap = new Interface(connection->getSize(), BT_BIT);
-			bitmaps.push_back(bitmap);
+			bitmaps->push_back(bitmap);
 		}
 		Connection* thresholds = layers[i]->getThresholds();
 		Interface* bitmap = new Interface(thresholds->getSize(), BT_BIT);
-		bitmaps.push_back(bitmap);
+		bitmaps->push_back(bitmap);
 	}
 	return bitmaps;
 }
 
-vector<Interface*> Individual::prepareCrossoverNeurons()
+vector<Interface*>* Individual::prepareCrossoverNeurons()
 {
-	vector<Interface*> bitmaps;
+	vector<Interface*>* bitmaps = new vector<Interface*>();
 	for (unsigned i = 0; i < layers.size(); i++){
 
 		Interface* bitmap = new Interface(layers[i]->getOutput()->getSize(), BT_BIT);
-		bitmaps.push_back(bitmap);
+		bitmaps->push_back(bitmap);
 	}
 	return bitmaps;
 }
 
-vector<Interface*> Individual::prepareCrossoverLayers()
+vector<Interface*>* Individual::prepareCrossoverLayers()
 {
-	vector<Interface*> bitmaps;
+	vector<Interface*>* bitmaps = new vector<Interface*>();
 	Interface* bitmap = new Interface(layers.size(), BT_BIT);
-	bitmaps.push_back(bitmap);
+	bitmaps->push_back(bitmap);
 	return bitmaps;
 }
 
-void Individual::crossoverWeighs(Individual* other, vector<Interface*> bitmaps)
+void Individual::crossoverWeighs(Individual* other, vector<Interface*>* bitmaps)
 {
 	unsigned index = 0;
 	for (unsigned i = 0; i < layers.size(); i++)
@@ -292,18 +299,18 @@ void Individual::crossoverWeighs(Individual* other, vector<Interface*> bitmaps)
 		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++)
 		{
 			Connection* connection = layers[i]->getConnection(j);
-			connection->crossover(other->getLayer(i)->getConnection(j), bitmaps[index]);
+			connection->crossover(other->getLayer(i)->getConnection(j), (*bitmaps)[index]);
 			index++;
 		}
 		Connection* thresholds = layers[i]->getThresholds();
-		thresholds->crossover(other->getLayer(i)->getThresholds(), bitmaps[index]);
+		thresholds->crossover(other->getLayer(i)->getThresholds(), (*bitmaps)[index]);
 		index++;
 	}
 }
 
-void Individual::crossoverNeurons(Individual *other, vector<Interface*> bitmaps)
+void Individual::crossoverNeurons(Individual *other, vector<Interface*>* bitmaps)
 {
-	vector<Interface*> bitmapsWeighs = prepareCrossoverWeighs();
+	vector<Interface*>* bitmapsWeighs = prepareCrossoverWeighs();
 
 	unsigned index = 0;
 
@@ -318,27 +325,28 @@ void Individual::crossoverNeurons(Individual *other, vector<Interface*> bitmaps)
 			unsigned offset = 0;
 			for (unsigned k = 0; k < outputSize; k++)
 			{
-				if (bitmaps[i]->getElement(k))
+				if ((*bitmaps)[i]->getElement(k))
 				{
 					for (unsigned l = 0; l < inputSize; l++)
 					{
-						bitmapsWeighs[index]->setElement(offset + l, 1);
+						(*bitmapsWeighs)[index]->setElement(offset + l, 1);
 					}
 				}
 				offset += inputSize;
 			}
 			++index;
 		}
-		bitmapsWeighs[index]->copyFromFast(bitmaps[i]);
+		(*bitmapsWeighs)[index]->copyFromFast((*bitmaps)[i]);
 		++index;
 	}
 
 	crossoverWeighs(other, bitmapsWeighs);
+	freeBitmaps(bitmapsWeighs);
 }
 
-void Individual::crossoverNeuronsInverted(Individual* other, vector<Interface*> bitmaps)
+void Individual::crossoverNeuronsInverted(Individual* other, vector<Interface*>* bitmaps)
 {
-	vector<Interface*> bitmapsWeighs = prepareCrossoverWeighs();
+	vector<Interface*>* bitmapsWeighs = prepareCrossoverWeighs();
 
 	unsigned index = 0;
 
@@ -353,12 +361,12 @@ void Individual::crossoverNeuronsInverted(Individual* other, vector<Interface*> 
 				{
 					for (unsigned i = 0; i < input->getSize(); i++)
 					{
-						if (bitmaps[inputLay]->getElement(i))
+						if ((*bitmaps)[inputLay]->getElement(i))
 						{
 							unsigned offset = 0;
 							while (offset < layers[outputLay]->getConnection(k)->getSize())
 							{
-								bitmapsWeighs[index]->setElement( offset + i, 1);
+								(*bitmapsWeighs)[index]->setElement( offset + i, 1);
 								offset += input->getSize();
 							}
 						}
@@ -367,16 +375,17 @@ void Individual::crossoverNeuronsInverted(Individual* other, vector<Interface*> 
 			}
 			++index;
 		}
-		bitmapsWeighs[index]->copyFromFast(bitmaps[outputLay]);
+		(*bitmapsWeighs)[index]->copyFromFast((*bitmaps)[outputLay]);
 		++index;
 	}
 
 	crossoverWeighs(other, bitmapsWeighs);
+	freeBitmaps(bitmapsWeighs);
 }
 
-void Individual::crossoverLayers(Individual* other, vector<Interface*> bitmaps)
+void Individual::crossoverLayers(Individual* other, vector<Interface*>* bitmaps)
 {
-	if (bitmaps[0]->getSize() != layers.size())
+	if ((*bitmaps)[0]->getSize() != layers.size())
 	{
 		std::string error =
 				"The number of layers must be equal to the size of the bitBuffer.";
@@ -384,7 +393,7 @@ void Individual::crossoverLayers(Individual* other, vector<Interface*> bitmaps)
 	}
 	for (unsigned i = 0; i < layers.size(); i++)
 	{
-		if (!bitmaps[0]->getElement(i))
+		if (!(*bitmaps)[0]->getElement(i))
 		{
 			//TODO no debería ser swapWeighs ?
 			layers[i]->copyWeighs(other->layers[i]);
