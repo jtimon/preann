@@ -26,18 +26,23 @@ void ReversiTask::test(Individual* individual)
 		SquareState turn = PLAYER_1;
 		board->initBoard();
 
-		while(!board->endGame()){
-			if(board->canMove(turn)){
-				// this way the individual moves first half of the games
-				if(i % 2 == 0){
+		// this way the individual moves first only half of the games
+		if(i % 2 == 0){
+			while(!board->endGame()){
+				if(board->canMove(turn)){
 					individualTurn(turn, individual);
 					board->computerTurn(turn);
-				} else {
+				}
+				turn = Board::opponent(turn);
+			}
+		} else {
+			while(!board->endGame()){
+				if(board->canMove(turn)){
 					board->computerTurn(turn);
 					individualTurn(turn, individual);
 				}
+				turn = Board::opponent(turn);
 			}
-			turn = Board::opponent(turn);
 		}
 	}
 	individual->setFitness(fitness);
