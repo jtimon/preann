@@ -37,6 +37,8 @@ std::string Enumerations::toString(EnumType enumType, unsigned enumValue)
 		return Enumerations::implementationToString(enumValue);
 	case ET_FUNCTION:
 		return Enumerations::functionTypeToString(enumValue);
+	case ET_SELECTION_ALGORITHM:
+		return Enumerations::selectionAlgorithmToString(enumValue);
 	case ET_CROSS_LEVEL:
 		return Enumerations::crossoverLevelToString(enumValue);
 	case ET_CROSS_ALG:
