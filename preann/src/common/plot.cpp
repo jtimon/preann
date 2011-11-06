@@ -172,15 +172,14 @@ void Plot::plot(float (*f)(Test*), string path, unsigned repetitions, string tes
 void plotTaskFunction(Test* test)
 {
 	string* path = (string*)test->getVariable("path");
-	Task* task = (Task*)test->getVariable("task");
-	Individual* example = (Individual*)test->getVariable("example");
-	unsigned* populationSize = (unsigned*)test->getVariable("populationSize");
-	unsigned* maxGenerations = (unsigned*)test->getVariable("maxGenerations");
-	float* weighsRange = (float*)test->getVariable("weighsRange");
 
-	Population* population = new Population(task, example, *populationSize, *weighsRange);
+	unsigned* maxGenerations = (unsigned*)test->getVariable("maxGenerations");
+	Population* initialPopulation = (Population*)test->getVariable("initialPopulation");
+	Task* task = initialPopulation->getTask();
+
+	Population* population = new Population(initialPopulation);
 	//TODO hacer la selección parametrizable y un enumerado
-    unsigned numIndiv = *populationSize ;
+    unsigned numIndiv = population->getSize()/2 ;
 	population->setSelectionRouletteWheel(numIndiv);
 	CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm)test->getEnum(ET_CROSS_ALG);
 	CrossoverLevel crossoverLevel = (CrossoverLevel)test->getEnum(ET_CROSS_LEVEL);
@@ -231,12 +230,13 @@ void Plot::plotTask(string path, Task* task, Individual* example, unsigned popul
 		string testedTask = task->toString();
 		createPlotScript(path, testedTask);
 		putVariable("path", &path);
-		putVariable("task", task);
-		putVariable("example", example);
-		putVariable("populationSize", &populationSize);
+
+		Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
+
+		putVariable("initialPopulation", initialPopulation);
 		putVariable("maxGenerations", &maxGenerations);
-		putVariable("weighsRange", &weighsRange);
 		loopFunction(simpleAction, plotTaskFunction, testedTask);
+		delete(initialPopulation);
 		cout << testedTask << endl;
 		plotFile(path, testedTask);
     } else {

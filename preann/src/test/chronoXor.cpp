@@ -28,17 +28,16 @@ int main(int argc, char *argv[])
 
 		plot.printParameters();
 
-		Task* task = new BinaryTask(BO_OR, VECTORS_SIZE);
+		Task* task = new BinaryTask(BO_AND, VECTORS_SIZE);
 		Individual* example = new Individual(IT_SSE2);
 		task->setInputs(example);
-		example->addLayer(VECTORS_SIZE * 2, BT_BIT, FT_IDENTITY);
+//		example->addLayer(VECTORS_SIZE * 2, BT_BIT, FT_IDENTITY);
 		example->addLayer(VECTORS_SIZE, BT_BIT, FT_IDENTITY);
 		example->addInputConnection(0, 0);
 		example->addInputConnection(1, 0);
-		//TODO bucle infinito con una sola capa
-		example->addLayersConnection(0, 1);
+//		example->addLayersConnection(0, 1);
 
-		plot.plotTask(path, task, example, 8, 10, 5);
+		plot.plotTask(path, task, example, 8, 20, 5);
 
 		delete(example);
 		delete(task);
