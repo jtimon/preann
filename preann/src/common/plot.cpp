@@ -174,19 +174,36 @@ void plotTaskFunction(Test* test)
 	string* path = (string*)test->getVariable("path");
 
 	Population* initialPopulation = (Population*)test->getVariable("initialPopulation");
-	Task* task = initialPopulation->getTask();
-
 	Population* population = new Population(initialPopulation);
-	//TODO hacer la selección parametrizable y un enumerado
+	Task* task = population->getTask();
+
+    unsigned numSelection = *(unsigned*)test->getVariable("numSelection");
+	SelectionAlgorithm selectionAlgorithm = (SelectionAlgorithm)test->getEnum(ET_SELECTION_ALGORITHM);
+	switch (selectionAlgorithm){
+	case SA_ROULETTE_WHEEL:
+		population->setSelectionRouletteWheel(numSelection);
+		break;
+	case SA_RANKING:
+		{
+		float rankingBase = *(float*)test->getVariable("rankingBase");
+		float rankingStep = *(float*)test->getVariable("rankingStep");
+		population->setSelectionRanking(numSelection, rankingBase, rankingStep);
+		}
+		break;
+	case SA_TOURNAMENT:
+		break;
+		{
+		unsigned tournamentSize = *(unsigned*)test->getVariable("tournamentSize");
+		population->setSelectionTournament(numSelection, tournamentSize);
+		}
+	case SA_TRUNCATION:
+		population->setSelectionTruncation(numSelection);
+		break;
+	}
+
     unsigned numCrossover = *(unsigned*)test->getVariable("numCrossover");
-	population->setSelectionRouletteWheel(numCrossover);
 	CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm)test->getEnum(ET_CROSS_ALG);
 	CrossoverLevel crossoverLevel = (CrossoverLevel)test->getEnum(ET_CROSS_LEVEL);
-
-//	string aaa = Enumerations::crossoverAlgorithmToString(crossoverAlgorithm) + "  " +
-//			Enumerations::crossoverLevelToString(crossoverLevel);
-//	printf("%s\n", aaa);
-
 	switch (crossoverAlgorithm){
 	case CA_UNIFORM:
 		{
