@@ -18,10 +18,8 @@ int main(int argc, char *argv[])
 		string path = "/home/timon/workspace/preann/output/";
 
 		Plot plot;
-//		plot.withAll(ET_CROSS_ALG);
+		plot.withAll(ET_CROSS_ALG);
 		plot.withAll(ET_CROSS_LEVEL);
-		//TODO quitar excludes
-		plot.exclude(ET_CROSS_ALG, 1, CA_PROPORTIONAL);
 
 		plot.with(ET_MUTATION_ALG, 1, MA_PER_INDIVIDUAL);
 

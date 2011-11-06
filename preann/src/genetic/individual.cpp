@@ -104,37 +104,36 @@ void Individual::mutate(float probability, float mutationRange)
 void Individual::proportionalCrossover(CrossoverLevel crossoverLevel, Individual* other)
 {
 	float otherFitness = other->getFitness();
-	float thisFitness = fitness;
-	float probability;
+	float probability = 0;
 
-	//TODO rewrite
-	if ((thisFitness < 0 && otherFitness > 0) || (thisFitness > 0 && otherFitness < 0))
+	if (fitness == 0){
+		if (otherFitness == 0){
+			probability = 0.5;
+		} else if (otherFitness > 0){
+			probability = 0;
+		} else {
+			probability = 1;
+		}
+	}
+	else if (otherFitness == 0){
+		if (fitness > 0){
+			probability = 0;
+		} else {
+			probability = 1;
+		}
+	}
+	else if ((fitness < 0 && otherFitness > 0) || (fitness > 0 && otherFitness < 0))
 	{
 		std::string error =
 			"The fitness of the individuals have different sign: cannot crossover them proportionally.";
 		throw error;
-	}
-	else if (thisFitness == 0){
-		if (otherFitness > 0){
-			probability = 0;
-		} else if (otherFitness < 0){
-			probability = 1;
-		} else {
-			probability = 0.5;
-		}
-	} else if (otherFitness == 0){
-		if (thisFitness > 0){
-			probability = 1;
-		} else if (thisFitness < 0){
-			probability = 0;
-		}
 	} else {
-		if (thisFitness < 0)
+		if (fitness < 0)
 		{
-			otherFitness = -thisFitness;
-			thisFitness = -otherFitness;
+			otherFitness = -fitness;
+			fitness = -otherFitness;
 		}
-		probability = thisFitness / (thisFitness + otherFitness);
+		probability = fitness / (fitness + otherFitness);
 	}
 
 	uniformCrossover(crossoverLevel, other, probability);
