@@ -26,6 +26,22 @@ int main(int argc, char *argv[])
 		plot.setColorEnum(ET_CROSS_ALG);
 		plot.setPointEnum(ET_CROSS_LEVEL);
 
+		unsigned populationSize = 8;
+		unsigned numCrossover = populationSize/2;
+		float weighsRange = 5;
+		unsigned generations = 20;
+		plot.putVariable("numCrossover", &numCrossover);
+		float uniformCrossProb = 0.7;
+		plot.putVariable("uniformCrossProb", &uniformCrossProb);
+		unsigned numPoints = 3;
+		plot.putVariable("numPoints", &numPoints);
+		unsigned numMutations = 4;
+		plot.putVariable("numMutations", &numMutations);
+		unsigned mutationRange = 5;
+		plot.putVariable("mutationRange", &mutationRange);
+		unsigned mutationProb = 0.1;
+		plot.putVariable("mutationProb", &mutationProb);
+
 		plot.printParameters();
 
 		Task* task = new BinaryTask(BO_AND, VECTORS_SIZE);
@@ -37,7 +53,7 @@ int main(int argc, char *argv[])
 		example->addInputConnection(1, 0);
 //		example->addLayersConnection(0, 1);
 
-		plot.plotTask(path, task, example, 8, 20, 5);
+		plot.plotTask(path, task, example, populationSize, generations, weighsRange);
 
 		delete(example);
 		delete(task);

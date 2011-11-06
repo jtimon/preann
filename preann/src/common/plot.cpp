@@ -173,14 +173,13 @@ void plotTaskFunction(Test* test)
 {
 	string* path = (string*)test->getVariable("path");
 
-	unsigned* maxGenerations = (unsigned*)test->getVariable("maxGenerations");
 	Population* initialPopulation = (Population*)test->getVariable("initialPopulation");
 	Task* task = initialPopulation->getTask();
 
 	Population* population = new Population(initialPopulation);
 	//TODO hacer la selección parametrizable y un enumerado
-    unsigned numIndiv = population->getSize()/2 ;
-	population->setSelectionRouletteWheel(numIndiv);
+    unsigned numCrossover = *(unsigned*)test->getVariable("numCrossover");
+	population->setSelectionRouletteWheel(numCrossover);
 	CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm)test->getEnum(ET_CROSS_ALG);
 	CrossoverLevel crossoverLevel = (CrossoverLevel)test->getEnum(ET_CROSS_LEVEL);
 
@@ -190,28 +189,39 @@ void plotTaskFunction(Test* test)
 
 	switch (crossoverAlgorithm){
 	case CA_UNIFORM:
-		population->setCrossoverUniformScheme(crossoverLevel, numIndiv, 0.7);
+		{
+		float uniformCrossProb = *(float*)test->getVariable("uniformCrossProb");
+		population->setCrossoverUniformScheme(crossoverLevel, numCrossover, uniformCrossProb);
+		}
 		break;
 	case CA_PROPORTIONAL:
-		population->setCrossoverProportionalScheme(crossoverLevel, numIndiv);
+		population->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
 		break;
 	case CA_MULTIPOINT:
-		population->setCrossoverMultipointScheme(crossoverLevel, numIndiv, 3);
+		{
+		unsigned numPoints = *(unsigned*)test->getVariable("numPoints");
+		population->setCrossoverMultipointScheme(crossoverLevel, numCrossover, numPoints);
+		}
 		break;
 
 	}
 	MutationAlgorithm mutationAlgorithm = (MutationAlgorithm)test->getEnum(ET_MUTATION_ALG);
 	if (mutationAlgorithm == MA_PER_INDIVIDUAL){
-		population->setMutationsPerIndividual(4, 1);
+		unsigned numMutations = *(unsigned*)test->getVariable("numMutations");
+		float mutationRange = *(float*)test->getVariable("mutationRange");
+		population->setMutationsPerIndividual(numMutations, mutationRange);
 	} else if (mutationAlgorithm == MA_PROBABILISTIC){
-		population->setMutationProbability(0.01, 5);
+		float mutationRange = *(float*)test->getVariable("mutationRange");
+		float mutationProb = *(float*)test->getVariable("mutationProb");
+		population->setMutationProbability(0.01, mutationRange);
 	}
 
 	string functionName = test->getCurrentState();
 	string dataPath = (*path) + "data/" + task->toString() + "_" + functionName + ".DAT";
 	FILE* dataFile = test->openFile(dataPath);
 	fprintf(dataFile, "# Iterator %s \n", functionName.data());
-	for (unsigned generation = 1; generation <= *maxGenerations; ++generation) {
+	unsigned maxGenerations = *(unsigned*)test->getVariable("maxGenerations");
+	for (unsigned generation = 1; generation <= maxGenerations; ++generation) {
 
 		float fitness = population->getAverageScore();
 		fprintf(dataFile, " %d %f \n", generation, fitness);
