@@ -200,7 +200,7 @@ void ReversiBoard::turn(SquareState player, Individual* individual)
 	if (bestMoves.size() > 0){
 		Move chosenMove = bestMoves[ Random::positiveInteger(bestMoves.size()) ];
 		makeMove(chosenMove.xPos, chosenMove.yPos, player);
-	}	
+	}
 }
 
 float ReversiBoard::individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual)
@@ -209,11 +209,11 @@ float ReversiBoard::individualEstimation(unsigned xPos, unsigned yPos, SquareSta
 		return 0;
 	}
 	ReversiBoard* futureBoard = new ReversiBoard(this);
-	futureBoard->makeMove(xPos, yPos, turn);
+	futureBoard->makeMove(xPos, yPos, player);
 	individual->updateInput(0, futureBoard->updateInterface());
 	individual->calculateOutput();
 	delete(futureBoard);
-	
+
 	// the first element of the last layer
 	return individual->getOutput(individual->getNumLayers() - 1)->getElement(0);
 }
