@@ -8,7 +8,7 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
-#include "interface.h"
+#include "individual.h"
 
 typedef enum {EMPTY, PLAYER_1, PLAYER_2} SquareState;
 
@@ -27,18 +27,21 @@ public:
 	Board(unsigned size);
 	virtual ~Board();
 
+	virtual void initBoard();
+	virtual bool endGame() = 0;
 	virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player) = 0;
 	virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player) = 0;
 	virtual bool canMove(SquareState player) = 0;
-	virtual bool endGame() = 0;
-	virtual void computerTurn(SquareState turn) = 0;
+	virtual void turn(SquareState player, Individual* individual = NULL) = 0;
+	virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player) = 0;
+	virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual) = 0;
+	virtual unsigned countPoints(SquareState player);
 
 	unsigned size();
 	void setSquare(unsigned xPos, unsigned yPos, SquareState squareState);
 	SquareState getSquare(unsigned xPos, unsigned yPos);
 	Interface* getInterface();
-	void updateInterface();
-	unsigned countPoints(SquareState player);
+	Interface* updateInterface();
 	static SquareState opponent(SquareState player);
 };
 

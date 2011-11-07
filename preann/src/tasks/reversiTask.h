@@ -12,10 +12,8 @@
 #include "reversiBoard.h"
 
 class ReversiTask : Task {
-	ReversiBoard* board;
+	ReversiBoard* tBoard;
 	unsigned tNumTests;
-
-	void individualTurn(SquareState turn, Individual* individual);
 public:
 	ReversiTask(unsigned size, unsigned numTests = 1);
 	virtual ~ReversiTask();

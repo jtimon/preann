@@ -20,6 +20,15 @@ Board::~Board()
 	delete(tInterface);
 }
 
+void Board::initBoard()
+{
+	for (int x = 0; x < tSize; ++x) {
+		for (int y = 0; y < tSize; ++y) {
+			tBoard[x][y] = EMPTY;
+		}
+	}
+}
+
 unsigned Board::size()
 {
 	return tSize;
@@ -50,7 +59,7 @@ Interface* Board::getInterface()
 	return tInterface;
 }
 
-void Board::updateInterface()
+Interface* Board::updateInterface()
 {
 	unsigned index = 0;
 	for (int x = 0; x < tSize; ++x) {
@@ -66,6 +75,7 @@ void Board::updateInterface()
 			tInterface->setElement(index++, play2);
 		}
 	}
+	return tInterface;
 }
 
 unsigned Board::countPoints(SquareState player)

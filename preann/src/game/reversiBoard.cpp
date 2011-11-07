@@ -7,6 +7,15 @@
 
 #include "reversiBoard.h"
 
+ReversiBoard::ReversiBoard(ReversiBoard* other) : Board(other->size())
+{
+	for (int x = 0; x < tSize; ++x) {
+		for (int y = 0; y < tSize; ++y) {
+			tBoard[x][y] = other->getSquare(x, y);
+		}
+	}
+}
+
 ReversiBoard::ReversiBoard(unsigned size) : Board(size)
 {
 	std::string error;
@@ -26,6 +35,11 @@ ReversiBoard::~ReversiBoard()
 
 void ReversiBoard::initBoard()
 {
+	for (int x = 0; x < tSize; ++x) {
+		for (int y = 0; y < tSize; ++y) {
+			tBoard[x][y] = EMPTY;
+		}
+	}
     int halfSize = tSize / 2;
     setSquare(halfSize, halfSize, PLAYER_1);
 	setSquare(halfSize-1, halfSize-1, PLAYER_1);
@@ -153,8 +167,12 @@ bool ReversiBoard::endGame()
 	return true;
 }
 
-void ReversiBoard::computerTurn(SquareState turn)
+void ReversiBoard::turn(SquareState player, Individual* individual)
 {
+	if (player == EMPTY){
+		std::string error = "ReversiBoard::turn : Empty square is not a player.";
+		throw error;
+	}
 	float maxQuality = 0;
 	vector<Move> moves;
 	for (int x = 0; x < tSize; ++x) {
@@ -162,7 +180,11 @@ void ReversiBoard::computerTurn(SquareState turn)
 			Move move;
 			move.xPos = x;
 			move.yPos = y;
-			move.quality = (float)getQuality(x, y, turn);
+			if (individual == NULL){
+				move.quality = computerEstimation(x, y, player);
+			} else {
+				move.quality = individualEstimation(x, y, player, individual);
+			}
 			if (move.quality >= maxQuality){
 				maxQuality = move.quality;
 				moves.push_back(move);
@@ -177,28 +199,32 @@ void ReversiBoard::computerTurn(SquareState turn)
 	}
 	if (bestMoves.size() > 0){
 		Move chosenMove = bestMoves[ Random::positiveInteger(bestMoves.size()) ];
-		makeMove(chosenMove.xPos, chosenMove.yPos, turn);
-	}
+		makeMove(chosenMove.xPos, chosenMove.yPos, player);
+	}	
 }
 
-unsigned ReversiBoard::getQuality(unsigned xPos, unsigned yPos, SquareState player)
+float ReversiBoard::individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual)
 {
-	if (xPos >= tSize || yPos >= tSize){
-		std::string error = "ReversiBoard::legalMove : The position (" + to_string(xPos) + ", " +
-				to_string(yPos) + ") is out of range. The size of the board is " + to_string(tSize);
-		throw error;
-	}
-	if (player == EMPTY){
-		std::string error = "ReversiBoard::legalMove : Empty square is not a player.";
-		throw error;
-	}
 	if (tBoard[xPos][yPos] != EMPTY){
-		std::string error = "ReversiBoard::legalMove : the square at position (" + to_string(xPos) +
-				", " + to_string(yPos) + ") is already accupied";
-		throw error;
+		return 0;
+	}
+	ReversiBoard* futureBoard = new ReversiBoard(this);
+	futureBoard->makeMove(xPos, yPos, turn);
+	individual->updateInput(0, futureBoard->updateInterface());
+	individual->calculateOutput();
+	delete(futureBoard);
+	
+	// the first element of the last layer
+	return individual->getOutput(individual->getNumLayers() - 1)->getElement(0);
+}
+
+float ReversiBoard::computerEstimation(unsigned xPos, unsigned yPos, SquareState player)
+{
+	if (tBoard[xPos][yPos] != EMPTY){
+		return 0;
 	}
 	unsigned x=0, y=0;
-	unsigned quality = 0;
+	float quality = 0;
 
 	for (int a=-1; a <= 1; a++){    //for each direction (left, right)
 		for(int b=-1; b <= 1; b++){  // for each direction (up down)
