@@ -191,11 +191,11 @@ void plotTaskFunction(Test* test)
 		}
 		break;
 	case SA_TOURNAMENT:
-		break;
 		{
 		unsigned tournamentSize = *(unsigned*)test->getVariable("tournamentSize");
 		population->setSelectionTournament(numSelection, tournamentSize);
 		}
+		break;
 	case SA_TRUNCATION:
 		population->setSelectionTruncation(numSelection);
 		break;

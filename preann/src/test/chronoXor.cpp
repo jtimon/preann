@@ -18,8 +18,7 @@ int main(int argc, char *argv[])
 		string path = "/home/timon/workspace/preann/output/";
 
 		Plot plot;
-//		plot.withAll(ET_SELECTION_ALGORITHM);
-		plot.exclude(ET_SELECTION_ALGORITHM, 1, SA_TOURNAMENT);
+		plot.withAll(ET_SELECTION_ALGORITHM);
 		plot.withAll(ET_CROSS_ALG);
 //		plot.withAll(ET_CROSS_LEVEL);
 		plot.with(ET_CROSS_LEVEL, 1, CL_WEIGH);
