@@ -175,7 +175,6 @@ void plotTaskFunction(Test* test)
 
 	Population* initialPopulation = (Population*)test->getVariable("initialPopulation");
 	Population* population = new Population(initialPopulation);
-	Task* task = population->getTask();
 
     unsigned numSelection = *(unsigned*)test->getVariable("numSelection");
 	SelectionAlgorithm selectionAlgorithm = (SelectionAlgorithm)test->getEnum(ET_SELECTION_ALGORITHM);
@@ -233,6 +232,7 @@ void plotTaskFunction(Test* test)
 		population->setMutationProbability(0.01, mutationRange);
 	}
 
+	Task* task = population->getTask();
 	string functionName = test->getCurrentState();
 	string dataPath = (*path) + "data/" + task->toString() + "_" + functionName + ".DAT";
 	FILE* dataFile = test->openFile(dataPath);
