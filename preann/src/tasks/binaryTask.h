@@ -13,7 +13,6 @@
 class BinaryTask : public Task {
 protected:
 	BinaryOperation tBinaryOperation;
-	unsigned tSize;
 	unsigned tNumTests;
 	Interface* tInput1;
 	Interface* tInput2;

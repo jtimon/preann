@@ -10,7 +10,6 @@
 BinaryTask::BinaryTask(BinaryOperation binaryOperation, unsigned size)
 {
 	tBinaryOperation = binaryOperation;
-	tSize = size;
 	tNumTests = 0;
 	tInput1 = new Interface(size, BT_BIT);
 	tInput2 = new Interface(size, BT_BIT);
@@ -20,7 +19,6 @@ BinaryTask::BinaryTask(BinaryOperation binaryOperation, unsigned size)
 BinaryTask::BinaryTask(BinaryOperation binaryOperation, unsigned size, unsigned numTests)
 {
 	tBinaryOperation = binaryOperation;
-	tSize = size;
 	tNumTests = numTests;
 	tInput1 = new Interface(size, BT_BIT);
 	tInput2 = new Interface(size, BT_BIT);
@@ -128,5 +126,5 @@ void BinaryTask::doOperation()
 
 string BinaryTask::toString()
 {
-    return Enumerations::binaryOperationToString(tBinaryOperation);
+    return Enumerations::binaryOperationToString(tBinaryOperation) + to_string(tInput1->getSize());
 }
