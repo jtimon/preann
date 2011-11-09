@@ -48,9 +48,64 @@ void testLayer(Test* test)
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
-    delete (layer);
+    delete(layer);
 
     checkAndPrintErrors("Layer", test);
+}
+
+void testNeuralNet(Test* test)
+{
+    BufferType bufferType = (BufferType)test->getEnum(ET_BUFFER);
+    ImplementationType implementationType = (ImplementationType)test->getEnum(ET_IMPLEMENTATION);
+    
+    NeuralNet* net = new NeuralNet(implementationType);
+    Interface* input = new Interface(size, bufferType);
+	net->addInputLayer(input);
+	net->addInputLayer(input);
+	net->addInputLayer(input);
+	net->addLayer(size, bufferType, FT_IDENTITY);
+	net->addLayer(size, bufferType, FT_IDENTITY);
+	net->addLayer(size, bufferType, FT_IDENTITY);
+	net->addInputConnection(0, 0);
+	net->addInputConnection(1, 0);
+	net->addInputConnection(2, 0);
+	net->addLayersConnection(0, 1);
+	net->addLayersConnection(0, 2);
+	net->addLayersConnection(1, 2);
+	net->addLayersConnection(2, 0);
+	
+    delete(net);
+    delete(input);
+    checkAndPrintErrors("NeuralNet", test);
+}
+
+void testPopulation(Test* test)
+{
+    BufferType bufferType = (BufferType)test->getEnum(ET_BUFFER);
+    ImplementationType implementationType = (ImplementationType)test->getEnum(ET_IMPLEMENTATION);
+    
+    Interface* input = new Interface(size, bufferType);
+    Individual* example = new Individual(implementationType);
+	example->addInputLayer(input);
+	example->addInputLayer(input);
+	example->addInputLayer(input);
+	example->addLayer(size, bufferType, FT_IDENTITY);
+	example->addLayer(size, bufferType, FT_IDENTITY);
+	example->addLayer(size, bufferType, FT_IDENTITY);
+	example->addInputConnection(0, 0);
+	example->addInputConnection(1, 0);
+	example->addInputConnection(2, 0);
+	example->addLayersConnection(0, 1);
+	example->addLayersConnection(0, 2);
+	example->addLayersConnection(1, 2);
+	example->addLayersConnection(2, 0);
+    Task* task = new BinaryTask(BO_OR, size, 5);
+    Population* population = new Population(task, example, 100, 20);
+	
+    delete(population);
+    delete(task);
+    delete(input);
+    checkAndPrintErrors("Population", test);
 }
 
 //int a, b, c, d;
@@ -89,6 +144,8 @@ int main(int argc, char *argv[]) {
 
 		test.simpleTest(testConnection, "Connection::memory");
 		test.simpleTest(testLayer, "Layer::memory");
+		test.simpleTest(testNeuralNet, "NeuralNet::memory");
+		test.simpleTest(testPopulation, "Population::memory");
 
 		printf("Exit success.\n", 1);
 		MemoryManagement::printTotalAllocated();
