@@ -6,7 +6,9 @@ using namespace std;
 
 #include "test.h"
 #include "population.h"
+#include "binaryTask.h"
 #include "chronometer.h"
+
 
 unsigned memoryLosses = 0;
 int size;
@@ -57,7 +59,7 @@ void testNeuralNet(Test* test)
 {
     BufferType bufferType = (BufferType)test->getEnum(ET_BUFFER);
     ImplementationType implementationType = (ImplementationType)test->getEnum(ET_IMPLEMENTATION);
-    
+
     NeuralNet* net = new NeuralNet(implementationType);
     Interface* input = new Interface(size, bufferType);
 	net->addInputLayer(input);
@@ -73,7 +75,7 @@ void testNeuralNet(Test* test)
 	net->addLayersConnection(0, 2);
 	net->addLayersConnection(1, 2);
 	net->addLayersConnection(2, 0);
-	
+
     delete(net);
     delete(input);
     checkAndPrintErrors("NeuralNet", test);
@@ -83,7 +85,7 @@ void testPopulation(Test* test)
 {
     BufferType bufferType = (BufferType)test->getEnum(ET_BUFFER);
     ImplementationType implementationType = (ImplementationType)test->getEnum(ET_IMPLEMENTATION);
-    
+
     Interface* input = new Interface(size, bufferType);
     Individual* example = new Individual(implementationType);
 	example->addInputLayer(input);
@@ -101,7 +103,7 @@ void testPopulation(Test* test)
 	example->addLayersConnection(2, 0);
     Task* task = new BinaryTask(BO_OR, size, 5);
     Population* population = new Population(task, example, 100, 20);
-	
+
     delete(population);
     delete(task);
     delete(input);
