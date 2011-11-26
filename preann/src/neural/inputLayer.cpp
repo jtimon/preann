@@ -6,6 +6,8 @@ InputLayer::InputLayer(Interface* interface, ImplementationType implementationTy
 {
 	tInput = interface;
 	output = Factory::newBuffer(interface->getSize(), interface->getBufferType(), implementationType);
+	//TODO un solo interfaz para entrada y salida
+	tOuputInterface = NULL;
 
 	thresholds = NULL;
 	functionType = FT_IDENTITY;
@@ -15,6 +17,7 @@ InputLayer::InputLayer(FILE* stream, ImplementationType implementationType)
 {
 	output = Factory::newBuffer(stream, implementationType);
 	tInput = new Interface(output->getSize(), output->getBufferType());
+	tOuputInterface = NULL;
 	thresholds = NULL;
 	functionType = FT_IDENTITY;
 }

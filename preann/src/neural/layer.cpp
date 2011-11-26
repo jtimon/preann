@@ -28,13 +28,13 @@ Layer::Layer(FILE* stream, ImplementationType implementationType)
 	fread(&functionType, sizeof(FunctionType), 1, stream);
 	output = Factory::newBuffer(stream, implementationType);
 	thresholds = Factory::newThresholds(output, implementationType);
+	tOuputInterface = NULL;
 }
 
 void Layer::save(FILE* stream)
 {
 	fwrite(&functionType, sizeof(FunctionType), 1, stream);
 	output->save(stream);
-	tOuputInterface = NULL;
 }
 
 Layer::~Layer()
@@ -48,6 +48,9 @@ Layer::~Layer()
 	}
 	if (output) {
 		delete (output);
+	}
+	if (tOuputInterface) {
+		delete (tOuputInterface);
 	}
 }
 
