@@ -102,9 +102,10 @@ void testPopulation(Test* test)
 	example->addLayersConnection(1, 2);
 	example->addLayersConnection(2, 0);
     Task* task = new BinaryTask(BO_OR, size, 5);
-    Population* population = new Population(task, example, 100, 20);
+    Population* population = new Population(task, example, 5, 20);
 
     delete(population);
+    delete(example);
     delete(task);
     delete(input);
     checkAndPrintErrors("Population", test);
