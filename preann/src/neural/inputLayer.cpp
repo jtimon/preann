@@ -26,9 +26,6 @@ void InputLayer::save(FILE* stream)
 
 InputLayer::~InputLayer()
 {
-	if (output){
-		delete(output);
-	}
 }
 
 ImplementationType InputLayer::getImplementationType()

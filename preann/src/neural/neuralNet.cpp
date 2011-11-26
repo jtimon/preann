@@ -7,12 +7,16 @@ NeuralNet::NeuralNet(ImplementationType implementationType)
 
 NeuralNet::~NeuralNet()
 {
+	for (unsigned i = 0; i < inputs.size(); i++)
+	{
+		delete (inputs[i]);
+	}
+	inputs.clear();
 	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		delete (layers[i]);
 	}
 	layers.clear();
-	inputs.clear();
 }
 
 Layer* NeuralNet::getLayer(unsigned pos)
@@ -44,7 +48,8 @@ void NeuralNet::addInputLayer(unsigned size, BufferType bufferType)
 
 void NeuralNet::addInputLayer(Interface* interface)
 {
-	inputs.push_back(new InputLayer(interface, getImplementationType()));
+    InputLayer* inputLayer = new InputLayer(interface, getImplementationType());
+    inputs.push_back(inputLayer);
 }
 
 void NeuralNet::updateInput(unsigned inputPos, Interface* input)
