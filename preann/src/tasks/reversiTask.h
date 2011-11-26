@@ -11,7 +11,7 @@
 #include "task.h"
 #include "reversiBoard.h"
 
-class ReversiTask : Task {
+class ReversiTask : public Task {
 	ReversiBoard* tBoard;
 	unsigned tNumTests;
 public:
