@@ -7,16 +7,8 @@ NeuralNet::NeuralNet(ImplementationType implementationType)
 
 NeuralNet::~NeuralNet()
 {
-	for (unsigned i = 0; i < inputs.size(); i++)
-	{
-		delete (inputs[i]);
-	}
-	inputs.clear();
-	for (unsigned i = 0; i < layers.size(); i++)
-	{
-		delete (layers[i]);
-	}
-	layers.clear();
+	CLEAR_PTR_VECTOR(InputLayer, inputs)
+	CLEAR_PTR_VECTOR(Layer, layers)
 }
 
 Layer* NeuralNet::getLayer(unsigned pos)

@@ -77,11 +77,7 @@ void Population::setDefaults()
 
 Population::~Population()
 {
-	list<Individual*>::iterator it;
-	FOR_EACH(it, individuals){
-		delete(*it);
-	}
-	individuals.clear();
+	CLEAR_PTR_LIST(Individual, individuals)
 	parents.clear();
 	offSpring.clear();
 }

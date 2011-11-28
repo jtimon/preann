@@ -39,10 +39,7 @@ void Layer::save(FILE* stream)
 
 Layer::~Layer()
 {
-	for (unsigned i=0; i < connections.size(); i++){
-		delete(connections[i]);
-	}
-	connections.clear();
+	CLEAR_PTR_VECTOR(Connection, connections)
 	if (thresholds) {
 		delete(thresholds);
 	}

@@ -8,8 +8,6 @@ class Layer {
 protected:
 	Layer() {};
 	std::vector<Connection*> connections;
-//	Connection** connections;
-//	unsigned numberInputs;
 
 	Connection* thresholds;
 	Buffer* output;
