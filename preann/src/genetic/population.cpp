@@ -320,6 +320,11 @@ unsigned Population::getSize()
 	return individuals.size();
 }
 
+std::string Population::toString()
+{
+	return task->toString() + "_" + to_string(maxSize);
+}
+
 Individual* Population::getIndividual(unsigned pos)
 {
 	unsigned index = 0;

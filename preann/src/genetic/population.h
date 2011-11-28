@@ -87,6 +87,8 @@ public:
 	Task* getTask();
 	unsigned getSize();
 	Individual* getIndividual(unsigned pos);
+
+	std::string toString();
 };
 
 #endif /* POPULATION_H_ */
