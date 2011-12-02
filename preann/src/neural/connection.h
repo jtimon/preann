@@ -8,6 +8,7 @@ protected:
 	Buffer* tInput;
 
 	virtual void mutateImpl(unsigned pos, float mutation) = 0;
+	virtual void resetConnectionImpl(unsigned pos) = 0;
 	virtual void crossoverImpl(Buffer* other, Interface* bitBuffer) = 0;
 public:
 	Connection(){};
@@ -17,6 +18,7 @@ public:
 
 	virtual void calculateAndAddTo(Buffer* results) = 0;
 	void mutate(unsigned pos, float mutation);
+	void resetConnection(unsigned pos);
 	void crossover(Connection* other, Interface* bitBuffer);
 };
 

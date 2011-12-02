@@ -11,28 +11,50 @@ protected:
 	virtual void mutateImpl(unsigned pos, float mutation)
 	{
 		switch (bufferTypeTempl){
-		case BT_BYTE:{
-			c_typeTempl* weigh = &(((c_typeTempl*)data)[pos]);
-			int result = (int)mutation + *weigh;
-			if (result <= 0){
-				*weigh = 0;
+		case BT_BYTE:
+			{
+				c_typeTempl* weigh = &(((c_typeTempl*)data)[pos]);
+				int result = (int)mutation + *weigh;
+				if (result <= 0){
+					*weigh = 0;
+				}
+				else if (result >= 255) {
+					*weigh = 255;
+				}
+				else {
+					*weigh = result;
+				}
 			}
-			else if (result >= 255) {
-				*weigh = 255;
-			}
-			else {
-				*weigh = result;
-			}
-			}break;
+			break;
 		case BT_FLOAT:
-			((c_typeTempl*)data)[pos] += mutation;
+				((c_typeTempl*)data)[pos] += mutation;
 			break;
 		case BT_BIT:
 		case BT_SIGN:
 			{
-			unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
-			((unsigned*)data)[pos / BITS_PER_UNSIGNED] ^= mask;
+				unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
+				((unsigned*)data)[pos / BITS_PER_UNSIGNED] ^= mask;
 			}
+		}
+	}
+	
+	virtual void resetConnectionImpl(unsigned pos)
+	{
+		switch (bufferTypeTempl){
+		case BT_BYTE:
+		{
+			((c_typeTempl*)data)[pos] = 128;
+		}
+		break;
+		case BT_FLOAT:
+			((c_typeTempl*)data)[pos] = 0;
+		break;
+		case BT_BIT:
+		case BT_SIGN:
+		{
+			unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
+			((unsigned*)data)[pos / BITS_PER_UNSIGNED] &= ~mask;
+		}
 		}
 	}
 

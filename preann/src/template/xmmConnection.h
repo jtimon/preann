@@ -85,33 +85,78 @@ protected:
 	    unsigned elem = (outputPos * offsetPerInput) + inputPos;
 
 	    switch (bufferTypeTempl){
-	        case BT_BYTE:
-	            {
-	            	c_typeTempl *weigh = &(((c_typeTempl*)(data))[elem]);
-	                int result = (int)(mutation) + *weigh;
-	                if(result <= 0){
-	                    *weigh = 0;
-	            }else
-	                if(result >= 255){
-	                    *weigh = 255;
-	                }else{
-	                    *weigh = result;
-	                }
+	    case BT_BYTE:
+		 {
+				c_typeTempl *weigh = &(((c_typeTempl*)(data))[elem]);
+				int result = (int)(mutation) + *weigh;
+				if(result <= 0){
+					*weigh = 0;
+			} else {
+				if(result >= 255){
+					*weigh = 255;
+				}else{
+					*weigh = result;
+				}
+			}
 
-	        }
-	        break;
+		}
+		break;
 	    case BT_FLOAT:
-	    	offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
-	    	elem = (outputPos * offsetPerInput) + inputPos;
-	        ((c_typeTempl*)(data))[elem] += mutation;
-				break;
+			offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
+			elem = (outputPos * offsetPerInput) + inputPos;
+			((c_typeTempl*)(data))[elem] += mutation;
+		break;
 		case BT_BIT:
 		case BT_SIGN:
 			std::string error = "XmmConnection::mutate is not implemented for BufferType BIT nor SIGN.";
 			throw error;
 		}
 	}
+	
+	virtual void resetConnectionImpl(unsigned pos)
+	{
+		unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), bufferTypeTempl);
+		unsigned outputPos = pos / tInput->getSize();
+	    unsigned inputPos = pos % tInput->getSize();
+	    unsigned elem = (outputPos * offsetPerInput) + inputPos;
 
+	    switch (bufferTypeTempl){
+		case BT_BYTE:
+			((c_typeTempl*)data)[elem] = 128;
+		break;
+	    case BT_FLOAT:
+	    	{
+				offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
+				elem = (outputPos * offsetPerInput) + inputPos;
+				((c_typeTempl*)(data))[elem] = 0;
+	    	}
+			break;
+		case BT_BIT:
+		case BT_SIGN:
+			std::string error = "XmmConnection::resetConnection is not implemented for BufferType BIT nor SIGN.";
+			throw error;
+		}
+	}
+
+	virtual void resetConnectionImpl(unsigned pos)
+	{
+		switch (bufferTypeTempl){
+		case BT_BYTE:{
+				c_typeTempl* weigh = &(((c_typeTempl*)data)[pos]);
+				*weigh = 128;
+			}break;
+		case BT_FLOAT:
+				((c_typeTempl*)data)[pos] = 0;
+			break;
+		case BT_BIT:
+		case BT_SIGN:
+			{
+			unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
+			((unsigned*)data)[pos / BITS_PER_UNSIGNED] &= ~mask;
+			}
+		}
+	}
+	
 	virtual void crossoverImpl(Buffer* other, Interface* bitBuffer)
 	{
 		void* otherWeighs = other->getDataPointer();
