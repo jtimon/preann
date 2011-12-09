@@ -212,6 +212,23 @@ void cuda_crossover(void* buffer1, void* buffer2, unsigned* bitBuffer, unsigned 
 	}
 }
 
+//TODO CU es necesario usar un kernel para esto ??
+__global__
+void resetFloatKernel(float* buffer, unsigned pos)
+{
+	if (threadIdx.x == 0){
+		buffer[pos] = 0;
+	}
+}
+
+__global__
+void resetByteKernel(unsigned char* buffer, unsigned pos)
+{
+	if (threadIdx.x == 0){
+		buffer[pos] = 128;
+	}
+}
+
 __global__
 void mutateFloatKernel(float* buffer, unsigned pos, float mutation)
 {
@@ -250,6 +267,24 @@ extern "C" void cuda_mutate(void* buffer, unsigned pos, float mutation, BufferTy
 	case BT_SIGN:
 		{
 		std::string error = "cuda_mutate is not implemented for BufferType BIT nor SIGN.";
+		throw error;
+		}
+	}
+}
+
+extern "C" void cuda_reset(void* buffer, unsigned pos, BufferType bufferType)
+{
+	switch (bufferType){
+	case BT_BYTE:
+		resetByteKernel<<< 1, 8 >>>((unsigned char*)buffer, pos);
+		break;
+	case BT_FLOAT:
+		resetFloatKernel<<< 1, 8 >>>((float*)buffer, pos);
+		break;
+	case BT_BIT:
+	case BT_SIGN:
+		{
+		std::string error = "cuda_reset is not implemented for BufferType BIT nor SIGN.";
 		throw error;
 		}
 	}

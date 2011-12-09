@@ -19,6 +19,11 @@ protected:
 		cuda_mutate(data, pos, mutation, bufferTypeTempl);
 	}
 
+	virtual void resetConnectionImpl(unsigned pos)
+	{
+		cuda_reset(data, pos, bufferTypeTempl);
+	}
+
 	virtual void crossoverImpl(Buffer* other, Interface* bitBuffer)
 	{
 		CudaBuffer<bufferTypeTempl, c_typeTempl> cudaBitBuffer(bitBuffer, Cuda_Threads_Per_Block);

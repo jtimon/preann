@@ -112,7 +112,7 @@ protected:
 			throw error;
 		}
 	}
-	
+
 	virtual void resetConnectionImpl(unsigned pos)
 	{
 		unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(), bufferTypeTempl);
@@ -138,25 +138,6 @@ protected:
 		}
 	}
 
-	virtual void resetConnectionImpl(unsigned pos)
-	{
-		switch (bufferTypeTempl){
-		case BT_BYTE:{
-				c_typeTempl* weigh = &(((c_typeTempl*)data)[pos]);
-				*weigh = 128;
-			}break;
-		case BT_FLOAT:
-				((c_typeTempl*)data)[pos] = 0;
-			break;
-		case BT_BIT:
-		case BT_SIGN:
-			{
-			unsigned mask = 0x80000000>>(pos % BITS_PER_UNSIGNED) ;
-			((unsigned*)data)[pos / BITS_PER_UNSIGNED] &= ~mask;
-			}
-		}
-	}
-	
 	virtual void crossoverImpl(Buffer* other, Interface* bitBuffer)
 	{
 		void* otherWeighs = other->getDataPointer();

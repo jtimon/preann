@@ -20,15 +20,23 @@ protected:
 		interface->transposeMatrix(tSize / tInput->getSize());
 	}
 
-	virtual void mutateImpl(unsigned pos, float mutation)
+	unsigned invertPos(unsigned pos)
 	{
 		//TODO z simplificar cuentas
 		unsigned outputPos = pos / tInput->getSize();
 		unsigned inputPos = (pos % tInput->getSize());
 		unsigned outputSize = tSize / tInput->getSize();
-		pos = outputPos + (inputPos * outputSize);
+		return outputPos + (inputPos * outputSize);
+	}
 
-		cuda_mutate(data, pos, mutation, bufferTypeTempl);
+	virtual void mutateImpl(unsigned pos, float mutation)
+	{
+		cuda_mutate(data, invertPos(pos), mutation, bufferTypeTempl);
+	}
+
+	virtual void resetConnectionImpl(unsigned pos)
+	{
+		cuda_reset(data, invertPos(pos), bufferTypeTempl);
 	}
 
 	virtual void crossoverImpl(Buffer* other, Interface* bitBuffer)
