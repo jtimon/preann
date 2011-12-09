@@ -23,6 +23,8 @@ unsigned Enumerations::enumTypeDim(EnumType enumType){
 		return CROSSOVER_LEVEL_DIM;
 	case ET_MUTATION_ALG:
 		return MUTATION_ALGORITHM_DIM;
+	case ET_RESET_ALG:
+		return RESET_ALGORITHM_DIM;
 	}
 	string error = "enumTypeDim EnumType " + to_string(enumType) + "not found.";
 	throw error;
@@ -45,6 +47,8 @@ std::string Enumerations::toString(EnumType enumType, unsigned enumValue)
 		return Enumerations::crossoverAlgorithmToString(enumValue);
 	case ET_MUTATION_ALG:
 		return Enumerations::mutationAlgorithmToString(enumValue);
+	case ET_RESET_ALG:
+		return Enumerations::resetAlgorithmToString(enumValue);
 	case ET_BINARY_OPERATION:
 		return Enumerations::binaryOperationToString(enumValue);
 	}
@@ -96,9 +100,25 @@ std::string Enumerations::crossoverAlgorithmToString(unsigned crossoverAlgorithm
 	throw error;
 }
 
+std::string Enumerations::resetAlgorithmToString(unsigned resetAlgorithm)
+{
+	switch((ResetAlgorithm)resetAlgorithm){
+	case RA_DISABLED:
+		return "DISABLED";
+	case RA_PER_INDIVIDUAL:
+		return "PER_INDIVIDUAL";
+	case RA_PROBABILISTIC:
+		return "PROBABILISTIC";
+	}
+	string error = " Enumerations::resetAlgorithmToString resetAlgorithm not found";
+	throw error;
+}
+
 std::string Enumerations::mutationAlgorithmToString(unsigned mutationAlgorithm)
 {
 	switch((MutationAlgorithm)mutationAlgorithm){
+	case MA_DISABLED:
+		return "DISABLED";
 	case MA_PER_INDIVIDUAL:
 		return "PER_INDIVIDUAL";
 	case MA_PROBABILISTIC:
@@ -198,6 +218,8 @@ std::string Enumerations::enumTypeToString(EnumType enumType)
 		return "Implementation_type";
 	case ET_MUTATION_ALG:
 		return "Mutation_algorithm";
+	case ET_RESET_ALG:
+		return "Reset_algorithm";
 	}
 	string error = " Enumerations::enumTypeToString EnumType not found";
 	throw error;

@@ -22,13 +22,15 @@ typedef enum {CL_WEIGH, CL_NEURON, CL_NEURON_INVERTED, CL_LAYER} CrossoverLevel;
 #define CROSSOVER_LEVEL_DIM 4
 typedef enum {CA_UNIFORM, CA_PROPORTIONAL, CA_MULTIPOINT} CrossoverAlgorithm;
 #define CROSSOVER_ALGORITHM_DIM 3
-typedef enum {MA_PER_INDIVIDUAL, MA_PROBABILISTIC} MutationAlgorithm;
-#define MUTATION_ALGORITHM_DIM 2
+typedef enum {MA_DISABLED, MA_PER_INDIVIDUAL, MA_PROBABILISTIC} MutationAlgorithm;
+#define MUTATION_ALGORITHM_DIM 3
+typedef enum {RA_DISABLED, RA_PER_INDIVIDUAL, RA_PROBABILISTIC} ResetAlgorithm;
+#define RESET_ALGORITHM_DIM 3
 typedef enum {BO_OR, BO_AND, BO_XOR} BinaryOperation;
 #define BINARY_OPERATION_DIM 3
 
-typedef enum {ET_BUFFER, ET_IMPLEMENTATION, ET_FUNCTION, ET_SELECTION_ALGORITHM, ET_CROSS_LEVEL, ET_CROSS_ALG, ET_MUTATION_ALG, ET_BINARY_OPERATION} EnumType;
-#define ENUM_TYPE_DIM 8
+typedef enum {ET_BUFFER, ET_IMPLEMENTATION, ET_FUNCTION, ET_SELECTION_ALGORITHM, ET_CROSS_LEVEL, ET_CROSS_ALG, ET_MUTATION_ALG, ET_BINARY_OPERATION, ET_RESET_ALG} EnumType;
+#define ENUM_TYPE_DIM 9
 
 class Enumerations {
 private:
@@ -41,6 +43,7 @@ public:
 	static std::string selectionAlgorithmToString(unsigned selectionAlgorithm);
 	static std::string crossoverAlgorithmToString(unsigned crossoverAlgorithm);
 	static std::string mutationAlgorithmToString(unsigned mutationAlgorithm);
+	static std::string resetAlgorithmToString(unsigned resetAlgorithm);
 	static std::string bufferTypeToString(unsigned bufferType);
 	static std::string implementationToString(unsigned implementationType);
 	static std::string enumTypeToString(EnumType enumType);
