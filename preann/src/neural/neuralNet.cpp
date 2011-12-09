@@ -18,6 +18,10 @@ Layer* NeuralNet::getLayer(unsigned pos)
 
 void NeuralNet::calculateOutput()
 {
+	for (unsigned i = 0; i < inputs.size(); i++)
+	{
+		inputs[i]->calculateOutput();
+	}
 	for (unsigned i = 0; i < layers.size(); i++)
 	{
 		layers[i]->calculateOutput();
