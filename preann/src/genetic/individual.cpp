@@ -101,6 +101,53 @@ void Individual::mutate(float probability, float mutationRange)
 	}
 }
 
+void Individual::reset(unsigned numResets)
+{
+	for (unsigned i = 0; i < numResets; i++)
+	{
+		unsigned chosenLayer = Random::positiveInteger(layers.size());
+	    unsigned numInputs = layers[chosenLayer]->getNumberInputs();
+	    unsigned chosenConnection = Random::positiveInteger(numInputs + 1);
+		Connection* connection;
+		if (chosenConnection == numInputs)
+		{
+			connection = layers[chosenLayer]->getThresholds();
+		}
+		else
+		{
+			connection = layers[chosenLayer]->getConnection(chosenConnection);
+		}
+		connection->reset(Random::positiveInteger(connection->getSize()));
+	}
+}
+
+void Individual::reset(float probability)
+{
+	for (unsigned i = 0; i < layers.size(); i++)
+	{
+		for (unsigned j = 0; j < layers[i]->getNumberInputs(); j++)
+		{
+
+			Connection* connection = layers[i]->getConnection(j);
+			for (unsigned k = 0; k < connection->getSize(); k++)
+			{
+				if (Random::positiveFloat(1) < probability)
+				{
+					connection->reset(k);
+				}
+			}
+		}
+		Connection* connection = layers[i]->getThresholds();
+		for (unsigned k = 0; k < connection->getSize(); k++)
+		{
+			if (Random::positiveFloat(1) < probability)
+			{
+				connection->reset(k);
+			}
+		}
+	}
+}
+
 void Individual::proportionalCrossover(CrossoverLevel crossoverLevel, Individual* other)
 {
 	float otherFitness = other->getFitness();

@@ -41,6 +41,8 @@ public:
 	Individual* newCopy(ImplementationType implementationType, bool copyWeighs);
 	void mutate(unsigned numMutations, float mutationRange);
 	void mutate(float probability, float mutationRange);
+	void reset(unsigned numResets);
+	void reset(float probability);
 	void uniformCrossover(CrossoverLevel crossoverLevel, Individual* other, float probability);
 	void proportionalCrossover(CrossoverLevel crossoverLevel, Individual* other);
 	void multipointCrossover(CrossoverLevel crossoverLevel, Individual* other, unsigned numPoints);
