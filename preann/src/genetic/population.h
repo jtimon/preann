@@ -21,6 +21,7 @@ class Population {
 	vector<Individual*> parents;
 	vector<Individual*> offSpring;
 
+	unsigned nPreserve;
 	unsigned numTruncation;
 	unsigned numRouletteWheel;
 	unsigned numTournament;
@@ -37,6 +38,10 @@ class Population {
 	float mutationsPerIndividualRange;
 	float mutationProbability;
 	float mutationProbabilityRange;
+
+	unsigned resetPerIndividual;
+	float resetProbability;
+
 	float total_score;
 	void setDefaults();
 	void selection();
@@ -51,7 +56,9 @@ class Population {
 	void oneCrossover(Individual* offSpringA, Individual* offSpringB, CrossoverAlgorithm crossoverAlgorithm, CrossoverLevel crossoverLevel);
 	void produceTwoOffsprings(unsigned & parentA, unsigned & parentB, Interface &bufferUsedParents, unsigned &usedParents);
 	void mutation();
+	void reset();
     void checkNotEmpty();
+    void eliminateWorse();
 public:
 	Population(Population* other);
 	Population(Task* task);
@@ -61,6 +68,7 @@ public:
 	void save(FILE* stream);
 	void load(FILE* stream);
 
+	void setPreservation(unsigned number);
 	void setSelectionRouletteWheel(unsigned number);
 	void setSelectionTruncation(unsigned number);
 	void setSelectionTournament(unsigned number, unsigned tourSize);
@@ -75,6 +83,9 @@ public:
 
 	void setMutationsPerIndividual(unsigned numMutations, float range);
 	void setMutationProbability(float probability, float range);
+
+	void setResetsPerIndividual(unsigned numResets);
+	void setResetProbability(float resetProb);
 
 	void insertIndividual(Individual* individual);
 	unsigned nextGeneration();

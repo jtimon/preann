@@ -12,7 +12,7 @@ Population::Population(Population* other)
 	this->maxSize = other->getSize();
 	this->task = other->getTask();
 	setDefaults();
-	
+
 	Individual* newIndividual;
 	for (unsigned i = 0; i < maxSize; i++)
 	{
@@ -49,6 +49,8 @@ void Population::setDefaults()
 {
 	generation = 0;
 
+	nPreserve = 1;
+
 	numRouletteWheel = 0;
 	numRanking = 0;
 	rankingBase = 5;
@@ -71,6 +73,8 @@ void Population::setDefaults()
 	mutationsPerIndividualRange = 0;
 	mutationProbability = 0;
 	mutationProbabilityRange = 0;
+	resetPerIndividual = 0;
+	resetProbability = 0;
 
 	total_score = 0;
 }
@@ -194,6 +198,21 @@ void Population::setMutationProbability(float probability, float range)
 	mutationProbabilityRange = range;
 }
 
+void Population::setResetsPerIndividual(unsigned numResets)
+{
+	resetPerIndividual = numResets;
+}
+
+void Population::setResetProbability(float resetProb)
+{
+	resetProbability = resetProb;
+}
+
+void Population::setPreservation(unsigned number)
+{
+	nPreserve = number;
+}
+
 void Population::setSelectionRouletteWheel(unsigned number)
 {
 	numRouletteWheel = number;
@@ -285,12 +304,43 @@ void Population::mutation()
 	}
 }
 
+void Population::reset()
+{
+	if (resetPerIndividual)
+	{
+		for (unsigned i = 0; i < offSpring.size(); i++)
+		{
+			offSpring[i]->reset(resetPerIndividual);
+		}
+	}
+	if (resetProbability)
+	{
+		for (unsigned i = 0; i < offSpring.size(); i++)
+		{
+			offSpring[i]->reset(resetProbability);
+		}
+	}
+}
+
+void Population::eliminateWorse()
+{
+//	printf("individualsSize %d nPreserve %d \n", individuals.size(), nPreserve);
+    while(individuals.size() > nPreserve){
+		total_score -= individuals.back()->getFitness();
+//		printf("individualsSize %d nPreserve %d total_score %f \n", individuals.size(), nPreserve, total_score);
+		delete(individuals.back());
+		individuals.pop_back();
+    }
+}
+
 unsigned Population::nextGeneration()
 {
 	selection();
 	crossover();
+	reset();
 	mutation();
-	for (unsigned i = 0; i < offSpring.size(); i++)
+    eliminateWorse();
+    for (unsigned i = 0; i < offSpring.size(); i++)
 	{
 		this->insertIndividual(offSpring[i]);
 	}
