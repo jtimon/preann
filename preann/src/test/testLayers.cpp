@@ -9,10 +9,6 @@ using namespace std;
 #include "cuda_code.h"
 #include "test.h"
 
-int size;
-unsigned outputSize = 100;
-float initialWeighsRange = 20;
-
 #define PATH "/home/timon/layer.lay"
 #define NUM_INPUTS 3
 
@@ -31,6 +27,9 @@ Layer* createAndLoadLayer(ImplementationType implementationType, Buffer** inputB
 
 Layer* createAndSaveLayer(Test* test, Buffer** controlInputs)
 {
+	GET_SIZE
+	GET_INITIAL_WEIGHS_RANGE
+
     Layer* controlLayer = new Layer(size, (BufferType)test->getEnum(ET_BUFFER), FT_IDENTITY, IT_C);
 
     for (unsigned i = 0; i < NUM_INPUTS; i++){
@@ -48,6 +47,8 @@ Layer* createAndSaveLayer(Test* test, Buffer** controlInputs)
 unsigned testCalculateOutput(Test* test)
 {
 	START_TEST
+	GET_SIZE
+	GET_INITIAL_WEIGHS_RANGE
 
 	Buffer* controlInputBuffers[NUM_INPUTS];
 	for (unsigned i = 0; i < NUM_INPUTS; i++) {
@@ -92,7 +93,9 @@ int main(int argc, char *argv[]) {
 	Test test;
 	total.start();
 
-	test.addIterator(&size, 1, 50, 49);
+	test.addIterator("size", 1, 51, 49);
+	float initialWeighsRange = 20;
+	test.putVariable("initialWeighsRange", &initialWeighsRange);
 	test.withAll(ET_IMPLEMENTATION);
 	test.exclude(ET_BUFFER, 1, BT_BYTE);
 	test.printParameters();

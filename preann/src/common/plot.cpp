@@ -27,12 +27,22 @@ void Plot::setPointEnum(EnumType pointEnum)
 	this->pointEnum = pointEnum;
 }
 
-void Plot::addPlotIterator(int* variable, unsigned min, unsigned max, unsigned increment)
+void Plot::addPlotIterator(std::string key, float min, float max, float increment)
 {
-	plotIterator.variable = variable;
+	plotIteratorKey = key;
+	plotIterator.value = min;
 	plotIterator.min = min;
 	plotIterator.max = max;
 	plotIterator.increment = increment;
+}
+
+float Plot::getIterValue(std::string key)
+{
+	if (key.compare(plotIteratorKey) == 0){
+		return plotIterator.value;
+	} else {
+		return getIterator(key).value;
+	}
 }
 
 IteratorConfig Plot::getPlotIterator()
@@ -98,8 +108,8 @@ void Plot::plotFile(string path, string testedMethod)
 void preparePlotFunction(Test* test)
 {
 	string* subPath = (string*)test->getVariable("subPath");
-    FILE *plotFile = (FILE*)test->getVariable("plotFile");
-    unsigned *count = (unsigned *)test->getVariable("count");
+    FILE* plotFile = (FILE*)test->getVariable("plotFile");
+    unsigned* count = (unsigned*)test->getVariable("count");
     string functionName = test->getCurrentState();
 
     if ((*count)++ > 0){
@@ -151,7 +161,7 @@ void plotAction(float (*g)(Test*), Test* test)
 	IteratorConfig plotIter = ((Plot*)test)->getPlotIterator();
 	FOR_ITER_CONF(plotIter){
 		float total = g(test);
-		fprintf(dataFile, " %d %f \n", *plotIter.variable, total/(*repetitions));
+		fprintf(dataFile, " %f %f \n", plotIter.value, total/(*repetitions));
 	}
 	fclose(dataFile);
 }

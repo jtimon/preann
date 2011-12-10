@@ -21,6 +21,7 @@
 
 class Plot : public Test {
 protected:
+	std::string plotIteratorKey;
 	IteratorConfig plotIterator;
 
 	EnumType colorEnum;
@@ -38,9 +39,10 @@ public:
 	int getPointType();
 	int getLineColor();
 
+	virtual float getIterValue(std::string key);
 	void setColorEnum(EnumType colorEnum);
 	void setPointEnum(EnumType pointEnum);
-	void addPlotIterator(int* variable, unsigned min, unsigned max, unsigned increment);
+	void addPlotIterator(std::string key, float min, float max, float increment);
 	IteratorConfig getPlotIterator();
 
 //	void plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);

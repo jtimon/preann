@@ -10,10 +10,6 @@ using namespace std;
 
 #define NUM_MUTATIONS 10
 
-int size;
-int outputSize = 100;
-float initialWeighsRange = 20;
-
 unsigned testCalculateAndAddTo(Test* test)
 {
 	START_CONNECTION_TEST
@@ -103,8 +99,10 @@ int main(int argc, char *argv[]) {
 
 	Test test;
 
-	test.addIterator(&size, 2, 12, 10);
-	test.addIterator(&outputSize, 1, 3, 2);
+	test.addIterator("size", 2, 13, 10);
+	test.addIterator("outputSize", 1, 4, 2);
+	float initialWeighsRange = 20;
+	test.putVariable("initialWeighsRange", &initialWeighsRange);
 	test.exclude(ET_BUFFER, 1, BT_BYTE);
 	test.withAll(ET_IMPLEMENTATION);
 	test.printParameters();

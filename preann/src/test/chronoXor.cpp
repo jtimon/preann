@@ -8,6 +8,17 @@ using namespace std;
 #include "population.h"
 #include "binaryTask.h"
 
+//TODO diciembre methods must be all verbs
+//common
+//game
+//genetic
+//neural
+//optimization
+//tasks
+//template
+
+// 2 32
+// 3 192
 #define VECTORS_SIZE 2
 
 int main(int argc, char *argv[])
@@ -19,13 +30,18 @@ int main(int argc, char *argv[])
 
 		Plot plot;
 		plot.withAll(ET_SELECTION_ALGORITHM);
-		plot.withAll(ET_CROSS_ALG);
+//		plot.with(ET_SELECTION_ALGORITHM, 2, SA_RANKING, SA_TOURNAMENT);
+//		plot.withAll(ET_CROSS_ALG);
+//		plot.exclude(ET_CROSS_ALG, 1, CA_PROPORTIONAL);
+		plot.with(ET_CROSS_ALG, 1, CA_UNIFORM);
 //		plot.withAll(ET_CROSS_LEVEL);
 		plot.with(ET_CROSS_LEVEL, 1, CL_WEIGH);
 
-		plot.with(ET_MUTATION_ALG, 1, MA_PER_INDIVIDUAL);
+		plot.with(ET_MUTATION_ALG, 1, MA_PROBABILISTIC);
+		plot.withAll(ET_RESET_ALG);
+//		plot.with(ET_RESET_ALG, 2, RA_DISABLED, RA_PROBABILISTIC);
 
-		plot.setColorEnum(ET_CROSS_ALG);
+		plot.setColorEnum(ET_RESET_ALG);
 		plot.setPointEnum(ET_SELECTION_ALGORITHM);
 		unsigned populationSize = 8;
 
@@ -45,26 +61,31 @@ int main(int argc, char *argv[])
 		unsigned numPoints = 3;
 		plot.putVariable("numPoints", &numPoints);
 
-		unsigned numMutations = 4;
+		unsigned numMutations = 1;
 		plot.putVariable("numMutations", &numMutations);
-		unsigned mutationRange = 5;
+		unsigned mutationRange = 2;
 		plot.putVariable("mutationRange", &mutationRange);
-		unsigned mutationProb = 0.1;
+		float mutationProb = 0.1;
 		plot.putVariable("mutationProb", &mutationProb);
+
+		unsigned numResets = 2;
+		plot.putVariable("numResets", &numResets);
+		float resetProb = 0.05;
+		plot.putVariable("resetProb", &resetProb);
 
 		plot.printParameters();
 
-		Task* task = new BinaryTask(BO_OR, VECTORS_SIZE);
+		Task* task = new BinaryTask(BO_XOR, VECTORS_SIZE);
 		Individual* example = new Individual(IT_SSE2);
 		task->setInputs(example);
-//		example->addLayer(VECTORS_SIZE * 2, BT_BIT, FT_IDENTITY);
+		example->addLayer(VECTORS_SIZE * 2, BT_BIT, FT_IDENTITY);
 		example->addLayer(VECTORS_SIZE, BT_BIT, FT_IDENTITY);
 		example->addInputConnection(0, 0);
 		example->addInputConnection(1, 0);
-//		example->addLayersConnection(0, 1);
+		example->addLayersConnection(0, 1);
 
-		float weighsRange = 5;
-		unsigned generations = 20;
+		float weighsRange = 2;
+		unsigned generations = 200;
 		plot.plotTask(path, task, example, populationSize, generations, weighsRange);
 
 		delete(example);

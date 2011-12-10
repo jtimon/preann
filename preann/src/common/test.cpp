@@ -62,10 +62,6 @@ EnumIterConfig* Test::getEnumConfigAtPos(unsigned pos)
 
 unsigned Test::getEnum(EnumType enumType)
 {
-	if (!enumMap.count(enumType)){
-		string error = "Test::getEnum : The test has no defined vector for enum " + Enumerations::enumTypeToString(enumType);
-		throw error;
-	}
 	EnumIterConfig* enumConfig = getEnumConfig(enumType);
 	unsigned index = enumConfig->index;
     unsigned vectorSize = enumConfig->valueVector.size();
@@ -101,15 +97,38 @@ void Test::simpleTest( void (*f)(Test*), string testedMethod )
 	cout << testedMethod << endl;
 }
 
-void Test::addIterator(int* variable, int min, int max, int increment)
+void Test::addIterator(std::string key, float min, float max, float increment)
 {
-	IteratorConfig iterator;
-	iterator.variable = variable;
-	*iterator.variable = min;
-	iterator.min = min;
-	iterator.max = max;
-	iterator.increment = increment;
-	iterators.push_back(iterator);
+	if (iterMap.count(key)){
+		unsigned pos = iterMap[key];
+		iterators[pos].value = min;
+		iterators[pos].min = min;
+		iterators[pos].max = max;
+		iterators[pos].increment = increment;
+	} else {
+		IteratorConfig iterator;
+		iterator.value = min;
+		iterator.min = min;
+		iterator.max = max;
+		iterator.increment = increment;
+		iterMap[key] = iterators.size();
+		iterators.push_back(iterator);
+	}
+}
+
+float Test::getIterValue(std::string key)
+{
+	return getIterator(key).value;
+}
+
+IteratorConfig Test::getIterator(std::string key)
+{
+	if (!iterMap.count(key)){
+		string error = "Test::getIterValue : The test has no iterator " + key;
+		throw error;
+	}
+	unsigned pos = iterMap[key];
+	return iterators[pos];
 }
 
 void Test::putVariable(std::string key, void* variable)
@@ -204,7 +223,7 @@ std::string Test::getCurrentState()
 
 	for(unsigned i=0; i < iterators.size(); ++i){
 		if (iterators[i].min != iterators[i].max){
-			state += "_" + to_string(*iterators[i].variable);
+			state += "_" + to_string(iterators[i].value);
 		}
 	}
 	if (state.length() > 1) {

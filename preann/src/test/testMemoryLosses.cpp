@@ -11,8 +11,6 @@ using namespace std;
 
 
 unsigned memoryLosses = 0;
-int size;
-unsigned ouputSize = 100;
 
 void checkAndPrintErrors(string testingClass, Test* test)
 {
@@ -27,26 +25,23 @@ void checkAndPrintErrors(string testingClass, Test* test)
 
 void testBuffer(Test* test)
 {
-	Buffer* buffer = Factory::newBuffer(size, (BufferType)test->getEnum(ET_BUFFER), (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
-	delete(buffer);
+	START_BUFFER
+	END_BUFFER
 
     checkAndPrintErrors("Buffer", test);
 }
 
 void testConnection(Test* test)
 {
-	Buffer* buffer = Factory::newBuffer(size, (BufferType)test->getEnum(ET_BUFFER), (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
-	Connection* connection = Factory::newConnection(buffer, size, (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
-
-	delete(connection);
-	delete(buffer);
+	START_CONNECTION
+	END_CONNECTION
 
     checkAndPrintErrors("Connection", test);
 }
 
 void testLayer(Test* test)
 {
-    Layer *layer = new Layer(size, (BufferType)test->getEnum(ET_BUFFER), FT_IDENTITY, (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
+    Layer *layer = new Layer(test->getIterValue("size"), (BufferType)test->getEnum(ET_BUFFER), FT_IDENTITY, (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
@@ -57,6 +52,7 @@ void testLayer(Test* test)
 
 void testNeuralNet(Test* test)
 {
+	unsigned size = test->getIterValue("size");
     BufferType bufferType = (BufferType)test->getEnum(ET_BUFFER);
     ImplementationType implementationType = (ImplementationType)test->getEnum(ET_IMPLEMENTATION);
 
@@ -83,6 +79,8 @@ void testNeuralNet(Test* test)
 
 void testPopulation(Test* test)
 {
+	GET_SIZE
+
     BufferType bufferType = (BufferType)test->getEnum(ET_BUFFER);
     ImplementationType implementationType = (ImplementationType)test->getEnum(ET_IMPLEMENTATION);
 
@@ -135,7 +133,10 @@ int main(int argc, char *argv[]) {
 //		test.addIterator(&d, 1, 2, 1);
 //		test.test(miFuncioncita, "afdgfdgd");
 
-		test.addIterator(&size, 100, 100, 100);
+		test.addIterator("size", 100, 101, 100);
+		test.addIterator("outputSize", 1, 4, 2);
+		float initialWeighsRange = 20;
+		test.putVariable("initialWeighsRange", &initialWeighsRange);
 		test.withAll(ET_BUFFER);
 		test.withAll(ET_IMPLEMENTATION);
 		test.printParameters();

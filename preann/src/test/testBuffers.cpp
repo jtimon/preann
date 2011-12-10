@@ -8,7 +8,6 @@ using namespace std;
 #include "test.h"
 #include "factory.h"
 
-int size;
 float initialWeighsRange = 20;
 
 unsigned testActivation(Test* test)
@@ -90,7 +89,11 @@ int main(int argc, char *argv[]) {
 	Test test;
 	test.withAll(ET_BUFFER);
 	test.withAll(ET_IMPLEMENTATION);
-	test.addIterator(&size, 10, 10, 10);
+	test.with(ET_FUNCTION, 1, FT_IDENTITY);
+
+	test.addIterator("size", 10, 11, 10);
+	float initialWeighsRange = 20;
+	test.putVariable("initialWeighsRange", &initialWeighsRange);
 	test.printParameters();
 
 	try {

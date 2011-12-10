@@ -7,9 +7,6 @@ using namespace std;
 #include "plot.h"
 #include "factory.h"
 
-int size;
-float initialWeighsRange = 20;
-
 float chronoCopyToInterface(Test* test)
 {
 	START_BUFFER_PLOT
@@ -61,7 +58,9 @@ int main(int argc, char *argv[])
 		string path = "/home/timon/workspace/preann/output/";
 
 		Plot plot;
-		plot.addPlotIterator(&size, 1000, 10000, 1000);
+		plot.addPlotIterator("size", 1000, 10000, 1000);
+		float initialWeighsRange = 20;
+		plot.putVariable("initialWeighsRange", &initialWeighsRange);
 		plot.exclude(ET_BUFFER, 1, BT_BYTE);
 		plot.exclude(ET_IMPLEMENTATION, 1, IT_CUDA);
 

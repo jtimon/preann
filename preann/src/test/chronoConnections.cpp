@@ -7,10 +7,6 @@ using namespace std;
 #include "plot.h"
 #include "factory.h"
 
-int size;
-unsigned outputSize = 100;
-float initialWeighsRange = 20;
-
 float chronoCalculateAndAddTo(Test* test)
 {
 	START_CONNECTION_PLOT
@@ -66,7 +62,10 @@ int main(int argc, char *argv[])
 	string path = "/home/timon/workspace/preann/output/";
 
 	Plot plot;
-	plot.addPlotIterator(&size, 1000, 10000, 1000);
+	plot.addPlotIterator("size", 1000, 10000, 1000);
+	plot.addIterator("outputSize", 100, 101, 100);
+	float initialWeighsRange = 20;
+	plot.putVariable("initialWeighsRange", &initialWeighsRange);
 	plot.exclude(ET_BUFFER, 1, BT_BYTE);
 	plot.withAll(ET_IMPLEMENTATION);
 
