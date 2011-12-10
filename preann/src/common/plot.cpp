@@ -229,7 +229,15 @@ void plotTaskFunction(Test* test)
 	} else if (mutationAlgorithm == MA_PROBABILISTIC){
 		float mutationRange = *(float*)test->getVariable("mutationRange");
 		float mutationProb = *(float*)test->getVariable("mutationProb");
-		population->setMutationProbability(0.01, mutationRange);
+		population->setMutationProbability(mutationProb, mutationRange);
+	}
+	ResetAlgorithm resetAlgorithm = (ResetAlgorithm)test->getEnum(ET_RESET_ALG);
+	if (resetAlgorithm == RA_PER_INDIVIDUAL){
+		unsigned numResets = *(unsigned*)test->getVariable("numResets");
+		population->setResetsPerIndividual(numResets);
+	} else if (resetAlgorithm == RA_PROBABILISTIC){
+		float resetProb = *(float*)test->getVariable("resetProb");
+		population->setResetProbability(resetProb);
 	}
 
 	Task* task = population->getTask();
@@ -238,14 +246,16 @@ void plotTaskFunction(Test* test)
 	FILE* dataFile = test->openFile(dataPath);
 	fprintf(dataFile, "# Iterator %s \n", functionName.data());
 	unsigned maxGenerations = *(unsigned*)test->getVariable("maxGenerations");
+//		printf(" %f %f\n", population->getBestIndividualScore(), population->getWorstIndividualScore());
 	for (unsigned generation = 1; generation <= maxGenerations; ++generation) {
+//	for (unsigned generation = 1; population->getBestIndividualScore() < 25; ++generation) {
 
-		float fitness = population->getAverageScore();
+		float fitness = population->getBestIndividualScore();
 		fprintf(dataFile, " %d %f \n", generation, fitness);
-//		printf(" %d %f %f %f\n", generation, fitness, population->getBestIndividualScore(), population->getWorstIndividualScore());
+		printf(" %d %f %f %f\n", generation, fitness, population->getBestIndividualScore(), population->getWorstIndividualScore());
 		population->nextGeneration();
 	}
-//	test->printCurrentState();
+	test->printCurrentState();
 	fclose(dataFile);
 	delete(population);
 }
