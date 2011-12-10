@@ -18,7 +18,7 @@ public:
 
 	virtual void calculateAndAddTo(Buffer* results) = 0;
 	void mutate(unsigned pos, float mutation);
-	void resetConnection(unsigned pos);
+	void reset(unsigned pos);
 	void crossover(Connection* other, Interface* bitBuffer);
 };
 

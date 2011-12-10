@@ -15,10 +15,10 @@ void Connection::mutate(unsigned pos, float mutation)
 	mutateImpl(pos, mutation);
 }
 
-void Connection::resetConnection(unsigned pos)
+void Connection::reset(unsigned pos)
 {
 	if (pos > getSize()){
-		std::string error = "Connection::resetConnection The position being reset is greater than the size of the buffer.";
+		std::string error = "Connection::reset The position being reset is greater than the size of the buffer.";
 		throw error;
 	}
 	resetConnectionImpl(pos);
