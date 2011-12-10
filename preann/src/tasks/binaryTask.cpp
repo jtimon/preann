@@ -69,15 +69,16 @@ void BinaryTask::test(Individual *individual)
 		points = pow(2, tInput1->getSize()) * pow(2, tInput2->getSize()) * tOutput->getSize();
 
 		tInput1->reset();
-		while(bitVectorIncrement(tInput1)){
+		do {
 			tInput2->reset();
-			while(bitVectorIncrement(tInput2)){
+			do {
 				doOperation();
 				individual->calculateOutput();
 				Interface* individualOut = individual->getOutput(individual->getNumLayers()-1);
 				points -= individualOut->compareTo(tOutput);
-			}
-		}
+
+			} while (bitVectorIncrement(tInput2));
+		} while (bitVectorIncrement(tInput1));
 	} else {
 		points = tOutput->getSize() * tNumTests;
 
