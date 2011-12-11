@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
 		plot.withAll(ET_RESET_ALG);
 //		plot.with(ET_RESET_ALG, 2, RA_DISABLED, RA_PROBABILISTIC);
 
+		plot.addPlotIterator("generation", 0, 200, 1);
 		plot.setColorEnum(ET_RESET_ALG);
 		plot.setPointEnum(ET_SELECTION_ALGORITHM);
 		unsigned populationSize = 8;
@@ -85,8 +86,7 @@ int main(int argc, char *argv[])
 		example->addLayersConnection(0, 1);
 
 		float weighsRange = 2;
-		unsigned generations = 200;
-		plot.plotTask(path, task, example, populationSize, generations, weighsRange);
+		plot.plotTask(path, task, example, populationSize, weighsRange);
 
 		delete(example);
 		delete(task);

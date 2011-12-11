@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 
 		plot.with(ET_MUTATION_ALG, 1, MA_PER_INDIVIDUAL);
 
+		plot.addPlotIterator("generation", 0, 200, 1);
 		plot.setColorEnum(ET_CROSS_ALG);
 		plot.setPointEnum(ET_SELECTION_ALGORITHM);
 		unsigned populationSize = 8;
@@ -65,8 +66,7 @@ int main(int argc, char *argv[])
 		example->addLayersConnection(0, 2);
 
 		float weighsRange = 5;
-		unsigned generations = 20;
-		plot.plotTask(path, task, example, populationSize, generations, weighsRange);
+		plot.plotTask(path, task, example, populationSize, weighsRange);
 
 		delete(example);
 		delete(task);

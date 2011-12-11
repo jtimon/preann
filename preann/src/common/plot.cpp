@@ -255,24 +255,24 @@ void plotTaskFunction(Test* test)
 	string dataPath = (*path) + "data/" + task->toString() + "_" + functionName + ".DAT";
 	FILE* dataFile = test->openFile(dataPath);
 	fprintf(dataFile, "# Iterator %s \n", functionName.data());
-	unsigned maxGenerations = *(unsigned*)test->getVariable("maxGenerations");
 //		printf(" %f %f\n", population->getBestIndividualScore(), population->getWorstIndividualScore());
-	for (unsigned generation = 1; generation <= maxGenerations; ++generation) {
-//	for (unsigned generation = 1; population->getBestIndividualScore() < 25; ++generation) {
 
+	IteratorConfig plotIter = ((Plot*)test)->getPlotIterator();
+	printf(" %f %f %f %f\n", plotIter.value, plotIter.min, plotIter.max, plotIter.increment);
+	FOR_ITER_CONF(plotIter){
 		float fitness = population->getBestIndividualScore();
-		fprintf(dataFile, " %d %f \n", generation, fitness);
-		printf(" %d %f %f %f\n", generation, fitness, population->getBestIndividualScore(), population->getWorstIndividualScore());
+		fprintf(dataFile, " %d %f \n", (unsigned)plotIter.value, fitness);
+		printf(" %d %f %f %f\n", (unsigned)plotIter.value, fitness, population->getBestIndividualScore(), population->getWorstIndividualScore());
 		population->nextGeneration();
 	}
 	test->printCurrentState();
 	fclose(dataFile);
 	delete(population);
 }
-void Plot::plotTask(string path, Task* task, Individual* example, unsigned populationSize, unsigned maxGenerations,  float weighsRange)
+void Plot::plotTask(string path, Task* task, Individual* example, unsigned populationSize, float weighsRange)
 {
     if (task != NULL && example != NULL &&
-		example->getNumLayers() > 0 && populationSize > 0 && maxGenerations > 0 && weighsRange > 0) {
+		example->getNumLayers() > 0 && populationSize > 0 && weighsRange > 0) {
 
 		string testedTask = task->toString();
 		createPlotScript(path, testedTask);
@@ -281,7 +281,6 @@ void Plot::plotTask(string path, Task* task, Individual* example, unsigned popul
 		Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
 
 		putVariable("initialPopulation", initialPopulation);
-		putVariable("maxGenerations", &maxGenerations);
 		loopFunction(simpleAction, plotTaskFunction, testedTask);
 		delete(initialPopulation);
 		cout << testedTask << endl;
