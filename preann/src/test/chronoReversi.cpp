@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 
 		plot.with(ET_MUTATION_ALG, 1, MA_PER_INDIVIDUAL);
 
-		plot.addPlotIterator("generation", 0, 200, 1);
+		plot.putPlotIterator("generation", 0, 200, 1);
 		plot.setColorEnum(ET_CROSS_ALG);
 		plot.setPointEnum(ET_SELECTION_ALGORITHM);
 		unsigned populationSize = 8;

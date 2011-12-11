@@ -27,7 +27,7 @@ void Plot::setPointEnum(EnumType pointEnum)
 	this->pointEnum = pointEnum;
 }
 
-void Plot::addPlotIterator(std::string key, float min, float max, float increment)
+void Plot::putPlotIterator(std::string key, float min, float max, float increment)
 {
 	plotIteratorKey = key;
 	plotIterator.value = min;
@@ -36,7 +36,7 @@ void Plot::addPlotIterator(std::string key, float min, float max, float incremen
 	plotIterator.increment = increment;
 }
 
-float Plot::getIterValue(std::string key)
+float Plot::getValue(std::string key)
 {
 	if (key.compare(plotIteratorKey) == 0){
 		return plotIterator.value;
@@ -109,6 +109,7 @@ void preparePlotFunction(Test* test)
 {
 	string* subPath = (string*)test->getVariable("subPath");
     FILE* plotFile = (FILE*)test->getVariable("plotFile");
+    //TODO substitute count variable for an iterator
     unsigned* count = (unsigned*)test->getVariable("count");
     string functionName = test->getCurrentState();
 
@@ -151,7 +152,6 @@ void Plot::createPlotScript(string path, string testedMethod)
 void plotAction(float (*g)(Test*), Test* test)
 {
 	string* path = (string*)test->getVariable("path");
-	unsigned* repetitions = (unsigned*)test->getVariable("repetitions");
 	string* testedMethod = (string*)test->getVariable("testedMethod");
 	string functionName = test->getCurrentState();
 
@@ -161,16 +161,15 @@ void plotAction(float (*g)(Test*), Test* test)
 	IteratorConfig plotIter = ((Plot*)test)->getPlotIterator();
 	FOR_ITER_CONF(plotIter){
 		float total = g(test);
-		fprintf(dataFile, " %f %f \n", plotIter.value, total/(*repetitions));
+		fprintf(dataFile, " %f %f \n", plotIter.value, total/test->getValue("repetitions"));
 	}
 	fclose(dataFile);
 }
-void Plot::plot(float (*f)(Test*), string path, unsigned repetitions, string testedMethod)
+void Plot::plot(float (*f)(Test*), string path, string testedMethod)
 {
 	createPlotScript(path, testedMethod);
 
 	putVariable("path", &path);
-	putVariable("repetitions", &repetitions);
 	putVariable("testedMethod", &testedMethod);
 
 	loopFunction( plotAction, f, testedMethod );
@@ -186,68 +185,52 @@ void plotTaskFunction(Test* test)
 	Population* initialPopulation = (Population*)test->getVariable("initialPopulation");
 	Population* population = new Population(initialPopulation);
 
-    unsigned numSelection = *(unsigned*)test->getVariable("numSelection");
+    unsigned numSelection = test->getValue("numSelection");
 	SelectionAlgorithm selectionAlgorithm = (SelectionAlgorithm)test->getEnum(ET_SELECTION_ALGORITHM);
 	switch (selectionAlgorithm){
 	case SA_ROULETTE_WHEEL:
-		population->setSelectionRouletteWheel(numSelection);
+			population->setSelectionRouletteWheel(numSelection);
 		break;
 	case SA_RANKING:
-		{
-		float rankingBase = *(float*)test->getVariable("rankingBase");
-		float rankingStep = *(float*)test->getVariable("rankingStep");
-		population->setSelectionRanking(numSelection, rankingBase, rankingStep);
-		}
+			population->setSelectionRanking(numSelection, test->getValue("rankingBase"),
+					test->getValue("rankingStep"));
 		break;
 	case SA_TOURNAMENT:
-		{
-		unsigned tournamentSize = *(unsigned*)test->getVariable("tournamentSize");
-		population->setSelectionTournament(numSelection, tournamentSize);
-		}
+			population->setSelectionTournament(numSelection, test->getValue("tournamentSize"));
 		break;
 	case SA_TRUNCATION:
-		population->setSelectionTruncation(numSelection);
+			population->setSelectionTruncation(numSelection);
 		break;
 	}
 
-    unsigned numCrossover = *(unsigned*)test->getVariable("numCrossover");
+    unsigned numCrossover = test->getValue("numCrossover");
 	CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm)test->getEnum(ET_CROSS_ALG);
 	CrossoverLevel crossoverLevel = (CrossoverLevel)test->getEnum(ET_CROSS_LEVEL);
 	switch (crossoverAlgorithm){
 	case CA_UNIFORM:
-		{
-		float uniformCrossProb = *(float*)test->getVariable("uniformCrossProb");
-		population->setCrossoverUniformScheme(crossoverLevel, numCrossover, uniformCrossProb);
-		}
+			population->setCrossoverUniformScheme(crossoverLevel, numCrossover,
+					test->getValue("uniformCrossProb"));
 		break;
 	case CA_PROPORTIONAL:
-		population->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
+			population->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
 		break;
 	case CA_MULTIPOINT:
-		{
-		unsigned numPoints = *(unsigned*)test->getVariable("numPoints");
-		population->setCrossoverMultipointScheme(crossoverLevel, numCrossover, numPoints);
-		}
+			population->setCrossoverMultipointScheme(crossoverLevel, numCrossover, test->getValue("numPoints"));
 		break;
-
 	}
+
 	MutationAlgorithm mutationAlgorithm = (MutationAlgorithm)test->getEnum(ET_MUTATION_ALG);
 	if (mutationAlgorithm == MA_PER_INDIVIDUAL){
-		unsigned numMutations = *(unsigned*)test->getVariable("numMutations");
-		float mutationRange = *(float*)test->getVariable("mutationRange");
-		population->setMutationsPerIndividual(numMutations, mutationRange);
+		population->setMutationsPerIndividual(test->getValue("numMutations"), test->getValue("mutationRange"));
 	} else if (mutationAlgorithm == MA_PROBABILISTIC){
-		float mutationRange = *(float*)test->getVariable("mutationRange");
-		float mutationProb = *(float*)test->getVariable("mutationProb");
-		population->setMutationProbability(mutationProb, mutationRange);
+		population->setMutationProbability(test->getValue("mutationProb"), test->getValue("mutationRange"));
 	}
+
 	ResetAlgorithm resetAlgorithm = (ResetAlgorithm)test->getEnum(ET_RESET_ALG);
 	if (resetAlgorithm == RA_PER_INDIVIDUAL){
-		unsigned numResets = *(unsigned*)test->getVariable("numResets");
-		population->setResetsPerIndividual(numResets);
+		population->setResetsPerIndividual(test->getValue("numResets"));
 	} else if (resetAlgorithm == RA_PROBABILISTIC){
-		float resetProb = *(float*)test->getVariable("resetProb");
-		population->setResetProbability(resetProb);
+		population->setResetProbability(test->getValue("resetProb"));
 	}
 
 	Task* task = population->getTask();

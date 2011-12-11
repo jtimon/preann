@@ -41,7 +41,7 @@ void testConnection(Test* test)
 
 void testLayer(Test* test)
 {
-    Layer *layer = new Layer(test->getIterValue("size"), (BufferType)test->getEnum(ET_BUFFER), FT_IDENTITY, (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
+    Layer *layer = new Layer(test->getValue("size"), (BufferType)test->getEnum(ET_BUFFER), FT_IDENTITY, (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
     layer->addInput(layer->getOutput());
@@ -52,7 +52,7 @@ void testLayer(Test* test)
 
 void testNeuralNet(Test* test)
 {
-	unsigned size = test->getIterValue("size");
+	unsigned size = test->getValue("size");
     BufferType bufferType = (BufferType)test->getEnum(ET_BUFFER);
     ImplementationType implementationType = (ImplementationType)test->getEnum(ET_IMPLEMENTATION);
 
@@ -109,34 +109,15 @@ void testPopulation(Test* test)
     checkAndPrintErrors("Population", test);
 }
 
-//int a, b, c, d;
-//unsigned miFuncioncita(Test* test){
-//	test->printCurrentState();
-//	return Random::positiveInteger(2);
-//}
-
 int main(int argc, char *argv[]) {
 
 	Test test;
 	Chronometer total;
 	total.start();
 	try {
-//		test.withAll(ET_BUFFER);
-//		test.withAll(ET_IMPLEMENTATION);
-//		test.withAll(ET_CROSS_ALG);
-//		test.withAll(ET_CROSS_LEVEL);
-//		test.withAll(ET_MUTATION_ALG);
-//		test.withAll(ET_FUNCTION);
-//		test.addIterator(&a, 1, 2, 1);
-//		test.addIterator(&b, 1, 2, 1);
-//		test.addIterator(&c, 1, 2, 1);
-//		test.addIterator(&d, 1, 2, 1);
-//		test.test(miFuncioncita, "afdgfdgd");
-
-		test.addIterator("size", 100, 101, 100);
-		test.addIterator("outputSize", 1, 4, 2);
-		float initialWeighsRange = 20;
-		test.putVariable("initialWeighsRange", &initialWeighsRange);
+		test.putIterator("size", 100, 101, 100);
+		test.putIterator("outputSize", 1, 4, 2);
+		test.putConstant("initialWeighsRange", 20);
 		test.withAll(ET_BUFFER);
 		test.withAll(ET_IMPLEMENTATION);
 		test.printParameters();
@@ -149,12 +130,14 @@ int main(int argc, char *argv[]) {
 		test.simpleTest(testConnection, "Connection::memory");
 		test.simpleTest(testLayer, "Layer::memory");
 		test.simpleTest(testNeuralNet, "NeuralNet::memory");
+		test.putIterator("size", 1, 3, 1);
+		test.putConstant("outputSize", 1);
 		test.simpleTest(testPopulation, "Population::memory");
 
 		printf("Exit success.\n", 1);
 		MemoryManagement::printTotalAllocated();
 		MemoryManagement::printTotalPointers();
-	} catch (std::string error) {
+	} catch (string error) {
 		cout << "Error: " << error << endl;
 	} catch (...) {
 		printf("An error was thrown.\n", 1);

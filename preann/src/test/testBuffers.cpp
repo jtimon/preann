@@ -91,9 +91,8 @@ int main(int argc, char *argv[]) {
 	test.withAll(ET_IMPLEMENTATION);
 	test.with(ET_FUNCTION, 1, FT_IDENTITY);
 
-	test.addIterator("size", 10, 11, 10);
-	float initialWeighsRange = 20;
-	test.putVariable("initialWeighsRange", &initialWeighsRange);
+	test.putIterator("size", 10, 11, 10);
+	test.putConstant("initialWeighsRange", 20);
 	test.printParameters();
 
 	try {

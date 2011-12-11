@@ -14,7 +14,7 @@ float chronoCalculateAndAddTo(Test* test)
 	Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT, connection->getImplementationType());
 
 	chrono.start();
-	for (unsigned i = 0; i < (*repetitions); ++i) {
+	for (unsigned i = 0; i < repetitions; ++i) {
 		connection->calculateAndAddTo(results);
 	}
 	chrono.stop();
@@ -30,7 +30,7 @@ float chronoMutate(Test* test)
 	unsigned pos = Random::positiveInteger(connection->getSize());
 	float mutation = Random::floatNum(initialWeighsRange);
 	chrono.start();
-	for (unsigned i = 0; i < (*repetitions); ++i) {
+	for (unsigned i = 0; i < repetitions; ++i) {
 		connection->mutate(pos, mutation);
 	}
 	chrono.stop();
@@ -46,7 +46,7 @@ float chronoCrossover(Test* test)
 	Interface bitVector(connection->getSize(), BT_BIT);
 	bitVector.random(2);
 	chrono.start();
-	for (unsigned i = 0; i < (*repetitions); ++i) {
+	for (unsigned i = 0; i < repetitions; ++i) {
 		connection->crossover(other, &bitVector);
 	}
 	chrono.stop();
@@ -62,10 +62,9 @@ int main(int argc, char *argv[])
 	string path = "/home/timon/workspace/preann/output/";
 
 	Plot plot;
-	plot.addPlotIterator("size", 1000, 10000, 1000);
-	plot.addIterator("outputSize", 100, 101, 100);
-	float initialWeighsRange = 20;
-	plot.putVariable("initialWeighsRange", &initialWeighsRange);
+//	plot.putIterator("outputSize", 100, 201, 100);
+	plot.putConstant("outputSize", 100);
+	plot.putConstant("initialWeighsRange", 20);
 	plot.exclude(ET_BUFFER, 1, BT_BYTE);
 	plot.withAll(ET_IMPLEMENTATION);
 
@@ -75,12 +74,17 @@ int main(int argc, char *argv[])
 	plot.printParameters();
 
 	try {
-		plot.plot(chronoMutate, path, 1000, "CONNECTION_MUTATE");
-		plot.plot(chronoCrossover, path, 10, "CONNECTION_CROSSOVER");
+		plot.putPlotIterator("size", 250, 2000, 500);
+		plot.putConstant("repetitions", 1000);
+		plot.plot(chronoMutate, path, "CONNECTION_MUTATE");
 
-		//TODO todas las implementaciones cuda tienen maximo ??
-		plot.exclude(ET_IMPLEMENTATION, 3, IT_CUDA, IT_CUDA_REDUC, IT_CUDA_INV);
-		plot.plot(chronoCalculateAndAddTo, path, 20, "CONNECTION_CALCULATEANDADDTO");
+		plot.putPlotIterator("size", 100, 301, 100);
+		plot.putConstant("repetitions", 10);
+		plot.plot(chronoCrossover, path, "CONNECTION_CROSSOVER");
+
+		plot.putPlotIterator("size", 1000, 2001, 1000);
+		plot.putConstant("repetitions", 1);
+		plot.plot(chronoCalculateAndAddTo, path, "CONNECTION_CALCULATEANDADDTO");
 
 		printf("Exit success.\n");
 		MemoryManagement::printTotalAllocated();

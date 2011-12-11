@@ -97,26 +97,41 @@ void Test::simpleTest( void (*f)(Test*), string testedMethod )
 	cout << testedMethod << endl;
 }
 
-void Test::addIterator(std::string key, float min, float max, float increment)
+void setToIteratorConfig(IteratorConfig &iteratorConfig, float min, float max, float increment)
+{
+	iteratorConfig.value = min;
+	iteratorConfig.min = min;
+	iteratorConfig.max = max;
+	iteratorConfig.increment = increment;
+}
+
+void Test::putConstant(std::string key, float constant)
 {
 	if (iterMap.count(key)){
 		unsigned pos = iterMap[key];
-		iterators[pos].value = min;
-		iterators[pos].min = min;
-		iterators[pos].max = max;
-		iterators[pos].increment = increment;
+		setToIteratorConfig(iterators[pos], constant, constant + 1, 2);
 	} else {
 		IteratorConfig iterator;
-		iterator.value = min;
-		iterator.min = min;
-		iterator.max = max;
-		iterator.increment = increment;
+		setToIteratorConfig(iterator, constant, constant + 1, 2);
 		iterMap[key] = iterators.size();
 		iterators.push_back(iterator);
 	}
 }
 
-float Test::getIterValue(std::string key)
+void Test::putIterator(std::string key, float min, float max, float increment)
+{
+	if (iterMap.count(key)){
+		unsigned pos = iterMap[key];
+		setToIteratorConfig(iterators[pos], min, max, increment);
+	} else {
+		IteratorConfig iterator;
+		setToIteratorConfig(iterator, min, max, increment);
+		iterMap[key] = iterators.size();
+		iterators.push_back(iterator);
+	}
+}
+
+float Test::getValue(std::string key)
 {
 	return getIterator(key).value;
 }

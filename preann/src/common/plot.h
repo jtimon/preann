@@ -8,7 +8,7 @@
 #include "population.h"
 #include "task.h"
 
-#define START_PLOT Chronometer chrono; unsigned* repetitions = (unsigned*)test->getVariable("repetitions");
+#define START_PLOT Chronometer chrono; unsigned repetitions = test->getValue("repetitions");
 #define END_PLOT return chrono.getSeconds();
 
 #define START_BUFFER_PLOT START_PLOT START_BUFFER
@@ -39,15 +39,15 @@ public:
 	int getPointType();
 	int getLineColor();
 
-	virtual float getIterValue(std::string key);
+	virtual float getValue(std::string key);
 	void setColorEnum(EnumType colorEnum);
 	void setPointEnum(EnumType pointEnum);
-	void addPlotIterator(std::string key, float min, float max, float increment);
+	void putPlotIterator(std::string key, float min, float max, float increment);
 	IteratorConfig getPlotIterator();
 
 //	void plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
 //	void plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
-	void plot(float (*f)(Test*), string path, unsigned repetitions, string testedMethod);
+	void plot(float (*f)(Test*), string path, string testedMethod);
 	void plotTask(string path, Task* task, Individual* example, unsigned populationSize, float weighsRange);
 };
 

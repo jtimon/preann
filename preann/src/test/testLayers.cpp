@@ -93,9 +93,8 @@ int main(int argc, char *argv[]) {
 	Test test;
 	total.start();
 
-	test.addIterator("size", 1, 51, 49);
-	float initialWeighsRange = 20;
-	test.putVariable("initialWeighsRange", &initialWeighsRange);
+	test.putIterator("size", 1, 51, 49);
+	test.putConstant("initialWeighsRange", 20);
 	test.withAll(ET_IMPLEMENTATION);
 	test.exclude(ET_BUFFER, 1, BT_BYTE);
 	test.printParameters();

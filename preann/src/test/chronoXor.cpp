@@ -41,38 +41,26 @@ int main(int argc, char *argv[])
 		plot.withAll(ET_RESET_ALG);
 //		plot.with(ET_RESET_ALG, 2, RA_DISABLED, RA_PROBABILISTIC);
 
-		plot.addPlotIterator("generation", 0, 200, 1);
+		plot.putPlotIterator("generation", 0, 200, 1);
 		plot.setColorEnum(ET_RESET_ALG);
 		plot.setPointEnum(ET_SELECTION_ALGORITHM);
 		unsigned populationSize = 8;
 
-		unsigned numSelection = populationSize / 2;
-		plot.putVariable("numSelection", &numSelection);
-		float rankingBase = 10;
-		plot.putVariable("rankingBase", &rankingBase);
-		float rankingStep = 5;
-		plot.putVariable("rankingStep", &rankingStep);
-		unsigned tournamentSize = 4;
-		plot.putVariable("tournamentSize", &tournamentSize);
+		plot.putConstant("numSelection", populationSize / 2);
+		plot.putConstant("rankingBase", 10);
+		plot.putConstant("rankingStep", 5);
+		plot.putConstant("tournamentSize", 4);
 
-		unsigned numCrossover = populationSize / 2;
-		plot.putVariable("numCrossover", &numCrossover);
-		float uniformCrossProb = 0.7;
-		plot.putVariable("uniformCrossProb", &uniformCrossProb);
-		unsigned numPoints = 3;
-		plot.putVariable("numPoints", &numPoints);
+		plot.putConstant("numCrossover", populationSize / 2);
+		plot.putConstant("uniformCrossProb", 0.7);
+		plot.putConstant("numPoints", 3);
 
-		unsigned numMutations = 1;
-		plot.putVariable("numMutations", &numMutations);
-		unsigned mutationRange = 2;
-		plot.putVariable("mutationRange", &mutationRange);
-		float mutationProb = 0.1;
-		plot.putVariable("mutationProb", &mutationProb);
+		plot.putConstant("numMutations", 1);
+		plot.putConstant("mutationRange", 2);
+		plot.putConstant("mutationProb", 0.1);
 
-		unsigned numResets = 2;
-		plot.putVariable("numResets", &numResets);
-		float resetProb = 0.05;
-		plot.putVariable("resetProb", &resetProb);
+		plot.putConstant("numResets", 2);
+		plot.putConstant("resetProb", 0.05);
 
 		plot.printParameters();
 

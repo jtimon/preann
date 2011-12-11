@@ -7,9 +7,9 @@
 #define START_TEST unsigned differencesCounter = 0;
 #define END_TEST return differencesCounter;
 
-#define GET_SIZE unsigned size = test->getIterValue("size");
-#define GET_INITIAL_WEIGHS_RANGE float initialWeighsRange = *((float*)test->getVariable("initialWeighsRange"));
-#define GET_OUTPUT_SIZE unsigned outputSize = test->getIterValue("outputSize");
+#define GET_SIZE unsigned size = test->getValue("size");
+#define GET_INITIAL_WEIGHS_RANGE float initialWeighsRange = test->getValue("initialWeighsRange");
+#define GET_OUTPUT_SIZE unsigned outputSize = test->getValue("outputSize");
 
 #define START_BUFFER GET_SIZE GET_INITIAL_WEIGHS_RANGE Buffer* buffer = Factory::newBuffer(size, (BufferType)test->getEnum(ET_BUFFER), (ImplementationType)test->getEnum(ET_IMPLEMENTATION)); buffer->random(initialWeighsRange);
 #define END_BUFFER delete(buffer);
@@ -41,14 +41,12 @@ struct EnumIterConfig{
 class Test {
 protected:
 	std::map<string, void*> variables;
+
 	std::vector<IteratorConfig> iterators;
 	std::map<std::string, unsigned > iterMap;
+
 	std::vector<EnumIterConfig*> enumerations;
 	std::map<EnumType, unsigned > enumMap;
-
-//	map<EnumType, unsigned> enumTypePos;
-//	vector< vector<unsigned> > enumTypes;
-//	vector< vector<unsigned>::iterator > enumTypeIters;
 
 	void initEnumType(EnumType enumType);
 	EnumType enumTypeAtPos(unsigned pos);
@@ -62,25 +60,10 @@ public:
 	void putVariable(std::string key, void* variable);
 	void* getVariable(std::string key);
 
-//	template <class T>
-//	void putVariable(std::string key, T variable)
-//	{
-//		variables.erase(key);
-//		variables.insert( pair<string, void*>(key, (void*)variable) );
-//	};
-//
-////	template <class T>
-//	void* getVariable(std::string key)
-//	{
-//		if(!variables.count(key)){
-//			std::string error = " Test::getVariable : variable \"" + key + "\" not found.";
-//			throw error;
-//		}
-//		return variables[key];
-//	};
+	void putConstant(std::string key, float constant);
+	void putIterator(std::string key, float min, float max, float increment);
+	virtual float getValue(std::string key);
 
-	void addIterator(std::string key, float min, float max, float increment);
-	virtual float getIterValue(std::string key);
     void withAll(EnumType enumType);
     void with(EnumType enumType, unsigned count, ...);
     void exclude(EnumType enumType, unsigned count, ...);
@@ -107,6 +90,7 @@ public:
     	} catch (string error) {
     		cout << "Error: " << error << endl;
     		cout << " While looping "<< testedMethod << " State: " << getCurrentState() << endl;
+    		throw error;
     	}
     }
 
