@@ -236,9 +236,11 @@ std::string Test::getCurrentState()
 		}
 	}
 
-	for(unsigned i=0; i < iterators.size(); ++i){
-		if (iterators[i].min != iterators[i].max){
-			state += "_" + to_string(iterators[i].value);
+    map<std::string, unsigned>::iterator it2;
+	FOR_EACH(it2, iterMap){
+		IteratorConfig iter = iterators[it2->second];
+		if (iter.min + iter.increment < iter.max){
+			state += "_" + it2->first + "_" + to_string(iter.value);
 		}
 	}
 	if (state.length() > 1) {
