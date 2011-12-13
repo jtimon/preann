@@ -32,6 +32,10 @@ Population::Population(Task* task)
 
 Population::Population(Task* task, Individual* example, unsigned size, float range)
 {
+	if (size == 0){
+		std::string error = "Population::Population : The Population has to have a bigger size than 0.";
+		throw error;
+	}
 	this->maxSize = size;
 	this->task = task;
 	setDefaults();

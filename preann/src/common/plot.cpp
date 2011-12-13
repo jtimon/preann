@@ -238,29 +238,28 @@ void plotTaskFunction(Test* test)
 	string dataPath = (*path) + "data/" + task->toString() + "_" + functionName + ".DAT";
 	FILE* dataFile = test->openFile(dataPath);
 	fprintf(dataFile, "# Iterator %s \n", functionName.data());
-//		printf(" %f %f\n", population->getBestIndividualScore(), population->getWorstIndividualScore());
 
 	IteratorConfig plotIter = ((Plot*)test)->getPlotIterator();
-	printf(" %f %f %f %f\n", plotIter.value, plotIter.min, plotIter.max, plotIter.increment);
 	FOR_ITER_CONF(plotIter){
 		float fitness = population->getBestIndividualScore();
 		fprintf(dataFile, " %d %f \n", (unsigned)plotIter.value, fitness);
-		printf(" %d %f %f %f\n", (unsigned)plotIter.value, fitness, population->getBestIndividualScore(), population->getWorstIndividualScore());
 		population->nextGeneration();
 	}
 	test->printCurrentState();
 	fclose(dataFile);
 	delete(population);
 }
-void Plot::plotTask(string path, Task* task, Individual* example, unsigned populationSize, float weighsRange)
+void Plot::plotTask(string path, Task* task, Individual* example)
 {
-    if (task != NULL && example != NULL &&
-		example->getNumLayers() > 0 && populationSize > 0 && weighsRange > 0) {
+    if (task != NULL && example != NULL && example->getNumLayers() > 0) {
 
 		string testedTask = task->toString();
 		createPlotScript(path, testedTask);
 		putVariable("path", &path);
 
+
+		unsigned populationSize = getValue("populationSize");
+		float weighsRange = getValue("initialWeighsRange");
 		Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
 
 		putVariable("initialPopulation", initialPopulation);

@@ -81,10 +81,15 @@ public:
 
     void simpleTest( void (*f)(Test*), string testedMethod);
     void test( unsigned (*f)(Test*), string testedMethod);
+	void resetLoops()
+	{
+		//TODO AA o hacemos lo de los loops mejor??
+	};
 
     template <class classTempl>
     void loopFunction( void (*action)(classTempl (*)(Test*), Test*), classTempl (*f)(Test*), string& testedMethod )
     {
+		resetLoops();
     	try {
     		forEnumsIters(action, f, 0);
     	} catch (string error) {

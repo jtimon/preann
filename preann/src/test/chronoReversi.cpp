@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 
 		plot.with(ET_MUTATION_ALG, 1, MA_PER_INDIVIDUAL);
 
+		//TODO revise chronoReversi
 		plot.putPlotIterator("generation", 0, 200, 1);
 		plot.setColorEnum(ET_CROSS_ALG);
 		plot.setPointEnum(ET_SELECTION_ALGORITHM);
@@ -66,7 +67,7 @@ int main(int argc, char *argv[])
 		example->addLayersConnection(0, 2);
 
 		float weighsRange = 5;
-		plot.plotTask(path, task, example, populationSize, weighsRange);
+		plot.plotTask(path, task, example);
 
 		delete(example);
 		delete(task);

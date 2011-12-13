@@ -48,7 +48,7 @@ public:
 //	void plot(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
 //	void plot2(string path, float (*f)(Test*, unsigned), unsigned repetitions, string testedMethod);
 	void plot(float (*f)(Test*), string path, string testedMethod);
-	void plotTask(string path, Task* task, Individual* example, unsigned populationSize, float weighsRange);
+	void plotTask(string path, Task* task, Individual* example);
 };
 
 #endif /* PLOT_H_ */
