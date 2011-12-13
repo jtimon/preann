@@ -11,10 +11,18 @@
 #include "enumerations.h"
 
 class ParametersMap {
+	std::map<string, float> tNumbers;
+	std::map<string, void*> tPtrs;
+	std::map<string, string> tStrings;
 public:
 	ParametersMap();
 	virtual ~ParametersMap();
 	void putNumber(std::string key, float number);
+	float getNumber(std::string key);
+	void putPtr(std::string key, void* ptr);
+	void* getPtr(std::string key);
+	void putString(std::string key, std::string str);
+	std::string getString(std::string key);
 };
 
 class Loop {
@@ -22,97 +30,72 @@ protected:
 	std::string tKey;
 	Loop* tInnerLoop;
 	Loop* tCallerLoop;
+	
+	void repeatFunctionBase(void (*func)(ParametersMap*), ParametersMap* parametersMap);
+	void repeatActionBase(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
+			void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop);
+	void setCallerLoop(Loop* callerLoop);
 public:
 	Loop();
+	Loop(std::string key, Loop* innerLoop);
 	virtual ~Loop();
-
+	
 	virtual std::string getState() = 0;
-
-	void repeatFunctionBase(void (*func)(ParametersMap*), ParametersMap* parametersMap){
-			if (tInnerLoop){
-				tInnerLoop->repeatFunction(func, parametersMap);
-			} else {
-				(*func)(parametersMap);
-			}
-	};
-	void repeatActionBase(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
-			void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
-	{
-			if (tInnerLoop){
-				tInnerLoop->repeatAction(action, func, parametersMap, functionLoop);
-			} else {
-				(*action)(func, parametersMap, functionLoop);
-//				functionLoop->repeatFunction(func, parametersMap);
-			}
-	};
 	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
-
 	virtual void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
-			void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop) = 0;
+					void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop) = 0;
 };
 
 class RangeLoop : public Loop {
-	float tMin, tMax, tInc;
+	float tValue, tMin, tMax, tInc;
 public:
-	RangeLoop(std::string key, float min, float max, float inc){
-		tKey = key;
-		tMin = min;
-		tMax = max;
-		tInc = inc;
-	};
+	RangeLoop(std::string key, float min, float max, float inc, Loop* innerLoop);
 	virtual ~RangeLoop();
 
-	std::string getState(){
-		//TODO
-		return tCallerLoop->getState() + "_" + tKey + "_" + to_string();
-	};
-
-	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap)
-	{
-		for(float value = tMin; value < tMax; value += tInc){
-			parametersMap->putNumber(tKey, value);
-			repeatFunctionBase(func, parametersMap);
-		}
-	};
-	void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
-			void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
-	{
-		for(float value = tMin; value < tMax; value += tInc){
-			parametersMap->putNumber(tKey, value);
-			repeatActionBase(action, func, parametersMap, functionLoop);
-		}
-	};
-};
-
-class JoinLoop : public Loop {
-	vector<Loop*> innerLoops;
+	virtual std::string getState();
+	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap);
+	virtual void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
+					void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop);
 };
 
 class EnumLoop : public Loop {
+	EnumType tEnumType;
+	vector<unsigned> tValueVector;
+	unsigned tIndex;
 public:
-	EnumLoop(std::string key, EnumType enumType){
-		tKey = key;
-	};
-	EnumLoop(std::string key, EnumType enumType, unsigned count, ...){
-		tKey = key;
-	};
+	EnumLoop(std::string key, EnumType enumType, Loop* innerLoop);
+	EnumLoop(Loop* innerLoop, std::string key, EnumType enumType, unsigned count, ...);
 	virtual ~EnumLoop();
-	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap)
-	{
-//		for(float value = tMin; value < tMax; value += tInc){
-//			parametersMap->putNumber(key, value);
-//			repeatFunctionBase(func, parametersMap);
-//		}
-	};
-	void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
-			void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
-	{
-//		for(float value = tMin; value < tMax; value += tInc){
-//			parametersMap->putNumber(key, value);
-//			repeatActionBase(func, parametersMap, functionLoop);
-//		}
-//		(*action)(func, this);
-	};
+
+	virtual std::string getState();
+	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap);
+	virtual void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
+					void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop);
+};
+
+class JoinLoop : public Loop {
+	vector<Loop*> tInnerLoops;
+public:
+	JoinLoop(unsigned count, ...);
+	virtual ~JoinLoop();
+	
+	virtual std::string getState();
+	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap);
+	virtual void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
+					void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop);
+};
+
+class EnumValueLoop : public Loop {
+	EnumType tEnumType;
+	unsigned tEnumValue;
+public:
+	EnumValueLoop(std::string key, EnumType enumType, unsigned enumValue, Loop* innerLoop);
+	virtual ~EnumValueLoop();
+	
+	virtual std::string getState();
+	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap);
+	virtual void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
+					void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop);
 };
 
 #endif /* LOOP_H_ */
