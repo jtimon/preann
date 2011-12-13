@@ -40,6 +40,8 @@ public:
 	Loop(std::string key, Loop* innerLoop);
 	virtual ~Loop();
 	
+	void test(void (*func)(ParametersMap*), ParametersMap* parametersMap);
+	
 	virtual std::string getState() = 0;
 	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
 	virtual void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),

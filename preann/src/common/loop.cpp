@@ -7,7 +7,7 @@
 
 #include "loop.h"
 
-// ParametersMap 
+// class ParametersMap 
 ParametersMap::ParametersMap()
 {
 }
@@ -98,6 +98,7 @@ void Loop::repeatActionBase(void (*action)(void (*)(ParametersMap*), ParametersM
 		tInnerLoop->setCallerLoop(this);
 		tInnerLoop->repeatAction(action, func, parametersMap, functionLoop);
 	} else {
+		parametersMap->putPtr("actionLoop", this);
 		(*action)(func, parametersMap, functionLoop);
 	}
 }
@@ -106,6 +107,64 @@ void Loop::setCallerLoop(Loop* callerLoop)
 {
 	tCallerLoop = callerLoop;
 }
+
+void testAction(unsigned (*f)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
+{
+	f(parametersMap);
+	unsigned differencesCounter = parametersMap->getNumber("differencesCounter");
+	if (differencesCounter > 0){
+		Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
+		cout << actionLoop->getState() << " : " << differencesCounter << " differences detected." << endl;
+	}
+}
+void Loop::test(void (*func)(ParametersMap*), ParametersMap* parametersMap)
+{
+	repeatAction(testAction, func, parametersMap, NULL);
+}
+
+//void preparePlotFunction(Test* test)
+//{
+//	string* subPath = (string*)test->getVariable("subPath");
+//    FILE* plotFile = (FILE*)test->getVariable("plotFile");
+//    //TODO substitute count variable for an iterator
+//    unsigned* count = (unsigned*)test->getVariable("count");
+//    string functionName = test->getCurrentState();
+//
+//    if ((*count)++ > 0){
+//        fprintf(plotFile, " , ");
+//    }
+//    string dataPath = (*subPath) + functionName + ".DAT";
+//    int lineColor = ((Plot*)test)->getLineColor();
+//    int pointType = ((Plot*)test)->getPointType();
+//
+//    string line = " \"" + dataPath + "\" using 1:2 title \"" + functionName + "\" with linespoints lt " + to_string(lineColor) + " pt " + to_string(pointType);
+//    fprintf(plotFile, "%s", line.data());
+//}
+//
+//void Plot::createPlotScript(string path, string testedMethod)
+//{
+//	string plotPath = getPlotPath(path, testedMethod);
+//	string outputPath = path + "images/" + testedMethod + ".png";
+//
+//	FILE* plotFile = openFile(plotPath);
+//
+//	fprintf(plotFile, "set terminal png \n");
+//	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
+//	fprintf(plotFile, "plot ");
+//
+//	unsigned count = 0;
+//	string subPath = path + "data/" + testedMethod + "_";
+//
+//	putVariable("subPath", &subPath);
+//	putVariable("plotFile", plotFile);
+//	putVariable("count", &count);
+//
+//    string functionName = "preparePlotFunction";
+//    loopFunction(simpleAction, preparePlotFunction, functionName);
+//
+//	fprintf(plotFile, "\n");
+//	fclose(plotFile);
+//}
 
 // class RangeLoop
 RangeLoop::RangeLoop(std::string key, float min, float max, float inc, Loop* innerLoop) : Loop(key, innerLoop)
@@ -277,4 +336,3 @@ void EnumValueLoop::repeatAction(void (*action)(void (*)(ParametersMap*), Parame
 	tInnerLoop->setCallerLoop(this);
 	tInnerLoop->repeatAction(action, func, parametersMap, functionLoop);
 }
-
