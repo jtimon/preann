@@ -21,9 +21,13 @@ class Loop {
 protected:
 	std::string tKey;
 	Loop* tInnerLoop;
+	Loop* tCallerLoop;
 public:
 	Loop();
 	virtual ~Loop();
+
+	virtual std::string getState() = 0;
+
 	void repeatFunctionBase(void (*func)(ParametersMap*), ParametersMap* parametersMap){
 			if (tInnerLoop){
 				tInnerLoop->repeatFunction(func, parametersMap);
@@ -57,6 +61,12 @@ public:
 		tInc = inc;
 	};
 	virtual ~RangeLoop();
+
+	std::string getState(){
+		//TODO
+		return tCallerLoop->getState() + "_" + tKey + "_" + to_string();
+	};
+
 	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap)
 	{
 		for(float value = tMin; value < tMax; value += tInc){
