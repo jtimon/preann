@@ -110,61 +110,198 @@ void Loop::setCallerLoop(Loop* callerLoop)
 
 void testAction(unsigned (*f)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
 {
-	f(parametersMap);
-	unsigned differencesCounter = parametersMap->getNumber("differencesCounter");
-	if (differencesCounter > 0){
-		Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
-		cout << actionLoop->getState() << " : " << differencesCounter << " differences detected." << endl;
+	try {
+		f(parametersMap);
+		unsigned differencesCounter = parametersMap->getNumber("differencesCounter");
+		if (differencesCounter > 0){
+			Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
+			cout << actionLoop->getState() << " : " << differencesCounter << " differences detected." << endl;
+		}
+	} catch (string e) {
+		string functionLabel = parametersMap->getString("functionLabel");
+		cout << " while testing " + functionLabel + " : " + e << endl;
 	}
 }
-void Loop::test(void (*func)(ParametersMap*), ParametersMap* parametersMap)
+void Loop::test(void (*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel)
 {
+	parametersMap->putString("functionLabel", functionLabel);
 	repeatAction(testAction, func, parametersMap, NULL);
 }
 
-//void preparePlotFunction(Test* test)
-//{
-//	string* subPath = (string*)test->getVariable("subPath");
-//    FILE* plotFile = (FILE*)test->getVariable("plotFile");
-//    //TODO substitute count variable for an iterator
-//    unsigned* count = (unsigned*)test->getVariable("count");
-//    string functionName = test->getCurrentState();
-//
-//    if ((*count)++ > 0){
-//        fprintf(plotFile, " , ");
-//    }
-//    string dataPath = (*subPath) + functionName + ".DAT";
-//    int lineColor = ((Plot*)test)->getLineColor();
-//    int pointType = ((Plot*)test)->getPointType();
-//
-//    string line = " \"" + dataPath + "\" using 1:2 title \"" + functionName + "\" with linespoints lt " + to_string(lineColor) + " pt " + to_string(pointType);
-//    fprintf(plotFile, "%s", line.data());
-//}
-//
-//void Plot::createPlotScript(string path, string testedMethod)
-//{
-//	string plotPath = getPlotPath(path, testedMethod);
-//	string outputPath = path + "images/" + testedMethod + ".png";
-//
-//	FILE* plotFile = openFile(plotPath);
-//
-//	fprintf(plotFile, "set terminal png \n");
-//	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
-//	fprintf(plotFile, "plot ");
-//
-//	unsigned count = 0;
-//	string subPath = path + "data/" + testedMethod + "_";
-//
-//	putVariable("subPath", &subPath);
-//	putVariable("plotFile", plotFile);
-//	putVariable("count", &count);
-//
-//    string functionName = "preparePlotFunction";
-//    loopFunction(simpleAction, preparePlotFunction, functionName);
-//
-//	fprintf(plotFile, "\n");
-//	fclose(plotFile);
-//}
+unsigned Loop::valueToUnsigned()
+{
+	string error = "valueToUnsigned not implemented for this kind of Loop.";
+	throw error;
+}
+
+int mapPointType(unsigned value)
+{
+// pt : 1=+, 2=X, 3=*, 4=square, 5=filled square, 6=circle,
+//            7=filled circle, 8=triangle, 9=filled triangle, etc.
+	switch (getEnum(pointEnum)){
+		case 0:
+			return 2;
+		case 1:
+			return 6;
+		case 2:
+			return 4;
+		case 3:
+			return 8;
+		default:
+		case 4:
+			return 1;
+		case 5:
+			return 3;
+	}
+}
+int mapLineColor(unsigned value)
+{
+// lt is for color of the points: -1=black 1=red 2=grn 3=blue 4=purple 5=aqua 6=brn 7=orange 8=light-brn
+	switch (getEnum(colorEnum)){
+		case 0:
+			return 1;
+		case 1:
+			return 2;
+		case 2:
+			return 3;
+		case 3:
+			return 5;
+		default:
+		case 4:
+			return -1;
+		case 5:
+			return 7;
+		case 6:
+			return 4;
+	}
+}
+int Loop::getLineColor(ParametersMap* parametersMap)
+{
+	try {
+		string lineColorParam = parametersMap->getString("lineColor");
+		if(lineColorParam.compare(tKey) == 0){
+			return mapLineColor(valueToUnsigned());
+		} else {
+			return this->tCallerLoop->getLineColor(parametersMap);
+		}
+	} catch (string e) {
+		return mapLineColor(0);
+	}
+}
+
+int Loop::getPointType(ParametersMap* parametersMap)
+{
+	try {
+		string pointTypeParam = parametersMap->getString("pointType");
+		if(pointTypeParam.compare(tKey) == 0){
+			return mapLineColor(valueToUnsigned());
+		} else {
+			return this->tCallerLoop->getLineColor(parametersMap);
+		}
+	} catch (string e) {
+		return mapLineColor(0);
+	}
+}
+
+void preparePlotFunction(ParametersMap* parametersMap)
+{
+	string subPath = parametersMap->getString("subPath");
+    FILE* plotFile = (FILE*)parametersMap->getPtr("plotFile");
+    
+    unsigned first = parametersMap->getNumber("first");
+	Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
+    string state = actionLoop->getState();
+
+    if (!first){
+        fprintf(plotFile, " , ");
+        parametersMap->putNumber("first", 0);
+    }
+    string dataPath = subPath + state + ".DAT";
+    int lineColor = actionLoop->getLineColor(parametersMap);
+    int pointType = actionLoop->getPointType(parametersMap);
+
+    string line = " \"" + dataPath + "\" using 1:2 title \"" + state + "\" with linespoints lt " + to_string(lineColor) + " pt " + to_string(pointType);
+    fprintf(plotFile, "%s", line.data());
+}
+void Loop::createGnuPlotScript(void (*func)(ParametersMap*), ParametersMap* parametersMap)
+{
+	string path = parametersMap->getString("path");
+	string functionLabel = parametersMap->getString("functionLabel");
+	
+	string plotPath = path + "gnuplot/" + functionLabel + ".plt";
+	string outputPath = path + "images/" + functionLabel + ".png";
+
+	FILE* plotFile = openFile(plotPath);
+
+	fprintf(plotFile, "set terminal png \n");
+	fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
+	fprintf(plotFile, "plot ");
+
+	unsigned count = 0;
+	string subPath = path + "data/" + functionLabel + "_";
+
+	parametersMap->putString("subPath", subPath);
+	parametersMap->putPtr("plotFile", plotFile);
+	parametersMap->putNumber("first", 1);
+
+	try {
+		repeatFunction(preparePlotFunction, parametersMap);
+	} catch (string e) {
+		string error = " while repeating preparePlotFunction : " + e;
+		
+	}
+    string functionName = "preparePlotFunction";
+    loopFunction(simpleAction, preparePlotFunction, functionName);
+
+	fprintf(plotFile, "\n");
+	fclose(plotFile);
+}
+
+
+void plotAction(unsigned (*f)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
+{
+	string path = parametersMap->getSize()("path");
+	string functionLabel = parametersMap->getVariable("functionLabel");
+	Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
+	string state = actionLoop->getState();
+
+	string dataPath = path + "data/" + functionLabel + "_" + state + ".DAT";
+	FILE* dataFile = test->openFile(dataPath);
+	fprintf(dataFile, "# Iterator %s \n", state.data());
+	
+	parametersMap->putNumber("totalTime", 0);
+	parametersMap->putNumber("repetitions", 0);
+	parametersMap->putNumber("repetitions", 0);
+	
+	//TODO AAAA pensar esto bien
+//	functionLoop->repeatFunction(f, parametersMap);
+//	fprintf(dataFile, " %f %f \n", plotIter.value, total/test->getValue("repetitions"));
+//	
+//	IteratorConfig plotIter = ((Plot*)test)->getPlotIterator();
+//	FOR_ITER_CONF(plotIter){
+//		float total = g(test);
+//	}
+	
+	fclose(dataFile);
+}
+
+void plotFile(string path, string functionLabel)
+{
+	string plotPath = path + "gnuplot/" + functionLabel + ".plt";
+	string syscommand = "gnuplot " + plotPath;
+	system(syscommand.data());
+}
+void Loop::plot(void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* innerLoop, std::string functionLabel)
+{
+	parametersMap->putString("functionLabel", functionLabel);
+	createGnuPlotScript(func, parametersMap);
+	
+	this->repeatAction(plotAction, func, parametersMap, innerLoop);
+
+	string path = parametersMap->getString("path");
+	plotFile(path, functionLabel);
+	cout << functionLabel << endl;
+}
 
 // class RangeLoop
 RangeLoop::RangeLoop(std::string key, float min, float max, float inc, Loop* innerLoop) : Loop(key, innerLoop)
@@ -176,6 +313,18 @@ RangeLoop::RangeLoop(std::string key, float min, float max, float inc, Loop* inn
 
 RangeLoop::~RangeLoop()
 {
+}
+
+unsigned RangeLoop::valueToUnsigned()
+{
+	unsigned toReturn = 0;
+	for(float auxValue = tMin; auxValue < tMax; auxValue += tInc){
+		if (auxValue == tValue){
+			return toReturn;
+		}
+		++toReturn;
+	}
+	return toReturn;
 }
 
 std::string RangeLoop::getState(){
@@ -206,6 +355,11 @@ EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop) : Loop(k
 	for(unsigned i=0; i < dim; i++){
 		tValueVector.push_back( i);
 	}
+}
+
+unsigned EnumLoop::valueToUnsigned()
+{
+	return tValueVector[tIndex];
 }
 
 EnumLoop::EnumLoop(Loop* innerLoop, std::string key, EnumType enumType, unsigned count, ...) : Loop(key, innerLoop)

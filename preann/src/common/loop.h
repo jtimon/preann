@@ -35,12 +35,19 @@ protected:
 	void repeatActionBase(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
 			void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop);
 	void setCallerLoop(Loop* callerLoop);
+	
+	//TODO friend class ??
+	friend int getLineColor(ParametersMap* parametersMap);
+	friend int getPointType(ParametersMap* parametersMap);
+	friend virtual unsigned valueToUnsigned();
+	void createGnuPlotScript(void (*func)(ParametersMap*), ParametersMap* parametersMap);
 public:
 	Loop();
 	Loop(std::string key, Loop* innerLoop);
 	virtual ~Loop();
 	
-	void test(void (*func)(ParametersMap*), ParametersMap* parametersMap);
+	void test(void (*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel);
+	void plot(void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* innerLoop, std::string functionLabel);
 	
 	virtual std::string getState() = 0;
 	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
@@ -49,7 +56,9 @@ public:
 };
 
 class RangeLoop : public Loop {
+protected:
 	float tValue, tMin, tMax, tInc;
+	virtual unsigned valueToUnsigned();
 public:
 	RangeLoop(std::string key, float min, float max, float inc, Loop* innerLoop);
 	virtual ~RangeLoop();
@@ -61,9 +70,11 @@ public:
 };
 
 class EnumLoop : public Loop {
+protected:
 	EnumType tEnumType;
 	vector<unsigned> tValueVector;
 	unsigned tIndex;
+	virtual unsigned valueToUnsigned();
 public:
 	EnumLoop(std::string key, EnumType enumType, Loop* innerLoop);
 	EnumLoop(Loop* innerLoop, std::string key, EnumType enumType, unsigned count, ...);
@@ -76,6 +87,7 @@ public:
 };
 
 class JoinLoop : public Loop {
+protected:
 	vector<Loop*> tInnerLoops;
 public:
 	JoinLoop(unsigned count, ...);
@@ -88,6 +100,7 @@ public:
 };
 
 class EnumValueLoop : public Loop {
+protected:
 	EnumType tEnumType;
 	unsigned tEnumValue;
 public:
