@@ -46,6 +46,8 @@ public:
 	Loop(std::string key, Loop* innerLoop);
 	virtual ~Loop();
 	
+	string getKey();
+	
 	void test(void (*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel);
 	void plot(void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* innerLoop, std::string functionLabel);
 	

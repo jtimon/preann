@@ -81,6 +81,11 @@ Loop::~Loop()
 	}
 }
 
+string Loop::getKey()
+{
+	return tKey;
+}
+
 void Loop::repeatFunctionBase(void (*func)(ParametersMap*), ParametersMap* parametersMap)
 {
 	if (tInnerLoop){
@@ -258,6 +263,20 @@ void Loop::createGnuPlotScript(void (*func)(ParametersMap*), ParametersMap* para
 }
 
 
+void plotInnerAction(unsigned (*f)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
+{
+	parametersMap->putNumber("totalTime", 0);
+	parametersMap->putNumber("repetitions", 0);
+	
+	functionLoop->repeatFunction(f, parametersMap);
+	
+	FILE* dataFile = parametersMap->getPtr("dataFile");
+	string plotLoopValueKey = parametersMap->getString("plotLoopValue");
+	float plotLoopValue = parametersMap->getNumber(plotLoopValueKey);
+	float totalTime = parametersMap->getNumber("totalTime");
+	unsigned repetitions = parametersMap->getNumber("repetitions");
+	fprintf(dataFile, " %f %f \n", plotLoopValue, totalTime/repetitions);
+}
 void plotAction(unsigned (*f)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
 {
 	string path = parametersMap->getSize()("path");
@@ -269,22 +288,13 @@ void plotAction(unsigned (*f)(ParametersMap*), ParametersMap* parametersMap, Loo
 	FILE* dataFile = test->openFile(dataPath);
 	fprintf(dataFile, "# Iterator %s \n", state.data());
 	
-	parametersMap->putNumber("totalTime", 0);
-	parametersMap->putNumber("repetitions", 0);
-	parametersMap->putNumber("repetitions", 0);
-	
-	//TODO AAAA pensar esto bien
-//	functionLoop->repeatFunction(f, parametersMap);
-//	fprintf(dataFile, " %f %f \n", plotIter.value, total/test->getValue("repetitions"));
-//	
-//	IteratorConfig plotIter = ((Plot*)test)->getPlotIterator();
-//	FOR_ITER_CONF(plotIter){
-//		float total = g(test);
-//	}
+	parametersMap->putPtr("dataFile", dataFile);
+	Loop* plotLoop = parametersMap->getPtr("plotLoop");
+	parametersMap->putString("plotLoopValue", plotLoop->getKey());
+	plotLoop->repeatAction(plotInnerAction, f, parametersMap, functionLoop);
 	
 	fclose(dataFile);
 }
-
 void plotFile(string path, string functionLabel)
 {
 	string plotPath = path + "gnuplot/" + functionLabel + ".plt";
