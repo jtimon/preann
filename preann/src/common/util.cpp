@@ -10,6 +10,18 @@
 vector<void*> MemoryManagement::ptrs;
 vector<unsigned> MemoryManagement::sizes;
 
+FILE* openFile(string path)
+{
+	FILE* dataFile;
+	if (!(dataFile = fopen(path.data(), "w")))
+	{
+		string error = "Error opening " + path;
+		throw error;
+	}
+//	printf(" opening file \"%s\"\n", path.data());
+	return dataFile;
+};
+
 void* MemoryManagement::malloc(unsigned size)
 {
 	if (size == 0) {

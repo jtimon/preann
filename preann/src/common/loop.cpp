@@ -7,7 +7,7 @@
 
 #include "loop.h"
 
-// class ParametersMap 
+// class ParametersMap
 ParametersMap::ParametersMap()
 {
 }
@@ -59,7 +59,7 @@ std::string ParametersMap::getString(std::string key)
 	return tStrings[key];
 }
 
-// class Loop 
+// class Loop
 Loop::Loop()
 {
 	tKey = "Not Named Loop";
@@ -67,7 +67,7 @@ Loop::Loop()
 	tCallerLoop = NULL;
 }
 
-Loop::Loop(Loop* innerLoop, std::string key)
+Loop::Loop(std::string key, Loop* innerLoop)
 {
 	tKey = key;
 	tInnerLoop = innerLoop;
@@ -113,7 +113,7 @@ void Loop::setCallerLoop(Loop* callerLoop)
 	tCallerLoop = callerLoop;
 }
 
-void testAction(unsigned (*f)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
+void testAction(void (*f)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
 {
 	try {
 		f(parametersMap);
@@ -143,7 +143,7 @@ int mapPointType(unsigned value)
 {
 // pt : 1=+, 2=X, 3=*, 4=square, 5=filled square, 6=circle,
 //            7=filled circle, 8=triangle, 9=filled triangle, etc.
-	switch (getEnum(pointEnum)){
+	switch (value){
 		case 0:
 			return 2;
 		case 1:
@@ -162,7 +162,7 @@ int mapPointType(unsigned value)
 int mapLineColor(unsigned value)
 {
 // lt is for color of the points: -1=black 1=red 2=grn 3=blue 4=purple 5=aqua 6=brn 7=orange 8=light-brn
-	switch (getEnum(colorEnum)){
+	switch (value){
 		case 0:
 			return 1;
 		case 1:
@@ -212,7 +212,7 @@ void preparePlotFunction(ParametersMap* parametersMap)
 {
 	string subPath = parametersMap->getString("subPath");
     FILE* plotFile = (FILE*)parametersMap->getPtr("plotFile");
-    
+
     unsigned first = parametersMap->getNumber("first");
 	Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
     string state = actionLoop->getState();
@@ -232,7 +232,7 @@ void Loop::createGnuPlotScript(void (*func)(ParametersMap*), ParametersMap* para
 {
 	string path = parametersMap->getString("path");
 	string functionLabel = parametersMap->getString("functionLabel");
-	
+
 	string plotPath = path + "gnuplot/" + functionLabel + ".plt";
 	string outputPath = path + "images/" + functionLabel + ".png";
 
@@ -253,46 +253,43 @@ void Loop::createGnuPlotScript(void (*func)(ParametersMap*), ParametersMap* para
 		repeatFunction(preparePlotFunction, parametersMap);
 	} catch (string e) {
 		string error = " while repeating preparePlotFunction : " + e;
-		
+		throw error;
 	}
-    string functionName = "preparePlotFunction";
-    loopFunction(simpleAction, preparePlotFunction, functionName);
 
 	fprintf(plotFile, "\n");
 	fclose(plotFile);
 }
 
-
-void plotInnerAction(unsigned (*f)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
+void plotInnerAction(void (*f)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
 {
 	parametersMap->putNumber("totalTime", 0);
 	parametersMap->putNumber("repetitions", 0);
-	
+
 	functionLoop->repeatFunction(f, parametersMap);
-	
-	FILE* dataFile = parametersMap->getPtr("dataFile");
+
+	FILE* dataFile = (FILE*)parametersMap->getPtr("dataFile");
 	string plotLoopValueKey = parametersMap->getString("plotLoopValue");
 	float plotLoopValue = parametersMap->getNumber(plotLoopValueKey);
 	float totalTime = parametersMap->getNumber("totalTime");
 	unsigned repetitions = parametersMap->getNumber("repetitions");
 	fprintf(dataFile, " %f %f \n", plotLoopValue, totalTime/repetitions);
 }
-void plotAction(unsigned (*f)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
+void plotAction(void (*f)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
 {
-	string path = parametersMap->getSize()("path");
-	string functionLabel = parametersMap->getVariable("functionLabel");
+	string path = parametersMap->getString("path");
+	string functionLabel = parametersMap->getString("functionLabel");
 	Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
 	string state = actionLoop->getState();
 
 	string dataPath = path + "data/" + functionLabel + "_" + state + ".DAT";
-	FILE* dataFile = test->openFile(dataPath);
+	FILE* dataFile = openFile(dataPath);
 	fprintf(dataFile, "# Iterator %s \n", state.data());
-	
+
 	parametersMap->putPtr("dataFile", dataFile);
-	Loop* plotLoop = parametersMap->getPtr("plotLoop");
+	Loop* plotLoop = (Loop*)parametersMap->getPtr("plotLoop");
 	parametersMap->putString("plotLoopValue", plotLoop->getKey());
 	plotLoop->repeatAction(plotInnerAction, f, parametersMap, functionLoop);
-	
+
 	fclose(dataFile);
 }
 void plotFile(string path, string functionLabel)
@@ -305,7 +302,7 @@ void Loop::plot(void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop
 {
 	parametersMap->putString("functionLabel", functionLabel);
 	createGnuPlotScript(func, parametersMap);
-	
+
 	this->repeatAction(plotAction, func, parametersMap, innerLoop);
 
 	string path = parametersMap->getString("path");
@@ -358,7 +355,7 @@ void RangeLoop::repeatAction(void (*action)(void (*)(ParametersMap*), Parameters
 	}
 }
 
-// class EnumLoop 
+// class EnumLoop
 EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop) : Loop(key, innerLoop)
 {
 	unsigned dim = Enumerations::enumTypeDim(enumType);
@@ -385,7 +382,7 @@ EnumLoop::EnumLoop(Loop* innerLoop, std::string key, EnumType enumType, unsigned
 	for (unsigned i = 0; i < count; i++){
 		unsigned arg = va_arg (ap, unsigned);
 		if (arg > dim){
-			string error = "EnumLoop : the enumType " + enumTypeToString(enumType) + " only has " + to_string(dim) + "possible values.";
+			string error = "EnumLoop : the enumType " + Enumerations::enumTypeToString(enumType) + " only has " + to_string(dim) + "possible values.";
 			throw error;
 		} else {
 			tValueVector.push_back(arg);
@@ -419,7 +416,7 @@ void EnumLoop::repeatAction(void (*action)(void (*)(ParametersMap*), ParametersM
 	}
 }
 
-// class JoinLoop 
+// class JoinLoop
 JoinLoop::JoinLoop(unsigned count, ...)
 {
 	if (count < 2){

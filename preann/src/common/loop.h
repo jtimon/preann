@@ -26,31 +26,32 @@ public:
 };
 
 class Loop {
+private:
 protected:
+
 	std::string tKey;
 	Loop* tInnerLoop;
 	Loop* tCallerLoop;
-	
+
 	void repeatFunctionBase(void (*func)(ParametersMap*), ParametersMap* parametersMap);
 	void repeatActionBase(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
 			void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop);
-	void setCallerLoop(Loop* callerLoop);
-	
-	//TODO friend class ??
-	friend int getLineColor(ParametersMap* parametersMap);
-	friend int getPointType(ParametersMap* parametersMap);
-	friend virtual unsigned valueToUnsigned();
+
+	virtual unsigned valueToUnsigned();
 	void createGnuPlotScript(void (*func)(ParametersMap*), ParametersMap* parametersMap);
 public:
 	Loop();
 	Loop(std::string key, Loop* innerLoop);
 	virtual ~Loop();
-	
+
 	string getKey();
-	
+	void setCallerLoop(Loop* callerLoop);
+	int getLineColor(ParametersMap* parametersMap);
+	int getPointType(ParametersMap* parametersMap);
+
 	void test(void (*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel);
 	void plot(void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* innerLoop, std::string functionLabel);
-	
+
 	virtual std::string getState() = 0;
 	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
 	virtual void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
@@ -94,7 +95,7 @@ protected:
 public:
 	JoinLoop(unsigned count, ...);
 	virtual ~JoinLoop();
-	
+
 	virtual std::string getState();
 	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap);
 	virtual void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
@@ -108,7 +109,7 @@ protected:
 public:
 	EnumValueLoop(std::string key, EnumType enumType, unsigned enumValue, Loop* innerLoop);
 	virtual ~EnumValueLoop();
-	
+
 	virtual std::string getState();
 	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap);
 	virtual void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),

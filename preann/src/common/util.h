@@ -51,6 +51,8 @@ std::string to_string (const T& t)
 	return ss.str();
 }
 
+FILE* openFile(string path);
+
 class Random {
 public:
 	static int integer(unsigned range);
