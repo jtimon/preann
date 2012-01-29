@@ -131,8 +131,8 @@ int main(int argc, char *argv[])
         loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
                 ET_IMPLEMENTATION, loop);
 
-//        parametersMap.putString("functionLabel", "test loops");
-//        loop->repeatFunction(testLoops, &parametersMap);
+        //        parametersMap.putString("functionLabel", "test loops");
+        //        loop->repeatFunction(testLoops, &parametersMap);
 
         parametersMap.print();
         parametersMap.putString("functionLabel", "Buffer::memory_test");

@@ -52,9 +52,9 @@ void chronoXor(Plot* plot, string path, unsigned vectorsSize)
     example->addInputConnection(1, 0);
     example->addLayersConnection(0, 1);
 
-	float a = plot->getValue("populationSize");
-	unsigned b = plot->getValue("populationSize");
-	printf(" %f %d \n", a, b);
+    float a = plot->getValue("populationSize");
+    unsigned b = plot->getValue("populationSize");
+    printf(" %f %d \n", a, b);
     plot->plotTask(path, task, example);
 
     delete (example);
@@ -76,64 +76,64 @@ void chronoXor(Plot* plot, string path, unsigned vectorsSize)
 
 int main(int argc, char *argv[])
 {
-	Chronometer total;
-	total.start();
-	try {
-		unsigned vectorsSize = 2;
-		string path = "/home/timon/workspace/preann/output/";
+    Chronometer total;
+    total.start();
+    try {
+        unsigned vectorsSize = 2;
+        string path = "/home/timon/workspace/preann/output/";
 
-		Plot* plot = new Plot();
-		plot->withAll(ET_SELECTION_ALGORITHM);
+        Plot* plot = new Plot();
+        plot->withAll(ET_SELECTION_ALGORITHM);
 
-		plot->with(ET_CROSS_ALG, 1, CA_UNIFORM);
-		plot->with(ET_CROSS_LEVEL, 1, CL_WEIGH);
-		plot->with(ET_MUTATION_ALG, 1, MA_PROBABILISTIC);
-		plot->withAll(ET_RESET_ALG);
+        plot->with(ET_CROSS_ALG, 1, CA_UNIFORM);
+        plot->with(ET_CROSS_LEVEL, 1, CL_WEIGH);
+        plot->with(ET_MUTATION_ALG, 1, MA_PROBABILISTIC);
+        plot->withAll(ET_RESET_ALG);
 
-		plot->putPlotIterator("generation", 0, 200, 1);
-		plot->setColorEnum(ET_RESET_ALG);
-		plot->setPointEnum(ET_SELECTION_ALGORITHM);
+        plot->putPlotIterator("generation", 0, 200, 1);
+        plot->setColorEnum(ET_RESET_ALG);
+        plot->setPointEnum(ET_SELECTION_ALGORITHM);
 
-		unsigned populationSize = 8;
-		plot->putConstant("initialWeighsRange", 2);
-		plot->putConstant("populationSize", populationSize);
-		plot->putConstant("numSelection", populationSize / 2);
-		plot->putConstant("numCrossover", populationSize / 2);
+        unsigned populationSize = 8;
+        plot->putConstant("initialWeighsRange", 2);
+        plot->putConstant("populationSize", populationSize);
+        plot->putConstant("numSelection", populationSize / 2);
+        plot->putConstant("numCrossover", populationSize / 2);
 
-		plot->putConstant("rankingBase", 10);
-		plot->putConstant("rankingStep", 5);
-		plot->putConstant("tournamentSize", 4);
+        plot->putConstant("rankingBase", 10);
+        plot->putConstant("rankingStep", 5);
+        plot->putConstant("tournamentSize", 4);
 
-		plot->putConstant("uniformCrossProb", 0.7);
-		plot->putConstant("numPoints", 3);
+        plot->putConstant("uniformCrossProb", 0.7);
+        plot->putConstant("numPoints", 3);
 
-		plot->putConstant("numMutations", 1);
-		plot->putConstant("mutationRange", 2);
-		plot->putConstant("mutationProb", 0.1);
+        plot->putConstant("numMutations", 1);
+        plot->putConstant("mutationRange", 2);
+        plot->putConstant("mutationProb", 0.1);
 
-		plot->putConstant("numResets", 2);
-		plot->putConstant("resetProb", 0.05);
+        plot->putConstant("numResets", 2);
+        plot->putConstant("resetProb", 0.05);
 
-		plot->printParameters();
+        plot->printParameters();
 
-//		chronoOr(plot, path, vectorsSize);
-//		chronoAnd(plot, path, vectorsSize);
-		chronoXor(plot, path, vectorsSize);
-		float a = plot->getValue("populationSize");
-		unsigned b = plot->getValue("populationSize");
-		printf(" %d %f %d \n", populationSize, a, b);
+        //		chronoOr(plot, path, vectorsSize);
+        //		chronoAnd(plot, path, vectorsSize);
+        chronoXor(plot, path, vectorsSize);
+        float a = plot->getValue("populationSize");
+        unsigned b = plot->getValue("populationSize");
+        printf(" %d %f %d \n", populationSize, a, b);
 
-		printf("Exit success.\n");
-		MemoryManagement::printTotalAllocated();
-		MemoryManagement::printTotalPointers();
-	} catch (std::string error) {
-		cout << "Error: " << error << endl;
-		//	} catch (...) {
-		//		printf("An error was thrown.\n", 1);
-	}
+        printf("Exit success.\n");
+        MemoryManagement::printTotalAllocated();
+        MemoryManagement::printTotalPointers();
+    } catch (std::string error) {
+        cout << "Error: " << error << endl;
+        //	} catch (...) {
+        //		printf("An error was thrown.\n", 1);
+    }
 
-	//MemoryManagement::mem_printListOfPointers();
-	total.stop();
-	printf("Total time spent: %f \n", total.getSeconds());
-	return EXIT_SUCCESS;
+    //MemoryManagement::mem_printListOfPointers();
+    total.stop();
+    printf("Total time spent: %f \n", total.getSeconds());
+    return EXIT_SUCCESS;
 }

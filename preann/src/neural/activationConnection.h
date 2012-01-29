@@ -10,13 +10,14 @@
 
 #include "connection.h"
 
-class ActivationConnection : public Connection {
-	FunctionType functionType;
-	Buffer* thresholds;
+class ActivationConnection : public Connection
+{
+    FunctionType functionType;
+    Buffer* thresholds;
 public:
-	ActivationConnection();
-	virtual ~ActivationConnection();
-	virtual void activation() = 0;
+    ActivationConnection();
+    virtual ~ActivationConnection();
+    virtual void activation() = 0;
 };
 
 #endif /* ACTIVATIONCONNECTION_H_ */

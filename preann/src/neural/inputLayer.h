@@ -10,23 +10,24 @@
 
 #include "layer.h"
 
-class InputLayer: public Layer {
-	Interface* tInput;
+class InputLayer : public Layer
+{
+    Interface* tInput;
 protected:
-	ImplementationType getImplementationType();
+    ImplementationType getImplementationType();
 public:
-	InputLayer(Interface* interface, ImplementationType implementationType);
-	InputLayer(FILE* stream, ImplementationType implementationType);
-	virtual void save(FILE* stream);
-	virtual ~InputLayer();
+    InputLayer(Interface* interface, ImplementationType implementationType);
+    InputLayer(FILE* stream, ImplementationType implementationType);
+    virtual void save(FILE* stream);
+    virtual ~InputLayer();
 
-	virtual void addInput(Buffer* input);
-	virtual void calculateOutput();
+    virtual void addInput(Buffer* input);
+    virtual void calculateOutput();
 
-	virtual void randomWeighs(float range);
-	virtual void copyWeighs(Layer* sourceLayer);
+    virtual void randomWeighs(float range);
+    virtual void copyWeighs(Layer* sourceLayer);
 
-	Interface* getInputInterface();
+    Interface* getInputInterface();
 
 };
 

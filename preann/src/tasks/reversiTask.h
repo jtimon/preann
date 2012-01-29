@@ -11,17 +11,17 @@
 #include "task.h"
 #include "reversiBoard.h"
 
-class ReversiTask : public Task {
-	ReversiBoard* tBoard;
-	unsigned tNumTests;
+class ReversiTask : public Task
+{
+    ReversiBoard* tBoard;
+    unsigned tNumTests;
 public:
-	ReversiTask(unsigned size, unsigned numTests = 1);
-	virtual ~ReversiTask();
+    ReversiTask(unsigned size, unsigned numTests = 1);
+    virtual ~ReversiTask();
 
-	virtual void test(Individual* individual);
-	virtual void setInputs(Individual* individual);
-	virtual std::string toString();
-
+    virtual void test(Individual* individual);
+    virtual void setInputs(Individual* individual);
+    virtual std::string toString();
 
 };
 

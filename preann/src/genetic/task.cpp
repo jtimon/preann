@@ -15,23 +15,23 @@ Task::~Task()
 {
 }
 /*
-float Task::step(neuralNet *net)
-{
+ float Task::step(neuralNet *net)
+ {
 
-}
+ }
 
 
 
-float Task::test(neuralNet *net, unsigned  episodes)
-{
-	float accumulator = 0;
-	for (unsigned i=0; i < episodes; i++){
-		accumulator += step(net);
-	}
-}
+ float Task::test(neuralNet *net, unsigned  episodes)
+ {
+ float accumulator = 0;
+ for (unsigned i=0; i < episodes; i++){
+ accumulator += step(net);
+ }
+ }
 
-float Task::test(neuralNet *net)
-{
-	test(net, 1);
-}*/
+ float Task::test(neuralNet *net)
+ {
+ test(net, 1);
+ }*/
 

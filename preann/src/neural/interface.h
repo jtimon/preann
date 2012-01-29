@@ -10,36 +10,37 @@
 
 #include "enumerations.h"
 
-class Interface {
+class Interface
+{
 
-	unsigned size;
-	void* data;
-	BufferType bufferType;
+    unsigned size;
+    void* data;
+    BufferType bufferType;
 
 public:
-	Interface();
-	Interface(FILE* stream);
-	Interface(unsigned size, BufferType bufferType);
-	Interface(Interface* toCopy);
-	virtual ~Interface();
+    Interface();
+    Interface(FILE* stream);
+    Interface(unsigned size, BufferType bufferType);
+    Interface(Interface* toCopy);
+    virtual ~Interface();
 
-	void* getDataPointer();
-	virtual unsigned getByteSize();
+    void* getDataPointer();
+    virtual unsigned getByteSize();
 
-	unsigned getSize();
-	BufferType getBufferType();
-	float getElement(unsigned pos);
-	void setElement(unsigned pos, float value);
+    unsigned getSize();
+    BufferType getBufferType();
+    float getElement(unsigned pos);
+    void setElement(unsigned pos, float value);
 
-	void copyFromFast(Interface* other);
-	void copyFrom(Interface* other);
-	void print();
-	float compareTo(Interface* other);
-	void random(float range);
+    void copyFromFast(Interface* other);
+    void copyFrom(Interface* other);
+    void print();
+    float compareTo(Interface* other);
+    void random(float range);
     void reset();
-	void save(FILE* stream);
-	void load(FILE* stream);
-	void transposeMatrix(unsigned width);
+    void save(FILE* stream);
+    void load(FILE* stream);
+    void transposeMatrix(unsigned width);
 };
 
 #endif /* INTERFACE_H_ */

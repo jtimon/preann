@@ -10,17 +10,18 @@
 
 #include "task.h"
 
-class ClassificationTask: public Task {
-
-	Interface** inputs;
-	Interface** desiredOutputs;
-	unsigned inputsDim;
+class ClassificationTask : public Task
+{
+    Interface** inputs;
+    Interface** desiredOutputs;
+    unsigned inputsDim;
 public:
-	ClassificationTask();
-	ClassificationTask(Interface** inputs, Interface** desiredOutputs, unsigned inputsDim);
-	virtual ~ClassificationTask();
-	virtual void test(Individual* individual);
-	virtual string toString();
+    ClassificationTask();
+    ClassificationTask(Interface** inputs, Interface** desiredOutputs,
+            unsigned inputsDim);
+    virtual ~ClassificationTask();
+    virtual void test(Individual* individual);
+    virtual string toString();
 };
 
 #endif /* CLASSIFICATIONTASK_H_ */

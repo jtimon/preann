@@ -10,10 +10,11 @@
 
 #include "connection.h"
 
-class FullConnection : public Connection {
+class FullConnection : public Connection
+{
 public:
-	FullConnection();
-	virtual ~FullConnection();
+    FullConnection();
+    virtual ~FullConnection();
 };
 
 #endif /* FULLCONNECTION_H_ */

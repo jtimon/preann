@@ -10,22 +10,25 @@
 
 #include "board.h"
 
-class ReversiBoard: public Board {
+class ReversiBoard : public Board
+{
 public:
-	ReversiBoard(ReversiBoard* other);
-	ReversiBoard(unsigned size);
-	virtual ~ReversiBoard();
-	
-	virtual void initBoard();
-	
-	virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player);
-	virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player);
-	virtual bool canMove(SquareState player);
-	virtual bool endGame();
-	virtual void turn(SquareState player, Individual* individual = NULL);
-	virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player);
-	virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual);
-	
+    ReversiBoard(ReversiBoard* other);
+    ReversiBoard(unsigned size);
+    virtual ~ReversiBoard();
+
+    virtual void initBoard();
+
+    virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player);
+    virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player);
+    virtual bool canMove(SquareState player);
+    virtual bool endGame();
+    virtual void turn(SquareState player, Individual* individual = NULL);
+    virtual float computerEstimation(unsigned xPos, unsigned yPos,
+            SquareState player);
+    virtual float individualEstimation(unsigned xPos, unsigned yPos,
+            SquareState player, Individual* individual);
+
 };
 
 #endif /* REVERSIBOARD_H_ */

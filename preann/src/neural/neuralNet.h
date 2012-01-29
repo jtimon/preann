@@ -4,50 +4,55 @@
 #include "factory.h"
 #include "inputLayer.h"
 
-class NeuralNet {
-	void loadGraphs(FILE* stream);
-	void stablishConnections();
+class NeuralNet
+{
+    void loadGraphs(FILE* stream);
+    void stablishConnections();
 protected:
-	ImplementationType implementationType;
+    ImplementationType implementationType;
 
-	vector<InputLayer*> inputs;
-	vector<Layer*> layers;
+    vector<InputLayer*> inputs;
+    vector<Layer*> layers;
 
-	SimpleGraph inputConnectionsGraph;
-	SimpleGraph connectionsGraph;
+    SimpleGraph inputConnectionsGraph;
+    SimpleGraph connectionsGraph;
 
-	Layer* getLayer(unsigned pos);
-	ImplementationType getImplementationType();
+    Layer* getLayer(unsigned pos);
+    ImplementationType getImplementationType();
 public:
 
-	NeuralNet(ImplementationType implementationType = IT_C);
-	virtual ~NeuralNet();
+    NeuralNet(ImplementationType implementationType = IT_C);
+    virtual ~NeuralNet();
 
-	void addInputLayer(Interface* interface);
-	void addInputLayer(unsigned size, BufferType bufferType);
-	void updateInput(unsigned inputPos, Interface* input);
-	unsigned getNumInputs();
+    void addInputLayer(Interface* interface);
+    void addInputLayer(unsigned size, BufferType bufferType);
+    void updateInput(unsigned inputPos, Interface* input);
+    unsigned getNumInputs();
 
-	Interface* getOutput(unsigned layerPos);
+    Interface* getOutput(unsigned layerPos);
 
-	void addLayer(unsigned size, BufferType destinationType = BT_FLOAT,
-			FunctionType functiontype = FT_IDENTITY);
-	unsigned getNumLayers();
+    void addLayer(unsigned size, BufferType destinationType = BT_FLOAT,
+            FunctionType functiontype = FT_IDENTITY);
+    unsigned getNumLayers();
 
-	void addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos);
-	void addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos);
+    void addInputConnection(unsigned sourceInputPos,
+            unsigned destinationLayerPos);
+    void addLayersConnection(unsigned sourceLayerPos,
+            unsigned destinationLayerPos);
 
-	virtual void calculateOutput();
-	void randomWeighs(float range);
-	void save(FILE* stream);
-	void load(FILE* stream);
+    virtual void calculateOutput();
+    void randomWeighs(float range);
+    void save(FILE* stream);
+    void load(FILE* stream);
 
-	void createFeedForwardNet(unsigned inputSize, BufferType inputType,
-			unsigned numLayers, unsigned sizeLayers,
-			BufferType hiddenLayersType, FunctionType functiontype = FT_IDENTITY);
-	void createFullyConnectedNet(unsigned inputSize, BufferType inputType,
-			unsigned numLayers, unsigned sizeLayers,
-			BufferType hiddenLayersType, FunctionType functiontype = FT_IDENTITY);
+    void createFeedForwardNet(unsigned inputSize, BufferType inputType,
+            unsigned numLayers, unsigned sizeLayers,
+            BufferType hiddenLayersType, FunctionType functiontype =
+                    FT_IDENTITY);
+    void createFullyConnectedNet(unsigned inputSize, BufferType inputType,
+            unsigned numLayers, unsigned sizeLayers,
+            BufferType hiddenLayersType, FunctionType functiontype =
+                    FT_IDENTITY);
 
 };
 

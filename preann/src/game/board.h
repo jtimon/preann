@@ -10,39 +10,46 @@
 
 #include "individual.h"
 
-typedef enum {EMPTY, PLAYER_1, PLAYER_2} SquareState;
+typedef enum
+{
+    EMPTY, PLAYER_1, PLAYER_2
+} SquareState;
 
-struct Move {
-	unsigned xPos;
-	unsigned yPos;
-	float quality;
+struct Move
+{
+    unsigned xPos;
+    unsigned yPos;
+    float quality;
 };
 
-class Board {
+class Board
+{
 protected:
-	unsigned tSize;
-	SquareState** tBoard;
-	Interface* tInterface;
+    unsigned tSize;
+    SquareState** tBoard;
+    Interface* tInterface;
 public:
-	Board(unsigned size);
-	virtual ~Board();
+    Board(unsigned size);
+    virtual ~Board();
 
-	virtual void initBoard();
-	virtual bool endGame() = 0;
-	virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player) = 0;
-	virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player) = 0;
-	virtual bool canMove(SquareState player) = 0;
-	virtual void turn(SquareState player, Individual* individual = NULL) = 0;
-	virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player) = 0;
-	virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual) = 0;
-	virtual unsigned countPoints(SquareState player);
+    virtual void initBoard();
+    virtual bool endGame() = 0;
+    virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player) = 0;
+    virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player) = 0;
+    virtual bool canMove(SquareState player) = 0;
+    virtual void turn(SquareState player, Individual* individual = NULL) = 0;
+    virtual float computerEstimation(unsigned xPos, unsigned yPos,
+            SquareState player) = 0;
+    virtual float individualEstimation(unsigned xPos, unsigned yPos,
+            SquareState player, Individual* individual) = 0;
+    virtual unsigned countPoints(SquareState player);
 
-	unsigned size();
-	void setSquare(unsigned xPos, unsigned yPos, SquareState squareState);
-	SquareState getSquare(unsigned xPos, unsigned yPos);
-	Interface* getInterface();
-	Interface* updateInterface();
-	static SquareState opponent(SquareState player);
+    unsigned size();
+    void setSquare(unsigned xPos, unsigned yPos, SquareState squareState);
+    SquareState getSquare(unsigned xPos, unsigned yPos);
+    Interface* getInterface();
+    Interface* updateInterface();
+    static SquareState opponent(SquareState player);
 };
 
 #endif /* BOARD_H_ */

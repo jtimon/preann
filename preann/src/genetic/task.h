@@ -10,17 +10,18 @@
 
 #include "individual.h"
 
-class Task {
+class Task
+{
 protected:
-	//virtual float step(neuralNet* net);
+    //virtual float step(neuralNet* net);
 public:
-	Task();
-	virtual ~Task();
+    Task();
+    virtual ~Task();
 
-	virtual void test(Individual* individual) = 0;
-	virtual void setInputs(Individual* individual) = 0;
-	virtual string toString() = 0;
-	//virtual float test(neuralNet* net, unsigned episodes);
+    virtual void test(Individual* individual) = 0;
+    virtual void setInputs(Individual* individual) = 0;
+    virtual string toString() = 0;
+    //virtual float test(neuralNet* net, unsigned episodes);
 
 };
 

@@ -13,7 +13,10 @@
 
 class Dummy
 {
-    Dummy(){};
+    Dummy()
+    {
+    }
+    ;
 public:
     static Interface* interface(ParametersMap* parametersMap);
     static Buffer* buffer(ParametersMap* parametersMap);
