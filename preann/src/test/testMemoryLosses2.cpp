@@ -102,6 +102,11 @@ void testPopulation(ParametersMap* parametersMap)
     checkAndPrintErrors("Population", parametersMap);
 }
 
+void testLoops(ParametersMap* parametersMap)
+{
+    parametersMap->print();
+}
+
 int main(int argc, char *argv[])
 {
     Chronometer total;
@@ -110,7 +115,8 @@ int main(int argc, char *argv[])
         Loop* loop;
         ParametersMap parametersMap;
         parametersMap.putNumber("initialWeighsRange", 20);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
+                FT_IDENTITY);
 
         RangeLoop* sizeLoop = new RangeLoop("size", 100, 101, 100, NULL);
         loop = sizeLoop;
@@ -118,31 +124,38 @@ int main(int argc, char *argv[])
         RangeLoop* outputSizeLoop = new RangeLoop("outputSize", 1, 4, 2, loop);
         loop = outputSizeLoop;
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop);
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(
+                ET_BUFFER), ET_BUFFER, loop);
         loop = bufferTypeLoop;
 
         loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
                 ET_IMPLEMENTATION, loop);
 
+//        parametersMap.putString("functionLabel", "test loops");
+//        loop->repeatFunction(testLoops, &parametersMap);
 
+        parametersMap.print();
         parametersMap.putString("functionLabel", "Buffer::memory_test");
         loop->repeatFunction(testBuffer, &parametersMap);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
 
+        parametersMap.print();
         parametersMap.putString("functionLabel", "Connection::memory_test");
         loop->repeatFunction(testConnection, &parametersMap);
 
         RangeLoop* numInputsLoop = new RangeLoop("numInputs", 1, 3, 1, loop);
         loop = numInputsLoop;
 
+        parametersMap.print();
         parametersMap.putString("functionLabel", "Layer::memory_test");
         loop->repeatFunction(testLayer, &parametersMap);
 
         RangeLoop* numLayersLoop = new RangeLoop("numLayers", 1, 3, 1, loop);
         loop = numLayersLoop;
 
+        parametersMap.print();
         parametersMap.putString("functionLabel", "NeuralNet::memory_test");
         loop->repeatFunction(testNeuralNet, &parametersMap);
 
@@ -151,10 +164,11 @@ int main(int argc, char *argv[])
         numInputsLoop->resetRange(1, 2, 1);
         numLayersLoop->resetRange(1, 2, 1);
 
+        parametersMap.print();
         parametersMap.putString("functionLabel", "Population::memory_test");
         loop->repeatFunction(testPopulation, &parametersMap);
 
-        delete(loop);
+        delete (loop);
 
         printf("Exit success.\n", 1);
         MemoryManagement::printTotalAllocated();
