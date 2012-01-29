@@ -166,34 +166,35 @@ void Population::save(FILE *stream)
 
 void Population::insertIndividual(Individual *individual)
 {
-	task->test(individual);
-	bool inserted = false;
+    task->test(individual);
+    bool inserted = false;
 
     float fitness = individual->getFitness();
     list<Individual*>::iterator it;
     FOR_EACH(it, individuals){
-		if(fitness > (*it)->getFitness()) {
-			individuals.insert(it, individual);
-			total_score += fitness;
-			inserted = true;
-			break;
-		}
-	}
+        // equal for neutral search (accumulate changes)
+        if(fitness >= (*it)->getFitness()) {
+            individuals.insert(it, individual);
+            total_score += fitness;
+            inserted = true;
+            break;
+        }
+    }
     if (!inserted){
     	individuals.push_back(individual);
-		total_score += fitness;
+        total_score += fitness;
     }
-	if (individuals.size() > this->maxSize){
-		total_score -= individuals.back()->getFitness();
-		delete(individuals.back());
-		individuals.pop_back();
-	}
+    if (individuals.size() > this->maxSize){
+        total_score -= individuals.back()->getFitness();
+        delete(individuals.back());
+        individuals.pop_back();
+    }
 }
 
 void Population::setMutationsPerIndividual(unsigned numMutations, float range)
 {
-	mutationsPerIndividual = numMutations;
-	mutationsPerIndividualRange = range;
+    mutationsPerIndividual = numMutations;
+    mutationsPerIndividualRange = range;
 }
 
 void Population::setMutationProbability(float probability, float range)
