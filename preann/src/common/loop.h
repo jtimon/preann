@@ -46,6 +46,7 @@ public:
             Loop* innerLoop, std::string functionLabel);
 
     virtual Loop* findLoop(std::string key);
+    virtual void print() = 0;
 
     virtual std::string getState() = 0;
     virtual void repeatFunction(void(*func)(ParametersMap*),
@@ -69,6 +70,7 @@ public:
 
     void resetRange(float min, float max, float inc);
 
+    virtual void print();
     virtual std::string getState();
     virtual void repeatFunction(void(*func)(ParametersMap*),
             ParametersMap* parametersMap);
@@ -94,6 +96,7 @@ public:
     void with(EnumType enumType, unsigned count, ...);
     void exclude(EnumType enumType, unsigned count, ...);
 
+    virtual void print();
     virtual std::string getState();
     virtual void repeatFunction(void(*func)(ParametersMap*),
             ParametersMap* parametersMap);
@@ -112,6 +115,7 @@ public:
 
     virtual Loop* findLoop(std::string key);
 
+    virtual void print();
     virtual std::string getState();
     virtual void repeatFunction(void(*func)(ParametersMap*),
             ParametersMap* parametersMap);
@@ -130,6 +134,7 @@ public:
             Loop* innerLoop);
     virtual ~EnumValueLoop();
 
+    virtual void print();
     virtual std::string getState();
     virtual void repeatFunction(void(*func)(ParametersMap*),
             ParametersMap* parametersMap);

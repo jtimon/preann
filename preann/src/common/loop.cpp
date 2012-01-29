@@ -314,11 +314,21 @@ unsigned RangeLoop::valueToUnsigned()
     return toReturn;
 }
 
+void RangeLoop::print()
+{
+    if (tMin + tInc < tMax) {
+        cout << tKey << ": from " << tMin << " to " << tMax << " by " << tInc
+                << endl;
+    }
+    if (tInnerLoop != NULL) {
+        tInnerLoop->print();
+    }
+}
+
 std::string RangeLoop::getState()
 {
     return tCallerLoop->getState() + "_" + tKey + "_" + to_string(tValue);
 }
-;
 
 void RangeLoop::repeatFunction(void(*func)(ParametersMap*),
         ParametersMap* parametersMap)
@@ -343,10 +353,7 @@ void RangeLoop::repeatAction(void(*action)(void(*)(ParametersMap*),
 EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop) :
     Loop(key, innerLoop)
 {
-    unsigned dim = Enumerations::enumTypeDim(enumType);
-    for (unsigned i = 0; i < dim; i++) {
-        tValueVector.push_back(i);
-    }
+    withAll(enumType);
 }
 
 unsigned EnumLoop::valueToUnsigned()
@@ -362,6 +369,9 @@ EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop,
         string error = "EnumLoop : at least one enum value must be specified.";
         throw error;
     }
+    tEnumType = enumType;
+    tValueVector.clear();
+
     va_list ap;
     va_start(ap, count);
 
@@ -386,6 +396,7 @@ EnumLoop::~EnumLoop()
 
 void EnumLoop::withAll(EnumType enumType)
 {
+    tEnumType = enumType;
     tValueVector.clear();
 
     unsigned dim = Enumerations::enumTypeDim(enumType);
@@ -396,6 +407,7 @@ void EnumLoop::withAll(EnumType enumType)
 
 void EnumLoop::with(EnumType enumType, unsigned count, ...)
 {
+    tEnumType = enumType;
     tValueVector.clear();
 
     va_list ap;
@@ -432,12 +444,25 @@ void EnumLoop::exclude(EnumType enumType, unsigned count, ...)
     va_end(ap);
 }
 
+void EnumLoop::print()
+{
+    cout << tKey << " (" << Enumerations::enumTypeToString(tEnumType) << ") : ";
+
+    for (int i = 0; i < tValueVector.size(); ++i) {
+        cout << Enumerations::toString(tEnumType, tValueVector[i]) << " ";
+    }
+    cout << endl;
+
+    if (tInnerLoop != NULL) {
+        tInnerLoop->print();
+    }
+}
+
 std::string EnumLoop::getState()
 {
     return tCallerLoop->getState() + "_" + tKey + "_" + Enumerations::toString(
             tEnumType, tValueVector[tIndex]);
 }
-;
 
 void EnumLoop::repeatFunction(void(*func)(ParametersMap*),
         ParametersMap* parametersMap)
@@ -497,6 +522,15 @@ Loop* JoinLoop::findLoop(std::string key)
     return NULL;
 }
 
+void JoinLoop::print()
+{
+    for (int i = 0; i < tInnerLoops.size(); ++i) {
+        cout << "Branch " << i << endl;
+        tInnerLoops[i]->print();
+        cout << "----------------" << endl;
+    }
+}
+
 std::string JoinLoop::getState()
 {
     return tCallerLoop->getState();
@@ -537,6 +571,15 @@ EnumValueLoop::EnumValueLoop(std::string key, EnumType enumType,
 
 EnumValueLoop::~EnumValueLoop()
 {
+}
+
+void EnumValueLoop::print()
+{
+    cout << tKey << " (" << Enumerations::enumTypeToString(tEnumType) << ") : "
+            << Enumerations::toString(tEnumType, tEnumValue) << endl;
+    if (tInnerLoop != NULL) {
+        tInnerLoop->print();
+    }
 }
 
 std::string EnumValueLoop::getState()
