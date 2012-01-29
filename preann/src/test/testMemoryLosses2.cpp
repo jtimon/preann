@@ -1,172 +1,174 @@
-
 #include <iostream>
 #include <fstream>
 
 using namespace std;
 
 #include "loop.h"
-#include "test.h"
+#include "dummy.h"
 #include "population.h"
 #include "binaryTask.h"
 #include "chronometer.h"
 
-
 unsigned memoryLosses = 0;
 
-void checkAndPrintErrors(string testingClass, Test* test)
+void checkAndPrintErrors(string testingClass, ParametersMap* parametersMap)
 {
-    if(MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0){
-        cout << "Memory loss detected testing class " << testingClass << ".\n" << endl;
-        test->printCurrentState();
+    if (MemoryManagement::getPtrCounter() > 0
+            || MemoryManagement::getTotalAllocated() > 0) {
+
+        Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
+
+        cout << "Memory loss detected testing class " << testingClass
+                << " at state " << actionLoop->getState() << ".\n" << endl;
+
         MemoryManagement::printTotalAllocated();
         MemoryManagement::printTotalPointers();
         memoryLosses++;
     }
 }
 
-void testBuffer(Test* test)
+void testBuffer(ParametersMap* parametersMap)
 {
-	START_BUFFER
-	END_BUFFER
+    Buffer* buffer = Dummy::buffer(parametersMap);
+    delete (buffer);
 
-    checkAndPrintErrors("Buffer", test);
+    checkAndPrintErrors("Buffer", parametersMap);
 }
 
-void testBuffer2(Test* test)
+void testConnection(ParametersMap* parametersMap)
 {
-	START_BUFFER
-	END_BUFFER
+    Buffer* buffer = Dummy::buffer(parametersMap);
+    Connection* connection = Dummy::connection(parametersMap, buffer);
 
-    checkAndPrintErrors("Buffer", test);
+    delete (connection);
+    delete (buffer);
+
+    checkAndPrintErrors("Connection", parametersMap);
 }
 
-void testConnection(Test* test)
+void testLayer(ParametersMap* parametersMap)
 {
-	START_CONNECTION
-	END_CONNECTION
+    Layer* layer = Dummy::layer(parametersMap);
+    delete (layer);
 
-    checkAndPrintErrors("Connection", test);
+    checkAndPrintErrors("Layer", parametersMap);
 }
 
-void testLayer(Test* test)
+void testNeuralNet(ParametersMap* parametersMap)
 {
-    Layer *layer = new Layer(test->getValue("size"), (BufferType)test->getEnum(ET_BUFFER), FT_IDENTITY, (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
-    layer->addInput(layer->getOutput());
-    layer->addInput(layer->getOutput());
-    layer->addInput(layer->getOutput());
-    delete(layer);
+    Interface* input = Dummy::interface(parametersMap);
+    NeuralNet* net = Dummy::neuralNet(parametersMap, input);
 
-    checkAndPrintErrors("Layer", test);
+    delete (net);
+    delete (input);
+
+    checkAndPrintErrors("NeuralNet", parametersMap);
 }
 
-void testNeuralNet(Test* test)
+void testPopulation(ParametersMap* parametersMap)
 {
-	unsigned size = test->getValue("size");
-    BufferType bufferType = (BufferType)test->getEnum(ET_BUFFER);
-    ImplementationType implementationType = (ImplementationType)test->getEnum(ET_IMPLEMENTATION);
+    BufferType bufferType = (BufferType)parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_BUFFER));
+    ImplementationType implementationType =
+            (ImplementationType)parametersMap->getNumber(
+                    Enumerations::enumTypeToString(ET_IMPLEMENTATION));
+    FunctionType functionType = (FunctionType)parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_FUNCTION));
 
-    NeuralNet* net = new NeuralNet(implementationType);
-    Interface* input = new Interface(size, bufferType);
-	net->addInputLayer(input);
-	net->addInputLayer(input);
-	net->addInputLayer(input);
-	net->addLayer(size, bufferType, FT_IDENTITY);
-	net->addLayer(size, bufferType, FT_IDENTITY);
-	net->addLayer(size, bufferType, FT_IDENTITY);
-	net->addInputConnection(0, 0);
-	net->addInputConnection(1, 0);
-	net->addInputConnection(2, 0);
-	net->addLayersConnection(0, 1);
-	net->addLayersConnection(0, 2);
-	net->addLayersConnection(1, 2);
-	net->addLayersConnection(2, 0);
-
-    delete(net);
-    delete(input);
-    checkAndPrintErrors("NeuralNet", test);
-}
-
-void testPopulation(Test* test)
-{
-	GET_SIZE
-
-    BufferType bufferType = (BufferType)test->getEnum(ET_BUFFER);
-    ImplementationType implementationType = (ImplementationType)test->getEnum(ET_IMPLEMENTATION);
+    unsigned size = (unsigned)parametersMap->getNumber("size");
 
     Interface* input = new Interface(size, bufferType);
     Individual* example = new Individual(implementationType);
-	example->addInputLayer(input);
-	example->addInputLayer(input);
-	example->addInputLayer(input);
-	example->addLayer(size, bufferType, FT_IDENTITY);
-	example->addLayer(size, bufferType, FT_IDENTITY);
-	example->addLayer(size, bufferType, FT_IDENTITY);
-	example->addInputConnection(0, 0);
-	example->addInputConnection(1, 0);
-	example->addInputConnection(2, 0);
-	example->addLayersConnection(0, 1);
-	example->addLayersConnection(0, 2);
-	example->addLayersConnection(1, 2);
-	example->addLayersConnection(2, 0);
+    example->addInputLayer(input);
+    example->addInputLayer(input);
+    example->addInputLayer(input);
+    example->addLayer(size, bufferType, functionType);
+    example->addLayer(size, bufferType, functionType);
+    example->addLayer(size, bufferType, functionType);
+    example->addInputConnection(0, 0);
+    example->addInputConnection(1, 0);
+    example->addInputConnection(2, 0);
+    example->addLayersConnection(0, 1);
+    example->addLayersConnection(0, 2);
+    example->addLayersConnection(1, 2);
+    example->addLayersConnection(2, 0);
     Task* task = new BinaryTask(BO_OR, size, 5);
     Population* population = new Population(task, example, 5, 20);
 
-    delete(population);
-    delete(example);
-    delete(task);
-    delete(input);
-    checkAndPrintErrors("Population", test);
+    delete (population);
+    delete (example);
+    delete (task);
+    delete (input);
+    checkAndPrintErrors("Population", parametersMap);
 }
 
-int main(int argc, char *argv[]) {
-	Chronometer total;
-	total.start();
-	try {
-		Loop* loop;
-		ParametersMap parametersMap;
-		parametersMap.putNumber("initialWeighsRange", 20);
+int main(int argc, char *argv[])
+{
+    Chronometer total;
+    total.start();
+    try {
+        Loop* loop;
+        ParametersMap parametersMap;
+        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-		loop = new RangeLoop("size", 100, 101, 100, NULL);
-		loop = new RangeLoop("outputSize", 1, 4, 2, loop);
-		loop = new EnumLoop("bufferType", ET_BUFFER, loop);
-		loop = new EnumLoop("implementationType", ET_IMPLEMENTATION, loop);
+        RangeLoop* sizeLoop = new RangeLoop("size", 100, 101, 100, NULL);
+        loop = sizeLoop;
 
-		loop->repeatFunction(testBuffer2, &parametersMap);
+        RangeLoop* outputSizeLoop = new RangeLoop("outputSize", 1, 4, 2, loop);
+        loop = outputSizeLoop;
+
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop);
+        loop = bufferTypeLoop;
+
+        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
+                ET_IMPLEMENTATION, loop);
 
 
-		Test test;
-		test.putIterator("size", 100, 101, 100);
-		test.putIterator("outputSize", 1, 4, 2);
-		test.putConstant("initialWeighsRange", 20);
-		test.withAll(ET_BUFFER);
-		test.withAll(ET_IMPLEMENTATION);
-		test.printParameters();
+        parametersMap.putString("functionLabel", "Buffer::memory_test");
+        loop->repeatFunction(testBuffer, &parametersMap);
 
-		test.simpleTest(testBuffer, "Buffer::memory");
+        // exclude BYTE
+        bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
 
-		test.exclude(ET_BUFFER, 1, BT_BYTE);
-		test.printParameters();
+        parametersMap.putString("functionLabel", "Connection::memory_test");
+        loop->repeatFunction(testConnection, &parametersMap);
 
-		test.simpleTest(testConnection, "Connection::memory");
-		test.simpleTest(testLayer, "Layer::memory");
-		test.simpleTest(testNeuralNet, "NeuralNet::memory");
-		test.putIterator("size", 1, 3, 1);
-		test.putConstant("outputSize", 1);
-		test.simpleTest(testPopulation, "Population::memory");
+        RangeLoop* numInputsLoop = new RangeLoop("numInputs", 1, 3, 1, loop);
+        loop = numInputsLoop;
 
-		printf("Exit success.\n", 1);
-		MemoryManagement::printTotalAllocated();
-		MemoryManagement::printTotalPointers();
-	} catch (string error) {
-		cout << "Error: " << error << endl;
-	} catch (...) {
-		printf("An error was thrown.\n", 1);
-	}
+        parametersMap.putString("functionLabel", "Layer::memory_test");
+        loop->repeatFunction(testLayer, &parametersMap);
 
-	cout << "Total memory losses: " << memoryLosses << endl;
-	MemoryManagement::printListOfPointers();
+        RangeLoop* numLayersLoop = new RangeLoop("numLayers", 1, 3, 1, loop);
+        loop = numLayersLoop;
 
-	total.stop();
-	printf("Total time spent: %f \n", total.getSeconds());
-	return EXIT_SUCCESS;
+        parametersMap.putString("functionLabel", "NeuralNet::memory_test");
+        loop->repeatFunction(testNeuralNet, &parametersMap);
+
+        sizeLoop->resetRange(1, 3, 1);
+        outputSizeLoop->resetRange(1, 2, 1);
+        numInputsLoop->resetRange(1, 2, 1);
+        numLayersLoop->resetRange(1, 2, 1);
+
+        parametersMap.putString("functionLabel", "Population::memory_test");
+        loop->repeatFunction(testPopulation, &parametersMap);
+
+        delete(loop);
+
+        printf("Exit success.\n", 1);
+        MemoryManagement::printTotalAllocated();
+        MemoryManagement::printTotalPointers();
+    } catch (string error) {
+        cout << "Error: " << error << endl;
+    } catch (...) {
+        printf("An error was thrown.\n", 1);
+    }
+
+    cout << "Total memory losses: " << memoryLosses << endl;
+    MemoryManagement::printListOfPointers();
+
+    total.stop();
+    printf("Total time spent: %f \n", total.getSeconds());
+    return EXIT_SUCCESS;
 }

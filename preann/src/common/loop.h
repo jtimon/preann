@@ -9,21 +9,7 @@
 #define LOOP_H_
 
 #include "enumerations.h"
-
-class ParametersMap {
-	std::map<string, float> tNumbers;
-	std::map<string, void*> tPtrs;
-	std::map<string, string> tStrings;
-public:
-	ParametersMap();
-	virtual ~ParametersMap();
-	void putNumber(std::string key, float number);
-	float getNumber(std::string key);
-	void putPtr(std::string key, void* ptr);
-	void* getPtr(std::string key);
-	void putString(std::string key, std::string str);
-	std::string getString(std::string key);
-};
+#include "parametersMap.h"
 
 class Loop {
 private:
@@ -39,9 +25,10 @@ protected:
 
 	virtual unsigned valueToUnsigned();
 	void createGnuPlotScript(void (*func)(ParametersMap*), ParametersMap* parametersMap);
-public:
+
 	Loop();
 	Loop(std::string key, Loop* innerLoop);
+public:
 	virtual ~Loop();
 
 	string getKey();
@@ -51,6 +38,8 @@ public:
 
 	void test(void (*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel);
 	void plot(void (*func)(ParametersMap*), ParametersMap* parametersMap, Loop* innerLoop, std::string functionLabel);
+
+	virtual Loop* findLoop(std::string key);
 
 	virtual std::string getState() = 0;
 	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
@@ -66,6 +55,8 @@ public:
 	RangeLoop(std::string key, float min, float max, float inc, Loop* innerLoop);
 	virtual ~RangeLoop();
 
+	void resetRange(float min, float max, float inc);
+
 	virtual std::string getState();
 	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap);
 	virtual void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop),
@@ -80,8 +71,12 @@ protected:
 	virtual unsigned valueToUnsigned();
 public:
 	EnumLoop(std::string key, EnumType enumType, Loop* innerLoop);
-	EnumLoop(Loop* innerLoop, std::string key, EnumType enumType, unsigned count, ...);
+	EnumLoop(std::string key, EnumType enumType, Loop* innerLoop, unsigned count, ...);
 	virtual ~EnumLoop();
+
+        void withAll(EnumType enumType);
+        void with(EnumType enumType, unsigned count, ...);
+        void exclude(EnumType enumType, unsigned count, ...);
 
 	virtual std::string getState();
 	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap);
@@ -95,6 +90,8 @@ protected:
 public:
 	JoinLoop(unsigned count, ...);
 	virtual ~JoinLoop();
+
+	virtual Loop* findLoop(std::string key);
 
 	virtual std::string getState();
 	virtual void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap);
