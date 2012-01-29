@@ -4,19 +4,19 @@
 using namespace std;
 
 #include "chronometer.h"
+#include "loop.h"
+#include "dummy.h"
 #include "test.h"
-#include "factory.h"
 
-float initialWeighsRange = 20;
-
-unsigned testActivation(Test* test)
+void testActivation(ParametersMap* parametersMap)
 {
-    START_BUFFER_TEST
+    float differencesCounter = 0;
+    Buffer* buffer = Dummy::buffer(parametersMap);
 
-    FunctionType functionType = (FunctionType)test->getEnum(ET_FUNCTION);
+    FunctionType functionType = (FunctionType)parametersMap->getNumber(Enumerations::enumTypeToString(ET_FUNCTION));
     Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT,
             buffer->getImplementationType());
-    results->random(initialWeighsRange);
+    results->random(parametersMap->getNumber("initialWeighsRange"));
 
     Buffer* cResults = Factory::newBuffer(results, IT_C);
     Buffer* cBuffer = Factory::newBuffer(buffer->getSize(),
@@ -26,19 +26,21 @@ unsigned testActivation(Test* test)
     cBuffer->activation(cResults, functionType);
     differencesCounter += Test::assertEquals(cBuffer, buffer);
 
+    delete (buffer);
     delete (results);
     delete (cBuffer);
     delete (cResults);
 
-    END_BUFFER_TEST
+    parametersMap->putNumber("differencesCounter", differencesCounter);
 }
 
-unsigned testCopyFromInterface(Test* test)
+void testCopyFromInterface(ParametersMap* parametersMap)
 {
-    START_BUFFER_TEST
+    float differencesCounter = 0;
+    Buffer* buffer = Dummy::buffer(parametersMap);
 
     Interface interface(buffer->getSize(), buffer->getBufferType());
-    interface.random(initialWeighsRange);
+    interface.random(parametersMap->getNumber("initialWeighsRange"));
 
     Buffer* cBuffer = Factory::newBuffer(buffer, IT_C);
 
@@ -47,14 +49,16 @@ unsigned testCopyFromInterface(Test* test)
 
     differencesCounter += Test::assertEquals(cBuffer, buffer);
 
+    delete (buffer);
     delete (cBuffer);
 
-    END_BUFFER_TEST
+    parametersMap->putNumber("differencesCounter", differencesCounter);
 }
 
-unsigned testCopyToInterface(Test* test)
+void testCopyToInterface(ParametersMap* parametersMap)
 {
-    START_BUFFER_TEST
+    float differencesCounter = 0;
+    Buffer* buffer = Dummy::buffer(parametersMap);
 
     Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
 
@@ -67,20 +71,24 @@ unsigned testCopyToInterface(Test* test)
 
     differencesCounter = Test::assertEqualsInterfaces(&cInterface, &interface);
 
+    delete (buffer);
     delete (cBuffer);
 
-    END_BUFFER_TEST
+    parametersMap->putNumber("differencesCounter", differencesCounter);
 }
 
-unsigned testClone(Test* test)
+void testClone(ParametersMap* parametersMap)
 {
-    START_BUFFER_TEST
+    float differencesCounter = 0;
+    Buffer* buffer = Dummy::buffer(parametersMap);
 
     Buffer* copy = buffer->clone();
     differencesCounter += Test::assertEquals(buffer, copy);
+
+    delete (buffer);
     delete (copy);
 
-    END_BUFFER_TEST
+    parametersMap->putNumber("differencesCounter", differencesCounter);
 }
 
 int main(int argc, char *argv[])
@@ -88,24 +96,42 @@ int main(int argc, char *argv[])
 
     Chronometer total;
     total.start();
-
-    Test test;
-    test.withAll(ET_BUFFER);
-    test.withAll(ET_IMPLEMENTATION);
-    test.with(ET_FUNCTION, 1, FT_IDENTITY);
-
-    test.putIterator("size", 10, 11, 10);
-    test.putConstant("initialWeighsRange", 20);
-    test.printParameters();
-
     try {
-        test.test(testClone, "Buffer::clone");
-        test.test(testCopyFromInterface, "Buffer::copyFromInterface");
-        test.test(testCopyToInterface, "Buffer::copyToInterface");
+        Loop* loop;
+        ParametersMap parametersMap;
+        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
+                FT_IDENTITY);
 
-        test.exclude(ET_BUFFER, 1, BT_BYTE);
-        test.printParameters();
-        test.test(testActivation, "Buffer::activation");
+        loop = new RangeLoop("size", 100, 101, 100, NULL);
+
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(
+                ET_BUFFER), ET_BUFFER, loop);
+        loop = bufferTypeLoop;
+
+        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
+                ET_IMPLEMENTATION, loop);
+
+        loop->print();
+
+        parametersMap.putString("functionLabel", "Buffer::clone");
+        cout << "Buffer::clone" << endl;
+        loop->repeatFunction(testClone, &parametersMap);
+
+        parametersMap.putString("functionLabel", "Buffer::copyFromInterface");
+        cout << "Buffer::copyFromInterface" << endl;
+        loop->repeatFunction(testCopyFromInterface, &parametersMap);
+
+        parametersMap.putString("functionLabel", "Buffer::copyToInterface");
+        cout << "Buffer::copyToInterface" << endl;
+        loop->repeatFunction(testCopyToInterface, &parametersMap);
+
+        bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
+        loop->print();
+
+        parametersMap.putString("functionLabel", "Buffer::activation");
+        cout << "Buffer::activation" << endl;
+        loop->repeatFunction(testActivation, &parametersMap);
 
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();

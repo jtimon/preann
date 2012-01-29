@@ -131,41 +131,48 @@ int main(int argc, char *argv[])
         loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
                 ET_IMPLEMENTATION, loop);
 
+        loop->print();
+
         //        parametersMap.putString("functionLabel", "test loops");
         //        loop->repeatFunction(testLoops, &parametersMap);
 
-        parametersMap.print();
+
         parametersMap.putString("functionLabel", "Buffer::memory_test");
+        cout << parametersMap.getString("functionLabel") << endl;
         loop->repeatFunction(testBuffer, &parametersMap);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
+        loop->print();
 
-        parametersMap.print();
         parametersMap.putString("functionLabel", "Connection::memory_test");
+        cout << parametersMap.getString("functionLabel") << endl;
         loop->repeatFunction(testConnection, &parametersMap);
 
         RangeLoop* numInputsLoop = new RangeLoop("numInputs", 1, 3, 1, loop);
         loop = numInputsLoop;
+        loop->print();
 
-        parametersMap.print();
         parametersMap.putString("functionLabel", "Layer::memory_test");
+        cout << parametersMap.getString("functionLabel") << endl;
         loop->repeatFunction(testLayer, &parametersMap);
 
         RangeLoop* numLayersLoop = new RangeLoop("numLayers", 1, 3, 1, loop);
         loop = numLayersLoop;
+        loop->print();
 
-        parametersMap.print();
         parametersMap.putString("functionLabel", "NeuralNet::memory_test");
+        cout << parametersMap.getString("functionLabel") << endl;
         loop->repeatFunction(testNeuralNet, &parametersMap);
 
         sizeLoop->resetRange(1, 3, 1);
-        outputSizeLoop->resetRange(1, 2, 1);
-        numInputsLoop->resetRange(1, 2, 1);
-        numLayersLoop->resetRange(1, 2, 1);
+        outputSizeLoop->resetRange(1, 1, 1);
+        numInputsLoop->resetRange(1, 1, 1);
+        numLayersLoop->resetRange(1, 1, 1);
+        loop->print();
 
-        parametersMap.print();
         parametersMap.putString("functionLabel", "Population::memory_test");
+        cout << parametersMap.getString("functionLabel") << endl;
         loop->repeatFunction(testPopulation, &parametersMap);
 
         delete (loop);
