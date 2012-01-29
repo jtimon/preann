@@ -21,6 +21,7 @@ INCLUDES  = $(addprefix -I , $(addprefix src/,$(LIB_MODULES)))
 
 PROGRAMS = $(wildcard src/test/*.cpp)
 EXE      = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,bin/%.exe,$(main)))
+LOGS     = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,output/log/%.log,$(main)))
 
 CXX = g++-4.3 -ggdb $(INCLUDES) $(FACT_FLAGS)
 CXX_LINK = g++-4.3 
@@ -52,15 +53,15 @@ OBJ += $(FACT_OBJ)
 .PHONY: all clean checkdirs cpp sse2 cuda
 .SECONDARY:
 
-all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
-#	./bin/chronoBuffers.exe
-	./bin/testMemoryLosses.exe
+all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
+	./bin/testMemoryLosses2.exe
+#	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe 
 #	./bin/testConnections.exe 
 #	./bin/testLayers.exe 
 #	./bin/chronoBuffers.exe 
 #	./bin/chronoConnections.exe 
-	./bin/chronoXor.exe
+#	./bin/chronoXor.exe
 #	./bin/testMemoryLosses.exe > ./output/log/testMemoryLosses.log
 #	./bin/testBuffers.exe > ./output/log/testBuffers.log
 #	./bin/testConnections.exe > ./output/log/testConnections.log
@@ -69,11 +70,14 @@ all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	./bin/chronoConnections.exe > ./output/log/chronoConnections.log
 #	./bin/chronoXor.exe > ./output/log/chronoXor.log
 
+#all: $(LOGS)
 checkdirs: $(BUILD_DIR)
 
 $(BUILD_DIR):
 	mkdir -p $@
 
+output/log/%.log: bin/%.exe
+	./$< > $@
 bin/%.exe: build/test/%.o $(OBJ)
 	$(NVCC_LINK) $^ -o $@
 #	./$@ > $(patsubst bin/%.exe,output/log/%.log,$@)
