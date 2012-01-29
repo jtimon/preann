@@ -37,59 +37,63 @@ using namespace std;
 #define BITS_PER_UNSIGNED (sizeof(unsigned) * BITS_PER_BYTE)
 
 // TODO explorar esta posibilidad en vez de user punteros a las variables
-template <class T>
-T& ptrToType(void* ptr)
-{
-	return *((T*)ptr);
-}
+template<class T>
+    T& ptrToType(void* ptr)
+    {
+        return *((T*)ptr);
+    }
 
-template <class T>
-std::string to_string (const T& t)
-{
-	std::stringstream ss;
-	ss << t;
-	return ss.str();
-}
+template<class T>
+    std::string to_string(const T& t)
+    {
+        std::stringstream ss;
+        ss << t;
+        return ss.str();
+    }
 
 FILE* openFile(string path);
 
-class Random {
+class Random
+{
 public:
-	static int integer(unsigned range);
-	static float floatNum(float range);
-	static unsigned positiveInteger(unsigned range);
-	static float positiveFloat(float range);
+    static int integer(unsigned range);
+    static float floatNum(float range);
+    static unsigned positiveInteger(unsigned range);
+    static float positiveFloat(float range);
 };
 
-class MemoryManagement {
-	//TODO usar void * calloc ( size_t num, size_t size );
-	static vector<void*> ptrs;
-	static vector<unsigned> sizes;
+class MemoryManagement
+{
+    //TODO usar void * calloc ( size_t num, size_t size );
+    static vector<void*> ptrs;
+    static vector<unsigned> sizes;
 
 public:
-	static void* malloc(unsigned size);
-	static void free(void* ptr);
-	static void printTotalAllocated();
-	static void printTotalPointers();
-	static void printListOfPointers();
-	static unsigned getPtrCounter();
-	static unsigned getTotalAllocated();
+    static void* malloc(unsigned size);
+    static void free(void* ptr);
+    static void printTotalAllocated();
+    static void printTotalPointers();
+    static void printListOfPointers();
+    static unsigned getPtrCounter();
+    static unsigned getTotalAllocated();
 };
 
-typedef std::vector< std::pair<unsigned, unsigned> > pair_vect;
-typedef std::vector< std::pair<unsigned, unsigned> >::iterator pair_vect_iterator;
+typedef std::vector<std::pair<unsigned, unsigned> > pair_vect;
+typedef std::vector<std::pair<unsigned, unsigned> >::iterator
+        pair_vect_iterator;
 
-class SimpleGraph {
-	std::vector< std::pair<unsigned, unsigned> > graph;
+class SimpleGraph
+{
+    std::vector<std::pair<unsigned, unsigned> > graph;
 public:
-	virtual ~SimpleGraph();
-	void addConnection(unsigned source, unsigned destination);
-	bool removeConnection(unsigned source, unsigned destination);
-	bool checkConnection(unsigned source, unsigned destination);
-	std::vector< std::pair<unsigned, unsigned> >::iterator getIterator();
-	std::vector< std::pair<unsigned, unsigned> >::iterator getEnd();
-	void save(FILE* stream);
-	void load(FILE* stream);
+    virtual ~SimpleGraph();
+    void addConnection(unsigned source, unsigned destination);
+    bool removeConnection(unsigned source, unsigned destination);
+    bool checkConnection(unsigned source, unsigned destination);
+    std::vector<std::pair<unsigned, unsigned> >::iterator getIterator();
+    std::vector<std::pair<unsigned, unsigned> >::iterator getEnd();
+    void save(FILE* stream);
+    void load(FILE* stream);
 };
 
 #endif /* UTIL_H_ */
