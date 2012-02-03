@@ -84,6 +84,7 @@ void Loop::test(void(*func)(ParametersMap*), ParametersMap* parametersMap,
         std::string functionLabel)
 {
     parametersMap->putString("functionLabel", functionLabel);
+    cout << "Testing... " << functionLabel << endl;
     repeatAction(testAction, func, parametersMap, NULL);
 }
 
@@ -261,6 +262,7 @@ void Loop::plot(void(*func)(ParametersMap*), ParametersMap* parametersMap,
         Loop* innerLoop, std::string functionLabel)
 {
     parametersMap->putString("functionLabel", functionLabel);
+    cout << "Plotting... " << functionLabel << endl;
     createGnuPlotScript(func, parametersMap);
 
     this->repeatAction(plotAction, func, parametersMap, innerLoop);
