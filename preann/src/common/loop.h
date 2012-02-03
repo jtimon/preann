@@ -37,6 +37,7 @@ public:
 
     string getKey();
     void setCallerLoop(Loop* callerLoop);
+
     int getLineColor(ParametersMap* parametersMap);
     int getPointType(ParametersMap* parametersMap);
 
