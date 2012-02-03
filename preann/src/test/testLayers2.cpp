@@ -3,9 +3,9 @@
 
 using namespace std;
 
-#include "population.h"
 #include "chronometer.h"
-#include "cuda_code.h"
+#include "loop.h"
+#include "dummy.h"
 #include "test.h"
 
 void testCalculateOutput(ParametersMap* parametersMap)
@@ -29,7 +29,7 @@ void testCalculateOutput(ParametersMap* parametersMap)
 	}
 	layerC->loadWeighs(stream);
 	fclose(stream);
-	
+
     //test calculation
     layer->calculateOutput();
     layerC->calculateOutput();
@@ -41,7 +41,7 @@ void testCalculateOutput(ParametersMap* parametersMap)
     delete (bufferC);
     delete (layer);
     delete (buffer);
-    
+
     parametersMap->putNumber("differencesCounter", differencesCounter);
 }
 
@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
         Loop* loop;
         ParametersMap parametersMap;
         parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber("numInputs", 2);
         parametersMap.putString("layerPath", "/home/timon/layer.lay");
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
                 FT_IDENTITY);

@@ -12,9 +12,10 @@ using namespace std;
 
 void testCalculateAndAddTo(ParametersMap* parametersMap)
 {
-	float differencesCounter = 0;
-	Buffer* buffer = Dummy::buffer(parametersMap);
-	Connection* connection = Dummy::connection(parametersMap);
+    float differencesCounter = 0;
+    Buffer* buffer = Dummy::buffer(parametersMap);
+    Connection* connection = Dummy::connection(parametersMap, buffer);
+    unsigned outputSize = parametersMap->getNumber("outputSize");
 
     Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT,
             connection->getImplementationType());
@@ -43,9 +44,11 @@ void testCalculateAndAddTo(ParametersMap* parametersMap)
 
 void testMutate(ParametersMap* parametersMap)
 {
-	float differencesCounter = 0;
-	Buffer* buffer = Dummy::buffer(parametersMap);
-	Connection* connection = Dummy::connection(parametersMap); 
+    float differencesCounter = 0;
+    Buffer* buffer = Dummy::buffer(parametersMap);
+    Connection* connection = Dummy::connection(parametersMap, buffer);
+    float initialWeighsRange = parametersMap->getNumber("initialWeighsRange");
+    unsigned outputSize = parametersMap->getNumber("outputSize");
 
     unsigned pos = Random::positiveInteger(connection->getSize());
     float mutation = Random::floatNum(initialWeighsRange);
@@ -74,9 +77,11 @@ void testMutate(ParametersMap* parametersMap)
 
 void testCrossover(ParametersMap* parametersMap)
 {
-	float differencesCounter = 0;
-	Buffer* buffer = Dummy::buffer(parametersMap);
-	Connection* connection = Dummy::connection(parametersMap); 
+    float differencesCounter = 0;
+    Buffer* buffer = Dummy::buffer(parametersMap);
+    Connection* connection = Dummy::connection(parametersMap, buffer);
+    float initialWeighsRange = parametersMap->getNumber("initialWeighsRange");
+    unsigned outputSize = parametersMap->getNumber("outputSize");
 
     Connection* other = Factory::newConnection(connection->getInput(),
             outputSize, connection->getImplementationType());
@@ -102,7 +107,7 @@ void testCrossover(ParametersMap* parametersMap)
     delete (cInput);
     delete (cConnection);
     delete (cOther);
-    
+
     delete (connection);
     delete (buffer);
 
@@ -117,6 +122,7 @@ int main(int argc, char *argv[])
         Loop* loop;
         ParametersMap parametersMap;
         parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber("numInputs", 2);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
                 FT_IDENTITY);
 
@@ -131,10 +137,11 @@ int main(int argc, char *argv[])
                 ET_IMPLEMENTATION, loop);
         loop->print();
 
-        loop->test(testCalculateAndAddTo, &parametersMap, "Connection::calculateAndAddTo");
+        loop->test(testCalculateAndAddTo, &parametersMap,
+                "Connection::calculateAndAddTo");
         loop->test(testMutate, &parametersMap, "Connection::mutate");
         loop->test(testCrossover, &parametersMap, "Connection::crossover");
-        
+
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();
         MemoryManagement::printTotalPointers();
