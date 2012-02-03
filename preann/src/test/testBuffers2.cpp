@@ -93,7 +93,6 @@ void testClone(ParametersMap* parametersMap)
 
 int main(int argc, char *argv[])
 {
-
     Chronometer total;
     total.start();
     try {
@@ -111,27 +110,16 @@ int main(int argc, char *argv[])
 
         loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
                 ET_IMPLEMENTATION, loop);
-
         loop->print();
 
-        parametersMap.putString("functionLabel", "Buffer::clone");
-        cout << "Buffer::clone" << endl;
-        loop->repeatFunction(testClone, &parametersMap);
-
-        parametersMap.putString("functionLabel", "Buffer::copyFromInterface");
-        cout << "Buffer::copyFromInterface" << endl;
-        loop->repeatFunction(testCopyFromInterface, &parametersMap);
-
-        parametersMap.putString("functionLabel", "Buffer::copyToInterface");
-        cout << "Buffer::copyToInterface" << endl;
-        loop->repeatFunction(testCopyToInterface, &parametersMap);
+        loop->test(testClone, &parametersMap, "Buffer::clone");
+        loop->test(testCopyFromInterface, &parametersMap, "Buffer::copyFromInterface");
+        loop->test(testCopyToInterface, &parametersMap, "Buffer::copyToInterface");
 
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         loop->print();
 
-        parametersMap.putString("functionLabel", "Buffer::activation");
-        cout << "Buffer::activation" << endl;
-        loop->repeatFunction(testActivation, &parametersMap);
+        loop->test(testActivation, &parametersMap, "Buffer::activation");
 
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();
