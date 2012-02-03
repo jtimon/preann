@@ -48,8 +48,11 @@ void testConnection(ParametersMap* parametersMap)
 
 void testLayer(ParametersMap* parametersMap)
 {
-    Layer* layer = Dummy::layer(parametersMap);
+    Buffer* buffer = Dummy::buffer(parametersMap);
+    Layer* layer = Dummy::layer(parametersMap, buffer);
+    
     delete (layer);
+    delete (buffer);
 
     checkAndPrintErrors("Layer", parametersMap);
 }
