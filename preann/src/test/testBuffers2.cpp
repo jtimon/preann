@@ -8,36 +8,41 @@ using namespace std;
 #include "dummy.h"
 #include "test.h"
 
-void testActivation(ParametersMap* parametersMap)
-{
-    float differencesCounter = 0;
+#define START                                                                           \
+    float differencesCounter = 0;                                                       \
     Buffer* buffer = Dummy::buffer(parametersMap);
 
-    FunctionType functionType = (FunctionType)parametersMap->getNumber(Enumerations::enumTypeToString(ET_FUNCTION));
+#define END                                                                             \
+    delete (buffer);                                                                    \
+    parametersMap->putNumber("differencesCounter", differencesCounter);
+
+void testActivation(ParametersMap* parametersMap)
+{
+    START
+
+    FunctionType functionType = (FunctionType)parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_FUNCTION));
     Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT,
             buffer->getImplementationType());
     results->random(parametersMap->getNumber("initialWeighsRange"));
 
     Buffer* cResults = Factory::newBuffer(results, IT_C);
-    Buffer* cBuffer = Factory::newBuffer(buffer->getSize(),
-            buffer->getBufferType(), IT_C);
+    Buffer* cBuffer = Factory::newBuffer(buffer->getSize(), buffer->getBufferType(), IT_C);
 
     buffer->activation(results, functionType);
     cBuffer->activation(cResults, functionType);
     differencesCounter += Test::assertEquals(cBuffer, buffer);
 
-    delete (buffer);
     delete (results);
     delete (cBuffer);
     delete (cResults);
 
-    parametersMap->putNumber("differencesCounter", differencesCounter);
+    END
 }
 
 void testCopyFromInterface(ParametersMap* parametersMap)
 {
-    float differencesCounter = 0;
-    Buffer* buffer = Dummy::buffer(parametersMap);
+    START
 
     Interface interface(buffer->getSize(), buffer->getBufferType());
     interface.random(parametersMap->getNumber("initialWeighsRange"));
@@ -49,46 +54,40 @@ void testCopyFromInterface(ParametersMap* parametersMap)
 
     differencesCounter += Test::assertEquals(cBuffer, buffer);
 
-    delete (buffer);
     delete (cBuffer);
 
-    parametersMap->putNumber("differencesCounter", differencesCounter);
+    END
 }
 
 void testCopyToInterface(ParametersMap* parametersMap)
 {
-    float differencesCounter = 0;
-    Buffer* buffer = Dummy::buffer(parametersMap);
+    START
 
     Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
 
     Buffer* cBuffer = Factory::newBuffer(buffer, IT_C);
-    Interface cInterface =
-            Interface(buffer->getSize(), buffer->getBufferType());
+    Interface cInterface = Interface(buffer->getSize(), buffer->getBufferType());
 
     buffer->copyToInterface(&interface);
     cBuffer->copyToInterface(&cInterface);
 
     differencesCounter = Test::assertEqualsInterfaces(&cInterface, &interface);
 
-    delete (buffer);
     delete (cBuffer);
 
-    parametersMap->putNumber("differencesCounter", differencesCounter);
+    END
 }
 
 void testClone(ParametersMap* parametersMap)
 {
-    float differencesCounter = 0;
-    Buffer* buffer = Dummy::buffer(parametersMap);
+    START
 
     Buffer* copy = buffer->clone();
     differencesCounter += Test::assertEquals(buffer, copy);
 
-    delete (buffer);
     delete (copy);
 
-    parametersMap->putNumber("differencesCounter", differencesCounter);
+    END
 }
 
 int main(int argc, char *argv[])
@@ -99,17 +98,16 @@ int main(int argc, char *argv[])
         Loop* loop;
         ParametersMap parametersMap;
         parametersMap.putNumber("initialWeighsRange", 20);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
-                FT_IDENTITY);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         loop = new RangeLoop("size", 100, 101, 100, NULL);
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(
-                ET_BUFFER), ET_BUFFER, loop);
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER),
+                ET_BUFFER, loop);
         loop = bufferTypeLoop;
 
-        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
-                ET_IMPLEMENTATION, loop);
+        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION,
+                loop);
         loop->print();
 
         loop->test(testClone, &parametersMap, "Buffer::clone");
