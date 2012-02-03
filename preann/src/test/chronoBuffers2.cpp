@@ -113,24 +113,6 @@ int main(int argc, char *argv[])
 
         loop->plot(chronoActivation, &parametersMap, innerLoop, "Buffer::chronoActivation");
 
-//        Plot plot;
-//        plot.putPlotIterator("size", 1000, 10000, 1000);
-//        plot.putConstant("initialWeighsRange", 20);
-//        plot.putConstant("repetitions", 20);
-//        plot.exclude(ET_BUFFER, 1, BT_BYTE);
-//        plot.exclude(ET_IMPLEMENTATION, 1, IT_CUDA);
-//
-//        plot.setColorEnum(ET_IMPLEMENTATION);
-//        plot.setPointEnum(ET_BUFFER);
-//
-//        plot.printParameters();
-//        plot.printCurrentState();
-
-        //		plot.plot(chronoActivation, path, 100, "BUFFER_ACTIVATION");
-        //		plot.plot(chronoCopyFromInterface, path, 1000, "BUFFER_COPYFROMINTERFACE");
-        //		plot.plot(chronoCopyToInterface, path, 1000, "BUFFER_COPYTOINTERFACE");
-//        plot.plot(chronoCopyToInterface, path, "BUFFER_COPYTOINTERFACE");
-
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();
         MemoryManagement::printTotalPointers();
