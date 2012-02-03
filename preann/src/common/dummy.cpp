@@ -57,7 +57,7 @@ Connection* Dummy::connection(ParametersMap* parametersMap, Buffer* buffer)
     return connection;
 }
 
-Layer* Dummy::layer(ParametersMap* parametersMap)
+Layer* Dummy::layer(ParametersMap* parametersMap, Buffer* input)
 {
     BufferType bufferType = (BufferType)parametersMap->getNumber(
             Enumerations::enumTypeToString(ET_BUFFER));
@@ -74,8 +74,9 @@ Layer* Dummy::layer(ParametersMap* parametersMap)
     Layer* layer =
             new Layer(size, bufferType, functionType, implementationType);
     for (unsigned i = 0; i < numInputs; ++i) {
-        layer->addInput(layer->getOutput());
+        layer->addInput(input);
     }
+    layer->randomWeighs(initialWeighsRange);
 
     return layer;
 }
