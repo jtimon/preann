@@ -7,8 +7,7 @@ using namespace std;
 #include "loop.h"
 #include "dummy.h"
 #include "test.h"
-//#include "plot.h"
-//#include "factory.h"
+
 #define START                                                                           \
     Chronometer chrono;                                                                 \
     unsigned repetitions = parametersMap->getNumber("repetitions");                     \
@@ -17,7 +16,6 @@ using namespace std;
 #define END                                                                             \
     delete (buffer);                                                                    \
     parametersMap->putNumber("timeCount", chrono.getSeconds());                         \
-
 
 void chronoCopyToInterface(ParametersMap* parametersMap)
 {
@@ -93,18 +91,19 @@ int main(int argc, char *argv[])
         parametersMap.putString("lineColor", Enumerations::enumTypeToString(ET_IMPLEMENTATION));
         parametersMap.putString("pointType", Enumerations::enumTypeToString(ET_BUFFER));
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(
-                ET_BUFFER), ET_BUFFER, NULL);
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER),
+                ET_BUFFER, NULL);
         loop = bufferTypeLoop;
 
-        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
-                ET_IMPLEMENTATION, loop);
-
+        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION,
+                loop);
 
         loop->print();
 
-        loop->plot(chronoCopyToInterface, &parametersMap, innerLoop, "Buffer::chronoCopyToInterface");
-        loop->plot(chronoCopyFromInterface, &parametersMap, innerLoop, "Buffer::chronoCopyFromInterface");
+        loop->plot(chronoCopyToInterface, &parametersMap, innerLoop,
+                "Buffer::chronoCopyToInterface");
+        loop->plot(chronoCopyFromInterface, &parametersMap, innerLoop,
+                "Buffer::chronoCopyFromInterface");
         loop->plot(chronoClone, &parametersMap, innerLoop, "Buffer::chronoClone");
 
         // exclude BYTE
