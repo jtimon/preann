@@ -71,6 +71,7 @@ class MemoryManagement
 public:
     static void* malloc(unsigned size);
     static void free(void* ptr);
+    static void clear();
     static void printTotalAllocated();
     static void printTotalPointers();
     static void printListOfPointers();
@@ -79,8 +80,7 @@ public:
 };
 
 typedef std::vector<std::pair<unsigned, unsigned> > pair_vect;
-typedef std::vector<std::pair<unsigned, unsigned> >::iterator
-        pair_vect_iterator;
+typedef std::vector<std::pair<unsigned, unsigned> >::iterator pair_vect_iterator;
 
 class SimpleGraph
 {

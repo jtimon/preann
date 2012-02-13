@@ -56,6 +56,15 @@ void MemoryManagement::free(void* ptr)
     }
 }
 
+void MemoryManagement::clear()
+{
+    for (int i = 0; i < ptrs.size(); i++) {
+        std::free(ptrs[i]);
+    }
+    ptrs.clear();
+    sizes.clear();
+}
+
 void MemoryManagement::printTotalAllocated()
 {
     unsigned totalAllocated = 0;
@@ -71,9 +80,8 @@ void MemoryManagement::printTotalAllocated()
         mb = kb / 1024;
         kb = kb % 1024;
     }
-    cout << "There are " << mb << " MB " << kb << " KB and " << b
-            << " Bytes allocated. ( total " << totalAllocated << " Bytes )"
-            << endl;
+    cout << "There are " << mb << " MB " << kb << " KB and " << b << " Bytes allocated. ( total "
+            << totalAllocated << " Bytes )" << endl;
 }
 
 void MemoryManagement::printTotalPointers()
@@ -84,8 +92,7 @@ void MemoryManagement::printTotalPointers()
 void MemoryManagement::printListOfPointers()
 {
     for (int i = 0; i < ptrs.size(); i++) {
-        printf(" %d mem_address %d  size = %d \n", i, (unsigned)ptrs[i],
-                sizes[i]);
+        printf(" %d mem_address %d  size = %d \n", i, (unsigned)ptrs[i], sizes[i]);
     }
 }
 
@@ -130,8 +137,8 @@ SimpleGraph::~SimpleGraph()
 void SimpleGraph::addConnection(unsigned source, unsigned destination)
 {
     std::pair<unsigned, unsigned> m_pair = std::make_pair(source, destination);
-    std::vector<std::pair<unsigned, unsigned> >::iterator iter = std::find(
-            graph.begin(), graph.end(), m_pair);
+    std::vector<std::pair<unsigned, unsigned> >::iterator iter =
+            std::find(graph.begin(), graph.end(), m_pair);
     if (iter == graph.end()) {
         graph.push_back(m_pair);
     }
@@ -139,8 +146,8 @@ void SimpleGraph::addConnection(unsigned source, unsigned destination)
 
 bool SimpleGraph::removeConnection(unsigned source, unsigned destination)
 {
-    std::vector<std::pair<unsigned, unsigned> >::iterator iter = std::find(
-            graph.begin(), graph.end(), std::make_pair(source, destination));
+    std::vector<std::pair<unsigned, unsigned> >::iterator iter =
+            std::find(graph.begin(), graph.end(), std::make_pair(source, destination));
     if (iter != graph.end()) {
         graph.erase(iter);
         return true;
@@ -150,8 +157,8 @@ bool SimpleGraph::removeConnection(unsigned source, unsigned destination)
 
 bool SimpleGraph::checkConnection(unsigned source, unsigned destination)
 {
-    std::vector<std::pair<unsigned, unsigned> >::iterator iter = std::find(
-            graph.begin(), graph.end(), std::make_pair(source, destination));
+    std::vector<std::pair<unsigned, unsigned> >::iterator iter =
+            std::find(graph.begin(), graph.end(), std::make_pair(source, destination));
     if (iter != graph.end()) {
         return true;
     }
