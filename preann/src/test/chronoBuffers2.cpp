@@ -14,8 +14,8 @@ using namespace std;
     Buffer* buffer = Dummy::buffer(parametersMap);
 
 #define END                                                                             \
-    delete (buffer);                                                                    \
     parametersMap->putNumber("timeCount", chrono.getSeconds());                         \
+    delete (buffer);                                                                    \
 
 void chronoCopyToInterface(ParametersMap* parametersMap)
 {
@@ -49,8 +49,7 @@ void chronoActivation(ParametersMap* parametersMap)
 {
     START
 
-    Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT,
-            buffer->getImplementationType());
+    Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT, buffer->getImplementationType());
     chrono.start();
     for (unsigned i = 0; i < repetitions; ++i) {
         buffer->activation(results, FT_IDENTITY);
@@ -80,37 +79,41 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Loop* loop;
         ParametersMap parametersMap;
         parametersMap.putString("path", "/home/timon/workspace/preann/output/");
         parametersMap.putNumber("initialWeighsRange", 20);
         parametersMap.putNumber("repetitions", 20);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        parametersMap.putString(PLOT_LOOP, "size");
+        parametersMap.putNumber(PLOT_MIN, 1000);
+        parametersMap.putNumber(PLOT_MAX, 10001);
+        parametersMap.putNumber(PLOT_INC, 1000);
 
-        Loop* innerLoop = new RangeLoop("size", 1000, 10000, 1000, NULL);
-        parametersMap.putString("lineColor", Enumerations::enumTypeToString(ET_IMPLEMENTATION));
-        parametersMap.putString("pointType", Enumerations::enumTypeToString(ET_BUFFER));
+        Loop* loop = NULL;
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER),
-                ET_BUFFER, NULL);
+        EnumLoop* implTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
+                                              ET_IMPLEMENTATION, loop);
+        loop = implTypeLoop;
+
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop);
         loop = bufferTypeLoop;
 
-        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION,
-                loop);
+        parametersMap.putPtr(PLOT_LINE_COLOR_LOOP, implTypeLoop);
+        parametersMap.putPtr(PLOT_POINT_TYPE_LOOP, bufferTypeLoop);
 
         loop->print();
 
-        loop->plot(chronoCopyToInterface, &parametersMap, innerLoop,
-                "Buffer::chronoCopyToInterface");
-        loop->plot(chronoCopyFromInterface, &parametersMap, innerLoop,
-                "Buffer::chronoCopyFromInterface");
-        loop->plot(chronoClone, &parametersMap, innerLoop, "Buffer::chronoClone");
+        loop->plot(chronoCopyToInterface, &parametersMap, "Buffer_copyToInterface", "size", 1000, 10001, 3000);
+//        loop->plot(chronoCopyFromInterface, &parametersMap, "Buffer_copyFromInterface", "size", 1000, 10001, 3000);
+//        loop->plot(chronoClone, &parametersMap, "Buffer_clone", "size", 1000, 10001, 3000);
+//
+//        // exclude BYTE
+//        bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
+//        loop->print();
+//
+//        loop->plot(chronoActivation, &parametersMap, "Buffer_activation", "size", 1000, 10001, 3000);
 
-        // exclude BYTE
-        bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
-        loop->print();
-
-        loop->plot(chronoActivation, &parametersMap, innerLoop, "Buffer::chronoActivation");
+        delete (loop);
 
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();

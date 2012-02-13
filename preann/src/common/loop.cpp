@@ -34,58 +34,82 @@ string Loop::getKey()
     return tKey;
 }
 
-void Loop::repeatFunctionBase(void(*func)(ParametersMap*),
-        ParametersMap* parametersMap)
-{
-    if (tInnerLoop) {
-        tInnerLoop->setCallerLoop(this);
-        tInnerLoop->repeatFunction(func, parametersMap);
-    } else {
-        (*func)(parametersMap);
-    }
-}
-
-void Loop::repeatActionBase(void(*action)(void(*)(ParametersMap*),
-        ParametersMap* parametersMap, Loop* functionLoop), void(*func)(
-        ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
-{
-    if (tInnerLoop) {
-        tInnerLoop->setCallerLoop(this);
-        tInnerLoop->repeatAction(action, func, parametersMap, functionLoop);
-    } else {
-        parametersMap->putPtr("actionLoop", this);
-        (*action)(func, parametersMap, functionLoop);
-    }
-}
-
 void Loop::setCallerLoop(Loop* callerLoop)
 {
     tCallerLoop = callerLoop;
 }
 
-void testAction(void(*f)(ParametersMap*), ParametersMap* parametersMap,
-        Loop* functionLoop)
+void Loop::repeatFunctionBase(void(*func)(ParametersMap*), ParametersMap* parametersMap)
+{
+    if (tInnerLoop) {
+        tInnerLoop->setCallerLoop(this);
+        tInnerLoop->repeatFunctionImpl(func, parametersMap);
+    } else {
+        parametersMap->putString(LOOP_STATE, this->getState(true));
+        (*func)(parametersMap);
+    }
+}
+
+void Loop::repeatActionBase(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
+                            void(*func)(ParametersMap*), ParametersMap* parametersMap)
+{
+    if (tInnerLoop) {
+        tInnerLoop->setCallerLoop(this);
+        tInnerLoop->repeatActionImpl(action, func, parametersMap);
+    } else {
+        parametersMap->putString(LOOP_STATE, this->getState(true));
+        (*action)(func, parametersMap);
+    }
+}
+
+void Loop::repeatFunction(void(*func)(ParametersMap*), ParametersMap* parametersMap,
+                          std::string functionLabel)
+{
+    cout << "Repeating function... " << functionLabel << endl;
+    this->setCallerLoop(NULL);
+    try {
+        this->repeatFunctionImpl(func, parametersMap);
+    } catch (string e) {
+        cout << "Error while repeating function... " << functionLabel << endl;
+    }
+
+    parametersMap->putString(LOOP_LABEL, functionLabel);
+    this->setCallerLoop(NULL);
+}
+
+void Loop::repeatAction(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
+                        void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel)
+{
+    cout << "Repeating action... " << functionLabel << endl;
+    this->setCallerLoop(NULL);
+    try {
+        this->repeatActionImpl(action, func, parametersMap);
+    } catch (string e) {
+        cout << "Error while repeating action... " << functionLabel << endl;
+    }
+}
+
+void testAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
 {
     try {
         f(parametersMap);
-        unsigned differencesCounter = parametersMap->getNumber(
-                "differencesCounter");
+        unsigned differencesCounter = parametersMap->getNumber("differencesCounter");
         if (differencesCounter > 0) {
-            Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
-            cout << actionLoop->getState() << " : " << differencesCounter
-                    << " differences detected." << endl;
+            string state = parametersMap->getString(LOOP_STATE);
+            cout << state << " : " << differencesCounter << " differences detected." << endl;
         }
     } catch (string e) {
-        string functionLabel = parametersMap->getString("functionLabel");
-        cout << " while testing " + functionLabel + " : " + e << endl;
+        cout << " while testing " + parametersMap->getString(LOOP_LABEL) + " at state "
+                + parametersMap->getString(LOOP_STATE) + " : " + e << endl;
     }
 }
-void Loop::test(void(*func)(ParametersMap*), ParametersMap* parametersMap,
-        std::string functionLabel)
+void Loop::test(void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel)
 {
-    parametersMap->putString("functionLabel", functionLabel);
     cout << "Testing... " << functionLabel << endl;
-    repeatAction(testAction, func, parametersMap, NULL);
+    parametersMap->putString(LOOP_LABEL, functionLabel);
+
+    this->setCallerLoop(NULL);
+    repeatActionImpl(testAction, func, parametersMap);
 }
 
 unsigned Loop::valueToUnsigned()
@@ -135,61 +159,53 @@ int mapLineColor(unsigned value)
             return 4;
     }
 }
-int Loop::getLineColor(ParametersMap* parametersMap)
-{
-    try {
-        string lineColorParam = parametersMap->getString("lineColor");
-        if (lineColorParam.compare(tKey) == 0) {
-            return mapLineColor(valueToUnsigned());
-        } else {
-            return this->tCallerLoop->getLineColor(parametersMap);
-        }
-    } catch (string e) {
-        return mapLineColor(0);
-    }
-}
-
-int Loop::getPointType(ParametersMap* parametersMap)
-{
-    try {
-        string pointTypeParam = parametersMap->getString("pointType");
-        if (pointTypeParam.compare(tKey) == 0) {
-            return mapLineColor(valueToUnsigned());
-        } else {
-            return this->tCallerLoop->getLineColor(parametersMap);
-        }
-    } catch (string e) {
-        return mapLineColor(0);
-    }
-}
 
 void preparePlotFunction(ParametersMap* parametersMap)
 {
-    string subPath = parametersMap->getString("subPath");
     FILE* plotFile = (FILE*)parametersMap->getPtr("plotFile");
 
+    // after the first one, end the previous line with a comma
     unsigned first = parametersMap->getNumber("first");
-    Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
-    string state = actionLoop->getState();
-
-    if (!first) {
-        fprintf(plotFile, " , ");
+    if (first) {
         parametersMap->putNumber("first", 0);
+    } else {
+        fprintf(plotFile, " , \\\n\t");
     }
-    string dataPath = subPath + state + ".DAT";
-    int lineColor = actionLoop->getLineColor(parametersMap);
-    int pointType = actionLoop->getPointType(parametersMap);
 
-    string line = " \"" + dataPath + "\" using 1:2 title \"" + state
-            + "\" with linespoints lt " + to_string(lineColor) + " pt "
-            + to_string(pointType);
+    string state = parametersMap->getString(LOOP_STATE);
+    string subPath = parametersMap->getString("subPath");
+    string dataPath = subPath + state + ".DAT";
+
+    string line = " \"" + dataPath + "\" using 1:2 title \"" + state + "\"";
+
+    Loop* lineColorLoop = NULL;
+    Loop* pointTypeLoop = NULL;
+    try {
+        lineColorLoop = (Loop*)parametersMap->getPtr(PLOT_LINE_COLOR_LOOP);
+    } catch (string e) {
+    };
+    try {
+        pointTypeLoop = (Loop*)parametersMap->getPtr(PLOT_POINT_TYPE_LOOP);
+    } catch (string e) {
+    };
+
+    int lineColor = mapLineColor(1000);
+    int pointType = mapPointType(1000);
+    if (lineColorLoop != NULL) {
+        lineColor = mapLineColor(lineColorLoop->valueToUnsigned());
+    }
+    if (lineColorLoop != NULL) {
+        pointType = mapPointType(pointTypeLoop->valueToUnsigned());
+    }
+    line += " with linespoints lt " + to_string(lineColor);
+    line += " pt " + to_string(pointType);
+
     fprintf(plotFile, "%s", line.data());
 }
-void Loop::createGnuPlotScript(void(*func)(ParametersMap*),
-        ParametersMap* parametersMap)
+void Loop::createGnuPlotScript(void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
     string path = parametersMap->getString("path");
-    string functionLabel = parametersMap->getString("functionLabel");
+    string functionLabel = parametersMap->getString(LOOP_LABEL);
 
     string plotPath = path + "gnuplot/" + functionLabel + ".plt";
     string outputPath = path + "images/" + functionLabel + ".png";
@@ -197,6 +213,15 @@ void Loop::createGnuPlotScript(void(*func)(ParametersMap*),
     FILE* plotFile = openFile(plotPath);
 
     fprintf(plotFile, "set terminal png \n");
+    fprintf(plotFile, "set key outside \n");
+    fprintf(plotFile, "set key box \n");
+
+    //TODO mover xAxis
+    string xAxis = "Size";
+    string yAxis = "Time (seconds)";
+    fprintf(plotFile, "set title \"%s\" \n", functionLabel.data());
+    fprintf(plotFile, "set xlabel \"%s\" \n", xAxis.data());
+    fprintf(plotFile, "set ylabel \"%s\" \n", yAxis.data());
     fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
     fprintf(plotFile, "plot ");
 
@@ -208,7 +233,7 @@ void Loop::createGnuPlotScript(void(*func)(ParametersMap*),
     parametersMap->putNumber("first", 1);
 
     try {
-        repeatFunction(preparePlotFunction, parametersMap);
+        this->repeatFunctionImpl(preparePlotFunction, parametersMap);
     } catch (string e) {
         string error = " while repeating preparePlotFunction : " + e;
         throw error;
@@ -218,39 +243,38 @@ void Loop::createGnuPlotScript(void(*func)(ParametersMap*),
     fclose(plotFile);
 }
 
-void plotInnerAction(void(*f)(ParametersMap*), ParametersMap* parametersMap,
-        Loop* functionLoop)
+void plotAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
 {
-    parametersMap->putNumber("totalTime", 0);
-    parametersMap->putNumber("repetitions", 0);
+    try {
+        string path = parametersMap->getString("path");
+        string functionLabel = parametersMap->getString(LOOP_LABEL);
+        string state = parametersMap->getString(LOOP_STATE);
+        unsigned repetitions = parametersMap->getNumber("repetitions");
 
-    functionLoop->repeatFunction(f, parametersMap);
+        string dataPath = path + "data/" + functionLabel + "_" + state + ".DAT";
+        FILE* dataFile = openFile(dataPath);
+        fprintf(dataFile, "# Iterator %s \n", state.data());
 
-    FILE* dataFile = (FILE*)parametersMap->getPtr("dataFile");
-    string plotLoopValueKey = parametersMap->getString("plotLoopValue");
-    float plotLoopValue = parametersMap->getNumber(plotLoopValueKey);
-    float totalTime = parametersMap->getNumber("totalTime");
-    unsigned repetitions = parametersMap->getNumber("repetitions");
-    fprintf(dataFile, " %f %f \n", plotLoopValue, totalTime / repetitions);
-}
-void plotAction(void(*f)(ParametersMap*), ParametersMap* parametersMap,
-        Loop* functionLoop)
-{
-    string path = parametersMap->getString("path");
-    string functionLabel = parametersMap->getString("functionLabel");
-    Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
-    string state = actionLoop->getState();
+        string plotVar = parametersMap->getString(PLOT_LOOP);
+        float min = parametersMap->getNumber(PLOT_MIN);
+        float max = parametersMap->getNumber(PLOT_MAX);
+        float inc = parametersMap->getNumber(PLOT_INC);
 
-    string dataPath = path + "data/" + functionLabel + "_" + state + ".DAT";
-    FILE* dataFile = openFile(dataPath);
-    fprintf(dataFile, "# Iterator %s \n", state.data());
+        for (float i = min; i < max; i += inc) {
+            parametersMap->putNumber(plotVar, i);
+            parametersMap->putNumber("timeCount", 0);
 
-    parametersMap->putPtr("dataFile", dataFile);
-    Loop* plotLoop = (Loop*)parametersMap->getPtr("plotLoop");
-    parametersMap->putString("plotLoopValue", plotLoop->getKey());
-    plotLoop->repeatAction(plotInnerAction, f, parametersMap, functionLoop);
+            f(parametersMap);
 
-    fclose(dataFile);
+            float totalTime = parametersMap->getNumber("timeCount");
+            fprintf(dataFile, " %f %f \n", i, totalTime / repetitions);
+        }
+
+        fclose(dataFile);
+    } catch (string e) {
+        cout << " while testing " + parametersMap->getString(LOOP_LABEL) + " at state "
+                + parametersMap->getString(LOOP_STATE) + " : " + e << endl;
+    }
 }
 void plotFile(string path, string functionLabel)
 {
@@ -258,18 +282,19 @@ void plotFile(string path, string functionLabel)
     string syscommand = "gnuplot " + plotPath;
     system(syscommand.data());
 }
-void Loop::plot(void(*func)(ParametersMap*), ParametersMap* parametersMap,
-        Loop* innerLoop, std::string functionLabel)
+void Loop::plot(void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel,
+                std::string plotVarKey, float min, float max, float inc)
 {
-    parametersMap->putString("functionLabel", functionLabel);
     cout << "Plotting... " << functionLabel << endl;
+    parametersMap->putString(LOOP_LABEL, functionLabel);
+
     createGnuPlotScript(func, parametersMap);
 
-    this->repeatAction(plotAction, func, parametersMap, innerLoop);
+    this->setCallerLoop(NULL);
+    this->repeatActionImpl(plotAction, func, parametersMap);
 
     string path = parametersMap->getString("path");
     plotFile(path, functionLabel);
-    cout << functionLabel << endl;
 }
 
 Loop* Loop::findLoop(std::string key)
@@ -283,9 +308,21 @@ Loop* Loop::findLoop(std::string key)
     return tInnerLoop->findLoop(key);
 }
 
+std::string Loop::getState(bool longVersion)
+{
+    string state = "";
+    if (tCallerLoop != NULL) {
+        state += tCallerLoop->getState(longVersion) + "_";
+    }
+    if (longVersion) {
+        state += tKey + "_";
+    }
+    state += this->valueToString();
+    return state;
+}
+
 // class RangeLoop
-RangeLoop::RangeLoop(std::string key, float min, float max, float inc,
-        Loop* innerLoop) :
+RangeLoop::RangeLoop(std::string key, float min, float max, float inc, Loop* innerLoop) :
     Loop(key, innerLoop)
 {
     tMin = min;
@@ -319,35 +356,32 @@ unsigned RangeLoop::valueToUnsigned()
 void RangeLoop::print()
 {
     if (tMin + tInc < tMax) {
-        cout << tKey << ": from " << tMin << " to " << tMax << " by " << tInc
-                << endl;
+        cout << tKey << ": from " << tMin << " to " << tMax << " by " << tInc << endl;
     }
     if (tInnerLoop != NULL) {
         tInnerLoop->print();
     }
 }
 
-std::string RangeLoop::getState()
+std::string RangeLoop::valueToString()
 {
-    return tCallerLoop->getState() + "_" + tKey + "_" + to_string(tValue);
+    return to_string(tValue);
 }
 
-void RangeLoop::repeatFunction(void(*func)(ParametersMap*),
-        ParametersMap* parametersMap)
+void RangeLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
     for (tValue = tMin; tValue < tMax; tValue += tInc) {
         parametersMap->putNumber(tKey, tValue);
-        repeatFunctionBase(func, parametersMap);
+        this->repeatFunctionBase(func, parametersMap);
     }
 }
 
-void RangeLoop::repeatAction(void(*action)(void(*)(ParametersMap*),
-        ParametersMap* parametersMap, Loop* functionLoop), void(*func)(
-        ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
+void RangeLoop::repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
+                                 void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
     for (tValue = tMin; tValue < tMax; tValue += tInc) {
         parametersMap->putNumber(tKey, tValue);
-        repeatActionBase(action, func, parametersMap, functionLoop);
+        this->repeatActionBase(action, func, parametersMap);
     }
 }
 
@@ -355,7 +389,7 @@ void RangeLoop::repeatAction(void(*action)(void(*)(ParametersMap*),
 EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop) :
     Loop(key, innerLoop)
 {
-    withAll(enumType);
+    this->withAll(enumType);
 }
 
 unsigned EnumLoop::valueToUnsigned()
@@ -363,16 +397,21 @@ unsigned EnumLoop::valueToUnsigned()
     return tValueVector[tIndex];
 }
 
-EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop,
-        unsigned count, ...) :
+unsigned EnumLoop::reset(EnumType enumType)
+{
+    tEnumType = enumType;
+    tValueVector.clear();
+    tIndex = 0;
+}
+
+EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop, unsigned count, ...) :
     Loop(key, innerLoop)
 {
     if (count == 0) {
         string error = "EnumLoop : at least one enum value must be specified.";
         throw error;
     }
-    tEnumType = enumType;
-    tValueVector.clear();
+    this->reset(enumType);
 
     va_list ap;
     va_start(ap, count);
@@ -381,9 +420,8 @@ EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop,
     for (unsigned i = 0; i < count; i++) {
         unsigned arg = va_arg (ap, unsigned);
         if (arg > dim) {
-            string error = "EnumLoop : the enumType "
-                    + Enumerations::enumTypeToString(enumType) + " only has "
-                    + to_string(dim) + "possible values.";
+            string error = "EnumLoop : the enumType " + Enumerations::enumTypeToString(enumType)
+                    + " only has " + to_string(dim) + "possible values.";
             throw error;
         } else {
             tValueVector.push_back(arg);
@@ -398,8 +436,7 @@ EnumLoop::~EnumLoop()
 
 void EnumLoop::withAll(EnumType enumType)
 {
-    tEnumType = enumType;
-    tValueVector.clear();
+    this->reset(enumType);
 
     unsigned dim = Enumerations::enumTypeDim(enumType);
     for (unsigned i = 0; i < dim; i++) {
@@ -409,8 +446,7 @@ void EnumLoop::withAll(EnumType enumType)
 
 void EnumLoop::with(EnumType enumType, unsigned count, ...)
 {
-    tEnumType = enumType;
-    tValueVector.clear();
+    this->reset(enumType);
 
     va_list ap;
     va_start(ap, count);
@@ -418,7 +454,11 @@ void EnumLoop::with(EnumType enumType, unsigned count, ...)
     unsigned dim = Enumerations::enumTypeDim(enumType);
     for (unsigned i = 0; i < count; i++) {
         unsigned arg = va_arg (ap, unsigned);
-        if (arg < dim) {
+        if (arg > dim) {
+            string error = "EnumLoop::with : the enumType " + Enumerations::enumTypeToString(enumType)
+                    + " only has " + to_string(dim) + "possible values.";
+            throw error;
+        } else {
             tValueVector.push_back(arg);
         }
     }
@@ -427,7 +467,7 @@ void EnumLoop::with(EnumType enumType, unsigned count, ...)
 
 void EnumLoop::exclude(EnumType enumType, unsigned count, ...)
 {
-    withAll(enumType);
+    this->withAll(enumType);
 
     va_list ap;
     va_start(ap, count);
@@ -460,28 +500,25 @@ void EnumLoop::print()
     }
 }
 
-std::string EnumLoop::getState()
+std::string EnumLoop::valueToString()
 {
-    return tCallerLoop->getState() + "_" + tKey + "_" + Enumerations::toString(
-            tEnumType, tValueVector[tIndex]);
+    return Enumerations::toString(tEnumType, tValueVector[tIndex]);
 }
 
-void EnumLoop::repeatFunction(void(*func)(ParametersMap*),
-        ParametersMap* parametersMap)
+void EnumLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
-    for (int i = 0; i < tValueVector.size(); ++i) {
-        parametersMap->putNumber(tKey, tValueVector[i]);
-        repeatFunctionBase(func, parametersMap);
+    for (tIndex = 0; tIndex < tValueVector.size(); ++tIndex) {
+        parametersMap->putNumber(tKey, tValueVector[tIndex]);
+        this->repeatFunctionBase(func, parametersMap);
     }
 }
 
-void EnumLoop::repeatAction(void(*action)(void(*)(ParametersMap*),
-        ParametersMap* parametersMap, Loop* functionLoop), void(*func)(
-        ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
+void EnumLoop::repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
+                                void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
-    for (int i = 0; i < tValueVector.size(); ++i) {
-        parametersMap->putNumber(tKey, tValueVector[i]);
-        repeatActionBase(action, func, parametersMap, functionLoop);
+    for (tIndex = 0; tIndex < tValueVector.size(); ++tIndex) {
+        parametersMap->putNumber(tKey, tValueVector[tIndex]);
+        this->repeatActionBase(action, func, parametersMap);
     }
 }
 
@@ -533,38 +570,44 @@ void JoinLoop::print()
     }
 }
 
-std::string JoinLoop::getState()
+std::string JoinLoop::valueToString()
 {
-    return tCallerLoop->getState();
+    string error = "JoinLoop::valueToString should not be called!";
+    throw error;
 }
 
-void JoinLoop::repeatFunction(void(*func)(ParametersMap*),
-        ParametersMap* parametersMap)
+std::string JoinLoop::getState(bool longVersion)
+{
+    string state = "";
+    if (tCallerLoop != NULL) {
+        state = tCallerLoop->getState(longVersion);
+    }
+    return state;
+}
+
+void JoinLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
     for (int i = 0; i < tInnerLoops.size(); ++i) {
         tInnerLoops[i]->setCallerLoop(this);
-        tInnerLoops[i]->repeatFunction(func, parametersMap);
+        tInnerLoops[i]->repeatFunctionImpl(func, parametersMap);
     }
 }
 
-void JoinLoop::repeatAction(void(*action)(void(*)(ParametersMap*),
-        ParametersMap* parametersMap, Loop* functionLoop), void(*func)(
-        ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
+void JoinLoop::repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
+                                void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
     for (int i = 0; i < tInnerLoops.size(); ++i) {
         tInnerLoops[i]->setCallerLoop(this);
-        tInnerLoops[i]->repeatAction(action, func, parametersMap, functionLoop);
+        tInnerLoops[i]->repeatActionImpl(action, func, parametersMap);
     }
 }
 
 // class EnumValueLoop
-EnumValueLoop::EnumValueLoop(std::string key, EnumType enumType,
-        unsigned enumValue, Loop* innerLoop) :
+EnumValueLoop::EnumValueLoop(std::string key, EnumType enumType, unsigned enumValue, Loop* innerLoop) :
     Loop(key, innerLoop)
 {
     if (innerLoop == NULL) {
-        string error =
-                "EnumValueLoop : EnumValueLoop makes no sense if it has no inner loop.";
+        string error = "EnumValueLoop : EnumValueLoop makes no sense if it has no inner loop.";
         throw error;
     }
     tEnumType = enumType;
@@ -584,25 +627,22 @@ void EnumValueLoop::print()
     }
 }
 
-std::string EnumValueLoop::getState()
+std::string EnumValueLoop::valueToString()
 {
-    return tCallerLoop->getState() + "_" + tKey + "_" + Enumerations::toString(
-            tEnumType, tEnumValue);
+    return Enumerations::toString(tEnumType, tEnumValue);
 }
 
-void EnumValueLoop::repeatFunction(void(*func)(ParametersMap*),
-        ParametersMap* parametersMap)
+void EnumValueLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
     parametersMap->putNumber(tKey, tEnumValue);
     tInnerLoop->setCallerLoop(this);
-    tInnerLoop->repeatFunction(func, parametersMap);
+    tInnerLoop->repeatFunctionImpl(func, parametersMap);
 }
 
-void EnumValueLoop::repeatAction(void(*action)(void(*)(ParametersMap*),
-        ParametersMap* parametersMap, Loop* functionLoop), void(*func)(
-        ParametersMap*), ParametersMap* parametersMap, Loop* functionLoop)
+void EnumValueLoop::repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
+                                     void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
     parametersMap->putNumber(tKey, tEnumValue);
     tInnerLoop->setCallerLoop(this);
-    tInnerLoop->repeatAction(action, func, parametersMap, functionLoop);
+    tInnerLoop->repeatActionImpl(action, func, parametersMap);
 }

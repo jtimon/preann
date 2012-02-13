@@ -16,13 +16,14 @@ void checkAndPrintErrors(string testingClass, ParametersMap* parametersMap)
     if (MemoryManagement::getPtrCounter() > 0
             || MemoryManagement::getTotalAllocated() > 0) {
 
-        Loop* actionLoop = (Loop*)parametersMap->getPtr("actionLoop");
+        string state = parametersMap->getString(LOOP_STATE);
 
         cout << "Memory loss detected testing class " << testingClass
-                << " at state " << actionLoop->getState() << ".\n" << endl;
+                << " at state " << state << ".\n" << endl;
 
         MemoryManagement::printTotalAllocated();
         MemoryManagement::printTotalPointers();
+        MemoryManagement::clear();
         memoryLosses++;
     }
 }
@@ -31,6 +32,7 @@ void testBuffer(ParametersMap* parametersMap)
 {
     Buffer* buffer = Dummy::buffer(parametersMap);
     delete (buffer);
+//    unsigned* aa = (unsigned*)MemoryManagement::malloc(sizeof(unsigned) * 5);
 
     checkAndPrintErrors("Buffer", parametersMap);
 }
@@ -50,7 +52,7 @@ void testLayer(ParametersMap* parametersMap)
 {
     Buffer* buffer = Dummy::buffer(parametersMap);
     Layer* layer = Dummy::layer(parametersMap, buffer);
-    
+
     delete (layer);
     delete (buffer);
 
@@ -136,37 +138,27 @@ int main(int argc, char *argv[])
 
         loop->print();
 
-        //        parametersMap.putString("functionLabel", "test loops");
-        //        loop->repeatFunction(testLoops, &parametersMap);
+//        loop->repeatFunction(testLoops, &parametersMap, "test loops");
 
-
-        parametersMap.putString("functionLabel", "Buffer::memory_test");
-        cout << parametersMap.getString("functionLabel") << endl;
-        loop->repeatFunction(testBuffer, &parametersMap);
+        loop->repeatFunction(testBuffer, &parametersMap, "Buffer::memory_test");
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         loop->print();
 
-        parametersMap.putString("functionLabel", "Connection::memory_test");
-        cout << parametersMap.getString("functionLabel") << endl;
-        loop->repeatFunction(testConnection, &parametersMap);
+        loop->repeatFunction(testConnection, &parametersMap, "Connection::memory_test");
 
         RangeLoop* numInputsLoop = new RangeLoop("numInputs", 1, 3, 1, loop);
         loop = numInputsLoop;
         loop->print();
 
-        parametersMap.putString("functionLabel", "Layer::memory_test");
-        cout << parametersMap.getString("functionLabel") << endl;
-        loop->repeatFunction(testLayer, &parametersMap);
+        loop->repeatFunction(testLayer, &parametersMap, "Layer::memory_test");
 
         RangeLoop* numLayersLoop = new RangeLoop("numLayers", 1, 3, 1, loop);
         loop = numLayersLoop;
         loop->print();
 
-        parametersMap.putString("functionLabel", "NeuralNet::memory_test");
-        cout << parametersMap.getString("functionLabel") << endl;
-        loop->repeatFunction(testNeuralNet, &parametersMap);
+        loop->repeatFunction(testNeuralNet, &parametersMap, "NeuralNet::memory_test");
 
         sizeLoop->resetRange(1, 3, 1);
         outputSizeLoop->resetRange(1, 1, 1);
@@ -174,9 +166,7 @@ int main(int argc, char *argv[])
         numLayersLoop->resetRange(1, 1, 1);
         loop->print();
 
-        parametersMap.putString("functionLabel", "Population::memory_test");
-        cout << parametersMap.getString("functionLabel") << endl;
-        loop->repeatFunction(testPopulation, &parametersMap);
+        loop->repeatFunction(testPopulation, &parametersMap, "Population::memory_test");
 
         delete (loop);
 
