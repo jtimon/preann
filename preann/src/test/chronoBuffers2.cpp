@@ -81,13 +81,11 @@ int main(int argc, char *argv[])
     try {
         ParametersMap parametersMap;
         parametersMap.putString("path", "/home/timon/workspace/preann/output/");
+        parametersMap.putString(PLOT_X_AXIS, "Size");
+        parametersMap.putString(PLOT_Y_AXIS, "Time (seconds)");
         parametersMap.putNumber("initialWeighsRange", 20);
-        parametersMap.putNumber("repetitions", 20);
+        parametersMap.putNumber("repetitions", 100);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
-        parametersMap.putString(PLOT_LOOP, "size");
-        parametersMap.putNumber(PLOT_MIN, 1000);
-        parametersMap.putNumber(PLOT_MAX, 10001);
-        parametersMap.putNumber(PLOT_INC, 1000);
 
         Loop* loop = NULL;
 
@@ -103,15 +101,16 @@ int main(int argc, char *argv[])
 
         loop->print();
 
-        loop->plot(chronoCopyToInterface, &parametersMap, "Buffer_copyToInterface", "size", 1000, 10001, 3000);
-//        loop->plot(chronoCopyFromInterface, &parametersMap, "Buffer_copyFromInterface", "size", 1000, 10001, 3000);
-//        loop->plot(chronoClone, &parametersMap, "Buffer_clone", "size", 1000, 10001, 3000);
-//
-//        // exclude BYTE
-//        bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
-//        loop->print();
-//
-//        loop->plot(chronoActivation, &parametersMap, "Buffer_activation", "size", 1000, 10001, 3000);
+        loop->plot(chronoCopyToInterface, &parametersMap, "Buffer_copyToInterface", "size", 2000, 20001, 2000);
+        loop->plot(chronoCopyFromInterface, &parametersMap, "Buffer_copyFromInterface", "size", 2000, 20001,
+                   2000);
+        loop->plot(chronoClone, &parametersMap, "Buffer_clone", "size", 1000, 10001, 3000);
+
+        // exclude BYTE
+        bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
+        loop->print();
+
+        loop->plot(chronoActivation, &parametersMap, "Buffer_activation", "size", 2000, 20001, 2000);
 
         delete (loop);
 
