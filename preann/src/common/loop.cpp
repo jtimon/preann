@@ -45,7 +45,7 @@ void Loop::repeatFunctionBase(void(*func)(ParametersMap*), ParametersMap* parame
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->repeatFunctionImpl(func, parametersMap);
     } else {
-        parametersMap->putString(LOOP_STATE, this->getState(true));
+        parametersMap->putString(LOOP_STATE, this->getState(false));
         (*func)(parametersMap);
     }
 }
@@ -57,7 +57,7 @@ void Loop::repeatActionBase(void(*action)(void(*)(ParametersMap*), ParametersMap
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->repeatActionImpl(action, func, parametersMap);
     } else {
-        parametersMap->putString(LOOP_STATE, this->getState(true));
+        parametersMap->putString(LOOP_STATE, this->getState(false));
         (*action)(func, parametersMap);
     }
 }
@@ -206,19 +206,18 @@ void Loop::createGnuPlotScript(void(*func)(ParametersMap*), ParametersMap* param
 {
     string path = parametersMap->getString("path");
     string functionLabel = parametersMap->getString(LOOP_LABEL);
+    string xAxis = parametersMap->getString(PLOT_X_AXIS);
+    string yAxis = parametersMap->getString(PLOT_Y_AXIS);
 
     string plotPath = path + "gnuplot/" + functionLabel + ".plt";
     string outputPath = path + "images/" + functionLabel + ".png";
 
     FILE* plotFile = openFile(plotPath);
 
-    fprintf(plotFile, "set terminal png \n");
-    fprintf(plotFile, "set key outside \n");
+    fprintf(plotFile, "set terminal png size 1024,512 \n");
+    fprintf(plotFile, "set key below\n");
     fprintf(plotFile, "set key box \n");
 
-    //TODO mover xAxis
-    string xAxis = "Size";
-    string yAxis = "Time (seconds)";
     fprintf(plotFile, "set title \"%s\" \n", functionLabel.data());
     fprintf(plotFile, "set xlabel \"%s\" \n", xAxis.data());
     fprintf(plotFile, "set ylabel \"%s\" \n", yAxis.data());
@@ -285,8 +284,14 @@ void plotFile(string path, string functionLabel)
 void Loop::plot(void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel,
                 std::string plotVarKey, float min, float max, float inc)
 {
-    cout << "Plotting... " << functionLabel << endl;
+    cout << "Plotting " << functionLabel << "...";
+    Chronometer chrono;
+    chrono.start();
     parametersMap->putString(LOOP_LABEL, functionLabel);
+    parametersMap->putString(PLOT_LOOP, "size");
+    parametersMap->putNumber(PLOT_MIN, min);
+    parametersMap->putNumber(PLOT_MAX, max);
+    parametersMap->putNumber(PLOT_INC, inc);
 
     createGnuPlotScript(func, parametersMap);
 
@@ -295,6 +300,8 @@ void Loop::plot(void(*func)(ParametersMap*), ParametersMap* parametersMap, std::
 
     string path = parametersMap->getString("path");
     plotFile(path, functionLabel);
+    chrono.stop();
+    cout << chrono.getSeconds() << " segundos." <<endl;
 }
 
 Loop* Loop::findLoop(std::string key)
