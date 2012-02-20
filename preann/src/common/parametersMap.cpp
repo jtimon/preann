@@ -25,8 +25,7 @@ void ParametersMap::putNumber(std::string key, float number)
 float ParametersMap::getNumber(std::string key)
 {
     if (!tNumbers.count(key)) {
-        string error = "ParametersMap::getNumber : There's no number named "
-                + key;
+        string error = "ParametersMap::getNumber : There's no number named " + key;
         throw error;
     }
     return tNumbers[key];
@@ -40,8 +39,7 @@ void ParametersMap::putPtr(std::string key, void* ptr)
 void* ParametersMap::getPtr(std::string key)
 {
     if (!tPtrs.count(key)) {
-        string error = "ParametersMap::getPtr : There's no pointer named "
-                + key;
+        string error = "ParametersMap::getPtr : There's no pointer named " + key;
         throw error;
     }
     return tPtrs[key];
@@ -54,11 +52,20 @@ void ParametersMap::putString(std::string key, std::string str)
 std::string ParametersMap::getString(std::string key)
 {
     if (!tStrings.count(key)) {
-        string error = "ParametersMap::getString : There's no string named "
-                + key;
+        string error = "ParametersMap::getString : There's no string named " + key;
         throw error;
     }
     return tStrings[key];
+}
+
+std::string ParametersMap::printNumber(std::string key)
+{
+    return key + "_" + to_string(this->getNumber(key));
+}
+
+std::string ParametersMap::printString(std::string key)
+{
+    return key + "_" + this->getString(key);
 }
 
 void ParametersMap::print()
@@ -67,8 +74,7 @@ void ParametersMap::print()
         cout << "Numbers:" << endl;
         std::map<string, float>::iterator numbersIt;
         FOR_EACH(numbersIt, tNumbers) {
-            cout << "    " << numbersIt->first << ": " << numbersIt->second
-                    << endl;
+            cout << "    " << numbersIt->first << ": " << numbersIt->second << endl;
         }
     }
 
@@ -84,8 +90,7 @@ void ParametersMap::print()
         cout << "Strings:" << endl;
         std::map<string, string>::iterator stringsIt;
         FOR_EACH(stringsIt, tStrings) {
-            cout << "    " << stringsIt->first << ": " << stringsIt->second
-                    << endl;
+            cout << "    " << stringsIt->first << ": " << stringsIt->second << endl;
         }
     }
     cout << endl;

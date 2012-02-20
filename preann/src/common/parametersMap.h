@@ -25,6 +25,8 @@ public:
     void putString(std::string key, std::string str);
     std::string getString(std::string key);
 
+    std::string printNumber(std::string key);
+    std::string printString(std::string key);
     void print();
     // All you have
     void copyTo(ParametersMap* parametersMap);
