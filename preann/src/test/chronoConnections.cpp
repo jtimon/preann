@@ -1,18 +1,29 @@
 #include <iostream>
 #include <fstream>
 
-using namespace std;
-
 #include "chronometer.h"
-#include "plot.h"
-#include "factory.h"
+#include "loop.h"
+#include "dummy.h"
+#include "test.h"
 
-float chronoCalculateAndAddTo(Test* test)
+#define START                                                                           \
+    Chronometer chrono;                                                                 \
+    unsigned repetitions = parametersMap->getNumber("repetitions");                     \
+    Buffer* buffer = Dummy::buffer(parametersMap);                                      \
+    Connection* connection = Dummy::connection(parametersMap, buffer);                  \
+    unsigned outputSize = parametersMap->getNumber("outputSize");                       \
+    float initialWeighsRange = parametersMap->getNumber("initialWeighsRange");
+
+#define END                                                                             \
+    parametersMap->putNumber("timeCount", chrono.getSeconds());                         \
+    delete (connection);                                                                \
+    delete (buffer);
+
+void chronoCalculateAndAddTo(ParametersMap* parametersMap)
 {
-    START_CONNECTION_PLOT
+    START
 
-    Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT,
-            connection->getImplementationType());
+    Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT, connection->getImplementationType());
 
     chrono.start();
     for (unsigned i = 0; i < repetitions; ++i) {
@@ -21,12 +32,12 @@ float chronoCalculateAndAddTo(Test* test)
     chrono.stop();
     delete (results);
 
-    END_CONNECTION_PLOT
+    END
 }
 
-float chronoMutate(Test* test)
+void chronoMutate(ParametersMap* parametersMap)
 {
-    START_CONNECTION_PLOT
+    START
 
     unsigned pos = Random::positiveInteger(connection->getSize());
     float mutation = Random::floatNum(initialWeighsRange);
@@ -36,15 +47,15 @@ float chronoMutate(Test* test)
     }
     chrono.stop();
 
-    END_CONNECTION_PLOT
+    END
 }
 
-float chronoCrossover(Test* test)
+void chronoCrossover(ParametersMap* parametersMap)
 {
-    START_CONNECTION_PLOT
+    START
 
-    Connection* other = Factory::newConnection(connection->getInput(),
-            outputSize, connection->getImplementationType());
+    Connection* other = Factory::newConnection(connection->getInput(), outputSize,
+                                               connection->getImplementationType());
     Interface bitVector(connection->getSize(), BT_BIT);
     bitVector.random(2);
     chrono.start();
@@ -54,39 +65,45 @@ float chronoCrossover(Test* test)
     chrono.stop();
     delete (other);
 
-    END_CONNECTION_PLOT
+    END
 }
 
 int main(int argc, char *argv[])
 {
     Chronometer total;
     total.start();
-    string path = "/home/timon/workspace/preann/output/";
-
-    Plot plot;
-    //	plot.putIterator("outputSize", 100, 201, 100);
-    plot.putConstant("outputSize", 100);
-    plot.putConstant("initialWeighsRange", 20);
-    plot.exclude(ET_BUFFER, 1, BT_BYTE);
-    plot.withAll(ET_IMPLEMENTATION);
-
-    plot.setColorEnum(ET_IMPLEMENTATION);
-    plot.setPointEnum(ET_BUFFER);
-
-    plot.printParameters();
-
     try {
-        plot.putPlotIterator("size", 250, 2000, 500);
-        plot.putConstant("repetitions", 1000);
-        plot.plot(chronoMutate, path, "CONNECTION_MUTATE");
+        ParametersMap parametersMap;
+        parametersMap.putString("path", "/home/timon/workspace/preann/output/");
+        parametersMap.putString(PLOT_X_AXIS, "Size");
+        parametersMap.putString(PLOT_Y_AXIS, "Time (seconds)");
+        parametersMap.putNumber("repetitions", 1000);
+        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber("numInputs", 2);
+        parametersMap.putNumber("numMutations", 10);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        plot.putPlotIterator("size", 100, 301, 100);
-        plot.putConstant("repetitions", 10);
-        plot.plot(chronoCrossover, path, "CONNECTION_CROSSOVER");
+        Loop* loop = NULL;
+        loop = new RangeLoop("outputSize", 1, 4, 2, loop);
 
-        plot.putPlotIterator("size", 1000, 2001, 1000);
-        plot.putConstant("repetitions", 1);
-        plot.plot(chronoCalculateAndAddTo, path, "CONNECTION_CALCULATEANDADDTO");
+        EnumLoop* implTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
+                                              ET_IMPLEMENTATION, loop);
+        loop = implTypeLoop;
+
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop,
+                                                3, BT_BIT, BT_SIGN, BT_FLOAT);
+        loop = bufferTypeLoop;
+
+        parametersMap.putPtr(PLOT_LINE_COLOR_LOOP, implTypeLoop);
+        parametersMap.putPtr(PLOT_POINT_TYPE_LOOP, bufferTypeLoop);
+        loop->print();
+
+        loop->plot(chronoMutate, &parametersMap, "Connection_mutate", "size", 250, 2000, 500);
+        parametersMap.putNumber("repetitions", 10);
+        loop->plot(chronoCrossover, &parametersMap, "Connection_crossover", "size", 100, 301, 100);
+        parametersMap.putNumber("repetitions", 1);
+        loop->plot(chronoCalculateAndAddTo, &parametersMap, "Connection_calculateAndAddTo", "size", 1000,
+                   2001, 1000);
 
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();

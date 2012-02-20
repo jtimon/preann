@@ -3,112 +3,73 @@
 
 using namespace std;
 
-#include "population.h"
 #include "chronometer.h"
-#include "cuda_code.h"
+#include "loop.h"
+#include "dummy.h"
 #include "test.h"
 
-#define PATH "/home/timon/layer.lay"
-#define NUM_INPUTS 3
-
-Layer* createAndLoadLayer(ImplementationType implementationType,
-        Buffer** inputBuffers)
+void testCalculateOutput(ParametersMap* parametersMap)
 {
-    FILE* stream = fopen(PATH, "r+b");
-    Layer* layer = new Layer(stream, implementationType);
+    unsigned differencesCounter = 0;
+    string path = parametersMap->getString("layerPath");
+    Buffer* buffer = Dummy::buffer(parametersMap);
+    Buffer* bufferC = Factory::newBuffer(buffer, IT_C);
+    Layer* layer = Dummy::layer(parametersMap, buffer);
 
-    for (unsigned i = 0; i < NUM_INPUTS; i++) {
-        layer->addInput(inputBuffers[i]);
-    }
-    layer->loadWeighs(stream);
-    fclose(stream);
-    return layer;
-}
+    FILE* stream = fopen(path.data(), "w+b");
+	layer->save(stream);
+	layer->saveWeighs(stream);
 
-Layer* createAndSaveLayer(Test* test, Buffer** controlInputs)
-{
-    GET_SIZE
-    GET_INITIAL_WEIGHS_RANGE
+    stream = fopen(path.data(), "r+b");
+	Layer* layerC = new Layer(stream, IT_C);
 
-    Layer* controlLayer = new Layer(size, (BufferType)test->getEnum(ET_BUFFER),
-            FT_IDENTITY, IT_C);
-
-    for (unsigned i = 0; i < NUM_INPUTS; i++) {
-        controlLayer->addInput(controlInputs[i]);
-    }
-    controlLayer->randomWeighs(initialWeighsRange);
-
-    FILE* stream = fopen(PATH, "w+b");
-    controlLayer->save(stream);
-    controlLayer->saveWeighs(stream);
-    fclose(stream);
-    return controlLayer;
-}
-
-unsigned testCalculateOutput(Test* test)
-{
-    START_TEST
-    GET_SIZE
-    GET_INITIAL_WEIGHS_RANGE
-
-    Buffer* controlInputBuffers[NUM_INPUTS];
-    for (unsigned i = 0; i < NUM_INPUTS; i++) {
-        BufferType bufferTypeAux = BT_BYTE;
-        while (bufferTypeAux == BT_BYTE) {
-            bufferTypeAux
-                    = (BufferType)Random::positiveInteger(BUFFER_TYPE_DIM);
-        }
-        controlInputBuffers[i] = Factory::newBuffer(size, bufferTypeAux, IT_C);
-        controlInputBuffers[i]->random(initialWeighsRange);
-    }
-
-    Layer* controlLayer = createAndSaveLayer(test, controlInputBuffers);
-    controlLayer->calculateOutput();
-
-    Buffer* inputBuffers[NUM_INPUTS];
-    for (unsigned i = 0; i < NUM_INPUTS; i++) {
-        inputBuffers[i] = Factory::newBuffer(size,
-                controlInputBuffers[i]->getBufferType(),
-                (ImplementationType)test->getEnum(ET_IMPLEMENTATION));
-        inputBuffers[i]->copyFrom(controlInputBuffers[i]);
-    }
-
-    Layer* layer = createAndLoadLayer((ImplementationType)test->getEnum(
-            ET_IMPLEMENTATION), inputBuffers);
+	unsigned numInputs = (unsigned)parametersMap->getNumber("numInputs");
+	for (unsigned i = 0; i < numInputs; ++i) {
+		layerC->addInput(bufferC);
+	}
+	layerC->loadWeighs(stream);
+	fclose(stream);
 
     //test calculation
     layer->calculateOutput();
+    layerC->calculateOutput();
 
-    differencesCounter += Test::assertEquals(controlLayer->getOutput(),
-            layer->getOutput());
+    differencesCounter += Test::assertEquals(layer->getOutput(),
+            layerC->getOutput());
 
+    delete (layerC);
+    delete (bufferC);
     delete (layer);
-    for (unsigned i = 0; i < NUM_INPUTS; i++) {
-        delete (inputBuffers[i]);
-    }
-    delete (controlLayer);
-    for (unsigned i = 0; i < NUM_INPUTS; i++) {
-        delete (controlInputBuffers[i]);
-    }
+    delete (buffer);
 
-    END_TEST
+    parametersMap->putNumber("differencesCounter", differencesCounter);
 }
 
 int main(int argc, char *argv[])
 {
     Chronometer total;
-    Test test;
     total.start();
-
-    test.putIterator("size", 1, 51, 49);
-    test.putConstant("initialWeighsRange", 20);
-    test.withAll(ET_IMPLEMENTATION);
-    test.exclude(ET_BUFFER, 1, BT_BYTE);
-    test.printParameters();
-
     try {
+        Loop* loop;
+        ParametersMap parametersMap;
+        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber("numInputs", 2);
+        parametersMap.putString("layerPath", "/home/timon/layer.lay");
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
+                FT_IDENTITY);
+
+        loop = new RangeLoop("size", 1, 51, 49, NULL);
+
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(
+                ET_BUFFER), ET_BUFFER, loop, 3, BT_BIT, BT_SIGN, BT_FLOAT);
+        loop = bufferTypeLoop;
+
+        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
+                ET_IMPLEMENTATION, loop);
+        loop->print();
+
         //TODO arreglar
-        test.test(testCalculateOutput, "Layer::calculateOutput");
+        loop->test(testCalculateOutput, &parametersMap, "Layer::calculateOutput");
 
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();

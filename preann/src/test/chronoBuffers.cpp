@@ -4,12 +4,22 @@
 using namespace std;
 
 #include "chronometer.h"
-#include "plot.h"
-#include "factory.h"
+#include "loop.h"
+#include "dummy.h"
+#include "test.h"
 
-float chronoCopyToInterface(Test* test)
+#define START                                                                           \
+    Chronometer chrono;                                                                 \
+    unsigned repetitions = parametersMap->getNumber("repetitions");                     \
+    Buffer* buffer = Dummy::buffer(parametersMap);
+
+#define END                                                                             \
+    parametersMap->putNumber("timeCount", chrono.getSeconds());                         \
+    delete (buffer);                                                                    \
+
+void chronoCopyToInterface(ParametersMap* parametersMap)
 {
-    START_BUFFER_PLOT
+    START
 
     Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
     chrono.start();
@@ -18,12 +28,12 @@ float chronoCopyToInterface(Test* test)
     }
     chrono.stop();
 
-    END_BUFFER_PLOT
+    END
 }
 
-float chronoCopyFromInterface(Test* test)
+void chronoCopyFromInterface(ParametersMap* parametersMap)
 {
-    START_BUFFER_PLOT
+    START
 
     Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
     chrono.start();
@@ -32,15 +42,14 @@ float chronoCopyFromInterface(Test* test)
     }
     chrono.stop();
 
-    END_BUFFER_PLOT
+    END
 }
 
-float chronoActivation(Test* test)
+void chronoActivation(ParametersMap* parametersMap)
 {
-    START_BUFFER_PLOT
+    START
 
-    Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT,
-            buffer->getImplementationType());
+    Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT, buffer->getImplementationType());
     chrono.start();
     for (unsigned i = 0; i < repetitions; ++i) {
         buffer->activation(results, FT_IDENTITY);
@@ -48,7 +57,21 @@ float chronoActivation(Test* test)
     chrono.stop();
     delete (results);
 
-    END_BUFFER_PLOT
+    END
+}
+
+void chronoClone(ParametersMap* parametersMap)
+{
+    START
+
+    chrono.start();
+    for (unsigned i = 0; i < repetitions; ++i) {
+        Buffer* copy = buffer->clone();
+        delete (copy);
+    }
+    chrono.stop();
+
+    END
 }
 
 int main(int argc, char *argv[])
@@ -56,25 +79,40 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        string path = "/home/timon/workspace/preann/output/";
+        ParametersMap parametersMap;
+        parametersMap.putString("path", "/home/timon/workspace/preann/output/");
+        parametersMap.putString(PLOT_X_AXIS, "Size");
+        parametersMap.putString(PLOT_Y_AXIS, "Time (seconds)");
+        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber("repetitions", 100);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        Plot plot;
-        plot.putPlotIterator("size", 1000, 10000, 1000);
-        plot.putConstant("initialWeighsRange", 20);
-        plot.putConstant("repetitions", 20);
-        plot.exclude(ET_BUFFER, 1, BT_BYTE);
-        plot.exclude(ET_IMPLEMENTATION, 1, IT_CUDA);
+        Loop* loop = NULL;
 
-        plot.setColorEnum(ET_IMPLEMENTATION);
-        plot.setPointEnum(ET_BUFFER);
+        EnumLoop* implTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
+                                              ET_IMPLEMENTATION, loop);
+        loop = implTypeLoop;
 
-        plot.printParameters();
-        plot.printCurrentState();
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop);
+        loop = bufferTypeLoop;
 
-        //		plot.plot(chronoActivation, path, 100, "BUFFER_ACTIVATION");
-        //		plot.plot(chronoCopyFromInterface, path, 1000, "BUFFER_COPYFROMINTERFACE");
-        //		plot.plot(chronoCopyToInterface, path, 1000, "BUFFER_COPYTOINTERFACE");
-        plot.plot(chronoCopyToInterface, path, "BUFFER_COPYTOINTERFACE");
+        parametersMap.putPtr(PLOT_LINE_COLOR_LOOP, implTypeLoop);
+        parametersMap.putPtr(PLOT_POINT_TYPE_LOOP, bufferTypeLoop);
+
+        loop->print();
+
+        loop->plot(chronoCopyToInterface, &parametersMap, "Buffer_copyToInterface", "size", 2000, 20001, 2000);
+        loop->plot(chronoCopyFromInterface, &parametersMap, "Buffer_copyFromInterface", "size", 2000, 20001,
+                   2000);
+        loop->plot(chronoClone, &parametersMap, "Buffer_clone", "size", 1000, 10001, 3000);
+
+        // exclude BYTE
+        bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
+        loop->print();
+
+        loop->plot(chronoActivation, &parametersMap, "Buffer_activation", "size", 2000, 20001, 2000);
+
+        delete (loop);
 
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();

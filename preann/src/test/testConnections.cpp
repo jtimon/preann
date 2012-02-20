@@ -4,17 +4,27 @@
 using namespace std;
 
 #include "chronometer.h"
+#include "loop.h"
+#include "dummy.h"
 #include "test.h"
-#include "factory.h"
 
-#define NUM_MUTATIONS 10
+#define START                                                                           \
+    float differencesCounter = 0;                                                       \
+    Buffer* buffer = Dummy::buffer(parametersMap);                                      \
+    Connection* connection = Dummy::connection(parametersMap, buffer);                  \
+    unsigned outputSize = parametersMap->getNumber("outputSize");                       \
+    float initialWeighsRange = parametersMap->getNumber("initialWeighsRange");
 
-unsigned testCalculateAndAddTo(Test* test)
+#define END                                                                             \
+    delete (connection);                                                                \
+    delete (buffer);                                                                    \
+    parametersMap->putNumber("differencesCounter", differencesCounter);
+
+void testCalculateAndAddTo(ParametersMap* parametersMap)
 {
-    START_CONNECTION_TEST
+    START
 
-    Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT,
-            connection->getImplementationType());
+    Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT, connection->getImplementationType());
 
     Buffer* cInput = Factory::newBuffer(connection->getInput(), IT_C);
     Connection* cConnection = Factory::newConnection(cInput, outputSize, IT_C);
@@ -32,12 +42,12 @@ unsigned testCalculateAndAddTo(Test* test)
     delete (cConnection);
     delete (cResults);
 
-    END_CONNECTION_TEST
+    END
 }
 
-unsigned testMutate(Test* test)
+void testMutate(ParametersMap* parametersMap)
 {
-    START_CONNECTION_TEST
+    START
 
     unsigned pos = Random::positiveInteger(connection->getSize());
     float mutation = Random::floatNum(initialWeighsRange);
@@ -47,7 +57,8 @@ unsigned testMutate(Test* test)
     Connection* cConnection = Factory::newConnection(cInput, outputSize, IT_C);
     cConnection->copyFrom(connection);
 
-    for (unsigned i = 0; i < NUM_MUTATIONS; i++) {
+    unsigned numMutations = (unsigned)parametersMap->getNumber("numMutations");
+    for (unsigned i = 0; i < numMutations; ++i) {
         float mutation = Random::floatNum(initialWeighsRange);
         unsigned pos = Random::positiveInteger(connection->getSize());
         connection->mutate(pos, mutation);
@@ -58,15 +69,15 @@ unsigned testMutate(Test* test)
     delete (cInput);
     delete (cConnection);
 
-    END_CONNECTION_TEST
+    END
 }
 
-unsigned testCrossover(Test* test)
+void testCrossover(ParametersMap* parametersMap)
 {
-    START_CONNECTION_TEST
+    START
 
-    Connection* other = Factory::newConnection(connection->getInput(),
-            outputSize, connection->getImplementationType());
+    Connection* other = Factory::newConnection(connection->getInput(), outputSize,
+            connection->getImplementationType());
     other->random(initialWeighsRange);
 
     Buffer* cInput = Factory::newBuffer(connection->getInput(), IT_C);
@@ -90,28 +101,35 @@ unsigned testCrossover(Test* test)
     delete (cConnection);
     delete (cOther);
 
-    END_CONNECTION_TEST
+    END
 }
 
 int main(int argc, char *argv[])
 {
-
     Chronometer total;
     total.start();
-
-    Test test;
-
-    test.putIterator("size", 2, 13, 10);
-    test.putIterator("outputSize", 1, 4, 2);
-    test.putConstant("initialWeighsRange", 20);
-    test.exclude(ET_BUFFER, 1, BT_BYTE);
-    test.withAll(ET_IMPLEMENTATION);
-    test.printParameters();
-
     try {
-        test.test(testCalculateAndAddTo, "Connection::calculateAndAddTo");
-        test.test(testMutate, "Connection::mutate");
-        test.test(testCrossover, "Connection::crossover");
+        Loop* loop;
+        ParametersMap parametersMap;
+        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber("numInputs", 2);
+        parametersMap.putNumber("numMutations", 10);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+
+        loop = new RangeLoop("size", 2, 13, 10, NULL);
+        loop = new RangeLoop("outputSize", 1, 4, 2, loop);
+
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER),
+                ET_BUFFER, loop, 3, BT_BIT, BT_SIGN, BT_FLOAT);
+        loop = bufferTypeLoop;
+
+        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION,
+                loop);
+        loop->print();
+
+        loop->test(testCalculateAndAddTo, &parametersMap, "Connection::calculateAndAddTo");
+        loop->test(testMutate, &parametersMap, "Connection::mutate");
+        loop->test(testCrossover, &parametersMap, "Connection::crossover");
 
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();
