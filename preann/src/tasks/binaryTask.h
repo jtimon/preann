@@ -30,6 +30,7 @@ public:
     virtual void setInputs(Individual* individual);
     virtual void doOperation();
     virtual string toString();
+    virtual Individual* getExample();
 
 };
 
