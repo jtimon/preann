@@ -54,23 +54,21 @@ OBJ += $(FACT_OBJ)
 .SECONDARY:
 
 all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
-#	./bin/testMemoryLosses2.exe
 #	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe 
-	./bin/testBuffers2.exe 
-	./bin/testConnections2.exe
-# FIXME 
-#	./bin/testLayers2.exe 
+#	./bin/testConnections.exe
 #	./bin/chronoBuffers.exe 
 #	./bin/chronoConnections.exe 
-#	./bin/chronoXor.exe
+	./bin/chronoBinaryTasks.exe 
+# FIXME 
+#	./bin/testLayers.exe 
 #	./bin/testMemoryLosses.exe > ./output/log/testMemoryLosses.log
 #	./bin/testBuffers.exe > ./output/log/testBuffers.log
 #	./bin/testConnections.exe > ./output/log/testConnections.log
 #	./bin/testLayers.exe > ./output/log/testLayers.log
 #	./bin/chronoBuffers.exe > ./output/log/chronoBuffers.log
 #	./bin/chronoConnections.exe > ./output/log/chronoConnections.log
-#	./bin/chronoXor.exe > ./output/log/chronoXor.log
+#	./bin/chronoBinaryTasks.exe > ./output/log/chronoBinaryTasks.log
 
 #all: $(LOGS)
 checkdirs: $(BUILD_DIR)
