@@ -162,7 +162,7 @@ int mapLineColor(unsigned value)
 
 void preparePlotFunction(ParametersMap* parametersMap)
 {
-    FILE* plotFile = (FILE*)parametersMap->getPtr("plotFile");
+    FILE* plotFile = (FILE*) parametersMap->getPtr("plotFile");
 
     // after the first one, end the previous line with a comma
     unsigned first = parametersMap->getNumber("first");
@@ -181,11 +181,11 @@ void preparePlotFunction(ParametersMap* parametersMap)
     Loop* lineColorLoop = NULL;
     Loop* pointTypeLoop = NULL;
     try {
-        lineColorLoop = (Loop*)parametersMap->getPtr(PLOT_LINE_COLOR_LOOP);
+        lineColorLoop = (Loop*) parametersMap->getPtr(PLOT_LINE_COLOR_LOOP);
     } catch (string e) {
     };
     try {
-        pointTypeLoop = (Loop*)parametersMap->getPtr(PLOT_POINT_TYPE_LOOP);
+        pointTypeLoop = (Loop*) parametersMap->getPtr(PLOT_POINT_TYPE_LOOP);
     } catch (string e) {
     };
 
@@ -202,7 +202,7 @@ void preparePlotFunction(ParametersMap* parametersMap)
 
     fprintf(plotFile, "%s", line.data());
 }
-void Loop::createGnuPlotScript(void(*func)(ParametersMap*), ParametersMap* parametersMap)
+void Loop::createGnuPlotScript(ParametersMap* parametersMap)
 {
     string path = parametersMap->getString("path");
     string functionLabel = parametersMap->getString(LOOP_LABEL);
@@ -252,9 +252,9 @@ void plotAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
 
         string dataPath = path + "data/" + functionLabel + "_" + state + ".DAT";
         FILE* dataFile = openFile(dataPath);
-        fprintf(dataFile, "# Iterator %s \n", state.data());
-
         string plotVar = parametersMap->getString(PLOT_LOOP);
+        fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+
         float min = parametersMap->getNumber(PLOT_MIN);
         float max = parametersMap->getNumber(PLOT_MAX);
         float inc = parametersMap->getNumber(PLOT_INC);
@@ -288,12 +288,12 @@ void Loop::plot(void(*func)(ParametersMap*), ParametersMap* parametersMap, std::
     Chronometer chrono;
     chrono.start();
     parametersMap->putString(LOOP_LABEL, functionLabel);
-    parametersMap->putString(PLOT_LOOP, "size");
+    parametersMap->putString(PLOT_LOOP, plotVarKey);
     parametersMap->putNumber(PLOT_MIN, min);
     parametersMap->putNumber(PLOT_MAX, max);
     parametersMap->putNumber(PLOT_INC, inc);
 
-    createGnuPlotScript(func, parametersMap);
+    createGnuPlotScript(parametersMap);
 
     this->setCallerLoop(NULL);
     this->repeatActionImpl(plotAction, func, parametersMap);
@@ -301,7 +301,60 @@ void Loop::plot(void(*func)(ParametersMap*), ParametersMap* parametersMap, std::
     string path = parametersMap->getString("path");
     plotFile(path, functionLabel);
     chrono.stop();
-    cout << chrono.getSeconds() << " segundos." <<endl;
+    cout << chrono.getSeconds() << " segundos." << endl;
+}
+
+void plotTaskFunction(ParametersMap* parametersMap)
+{
+    string path = parametersMap->getString("path");
+
+    Population* initialPopulation = (Population*) parametersMap->getPtr("initialPopulation");
+    Population* population = new Population(initialPopulation);
+    Dummy::configPopulation(population, parametersMap);
+
+    Task* task = population->getTask();
+    string state = parametersMap->getString(LOOP_STATE);
+    string dataPath = path + "data/" + task->toString() + "_" + state + ".DAT";
+    FILE* dataFile = openFile(dataPath);
+    string plotVar = "generation";
+    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+
+    float maxGenerations = parametersMap->getNumber("maxGenerations");
+    for (unsigned i = 0; i < maxGenerations; ++i) {
+        float fitness = population->getBestIndividualScore();
+        fprintf(dataFile, " %d %f \n", i, fitness);
+        population->nextGeneration();
+    }
+    fclose(dataFile);
+    delete (population);
+}
+void Loop::plotTask(ParametersMap* parametersMap, unsigned maxGenerations)
+{
+    Task* task = (Task*) parametersMap->getPtr("task");
+    string testedTask = task->toString();
+    parametersMap->putString(LOOP_LABEL, testedTask);
+    cout << "Plotting " << testedTask << "...";
+    Chronometer chrono;
+    chrono.start();
+
+    parametersMap->putNumber("maxGenerations", maxGenerations);
+    Individual* example = (Individual*) parametersMap->getPtr("example");
+    unsigned populationSize = parametersMap->getNumber("populationSize");
+    float weighsRange = parametersMap->getNumber("initialWeighsRange");
+    Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
+    parametersMap->putPtr("initialPopulation", initialPopulation);
+
+    createGnuPlotScript(parametersMap);
+
+    this->setCallerLoop(NULL);
+    this->repeatFunctionImpl(plotTaskFunction, parametersMap);
+
+    delete (initialPopulation);
+
+    string path = parametersMap->getString("path");
+    plotFile(path, testedTask);
+    chrono.stop();
+    cout << chrono.getSeconds() << " segundos." << endl;
 }
 
 Loop* Loop::findLoop(std::string key)

@@ -11,7 +11,9 @@
 #include "enumerations.h"
 #include "chronometer.h"
 #include "parametersMap.h"
+#include "dummy.h"
 
+//TODO pasar a ctes de clase
 #define LOOP_LABEL "__LOOP__FUNCTION_NAME"
 #define LOOP_STATE "__LOOP__RUNNING_STATE"
 #define PLOT_LOOP "__LOOP__PLOT_LOOP"
@@ -36,7 +38,7 @@ protected:
     void repeatActionBase(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
                           void(*func)(ParametersMap*), ParametersMap* parametersMap);
 
-    void createGnuPlotScript(void(*func)(ParametersMap*), ParametersMap* parametersMap);
+    void createGnuPlotScript(ParametersMap* parametersMap);
 
     Loop();
     Loop(std::string key, Loop* innerLoop);
@@ -50,9 +52,11 @@ public:
     int getLineColor(ParametersMap* parametersMap);
     int getPointType(ParametersMap* parametersMap);
 
+    //TODO sacar de la clase loop
     void test(void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel);
     void plot(void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel,
               std::string plotVarKey, float min, float max, float inc);
+    void plotTask(ParametersMap* parametersMap, unsigned maxGenerations);
 
     virtual Loop* findLoop(std::string key);
     virtual void print() = 0;
