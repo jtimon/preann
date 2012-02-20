@@ -24,7 +24,6 @@ public:
     static Connection* connection(ParametersMap* parametersMap, Buffer* buffer);
     static Layer* layer(ParametersMap* parametersMap, Buffer* input);
     static NeuralNet* neuralNet(ParametersMap* parametersMap, Interface* input);
-    static void configPopulation(Population* population, ParametersMap* parametersMap);
 };
 
 #endif /* DUMMY_H_ */

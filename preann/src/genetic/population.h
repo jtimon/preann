@@ -10,8 +10,8 @@
 
 #include "task.h"
 #include "individual.h"
+#include "parametersMap.h"
 
-//TODO usar clase vector
 class Population
 {
 
@@ -72,6 +72,7 @@ public:
     void save(FILE* stream);
     void load(FILE* stream);
 
+    void setParams(ParametersMap* parametersMap);
     void setPreservation(unsigned number);
     void setSelectionRouletteWheel(unsigned number);
     void setSelectionTruncation(unsigned number);

@@ -310,7 +310,7 @@ void plotTaskFunction(ParametersMap* parametersMap)
 
     Population* initialPopulation = (Population*) parametersMap->getPtr("initialPopulation");
     Population* population = new Population(initialPopulation);
-    Dummy::configPopulation(population, parametersMap);
+    population->setParams(parametersMap);
 
     Task* task = population->getTask();
     string state = parametersMap->getString(LOOP_STATE);
