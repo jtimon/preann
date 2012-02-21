@@ -57,12 +57,21 @@ void ReversiTask::setInputs(Individual* individual)
 
 Individual* ReversiTask::getExample()
 {
-    string error = "ReversiTask::getExample not implemented.";
-    throw error;
+    unsigned boardSize = tBoard->getSize();
+    Individual* example = new Individual(IT_C);
+    this->setInputs(example);
+    example->addLayer(boardSize, BT_BIT, FT_IDENTITY);
+    example->addLayer(boardSize, BT_BIT, FT_IDENTITY);
+    example->addLayer(1, BT_FLOAT, FT_IDENTITY);
+    example->addInputConnection(0, 0);
+    example->addLayersConnection(0, 1);
+    example->addLayersConnection(0, 2);
+
+    return example;
 }
 
 std::string ReversiTask::toString()
 {
-    return "REVERSI_" + to_string(tBoard->size());
+    return "REVERSI_" + to_string(tBoard->getSize());
 }
 

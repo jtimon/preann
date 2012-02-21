@@ -30,7 +30,7 @@ void Board::initBoard()
     }
 }
 
-unsigned Board::size()
+unsigned Board::getSize()
 {
     return tSize;
 }

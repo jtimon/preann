@@ -7,6 +7,7 @@
 
 #include "plot.h"
 
+/*
 Plot::Plot()
 {
     colorEnum = ET_IMPLEMENTATION;
@@ -289,3 +290,4 @@ void Plot::plotTask(string path, Task* task, Individual* example)
     }
 }
 
+*/

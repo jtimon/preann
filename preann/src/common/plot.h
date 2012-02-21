@@ -1,6 +1,6 @@
 #ifndef PLOT_H_
 #define PLOT_H_
-
+/*
 #include "chronometer.h"
 #include "test.h"
 #include "optimization/factory.h"
@@ -52,5 +52,5 @@ public:
     void plot(float(*f)(Test*), string path, string testedMethod);
     void plotTask(string path, Task* task, Individual* example);
 };
-
+*/
 #endif /* PLOT_H_ */

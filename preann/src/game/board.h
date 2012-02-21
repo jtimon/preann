@@ -44,7 +44,7 @@ public:
             SquareState player, Individual* individual) = 0;
     virtual unsigned countPoints(SquareState player);
 
-    unsigned size();
+    unsigned getSize();
     void setSquare(unsigned xPos, unsigned yPos, SquareState squareState);
     SquareState getSquare(unsigned xPos, unsigned yPos);
     Interface* getInterface();

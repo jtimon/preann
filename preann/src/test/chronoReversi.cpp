@@ -4,70 +4,72 @@
 using namespace std;
 
 #include "common/chronometer.h"
-#include "common/plot.h"
+#include "common/loop.h"
 #include "genetic/population.h"
 #include "tasks/reversiTask.h"
-
-#define BOARD_SIZE 6
 
 int main(int argc, char *argv[])
 {
     Chronometer total;
     total.start();
     try {
-        string path = "/home/timon/workspace/preann/output/";
-
-        Plot plot;
-        plot.withAll(ET_SELECTION_ALGORITHM);
-        plot.withAll(ET_CROSS_ALG);
-        //		plot.withAll(ET_CROSS_LEVEL);
-        plot.with(ET_CROSS_LEVEL, 1, CL_WEIGH);
-
-        plot.with(ET_MUTATION_ALG, 1, MA_PER_INDIVIDUAL);
-
-        //TODO revise chronoReversi
-        plot.putPlotIterator("generation", 0, 200, 1);
-        plot.setColorEnum(ET_CROSS_ALG);
-        plot.setPointEnum(ET_SELECTION_ALGORITHM);
+        ParametersMap parametersMap;
+        parametersMap.putString("path", "/home/timon/workspace/preann/output/");
+        parametersMap.putString(PLOT_X_AXIS, "Generation");
+        parametersMap.putString(PLOT_Y_AXIS, "Fitness");
+        parametersMap.putNumber("initialWeighsRange", 5);
         unsigned populationSize = 8;
+        parametersMap.putNumber("populationSize", populationSize);
+        parametersMap.putNumber("numSelection", populationSize / 2);
+        parametersMap.putNumber("numCrossover", populationSize / 2);
 
-        unsigned numSelection = populationSize / 2;
-        plot.putVariable("numSelection", &numSelection);
-        float rankingBase = 10;
-        plot.putVariable("rankingBase", &rankingBase);
-        float rankingStep = 5;
-        plot.putVariable("rankingStep", &rankingStep);
-        unsigned tournamentSize = 4;
-        plot.putVariable("tournamentSize", &tournamentSize);
+        parametersMap.putNumber("rankingBase", 10);
+        parametersMap.putNumber("rankingStep", 5);
+        parametersMap.putNumber("tournamentSize", 4);
 
-        unsigned numCrossover = populationSize / 2;
-        plot.putVariable("numCrossover", &numCrossover);
-        float uniformCrossProb = 0.7;
-        plot.putVariable("uniformCrossProb", &uniformCrossProb);
-        unsigned numPoints = 3;
-        plot.putVariable("numPoints", &numPoints);
+        parametersMap.putNumber("uniformCrossProb", 0.7);
+        parametersMap.putNumber("numPoints", 3);
 
-        unsigned numMutations = 4;
-        plot.putVariable("numMutations", &numMutations);
-        unsigned mutationRange = 5;
-        plot.putVariable("mutationRange", &mutationRange);
-        unsigned mutationProb = 0.1;
-        plot.putVariable("mutationProb", &mutationProb);
+        parametersMap.putNumber("numMutations", 1);
+        parametersMap.putNumber("mutationRange", 2);
+        parametersMap.putNumber("mutationProb", 0.1);
 
-        plot.printParameters();
+        parametersMap.putNumber("numResets", 2);
+        parametersMap.putNumber("resetProb", 0.05);
 
-        Task* task = new ReversiTask(BOARD_SIZE, 5);
-        Individual* example = new Individual(IT_SSE2);
-        task->setInputs(example);
-        example->addLayer(BOARD_SIZE, BT_BIT, FT_IDENTITY);
-        example->addLayer(BOARD_SIZE, BT_BIT, FT_IDENTITY);
-        example->addLayer(1, BT_FLOAT, FT_IDENTITY);
-        example->addInputConnection(0, 0);
-        example->addLayersConnection(0, 1);
-        example->addLayersConnection(0, 2);
+        //TODO repetitions for plotTask
+//        parametersMap.putNumber("repetitions", 100);
+//        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PROBABILISTIC);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_DISABLED);
 
-        float weighsRange = 5;
-        plot.plotTask(path, task, example);
+
+        //----------------------
+
+        Loop* loop = NULL;
+
+        EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
+                                              ET_SELECTION_ALGORITHM, loop);
+        loop = selecAlgLoop;
+
+//        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
+//        loop = resetAlgLoop;
+
+        parametersMap.putPtr(PLOT_LINE_COLOR_LOOP, selecAlgLoop);
+        parametersMap.putPtr(PLOT_POINT_TYPE_LOOP, selecAlgLoop);
+
+        loop->print();
+
+        Task* task = new ReversiTask(6, 5);
+        Individual* example = task->getExample();
+        parametersMap.putPtr("task", task);
+        parametersMap.putPtr("example", example);
+
+        unsigned maxGenerations = 100;
+        loop->plotTask(&parametersMap, maxGenerations);
 
         delete (example);
         delete (task);
@@ -77,8 +79,8 @@ int main(int argc, char *argv[])
         MemoryManagement::printTotalPointers();
     } catch (std::string error) {
         cout << "Error: " << error << endl;
-        //	} catch (...) {
-        //		printf("An error was thrown.\n", 1);
+        //      } catch (...) {
+        //              printf("An error was thrown.\n", 1);
     }
 
     //MemoryManagement::mem_printListOfPointers();

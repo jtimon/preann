@@ -8,7 +8,7 @@
 #include "reversiBoard.h"
 
 ReversiBoard::ReversiBoard(ReversiBoard* other) :
-    Board(other->size())
+    Board(other->getSize())
 {
     for (int x = 0; x < tSize; ++x) {
         for (int y = 0; y < tSize; ++y) {

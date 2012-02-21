@@ -5,28 +5,10 @@ using namespace std;
 
 #include "common/loop.h"
 #include "common/dummy.h"
+#include "common/test.h"
 #include "genetic/population.h"
 #include "tasks/binaryTask.h"
 #include "common/chronometer.h"
-
-unsigned memoryLosses = 0;
-
-void checkAndPrintErrors(string testingClass, ParametersMap* parametersMap)
-{
-    if (MemoryManagement::getPtrCounter() > 0
-            || MemoryManagement::getTotalAllocated() > 0) {
-
-        string state = parametersMap->getString(LOOP_STATE);
-
-        cout << "Memory loss detected testing class " << testingClass
-                << " at state " << state << ".\n" << endl;
-
-        MemoryManagement::printTotalAllocated();
-        MemoryManagement::printTotalPointers();
-        MemoryManagement::clear();
-        memoryLosses++;
-    }
-}
 
 void testBuffer(ParametersMap* parametersMap)
 {
@@ -34,7 +16,7 @@ void testBuffer(ParametersMap* parametersMap)
     delete (buffer);
 //    unsigned* aa = (unsigned*)MemoryManagement::malloc(sizeof(unsigned) * 5);
 
-    checkAndPrintErrors("Buffer", parametersMap);
+    Test::checkEmptyMemory(parametersMap);
 }
 
 void testConnection(ParametersMap* parametersMap)
@@ -45,7 +27,7 @@ void testConnection(ParametersMap* parametersMap)
     delete (connection);
     delete (buffer);
 
-    checkAndPrintErrors("Connection", parametersMap);
+    Test::checkEmptyMemory(parametersMap);
 }
 
 void testLayer(ParametersMap* parametersMap)
@@ -56,7 +38,7 @@ void testLayer(ParametersMap* parametersMap)
     delete (layer);
     delete (buffer);
 
-    checkAndPrintErrors("Layer", parametersMap);
+    Test::checkEmptyMemory(parametersMap);
 }
 
 void testNeuralNet(ParametersMap* parametersMap)
@@ -67,7 +49,7 @@ void testNeuralNet(ParametersMap* parametersMap)
     delete (net);
     delete (input);
 
-    checkAndPrintErrors("NeuralNet", parametersMap);
+    Test::checkEmptyMemory(parametersMap);
 }
 
 void testPopulation(ParametersMap* parametersMap)
@@ -104,7 +86,7 @@ void testPopulation(ParametersMap* parametersMap)
     delete (example);
     delete (task);
     delete (input);
-    checkAndPrintErrors("Population", parametersMap);
+    Test::checkEmptyMemory(parametersMap);
 }
 
 void testLoops(ParametersMap* parametersMap)
@@ -120,6 +102,7 @@ int main(int argc, char *argv[])
         Loop* loop;
         ParametersMap parametersMap;
         parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber("memoryLosses", 0);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
                 FT_IDENTITY);
 
@@ -170,6 +153,10 @@ int main(int argc, char *argv[])
 
         delete (loop);
 
+        unsigned memoryLosses = parametersMap.getNumber("memoryLosses");
+        cout << "Total memory losses: " << memoryLosses << endl;
+        MemoryManagement::printListOfPointers();
+
         printf("Exit success.\n", 1);
         MemoryManagement::printTotalAllocated();
         MemoryManagement::printTotalPointers();
@@ -178,9 +165,6 @@ int main(int argc, char *argv[])
     } catch (...) {
         printf("An error was thrown.\n", 1);
     }
-
-    cout << "Total memory losses: " << memoryLosses << endl;
-    MemoryManagement::printListOfPointers();
 
     total.stop();
     printf("Total time spent: %f \n", total.getSeconds());
