@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     total.start();
     try {
         ParametersMap parametersMap;
-        parametersMap.putString("path", "/home/timon/workspace/preann/output/");
+        parametersMap.putString(Test::PLOT_PATH, "/home/timon/workspace/preann/output/");
         parametersMap.putString(Test::PLOT_X_AXIS, "Size");
         parametersMap.putString(Test::PLOT_Y_AXIS, "Time (seconds)");
         parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);

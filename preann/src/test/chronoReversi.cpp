@@ -14,12 +14,12 @@ int main(int argc, char *argv[])
     total.start();
     try {
         ParametersMap parametersMap;
-        parametersMap.putString("path", "/home/timon/workspace/preann/output/");
+        parametersMap.putString(Test::PLOT_PATH, "/home/timon/workspace/preann/output/");
         parametersMap.putString(Test::PLOT_X_AXIS, "Generation");
         parametersMap.putString(Test::PLOT_Y_AXIS, "Fitness");
         parametersMap.putNumber(Factory::WEIGHS_RANGE, 5);
         unsigned populationSize = 8;
-        parametersMap.putNumber("populationSize", populationSize);
+        parametersMap.putNumber(Population::SIZE, populationSize);
         parametersMap.putNumber("numSelection", populationSize / 2);
         parametersMap.putNumber("numCrossover", populationSize / 2);
 
@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
 
         Task* task = new ReversiTask(6, 5);
         Individual* example = task->getExample();
-        parametersMap.putPtr("task", task);
-        parametersMap.putPtr("example", example);
+        parametersMap.putPtr(Test::TASK, task);
+        parametersMap.putPtr(Test::EXAMPLE_INDIVIDUAL, example);
 
         unsigned maxGenerations = 100;
         Test::plotTask(loop, &parametersMap, maxGenerations);

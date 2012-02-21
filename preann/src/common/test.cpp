@@ -19,6 +19,14 @@ const string Test::PLOT_MAX = "__LOOP__PLOT_MAX";
 const string Test::PLOT_INC = "__LOOP__PLOT_INC";
 const string Test::LINE_COLOR = "__LOOP__PLOT_LINE_COLOR";
 const string Test::POINT_TYPE = "__LOOP__PLOT_POINT_TYPE";
+const string Test::PLOT_PATH = "__plotPath";
+const string Test::PLOT_FILE = "__plotFile";
+const string Test::FIRST_STATE = "__firstState";
+const string Test::SUB_PATH = "__subPath";
+const string Test::INITIAL_POPULATION = "__initialPopulation";
+const string Test::EXAMPLE_INDIVIDUAL = "__exampleIndividual";
+const string Test::TASK = "__task_to_plot";
+const string Test::MAX_GENERATIONS = "__generations_to_plot";
 
 unsigned char Test::areEqual(float expected, float actual,
         BufferType bufferType)
@@ -163,30 +171,27 @@ int mapLineColor(unsigned value)
 
 void preparePlotFunction(ParametersMap* parametersMap)
 {
-    FILE* plotFile = (FILE*) parametersMap->getPtr("plotFile");
-
-    // after the first one, end the previous line with a comma
-    unsigned first = parametersMap->getNumber("first");
-    if (first) {
-        parametersMap->putNumber("first", 0);
-    } else {
+    FILE *plotFile = (FILE*)((parametersMap->getPtr(Test::PLOT_FILE)));
+    unsigned first = parametersMap->getNumber(Test::FIRST_STATE);
+    if(first){
+        parametersMap->putNumber(Test::FIRST_STATE, 0);
+    }else{
         fprintf(plotFile, " , \\\n\t");
     }
-
     string state = parametersMap->getString(Loop::STATE);
-    string subPath = parametersMap->getString("subPath");
+    string subPath = parametersMap->getString(Test::SUB_PATH);
     string dataPath = subPath + state + ".DAT";
-
     string line = " \"" + dataPath + "\" using 1:2 title \"" + state + "\"";
-
-    Loop* lineColorLoop = NULL;
-    Loop* pointTypeLoop = NULL;
+    Loop *lineColorLoop = NULL;
+    Loop *pointTypeLoop = NULL;
     try {
-        lineColorLoop = (Loop*) parametersMap->getPtr(Test::LINE_COLOR);
-    } catch (string e) {
-    };
+        lineColorLoop = (Loop*)((parametersMap->getPtr(Test::LINE_COLOR)));
+    }
+    catch(string e){
+    }
+    ;
     try {
-        pointTypeLoop = (Loop*) parametersMap->getPtr(Test::POINT_TYPE);
+        pointTypeLoop = (Loop*)((parametersMap->getPtr(Test::POINT_TYPE)));
     } catch (string e) {
     };
 
@@ -205,7 +210,7 @@ void preparePlotFunction(ParametersMap* parametersMap)
 }
 void Test::createGnuPlotScript(Loop* loop, ParametersMap* parametersMap)
 {
-    string path = parametersMap->getString("path");
+    string path = parametersMap->getString(Test::PLOT_PATH);
     string functionLabel = parametersMap->getString(Loop::LABEL);
     string xAxis = parametersMap->getString(PLOT_X_AXIS);
     string yAxis = parametersMap->getString(PLOT_Y_AXIS);
@@ -228,9 +233,9 @@ void Test::createGnuPlotScript(Loop* loop, ParametersMap* parametersMap)
     unsigned count = 0;
     string subPath = path + "data/" + functionLabel + "_";
 
-    parametersMap->putString("subPath", subPath);
-    parametersMap->putPtr("plotFile", plotFile);
-    parametersMap->putNumber("first", 1);
+    parametersMap->putString(Test::SUB_PATH, subPath);
+    parametersMap->putPtr(Test::PLOT_FILE, plotFile);
+    parametersMap->putNumber(Test::FIRST_STATE, 1);
 
     try {
         loop->repeatFunctionImpl(preparePlotFunction, parametersMap);
@@ -246,7 +251,7 @@ void Test::createGnuPlotScript(Loop* loop, ParametersMap* parametersMap)
 void plotAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
 {
     try {
-        string path = parametersMap->getString("path");
+        string path = parametersMap->getString(Test::PLOT_PATH);
         string functionLabel = parametersMap->getString(Loop::LABEL);
         string state = parametersMap->getString(Loop::STATE);
         unsigned repetitions = parametersMap->getNumber(Test::REPETITIONS);
@@ -298,7 +303,7 @@ void Test::plot(Loop* loop, void(*func)(ParametersMap*), ParametersMap* paramete
     loop->setCallerLoop(NULL);
     loop->repeatActionImpl(plotAction, func, parametersMap);
 
-    string path = parametersMap->getString("path");
+    string path = parametersMap->getString(Test::PLOT_PATH);
     plotFile(path, functionLabel);
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
@@ -306,9 +311,9 @@ void Test::plot(Loop* loop, void(*func)(ParametersMap*), ParametersMap* paramete
 
 void plotTaskFunction(ParametersMap* parametersMap)
 {
-    string path = parametersMap->getString("path");
+    string path = parametersMap->getString(Test::PLOT_PATH);
 
-    Population* initialPopulation = (Population*) parametersMap->getPtr("initialPopulation");
+    Population* initialPopulation = (Population*) parametersMap->getPtr(Test::INITIAL_POPULATION);
     Population* population = new Population(initialPopulation);
     population->setParams(parametersMap);
 
@@ -319,7 +324,7 @@ void plotTaskFunction(ParametersMap* parametersMap)
     string plotVar = "generation";
     fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
-    float maxGenerations = parametersMap->getNumber("maxGenerations");
+    float maxGenerations = parametersMap->getNumber(Test::MAX_GENERATIONS);
     for (unsigned i = 0; i < maxGenerations; ++i) {
         float fitness = population->getBestIndividualScore();
         fprintf(dataFile, " %d %f \n", i, fitness);
@@ -330,19 +335,19 @@ void plotTaskFunction(ParametersMap* parametersMap)
 }
 void Test::plotTask(Loop* loop, ParametersMap* parametersMap, unsigned maxGenerations)
 {
-    Task* task = (Task*) parametersMap->getPtr("task");
+    Task* task = (Task*) parametersMap->getPtr(Test::TASK);
     string testedTask = task->toString();
     parametersMap->putString(Loop::LABEL, testedTask);
     cout << "Plotting " << testedTask << "...";
     Chronometer chrono;
     chrono.start();
 
-    parametersMap->putNumber("maxGenerations", maxGenerations);
-    Individual* example = (Individual*) parametersMap->getPtr("example");
-    unsigned populationSize = parametersMap->getNumber("populationSize");
+    parametersMap->putNumber(Test::MAX_GENERATIONS, maxGenerations);
+    Individual* example = (Individual*) parametersMap->getPtr(Test::EXAMPLE_INDIVIDUAL);
+    unsigned populationSize = parametersMap->getNumber(Population::SIZE);
     float weighsRange = parametersMap->getNumber(Factory::WEIGHS_RANGE);
     Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
-    parametersMap->putPtr("initialPopulation", initialPopulation);
+    parametersMap->putPtr(Test::INITIAL_POPULATION, initialPopulation);
 
     createGnuPlotScript(loop, parametersMap);
 
@@ -351,7 +356,7 @@ void Test::plotTask(Loop* loop, ParametersMap* parametersMap, unsigned maxGenera
 
     delete (initialPopulation);
 
-    string path = parametersMap->getString("path");
+    string path = parametersMap->getString(Test::PLOT_PATH);
     plotFile(path, testedTask);
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;

@@ -7,8 +7,6 @@
 
 #include "loop.h"
 
-    static const string LABEL;
-    static const string STATE;
 const string Loop::LABEL = "__LOOP_FUNCTION_NAME";
 const string Loop::STATE = "__LOOP__RUNNING_STATE";
 

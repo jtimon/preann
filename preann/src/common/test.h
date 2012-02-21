@@ -38,6 +38,14 @@ public:
     static const string PLOT_INC;
     static const string LINE_COLOR;
     static const string POINT_TYPE;
+    static const string PLOT_PATH;
+    static const string PLOT_FILE;
+    static const string FIRST_STATE;
+    static const string SUB_PATH;
+    static const string INITIAL_POPULATION;
+    static const string EXAMPLE_INDIVIDUAL;
+    static const string TASK;
+    static const string MAX_GENERATIONS;
 protected:
     static void createGnuPlotScript(Loop* loop, ParametersMap* parametersMap);
 public:

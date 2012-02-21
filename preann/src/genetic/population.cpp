@@ -7,6 +7,8 @@
 
 #include "population.h"
 
+const string Population::SIZE = "__Population_size";
+
 Population::Population(Population* other)
 {
     this->maxSize = other->getSize();

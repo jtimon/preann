@@ -14,7 +14,9 @@
 
 class Population
 {
-
+public:
+    static const string SIZE;
+protected:
     unsigned generation;
     Task* task;
     unsigned maxSize;
