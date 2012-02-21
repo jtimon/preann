@@ -97,11 +97,11 @@ int main(int argc, char *argv[])
         parametersMap.putPtr(PLOT_POINT_TYPE_LOOP, bufferTypeLoop);
         loop->print();
 
-        loop->plot(chronoMutate, &parametersMap, "Connection_mutate", "size", 250, 2000, 500);
+        Test::plot(loop, chronoMutate, &parametersMap, "Connection_mutate", "size", 250, 2000, 500);
         parametersMap.putNumber("repetitions", 10);
-        loop->plot(chronoCrossover, &parametersMap, "Connection_crossover", "size", 100, 301, 100);
+        Test::plot(loop, chronoCrossover, &parametersMap, "Connection_crossover", "size", 100, 301, 100);
         parametersMap.putNumber("repetitions", 1);
-        loop->plot(chronoCalculateAndAddTo, &parametersMap, "Connection_calculateAndAddTo", "size", 1000,
+        Test::plot(loop, chronoCalculateAndAddTo, &parametersMap, "Connection_calculateAndAddTo", "size", 1000,
                    2001, 1000);
 
         printf("Exit success.\n");

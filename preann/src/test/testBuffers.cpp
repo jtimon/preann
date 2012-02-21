@@ -109,14 +109,14 @@ int main(int argc, char *argv[])
                 loop);
         loop->print();
 
-        loop->test(testClone, &parametersMap, "Buffer::clone");
-        loop->test(testCopyFromInterface, &parametersMap, "Buffer::copyFromInterface");
-        loop->test(testCopyToInterface, &parametersMap, "Buffer::copyToInterface");
+        Test::test(loop, testClone, &parametersMap, "Buffer::clone");
+        Test::test(loop, testCopyFromInterface, &parametersMap, "Buffer::copyFromInterface");
+        Test::test(loop, testCopyToInterface, &parametersMap, "Buffer::copyToInterface");
 
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         loop->print();
 
-        loop->test(testActivation, &parametersMap, "Buffer::activation");
+        Test::test(loop, testActivation, &parametersMap, "Buffer::activation");
 
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();

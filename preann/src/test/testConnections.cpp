@@ -126,9 +126,9 @@ int main(int argc, char *argv[])
                 loop);
         loop->print();
 
-        loop->test(testCalculateAndAddTo, &parametersMap, "Connection::calculateAndAddTo");
-        loop->test(testMutate, &parametersMap, "Connection::mutate");
-        loop->test(testCrossover, &parametersMap, "Connection::crossover");
+        Test::test(loop, testCalculateAndAddTo, &parametersMap, "Connection::calculateAndAddTo");
+        Test::test(loop, testMutate, &parametersMap, "Connection::mutate");
+        Test::test(loop, testCrossover, &parametersMap, "Connection::crossover");
 
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();

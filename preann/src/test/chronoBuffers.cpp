@@ -100,16 +100,17 @@ int main(int argc, char *argv[])
 
         loop->print();
 
-        loop->plot(chronoCopyToInterface, &parametersMap, "Buffer_copyToInterface", "size", 2000, 20001, 2000);
-        loop->plot(chronoCopyFromInterface, &parametersMap, "Buffer_copyFromInterface", "size", 2000, 20001,
-                   2000);
-        loop->plot(chronoClone, &parametersMap, "Buffer_clone", "size", 1000, 10001, 3000);
+        Test::plot(loop, chronoCopyToInterface, &parametersMap, "Buffer_copyToInterface", "size", 2000,
+                   20001, 2000);
+        Test::plot(loop, chronoCopyFromInterface, &parametersMap, "Buffer_copyFromInterface", "size", 2000,
+                   20001, 2000);
+        Test::plot(loop, chronoClone, &parametersMap, "Buffer_clone", "size", 1000, 10001, 3000);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         loop->print();
 
-        loop->plot(chronoActivation, &parametersMap, "Buffer_activation", "size", 2000, 20001, 2000);
+        Test::plot(loop, chronoActivation, &parametersMap, "Buffer_activation", "size", 2000, 20001, 2000);
 
         delete (loop);
 

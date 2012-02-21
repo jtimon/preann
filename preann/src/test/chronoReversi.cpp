@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
         parametersMap.putPtr("example", example);
 
         unsigned maxGenerations = 100;
-        loop->plotTask(&parametersMap, maxGenerations);
+        Test::plotTask(loop, &parametersMap, maxGenerations);
 
         delete (example);
         delete (task);

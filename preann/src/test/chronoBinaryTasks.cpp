@@ -12,7 +12,7 @@ using namespace std;
     Individual* example = task->getExample();                                           \
     parametersMap->putPtr("task", task);                                                \
     parametersMap->putPtr("example", example);                                          \
-    loop->plotTask(parametersMap, maxGenerations);                                      \
+    Test::plotTask(loop, parametersMap, maxGenerations);                                \
     delete (example);                                                                   \
     delete (task);
 

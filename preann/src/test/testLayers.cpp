@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
         loop->print();
 
         //TODO arreglar
-        loop->test(testCalculateOutput, &parametersMap, "Layer::calculateOutput");
+        Test::test(loop, testCalculateOutput, &parametersMap, "Layer::calculateOutput");
 
         printf("Exit success.\n");
         MemoryManagement::printTotalAllocated();

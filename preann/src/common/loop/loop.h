@@ -53,12 +53,6 @@ public:
     int getLineColor(ParametersMap* parametersMap);
     int getPointType(ParametersMap* parametersMap);
 
-    //TODO sacar de la clase loop
-    void test(void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel);
-    void plot(void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel,
-              std::string plotVarKey, float min, float max, float inc);
-    void plotTask(ParametersMap* parametersMap, unsigned maxGenerations);
-
     virtual Loop* findLoop(std::string key);
     virtual void print() = 0;
 
