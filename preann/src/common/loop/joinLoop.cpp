@@ -56,8 +56,7 @@ void JoinLoop::print()
 
 std::string JoinLoop::valueToString()
 {
-    string error = "JoinLoop::valueToString should not be called!";
-    throw error;
+    return tInnerLoops[tIndex]->valueToString();
 }
 
 std::string JoinLoop::getState(bool longVersion)
@@ -71,17 +70,17 @@ std::string JoinLoop::getState(bool longVersion)
 
 void JoinLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
-    for (int i = 0; i < tInnerLoops.size(); ++i) {
-        tInnerLoops[i]->setCallerLoop(this);
-        tInnerLoops[i]->repeatFunctionImpl(func, parametersMap);
+    for (tIndex = 0; tIndex < tInnerLoops.size(); ++tIndex) {
+        tInnerLoops[tIndex]->setCallerLoop(this);
+        tInnerLoops[tIndex]->repeatFunctionImpl(func, parametersMap);
     }
 }
 
 void JoinLoop::repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
                                 void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
-    for (int i = 0; i < tInnerLoops.size(); ++i) {
-        tInnerLoops[i]->setCallerLoop(this);
-        tInnerLoops[i]->repeatActionImpl(action, func, parametersMap);
+    for (tIndex = 0; tIndex < tInnerLoops.size(); ++tIndex) {
+        tInnerLoops[tIndex]->setCallerLoop(this);
+        tInnerLoops[tIndex]->repeatActionImpl(action, func, parametersMap);
     }
 }

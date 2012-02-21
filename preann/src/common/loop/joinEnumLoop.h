@@ -1,34 +1,37 @@
 /*
- * joinLoop.h
+ * joinEnumLoop.h
  *
  *  Created on: Feb 21, 2012
  *      Author: timon
  */
 
-#ifndef JOINLOOP_H_
-#define JOINLOOP_H_
+#ifndef JOINENUMLOOP_H_
+#define JOINENUMLOOP_H_
 
 #include "loop.h"
 
-class JoinLoop : public Loop
+class JoinEnumLoop : public Loop
 {
 protected:
+    EnumType tEnumType;
+    vector<unsigned> tValueVector;
     vector<Loop*> tInnerLoops;
     unsigned tIndex;
+    virtual unsigned valueToUnsigned();
 
     virtual void repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap);
     virtual void
     repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
                      void(*func)(ParametersMap*), ParametersMap* parametersMap);
 public:
-    JoinLoop(unsigned count, ...);
-    virtual ~JoinLoop();
+    JoinEnumLoop(std::string key, EnumType enumType);
+    virtual ~JoinEnumLoop();
+
+    void addEnumLoop(unsigned enumValue, Loop* loop);
 
     virtual Loop* findLoop(std::string key);
-
     virtual void print();
-    virtual std::string getState(bool longVersion);
     virtual std::string valueToString();
 };
 
-#endif /* JOINLOOP_H_ */
+#endif /* JOINENUMLOOP_H_ */

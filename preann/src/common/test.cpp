@@ -276,7 +276,7 @@ void plotAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
 
         fclose(dataFile);
     } catch (string e) {
-        cout << " while testing " + parametersMap->getString(Loop::LABEL) + " at state "
+        cout << " while plotting " + parametersMap->getString(Loop::LABEL) + " at state "
                 + parametersMap->getString(Loop::STATE) + " : " + e << endl;
     }
 }
@@ -311,27 +311,32 @@ void Test::plot(Loop* loop, void(*func)(ParametersMap*), ParametersMap* paramete
 
 void plotTaskFunction(ParametersMap* parametersMap)
 {
-    string path = parametersMap->getString(Test::PLOT_PATH);
-
-    Population* initialPopulation = (Population*) parametersMap->getPtr(Test::INITIAL_POPULATION);
-    Population* population = new Population(initialPopulation);
-    population->setParams(parametersMap);
-
-    Task* task = population->getTask();
     string state = parametersMap->getString(Loop::STATE);
-    string dataPath = path + "data/" + task->toString() + "_" + state + ".DAT";
-    FILE* dataFile = openFile(dataPath);
-    string plotVar = "generation";
-    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+    try {
+        string path = parametersMap->getString(Test::PLOT_PATH);
 
-    float maxGenerations = parametersMap->getNumber(Test::MAX_GENERATIONS);
-    for (unsigned i = 0; i < maxGenerations; ++i) {
-        float fitness = population->getBestIndividualScore();
-        fprintf(dataFile, " %d %f \n", i, fitness);
-        population->nextGeneration();
+        Population* initialPopulation = (Population*) parametersMap->getPtr(Test::INITIAL_POPULATION);
+        Population* population = new Population(initialPopulation);
+        population->setParams(parametersMap);
+
+        Task* task = population->getTask();
+        string dataPath = path + "data/" + task->toString() + "_" + state + ".DAT";
+        FILE* dataFile = openFile(dataPath);
+        string plotVar = "generation";
+        fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+
+        float maxGenerations = parametersMap->getNumber(Test::MAX_GENERATIONS);
+        for (unsigned i = 0; i < maxGenerations; ++i) {
+            float fitness = population->getBestIndividualScore();
+            fprintf(dataFile, " %d %f \n", i, fitness);
+            population->nextGeneration();
+        }
+        fclose(dataFile);
+        delete (population);
+    } catch (string e) {
+        cout << " while plotting " + parametersMap->getString(Loop::LABEL) + " at state "
+                + state + " : " + e << endl;
     }
-    fclose(dataFile);
-    delete (population);
 }
 void Test::plotTask(Loop* loop, ParametersMap* parametersMap, unsigned maxGenerations)
 {

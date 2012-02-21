@@ -8,6 +8,7 @@
 #include "loop/rangeLoop.h"
 #include "loop/enumLoop.h"
 #include "loop/joinLoop.h"
+#include "loop/joinEnumLoop.h"
 #include "loop/enumValueLoop.h"
 
 #include "neural/buffer.h"

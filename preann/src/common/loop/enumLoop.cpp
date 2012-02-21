@@ -53,6 +53,7 @@ EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop, unsigned
 
 EnumLoop::~EnumLoop()
 {
+    tValueVector.clear();
 }
 
 void EnumLoop::withAll(EnumType enumType)
