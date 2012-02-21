@@ -11,6 +11,14 @@ const string Test::DIFF_COUNT = "__differencesCounter";
 const string Test::MEM_LOSSES = "__memoryLosses";
 const string Test::REPETITIONS = "__repetitions";
 const string Test::TIME_COUNT = "__timeCount";
+const string Test::PLOT_LOOP = "__LOOP__PLOT_LOOP";
+const string Test::PLOT_X_AXIS = "__LOOP__PLOT_X_AXIS";
+const string Test::PLOT_Y_AXIS = "__LOOP__PLOT_Y_AXIS";
+const string Test::PLOT_MIN = "__LOOP__PLOT_MIN";
+const string Test::PLOT_MAX = "__LOOP__PLOT_MAX";
+const string Test::PLOT_INC = "__LOOP__PLOT_INC";
+const string Test::LINE_COLOR = "__LOOP__PLOT_LINE_COLOR";
+const string Test::POINT_TYPE = "__LOOP__PLOT_POINT_TYPE";
 
 unsigned char Test::areEqual(float expected, float actual,
         BufferType bufferType)
@@ -174,11 +182,11 @@ void preparePlotFunction(ParametersMap* parametersMap)
     Loop* lineColorLoop = NULL;
     Loop* pointTypeLoop = NULL;
     try {
-        lineColorLoop = (Loop*) parametersMap->getPtr(PLOT_LINE_COLOR_LOOP);
+        lineColorLoop = (Loop*) parametersMap->getPtr(Test::LINE_COLOR);
     } catch (string e) {
     };
     try {
-        pointTypeLoop = (Loop*) parametersMap->getPtr(PLOT_POINT_TYPE_LOOP);
+        pointTypeLoop = (Loop*) parametersMap->getPtr(Test::POINT_TYPE);
     } catch (string e) {
     };
 
@@ -245,12 +253,12 @@ void plotAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
 
         string dataPath = path + "data/" + functionLabel + "_" + state + ".DAT";
         FILE* dataFile = openFile(dataPath);
-        string plotVar = parametersMap->getString(PLOT_LOOP);
+        string plotVar = parametersMap->getString(Test::PLOT_LOOP);
         fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
-        float min = parametersMap->getNumber(PLOT_MIN);
-        float max = parametersMap->getNumber(PLOT_MAX);
-        float inc = parametersMap->getNumber(PLOT_INC);
+        float min = parametersMap->getNumber(Test::PLOT_MIN);
+        float max = parametersMap->getNumber(Test::PLOT_MAX);
+        float inc = parametersMap->getNumber(Test::PLOT_INC);
 
         for (float i = min; i < max; i += inc) {
             parametersMap->putNumber(plotVar, i);

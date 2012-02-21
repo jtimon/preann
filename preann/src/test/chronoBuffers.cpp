@@ -71,8 +71,8 @@ int main(int argc, char *argv[])
     try {
         ParametersMap parametersMap;
         parametersMap.putString("path", "/home/timon/workspace/preann/output/");
-        parametersMap.putString(PLOT_X_AXIS, "Size");
-        parametersMap.putString(PLOT_Y_AXIS, "Time (seconds)");
+        parametersMap.putString(Test::PLOT_X_AXIS, "Size");
+        parametersMap.putString(Test::PLOT_Y_AXIS, "Time (seconds)");
         parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
         parametersMap.putNumber(Test::REPETITIONS, 100);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
@@ -86,8 +86,8 @@ int main(int argc, char *argv[])
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop);
         loop = bufferTypeLoop;
 
-        parametersMap.putPtr(PLOT_LINE_COLOR_LOOP, implTypeLoop);
-        parametersMap.putPtr(PLOT_POINT_TYPE_LOOP, bufferTypeLoop);
+        parametersMap.putPtr(Test::LINE_COLOR, implTypeLoop);
+        parametersMap.putPtr(Test::POINT_TYPE, bufferTypeLoop);
 
         loop->print();
 

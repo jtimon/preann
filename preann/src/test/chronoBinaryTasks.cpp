@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
     try {
         ParametersMap parametersMap;
         parametersMap.putString("path", "/home/timon/workspace/preann/output/");
-        parametersMap.putString(PLOT_X_AXIS, "Generation");
-        parametersMap.putString(PLOT_Y_AXIS, "Fitness");
+        parametersMap.putString(Test::PLOT_X_AXIS, "Generation");
+        parametersMap.putString(Test::PLOT_Y_AXIS, "Fitness");
         parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
         unsigned populationSize = 8;
         parametersMap.putNumber("populationSize", populationSize);
@@ -93,8 +93,8 @@ int main(int argc, char *argv[])
 //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
 //        loop = resetAlgLoop;
 
-        parametersMap.putPtr(PLOT_LINE_COLOR_LOOP, selecAlgLoop);
-        parametersMap.putPtr(PLOT_POINT_TYPE_LOOP, selecAlgLoop);
+        parametersMap.putPtr(Test::LINE_COLOR, selecAlgLoop);
+        parametersMap.putPtr(Test::POINT_TYPE, selecAlgLoop);
 
         loop->print();
 

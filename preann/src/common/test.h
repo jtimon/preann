@@ -12,15 +12,6 @@
 
 #include "neural/buffer.h"
 
-#define PLOT_LOOP "__LOOP__PLOT_LOOP"
-#define PLOT_X_AXIS "__LOOP__PLOT_X_AXIS"
-#define PLOT_Y_AXIS "__LOOP__PLOT_Y_AXIS"
-#define PLOT_LINE_COLOR_LOOP "__LOOP__PLOT_LINE_COLOR_LOOP"
-#define PLOT_POINT_TYPE_LOOP "__LOOP__PLOT_POINT_TYPE_LOOP"
-#define PLOT_MIN "__LOOP__PLOT_MIN"
-#define PLOT_MAX "__LOOP__PLOT_MAX"
-#define PLOT_INC "__LOOP__PLOT_INC"
-
 #define START_CHRONO                                                                    \
     Chronometer chrono;                                                                 \
     unsigned repetitions = parametersMap->getNumber(Test::REPETITIONS);                 \
@@ -39,6 +30,14 @@ public:
     static const string MEM_LOSSES;
     static const string REPETITIONS;
     static const string TIME_COUNT;
+    static const string PLOT_LOOP;
+    static const string PLOT_X_AXIS;
+    static const string PLOT_Y_AXIS;
+    static const string PLOT_MIN;
+    static const string PLOT_MAX;
+    static const string PLOT_INC;
+    static const string LINE_COLOR;
+    static const string POINT_TYPE;
 protected:
     static void createGnuPlotScript(Loop* loop, ParametersMap* parametersMap);
 public:

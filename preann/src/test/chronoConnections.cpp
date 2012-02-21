@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
     try {
         ParametersMap parametersMap;
         parametersMap.putString("path", "/home/timon/workspace/preann/output/");
-        parametersMap.putString(PLOT_X_AXIS, "Size");
-        parametersMap.putString(PLOT_Y_AXIS, "Time (seconds)");
+        parametersMap.putString(Test::PLOT_X_AXIS, "Size");
+        parametersMap.putString(Test::PLOT_Y_AXIS, "Time (seconds)");
         parametersMap.putNumber(Test::REPETITIONS, 1000);
         parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
         parametersMap.putNumber("numInputs", 2);
@@ -86,8 +86,8 @@ int main(int argc, char *argv[])
                                                 3, BT_BIT, BT_SIGN, BT_FLOAT);
         loop = bufferTypeLoop;
 
-        parametersMap.putPtr(PLOT_LINE_COLOR_LOOP, implTypeLoop);
-        parametersMap.putPtr(PLOT_POINT_TYPE_LOOP, bufferTypeLoop);
+        parametersMap.putPtr(Test::LINE_COLOR, implTypeLoop);
+        parametersMap.putPtr(Test::POINT_TYPE, bufferTypeLoop);
         loop->print();
 
         Test::plot(loop, chronoMutate, &parametersMap, "Connection_mutate", Factory::SIZE, 250, 2000, 500);
