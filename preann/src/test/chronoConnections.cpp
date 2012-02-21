@@ -35,8 +35,8 @@ void chronoMutate(ParametersMap* parametersMap)
     unsigned pos = Random::positiveInteger(connection->getSize());
     float mutation = Random::floatNum(initialWeighsRange);
     START_CHRONO
-            connection->mutate(pos, mutation);
-        STOP_CHRONO
+        connection->mutate(pos, mutation);
+    STOP_CHRONO
 
     END
 }
@@ -69,7 +69,6 @@ int main(int argc, char *argv[])
         parametersMap.putNumber(Test::REPETITIONS, 1000);
         parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
         parametersMap.putNumber(Dummy::NUM_INPUTS, 2);
-        parametersMap.putNumber("numMutations", 10);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         Loop* loop = NULL;

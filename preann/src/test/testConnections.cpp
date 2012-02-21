@@ -7,6 +7,8 @@ using namespace std;
 #include "common/test.h"
 #include "common/dummy.h"
 
+const string NUM_MUTATIONS = "__numMutations";
+
 #define START                                                                           \
     float differencesCounter = 0;                                                       \
     Buffer* buffer = Dummy::buffer(parametersMap);                                      \
@@ -56,7 +58,7 @@ void testMutate(ParametersMap* parametersMap)
     Connection* cConnection = Factory::newConnection(cInput, outputSize);
     cConnection->copyFrom(connection);
 
-    unsigned numMutations = (unsigned)parametersMap->getNumber("numMutations");
+    unsigned numMutations = (unsigned)parametersMap->getNumber(NUM_MUTATIONS);
     for (unsigned i = 0; i < numMutations; ++i) {
         float mutation = Random::floatNum(initialWeighsRange);
         unsigned pos = Random::positiveInteger(connection->getSize());
@@ -111,7 +113,7 @@ int main(int argc, char *argv[])
         ParametersMap parametersMap;
         parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
         parametersMap.putNumber(Dummy::NUM_INPUTS, 2);
-        parametersMap.putNumber("numMutations", 10);
+        parametersMap.putNumber(NUM_MUTATIONS, 10);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         loop = new RangeLoop(Dummy::SIZE, 2, 13, 10, NULL);
