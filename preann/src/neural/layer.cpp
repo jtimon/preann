@@ -5,18 +5,8 @@ ImplementationType Layer::getImplementationType()
     return output->getImplementationType();
 }
 
-Buffer* Layer::newBuffer(FILE* stream)
-{
-    return Factory::newBuffer(stream, getImplementationType());
-}
-
-Buffer* Layer::newBuffer(unsigned size, BufferType bufferType)
-{
-    return Factory::newBuffer(size, bufferType, getImplementationType());
-}
-
 Layer::Layer(unsigned size, BufferType outputType, FunctionType functionType,
-        ImplementationType implementationType)
+             ImplementationType implementationType)
 {
     this->functionType = functionType;
     output = Factory::newBuffer(size, outputType, implementationType);
@@ -57,8 +47,7 @@ void Layer::loadWeighs(FILE* stream)
     unsigned numInputs;
     fread(&numInputs, sizeof(unsigned), 1, stream);
     if (numInputs != connections.size()) {
-        std::string error =
-                "Cannot load weighs: the layer doesn't have that numer of inputs.";
+        std::string error = "Cannot load weighs: the layer doesn't have that numer of inputs.";
         throw error;
     }
     for (unsigned i = 0; i < connections.size(); i++) {
@@ -80,8 +69,7 @@ void Layer::saveWeighs(FILE* stream)
 Interface* Layer::getOutputInterface()
 {
     if (tOuputInterface == NULL) {
-        tOuputInterface = new Interface(output->getSize(),
-                output->getBufferType());
+        tOuputInterface = new Interface(output->getSize(), output->getBufferType());
         output->copyToInterface(tOuputInterface);
     }
     return tOuputInterface;
@@ -90,8 +78,7 @@ Interface* Layer::getOutputInterface()
 void Layer::calculateOutput()
 {
     if (!output) {
-        std::string error =
-                "Cannot calculate the output of a Layer without output.";
+        std::string error = "Cannot calculate the output of a Layer without output.";
         throw error;
     }
     //TODO B do not use clone on the thresholds, compare with them in activation (one write less)
@@ -112,16 +99,14 @@ void Layer::calculateOutput()
 
 void Layer::addInput(Buffer* input)
 {
-    Connection* newConnection = Factory::newConnection(input,
-            output->getSize(), getImplementationType());
+    Connection* newConnection = Factory::newConnection(input, output->getSize());
     connections.push_back(newConnection);
 }
 
 void Layer::randomWeighs(float range)
 {
     for (unsigned i = 0; i < connections.size(); i++) {
-        Interface aux(connections[i]->getSize(),
-                connections[i]->getBufferType());
+        Interface aux(connections[i]->getSize(), connections[i]->getBufferType());
         aux.random(range);
         connections[i]->copyFromInterface(&aux);
     }
@@ -153,9 +138,8 @@ Connection* Layer::getThresholds()
 Connection* Layer::getConnection(unsigned inputPos)
 {
     if (inputPos > connections.size()) {
-        string error = "Cannot access the Connection in position " + to_string(
-                inputPos) + ": the Layer has only " + to_string(
-                connections.size()) + " inputs.";
+        string error = "Cannot access the Connection in position " + to_string(inputPos)
+                + ": the Layer has only " + to_string(connections.size()) + " inputs.";
         throw error;
     }
     return connections[inputPos];
@@ -169,17 +153,14 @@ FunctionType Layer::getFunctionType()
 void Layer::copyWeighs(Layer* sourceLayer)
 {
     if (connections.size() != sourceLayer->getNumberInputs()) {
-        std::string error =
-                "Layer::copyWeighs : Cannot copyWeighs from a layer with "
-                        + to_string(sourceLayer->getNumberInputs())
-                        + " connections to a layer with " + to_string(
-                        connections.size());
+        std::string error = "Layer::copyWeighs : Cannot copyWeighs from a layer with "
+                + to_string(sourceLayer->getNumberInputs()) + " connections to a layer with "
+                + to_string(connections.size());
         throw error;
     }
     if (this->getImplementationType() != sourceLayer->getImplementationType()) {
-        std::string
-                error =
-                        "Layer::copyWeighs : The layers are incompatible: the implementation is different.";
+        std::string error =
+                "Layer::copyWeighs : The layers are incompatible: the implementation is different.";
         throw error;
     }
     //TODO L implementar metodo Buffer::copyFast restringido a bufferes con el mismo tipo de implementacion

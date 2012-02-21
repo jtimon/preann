@@ -11,7 +11,7 @@ using namespace std;
 
 void testBuffer(ParametersMap* parametersMap)
 {
-    Buffer* buffer = Dummy::buffer(parametersMap);
+    Buffer* buffer = Factory::newBuffer(parametersMap);
     delete (buffer);
 //    unsigned* aa = (unsigned*)MemoryManagement::malloc(sizeof(unsigned) * 5);
 
@@ -20,8 +20,8 @@ void testBuffer(ParametersMap* parametersMap)
 
 void testConnection(ParametersMap* parametersMap)
 {
-    Buffer* buffer = Dummy::buffer(parametersMap);
-    Connection* connection = Dummy::connection(parametersMap, buffer);
+    Buffer* buffer = Factory::newBuffer(parametersMap);
+    Connection* connection = Factory::newConnection(parametersMap, buffer);
 
     delete (connection);
     delete (buffer);
@@ -31,7 +31,7 @@ void testConnection(ParametersMap* parametersMap)
 
 void testLayer(ParametersMap* parametersMap)
 {
-    Buffer* buffer = Dummy::buffer(parametersMap);
+    Buffer* buffer = Factory::newBuffer(parametersMap);
     Layer* layer = Dummy::layer(parametersMap, buffer);
 
     delete (layer);
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     try {
         Loop* loop;
         ParametersMap parametersMap;
-        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
         parametersMap.putNumber("memoryLosses", 0);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
                 FT_IDENTITY);

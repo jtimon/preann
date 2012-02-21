@@ -11,7 +11,7 @@ void testCalculateOutput(ParametersMap* parametersMap)
 {
     unsigned differencesCounter = 0;
     string path = parametersMap->getString("layerPath");
-    Buffer* buffer = Dummy::buffer(parametersMap);
+    Buffer* buffer = Factory::newBuffer(parametersMap);
     Buffer* bufferC = Factory::newBuffer(buffer, IT_C);
     Layer* layer = Dummy::layer(parametersMap, buffer);
 
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     try {
         Loop* loop;
         ParametersMap parametersMap;
-        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
         parametersMap.putNumber("numInputs", 2);
         parametersMap.putString("layerPath", "/home/timon/layer.lay");
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),

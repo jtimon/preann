@@ -17,8 +17,6 @@ protected:
     Buffer* output;
     Interface* tOuputInterface;
     FunctionType functionType;
-    Buffer* newBuffer(FILE* stream);
-    Buffer* newBuffer(unsigned size, BufferType bufferType);
 public:
     Layer(unsigned size, BufferType outputType, FunctionType functionType,
             ImplementationType implementationType);

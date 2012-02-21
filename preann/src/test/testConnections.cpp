@@ -9,10 +9,10 @@ using namespace std;
 
 #define START                                                                           \
     float differencesCounter = 0;                                                       \
-    Buffer* buffer = Dummy::buffer(parametersMap);                                      \
-    Connection* connection = Dummy::connection(parametersMap, buffer);                  \
-    unsigned outputSize = parametersMap->getNumber("outputSize");                       \
-    float initialWeighsRange = parametersMap->getNumber("initialWeighsRange");
+    Buffer* buffer = Factory::newBuffer(parametersMap);                                 \
+    Connection* connection = Factory::newConnection(parametersMap, buffer);             \
+    unsigned outputSize = parametersMap->getNumber(Factory::OUTPUT_SIZE);               \
+    float initialWeighsRange = parametersMap->getNumber(Factory::WEIGHS_RANGE);
 
 #define END                                                                             \
     delete (connection);                                                                \
@@ -26,7 +26,7 @@ void testCalculateAndAddTo(ParametersMap* parametersMap)
     Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT, connection->getImplementationType());
 
     Buffer* cInput = Factory::newBuffer(connection->getInput(), IT_C);
-    Connection* cConnection = Factory::newConnection(cInput, outputSize, IT_C);
+    Connection* cConnection = Factory::newConnection(cInput, outputSize);
     cConnection->copyFrom(connection);
 
     Buffer* cResults = Factory::newBuffer(outputSize, BT_FLOAT, IT_C);
@@ -53,7 +53,7 @@ void testMutate(ParametersMap* parametersMap)
     connection->mutate(pos, mutation);
 
     Buffer* cInput = Factory::newBuffer(connection->getInput(), IT_C);
-    Connection* cConnection = Factory::newConnection(cInput, outputSize, IT_C);
+    Connection* cConnection = Factory::newConnection(cInput, outputSize);
     cConnection->copyFrom(connection);
 
     unsigned numMutations = (unsigned)parametersMap->getNumber("numMutations");
@@ -75,14 +75,13 @@ void testCrossover(ParametersMap* parametersMap)
 {
     START
 
-    Connection* other = Factory::newConnection(connection->getInput(), outputSize,
-            connection->getImplementationType());
+    Connection* other = Factory::newConnection(connection->getInput(), outputSize);
     other->random(initialWeighsRange);
 
     Buffer* cInput = Factory::newBuffer(connection->getInput(), IT_C);
-    Connection* cConnection = Factory::newConnection(cInput, outputSize, IT_C);
+    Connection* cConnection = Factory::newConnection(cInput, outputSize);
     cConnection->copyFrom(connection);
-    Connection* cOther = Factory::newConnection(cInput, outputSize, IT_C);
+    Connection* cOther = Factory::newConnection(cInput, outputSize);
     cOther->copyFrom(other);
 
     Interface bitBuffer = Interface(connection->getSize(), BT_BIT);
@@ -110,7 +109,7 @@ int main(int argc, char *argv[])
     try {
         Loop* loop;
         ParametersMap parametersMap;
-        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
         parametersMap.putNumber("numInputs", 2);
         parametersMap.putNumber("numMutations", 10);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);

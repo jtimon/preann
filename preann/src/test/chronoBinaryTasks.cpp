@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
         parametersMap.putString("path", "/home/timon/workspace/preann/output/");
         parametersMap.putString(PLOT_X_AXIS, "Generation");
         parametersMap.putString(PLOT_Y_AXIS, "Fitness");
-        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
         unsigned populationSize = 8;
         parametersMap.putNumber("populationSize", populationSize);
         parametersMap.putNumber("numSelection", populationSize / 2);

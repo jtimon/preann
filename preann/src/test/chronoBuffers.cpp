@@ -10,7 +10,7 @@ using namespace std;
 #define START                                                                           \
     Chronometer chrono;                                                                 \
     unsigned repetitions = parametersMap->getNumber("repetitions");                     \
-    Buffer* buffer = Dummy::buffer(parametersMap);
+    Buffer* buffer = Factory::newBuffer(parametersMap);
 
 #define END                                                                             \
     parametersMap->putNumber("timeCount", chrono.getSeconds());                         \
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
         parametersMap.putString("path", "/home/timon/workspace/preann/output/");
         parametersMap.putString(PLOT_X_AXIS, "Size");
         parametersMap.putString(PLOT_Y_AXIS, "Time (seconds)");
-        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
         parametersMap.putNumber("repetitions", 100);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 

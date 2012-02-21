@@ -8,10 +8,10 @@
 #define START                                                                           \
     Chronometer chrono;                                                                 \
     unsigned repetitions = parametersMap->getNumber("repetitions");                     \
-    Buffer* buffer = Dummy::buffer(parametersMap);                                      \
-    Connection* connection = Dummy::connection(parametersMap, buffer);                  \
-    unsigned outputSize = parametersMap->getNumber("outputSize");                       \
-    float initialWeighsRange = parametersMap->getNumber("initialWeighsRange");
+    Buffer* buffer = Factory::newBuffer(parametersMap);                                 \
+    Connection* connection = Factory::newConnection(parametersMap, buffer);             \
+    unsigned outputSize = parametersMap->getNumber(Factory::OUTPUT_SIZE);               \
+    float initialWeighsRange = parametersMap->getNumber(Factory::WEIGHS_RANGE);
 
 #define END                                                                             \
     parametersMap->putNumber("timeCount", chrono.getSeconds());                         \
@@ -53,8 +53,7 @@ void chronoCrossover(ParametersMap* parametersMap)
 {
     START
 
-    Connection* other = Factory::newConnection(connection->getInput(), outputSize,
-                                               connection->getImplementationType());
+    Connection* other = Factory::newConnection(connection->getInput(), outputSize);
     Interface bitVector(connection->getSize(), BT_BIT);
     bitVector.random(2);
     chrono.start();
@@ -77,7 +76,7 @@ int main(int argc, char *argv[])
         parametersMap.putString(PLOT_X_AXIS, "Size");
         parametersMap.putString(PLOT_Y_AXIS, "Time (seconds)");
         parametersMap.putNumber("repetitions", 1000);
-        parametersMap.putNumber("initialWeighsRange", 20);
+        parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
         parametersMap.putNumber("numInputs", 2);
         parametersMap.putNumber("numMutations", 10);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);

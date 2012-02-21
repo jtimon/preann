@@ -12,43 +12,12 @@ Interface* Dummy::interface(ParametersMap* parametersMap)
     BufferType bufferType = (BufferType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_BUFFER));
 
     unsigned size = (unsigned) parametersMap->getNumber("size");
-    float initialWeighsRange = parametersMap->getNumber("initialWeighsRange");
+    float initialWeighsRange = parametersMap->getNumber(Factory::WEIGHS_RANGE);
 
     Interface* interface = new Interface(size, bufferType);
     interface->random(initialWeighsRange);
 
     return interface;
-}
-
-Buffer* Dummy::buffer(ParametersMap* parametersMap)
-{
-    BufferType bufferType = (BufferType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_BUFFER));
-    ImplementationType implementationType =
-            (ImplementationType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION));
-
-    unsigned size = (unsigned) parametersMap->getNumber("size");
-    float initialWeighsRange = parametersMap->getNumber("initialWeighsRange");
-
-    Buffer* buffer = Factory::newBuffer(size, bufferType, implementationType);
-    buffer->random(initialWeighsRange);
-
-    return buffer;
-}
-
-Connection* Dummy::connection(ParametersMap* parametersMap, Buffer* buffer)
-{
-    BufferType bufferType = (BufferType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_BUFFER));
-    ImplementationType implementationType =
-            (ImplementationType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION));
-
-    unsigned size = (unsigned) parametersMap->getNumber("size");
-    float initialWeighsRange = parametersMap->getNumber("initialWeighsRange");
-    unsigned outputSize = parametersMap->getNumber("outputSize");
-
-    Connection* connection = Factory::newConnection(buffer, outputSize, implementationType);
-    connection->random(initialWeighsRange);
-
-    return connection;
 }
 
 Layer* Dummy::layer(ParametersMap* parametersMap, Buffer* input)
@@ -60,7 +29,7 @@ Layer* Dummy::layer(ParametersMap* parametersMap, Buffer* input)
             (FunctionType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_FUNCTION));
 
     unsigned size = (unsigned) parametersMap->getNumber("size");
-    float initialWeighsRange = parametersMap->getNumber("initialWeighsRange");
+    float initialWeighsRange = parametersMap->getNumber(Factory::WEIGHS_RANGE);
     unsigned numInputs = (unsigned) parametersMap->getNumber("numInputs");
 
     Layer* layer = new Layer(size, bufferType, functionType, implementationType);
