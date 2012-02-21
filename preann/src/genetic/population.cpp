@@ -8,6 +8,18 @@
 #include "population.h"
 
 const string Population::SIZE = "__Population_size";
+const string Population::NUM_SELECTION = "__Population_numSelection";
+const string Population::NUM_CROSSOVER = "__Population_numCrossover";
+const string Population::RANKING_BASE = "__Population_rankingBase";
+const string Population::RANKING_STEP = "__Population_rankingStep";
+const string Population::TOURNAMENT_SIZE = "__Population_tournamentSize";
+const string Population::UNIFORM_CROSS_PROB = "__Population_uniformCrossProb";
+const string Population::NUM_POINTS = "__Population_numPoints";
+const string Population::NUM_MUTATIONS = "__Population_numMutations";
+const string Population::MUTATION_RANGE = "__Population_mutationRange";
+const string Population::MUTATION_PROB = "__Population_mutationProb";
+const string Population::NUM_RESETS = "__Population_numResets";
+const string Population::RESET_PROB = "__Population_resetProb";
 
 Population::Population(Population* other)
 {
@@ -191,7 +203,7 @@ void Population::insertIndividual(Individual *individual)
 
 void Population::setParams(ParametersMap* parametersMap)
 {
-    unsigned numSelection = parametersMap->getNumber("numSelection");
+    unsigned numSelection = parametersMap->getNumber(NUM_SELECTION);
     SelectionAlgorithm selectionAlgorithm =
             (SelectionAlgorithm) parametersMap->getNumber(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM));
     switch (selectionAlgorithm) {
@@ -199,47 +211,47 @@ void Population::setParams(ParametersMap* parametersMap)
             this->setSelectionRouletteWheel(numSelection);
             break;
         case SA_RANKING:
-            this->setSelectionRanking(numSelection, parametersMap->getNumber("rankingBase"),
-                                            parametersMap->getNumber("rankingStep"));
+            this->setSelectionRanking(numSelection, parametersMap->getNumber(RANKING_BASE),
+                                            parametersMap->getNumber(RANKING_STEP));
             break;
         case SA_TOURNAMENT:
-            this->setSelectionTournament(numSelection, parametersMap->getNumber("tournamentSize"));
+            this->setSelectionTournament(numSelection, parametersMap->getNumber(TOURNAMENT_SIZE));
             break;
         case SA_TRUNCATION:
             this->setSelectionTruncation(numSelection);
             break;
     }
 
-    unsigned numCrossover = parametersMap->getNumber("numCrossover");
+    unsigned numCrossover = parametersMap->getNumber(Population::NUM_CROSSOVER);
     CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm) parametersMap->getNumber(Enumerations::enumTypeToString(ET_CROSS_ALG));
     CrossoverLevel crossoverLevel = (CrossoverLevel) parametersMap->getNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL));
     switch (crossoverAlgorithm) {
         case CA_UNIFORM:
             this->setCrossoverUniformScheme(crossoverLevel, numCrossover,
-                                                  parametersMap->getNumber("uniformCrossProb"));
+                                                  parametersMap->getNumber(UNIFORM_CROSS_PROB));
             break;
         case CA_PROPORTIONAL:
             this->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
             break;
         case CA_MULTIPOINT:
             this->setCrossoverMultipointScheme(crossoverLevel, numCrossover,
-                                                     parametersMap->getNumber("numPoints"));
+                                                     parametersMap->getNumber(NUM_POINTS));
             break;
     }
 
     MutationAlgorithm mutationAlgorithm = (MutationAlgorithm) parametersMap->getNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG));
-    float mutationRange = parametersMap->getNumber("mutationRange");
+    float mutationRange = parametersMap->getNumber(MUTATION_RANGE);
     if (mutationAlgorithm == MA_PER_INDIVIDUAL) {
-        this->setMutationsPerIndividual(parametersMap->getNumber("numMutations"), mutationRange);
+        this->setMutationsPerIndividual(parametersMap->getNumber(NUM_MUTATIONS), mutationRange);
     } else if (mutationAlgorithm == MA_PROBABILISTIC) {
-        this->setMutationProbability(parametersMap->getNumber("mutationProb"), mutationRange);
+        this->setMutationProbability(parametersMap->getNumber(MUTATION_PROB), mutationRange);
     }
 
     ResetAlgorithm resetAlgorithm = (ResetAlgorithm) parametersMap->getNumber(Enumerations::enumTypeToString(ET_RESET_ALG));
     if (resetAlgorithm == RA_PER_INDIVIDUAL) {
-        this->setResetsPerIndividual(parametersMap->getNumber("numResets"));
+        this->setResetsPerIndividual(parametersMap->getNumber(NUM_RESETS));
     } else if (resetAlgorithm == RA_PROBABILISTIC) {
-        this->setResetProbability(parametersMap->getNumber("resetProb"));
+        this->setResetProbability(parametersMap->getNumber(RESET_PROB));
     }
 }
 

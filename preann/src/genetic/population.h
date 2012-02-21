@@ -16,6 +16,18 @@ class Population
 {
 public:
     static const string SIZE;
+    static const string NUM_SELECTION;
+    static const string NUM_CROSSOVER;
+    static const string RANKING_BASE;
+    static const string RANKING_STEP;
+    static const string TOURNAMENT_SIZE;
+    static const string UNIFORM_CROSS_PROB;
+    static const string NUM_POINTS;
+    static const string NUM_MUTATIONS;
+    static const string MUTATION_RANGE;
+    static const string MUTATION_PROB;
+    static const string NUM_RESETS;
+    static const string RESET_PROB;
 protected:
     unsigned generation;
     Task* task;

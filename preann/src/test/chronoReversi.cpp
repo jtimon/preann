@@ -20,22 +20,22 @@ int main(int argc, char *argv[])
         parametersMap.putNumber(Dummy::WEIGHS_RANGE, 5);
         unsigned populationSize = 8;
         parametersMap.putNumber(Population::SIZE, populationSize);
-        parametersMap.putNumber("numSelection", populationSize / 2);
-        parametersMap.putNumber("numCrossover", populationSize / 2);
+        parametersMap.putNumber(Population::NUM_SELECTION, populationSize / 2);
+        parametersMap.putNumber(Population::NUM_CROSSOVER, populationSize / 2);
 
-        parametersMap.putNumber("rankingBase", 10);
-        parametersMap.putNumber("rankingStep", 5);
-        parametersMap.putNumber("tournamentSize", 4);
+        parametersMap.putNumber(Population::RANKING_BASE, 10);
+        parametersMap.putNumber(Population::RANKING_STEP, 5);
+        parametersMap.putNumber(Population::TOURNAMENT_SIZE, 4);
 
-        parametersMap.putNumber("uniformCrossProb", 0.7);
-        parametersMap.putNumber("numPoints", 3);
+        parametersMap.putNumber(Population::UNIFORM_CROSS_PROB, 0.7);
+        parametersMap.putNumber(Population::NUM_POINTS, 3);
 
-        parametersMap.putNumber("numMutations", 1);
-        parametersMap.putNumber("mutationRange", 2);
-        parametersMap.putNumber("mutationProb", 0.1);
+        parametersMap.putNumber(Population::NUM_MUTATIONS, 1);
+        parametersMap.putNumber(Population::MUTATION_RANGE, 2);
+        parametersMap.putNumber(Population::MUTATION_PROB, 0.1);
 
-        parametersMap.putNumber("numResets", 2);
-        parametersMap.putNumber("resetProb", 0.05);
+        parametersMap.putNumber(Population::NUM_RESETS, 2);
+        parametersMap.putNumber(Population::RESET_PROB, 0.05);
 
         //TODO repetitions for plotTask
         //        parametersMap.putNumber(Test::REPETITIONS, 100);
