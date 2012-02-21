@@ -3,7 +3,6 @@
 
 using namespace std;
 
-#include "common/loop.h"
 #include "common/dummy.h"
 #include "common/test.h"
 #include "genetic/population.h"

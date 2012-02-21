@@ -4,7 +4,7 @@
 
 SHELL = /bin/sh
 
-MODULES   = common neural genetic game tasks optimization 
+MODULES   = common common/loop neural genetic game tasks optimization 
 LIB_MODULES = $(MODULES) template  
 
 SRC_DIR   = $(addprefix src/,$(MODULES))  

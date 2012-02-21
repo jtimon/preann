@@ -2,9 +2,14 @@
 #define TEST_H_
 
 #include "common/parametersMap.h"
-#include "common/loop.h"
-#include "neural/buffer.h"
 
+#include "common/loop/loop.h"
+#include "common/loop/rangeLoop.h"
+#include "common/loop/enumLoop.h"
+#include "common/loop/joinLoop.h"
+#include "common/loop/enumValueLoop.h"
+
+#include "neural/buffer.h"
 
 class Test
 {

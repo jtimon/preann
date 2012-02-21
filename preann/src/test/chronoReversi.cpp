@@ -4,7 +4,7 @@
 using namespace std;
 
 #include "common/chronometer.h"
-#include "common/loop.h"
+#include "common/test.h"
 #include "genetic/population.h"
 #include "tasks/reversiTask.h"
 

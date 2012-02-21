@@ -2,7 +2,7 @@
 #include <fstream>
 
 #include "common/chronometer.h"
-#include "common/loop.h"
+#include "common/test.h"
 #include "common/dummy.h"
 
 #define START                                                                           \

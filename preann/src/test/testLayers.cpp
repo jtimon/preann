@@ -4,9 +4,8 @@
 using namespace std;
 
 #include "common/chronometer.h"
-#include "common/loop.h"
-#include "common/dummy.h"
 #include "common/test.h"
+#include "common/dummy.h"
 
 void testCalculateOutput(ParametersMap* parametersMap)
 {
