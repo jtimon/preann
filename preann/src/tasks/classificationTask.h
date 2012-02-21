@@ -8,7 +8,7 @@
 #ifndef CLASSIFICATIONTASK_H_
 #define CLASSIFICATIONTASK_H_
 
-#include "task.h"
+#include "genetic/task.h"
 
 class ClassificationTask : public Task
 {
@@ -22,6 +22,7 @@ public:
     virtual ~ClassificationTask();
     virtual void test(Individual* individual);
     virtual string toString();
+    virtual Individual* getExample();
 };
 
 #endif /* CLASSIFICATIONTASK_H_ */

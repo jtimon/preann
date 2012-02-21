@@ -1,4 +1,4 @@
-#include "factory.h"
+#include "optimization/factory.h"
 
 #ifndef TEST_H_
 #define TEST_H_

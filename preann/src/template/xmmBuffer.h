@@ -8,8 +8,8 @@
 #ifndef XMMBUFFER_H_
 #define XMMBUFFER_H_
 
-#include "buffer.h"
-#include "sse2_code.h"
+#include "neural/buffer.h"
+#include "optimization/sse2_code.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
     class XmmBuffer : virtual public Buffer

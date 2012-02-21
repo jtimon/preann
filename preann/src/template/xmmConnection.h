@@ -1,7 +1,7 @@
 #ifndef XMMCONNECTION_H_
 #define XMMCONNECTION_H_
 
-#include "connection.h"
+#include "neural/connection.h"
 #include "xmmBuffer.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>

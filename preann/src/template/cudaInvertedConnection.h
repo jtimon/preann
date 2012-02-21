@@ -1,7 +1,7 @@
 #ifndef CUDAINVERTEDCONNECTION_H_
 #define CUDAINVERTEDCONNECTION_H_
 
-#include "connection.h"
+#include "neural/connection.h"
 #include "cudaBuffer.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>

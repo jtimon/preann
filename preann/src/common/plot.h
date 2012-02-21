@@ -3,9 +3,9 @@
 
 #include "chronometer.h"
 #include "test.h"
-#include "factory.h"
-#include "population.h"
-#include "task.h"
+#include "optimization/factory.h"
+#include "genetic/population.h"
+#include "genetic/task.h"
 
 #define START_PLOT Chronometer chrono; unsigned repetitions = test->getValue("repetitions");
 #define END_PLOT return chrono.getSeconds();

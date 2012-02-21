@@ -3,10 +3,10 @@
 
 using namespace std;
 
-#include "chronometer.h"
-#include "loop.h"
-#include "population.h"
-#include "binaryTask.h"
+#include "common/chronometer.h"
+#include "common/loop.h"
+#include "genetic/population.h"
+#include "tasks/binaryTask.h"
 
 #define COMMON                                                                          \
     Individual* example = task->getExample();                                           \

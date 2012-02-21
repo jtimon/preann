@@ -1,10 +1,9 @@
 #include <iostream>
 #include <fstream>
 
-#include "chronometer.h"
-#include "loop.h"
-#include "dummy.h"
-#include "test.h"
+#include "common/chronometer.h"
+#include "common/loop.h"
+#include "common/dummy.h"
 
 #define START                                                                           \
     Chronometer chrono;                                                                 \

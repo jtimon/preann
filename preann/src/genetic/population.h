@@ -10,7 +10,7 @@
 
 #include "task.h"
 #include "individual.h"
-#include "parametersMap.h"
+#include "common/parametersMap.h"
 
 class Population
 {

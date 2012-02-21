@@ -1,7 +1,7 @@
 #ifndef CPPCONNECTION_H_
 #define CPPCONNECTION_H_
 
-#include "fullConnection.h"
+#include "neural/fullConnection.h"
 #include "cppBuffer.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>

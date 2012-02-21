@@ -8,7 +8,7 @@
 #ifndef CPPBUFFER_H_
 #define CPPBUFFER_H_
 
-#include "buffer.h"
+#include "neural/buffer.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
     class CppBuffer : virtual public Buffer

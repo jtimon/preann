@@ -39,6 +39,12 @@ void ClassificationTask::test(Individual* individual)
     individual->setFitness(-accumulation);
 }
 
+Individual* ClassificationTask::getExample()
+{
+    string error = "ClassificationTask::getExample not implemented.";
+    throw error;
+}
+
 string ClassificationTask::toString()
 {
     return "Classification";

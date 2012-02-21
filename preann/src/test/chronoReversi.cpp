@@ -3,10 +3,10 @@
 
 using namespace std;
 
-#include "chronometer.h"
-#include "plot.h"
-#include "population.h"
-#include "reversiTask.h"
+#include "common/chronometer.h"
+#include "common/plot.h"
+#include "genetic/population.h"
+#include "tasks/reversiTask.h"
 
 #define BOARD_SIZE 6
 

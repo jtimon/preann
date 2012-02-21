@@ -1,8 +1,8 @@
 #ifndef CUDABUFFER_H_
 #define CUDABUFFER_H_
 
-#include "buffer.h"
-#include "cuda_code.h"
+#include "neural/buffer.h"
+#include "optimization/cuda_code.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
     class CudaBuffer : virtual public Buffer

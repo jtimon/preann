@@ -9,7 +9,7 @@
 #define DUMMY_H_
 
 #include "parametersMap.h"
-#include "population.h"
+#include "neural/neuralNet.h"
 
 class Dummy
 {

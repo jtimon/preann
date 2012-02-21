@@ -55,7 +55,14 @@ void ReversiTask::setInputs(Individual* individual)
     individual->addInputLayer(tBoard->getInterface());
 }
 
+Individual* ReversiTask::getExample()
+{
+    string error = "ReversiTask::getExample not implemented.";
+    throw error;
+}
+
 std::string ReversiTask::toString()
 {
     return "REVERSI_" + to_string(tBoard->size());
 }
+

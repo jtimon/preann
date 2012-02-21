@@ -7,7 +7,7 @@
 #ifndef FACTORY_H_
 #define FACTORY_H_
 
-#include "connection.h"
+#include "neural/connection.h"
 
 class Factory
 {

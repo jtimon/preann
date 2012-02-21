@@ -8,8 +8,8 @@
 #ifndef REVERSITASK_H_
 #define REVERSITASK_H_
 
-#include "task.h"
-#include "reversiBoard.h"
+#include "genetic/task.h"
+#include "game/reversiBoard.h"
 
 class ReversiTask : public Task
 {
@@ -22,6 +22,7 @@ public:
     virtual void test(Individual* individual);
     virtual void setInputs(Individual* individual);
     virtual std::string toString();
+    virtual Individual* getExample();
 
 };
 

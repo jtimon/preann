@@ -1,7 +1,7 @@
 #ifndef CUDA_DEFINITIONS_H_
 #define CUDA_DEFINITIONS_H_
 
-#include "enumerations.h"
+#include "common/enumerations.h"
 
 #define CUDA_THREADS_PER_BLOCK 64
 

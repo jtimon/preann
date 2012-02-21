@@ -17,7 +17,8 @@ CUDA_OBJ = build/optimization/cuda_code.o
 FULL_OBJ = $(SSE2_OBJ) $(CUDA_OBJ)
 
 OBJ       = $(patsubst src/%.cpp,build/%.o,$(SRC))
-INCLUDES  = $(addprefix -I , $(addprefix src/,$(LIB_MODULES))) 
+#INCLUDES  = $(addprefix -I , $(addprefix src/,$(LIB_MODULES))) 
+INCLUDES  = -I src/ 
 
 PROGRAMS = $(wildcard src/test/*.cpp)
 EXE      = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,bin/%.exe,$(main)))

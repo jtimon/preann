@@ -8,7 +8,7 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
-#include "individual.h"
+#include "genetic/individual.h"
 
 typedef enum
 {

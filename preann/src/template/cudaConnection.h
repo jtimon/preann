@@ -8,7 +8,7 @@
 #ifndef CUDACONNECTION_H_
 #define CUDACONNECTION_H_
 
-#include "connection.h"
+#include "neural/connection.h"
 #include "cudaBuffer.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>

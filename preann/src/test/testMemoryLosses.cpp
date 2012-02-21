@@ -3,11 +3,11 @@
 
 using namespace std;
 
-#include "loop.h"
-#include "dummy.h"
-#include "population.h"
-#include "binaryTask.h"
-#include "chronometer.h"
+#include "common/loop.h"
+#include "common/dummy.h"
+#include "genetic/population.h"
+#include "tasks/binaryTask.h"
+#include "common/chronometer.h"
 
 unsigned memoryLosses = 0;
 

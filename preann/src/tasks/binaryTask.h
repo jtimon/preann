@@ -8,7 +8,7 @@
 #ifndef BINARYTASK_H_
 #define BINARYTASK_H_
 
-#include "task.h"
+#include "genetic/task.h"
 
 class BinaryTask : public Task
 {

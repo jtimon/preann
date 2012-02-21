@@ -8,7 +8,7 @@
 #ifndef INDIVIDUAL_H_
 #define INDIVIDUAL_H_
 
-#include "neuralNet.h"
+#include "neural/neuralNet.h"
 
 class Individual : public NeuralNet
 {
