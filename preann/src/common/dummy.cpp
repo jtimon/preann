@@ -7,17 +7,48 @@
 
 #include "dummy.h"
 
+const string Dummy::SIZE = "__size";
+const string Dummy::WEIGHS_RANGE = "__initialWeighsRange";
+const string Dummy::OUTPUT_SIZE = "__outputSize";
+const string Dummy::NUM_INPUTS = "__numInputs";
+const string Dummy::NUM_LAYERS = "__numLayers";
+
 Interface* Dummy::interface(ParametersMap* parametersMap)
 {
     BufferType bufferType = (BufferType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_BUFFER));
 
-    unsigned size = (unsigned) parametersMap->getNumber("size");
-    float initialWeighsRange = parametersMap->getNumber(Factory::WEIGHS_RANGE);
+    unsigned size = (unsigned) parametersMap->getNumber(Dummy::SIZE);
+    float initialWeighsRange = parametersMap->getNumber(Dummy::WEIGHS_RANGE);
 
     Interface* interface = new Interface(size, bufferType);
     interface->random(initialWeighsRange);
 
     return interface;
+}
+
+Buffer* Dummy::buffer(ParametersMap* parametersMap)
+{
+    BufferType bufferType = (BufferType)(parametersMap->getNumber(Enumerations::enumTypeToString(ET_BUFFER)));
+    ImplementationType implementationType = (ImplementationType)(parametersMap->getNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION)));
+
+    unsigned size = (unsigned )(parametersMap->getNumber(Dummy::SIZE));
+    float initialWeighsRange = parametersMap->getNumber(Dummy::WEIGHS_RANGE);
+
+    Buffer* buffer = Factory::newBuffer(size, bufferType, implementationType);
+    buffer->random(initialWeighsRange);
+
+    return buffer;
+}
+
+Connection* Dummy::connection(ParametersMap* parametersMap, Buffer* buffer)
+{
+    float initialWeighsRange = parametersMap->getNumber(Dummy::WEIGHS_RANGE);
+    unsigned outputSize = parametersMap->getNumber(Dummy::OUTPUT_SIZE);
+
+    Connection* connection = Factory::newConnection(buffer, outputSize);
+    connection->random(initialWeighsRange);
+
+    return connection;
 }
 
 Layer* Dummy::layer(ParametersMap* parametersMap, Buffer* input)
@@ -28,9 +59,9 @@ Layer* Dummy::layer(ParametersMap* parametersMap, Buffer* input)
     FunctionType functionType =
             (FunctionType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_FUNCTION));
 
-    unsigned size = (unsigned) parametersMap->getNumber("size");
-    float initialWeighsRange = parametersMap->getNumber(Factory::WEIGHS_RANGE);
-    unsigned numInputs = (unsigned) parametersMap->getNumber("numInputs");
+    unsigned size = (unsigned) parametersMap->getNumber(Dummy::SIZE);
+    float initialWeighsRange = parametersMap->getNumber(Dummy::WEIGHS_RANGE);
+    unsigned numInputs = (unsigned) parametersMap->getNumber(Dummy::NUM_INPUTS);
 
     Layer* layer = new Layer(size, bufferType, functionType, implementationType);
     for (unsigned i = 0; i < numInputs; ++i) {
@@ -49,9 +80,9 @@ NeuralNet* Dummy::neuralNet(ParametersMap* parametersMap, Interface* input)
     FunctionType functionType =
             (FunctionType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_FUNCTION));
 
-    unsigned size = (unsigned) parametersMap->getNumber("size");
-    unsigned numInputs = (unsigned) parametersMap->getNumber("numInputs");
-    unsigned numLayers = parametersMap->getNumber("numLayers");
+    unsigned size = (unsigned) parametersMap->getNumber(Dummy::SIZE);
+    unsigned numInputs = (unsigned) parametersMap->getNumber(Dummy::NUM_INPUTS);
+    unsigned numLayers = parametersMap->getNumber(Dummy::NUM_LAYERS);
 
     NeuralNet* net = new NeuralNet(implementationType);
 

@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
         parametersMap.putString(Test::PLOT_PATH, "/home/timon/workspace/preann/output/");
         parametersMap.putString(Test::PLOT_X_AXIS, "Generation");
         parametersMap.putString(Test::PLOT_Y_AXIS, "Fitness");
-        parametersMap.putNumber(Factory::WEIGHS_RANGE, 5);
+        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 5);
         unsigned populationSize = 8;
         parametersMap.putNumber(Population::SIZE, populationSize);
         parametersMap.putNumber("numSelection", populationSize / 2);
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
         parametersMap.putNumber("resetProb", 0.05);
 
         //TODO repetitions for plotTask
-//        parametersMap.putNumber(Test::REPETITIONS, 100);
+        //        parametersMap.putNumber(Test::REPETITIONS, 100);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
                                               ET_SELECTION_ALGORITHM, loop);
         loop = selecAlgLoop;
 
-//        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
-//        loop = resetAlgLoop;
+        //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
+        //        loop = resetAlgLoop;
 
         parametersMap.putPtr(Test::LINE_COLOR, selecAlgLoop);
         parametersMap.putPtr(Test::POINT_TYPE, selecAlgLoop);

@@ -9,10 +9,10 @@ using namespace std;
 
 #define START                                                                           \
     float differencesCounter = 0;                                                       \
-    Buffer* buffer = Factory::newBuffer(parametersMap);                                 \
-    Connection* connection = Factory::newConnection(parametersMap, buffer);             \
-    unsigned outputSize = parametersMap->getNumber(Factory::OUTPUT_SIZE);               \
-    float initialWeighsRange = parametersMap->getNumber(Factory::WEIGHS_RANGE);
+    Buffer* buffer = Dummy::buffer(parametersMap);                                      \
+    Connection* connection = Dummy::connection(parametersMap, buffer);                  \
+    unsigned outputSize = parametersMap->getNumber(Dummy::OUTPUT_SIZE);                 \
+    float initialWeighsRange = parametersMap->getNumber(Dummy::WEIGHS_RANGE);
 
 #define END                                                                             \
     delete (connection);                                                                \
@@ -109,13 +109,13 @@ int main(int argc, char *argv[])
     try {
         Loop* loop;
         ParametersMap parametersMap;
-        parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
-        parametersMap.putNumber("numInputs", 2);
+        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
+        parametersMap.putNumber(Dummy::NUM_INPUTS, 2);
         parametersMap.putNumber("numMutations", 10);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        loop = new RangeLoop(Factory::SIZE, 2, 13, 10, NULL);
-        loop = new RangeLoop(Factory::OUTPUT_SIZE, 1, 4, 2, loop);
+        loop = new RangeLoop(Dummy::SIZE, 2, 13, 10, NULL);
+        loop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2, loop);
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER),
                 ET_BUFFER, loop, 3, BT_BIT, BT_SIGN, BT_FLOAT);

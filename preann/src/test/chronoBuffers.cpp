@@ -7,7 +7,7 @@ using namespace std;
 #include "common/dummy.h"
 
 #define START                                                                           \
-    Buffer* buffer = Factory::newBuffer(parametersMap);
+    Buffer* buffer = Dummy::buffer(parametersMap);
 
 #define END                                                                             \
     delete (buffer);
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
         parametersMap.putString(Test::PLOT_PATH, "/home/timon/workspace/preann/output/");
         parametersMap.putString(Test::PLOT_X_AXIS, "Size");
         parametersMap.putString(Test::PLOT_Y_AXIS, "Time (seconds)");
-        parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
+        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
         parametersMap.putNumber(Test::REPETITIONS, 100);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
@@ -91,17 +91,17 @@ int main(int argc, char *argv[])
 
         loop->print();
 
-        Test::plot(loop, chronoCopyToInterface, &parametersMap, "Buffer_copyToInterface", Factory::SIZE, 2000,
+        Test::plot(loop, chronoCopyToInterface, &parametersMap, "Buffer_copyToInterface", Dummy::SIZE, 2000,
                    20001, 2000);
-        Test::plot(loop, chronoCopyFromInterface, &parametersMap, "Buffer_copyFromInterface", Factory::SIZE, 2000,
+        Test::plot(loop, chronoCopyFromInterface, &parametersMap, "Buffer_copyFromInterface", Dummy::SIZE, 2000,
                    20001, 2000);
-        Test::plot(loop, chronoClone, &parametersMap, "Buffer_clone", Factory::SIZE, 1000, 10001, 3000);
+        Test::plot(loop, chronoClone, &parametersMap, "Buffer_clone", Dummy::SIZE, 1000, 10001, 3000);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         loop->print();
 
-        Test::plot(loop, chronoActivation, &parametersMap, "Buffer_activation", Factory::SIZE, 2000, 20001, 2000);
+        Test::plot(loop, chronoActivation, &parametersMap, "Buffer_activation", Dummy::SIZE, 2000, 20001, 2000);
 
         delete (loop);
 

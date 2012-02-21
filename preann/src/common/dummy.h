@@ -18,7 +18,12 @@ class Dummy
     }
     ;
 public:
-    //TODO move these things to factory or somewhere else
+    static const string SIZE;
+    static const string WEIGHS_RANGE;
+    static const string OUTPUT_SIZE;
+    static const string NUM_INPUTS;
+    static const string NUM_LAYERS;
+
     static Interface* interface(ParametersMap* parametersMap);
     static Buffer* buffer(ParametersMap* parametersMap);
     static Connection* connection(ParametersMap* parametersMap, Buffer* buffer);

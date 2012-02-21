@@ -9,7 +9,7 @@ using namespace std;
 
 #define START                                                                           \
     float differencesCounter = 0;                                                       \
-    Buffer* buffer = Factory::newBuffer(parametersMap);
+    Buffer* buffer = Dummy::buffer(parametersMap);
 
 #define END                                                                             \
     delete (buffer);                                                                    \
@@ -23,7 +23,7 @@ void testActivation(ParametersMap* parametersMap)
             Enumerations::enumTypeToString(ET_FUNCTION));
     Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT,
             buffer->getImplementationType());
-    results->random(parametersMap->getNumber(Factory::WEIGHS_RANGE));
+    results->random(parametersMap->getNumber(Dummy::WEIGHS_RANGE));
 
     Buffer* cResults = Factory::newBuffer(results, IT_C);
     Buffer* cBuffer = Factory::newBuffer(buffer->getSize(), buffer->getBufferType(), IT_C);
@@ -44,7 +44,7 @@ void testCopyFromInterface(ParametersMap* parametersMap)
     START
 
     Interface interface(buffer->getSize(), buffer->getBufferType());
-    interface.random(parametersMap->getNumber(Factory::WEIGHS_RANGE));
+    interface.random(parametersMap->getNumber(Dummy::WEIGHS_RANGE));
 
     Buffer* cBuffer = Factory::newBuffer(buffer, IT_C);
 
@@ -96,10 +96,10 @@ int main(int argc, char *argv[])
     try {
         Loop* loop;
         ParametersMap parametersMap;
-        parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
+        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        loop = new RangeLoop(Factory::SIZE, 100, 101, 100, NULL);
+        loop = new RangeLoop(Dummy::SIZE, 100, 101, 100, NULL);
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER),
                 ET_BUFFER, loop);

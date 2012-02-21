@@ -11,7 +11,7 @@ using namespace std;
 
 void testBuffer(ParametersMap* parametersMap)
 {
-    Buffer* buffer = Factory::newBuffer(parametersMap);
+    Buffer* buffer = Dummy::buffer(parametersMap);
     delete (buffer);
 //    unsigned* aa = (unsigned*)MemoryManagement::malloc(sizeof(unsigned) * 5);
 
@@ -20,8 +20,8 @@ void testBuffer(ParametersMap* parametersMap)
 
 void testConnection(ParametersMap* parametersMap)
 {
-    Buffer* buffer = Factory::newBuffer(parametersMap);
-    Connection* connection = Factory::newConnection(parametersMap, buffer);
+    Buffer* buffer = Dummy::buffer(parametersMap);
+    Connection* connection = Dummy::connection(parametersMap, buffer);
 
     delete (connection);
     delete (buffer);
@@ -31,7 +31,7 @@ void testConnection(ParametersMap* parametersMap)
 
 void testLayer(ParametersMap* parametersMap)
 {
-    Buffer* buffer = Factory::newBuffer(parametersMap);
+    Buffer* buffer = Dummy::buffer(parametersMap);
     Layer* layer = Dummy::layer(parametersMap, buffer);
 
     delete (layer);
@@ -61,9 +61,10 @@ void testPopulation(ParametersMap* parametersMap)
     FunctionType functionType = (FunctionType)parametersMap->getNumber(
             Enumerations::enumTypeToString(ET_FUNCTION));
 
-    unsigned size = (unsigned)parametersMap->getNumber(Factory::SIZE);
+    unsigned size = (unsigned)parametersMap->getNumber(Dummy::SIZE);
 
     Interface* input = new Interface(size, bufferType);
+    Task* task = new BinaryTask(BO_OR, size, 5);
     Individual* example = new Individual(implementationType);
     example->addInputLayer(input);
     example->addInputLayer(input);
@@ -78,7 +79,6 @@ void testPopulation(ParametersMap* parametersMap)
     example->addLayersConnection(0, 2);
     example->addLayersConnection(1, 2);
     example->addLayersConnection(2, 0);
-    Task* task = new BinaryTask(BO_OR, size, 5);
     Population* population = new Population(task, example, 5, 20);
 
     delete (population);
@@ -100,15 +100,15 @@ int main(int argc, char *argv[])
     try {
         Loop* loop;
         ParametersMap parametersMap;
-        parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
+        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
         parametersMap.putNumber(Test::MEM_LOSSES, 0);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
                 FT_IDENTITY);
 
-        RangeLoop* sizeLoop = new RangeLoop(Factory::SIZE, 100, 101, 100, NULL);
+        RangeLoop* sizeLoop = new RangeLoop(Dummy::SIZE, 100, 101, 100, NULL);
         loop = sizeLoop;
 
-        RangeLoop* outputSizeLoop = new RangeLoop(Factory::OUTPUT_SIZE, 1, 4, 2, loop);
+        RangeLoop* outputSizeLoop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2, loop);
         loop = outputSizeLoop;
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(
@@ -130,13 +130,13 @@ int main(int argc, char *argv[])
 
         loop->repeatFunction(testConnection, &parametersMap, "Connection::memory_test");
 
-        RangeLoop* numInputsLoop = new RangeLoop("numInputs", 1, 3, 1, loop);
+        RangeLoop* numInputsLoop = new RangeLoop(Dummy::NUM_INPUTS, 1, 3, 1, loop);
         loop = numInputsLoop;
         loop->print();
 
         loop->repeatFunction(testLayer, &parametersMap, "Layer::memory_test");
 
-        RangeLoop* numLayersLoop = new RangeLoop("numLayers", 1, 3, 1, loop);
+        RangeLoop* numLayersLoop = new RangeLoop(Dummy::NUM_LAYERS, 1, 3, 1, loop);
         loop = numLayersLoop;
         loop->print();
 

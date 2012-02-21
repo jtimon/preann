@@ -12,7 +12,6 @@
 
 class Interface
 {
-
     unsigned size;
     void* data;
     BufferType bufferType;

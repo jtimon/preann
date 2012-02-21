@@ -345,7 +345,7 @@ void Test::plotTask(Loop* loop, ParametersMap* parametersMap, unsigned maxGenera
     parametersMap->putNumber(Test::MAX_GENERATIONS, maxGenerations);
     Individual* example = (Individual*) parametersMap->getPtr(Test::EXAMPLE_INDIVIDUAL);
     unsigned populationSize = parametersMap->getNumber(Population::SIZE);
-    float weighsRange = parametersMap->getNumber(Factory::WEIGHS_RANGE);
+    float weighsRange = parametersMap->getNumber(Dummy::WEIGHS_RANGE);
     Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
     parametersMap->putPtr(Test::INITIAL_POPULATION, initialPopulation);
 

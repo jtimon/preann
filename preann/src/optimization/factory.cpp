@@ -7,10 +7,6 @@
 #define BIT_STORAGE unsigned
 #define SIGN_STORAGE BIT_STORAGE
 
-const string Factory::SIZE = "__size";
-const string Factory::WEIGHS_RANGE = "__initialWeighsRange";
-const string Factory::OUTPUT_SIZE = "__outputSize";
-
 Buffer* Factory::newBuffer(FILE* stream, ImplementationType implementationType)
 {
     Interface interface(stream);
@@ -98,29 +94,4 @@ Connection* Factory::newConnection(Buffer* input, unsigned outputSize)
             return func_newConnection<BT_SIGN, SIGN_STORAGE> (input,
                     outputSize, implementationType);
     }
-}
-
-Buffer* Factory::newBuffer(ParametersMap* parametersMap)
-{
-    BufferType bufferType = (BufferType)(parametersMap->getNumber(Enumerations::enumTypeToString(ET_BUFFER)));
-    ImplementationType implementationType = (ImplementationType)(parametersMap->getNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION)));
-
-    unsigned size = (unsigned )(parametersMap->getNumber(Factory::SIZE));
-    float initialWeighsRange = parametersMap->getNumber(Factory::WEIGHS_RANGE);
-
-    Buffer* buffer = Factory::newBuffer(size, bufferType, implementationType);
-    buffer->random(initialWeighsRange);
-
-    return buffer;
-}
-
-Connection* Factory::newConnection(ParametersMap* parametersMap, Buffer* buffer)
-{
-    float initialWeighsRange = parametersMap->getNumber(Factory::WEIGHS_RANGE);
-    unsigned outputSize = parametersMap->getNumber(Factory::OUTPUT_SIZE);
-
-    Connection* connection = Factory::newConnection(buffer, outputSize);
-    connection->random(initialWeighsRange);
-
-    return connection;
 }

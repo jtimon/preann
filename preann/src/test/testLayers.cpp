@@ -13,7 +13,7 @@ void testCalculateOutput(ParametersMap* parametersMap)
 {
     unsigned differencesCounter = 0;
     string path = parametersMap->getString(LAYER_PATH);
-    Buffer* buffer = Factory::newBuffer(parametersMap);
+    Buffer* buffer = Dummy::buffer(parametersMap);
     Buffer* bufferC = Factory::newBuffer(buffer, IT_C);
     Layer* layer = Dummy::layer(parametersMap, buffer);
 
@@ -24,7 +24,7 @@ void testCalculateOutput(ParametersMap* parametersMap)
     stream = fopen(path.data(), "r+b");
 	Layer* layerC = new Layer(stream, IT_C);
 
-	unsigned numInputs = (unsigned)parametersMap->getNumber("numInputs");
+	unsigned numInputs = (unsigned)parametersMap->getNumber(Dummy::NUM_INPUTS);
 	for (unsigned i = 0; i < numInputs; ++i) {
 		layerC->addInput(bufferC);
 	}
@@ -53,13 +53,13 @@ int main(int argc, char *argv[])
     try {
         Loop* loop;
         ParametersMap parametersMap;
-        parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
-        parametersMap.putNumber("numInputs", 2);
+        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
+        parametersMap.putNumber(Dummy::NUM_INPUTS, 2);
         parametersMap.putString(LAYER_PATH, "/home/timon/layer.lay");
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
                 FT_IDENTITY);
 
-        loop = new RangeLoop(Factory::SIZE, 1, 51, 49, NULL);
+        loop = new RangeLoop(Dummy::SIZE, 1, 51, 49, NULL);
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(
                 ET_BUFFER), ET_BUFFER, loop, 3, BT_BIT, BT_SIGN, BT_FLOAT);

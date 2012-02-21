@@ -12,10 +12,6 @@
 
 class Factory
 {
-public:
-    static const string SIZE;
-    static const string WEIGHS_RANGE;
-    static const string OUTPUT_SIZE;
 protected:
     static BufferType weighForInput(BufferType inputType);
 public:
@@ -29,9 +25,6 @@ public:
     static Connection* newThresholds(Buffer* output, ImplementationType implementationType);
     static Connection
             * newConnection(FILE* stream, unsigned outputSize, ImplementationType implementationType);
-
-    static Buffer* newBuffer(ParametersMap* parametersMap);
-    static Connection* newConnection(ParametersMap* parametersMap, Buffer* buffer);
 
 };
 
