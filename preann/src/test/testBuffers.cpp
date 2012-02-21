@@ -13,7 +13,7 @@ using namespace std;
 
 #define END                                                                             \
     delete (buffer);                                                                    \
-    parametersMap->putNumber("differencesCounter", differencesCounter);
+    parametersMap->putNumber(Test::DIFF_COUNT, differencesCounter);
 
 void testActivation(ParametersMap* parametersMap)
 {
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
         parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        loop = new RangeLoop("size", 100, 101, 100, NULL);
+        loop = new RangeLoop(Factory::SIZE, 100, 101, 100, NULL);
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER),
                 ET_BUFFER, loop);
@@ -119,14 +119,14 @@ int main(int argc, char *argv[])
         Test::test(loop, testActivation, &parametersMap, "Buffer::activation");
 
         printf("Exit success.\n");
-        MemoryManagement::printTotalAllocated();
-        MemoryManagement::printTotalPointers();
     } catch (std::string error) {
         cout << "Error: " << error << endl;
         //	} catch (...) {
         //		printf("An error was thrown.\n", 1);
     }
 
+    MemoryManagement::printTotalAllocated();
+    MemoryManagement::printTotalPointers();
     //MemoryManagement::mem_printListOfPointers();
     total.stop();
     printf("Total time spent: %f \n", total.getSeconds());

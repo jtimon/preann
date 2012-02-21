@@ -3,29 +3,23 @@
 
 using namespace std;
 
-#include "common/chronometer.h"
 #include "common/test.h"
 #include "common/dummy.h"
 
 #define START                                                                           \
-    Chronometer chrono;                                                                 \
-    unsigned repetitions = parametersMap->getNumber("repetitions");                     \
     Buffer* buffer = Factory::newBuffer(parametersMap);
 
 #define END                                                                             \
-    parametersMap->putNumber("timeCount", chrono.getSeconds());                         \
-    delete (buffer);                                                                    \
+    delete (buffer);
 
 void chronoCopyToInterface(ParametersMap* parametersMap)
 {
     START
 
-    Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
-    chrono.start();
-    for (unsigned i = 0; i < repetitions; ++i) {
+    Interface interface(buffer->getSize(), buffer->getBufferType());
+    START_CHRONO
         buffer->copyToInterface(&interface);
-    }
-    chrono.stop();
+    STOP_CHRONO
 
     END
 }
@@ -34,12 +28,11 @@ void chronoCopyFromInterface(ParametersMap* parametersMap)
 {
     START
 
-    Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
-    chrono.start();
-    for (unsigned i = 0; i < repetitions; ++i) {
+    Interface interface(buffer->getSize(), buffer->getBufferType());
+
+    START_CHRONO
         buffer->copyFromInterface(&interface);
-    }
-    chrono.stop();
+    STOP_CHRONO
 
     END
 }
@@ -49,11 +42,11 @@ void chronoActivation(ParametersMap* parametersMap)
     START
 
     Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT, buffer->getImplementationType());
-    chrono.start();
-    for (unsigned i = 0; i < repetitions; ++i) {
+
+    START_CHRONO
         buffer->activation(results, FT_IDENTITY);
-    }
-    chrono.stop();
+    STOP_CHRONO
+
     delete (results);
 
     END
@@ -63,12 +56,10 @@ void chronoClone(ParametersMap* parametersMap)
 {
     START
 
-    chrono.start();
-    for (unsigned i = 0; i < repetitions; ++i) {
+    START_CHRONO
         Buffer* copy = buffer->clone();
         delete (copy);
-    }
-    chrono.stop();
+    STOP_CHRONO
 
     END
 }
@@ -83,7 +74,7 @@ int main(int argc, char *argv[])
         parametersMap.putString(PLOT_X_AXIS, "Size");
         parametersMap.putString(PLOT_Y_AXIS, "Time (seconds)");
         parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
-        parametersMap.putNumber("repetitions", 100);
+        parametersMap.putNumber(Test::REPETITIONS, 100);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         Loop* loop = NULL;
@@ -100,29 +91,29 @@ int main(int argc, char *argv[])
 
         loop->print();
 
-        Test::plot(loop, chronoCopyToInterface, &parametersMap, "Buffer_copyToInterface", "size", 2000,
+        Test::plot(loop, chronoCopyToInterface, &parametersMap, "Buffer_copyToInterface", Factory::SIZE, 2000,
                    20001, 2000);
-        Test::plot(loop, chronoCopyFromInterface, &parametersMap, "Buffer_copyFromInterface", "size", 2000,
+        Test::plot(loop, chronoCopyFromInterface, &parametersMap, "Buffer_copyFromInterface", Factory::SIZE, 2000,
                    20001, 2000);
-        Test::plot(loop, chronoClone, &parametersMap, "Buffer_clone", "size", 1000, 10001, 3000);
+        Test::plot(loop, chronoClone, &parametersMap, "Buffer_clone", Factory::SIZE, 1000, 10001, 3000);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         loop->print();
 
-        Test::plot(loop, chronoActivation, &parametersMap, "Buffer_activation", "size", 2000, 20001, 2000);
+        Test::plot(loop, chronoActivation, &parametersMap, "Buffer_activation", Factory::SIZE, 2000, 20001, 2000);
 
         delete (loop);
 
         printf("Exit success.\n");
-        MemoryManagement::printTotalAllocated();
-        MemoryManagement::printTotalPointers();
     } catch (std::string error) {
         cout << "Error: " << error << endl;
         //	} catch (...) {
         //		printf("An error was thrown.\n", 1);
     }
 
+    MemoryManagement::printTotalAllocated();
+    MemoryManagement::printTotalPointers();
     //MemoryManagement::mem_printListOfPointers();
     total.stop();
     printf("Total time spent: %f \n", total.getSeconds());

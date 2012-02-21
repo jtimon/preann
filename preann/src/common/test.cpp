@@ -7,6 +7,11 @@
 
 #include "test.h"
 
+const string Test::DIFF_COUNT = "__differencesCounter";
+const string Test::MEM_LOSSES = "__memoryLosses";
+const string Test::REPETITIONS = "__repetitions";
+const string Test::TIME_COUNT = "__timeCount";
+
 unsigned char Test::areEqual(float expected, float actual,
         BufferType bufferType)
 {
@@ -71,15 +76,15 @@ void Test::checkEmptyMemory(ParametersMap* parametersMap)
     if (MemoryManagement::getPtrCounter() > 0
             || MemoryManagement::getTotalAllocated() > 0) {
 
-        cout << "Memory loss detected while testing " + parametersMap->getString(LOOP_LABEL) + " at state "
-                        + parametersMap->getString(LOOP_STATE) << endl;
+        cout << "Memory loss detected while testing " + parametersMap->getString(Loop::LABEL) + " at state "
+                        + parametersMap->getString(Loop::STATE) << endl;
 
         MemoryManagement::printTotalAllocated();
         MemoryManagement::printTotalPointers();
         MemoryManagement::clear();
-        unsigned memoryLosses = parametersMap->getNumber("memoryLosses");
+        unsigned memoryLosses = parametersMap->getNumber(Test::MEM_LOSSES);
         ++memoryLosses;
-        parametersMap->putNumber("memoryLosses", memoryLosses);
+        parametersMap->putNumber(Test::MEM_LOSSES, memoryLosses);
     }
 }
 
@@ -87,20 +92,20 @@ void testAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
 {
     try {
         f(parametersMap);
-        unsigned differencesCounter = parametersMap->getNumber("differencesCounter");
+        unsigned differencesCounter = parametersMap->getNumber(Test::DIFF_COUNT);
         if (differencesCounter > 0) {
-            string state = parametersMap->getString(LOOP_STATE);
+            string state = parametersMap->getString(Loop::STATE);
             cout << state << " : " << differencesCounter << " differences detected." << endl;
         }
     } catch (string e) {
-        cout << " while testing " + parametersMap->getString(LOOP_LABEL) + " at state "
-                + parametersMap->getString(LOOP_STATE) + " : " + e << endl;
+        cout << " while testing " + parametersMap->getString(Loop::LABEL) + " at state "
+                + parametersMap->getString(Loop::STATE) + " : " + e << endl;
     }
 }
 void Test::test(Loop* loop, void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel)
 {
     cout << "Testing... " << functionLabel << endl;
-    parametersMap->putString(LOOP_LABEL, functionLabel);
+    parametersMap->putString(Loop::LABEL, functionLabel);
 
     loop->setCallerLoop(NULL);
     loop->repeatActionImpl(testAction, func, parametersMap);
@@ -160,7 +165,7 @@ void preparePlotFunction(ParametersMap* parametersMap)
         fprintf(plotFile, " , \\\n\t");
     }
 
-    string state = parametersMap->getString(LOOP_STATE);
+    string state = parametersMap->getString(Loop::STATE);
     string subPath = parametersMap->getString("subPath");
     string dataPath = subPath + state + ".DAT";
 
@@ -193,7 +198,7 @@ void preparePlotFunction(ParametersMap* parametersMap)
 void Test::createGnuPlotScript(Loop* loop, ParametersMap* parametersMap)
 {
     string path = parametersMap->getString("path");
-    string functionLabel = parametersMap->getString(LOOP_LABEL);
+    string functionLabel = parametersMap->getString(Loop::LABEL);
     string xAxis = parametersMap->getString(PLOT_X_AXIS);
     string yAxis = parametersMap->getString(PLOT_Y_AXIS);
 
@@ -234,9 +239,9 @@ void plotAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
 {
     try {
         string path = parametersMap->getString("path");
-        string functionLabel = parametersMap->getString(LOOP_LABEL);
-        string state = parametersMap->getString(LOOP_STATE);
-        unsigned repetitions = parametersMap->getNumber("repetitions");
+        string functionLabel = parametersMap->getString(Loop::LABEL);
+        string state = parametersMap->getString(Loop::STATE);
+        unsigned repetitions = parametersMap->getNumber(Test::REPETITIONS);
 
         string dataPath = path + "data/" + functionLabel + "_" + state + ".DAT";
         FILE* dataFile = openFile(dataPath);
@@ -249,18 +254,17 @@ void plotAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
 
         for (float i = min; i < max; i += inc) {
             parametersMap->putNumber(plotVar, i);
-            parametersMap->putNumber("timeCount", 0);
 
             f(parametersMap);
 
-            float totalTime = parametersMap->getNumber("timeCount");
+            float totalTime = parametersMap->getNumber(Test::TIME_COUNT);
             fprintf(dataFile, " %f %f \n", i, totalTime / repetitions);
         }
 
         fclose(dataFile);
     } catch (string e) {
-        cout << " while testing " + parametersMap->getString(LOOP_LABEL) + " at state "
-                + parametersMap->getString(LOOP_STATE) + " : " + e << endl;
+        cout << " while testing " + parametersMap->getString(Loop::LABEL) + " at state "
+                + parametersMap->getString(Loop::STATE) + " : " + e << endl;
     }
 }
 void plotFile(string path, string functionLabel)
@@ -275,7 +279,7 @@ void Test::plot(Loop* loop, void(*func)(ParametersMap*), ParametersMap* paramete
     cout << "Plotting " << functionLabel << "...";
     Chronometer chrono;
     chrono.start();
-    parametersMap->putString(LOOP_LABEL, functionLabel);
+    parametersMap->putString(Loop::LABEL, functionLabel);
     parametersMap->putString(PLOT_LOOP, plotVarKey);
     parametersMap->putNumber(PLOT_MIN, min);
     parametersMap->putNumber(PLOT_MAX, max);
@@ -301,7 +305,7 @@ void plotTaskFunction(ParametersMap* parametersMap)
     population->setParams(parametersMap);
 
     Task* task = population->getTask();
-    string state = parametersMap->getString(LOOP_STATE);
+    string state = parametersMap->getString(Loop::STATE);
     string dataPath = path + "data/" + task->toString() + "_" + state + ".DAT";
     FILE* dataFile = openFile(dataPath);
     string plotVar = "generation";
@@ -320,7 +324,7 @@ void Test::plotTask(Loop* loop, ParametersMap* parametersMap, unsigned maxGenera
 {
     Task* task = (Task*) parametersMap->getPtr("task");
     string testedTask = task->toString();
-    parametersMap->putString(LOOP_LABEL, testedTask);
+    parametersMap->putString(Loop::LABEL, testedTask);
     cout << "Plotting " << testedTask << "...";
     Chronometer chrono;
     chrono.start();

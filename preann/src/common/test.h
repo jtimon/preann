@@ -1,18 +1,44 @@
 #ifndef TEST_H_
 #define TEST_H_
 
-#include "common/parametersMap.h"
+#include "parametersMap.h"
+#include "chronometer.h"
 
-#include "common/loop/loop.h"
-#include "common/loop/rangeLoop.h"
-#include "common/loop/enumLoop.h"
-#include "common/loop/joinLoop.h"
-#include "common/loop/enumValueLoop.h"
+#include "loop/loop.h"
+#include "loop/rangeLoop.h"
+#include "loop/enumLoop.h"
+#include "loop/joinLoop.h"
+#include "loop/enumValueLoop.h"
 
 #include "neural/buffer.h"
 
+#define PLOT_LOOP "__LOOP__PLOT_LOOP"
+#define PLOT_X_AXIS "__LOOP__PLOT_X_AXIS"
+#define PLOT_Y_AXIS "__LOOP__PLOT_Y_AXIS"
+#define PLOT_LINE_COLOR_LOOP "__LOOP__PLOT_LINE_COLOR_LOOP"
+#define PLOT_POINT_TYPE_LOOP "__LOOP__PLOT_POINT_TYPE_LOOP"
+#define PLOT_MIN "__LOOP__PLOT_MIN"
+#define PLOT_MAX "__LOOP__PLOT_MAX"
+#define PLOT_INC "__LOOP__PLOT_INC"
+
+#define START_CHRONO                                                                    \
+    Chronometer chrono;                                                                 \
+    unsigned repetitions = parametersMap->getNumber(Test::REPETITIONS);                 \
+    chrono.start();                                                                     \
+    for (unsigned i = 0; i < repetitions; ++i) {
+
+#define STOP_CHRONO                                                                     \
+    }                                                                                   \
+    chrono.stop();                                                                      \
+    parametersMap->putNumber(Test::TIME_COUNT, chrono.getSeconds());
+
 class Test
 {
+public:
+    static const string DIFF_COUNT;
+    static const string MEM_LOSSES;
+    static const string REPETITIONS;
+    static const string TIME_COUNT;
 protected:
     static void createGnuPlotScript(Loop* loop, ParametersMap* parametersMap);
 public:

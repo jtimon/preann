@@ -17,7 +17,7 @@ using namespace std;
 #define END                                                                             \
     delete (connection);                                                                \
     delete (buffer);                                                                    \
-    parametersMap->putNumber("differencesCounter", differencesCounter);
+    parametersMap->putNumber(Test::DIFF_COUNT, differencesCounter);
 
 void testCalculateAndAddTo(ParametersMap* parametersMap)
 {
@@ -114,8 +114,8 @@ int main(int argc, char *argv[])
         parametersMap.putNumber("numMutations", 10);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        loop = new RangeLoop("size", 2, 13, 10, NULL);
-        loop = new RangeLoop("outputSize", 1, 4, 2, loop);
+        loop = new RangeLoop(Factory::SIZE, 2, 13, 10, NULL);
+        loop = new RangeLoop(Factory::OUTPUT_SIZE, 1, 4, 2, loop);
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER),
                 ET_BUFFER, loop, 3, BT_BIT, BT_SIGN, BT_FLOAT);
@@ -130,14 +130,14 @@ int main(int argc, char *argv[])
         Test::test(loop, testCrossover, &parametersMap, "Connection::crossover");
 
         printf("Exit success.\n");
-        MemoryManagement::printTotalAllocated();
-        MemoryManagement::printTotalPointers();
     } catch (std::string error) {
         cout << "Error: " << error << endl;
         //	} catch (...) {
         //		printf("An error was thrown.\n", 1);
     }
 
+    MemoryManagement::printTotalAllocated();
+    MemoryManagement::printTotalPointers();
     //MemoryManagement::mem_printListOfPointers();
     total.stop();
     printf("Total time spent: %f \n", total.getSeconds());

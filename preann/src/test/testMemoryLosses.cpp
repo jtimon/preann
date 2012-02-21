@@ -61,7 +61,7 @@ void testPopulation(ParametersMap* parametersMap)
     FunctionType functionType = (FunctionType)parametersMap->getNumber(
             Enumerations::enumTypeToString(ET_FUNCTION));
 
-    unsigned size = (unsigned)parametersMap->getNumber("size");
+    unsigned size = (unsigned)parametersMap->getNumber(Factory::SIZE);
 
     Interface* input = new Interface(size, bufferType);
     Individual* example = new Individual(implementationType);
@@ -101,14 +101,14 @@ int main(int argc, char *argv[])
         Loop* loop;
         ParametersMap parametersMap;
         parametersMap.putNumber(Factory::WEIGHS_RANGE, 20);
-        parametersMap.putNumber("memoryLosses", 0);
+        parametersMap.putNumber(Test::MEM_LOSSES, 0);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
                 FT_IDENTITY);
 
-        RangeLoop* sizeLoop = new RangeLoop("size", 100, 101, 100, NULL);
+        RangeLoop* sizeLoop = new RangeLoop(Factory::SIZE, 100, 101, 100, NULL);
         loop = sizeLoop;
 
-        RangeLoop* outputSizeLoop = new RangeLoop("outputSize", 1, 4, 2, loop);
+        RangeLoop* outputSizeLoop = new RangeLoop(Factory::OUTPUT_SIZE, 1, 4, 2, loop);
         loop = outputSizeLoop;
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(
@@ -152,19 +152,19 @@ int main(int argc, char *argv[])
 
         delete (loop);
 
-        unsigned memoryLosses = parametersMap.getNumber("memoryLosses");
+        unsigned memoryLosses = parametersMap.getNumber(Test::MEM_LOSSES);
         cout << "Total memory losses: " << memoryLosses << endl;
         MemoryManagement::printListOfPointers();
 
         printf("Exit success.\n", 1);
-        MemoryManagement::printTotalAllocated();
-        MemoryManagement::printTotalPointers();
     } catch (string error) {
         cout << "Error: " << error << endl;
     } catch (...) {
         printf("An error was thrown.\n", 1);
     }
 
+    MemoryManagement::printTotalAllocated();
+    MemoryManagement::printTotalPointers();
     total.stop();
     printf("Total time spent: %f \n", total.getSeconds());
     return EXIT_SUCCESS;

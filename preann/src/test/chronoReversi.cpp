@@ -38,16 +38,12 @@ int main(int argc, char *argv[])
         parametersMap.putNumber("resetProb", 0.05);
 
         //TODO repetitions for plotTask
-//        parametersMap.putNumber("repetitions", 100);
-//        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+//        parametersMap.putNumber(Test::REPETITIONS, 100);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PROBABILISTIC);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_DISABLED);
-
-
-        //----------------------
 
         Loop* loop = NULL;
 
@@ -75,14 +71,14 @@ int main(int argc, char *argv[])
         delete (task);
 
         printf("Exit success.\n");
-        MemoryManagement::printTotalAllocated();
-        MemoryManagement::printTotalPointers();
     } catch (std::string error) {
         cout << "Error: " << error << endl;
         //      } catch (...) {
         //              printf("An error was thrown.\n", 1);
     }
 
+    MemoryManagement::printTotalAllocated();
+    MemoryManagement::printTotalPointers();
     //MemoryManagement::mem_printListOfPointers();
     total.stop();
     printf("Total time spent: %f \n", total.getSeconds());

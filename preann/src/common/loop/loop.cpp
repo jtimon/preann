@@ -7,6 +7,11 @@
 
 #include "loop.h"
 
+    static const string LABEL;
+    static const string STATE;
+const string Loop::LABEL = "__LOOP_FUNCTION_NAME";
+const string Loop::STATE = "__LOOP__RUNNING_STATE";
+
 Loop::Loop()
 {
     tKey = "Not Named Loop";
@@ -44,7 +49,7 @@ void Loop::repeatFunctionBase(void(*func)(ParametersMap*), ParametersMap* parame
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->repeatFunctionImpl(func, parametersMap);
     } else {
-        parametersMap->putString(LOOP_STATE, this->getState(false));
+        parametersMap->putString(Loop::STATE, this->getState(false));
         (*func)(parametersMap);
     }
 }
@@ -56,7 +61,7 @@ void Loop::repeatActionBase(void(*action)(void(*)(ParametersMap*), ParametersMap
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->repeatActionImpl(action, func, parametersMap);
     } else {
-        parametersMap->putString(LOOP_STATE, this->getState(false));
+        parametersMap->putString(Loop::STATE, this->getState(false));
         (*action)(func, parametersMap);
     }
 }
@@ -65,6 +70,7 @@ void Loop::repeatFunction(void(*func)(ParametersMap*), ParametersMap* parameters
                           std::string functionLabel)
 {
     cout << "Repeating function... " << functionLabel << endl;
+    parametersMap->putString(Loop::LABEL, functionLabel);
     this->setCallerLoop(NULL);
     try {
         this->repeatFunctionImpl(func, parametersMap);
@@ -72,14 +78,14 @@ void Loop::repeatFunction(void(*func)(ParametersMap*), ParametersMap* parameters
         cout << "Error while repeating function... " << functionLabel << endl;
     }
 
-    parametersMap->putString(LOOP_LABEL, functionLabel);
-    this->setCallerLoop(NULL);
+    parametersMap->putString(Loop::LABEL, functionLabel);
 }
 
 void Loop::repeatAction(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
                         void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel)
 {
     cout << "Repeating action... " << functionLabel << endl;
+    parametersMap->putString(Loop::LABEL, functionLabel);
     this->setCallerLoop(NULL);
     try {
         this->repeatActionImpl(action, func, parametersMap);
