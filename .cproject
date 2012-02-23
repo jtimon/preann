@@ -8,7 +8,7 @@
 <externalSettings/>
 <extensions>
 <extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-<extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
+<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 <extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 <extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -25,8 +25,8 @@
 <configuration artifactName="preann" buildProperties="" description="" errorParsers="org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.toolchain.gnu.base.1618752786" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
 <folderInfo id="cdt.managedbuild.toolchain.gnu.base.1618752786.1914776885" name="/" resourcePath="">
 <toolChain errorParsers="" id="cdt.managedbuild.toolchain.gnu.base.1078850281" name="cdt.managedbuild.toolchain.gnu.base" superClass="cdt.managedbuild.toolchain.gnu.base">
-<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.base.1689324720" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
-<builder errorParsers="org.eclipse.cdt.core.MakeErrorParser" id="cdt.managedbuild.target.gnu.builder.base.681763781" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.base">
+<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF" id="cdt.managedbuild.target.gnu.platform.base.1689324720" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+<builder arguments="VERBOSE=1" command="make" errorParsers="org.eclipse.cdt.core.MakeErrorParser" id="cdt.managedbuild.target.gnu.builder.base.681763781" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.base">
 <outputEntries>
 <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name=""/>
 </outputEntries>
@@ -59,6 +59,50 @@
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+<buildTargets>
+<target name="cpp" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments/>
+<buildTarget>cpp</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
+</target>
+<target name="all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments/>
+<buildTarget>all</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
+</target>
+<target name="cuda" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments/>
+<buildTarget>cuda</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
+</target>
+<target name="sse2" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments/>
+<buildTarget>sse2</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
+</target>
+<target name="clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments/>
+<buildTarget>clean</buildTarget>
+<stopOnError>true</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
+</target>
+</buildTargets>
+</storageModule>
 <storageModule moduleId="scannerConfiguration">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
@@ -161,8 +205,48 @@
 <parser enabled="false"/>
 </scannerInfoProvider>
 </profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileClang++">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="clang++" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileClang">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="clang" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileLLVMG++">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="llvm-g++" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileLLVMGCC">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="llvm-gcc" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
 <scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.base.1618752786;cdt.managedbuild.toolchain.gnu.base.1618752786.1914776885;cdt.managedbuild.tool.gnu.cpp.compiler.base.575044059;cdt.managedbuild.tool.gnu.cpp.compiler.input.1352217026">
-<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+<autodiscovery enabled="false" problemReportingEnabled="false" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 <buildOutputProvider>
 <openAction enabled="true" filePath=""/>
@@ -260,6 +344,46 @@
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
 <runAction arguments="-E -v ${plugin_state_location}/${specs_file}" command="${XL_compilerRoot}/xlC" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileClang++">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="clang++" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileClang">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="clang" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileLLVMG++">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="llvm-g++" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileLLVMGCC">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="llvm-gcc" useDefault="true"/>
 <parser enabled="false"/>
 </scannerInfoProvider>
 </profile>
@@ -278,12 +402,12 @@
 </profile>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
 <buildOutputProvider>
-<openAction enabled="false" filePath=""/>
+<openAction enabled="true" filePath=""/>
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="makefileGenerator">
 <runAction arguments="-f ${project_name}_scd.mk" command="make" useDefault="true"/>
-<parser enabled="false"/>
+<parser enabled="true"/>
 </scannerInfoProvider>
 </profile>
 <profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile">
@@ -318,7 +442,7 @@
 </profile>
 <profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC">
 <buildOutputProvider>
-<openAction enabled="false" filePath=""/>
+<openAction enabled="true" filePath=""/>
 <parser enabled="true"/>
 </buildOutputProvider>
 <scannerInfoProvider id="specsFile">
@@ -366,51 +490,47 @@
 <parser enabled="false"/>
 </scannerInfoProvider>
 </profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileClang++">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="clang++" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileClang">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="clang" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileLLVMG++">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="llvm-g++" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
+<profile id="org.eclipse.cdt.managedbuilder.llvm.ui.LLVMManagedMakePerProjectProfileLLVMGCC">
+<buildOutputProvider>
+<openAction enabled="false" filePath=""/>
+<parser enabled="true"/>
+</buildOutputProvider>
+<scannerInfoProvider id="specsFile">
+<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="llvm-gcc" useDefault="true"/>
+<parser enabled="false"/>
+</scannerInfoProvider>
+</profile>
 </scannerConfigBuildInfo>
-</storageModule>
-<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
-<buildTargets>
-<target name="cpp" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments/>
-<buildTarget>cpp</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>true</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
-</target>
-<target name="all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments/>
-<buildTarget>all</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>true</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
-</target>
-<target name="cuda" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments/>
-<buildTarget>cuda</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>true</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
-</target>
-<target name="sse2" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments/>
-<buildTarget>sse2</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>true</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
-</target>
-<target name="clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments/>
-<buildTarget>clean</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>true</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
-</target>
-</buildTargets>
 </storageModule>
 </cconfiguration>
 </storageModule>
