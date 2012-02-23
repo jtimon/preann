@@ -5,6 +5,7 @@
 SHELL = /bin/sh
 
 MODULES   = common common/loop neural genetic game tasks optimization 
+DOCUMENTS =	proyecto
 LIB_MODULES = $(MODULES) template  
 
 SRC_DIR   = $(addprefix src/,$(MODULES))  
@@ -23,6 +24,7 @@ INCLUDES  = -I src/
 PROGRAMS = $(wildcard src/test/*.cpp)
 EXE      = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,bin/%.exe,$(main)))
 LOGS     = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,output/log/%.log,$(main)))
+DOC		 = $(foreach docu, $(DOCUMENTS), doc/$(docu).pdf)
 
 CXX = g++-4.3 -ggdb $(INCLUDES) $(FACT_FLAGS)
 CXX_LINK = g++-4.3 
@@ -30,6 +32,7 @@ NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES) $(FACT_FLAGS)
 NVCC_LINK = $(NVCC) -L/usr/local/cuda/lib -lcudart 
 NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11 --device-emulation 
 NASM = nasm -f elf
+LATEX = pdflatex -output-directory doc/output/
 
 ifeq (all, $(MAKECMDGOALS))
 	FACT_OBJ = $(FULL_OBJ)
@@ -54,7 +57,7 @@ OBJ += $(FACT_OBJ)
 .PHONY: all clean checkdirs cpp sse2 cuda
 .SECONDARY:
 
-all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
+all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) doc/proyecto.pdf
 #	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe 
 #	./bin/testConnections.exe
@@ -76,6 +79,9 @@ checkdirs: $(BUILD_DIR)
 
 $(BUILD_DIR):
 	mkdir -p $@
+
+doc/%.pdf: doc/%.tex
+	$(LATEX) $<
 
 output/log/%.log: bin/%.exe
 	./$< > $@
