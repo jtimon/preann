@@ -10,6 +10,8 @@
 #ifndef ENUMERATIONS_H_
 #define ENUMERATIONS_H_
 
+#define PREANN_DIR "/home/jtimon/workspace/preann/"
+
 typedef enum
 {
     BT_FLOAT, BT_BIT, BT_SIGN, BT_BYTE

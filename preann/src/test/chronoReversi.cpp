@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     total.start();
     try {
         ParametersMap parametersMap;
-        parametersMap.putString(Test::PLOT_PATH, "/home/timon/workspace/preann/output/");
+        parametersMap.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
         parametersMap.putString(Test::PLOT_X_AXIS, "Generation");
         parametersMap.putString(Test::PLOT_Y_AXIS, "Fitness");
         parametersMap.putNumber(Dummy::WEIGHS_RANGE, 5);
