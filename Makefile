@@ -5,7 +5,6 @@
 SHELL = /bin/sh
 
 MODULES   = common common/loop neural genetic game tasks optimization 
-DOCUMENTS =	proyecto
 LIB_MODULES = $(MODULES) template  
 
 SRC_DIR   = $(addprefix src/,$(MODULES))  
@@ -24,20 +23,26 @@ INCLUDES  = -I src/
 PROGRAMS = $(wildcard src/test/*.cpp)
 EXE      = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,bin/%.exe,$(main)))
 LOGS     = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,output/log/%.log,$(main)))
-DOC		 = $(foreach docu, $(DOCUMENTS), doc/$(docu).pdf)
+DOCUMENTS =	$(wildcard doc/*.tex)
+DOC		 = $(foreach docu, $(DOCUMENTS), $(patsubst doc/%.tex,doc/%.pdf,$(docu)))
 
-CXX = g++-4.3 -ggdb $(INCLUDES) $(FACT_FLAGS)
-CXX_LINK = g++-4.3 
+CXX = g++ -ggdb $(INCLUDES) $(FACT_FLAGS)
+CXX_LINK = g++
+#CXX = g++-4.3 -ggdb $(INCLUDES) $(FACT_FLAGS)
+#CXX_LINK = g++-4.3  
 NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES) $(FACT_FLAGS)
 NVCC_LINK = $(NVCC) -L/usr/local/cuda/lib -lcudart 
 NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11 --device-emulation 
 NASM = nasm -f elf
-LATEX = pdflatex -output-directory doc/output/
+LATEX = pdflatex -output-directory=/home/jtimon/workspace/preann/doc/output
+DVIPDFM = dvipdfm
 
 ifeq (all, $(MAKECMDGOALS))
-	FACT_OBJ = $(FULL_OBJ)
-	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
+	NVCC_LINK = $(CXX_LINK)
+	FACT_OBJ = $(SSE2_OBJ)
+	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
 endif
+
 ifeq (cpp, $(MAKECMDGOALS))
 	NVCC_LINK = $(CXX_LINK)
 	FACT_FLAGS += -DCPP_IMPL
@@ -51,13 +56,18 @@ ifeq (cuda, $(MAKECMDGOALS))
 	FACT_OBJ = $(CUDA_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
 endif
+#ifeq (full, $(MAKECMDGOALS))
+#	FACT_OBJ = $(FULL_OBJ)
+#	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
+#endif
 
 OBJ += $(FACT_OBJ)
 
-.PHONY: all clean checkdirs cpp sse2 cuda
+.PHONY: all clean checkdirs cpp sse2 cuda doc clean_doc
 .SECONDARY:
 
-all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) doc/proyecto.pdf
+doc: $(DOC)
+all full cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
 #	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe 
 #	./bin/testConnections.exe
@@ -82,6 +92,7 @@ $(BUILD_DIR):
 
 doc/%.pdf: doc/%.tex
 	$(LATEX) $<
+	mv doc/output/%.pdf doc/%.pdf 
 
 output/log/%.log: bin/%.exe
 	./$< > $@
@@ -104,6 +115,9 @@ build/optimization/sse2_code.o : src/optimization/sse2_code.asm src/optimization
 clean: 
 	rm -rf $(BUILD_DIR)
 	rm bin/*.exe
+
+clean_doc:
+	rm doc/output/*
 
 #       Only use these programs directly
 #    awk cat cmp cp diff echo egrep expr false grep install-info ln ls
