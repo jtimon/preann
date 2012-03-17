@@ -92,7 +92,6 @@ $(BUILD_DIR):
 
 doc/%.pdf: doc/%.tex
 	$(LATEX) $<
-	mv doc/output/%.pdf doc/%.pdf 
 
 output/log/%.log: bin/%.exe
 	./$< > $@
