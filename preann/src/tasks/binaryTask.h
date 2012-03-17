@@ -31,6 +31,7 @@ public:
     virtual void doOperation();
     virtual string toString();
     virtual Individual* getExample();
+    virtual float getGoal();
 
 };
 

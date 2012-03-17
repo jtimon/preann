@@ -58,12 +58,19 @@ void BinaryTask::setInputs(Individual* individual)
     individual->addInputLayer(tInput2);
 }
 
+float BinaryTask::getGoal()
+{
+    if (tNumTests == 0) {
+        return pow(2, tInput1->getSize()) * pow(2, tInput2->getSize()) * tOutput->getSize();
+    } else {
+        return tOutput->getSize() * tNumTests;
+    }
+}
+
 void BinaryTask::test(Individual *individual)
 {
-    float points;
+    float points = getGoal();
     if (tNumTests == 0) {
-
-        points = pow(2, tInput1->getSize()) * pow(2, tInput2->getSize()) * tOutput->getSize();
 
         tInput1->reset();
         do {
@@ -77,7 +84,6 @@ void BinaryTask::test(Individual *individual)
             } while (bitVectorIncrement(tInput2));
         } while (bitVectorIncrement(tInput1));
     } else {
-        points = tOutput->getSize() * tNumTests;
 
         for (unsigned i = 0; i < tNumTests; ++i) {
             tInput1->random(1);

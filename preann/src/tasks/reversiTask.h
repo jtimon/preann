@@ -23,7 +23,7 @@ public:
     virtual void setInputs(Individual* individual);
     virtual std::string toString();
     virtual Individual* getExample();
-
+    virtual float getGoal();
 };
 
 #endif /* REVERSITASK_H_ */

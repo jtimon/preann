@@ -18,6 +18,11 @@ ReversiTask::~ReversiTask()
     delete (tBoard);
 }
 
+float ReversiTask::getGoal()
+{
+    return tNumTests * tBoard->getSize() * tBoard->getSize() / 2;
+}
+
 void ReversiTask::test(Individual* individual)
 {
     float fitness = 0;

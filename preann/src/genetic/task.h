@@ -23,7 +23,7 @@ public:
     virtual string toString() = 0;
     virtual Individual* getExample() = 0;
     //virtual float test(neuralNet* net, unsigned episodes);
-
+    virtual float getGoal() = 0;
 };
 
 #endif /* TASK_H_ */
