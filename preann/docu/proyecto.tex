@@ -153,7 +153,7 @@ donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada n\'umero \
 
 \begin{figure}[h]
 	\begin{center}
-		\includegraphics [trim= 0.5cm 22cm 10cm 0cm, clip, width=15cm]{feed-forward.jpg}
+		\includegraphics [trim= 0.5cm 22cm 10cm 0cm, clip, width=15cm]{doc/images/feed-forward.jpg}
 	\end{center}
 	\caption{Red neuronal \emph{feed-forward}.}
 	\label{figFeedForward}
@@ -161,7 +161,7 @@ donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada n\'umero \
 
 \begin{figure}[h]
 	\begin{center}
-		\includegraphics [scale=0.6]{recurrente.jpg}
+		\includegraphics [scale=0.6]{doc/images/recurrente.jpg}
 	\end{center}
 	\caption{Red neuronal recurrente.}
 	\label{figRecurrente}
@@ -203,14 +203,14 @@ donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada n\'umero \
 
 \begin{figure}[t]
 \begin{minipage}{0.45\textwidth}
-    \includegraphics [width=7.20cm]{grafo1.jpg}
+    \includegraphics [width=7.20cm]{doc/images/grafo1.jpg}
   \caption {Red neuronal y su codificaci\'on binaria (asumiendo que se usan 4 bits para representar cada n\'umero real).}\label{figGrafo1}
 \end{minipage}
 \begin{minipage}{0.10\textwidth}
 \hfill
 \end{minipage}
 \begin{minipage}{0.45\textwidth}
-    \includegraphics [width=7.20cm]{grafo2.jpg}
+    \includegraphics [width=7.20cm]{doc/images/grafo2.jpg}
   \caption{Red equivalente con codificaci\'on alternativa.}\label{figGrafo2}
 \end{minipage}
 \end{figure}
@@ -270,7 +270,16 @@ Un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algori
 
 \subsection{Objetivos}\label{anaObjetivos}
 
-En el presente proyecto se pretende construir una librer\'ia de programaci\'on en C++ para la utilizaci\'on de redes neuronales con entrenamiento mediante algoritmos gen\'eticos. Se quiere que sea lo m\'as flexible posible en cuanto a la estructura de la red, para poder, en un futuro, determinar la topolog\'ia tambi\'en de forma gen\'etica. Como los entrenamientos pueden ser costosos en tiempo de ejecuci\'on, la librer\'ia debe estar paralelizada internamente al menos para la ejecuci\'on de redes neuronales. Esta paralelizaci\'on debe poder aprovecharse por los sistemas m\'as extendidos para que pueda ser utilizada en proyectos que aprovechen la computaci\'on voluntaria.
+En el presente proyecto se pretende construir una librer\'ia de programaci\'on
+en C++ para la utilizaci\'on de redes neuronales con entrenamiento mediante
+algoritmos gen\'eticos. Se quiere que sea lo m\'as flexible posible en cuanto a
+la estructura de la red, para poder, en un futuro, determinar la topolog\'ia
+tambi\'en de forma gen\'etica. Por tanto, con la librer\'ia implementada debe ser
+posible crear una cualquier red con una arquitectura arbitraria. Deben ser
+posibles conexiones recurrentes y conectar capas con tipos de datos
+deferentes (por ejemplo, que una capa cuya salida son n\'umeros en coma flotante
+debe poder usar como entrada una capa que tiene bits como salida).
+ Como los entrenamientos pueden ser costosos en tiempo de ejecuci\'on, la librer\'ia debe estar paralelizada internamente al menos para la ejecuci\'on de redes neuronales. Esta paralelizaci\'on debe poder aprovecharse por los sistemas m\'as extendidos para que pueda ser utilizada en proyectos que aprovechen la computaci\'on voluntaria.
 
  Adem\'as, se probar\'a la librer\'ia en casos concretos con el fin de contestar a las siguientes cuestiones:
 
@@ -278,7 +287,7 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
  
  \item  ?`Qu\'e ventajas en el rendimiento se pueden obtener gracias a la paralelizaci\'on?
 
- \item  ?`Se puede simplificar la estructura de las redes neuronales para mejorar la paralelizaci\'on? ?`Qu\'e efecto tienen las funciones de tipo escal\'on (que permiten codificar la salida de cada neurona como un bit en vez de como un real) tanto en el rendimiento como en el aprendizaje? ?`Qu\'e efecto tiene la codificaci\'on de los pesos en estructuras discretas (en lugar de n\'umeros reales) tanto en el rendimiento como en el aprendizaje?
+ \item  ?`Se puede simplificar la estructura de las redes neuronales para mejorar la paralelizaci\'on? ?`Qu\'e efecto tienen las funciones de tipo escal\'on (que permiten codificar la salida de cada neurona como un bit en vez de como un n\'umero real) tanto en el rendimiento como en el aprendizaje? ?`Qu\'e efecto tiene la codificaci\'on de los pesos en estructuras discretas (en lugar de n\'umeros reales) tanto en el rendimiento como en el aprendizaje?
 
  \item  ?`Qu\'e operadores gen\'eticos resultan m\'as adecuados para el entrenamiento en diferentes problemas? ?`Qu\'e valores de los par\'ametros del algoritmo gen\'etico resultan m\'as adecuados para el entrenamiento en diferentes problemas?
 
@@ -321,7 +330,7 @@ A continuaci\'on, en la figura \ref{grafica1} se muestran resultados de los expe
 
 \begin{figure}[ht]
 	\begin{center}
-		\includegraphics [trim= 1cm 2cm 1cm 0.9cm, clip, width=\textwidth]{grafica2.jpg}
+		\includegraphics [trim= 1cm 2cm 1cm 0.9cm, clip, width=\textwidth]{doc/images/grafica2.jpg}
 	\end{center}
 	\caption{Comparaci\'on de varios operadores de selecci\'on con diferentes par\'ametros para el problema XOR en un aprendizaje de 5000 generaciones.}
 	\label{grafica1}
@@ -349,11 +358,10 @@ A continuaci\'on, en la figura \ref{grafica1} se muestran resultados de los expe
 %
 
   \bibitem{Yao99} \textsc{Xin Yao}: \emph{Evolving Artificial Neural Networks}. School of Computer Science, The University of Birmingham (1999).
-.
+
   \bibitem{GomezMiikkulainen2003} \textsc{Faustino J. G\'omez y Risto Miikkulainen}: \emph{Robust Non-Linear Control through Neuroevolution}. Deparment of Computer Science, The University of Texas (2003).
 
-  \bibitem{Bertona2005} \textsc{Luis Federico Bertona}: \emph{Entrenamiento de redes neuronales
- basado en algoritmos evolutivos}. Faculad de ingenier\'ia, Universidad de Buenos Aires (2005).
+  \bibitem{Bertona2005} \textsc{Luis Federico Bertona}: \emph{Entrenamiento de redes neuronales basado en algoritmos evolutivos}. Faculad de ingenier\'ia, Universidad de Buenos Aires (2005).
 
 
 \end{thebibliography}

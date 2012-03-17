@@ -1,0 +1,30 @@
+\select@language {spanish}
+\contentsline {section}{\numberline {1} Introducci\'on}{3}{section.1}
+\contentsline {section}{\numberline {2}Base te\'orica}{4}{section.2}
+\contentsline {subsection}{\numberline {2.1}Redes neuronales}{4}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Algoritmos gen\'eticos}{6}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Neuro-evoluci\'on}{7}{subsection.2.3}
+\contentsline {section}{\numberline {3}An\'alisis del problema}{8}{section.3}
+\contentsline {subsection}{\numberline {3.1}Fortalezas y deficiencias}{8}{subsection.3.1}
+\contentsline {subsubsection}{\numberline {3.1.1}Redes neuronales}{8}{subsubsection.3.1.1}
+\contentsline {subsubsection}{\numberline {3.1.2}Algoritmos gen\'eticos}{10}{subsubsection.3.1.2}
+\contentsline {subsection}{\numberline {3.2}Objetivos}{10}{subsection.3.2}
+\contentsline {section}{\numberline {4}Dise\~no e implementaci\'on}{11}{section.4}
+\contentsline {subsection}{\numberline {4.1} Implementaciones paralelas de las redes neuronales}{11}{subsection.4.1}
+\contentsline {subsubsection}{\numberline {4.1.1}Utilizaci\'on del coprocesador XMM}{11}{subsubsection.4.1.1}
+\contentsline {subsubsection}{\numberline {4.1.2}Utilizaci\'on de la arquitectura CUDA}{11}{subsubsection.4.1.2}
+\contentsline {subsection}{\numberline {4.2} Dise\~no del algoritmo gen\'etico}{11}{subsection.4.2}
+\contentsline {subsection}{\numberline {4.3} Interfaz del programador}{11}{subsection.4.3}
+\contentsline {section}{\numberline {5}Experimentaci\'on}{11}{section.5}
+\contentsline {subsection}{\numberline {5.1} Tareas de clasificaci\'on}{11}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2} Tareas de control}{11}{subsection.5.2}
+\contentsline {subsection}{\numberline {5.3} Juegos de estrategia abstractos}{11}{subsection.5.3}
+\contentsline {subsection}{\numberline {5.4} Juegos en tiempo real}{11}{subsection.5.4}
+\contentsline {subsection}{\numberline {5.5} Juegos con colaboraci\'on de m\'ultiples agentes}{11}{subsection.5.5}
+\contentsline {section}{\numberline {6}Resultados}{11}{section.6}
+\contentsline {subsection}{\numberline {6.1} Rendimiento de las implementaciones de red neuronal}{11}{subsection.6.1}
+\contentsline {subsection}{\numberline {6.2} Comparaci\'on entre redes discretas y lineales}{11}{subsection.6.2}
+\contentsline {subsection}{\numberline {6.3} Comparaci\'on de operadores gen\'eticos}{11}{subsection.6.3}
+\contentsline {subsection}{\numberline {6.4} Eficiencia del m\'etodo desarrollado para distintos problemas}{12}{subsection.6.4}
+\contentsline {section}{\numberline {7}Conclusiones}{12}{section.7}
+\contentsline {chapter}{Bibliograf\'{\i }a}{13}{section*.2}
