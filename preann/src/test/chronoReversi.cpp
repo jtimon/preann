@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PROBABILISTIC);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_DISABLED);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_PROBABILISTIC);
 
         Loop* loop = NULL;
 
@@ -59,12 +59,12 @@ int main(int argc, char *argv[])
 
         loop->print();
 
-        Task* task = new ReversiTask(6, 5);
+        Task* task = new ReversiTask(4, 5);
         Individual* example = task->getExample();
         parametersMap.putPtr(Test::TASK, task);
         parametersMap.putPtr(Test::EXAMPLE_INDIVIDUAL, example);
 
-        unsigned maxGenerations = 100;
+        unsigned maxGenerations = 999;
         Test::plotTask(loop, &parametersMap, maxGenerations);
 
         delete (example);

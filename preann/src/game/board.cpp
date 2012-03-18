@@ -7,16 +7,38 @@
 
 #include "board.h"
 
-Board::Board(unsigned size)
+void Board::baseConstructor(unsigned size)
 {
     tSize = size;
-    tBoard = (SquareState**)MemoryManagement::malloc(sizeof(SquareState)
-            * tSize * tSize);
+    tBoard = (SquareState**) MemoryManagement::malloc(sizeof(SquareState*) * tSize);
+    for (unsigned i = 0; i < tSize; ++i) {
+        tBoard[i] = (SquareState*) MemoryManagement::malloc(sizeof(SquareState) * tSize);
+    }
+
     tInterface = new Interface(tSize * tSize * 2, BT_BIT);
+}
+
+Board::Board(unsigned size)
+{
+    this->baseConstructor(size);
+}
+
+Board::Board(Board* other)
+{
+    this->baseConstructor(other->getSize());
+
+    for (int x = 0; x < tSize; ++x) {
+        for (int y = 0; y < tSize; ++y) {
+            tBoard[x][y] = other->getSquare(x, y);
+        }
+    }
 }
 
 Board::~Board()
 {
+    for (unsigned i = 0; i < tSize; ++i) {
+        MemoryManagement::free(tBoard[i]);
+    }
     MemoryManagement::free(tBoard);
     delete (tInterface);
 }
@@ -30,33 +52,42 @@ void Board::initBoard()
     }
 }
 
+bool Board::insideBoard(int x, int y)
+{
+    return x >= 0 && x < tSize && y >= 0 && y < tSize;
+}
+
+bool Board::squareIs(int x, int y, SquareState squareState)
+{
+    if (!insideBoard(x, y)) {
+        return false;
+    }
+    return tBoard[x][y] == squareState;
+}
+
 unsigned Board::getSize()
 {
     return tSize;
 }
 
-void Board::setSquare(unsigned xPos, unsigned yPos, SquareState squareState)
+void Board::setSquare(unsigned x, unsigned y, SquareState squareState)
 {
-    if (xPos >= tSize || yPos >= tSize) {
-        std::string error = "Board::setSquare : The position (" + to_string(
-                xPos) + ", " + to_string(yPos)
-                + ") is out of range. The size of the board is " + to_string(
-                tSize);
+    if (!insideBoard(x, y)) {
+        std::string error = "Board::setSquare : The position (" + to_string(x) + ", " + to_string(y)
+                + ") is out of range. The size of the board is " + to_string(tSize);
         throw error;
     }
-    tBoard[xPos][yPos] = squareState;
+    tBoard[x][y] = squareState;
 }
 
-SquareState Board::getSquare(unsigned xPos, unsigned yPos)
+SquareState Board::getSquare(unsigned x, unsigned y)
 {
-    if (xPos >= tSize || yPos >= tSize) {
-        std::string error = "Board::getSquare : The position (" + to_string(
-                xPos) + ", " + to_string(yPos)
-                + ") is out of range. The size of the board is " + to_string(
-                tSize);
+    if (!insideBoard(x, y)) {
+        std::string error = "Board::getSquare : The position (" + to_string(x) + ", " + to_string(y)
+                + ") is out of range. The size of the board is " + to_string(tSize);
         throw error;
     }
-    return tBoard[xPos][yPos];
+    return tBoard[x][y];
 }
 
 Interface* Board::getInterface()
@@ -83,9 +114,9 @@ Interface* Board::updateInterface()
     return tInterface;
 }
 
-unsigned Board::countPoints(SquareState player)
+int Board::countPoints(SquareState player)
 {
-    unsigned points = 0;
+    int points = 0;
     for (int x = 0; x < tSize; ++x) {
         for (int y = 0; y < tSize; ++y) {
             if (tBoard[x][y] == player) {
@@ -96,6 +127,24 @@ unsigned Board::countPoints(SquareState player)
         }
     }
     return points;
+}
+
+void Board::print()
+{
+    cout<<"---------------------------------------"<<endl;
+    for (int x = 0; x < tSize; ++x) {
+        for (int y = 0; y < tSize; ++y) {
+            if (tBoard[x][y] == PLAYER_1) {
+                cout<<" X";
+            } else if (tBoard[x][y] == PLAYER_2) {
+                cout<<" O";
+            } else {
+                cout<<" .";
+            }
+        }
+        cout<<endl;
+    }
+    cout<<"---------------------------------------"<<endl;
 }
 
 SquareState Board::opponent(SquareState player)
