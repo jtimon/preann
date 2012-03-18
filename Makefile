@@ -26,48 +26,56 @@ LOGS     = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,output/log/%.l
 DOCUMENTS =	$(wildcard doc/*.tex)
 DOC		 = $(foreach docu, $(DOCUMENTS), $(patsubst doc/%.tex,doc/%.pdf,$(docu)))
 
-CXX = g++ -ggdb $(INCLUDES) $(FACT_FLAGS)
-CXX_LINK = g++
-#CXX = g++-4.3 -ggdb $(INCLUDES) $(FACT_FLAGS)
-#CXX_LINK = g++-4.3  
+CXX = $(CXX_BASE) -ggdb $(INCLUDES) $(FACT_FLAGS)
+CXX_LINK = $(CXX_BASE)
 NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES) $(FACT_FLAGS)
 NVCC_LINK = $(NVCC) -L/usr/local/cuda/lib -lcudart 
-NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11 --device-emulation 
+NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11  
 NASM = nasm -f elf
 LATEX = pdflatex -output-directory=/home/jtimon/workspace/preann/doc/output
 DVIPDFM = dvipdfm
 
-ifeq (all, $(MAKECMDGOALS))
-	NVCC_LINK = $(CXX_LINK)
-	FACT_OBJ = $(SSE2_OBJ)
-	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
-endif
-
 ifeq (cpp, $(MAKECMDGOALS))
+	CXX_BASE = g++
 	NVCC_LINK = $(CXX_LINK)
-	FACT_FLAGS += -DCPP_IMPL
+	FACT_FLAGS = -DCPP_IMPL
 endif
 ifeq (sse2, $(MAKECMDGOALS))
+	CXX_BASE = g++
 	NVCC_LINK = $(CXX_LINK)
 	FACT_OBJ = $(SSE2_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
 endif
 ifeq (cuda, $(MAKECMDGOALS))
+	CXX_BASE = g++
 	FACT_OBJ = $(CUDA_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
 endif
-#ifeq (full, $(MAKECMDGOALS))
-#	FACT_OBJ = $(FULL_OBJ)
-#	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
-#endif
+ifeq (cuda_emu, $(MAKECMDGOALS))
+	CXX_BASE = g++-4.3
+	NVCC_COMPILE += --device-emulation  
+	FACT_OBJ = $(CUDA_OBJ)
+	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
+endif
+ifeq (all, $(MAKECMDGOALS))
+	CXX_BASE = g++
+	FACT_OBJ = $(FULL_OBJ)
+	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
+endif
+ifeq (all_emu, $(MAKECMDGOALS))
+	CXX_BASE = g++-4.3
+	NVCC_COMPILE += --device-emulation  
+	FACT_OBJ = $(FULL_OBJ)
+	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
+endif
 
 OBJ += $(FACT_OBJ)
 
-.PHONY: all clean checkdirs cpp sse2 cuda doc clean_doc
+.PHONY: all clean checkdirs cpp sse2 cuda doc clean_doc cuda_emu all_emu
 .SECONDARY:
 
 doc: $(DOC)
-all full cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
+cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
 #	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe 
 #	./bin/testConnections.exe
