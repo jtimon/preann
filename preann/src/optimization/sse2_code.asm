@@ -2,10 +2,11 @@ section .data
 
 mascara:    db 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128
 
-section .text use32
+; parece que esta linea ya no es necesaria
+;section .text use32
 
 global XMMbinario2
-XMMbinario2: 
+XMMbinario2:
 
 	;guardamos el valor de los registros
 	PUSH EBX
@@ -27,20 +28,20 @@ bucleBuffer:
 	MOV ESI, [ESP+24]    ;bufferIndicesEntradas
 	ADD ESI, EAX
 
-	MOV ECX, [ESI+4]     
+	MOV ECX, [ESI+4]
 	SHR ECX, 4           ;dividimos entre 16 (el número de entradas que se procesan por vuelta del bucle)
 
 	MOV ESI, [ESI]
 
-	MOV BL, 1	      ;para que la primera vez se inicie la mascara 
+	MOV BL, 1	      ;para que la primera vez se inicie la mascara
 bucle:
 
 	PSRLW XMM4, 1        ;desplazamos las mascaras de entradas
 	DEC BL               ;decrementamos el contador de las mascaras de entradas
-	JNZ noIniciarMascara ;si BL==0, se terminó de procesar el bloque de entrada		
+	JNZ noIniciarMascara ;si BL==0, se terminó de procesar el bloque de entrada
 
 	MOVDQA XMM4, XMM6     ;reiniciamos la mascara
-	MOV BL, 8             ;ciclos por bloque de entrada	
+	MOV BL, 8             ;ciclos por bloque de entrada
 	MOVDQU XMM1, [ESI]    ;leemos el bloque de estados de entrada que toca
 	ADD ESI, 16           ;actualizamos el puntero
 
@@ -53,7 +54,7 @@ noIniciarMascara:
 	PCMPEQB XMM5, XMM5    ;ponemos todo XMM5 a 1
 	PXOR XMM7, XMM5	      ;invertimos XMM7 (ahora está todo el byte a 1 en los bytes que tenian el bit que tocaba activo)
 
-	MOVDQU XMM5, XMM6     ;128 en todos los bytes de XMM5  
+	MOVDQU XMM5, XMM6     ;128 en todos los bytes de XMM5
 	PAND XMM5, XMM7       ;128 en todos los bytes que estaban activos
 
 	MOVDQU XMM2, [EDI]    ;leemos el bloque actual de pesos
@@ -89,7 +90,7 @@ noIniciarMascara:
 
 
 global XMMbipolar2
-XMMbipolar2: 
+XMMbipolar2:
 
 	;guardamos el valor de los registros
 	PUSH EBX
@@ -111,20 +112,20 @@ bucleBuffer2:
 	MOV ESI, [ESP+24]    ;bufferIndicesEntradas
 	ADD ESI, EAX
 
-	MOV ECX, [ESI+4]     
+	MOV ECX, [ESI+4]
 	SHR ECX, 4           ;dividimos entre 16 (el número de entradas que se procesan por vuelta del bucle)
 
 	MOV ESI, [ESI]
 
-	MOV BL, 1	      ;para que la primera vez se inicie la mascara 
+	MOV BL, 1	      ;para que la primera vez se inicie la mascara
 bucle2:
 
 	PSRLW XMM4, 1         ;desplazamos las mascaras de entradas
 	DEC BL                ;decrementamos el contador de las mascaras de entradas
-	JNZ noIniciarMascara2 ;si BL==0, se terminó de procesar el bloque de entrada		
+	JNZ noIniciarMascara2 ;si BL==0, se terminó de procesar el bloque de entrada
 
 	MOVDQA XMM4, XMM6     ;reiniciamos la mascara
-	MOV BL, 8             ;ciclos por bloque de entrada	
+	MOV BL, 8             ;ciclos por bloque de entrada
 	MOVDQU XMM1, [ESI]    ;leemos el bloque de estados de entrada que toca
 	ADD ESI, 16           ;actualizamos el puntero
 
@@ -135,14 +136,14 @@ noIniciarMascara2:
 	PAND XMM7, XMM1       ;obtenemos el valor del bit a procesar en cada byte
 	PCMPEQB XMM7, XMM0    ;si el bit estaba activo->se pone a 0 todo el byte, si no-> se pone a 1 todo el byte
 	PCMPEQB XMM2, XMM2    ;ponemos a 1 todo el XMM2
-	PXOR XMM2, XMM7	      ;en XMM2 esta el inverso de XMM7 
+	PXOR XMM2, XMM7	      ;en XMM2 esta el inverso de XMM7
 
 
 	MOVDQU XMM5, XMM6     ;128 en todo XMM5
 	PAND XMM5, XMM2       ;128 en todos los bytes que estaban activos
 	PSADBW XMM5, XMM0     ;sumamos 128 por cada byte que estaba activo
 	PSUBD XMM3, XMM5      ;sustraemos 128 por cada bit que estaba activo
-	
+
 	MOVDQU XMM5, XMM6     ;128 en todo XMM5
 	PAND XMM5, XMM7       ;128 en todos los bytes que estaban inactivos
 	PSADBW XMM5, XMM0     ;sumamos 128 por cada byte que estaba inactivo
@@ -184,7 +185,7 @@ noIniciarMascara2:
 
 ;extern "C" int XMMbinario (void* bufferEntrada, unsigned numeroBloques, unsigned char* pesos);
 global XMMbinario
-XMMbinario: 
+XMMbinario:
 
 	;guardamos el valor de los registros
 	PUSH EBX
@@ -200,15 +201,15 @@ XMMbinario:
 	PXOR XMM3, XMM3      ;anulamos el registro donde iremos acumulando las sumas
 	PXOR XMM0, XMM0      ;anulamos otro registro que usaremos cuando necesitemos
 	MOVDQU XMM6, [mascara];iniciamos la mascara para cuando la tengamos que usar
-	MOV BL, 1	      ;para que la primera vez se inicie la mascara 
+	MOV BL, 1	      ;para que la primera vez se inicie la mascara
 bucle3:
 
 	PSRLW XMM4, 1        ;desplazamos las mascaras de entradas
 	DEC BL               ;decrementamos el contador de las mascaras de entradas
-	JNZ noIniciarMascara3;si BL==0, se terminó de procesar el bloque de entrada		
+	JNZ noIniciarMascara3;si BL==0, se terminó de procesar el bloque de entrada
 
 	MOVDQA XMM4, XMM6     ;reiniciamos la mascara
-	MOV BL, 8             ;ciclos por bloque de entrada	
+	MOV BL, 8             ;ciclos por bloque de entrada
 	MOVDQU XMM1, [ESI]    ;leemos el bloque de estados de entrada que toca
 	ADD ESI, 16           ;actualizamos el puntero
 
@@ -221,7 +222,7 @@ noIniciarMascara3:
 	PCMPEQB XMM5, XMM5    ;ponemos todo XMM5 a 1
 	PXOR XMM7, XMM5	      ;invertimos XMM7 (ahora está todo el byte a 1 en los bytes que tenian el bit que tocaba activo)
 
-	MOVDQU XMM5, XMM6     ;128 en todos los bytes de XMM5  
+	MOVDQU XMM5, XMM6     ;128 en todos los bytes de XMM5
 	PAND XMM5, XMM7       ;128 en todos los bytes que estaban activos
 
 	MOVDQU XMM2, [EDI]    ;leemos el bloque actual de pesos
@@ -252,7 +253,7 @@ noIniciarMascara3:
 
 
 global XMMbipolar
-XMMbipolar: 
+XMMbipolar:
 
 	;guardamos el valor de los registros
 	PUSH EBX
@@ -268,16 +269,16 @@ XMMbipolar:
 	MOVDQU XMM6, [mascara];iniciamos la mascara para cuando la tengamos que usar
 	PXOR XMM3, XMM3       ;anulamos XMM3 para acumular los sumatorios en él
 	PXOR XMM0, XMM0       ;anulamos XMM0 para cuando lo tengamos que usar
-	MOV BL, 1	      ;para que la primera vez se inicie la mascara 
+	MOV BL, 1	      ;para que la primera vez se inicie la mascara
 
 bucle4:
 
 	PSRLW XMM4, 1         ;desplazamos las mascaras de entradas
 	DEC BL                ;decrementamos el contador de las mascaras de entradas
-	JNZ noIniciarMascara4 ;si BL==0, se terminó de procesar el bloque de entrada		
+	JNZ noIniciarMascara4 ;si BL==0, se terminó de procesar el bloque de entrada
 
 	MOVDQA XMM4, XMM6     ;reiniciamos la mascara
-	MOV BL, 8             ;ciclos por bloque de entrada	
+	MOV BL, 8             ;ciclos por bloque de entrada
 	MOVDQU XMM1, [ESI]    ;leemos el bloque de estados de entrada que toca
 	ADD ESI, 16           ;actualizamos el puntero
 
@@ -287,14 +288,14 @@ noIniciarMascara4:
 	PAND XMM7, XMM1       ;obtenemos el valor del bit a procesar en cada byte
 	PCMPEQB XMM7, XMM0    ;si el bit estaba activo->se pone a 0 todo el byte, si no-> se pone a 1 todo el byte
 	PCMPEQB XMM2, XMM2    ;ponemos a 1 todo el XMM2
-	PXOR XMM2, XMM7	      ;en XMM2 esta el inverso de XMM7 
+	PXOR XMM2, XMM7	      ;en XMM2 esta el inverso de XMM7
 
 
 	MOVDQU XMM5, XMM6     ;128 en todo XMM5
 	PAND XMM5, XMM2       ;128 en todos los bytes que estaban activos
 	PSADBW XMM5, XMM0     ;sumamos 128 por cada byte que estaba activo
 	PSUBD XMM3, XMM5      ;sustraemos 128 por cada bit que estaba activo
-	
+
 	MOVDQU XMM5, XMM6     ;128 en todo XMM5
 	PAND XMM5, XMM7       ;128 en todos los bytes que estaban inactivos
 	PSADBW XMM5, XMM0     ;sumamos 128 por cada byte que estaba inactivo
@@ -368,7 +369,7 @@ bucleReal:
 	MOVD EAX, XMM3    ;copiamos el resultado
 
 	MOV EDI, [ESP + 28]
-	MOV [EDI], EAX        ;las colocamos en el parámetro resultado  
+	MOV [EDI], EAX        ;las colocamos en el parámetro resultado
 
 	;restauramos los registros
 	POP EDI
@@ -397,7 +398,7 @@ bucleBufferReal:
 	MOV ESI, [ESP+20]    ;bufferIndicesEntradas
 	ADD ESI, EAX
 
-	MOV ECX, [ESI+4]     
+	MOV ECX, [ESI+4]
 	SHR ECX, 2           ;dividimos entre 4 (el número de entradas que se procesan por vuelta del bucle)
 
 	MOV ESI, [ESI]
@@ -414,7 +415,7 @@ bucleReal2:
 	ADDPS XMM3, XMM0      ;acumulamos los resultados
 
 	DEC ECX
-	JNZ bucleReal2  
+	JNZ bucleReal2
 
 	ADD EAX, 8            ;le sumamos a EAX el tamaño de una estructura de las que hay en el buffer
 	DEC EDX
@@ -426,10 +427,10 @@ bucleReal2:
 	MOVAPS XMM5, XMM4
 	PSRLDQ XMM4, 4    ;desplazamos el registro 4 bytes a la derecha
 	ADDPS XMM5, XMM4  ;sumamos la parte mas baja
-	MOVD EAX, XMM5    ;copiamos el resultado 
+	MOVD EAX, XMM5    ;copiamos el resultado
 
 	MOV EDI, [ESP + 28]
-	MOV [EDI], EAX        ;las colocamos en el parámetro resultado  
+	MOV [EDI], EAX        ;las colocamos en el parámetro resultado
 
 	;restauramos los registros
 	POP EDI
