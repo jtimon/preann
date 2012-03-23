@@ -20,7 +20,7 @@ ReversiTask::~ReversiTask()
 
 float ReversiTask::getGoal()
 {
-    return tNumTests * tBoard->getSize() * tBoard->getSize() / 2;
+    return tNumTests * tBoard->getSize() * tBoard->getSize();
 }
 
 void ReversiTask::test(Individual* individual)
@@ -47,12 +47,16 @@ void ReversiTask::test(Individual* individual)
                     tBoard->turn(turn, NULL);
                 }
             }
+//            tBoard->print();
             turn = Board::opponent(turn);
         }
         //TODO controlar negativos ??
         fitness += tBoard->countPoints(individualPlayer);
+//        tBoard->print();
+//        cout << " points " << tBoard->countPoints(individualPlayer) << endl;
     }
     individual->setFitness(fitness);
+//    cout << "fitness " << fitness << endl;
 }
 
 void ReversiTask::setInputs(Individual* individual)
