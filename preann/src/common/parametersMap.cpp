@@ -98,11 +98,62 @@ void ParametersMap::print()
 
 void ParametersMap::copyTo(ParametersMap* parametersMap)
 {
+    if (tNumbers.size() > 0) {
+        std::map<string, float>::iterator numbersIt;
+        FOR_EACH(numbersIt, tNumbers) {
+            parametersMap->putNumber(numbersIt->first, numbersIt->second);
+        }
+    }
 
+    if (tPtrs.size() > 0) {
+        std::map<string, void*>::iterator ptrsIt;
+        FOR_EACH(ptrsIt, tPtrs) {
+            parametersMap->putPtr(ptrsIt->first, ptrsIt->second);
+        }
+    }
+
+    if (tStrings.size() > 0) {
+        std::map<string, string>::iterator stringsIt;
+        FOR_EACH(stringsIt, tStrings) {
+            parametersMap->putString(stringsIt->first, stringsIt->second);
+        }
+    }
 }
 
 void ParametersMap::copyFrom(ParametersMap* parametersMap)
 {
+    if (tNumbers.size() > 0) {
+        std::map<string, float>::iterator it;
+        FOR_EACH(it, tNumbers) {
+            try {
+                float number = parametersMap->getNumber(it->first);
+                putNumber(it->first, number);
+            } catch(...) {
+            }
+        }
+    }
 
+    if (tPtrs.size() > 0) {
+        std::map<string, void*>::iterator it;
+        FOR_EACH(it, tPtrs) {
+            try {
+                void* ptr = parametersMap->getPtr(it->first);
+                putPtr(it->first, ptr);
+            } catch(...) {
+            }
+        }
+    }
+
+    if (tStrings.size() > 0) {
+        std::map<string, string>::iterator it;
+        FOR_EACH(it, tStrings) {
+            parametersMap->putString(it->first, it->second);
+            try {
+                string str = parametersMap->getString(it->first);
+                putString(it->first, str);
+            } catch(...) {
+            }
+        }
+    }
 }
 
