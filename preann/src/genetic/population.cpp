@@ -10,6 +10,7 @@
 const string Population::SIZE = "__Population_size";
 const string Population::NUM_SELECTION = "__Population_numSelection";
 const string Population::NUM_CROSSOVER = "__Population_numCrossover";
+const string Population::ROULETTE_WHEEL_BASE = "__Population_rouletteWheelBase";
 const string Population::RANKING_BASE = "__Population_rankingBase";
 const string Population::RANKING_STEP = "__Population_rankingStep";
 const string Population::TOURNAMENT_SIZE = "__Population_tournamentSize";
@@ -68,6 +69,7 @@ void Population::setDefaults()
     nPreserve = 1;
 
     numRouletteWheel = 0;
+    params.putNumber(ROULETTE_WHEEL_BASE, 1);
     numRanking = 0;
     rankingBase = 5;
     rankingStep = 1;
@@ -89,8 +91,6 @@ void Population::setDefaults()
     mutationProbabilityRange = 0;
     resetPerIndividual = 0;
     resetProbability = 0;
-
-    total_score = 0;
 }
 
 Population::~Population()
@@ -185,17 +185,14 @@ void Population::insertIndividual(Individual *individual)
         // equal for neutral search (accumulate changes)
         if (fitness >= (*it)->getFitness()) {
             individuals.insert(it, individual);
-            total_score += fitness;
             inserted = true;
             break;
         }
     }
     if (!inserted) {
         individuals.push_back(individual);
-        total_score += fitness;
     }
     if (individuals.size() > this->maxSize) {
-        total_score -= individuals.back()->getFitness();
         delete (individuals.back());
         individuals.pop_back();
     }
@@ -204,15 +201,15 @@ void Population::insertIndividual(Individual *individual)
 void Population::setParams(ParametersMap* parametersMap)
 {
     unsigned numSelection = parametersMap->getNumber(NUM_SELECTION);
-    SelectionAlgorithm selectionAlgorithm =
-            (SelectionAlgorithm) parametersMap->getNumber(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM));
+    SelectionAlgorithm selectionAlgorithm = (SelectionAlgorithm) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM));
     switch (selectionAlgorithm) {
         case SA_ROULETTE_WHEEL:
-            this->setSelectionRouletteWheel(numSelection);
+            this->setSelectionRouletteWheel(numSelection, parametersMap->getNumber(ROULETTE_WHEEL_BASE));
             break;
         case SA_RANKING:
             this->setSelectionRanking(numSelection, parametersMap->getNumber(RANKING_BASE),
-                                            parametersMap->getNumber(RANKING_STEP));
+                                      parametersMap->getNumber(RANKING_STEP));
             break;
         case SA_TOURNAMENT:
             this->setSelectionTournament(numSelection, parametersMap->getNumber(TOURNAMENT_SIZE));
@@ -223,23 +220,26 @@ void Population::setParams(ParametersMap* parametersMap)
     }
 
     unsigned numCrossover = parametersMap->getNumber(Population::NUM_CROSSOVER);
-    CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm) parametersMap->getNumber(Enumerations::enumTypeToString(ET_CROSS_ALG));
-    CrossoverLevel crossoverLevel = (CrossoverLevel) parametersMap->getNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL));
+    CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_CROSS_ALG));
+    CrossoverLevel crossoverLevel = (CrossoverLevel) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_CROSS_LEVEL));
     switch (crossoverAlgorithm) {
         case CA_UNIFORM:
             this->setCrossoverUniformScheme(crossoverLevel, numCrossover,
-                                                  parametersMap->getNumber(UNIFORM_CROSS_PROB));
+                                            parametersMap->getNumber(UNIFORM_CROSS_PROB));
             break;
         case CA_PROPORTIONAL:
             this->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
             break;
         case CA_MULTIPOINT:
             this->setCrossoverMultipointScheme(crossoverLevel, numCrossover,
-                                                     parametersMap->getNumber(NUM_POINTS));
+                                               parametersMap->getNumber(NUM_POINTS));
             break;
     }
 
-    MutationAlgorithm mutationAlgorithm = (MutationAlgorithm) parametersMap->getNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG));
+    MutationAlgorithm mutationAlgorithm = (MutationAlgorithm) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_MUTATION_ALG));
     float mutationRange = parametersMap->getNumber(MUTATION_RANGE);
     if (mutationAlgorithm == MA_PER_INDIVIDUAL) {
         this->setMutationsPerIndividual(parametersMap->getNumber(NUM_MUTATIONS), mutationRange);
@@ -247,7 +247,8 @@ void Population::setParams(ParametersMap* parametersMap)
         this->setMutationProbability(parametersMap->getNumber(MUTATION_PROB), mutationRange);
     }
 
-    ResetAlgorithm resetAlgorithm = (ResetAlgorithm) parametersMap->getNumber(Enumerations::enumTypeToString(ET_RESET_ALG));
+    ResetAlgorithm resetAlgorithm = (ResetAlgorithm) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_RESET_ALG));
     if (resetAlgorithm == RA_PER_INDIVIDUAL) {
         this->setResetsPerIndividual(parametersMap->getNumber(NUM_RESETS));
     } else if (resetAlgorithm == RA_PROBABILISTIC) {
@@ -285,6 +286,13 @@ void Population::setPreservation(unsigned number)
 void Population::setSelectionRouletteWheel(unsigned number)
 {
     numRouletteWheel = number;
+    params.putNumber(ROULETTE_WHEEL_BASE, 1);
+}
+
+void Population::setSelectionRouletteWheel(unsigned number, float minFitness)
+{
+    numRouletteWheel = number;
+    params.putNumber(ROULETTE_WHEEL_BASE, minFitness);
 }
 
 void Population::setSelectionTruncation(unsigned number)
@@ -381,7 +389,6 @@ void Population::eliminateWorse()
 {
     //	printf("individualsSize %d nPreserve %d \n", individuals.size(), nPreserve);
     while (individuals.size() > nPreserve) {
-        total_score -= individuals.back()->getFitness();
         //		printf("individualsSize %d nPreserve %d total_score %f \n", individuals.size(), nPreserve, total_score);
         delete (individuals.back());
         individuals.pop_back();
@@ -444,15 +451,25 @@ Individual* Population::getIndividual(unsigned pos)
 void Population::checkNotEmpty()
 {
     if (individuals.size() <= 0) {
-        std::string error = "The population is empty.";
+        std::string error = "Population::checkNotEmpty(): The population is empty.";
         throw error;
     }
+}
+
+float Population::getTotalScore()
+{
+    float total_score = 0;
+    list<Individual*>::iterator itIndividuals;
+    FOR_EACH(itIndividuals, individuals) {
+        total_score += (*itIndividuals)->getFitness();
+    }
+    return total_score;
 }
 
 float Population::getAverageScore()
 {
     checkNotEmpty();
-    return total_score / individuals.size();
+    return getTotalScore() / individuals.size();
 }
 
 Task* Population::getTask()
@@ -474,7 +491,8 @@ void Population::crossover()
             for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; ++crossLevel) {
 
                 if (numCrossover[crossAlg][crossLevel]) {
-                    std::string error = "The number of parents must be grater than 2 to do crossover.";
+                    std::string error =
+                            "Population::crossover(): The number of parents must be grater than 2 to do crossover.";
                     throw error;
                 }
             }
@@ -539,18 +557,27 @@ void Population::oneCrossover(Individual* offSpringA, Individual* offSpringB,
 
 void Population::selectRouletteWheel()
 {
-    //TODO adaptar para fitness negativos
+    float total_score = getTotalScore();
+    float window = 0;
+
+    float minFitness = individuals.back()->getFitness();
+    if (minFitness <= 0) {
+        float rouletteWheelBase = params.getNumber(ROULETTE_WHEEL_BASE);
+        window = rouletteWheelBase - minFitness;
+        total_score += window * individuals.size();
+    }
+
     for (unsigned i = 0; i < numRouletteWheel; i++) {
-        list<Individual*>::iterator it = individuals.begin();
+        list<Individual*>::iterator itIndividuals = individuals.begin();
         float chosen_point = Random::positiveFloat(total_score);
         while (chosen_point) {
-            float fitness = (*it)->getFitness();
+            float fitness = (*itIndividuals)->getFitness() + window;
             if (fitness > chosen_point) {
-                parents.push_back(*it);
+                parents.push_back(*itIndividuals);
                 chosen_point = 0;
             } else {
                 chosen_point -= fitness;
-                ++it;
+                ++itIndividuals;
             }
         }
     }
@@ -585,7 +612,7 @@ void Population::selectRanking()
 void Population::selectTournament()
 {
     if (tournamentSize > individuals.size()) {
-        std::string error = "The tournament size cannot be grater than the population size.";
+        std::string error = "Population::selectTournament: The tournament size cannot be grater than the population size.";
         throw error;
     }
 

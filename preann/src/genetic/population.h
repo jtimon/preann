@@ -18,6 +18,7 @@ public:
     static const string SIZE;
     static const string NUM_SELECTION;
     static const string NUM_CROSSOVER;
+    static const string ROULETTE_WHEEL_BASE;
     static const string RANKING_BASE;
     static const string RANKING_STEP;
     static const string TOURNAMENT_SIZE;
@@ -28,6 +29,8 @@ public:
     static const string MUTATION_PROB;
     static const string NUM_RESETS;
     static const string RESET_PROB;
+
+    ParametersMap params;
 protected:
     unsigned generation;
     Task* task;
@@ -57,7 +60,6 @@ protected:
     unsigned resetPerIndividual;
     float resetProbability;
 
-    float total_score;
     void setDefaults();
     void selection();
     void selectRouletteWheel();
@@ -89,6 +91,7 @@ public:
     void setParams(ParametersMap* parametersMap);
     void setPreservation(unsigned number);
     void setSelectionRouletteWheel(unsigned number);
+    void setSelectionRouletteWheel(unsigned number, float minFitness);
     void setSelectionTruncation(unsigned number);
     void setSelectionTournament(unsigned number, unsigned tourSize);
     void setSelectionRanking(unsigned number, float base, float step);
@@ -112,6 +115,7 @@ public:
     unsigned getGeneration();
     Individual* getBestIndividual();
     float getBestIndividualScore();
+    float getTotalScore();
     float getAverageScore();
     float getWorstIndividualScore();
     Task* getTask();
