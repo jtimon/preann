@@ -220,7 +220,7 @@ void Test::createGnuPlotScript(Loop* loop, ParametersMap* parametersMap)
 
     FILE* plotFile = openFile(plotPath);
 
-    fprintf(plotFile, "set terminal png size 1024,512 \n");
+    fprintf(plotFile, "set terminal png size 2048,1024 \n");
     fprintf(plotFile, "set key below\n");
     fprintf(plotFile, "set key box \n");
 
@@ -343,7 +343,7 @@ void Test::plotTask(Loop* loop, ParametersMap* parametersMap, unsigned maxGenera
     Task* task = (Task*) parametersMap->getPtr(Test::TASK);
     string testedTask = task->toString();
     parametersMap->putString(Loop::LABEL, testedTask);
-    cout << "Plotting " << testedTask << "...";
+    cout << "Plotting " << testedTask << " with goal " << task->getGoal() << "..." << endl;
     Chronometer chrono;
     chrono.start();
 
