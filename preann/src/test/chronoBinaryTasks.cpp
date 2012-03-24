@@ -62,14 +62,10 @@ int main(int argc, char *argv[])
         parametersMap.putNumber(Population::NUM_SELECTION, populationSize / 2);
         parametersMap.putNumber(Population::NUM_CROSSOVER, populationSize / 2);
 
-        parametersMap.putNumber(Population::RANKING_BASE, 10);
-        parametersMap.putNumber(Population::RANKING_STEP, 5);
-        parametersMap.putNumber(Population::TOURNAMENT_SIZE, 4);
-
         parametersMap.putNumber(Population::UNIFORM_CROSS_PROB, 0.7);
         parametersMap.putNumber(Population::NUM_POINTS, 3);
 
-        parametersMap.putNumber(Population::NUM_MUTATIONS, 1);
+        parametersMap.putNumber(Population::MUTATION_NUM, 1);
         parametersMap.putNumber(Population::MUTATION_RANGE, 2);
         parametersMap.putNumber(Population::MUTATION_PROB, 0.1);
 
@@ -78,7 +74,7 @@ int main(int argc, char *argv[])
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PROBABILISTIC);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PER_INDIVIDUAL);
 
         Loop* loop = NULL;
 
@@ -93,16 +89,14 @@ int main(int argc, char *argv[])
 //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG,
 //                                              loop);
 
-//        parametersMap.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_DISABLED);
         JoinEnumLoop* resetAlgLoop = new JoinEnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG);
 
-        RangeLoop* numResetsLoop = new RangeLoop(Population::NUM_RESETS, 1, 4, 1, loop);
+        RangeLoop* numResetsLoop = new RangeLoop(Population::RESET_NUM, 1, 4, 1, loop);
         resetAlgLoop->addEnumLoop(RA_PER_INDIVIDUAL, numResetsLoop);
 
         RangeLoop* resetProbLoop = new RangeLoop(Population::RESET_PROB, 0.05, 0.2, 0.1, loop);
         resetAlgLoop->addEnumLoop(RA_PROBABILISTIC, resetProbLoop);
 
-        resetAlgLoop->addEnumLoop(RA_DISABLED, loop);
         loop = resetAlgLoop;
 
         parametersMap.putPtr(Test::LINE_COLOR, selecAlgLoop);

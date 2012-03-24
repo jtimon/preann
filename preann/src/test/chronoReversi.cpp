@@ -23,18 +23,14 @@ int main(int argc, char *argv[])
         parametersMap.putNumber(Population::NUM_SELECTION, populationSize / 2);
         parametersMap.putNumber(Population::NUM_CROSSOVER, populationSize / 2);
 
-        parametersMap.putNumber(Population::RANKING_BASE, 10);
-        parametersMap.putNumber(Population::RANKING_STEP, 5);
-        parametersMap.putNumber(Population::TOURNAMENT_SIZE, 4);
-
         parametersMap.putNumber(Population::UNIFORM_CROSS_PROB, 0.7);
         parametersMap.putNumber(Population::NUM_POINTS, 3);
 
-        parametersMap.putNumber(Population::NUM_MUTATIONS, 1);
+        parametersMap.putNumber(Population::MUTATION_NUM, 1);
         parametersMap.putNumber(Population::MUTATION_RANGE, 2);
         parametersMap.putNumber(Population::MUTATION_PROB, 0.1);
 
-        parametersMap.putNumber(Population::NUM_RESETS, 2);
+        parametersMap.putNumber(Population::RESET_NUM, 2);
         parametersMap.putNumber(Population::RESET_PROB, 0.05);
 
         //TODO repetitions for plotTask
@@ -49,22 +45,28 @@ int main(int argc, char *argv[])
 
         EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
                                               ET_SELECTION_ALGORITHM, loop);
+        // SA_ROULETTE_WHEEL, SA_RANKING, SA_TOURNAMENT, SA_TRUNCATION
+//        selecAlgLoop->with(ET_SELECTION_ALGORITHM, 1, SA_ROULETTE_WHEEL);
         loop = selecAlgLoop;
+
+        RangeLoop* rouletteWheelBaseLoop = new RangeLoop(Population::ROULETTE_WHEEL_BASE, 1, 18, 4, loop);
+        loop = rouletteWheelBaseLoop;
+
 
         //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
         //        loop = resetAlgLoop;
 
-        parametersMap.putPtr(Test::LINE_COLOR, selecAlgLoop);
+        parametersMap.putPtr(Test::LINE_COLOR, rouletteWheelBaseLoop);
         parametersMap.putPtr(Test::POINT_TYPE, selecAlgLoop);
 
         loop->print();
 
-        Task* task = new ReversiTask(4, 5);
+        Task* task = new ReversiTask(4, 1);
         Individual* example = task->getExample();
         parametersMap.putPtr(Test::TASK, task);
         parametersMap.putPtr(Test::EXAMPLE_INDIVIDUAL, example);
 
-        unsigned maxGenerations = 999;
+        unsigned maxGenerations = 100;
         Test::plotTask(loop, &parametersMap, maxGenerations);
 
         delete (example);

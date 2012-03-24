@@ -10,16 +10,24 @@
 const string Population::SIZE = "__Population_size";
 const string Population::NUM_SELECTION = "__Population_numSelection";
 const string Population::NUM_CROSSOVER = "__Population_numCrossover";
+
+const string Population::NUM_ROULETTE_WHEEL = "__Population_numRouletteWheel";
 const string Population::ROULETTE_WHEEL_BASE = "__Population_rouletteWheelBase";
+const string Population::NUM_TRUNCATION = "__Population_numTruncation";
+const string Population::NUM_TOURNAMENT = "__Population_numTournament";
+const string Population::TOURNAMENT_SIZE = "__Population_tournamentSize";
+const string Population::NUM_RANKING = "__Population_numRanking";
+//const string Population::AAAAAAAA = "__Population_AAAA";
 const string Population::RANKING_BASE = "__Population_rankingBase";
 const string Population::RANKING_STEP = "__Population_rankingStep";
-const string Population::TOURNAMENT_SIZE = "__Population_tournamentSize";
 const string Population::UNIFORM_CROSS_PROB = "__Population_uniformCrossProb";
 const string Population::NUM_POINTS = "__Population_numPoints";
-const string Population::NUM_MUTATIONS = "__Population_numMutations";
+const string Population::MUTATION_NUM = "__Population_mutationsPerIndividual";
 const string Population::MUTATION_RANGE = "__Population_mutationRange";
 const string Population::MUTATION_PROB = "__Population_mutationProb";
-const string Population::NUM_RESETS = "__Population_numResets";
+const string Population::RESET_PER_IND_ENABLED = "__Population_resetPerIndividualEnabled";
+const string Population::RESET_NUM = "__Population_resetNumResets";
+const string Population::RESET_PROB_ENABLED = "__Population_resetProbabilisticEnabled";
 const string Population::RESET_PROB = "__Population_resetProb";
 
 Population::Population(Population* other)
@@ -68,14 +76,14 @@ void Population::setDefaults()
 
     nPreserve = 1;
 
-    numRouletteWheel = 0;
+    params.putNumber(NUM_ROULETTE_WHEEL, 0);
     params.putNumber(ROULETTE_WHEEL_BASE, 1);
-    numRanking = 0;
-    rankingBase = 5;
-    rankingStep = 1;
-    numTournament = 0;
-    tournamentSize = 2;
-    numTruncation = 0;
+    params.putNumber(NUM_RANKING, 0);
+    params.putNumber(RANKING_BASE, 9);
+    params.putNumber(RANKING_STEP, 6);
+    params.putNumber(NUM_TOURNAMENT, 0);
+    params.putNumber(TOURNAMENT_SIZE, 2);
+    params.putNumber(NUM_TRUNCATION, 0);
 
     for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; crossLevel++) {
         probabilityUniform[crossLevel] = 0;
@@ -85,12 +93,79 @@ void Population::setDefaults()
         }
     }
 
-    mutationsPerIndividual = 0;
-    mutationsPerIndividualRange = 0;
-    mutationProbability = 0;
-    mutationProbabilityRange = 0;
-    resetPerIndividual = 0;
-    resetProbability = 0;
+    params.putNumber(MUTATION_NUM, 0);
+    params.putNumber(MUTATION_PROB, 0);
+    params.putNumber(MUTATION_RANGE, 1);
+    params.putNumber(RESET_PER_IND_ENABLED, 0);
+    params.putNumber(RESET_NUM, 1);
+    params.putNumber(RESET_PROB_ENABLED, 0);
+    params.putNumber(RESET_PROB, 0.01);
+}
+
+void Population::putParam(string key, float number)
+{
+    params.putNumber(key, number);
+}
+
+void Population::setParams(ParametersMap* parametersMap)
+{
+    params.copyFrom(parametersMap);
+
+    unsigned numSelection = parametersMap->getNumber(NUM_SELECTION);
+    SelectionAlgorithm selectionAlgorithm = (SelectionAlgorithm) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM));
+    switch (selectionAlgorithm) {
+        case SA_ROULETTE_WHEEL:
+            params.putNumber(NUM_ROULETTE_WHEEL, numSelection);
+            break;
+        case SA_RANKING:
+            params.putNumber(NUM_RANKING, numSelection);
+            break;
+        case SA_TOURNAMENT:
+            params.putNumber(NUM_TOURNAMENT, numSelection);
+            break;
+        case SA_TRUNCATION:
+            params.putNumber(NUM_TRUNCATION, numSelection);
+            break;
+    }
+
+    unsigned numCrossover = parametersMap->getNumber(Population::NUM_CROSSOVER);
+    CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_CROSS_ALG));
+    CrossoverLevel crossoverLevel = (CrossoverLevel) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_CROSS_LEVEL));
+    switch (crossoverAlgorithm) {
+        case CA_UNIFORM:
+            this->setCrossoverUniformScheme(crossoverLevel, numCrossover,
+                                            parametersMap->getNumber(UNIFORM_CROSS_PROB));
+            break;
+        case CA_PROPORTIONAL:
+            this->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
+            break;
+        case CA_MULTIPOINT:
+            this->setCrossoverMultipointScheme(crossoverLevel, numCrossover,
+                                               parametersMap->getNumber(NUM_POINTS));
+            break;
+    }
+
+    //TODO A+ refactorizar ¿Quitar MutationAlgorithm completamente?
+    MutationAlgorithm mutationAlgorithm = (MutationAlgorithm) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_MUTATION_ALG));
+    if (mutationAlgorithm == MA_PER_INDIVIDUAL) {
+        params.putNumber(MUTATION_NUM, parametersMap->getNumber(MUTATION_NUM));
+    } else if (mutationAlgorithm == MA_PROBABILISTIC) {
+        params.putNumber(MUTATION_NUM, parametersMap->getNumber(MUTATION_PROB));
+    }
+
+    ResetAlgorithm resetAlgorithm = (ResetAlgorithm) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_RESET_ALG));
+    if (resetAlgorithm == RA_PER_INDIVIDUAL) {
+        params.putNumber(RESET_PER_IND_ENABLED, 1);
+        params.putNumber(RESET_PROB_ENABLED, 0);
+    } else if (resetAlgorithm == RA_PROBABILISTIC) {
+        params.putNumber(RESET_PER_IND_ENABLED, 0);
+        params.putNumber(RESET_PROB_ENABLED, 1);
+    }
 }
 
 Population::~Population()
@@ -198,84 +273,28 @@ void Population::insertIndividual(Individual *individual)
     }
 }
 
-void Population::setParams(ParametersMap* parametersMap)
-{
-    unsigned numSelection = parametersMap->getNumber(NUM_SELECTION);
-    SelectionAlgorithm selectionAlgorithm = (SelectionAlgorithm) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM));
-    switch (selectionAlgorithm) {
-        case SA_ROULETTE_WHEEL:
-            this->setSelectionRouletteWheel(numSelection, parametersMap->getNumber(ROULETTE_WHEEL_BASE));
-            break;
-        case SA_RANKING:
-            this->setSelectionRanking(numSelection, parametersMap->getNumber(RANKING_BASE),
-                                      parametersMap->getNumber(RANKING_STEP));
-            break;
-        case SA_TOURNAMENT:
-            this->setSelectionTournament(numSelection, parametersMap->getNumber(TOURNAMENT_SIZE));
-            break;
-        case SA_TRUNCATION:
-            this->setSelectionTruncation(numSelection);
-            break;
-    }
-
-    unsigned numCrossover = parametersMap->getNumber(Population::NUM_CROSSOVER);
-    CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_CROSS_ALG));
-    CrossoverLevel crossoverLevel = (CrossoverLevel) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_CROSS_LEVEL));
-    switch (crossoverAlgorithm) {
-        case CA_UNIFORM:
-            this->setCrossoverUniformScheme(crossoverLevel, numCrossover,
-                                            parametersMap->getNumber(UNIFORM_CROSS_PROB));
-            break;
-        case CA_PROPORTIONAL:
-            this->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
-            break;
-        case CA_MULTIPOINT:
-            this->setCrossoverMultipointScheme(crossoverLevel, numCrossover,
-                                               parametersMap->getNumber(NUM_POINTS));
-            break;
-    }
-
-    MutationAlgorithm mutationAlgorithm = (MutationAlgorithm) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_MUTATION_ALG));
-    float mutationRange = parametersMap->getNumber(MUTATION_RANGE);
-    if (mutationAlgorithm == MA_PER_INDIVIDUAL) {
-        this->setMutationsPerIndividual(parametersMap->getNumber(NUM_MUTATIONS), mutationRange);
-    } else if (mutationAlgorithm == MA_PROBABILISTIC) {
-        this->setMutationProbability(parametersMap->getNumber(MUTATION_PROB), mutationRange);
-    }
-
-    ResetAlgorithm resetAlgorithm = (ResetAlgorithm) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_RESET_ALG));
-    if (resetAlgorithm == RA_PER_INDIVIDUAL) {
-        this->setResetsPerIndividual(parametersMap->getNumber(NUM_RESETS));
-    } else if (resetAlgorithm == RA_PROBABILISTIC) {
-        this->setResetProbability(parametersMap->getNumber(RESET_PROB));
-    }
-}
-
 void Population::setMutationsPerIndividual(unsigned numMutations, float range)
 {
-    mutationsPerIndividual = numMutations;
-    mutationsPerIndividualRange = range;
+    params.putNumber(MUTATION_NUM, numMutations);
+    params.putNumber(MUTATION_RANGE, range);
 }
 
 void Population::setMutationProbability(float probability, float range)
 {
-    mutationProbability = probability;
-    mutationProbabilityRange = range;
+    params.putNumber(MUTATION_PROB, probability);
+    params.putNumber(MUTATION_RANGE, range);
 }
 
 void Population::setResetsPerIndividual(unsigned numResets)
 {
-    resetPerIndividual = numResets;
+    params.putNumber(RESET_PER_IND_ENABLED, 1);
+    params.putNumber(RESET_NUM, numResets);
 }
 
 void Population::setResetProbability(float resetProb)
 {
-    resetProbability = resetProb;
+    params.putNumber(RESET_PROB_ENABLED, 1);
+    params.putNumber(RESET_PROB, resetProb);
 }
 
 void Population::setPreservation(unsigned number)
@@ -285,32 +304,31 @@ void Population::setPreservation(unsigned number)
 
 void Population::setSelectionRouletteWheel(unsigned number)
 {
-    numRouletteWheel = number;
-    params.putNumber(ROULETTE_WHEEL_BASE, 1);
+    params.putNumber(NUM_ROULETTE_WHEEL, number);
 }
 
 void Population::setSelectionRouletteWheel(unsigned number, float minFitness)
 {
-    numRouletteWheel = number;
+    params.putNumber(NUM_ROULETTE_WHEEL, number);
     params.putNumber(ROULETTE_WHEEL_BASE, minFitness);
 }
 
 void Population::setSelectionTruncation(unsigned number)
 {
-    numTruncation = number;
+    params.putNumber(NUM_TRUNCATION, number);
 }
 
 void Population::setSelectionTournament(unsigned number, unsigned tourSize)
 {
-    numTournament = number;
-    this->tournamentSize = tourSize;
+    params.putNumber(NUM_TOURNAMENT, number);
+    params.putNumber(TOURNAMENT_SIZE, tourSize);
 }
 
 void Population::setSelectionRanking(unsigned number, float base, float step)
 {
-    numRanking = number;
-    this->rankingBase = base;
-    this->rankingStep = step;
+    params.putNumber(NUM_RANKING, number);
+    params.putNumber(RANKING_BASE, base);
+    params.putNumber(RANKING_STEP, step);
 }
 
 void Population::setCrossoverMultipointScheme(CrossoverLevel crossoverLevel, unsigned number,
@@ -347,40 +365,43 @@ void Population::setCrossoverUniformScheme(CrossoverLevel crossoverLevel, unsign
 
 void Population::selection()
 {
-    if (numRouletteWheel)
+    if (params.getNumber(NUM_ROULETTE_WHEEL) > 0)
         selectRouletteWheel();
-    if (numRanking)
+    if (params.getNumber(NUM_RANKING) > 0)
         selectRanking();
-    if (numTournament)
+    if (params.getNumber(NUM_TOURNAMENT) > 0)
         selectTournament();
-    if (numTruncation)
+    if (params.getNumber(NUM_TRUNCATION) > 0)
         selectTruncation();
 }
 
 void Population::mutation()
 {
-    if (mutationsPerIndividual) {
+    float mutationsRange = params.getNumber(MUTATION_RANGE);
+    float mutationsPerIndividual = params.getNumber(MUTATION_NUM);
+    if (mutationsPerIndividual > 0) {
         for (unsigned i = 0; i < offSpring.size(); i++) {
-            offSpring[i]->mutate(mutationsPerIndividual, mutationsPerIndividualRange);
+            offSpring[i]->mutate(mutationsPerIndividual, mutationsRange);
         }
     }
-    if (mutationProbability) {
+    float mutationProbability = params.getNumber(MUTATION_PROB);
+    if (mutationProbability > 0) {
         for (unsigned i = 0; i < offSpring.size(); i++) {
-            offSpring[i]->mutate(mutationProbability, mutationProbabilityRange);
+            offSpring[i]->mutate(mutationProbability, mutationsRange);
         }
     }
 }
 
 void Population::reset()
 {
-    if (resetPerIndividual) {
+    if (params.getNumber(RESET_PER_IND_ENABLED) > 0) {
         for (unsigned i = 0; i < offSpring.size(); i++) {
-            offSpring[i]->reset(resetPerIndividual);
+            offSpring[i]->reset(params.getNumber(RESET_NUM));
         }
     }
-    if (resetProbability) {
+    if (params.getNumber(RESET_PROB_ENABLED) > 0) {
         for (unsigned i = 0; i < offSpring.size(); i++) {
-            offSpring[i]->reset(resetProbability);
+            offSpring[i]->reset(params.getNumber(RESET_PROB));
         }
     }
 }
@@ -557,12 +578,14 @@ void Population::oneCrossover(Individual* offSpringA, Individual* offSpringB,
 
 void Population::selectRouletteWheel()
 {
+    unsigned numRouletteWheel = params.getNumber(NUM_ROULETTE_WHEEL);
+    float rouletteWheelBase = params.getNumber(ROULETTE_WHEEL_BASE);
+
     float total_score = getTotalScore();
     float window = 0;
 
     float minFitness = individuals.back()->getFitness();
     if (minFitness <= 0) {
-        float rouletteWheelBase = params.getNumber(ROULETTE_WHEEL_BASE);
         window = rouletteWheelBase - minFitness;
         total_score += window * individuals.size();
     }
@@ -585,6 +608,10 @@ void Population::selectRouletteWheel()
 
 void Population::selectRanking()
 {
+    unsigned numRanking = params.getNumber(NUM_RANKING);
+    unsigned rankingBase = params.getNumber(RANKING_BASE);
+    unsigned rankingStep = params.getNumber(RANKING_STEP);
+
     float total_base = rankingBase * individuals.size();
     for (unsigned i = 0; i < individuals.size(); i++) {
         total_base += i * rankingStep;
@@ -611,6 +638,9 @@ void Population::selectRanking()
 
 void Population::selectTournament()
 {
+    unsigned numTournament = params.getNumber(NUM_TOURNAMENT);
+    unsigned tournamentSize = params.getNumber(TOURNAMENT_SIZE);
+
     if (tournamentSize > individuals.size()) {
         std::string error = "Population::selectTournament: The tournament size cannot be grater than the population size.";
         throw error;
@@ -648,6 +678,7 @@ void Population::selectTournament()
 
 void Population::selectTruncation()
 {
+    unsigned numTruncation = params.getNumber(NUM_TRUNCATION);
     if (numTruncation > individuals.size()) {
         std::string error =
                 "The number of selected individuals by truncation cannot be grater than the population size.";

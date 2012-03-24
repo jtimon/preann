@@ -18,16 +18,25 @@ public:
     static const string SIZE;
     static const string NUM_SELECTION;
     static const string NUM_CROSSOVER;
+
+    static const string NUM_ROULETTE_WHEEL;
     static const string ROULETTE_WHEEL_BASE;
+    static const string NUM_TRUNCATION;
+    static const string NUM_TOURNAMENT;
+    static const string TOURNAMENT_SIZE;
+    static const string NUM_RANKING;
     static const string RANKING_BASE;
     static const string RANKING_STEP;
-    static const string TOURNAMENT_SIZE;
+
     static const string UNIFORM_CROSS_PROB;
     static const string NUM_POINTS;
-    static const string NUM_MUTATIONS;
+
+    static const string MUTATION_NUM;
     static const string MUTATION_RANGE;
     static const string MUTATION_PROB;
-    static const string NUM_RESETS;
+    static const string RESET_PER_IND_ENABLED;
+    static const string RESET_NUM;
+    static const string RESET_PROB_ENABLED;
     static const string RESET_PROB;
 
     ParametersMap params;
@@ -40,25 +49,10 @@ protected:
     vector<Individual*> offSpring;
 
     unsigned nPreserve;
-    unsigned numTruncation;
-    unsigned numRouletteWheel;
-    unsigned numTournament;
-    unsigned tournamentSize;
-    unsigned numRanking;
-    float rankingBase;
-    float rankingStep;
 
     unsigned numCrossover[CROSSOVER_ALGORITHM_DIM][CROSSOVER_LEVEL_DIM];
     float probabilityUniform[CROSSOVER_LEVEL_DIM];
     unsigned numPointsMultipoint[CROSSOVER_LEVEL_DIM];
-
-    unsigned mutationsPerIndividual;
-    float mutationsPerIndividualRange;
-    float mutationProbability;
-    float mutationProbabilityRange;
-
-    unsigned resetPerIndividual;
-    float resetProbability;
 
     void setDefaults();
     void selection();
@@ -88,6 +82,7 @@ public:
     void save(FILE* stream);
     void load(FILE* stream);
 
+    void putParam(string key, float number);
     void setParams(ParametersMap* parametersMap);
     void setPreservation(unsigned number);
     void setSelectionRouletteWheel(unsigned number);
