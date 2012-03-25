@@ -50,24 +50,23 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Loop* loop;
         Test test;
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         test.parameters.putString(LAYER_PATH, "/home/timon/layer.lay");
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        loop = new RangeLoop(Dummy::SIZE, 1, 51, 49, NULL);
+        test.addLoop(new RangeLoop(Dummy::SIZE, 1, 51, 49));
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop, 3,
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
-        loop = bufferTypeLoop;
+        test.addLoop(bufferTypeLoop);
 
-        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, loop);
-        loop->print();
+        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+        test.getLoop()->print();
 
         //TODO arreglar
-        test.test(loop, testCalculateOutput, "Layer::calculateOutput");
+        test.test(testCalculateOutput, "Layer::calculateOutput");
 
         printf("Exit success.\n");
     } catch (std::string error) {

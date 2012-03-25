@@ -27,6 +27,7 @@ public:
     JoinEnumLoop(std::string key, EnumType enumType);
     virtual ~JoinEnumLoop();
 
+    virtual void setInnerLoop(Loop* innerLoop);
     void addEnumLoop(unsigned enumValue, Loop* loop);
 
     virtual Loop* findLoop(std::string key);

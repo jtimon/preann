@@ -109,26 +109,26 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Loop* loop;
         Test test;
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         test.parameters.putNumber(NUM_MUTATIONS, 10);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        loop = new RangeLoop(Dummy::SIZE, 2, 13, 10, NULL);
-        loop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2, loop);
+        test.addLoop(new RangeLoop(Dummy::SIZE, 2, 13, 10));
+        test.addLoop(new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2));
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop, 3,
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
-        loop = bufferTypeLoop;
+        test.addLoop(bufferTypeLoop);
 
-        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, loop);
-        loop->print();
+        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
 
-        test.test(loop, testCalculateAndAddTo, "Connection::calculateAndAddTo");
-        test.test(loop, testMutate, "Connection::mutate");
-        test.test(loop, testCrossover, "Connection::crossover");
+        test.getLoop()->print();
+
+        test.test(testCalculateAndAddTo, "Connection::calculateAndAddTo");
+        test.test(testMutate, "Connection::mutate");
+        test.test(testCrossover, "Connection::crossover");
 
         printf("Exit success.\n");
     } catch (std::string error) {

@@ -7,8 +7,8 @@
 
 #include "enumLoop.h"
 
-EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop) :
-    Loop(key, innerLoop)
+EnumLoop::EnumLoop(std::string key, EnumType enumType) :
+    Loop(key)
 {
     this->withAll(enumType);
 }
@@ -25,8 +25,8 @@ unsigned EnumLoop::reset(EnumType enumType)
     tIndex = 0;
 }
 
-EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop, unsigned count, ...) :
-    Loop(key, innerLoop)
+EnumLoop::EnumLoop(std::string key, EnumType enumType, unsigned count, ...) :
+    Loop(key)
 {
     if (count == 0) {
         string error = "EnumLoop : at least one enum value must be specified.";
@@ -49,6 +49,12 @@ EnumLoop::EnumLoop(std::string key, EnumType enumType, Loop* innerLoop, unsigned
         }
     }
     va_end(ap);
+}
+
+EnumLoop::EnumLoop(std::string key, bool include, EnumType enumType, unsigned count, ...)
+{
+    //TODO
+//    this->
 }
 
 EnumLoop::~EnumLoop()

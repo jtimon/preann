@@ -41,16 +41,12 @@ int main(int argc, char *argv[])
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PROBABILISTIC);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_PROBABILISTIC);
 
-        Loop* loop = NULL;
-
         EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
-                                              ET_SELECTION_ALGORITHM, loop);
-        // SA_ROULETTE_WHEEL, SA_RANKING, SA_TOURNAMENT, SA_TRUNCATION
-//        selecAlgLoop->with(ET_SELECTION_ALGORITHM, 1, SA_ROULETTE_WHEEL);
-        loop = selecAlgLoop;
+                                              ET_SELECTION_ALGORITHM);
+        test.addLoop(selecAlgLoop);
 
-        RangeLoop* rouletteWheelBaseLoop = new RangeLoop(Population::ROULETTE_WHEEL_BASE, 1, 18, 4, loop);
-        loop = rouletteWheelBaseLoop;
+        RangeLoop* rouletteWheelBaseLoop = new RangeLoop(Population::ROULETTE_WHEEL_BASE, 1, 18, 4);
+        test.addLoop(rouletteWheelBaseLoop);
 
         //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
         //        loop = resetAlgLoop;
@@ -58,7 +54,7 @@ int main(int argc, char *argv[])
         test.parameters.putPtr(Test::LINE_COLOR, rouletteWheelBaseLoop);
         test.parameters.putPtr(Test::POINT_TYPE, selecAlgLoop);
 
-        loop->print();
+        test.getLoop()->print();
 
         Task* task = new ReversiTask(4, 1);
         Individual* example = task->getExample();
@@ -66,7 +62,7 @@ int main(int argc, char *argv[])
         test.parameters.putPtr(Test::EXAMPLE_INDIVIDUAL, example);
 
         unsigned maxGenerations = 100;
-        test.plotTask(loop, maxGenerations);
+        test.plotTask(maxGenerations);
 
         delete (example);
         delete (task);

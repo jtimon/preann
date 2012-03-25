@@ -71,26 +71,25 @@ int main(int argc, char *argv[])
         test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        Loop* loop = NULL;
-        loop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2, loop);
+        test.addLoop(new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2));
 
         EnumLoop* implTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
-                                              ET_IMPLEMENTATION, loop);
-        loop = implTypeLoop;
+                                              ET_IMPLEMENTATION);
+        test.addLoop(implTypeLoop);
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop, 3,
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
-        loop = bufferTypeLoop;
+        test.addLoop(bufferTypeLoop);
 
         test.parameters.putPtr(Test::LINE_COLOR, implTypeLoop);
         test.parameters.putPtr(Test::POINT_TYPE, bufferTypeLoop);
-        loop->print();
+        test.getLoop()->print();
 
-        test.plot(loop, chronoMutate, "Connection_mutate", Dummy::SIZE, 250, 2000, 500);
+        test.plot(chronoMutate, "Connection_mutate", Dummy::SIZE, 250, 2000, 500);
         test.parameters.putNumber(Test::REPETITIONS, 10);
-        test.plot(loop, chronoCrossover, "Connection_crossover", Dummy::SIZE, 100, 301, 100);
+        test.plot(chronoCrossover, "Connection_crossover", Dummy::SIZE, 100, 301, 100);
         test.parameters.putNumber(Test::REPETITIONS, 1);
-        test.plot(loop, chronoCalculateAndAddTo, "Connection_calculateAndAddTo", Dummy::SIZE, 1000, 2001,
+        test.plot(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", Dummy::SIZE, 1000, 2001,
                   1000);
 
         printf("Exit success.\n");

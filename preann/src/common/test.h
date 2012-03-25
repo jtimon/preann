@@ -7,9 +7,7 @@
 #include "loop/loop.h"
 #include "loop/rangeLoop.h"
 #include "loop/enumLoop.h"
-#include "loop/joinLoop.h"
 #include "loop/joinEnumLoop.h"
-#include "loop/enumValueLoop.h"
 
 #include "neural/buffer.h"
 
@@ -49,6 +47,7 @@ public:
     static const string MAX_GENERATIONS;
 protected:
     static void createGnuPlotScript(Loop* loop, ParametersMap* parametersMap);
+    Loop* tLoop;
 public:
     ParametersMap parameters;
     Test();
@@ -58,9 +57,12 @@ public:
     static unsigned assertEquals(Buffer* expected, Buffer* actual);
     static void checkEmptyMemory(ParametersMap* parametersMap);
 
-    void test(Loop* loop, void(*func)(ParametersMap*), std::string functionLabel);
-    void plot(Loop* loop, void(*func)(ParametersMap*), std::string functionLabel, std::string plotVarKey, float min, float max, float inc);
-    void plotTask(Loop* loop, unsigned maxGenerations);
+    void test(void(*func)(ParametersMap*), std::string functionLabel);
+    void plot(void(*func)(ParametersMap*), std::string functionLabel, std::string plotVarKey, float min, float max, float inc);
+    void plotTask(unsigned maxGenerations);
+    void addLoop(Loop* loop);
+    Loop* getLoop();
+
 
 };
 

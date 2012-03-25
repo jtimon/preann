@@ -35,11 +35,12 @@ protected:
     void createGnuPlotScript(ParametersMap* parametersMap);
 
     Loop();
-    Loop(std::string key, Loop* innerLoop);
+    Loop(std::string key);
 public:
     virtual ~Loop();
 
     string getKey();
+    virtual void setInnerLoop(Loop* innerLoop);
     void setCallerLoop(Loop* callerLoop);
 
     virtual unsigned valueToUnsigned();

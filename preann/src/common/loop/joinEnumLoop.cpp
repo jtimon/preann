@@ -8,7 +8,7 @@
 #include "joinEnumLoop.h"
 
 JoinEnumLoop::JoinEnumLoop(std::string key, EnumType enumType) :
-    Loop(key, NULL)
+    Loop(key)
 {
     tEnumType = enumType;
     tIndex = 0;
@@ -16,8 +16,20 @@ JoinEnumLoop::JoinEnumLoop(std::string key, EnumType enumType) :
 
 JoinEnumLoop::~JoinEnumLoop()
 {
+    for (int i = 0; i < tInnerLoops.size(); ++i) {
+        tInnerLoops[i]->setInnerLoop(NULL);
+        delete(tInnerLoops[i]);
+    }
     tValueVector.clear();
     tInnerLoops.clear();
+}
+
+void JoinEnumLoop::setInnerLoop(Loop* innerLoop)
+{
+    tInnerLoop = innerLoop;
+    for (int i = 0; i < tInnerLoops.size(); ++i) {
+        tInnerLoops[i]->setInnerLoop(tInnerLoop);
+    }
 }
 
 void JoinEnumLoop::addEnumLoop(unsigned enumValue, Loop* loop)
@@ -29,6 +41,7 @@ void JoinEnumLoop::addEnumLoop(unsigned enumValue, Loop* loop)
                 + to_string(enumValue);
         throw error;
     }
+    loop->setInnerLoop(tInnerLoop);
     tValueVector.push_back(enumValue);
     tInnerLoops.push_back(loop);
 }

@@ -9,10 +9,23 @@
 
 Test::Test()
 {
+    tLoop = NULL;
 }
 
 Test::~Test()
 {
+    delete (tLoop);
+}
+
+Loop* Test::getLoop()
+{
+    return tLoop;
+}
+
+void Test::addLoop(Loop* loop)
+{
+    loop->setInnerLoop(this->tLoop);
+    this->tLoop = loop;
 }
 
 const string Test::DIFF_COUNT = "__differencesCounter";
@@ -36,8 +49,7 @@ const string Test::EXAMPLE_INDIVIDUAL = "__exampleIndividual";
 const string Test::TASK = "__task_to_plot";
 const string Test::MAX_GENERATIONS = "__generations_to_plot";
 
-unsigned char Test::areEqual(float expected, float actual,
-        BufferType bufferType)
+unsigned char Test::areEqual(float expected, float actual, BufferType bufferType)
 {
     if (bufferType == BT_FLOAT) {
         return (expected - 1 < actual && expected + 1 > actual);
@@ -57,11 +69,9 @@ unsigned Test::assertEqualsInterfaces(Interface* expected, Interface* actual)
     unsigned differencesCounter = 0;
 
     for (unsigned i = 0; i < expected->getSize(); i++) {
-        if (!areEqual(expected->getElement(i), actual->getElement(i),
-                expected->getBufferType())) {
-            printf(
-                    "The interfaces are not equal at the position %d (expected = %f actual %f).\n",
-                    i, expected->getElement(i), actual->getElement(i));
+        if (!areEqual(expected->getElement(i), actual->getElement(i), expected->getBufferType())) {
+            printf("The interfaces are not equal at the position %d (expected = %f actual %f).\n", i,
+                   expected->getElement(i), actual->getElement(i));
             ++differencesCounter;
         }
     }
@@ -82,11 +92,9 @@ unsigned Test::assertEquals(Buffer* expected, Buffer* actual)
     Interface* actualInt = actual->toInterface();
 
     for (unsigned i = 0; i < expectedInt->getSize(); i++) {
-        if (!areEqual(expectedInt->getElement(i), actualInt->getElement(i),
-                expectedInt->getBufferType())) {
-            printf(
-                    "The buffers are not equal at the position %d (expected = %f actual %f).\n",
-                    i, expectedInt->getElement(i), actualInt->getElement(i));
+        if (!areEqual(expectedInt->getElement(i), actualInt->getElement(i), expectedInt->getBufferType())) {
+            printf("The buffers are not equal at the position %d (expected = %f actual %f).\n", i,
+                   expectedInt->getElement(i), actualInt->getElement(i));
             ++differencesCounter;
         }
     }
@@ -97,11 +105,11 @@ unsigned Test::assertEquals(Buffer* expected, Buffer* actual)
 
 void Test::checkEmptyMemory(ParametersMap* parametersMap)
 {
-    if (MemoryManagement::getPtrCounter() > 0
-            || MemoryManagement::getTotalAllocated() > 0) {
+    if (MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0) {
 
-        cout << "Memory loss detected while testing " + parametersMap->getString(Loop::LABEL) + " at state "
-                        + parametersMap->getString(Loop::STATE) << endl;
+        cout
+                << "Memory loss detected while testing " + parametersMap->getString(Loop::LABEL)
+                        + " at state " + parametersMap->getString(Loop::STATE) << endl;
 
         MemoryManagement::printTotalAllocated();
         MemoryManagement::printTotalPointers();
@@ -112,7 +120,7 @@ void Test::checkEmptyMemory(ParametersMap* parametersMap)
     }
 }
 
-void testAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
+void testAction(void (*f)(ParametersMap*), ParametersMap* parametersMap)
 {
     try {
         f(parametersMap);
@@ -122,17 +130,18 @@ void testAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
             cout << state << " : " << differencesCounter << " differences detected." << endl;
         }
     } catch (string e) {
-        cout << " while testing " + parametersMap->getString(Loop::LABEL) + " at state "
-                + parametersMap->getString(Loop::STATE) + " : " + e << endl;
+        cout
+                << " while testing " + parametersMap->getString(Loop::LABEL) + " at state "
+                        + parametersMap->getString(Loop::STATE) + " : " + e << endl;
     }
 }
-void Test::test(Loop* loop, void(*func)(ParametersMap*), std::string functionLabel)
+void Test::test(void (*func)(ParametersMap*), std::string functionLabel)
 {
     cout << "Testing... " << functionLabel << endl;
     parameters.putString(Loop::LABEL, functionLabel);
 
-    loop->setCallerLoop(NULL);
-    loop->repeatActionImpl(testAction, func, &parameters);
+    tLoop->setCallerLoop(NULL);
+    tLoop->repeatActionImpl(testAction, func, &parameters);
 }
 
 int mapPointType(unsigned value)
@@ -179,11 +188,11 @@ int mapLineColor(unsigned value)
 
 void preparePlotFunction(ParametersMap* parametersMap)
 {
-    FILE *plotFile = (FILE*)((parametersMap->getPtr(Test::PLOT_FILE)));
+    FILE *plotFile = (FILE*) ((parametersMap->getPtr(Test::PLOT_FILE)));
     unsigned first = parametersMap->getNumber(Test::FIRST_STATE);
-    if(first){
+    if (first) {
         parametersMap->putNumber(Test::FIRST_STATE, 0);
-    }else{
+    } else {
         fprintf(plotFile, " , \\\n\t");
     }
     string state = parametersMap->getString(Loop::STATE);
@@ -193,13 +202,11 @@ void preparePlotFunction(ParametersMap* parametersMap)
     Loop *lineColorLoop = NULL;
     Loop *pointTypeLoop = NULL;
     try {
-        lineColorLoop = (Loop*)((parametersMap->getPtr(Test::LINE_COLOR)));
-    }
-    catch(string e){
-    }
-    ;
+        lineColorLoop = (Loop*) ((parametersMap->getPtr(Test::LINE_COLOR)));
+    } catch (string e) {
+    };
     try {
-        pointTypeLoop = (Loop*)((parametersMap->getPtr(Test::POINT_TYPE)));
+        pointTypeLoop = (Loop*) ((parametersMap->getPtr(Test::POINT_TYPE)));
     } catch (string e) {
     };
 
@@ -256,7 +263,7 @@ void Test::createGnuPlotScript(Loop* loop, ParametersMap* parametersMap)
     fclose(plotFile);
 }
 
-void plotAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
+void plotAction(void (*f)(ParametersMap*), ParametersMap* parametersMap)
 {
     try {
         string path = parametersMap->getString(Test::PLOT_PATH);
@@ -284,8 +291,9 @@ void plotAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
 
         fclose(dataFile);
     } catch (string e) {
-        cout << " while plotting " + parametersMap->getString(Loop::LABEL) + " at state "
-                + parametersMap->getString(Loop::STATE) + " : " + e << endl;
+        cout
+                << " while plotting " + parametersMap->getString(Loop::LABEL) + " at state "
+                        + parametersMap->getString(Loop::STATE) + " : " + e << endl;
     }
 }
 void plotFile(string path, string functionLabel)
@@ -294,8 +302,8 @@ void plotFile(string path, string functionLabel)
     string syscommand = "gnuplot " + plotPath;
     system(syscommand.data());
 }
-void Test::plot(Loop* loop, void(*func)(ParametersMap*), std::string functionLabel,
-                std::string plotVarKey, float min, float max, float inc)
+void Test::plot(void (*func)(ParametersMap*), std::string functionLabel, std::string plotVarKey, float min,
+                float max, float inc)
 {
     cout << "Plotting " << functionLabel << "...";
     Chronometer chrono;
@@ -306,10 +314,10 @@ void Test::plot(Loop* loop, void(*func)(ParametersMap*), std::string functionLab
     parameters.putNumber(PLOT_MAX, max);
     parameters.putNumber(PLOT_INC, inc);
 
-    createGnuPlotScript(loop, &parameters);
+    createGnuPlotScript(tLoop, &parameters);
 
-    loop->setCallerLoop(NULL);
-    loop->repeatActionImpl(plotAction, func, &parameters);
+    tLoop->setCallerLoop(NULL);
+    tLoop->repeatActionImpl(plotAction, func, &parameters);
 
     string path = parameters.getString(Test::PLOT_PATH);
     plotFile(path, functionLabel);
@@ -342,11 +350,11 @@ void plotTaskFunction(ParametersMap* parametersMap)
         fclose(dataFile);
         delete (population);
     } catch (string e) {
-        cout << " while plotting " + parametersMap->getString(Loop::LABEL) + " at state "
-                + state + " : " + e << endl;
+        cout << " while plotting " + parametersMap->getString(Loop::LABEL) + " at state " + state + " : " + e
+                << endl;
     }
 }
-void Test::plotTask(Loop* loop, unsigned maxGenerations)
+void Test::plotTask(unsigned maxGenerations)
 {
     Task* task = (Task*) parameters.getPtr(Test::TASK);
     string testedTask = task->toString();
@@ -362,10 +370,10 @@ void Test::plotTask(Loop* loop, unsigned maxGenerations)
     Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
     parameters.putPtr(Test::INITIAL_POPULATION, initialPopulation);
 
-    createGnuPlotScript(loop, &parameters);
+    createGnuPlotScript(tLoop, &parameters);
 
-    loop->setCallerLoop(NULL);
-    loop->repeatFunctionImpl(plotTaskFunction, &parameters);
+    tLoop->setCallerLoop(NULL);
+    tLoop->repeatFunctionImpl(plotTaskFunction, &parameters);
 
     delete (initialPopulation);
 

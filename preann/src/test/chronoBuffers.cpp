@@ -77,31 +77,27 @@ int main(int argc, char *argv[])
         test.parameters.putNumber(Test::REPETITIONS, 100);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        Loop* loop = NULL;
-
         EnumLoop* implTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
-                                              ET_IMPLEMENTATION, loop);
-        loop = implTypeLoop;
+                                              ET_IMPLEMENTATION);
+        test.addLoop(implTypeLoop);
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop);
-        loop = bufferTypeLoop;
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
+        test.addLoop(bufferTypeLoop);
 
         test.parameters.putPtr(Test::LINE_COLOR, implTypeLoop);
         test.parameters.putPtr(Test::POINT_TYPE, bufferTypeLoop);
 
-        loop->print();
+        test.getLoop()->print();
 
-        test.plot(loop, chronoCopyToInterface, "Buffer_copyToInterface", Dummy::SIZE, 2000, 20001, 2000);
-        test.plot(loop, chronoCopyFromInterface, "Buffer_copyFromInterface", Dummy::SIZE, 2000, 20001, 2000);
-        test.plot(loop, chronoClone, "Buffer_clone", Dummy::SIZE, 1000, 10001, 3000);
+        test.plot(chronoCopyToInterface, "Buffer_copyToInterface", Dummy::SIZE, 2000, 20001, 2000);
+        test.plot(chronoCopyFromInterface, "Buffer_copyFromInterface", Dummy::SIZE, 2000, 20001, 2000);
+        test.plot(chronoClone, "Buffer_clone", Dummy::SIZE, 1000, 10001, 3000);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
-        loop->print();
+        test.getLoop()->print();
 
-        test.plot(loop, chronoActivation, "Buffer_activation", Dummy::SIZE, 2000, 20001, 2000);
-
-        delete (loop);
+        test.plot(chronoActivation, "Buffer_activation", Dummy::SIZE, 2000, 20001, 2000);
 
         printf("Exit success.\n");
     } catch (std::string error) {

@@ -96,58 +96,55 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Loop* loop;
-        ParametersMap parametersMap;
-        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
-        parametersMap.putNumber(Test::MEM_LOSSES, 0);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        Test test;
+        test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
+        test.parameters.putNumber(Test::MEM_LOSSES, 0);
+        test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        RangeLoop* sizeLoop = new RangeLoop(Dummy::SIZE, 100, 101, 100, NULL);
-        loop = sizeLoop;
+        RangeLoop* sizeLoop = new RangeLoop(Dummy::SIZE, 100, 101, 100);
+        test.addLoop(sizeLoop);
 
-        RangeLoop* outputSizeLoop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2, loop);
-        loop = outputSizeLoop;
+        RangeLoop* outputSizeLoop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2);
+        test.addLoop(outputSizeLoop);
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop);
-        loop = bufferTypeLoop;
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
+        test.addLoop(bufferTypeLoop);
 
-        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, loop);
+        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
 
-        loop->print();
+        test.getLoop()->print();
 
-//        loop->repeatFunction(testLoops, &parametersMap, "test loops");
+//        test.getLoop()->repeatFunction(testLoops, &parametersMap, "test loops");
 
-        loop->repeatFunction(testBuffer, &parametersMap, "Buffer::memory_test");
+        test.getLoop()->repeatFunction(testBuffer, &test.parameters, "Buffer::memory_test");
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
-        loop->print();
+        test.getLoop()->print();
 
-        loop->repeatFunction(testConnection, &parametersMap, "Connection::memory_test");
+        test.getLoop()->repeatFunction(testConnection, &test.parameters, "Connection::memory_test");
 
-        RangeLoop* numInputsLoop = new RangeLoop(Dummy::NUM_INPUTS, 1, 3, 1, loop);
-        loop = numInputsLoop;
-        loop->print();
+        RangeLoop* numInputsLoop = new RangeLoop(Dummy::NUM_INPUTS, 1, 3, 1);
+        test.addLoop(numInputsLoop);
+        test.getLoop()->print();
 
-        loop->repeatFunction(testLayer, &parametersMap, "Layer::memory_test");
+        test.getLoop()->repeatFunction(testLayer, &test.parameters, "Layer::memory_test");
 
-        RangeLoop* numLayersLoop = new RangeLoop(Dummy::NUM_LAYERS, 1, 3, 1, loop);
-        loop = numLayersLoop;
-        loop->print();
+        RangeLoop* numLayersLoop = new RangeLoop(Dummy::NUM_LAYERS, 1, 3, 1);
+        test.addLoop(numLayersLoop);
+        test.getLoop()->print();
 
-        loop->repeatFunction(testNeuralNet, &parametersMap, "NeuralNet::memory_test");
+        test.getLoop()->repeatFunction(testNeuralNet, &test.parameters, "NeuralNet::memory_test");
 
         sizeLoop->resetRange(1, 3, 1);
         outputSizeLoop->resetRange(1, 1, 1);
         numInputsLoop->resetRange(1, 1, 1);
         numLayersLoop->resetRange(1, 1, 1);
-        loop->print();
+        test.getLoop()->print();
 
-        loop->repeatFunction(testPopulation, &parametersMap, "Population::memory_test");
+        test.getLoop()->repeatFunction(testPopulation, &test.parameters, "Population::memory_test");
 
-        delete (loop);
-
-        unsigned memoryLosses = parametersMap.getNumber(Test::MEM_LOSSES);
+        unsigned memoryLosses = test.parameters.getNumber(Test::MEM_LOSSES);
         cout << "Total memory losses: " << memoryLosses << endl;
         MemoryManagement::printListOfPointers();
 

@@ -93,27 +93,27 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Loop* loop;
         Test test;
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        loop = new RangeLoop(Dummy::SIZE, 100, 101, 100, NULL);
+        test.addLoop(new RangeLoop(Dummy::SIZE, 100, 101, 100));
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop);
-        loop = bufferTypeLoop;
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
+        test.addLoop(bufferTypeLoop);
 
-        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, loop);
-        loop->print();
+        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
 
-        test.test(loop, testClone, "Buffer::clone");
-        test.test(loop, testCopyFromInterface, "Buffer::copyFromInterface");
-        test.test(loop, testCopyToInterface, "Buffer::copyToInterface");
+        test.getLoop()->print();
+
+        test.test(testClone, "Buffer::clone");
+        test.test(testCopyFromInterface, "Buffer::copyFromInterface");
+        test.test(testCopyToInterface, "Buffer::copyToInterface");
 
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
-        loop->print();
+        test.getLoop()->print();
 
-        test.test(loop, testActivation, "Buffer::activation");
+        test.test(testActivation, "Buffer::activation");
 
         printf("Exit success.\n");
     } catch (std::string error) {

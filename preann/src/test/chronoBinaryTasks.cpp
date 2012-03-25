@@ -12,23 +12,23 @@ using namespace std;
     Individual* example = task->getExample();                                           \
     test->parameters.putPtr(Test::TASK, task);                                          \
     test->parameters.putPtr(Test::EXAMPLE_INDIVIDUAL, example);                         \
-    test->plotTask(loop, maxGenerations);                                               \
+    test->plotTask(maxGenerations);                                                     \
     delete (example);                                                                   \
     delete (task);
 
-void chronoOr(Loop* loop, Test* test, unsigned vectorsSize, unsigned maxGenerations)
+void chronoOr(Test* test, unsigned vectorsSize, unsigned maxGenerations)
 {
     Task* task = new BinaryTask(BO_OR, vectorsSize);
     COMMON
 }
 
-void chronoAnd(Loop* loop, Test* test, unsigned vectorsSize, unsigned maxGenerations)
+void chronoAnd(Test* test, unsigned vectorsSize, unsigned maxGenerations)
 {
     Task* task = new BinaryTask(BO_AND, vectorsSize);
     COMMON
 }
 
-void chronoXor(Loop* loop, Test* test, unsigned vectorsSize, unsigned maxGenerations)
+void chronoXor(Test* test, unsigned vectorsSize, unsigned maxGenerations)
 {
     Task* task = new BinaryTask(BO_XOR, vectorsSize);
     COMMON
@@ -77,39 +77,30 @@ int main(int argc, char *argv[])
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
 //        test.parameters.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PER_INDIVIDUAL);
 
-        Loop* loop = NULL;
+        EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
+                                              ET_SELECTION_ALGORITHM);
+        test.addLoop(selecAlgLoop);
 
-//        EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
-//                                              ET_SELECTION_ALGORITHM, loop);
-//        loop = selecAlgLoop;
-
-
-
-//        test.parameters.putNumber(Population::NUM_RESETS, 2);
-//        test.parameters.putNumber(Population::RESET_PROB, 0.05);
-//        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG,
-//                                              loop);
 
         JoinEnumLoop* resetAlgLoop = new JoinEnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG);
+        test.addLoop(resetAlgLoop);
 
-        RangeLoop* numResetsLoop = new RangeLoop(Population::RESET_NUM, 1, 4, 1, loop);
+        RangeLoop* numResetsLoop = new RangeLoop(Population::RESET_NUM, 1, 4, 1);
         resetAlgLoop->addEnumLoop(RA_PER_INDIVIDUAL, numResetsLoop);
 
-        RangeLoop* resetProbLoop = new RangeLoop(Population::RESET_PROB, 0.05, 0.2, 0.1, loop);
+        RangeLoop* resetProbLoop = new RangeLoop(Population::RESET_PROB, 0.05, 0.2, 0.1);
         resetAlgLoop->addEnumLoop(RA_PROBABILISTIC, resetProbLoop);
-
-        loop = resetAlgLoop;
 
         test.parameters.putPtr(Test::LINE_COLOR, resetAlgLoop);
         test.parameters.putPtr(Test::POINT_TYPE, resetProbLoop);
 
-        loop->print();
+        test.getLoop()->print();
 
         unsigned vectorsSize = 2;
         unsigned maxGenerations = 200;
-//        chronoAnd(loop, &test, vectorsSize, maxGenerations);
-//        chronoOr(loop, &test, vectorsSize, maxGenerations);
-        chronoXor(loop, &test, vectorsSize, maxGenerations);
+//        chronoAnd(&test, vectorsSize, maxGenerations);
+//        chronoOr(&test, vectorsSize, maxGenerations);
+        chronoXor(&test, vectorsSize, maxGenerations);
 
         printf("Exit success.\n");
     } catch (std::string error) {

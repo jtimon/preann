@@ -22,7 +22,7 @@ protected:
                      void(*func)(ParametersMap*), ParametersMap* parametersMap);
     virtual std::string valueToString();
 public:
-    RangeLoop(std::string key, float min, float max, float inc, Loop* innerLoop);
+    RangeLoop(std::string key, float min, float max, float inc);
     virtual ~RangeLoop();
 
     void resetRange(float min, float max, float inc);

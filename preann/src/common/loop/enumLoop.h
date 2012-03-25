@@ -25,8 +25,9 @@ protected:
     repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
                      void(*func)(ParametersMap*), ParametersMap* parametersMap);
 public:
-    EnumLoop(std::string key, EnumType enumType, Loop* innerLoop);
-    EnumLoop(std::string key, EnumType enumType, Loop* innerLoop, unsigned count, ...);
+    EnumLoop(std::string key, EnumType enumType);
+    EnumLoop(std::string key, EnumType enumType, unsigned count, ...);
+    EnumLoop(std::string key, bool include, EnumType enumType, unsigned count, ...);
     virtual ~EnumLoop();
 
     void withAll(EnumType enumType);

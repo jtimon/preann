@@ -17,10 +17,10 @@ Loop::Loop()
     tCallerLoop = NULL;
 }
 
-Loop::Loop(std::string key, Loop* innerLoop)
+Loop::Loop(std::string key)
 {
     tKey = key;
-    tInnerLoop = innerLoop;
+    tInnerLoop = NULL;
     tCallerLoop = NULL;
 }
 
@@ -36,6 +36,11 @@ string Loop::getKey()
     return tKey;
 }
 
+void Loop::setInnerLoop(Loop* innerLoop)
+{
+    tInnerLoop = innerLoop;
+}
+
 void Loop::setCallerLoop(Loop* callerLoop)
 {
     tCallerLoop = callerLoop;
@@ -47,7 +52,9 @@ void Loop::repeatFunctionBase(void(*func)(ParametersMap*), ParametersMap* parame
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->repeatFunctionImpl(func, parametersMap);
     } else {
+        cout<< this->getState(true) << endl;
         parametersMap->putString(Loop::STATE, this->getState(false));
+//        parametersMap->print();
         (*func)(parametersMap);
     }
 }
@@ -59,7 +66,9 @@ void Loop::repeatActionBase(void(*action)(void(*)(ParametersMap*), ParametersMap
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->repeatActionImpl(action, func, parametersMap);
     } else {
+//        cout<< this->getState(true) << endl;
         parametersMap->putString(Loop::STATE, this->getState(false));
+//        parametersMap->print();
         (*action)(func, parametersMap);
     }
 }

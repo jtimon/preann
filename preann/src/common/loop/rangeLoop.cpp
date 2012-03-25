@@ -7,8 +7,8 @@
 
 #include "rangeLoop.h"
 
-RangeLoop::RangeLoop(std::string key, float min, float max, float inc, Loop* innerLoop) :
-    Loop(key, innerLoop)
+RangeLoop::RangeLoop(std::string key, float min, float max, float inc) :
+        Loop(key)
 {
     tMin = min;
     tMax = max;
@@ -53,7 +53,7 @@ std::string RangeLoop::valueToString()
     return to_string(tValue);
 }
 
-void RangeLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap)
+void RangeLoop::repeatFunctionImpl(void (*func)(ParametersMap*), ParametersMap* parametersMap)
 {
     for (tValue = tMin; tValue < tMax; tValue += tInc) {
         parametersMap->putNumber(tKey, tValue);
@@ -61,8 +61,8 @@ void RangeLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* p
     }
 }
 
-void RangeLoop::repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
-                                 void(*func)(ParametersMap*), ParametersMap* parametersMap)
+void RangeLoop::repeatActionImpl(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap),
+                                 void (*func)(ParametersMap*), ParametersMap* parametersMap)
 {
     for (tValue = tMin; tValue < tMax; tValue += tInc) {
         parametersMap->putNumber(tKey, tValue);
