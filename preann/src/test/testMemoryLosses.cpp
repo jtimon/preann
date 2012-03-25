@@ -53,15 +53,13 @@ void testNeuralNet(ParametersMap* parametersMap)
 
 void testPopulation(ParametersMap* parametersMap)
 {
-    BufferType bufferType = (BufferType)parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_BUFFER));
-    ImplementationType implementationType =
-            (ImplementationType)parametersMap->getNumber(
-                    Enumerations::enumTypeToString(ET_IMPLEMENTATION));
-    FunctionType functionType = (FunctionType)parametersMap->getNumber(
+    BufferType bufferType = (BufferType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_BUFFER));
+    ImplementationType implementationType = (ImplementationType) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_IMPLEMENTATION));
+    FunctionType functionType = (FunctionType) parametersMap->getNumber(
             Enumerations::enumTypeToString(ET_FUNCTION));
 
-    unsigned size = (unsigned)parametersMap->getNumber(Dummy::SIZE);
+    unsigned size = (unsigned) parametersMap->getNumber(Dummy::SIZE);
 
     Interface* input = new Interface(size, bufferType);
     Task* task = new BinaryTask(BO_OR, size, 5);
@@ -102,8 +100,7 @@ int main(int argc, char *argv[])
         ParametersMap parametersMap;
         parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
         parametersMap.putNumber(Test::MEM_LOSSES, 0);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
-                FT_IDENTITY);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         RangeLoop* sizeLoop = new RangeLoop(Dummy::SIZE, 100, 101, 100, NULL);
         loop = sizeLoop;
@@ -111,12 +108,10 @@ int main(int argc, char *argv[])
         RangeLoop* outputSizeLoop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2, loop);
         loop = outputSizeLoop;
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(
-                ET_BUFFER), ET_BUFFER, loop);
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop);
         loop = bufferTypeLoop;
 
-        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
-                ET_IMPLEMENTATION, loop);
+        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, loop);
 
         loop->print();
 

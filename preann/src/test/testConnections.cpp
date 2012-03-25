@@ -58,7 +58,7 @@ void testMutate(ParametersMap* parametersMap)
     Connection* cConnection = Factory::newConnection(cInput, outputSize);
     cConnection->copyFrom(connection);
 
-    unsigned numMutations = (unsigned)parametersMap->getNumber(NUM_MUTATIONS);
+    unsigned numMutations = (unsigned) parametersMap->getNumber(NUM_MUTATIONS);
     for (unsigned i = 0; i < numMutations; ++i) {
         float mutation = Random::floatNum(initialWeighsRange);
         unsigned pos = Random::positiveInteger(connection->getSize());
@@ -110,26 +110,25 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Loop* loop;
-        ParametersMap parametersMap;
-        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
-        parametersMap.putNumber(Dummy::NUM_INPUTS, 2);
-        parametersMap.putNumber(NUM_MUTATIONS, 10);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        Test test;
+        test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
+        test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
+        test.parameters.putNumber(NUM_MUTATIONS, 10);
+        test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         loop = new RangeLoop(Dummy::SIZE, 2, 13, 10, NULL);
         loop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2, loop);
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER),
-                ET_BUFFER, loop, 3, BT_BIT, BT_SIGN, BT_FLOAT);
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop, 3,
+                                                BT_BIT, BT_SIGN, BT_FLOAT);
         loop = bufferTypeLoop;
 
-        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION,
-                loop);
+        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, loop);
         loop->print();
 
-        Test::test(loop, testCalculateAndAddTo, &parametersMap, "Connection::calculateAndAddTo");
-        Test::test(loop, testMutate, &parametersMap, "Connection::mutate");
-        Test::test(loop, testCrossover, &parametersMap, "Connection::crossover");
+        test.test(loop, testCalculateAndAddTo, "Connection::calculateAndAddTo");
+        test.test(loop, testMutate, "Connection::mutate");
+        test.test(loop, testCrossover, "Connection::crossover");
 
         printf("Exit success.\n");
     } catch (std::string error) {

@@ -19,10 +19,9 @@ void testActivation(ParametersMap* parametersMap)
 {
     START
 
-    FunctionType functionType = (FunctionType)parametersMap->getNumber(
+    FunctionType functionType = (FunctionType) parametersMap->getNumber(
             Enumerations::enumTypeToString(ET_FUNCTION));
-    Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT,
-            buffer->getImplementationType());
+    Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT, buffer->getImplementationType());
     results->random(parametersMap->getNumber(Dummy::WEIGHS_RANGE));
 
     Buffer* cResults = Factory::newBuffer(results, IT_C);
@@ -95,28 +94,26 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Loop* loop;
-        ParametersMap parametersMap;
-        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        Test test;
+        test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
+        test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         loop = new RangeLoop(Dummy::SIZE, 100, 101, 100, NULL);
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER),
-                ET_BUFFER, loop);
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop);
         loop = bufferTypeLoop;
 
-        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION,
-                loop);
+        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, loop);
         loop->print();
 
-        Test::test(loop, testClone, &parametersMap, "Buffer::clone");
-        Test::test(loop, testCopyFromInterface, &parametersMap, "Buffer::copyFromInterface");
-        Test::test(loop, testCopyToInterface, &parametersMap, "Buffer::copyToInterface");
+        test.test(loop, testClone, "Buffer::clone");
+        test.test(loop, testCopyFromInterface, "Buffer::copyFromInterface");
+        test.test(loop, testCopyToInterface, "Buffer::copyToInterface");
 
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         loop->print();
 
-        Test::test(loop, testActivation, &parametersMap, "Buffer::activation");
+        test.test(loop, testActivation, "Buffer::activation");
 
         printf("Exit success.\n");
     } catch (std::string error) {

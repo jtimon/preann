@@ -20,8 +20,8 @@ void chronoCalculateAndAddTo(ParametersMap* parametersMap)
 
     Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT, connection->getImplementationType());
     START_CHRONO
-            connection->calculateAndAddTo(results);
-        STOP_CHRONO
+        connection->calculateAndAddTo(results);
+    STOP_CHRONO
 
     delete (results);
 
@@ -49,8 +49,8 @@ void chronoCrossover(ParametersMap* parametersMap)
     Interface bitVector(connection->getSize(), BT_BIT);
     bitVector.random(2);
     START_CHRONO
-            connection->crossover(other, &bitVector);
-        STOP_CHRONO
+        connection->crossover(other, &bitVector);
+    STOP_CHRONO
 
     delete (other);
 
@@ -62,14 +62,14 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        ParametersMap parametersMap;
-        parametersMap.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
-        parametersMap.putString(Test::PLOT_X_AXIS, "Size");
-        parametersMap.putString(Test::PLOT_Y_AXIS, "Time (seconds)");
-        parametersMap.putNumber(Test::REPETITIONS, 1000);
-        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
-        parametersMap.putNumber(Dummy::NUM_INPUTS, 2);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        Test test;
+        test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
+        test.parameters.putString(Test::PLOT_X_AXIS, "Size");
+        test.parameters.putString(Test::PLOT_Y_AXIS, "Time (seconds)");
+        test.parameters.putNumber(Test::REPETITIONS, 1000);
+        test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
+        test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
+        test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         Loop* loop = NULL;
         loop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2, loop);
@@ -78,20 +78,20 @@ int main(int argc, char *argv[])
                                               ET_IMPLEMENTATION, loop);
         loop = implTypeLoop;
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop,
-                                                3, BT_BIT, BT_SIGN, BT_FLOAT);
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop, 3,
+                                                BT_BIT, BT_SIGN, BT_FLOAT);
         loop = bufferTypeLoop;
 
-        parametersMap.putPtr(Test::LINE_COLOR, implTypeLoop);
-        parametersMap.putPtr(Test::POINT_TYPE, bufferTypeLoop);
+        test.parameters.putPtr(Test::LINE_COLOR, implTypeLoop);
+        test.parameters.putPtr(Test::POINT_TYPE, bufferTypeLoop);
         loop->print();
 
-        Test::plot(loop, chronoMutate, &parametersMap, "Connection_mutate", Dummy::SIZE, 250, 2000, 500);
-        parametersMap.putNumber(Test::REPETITIONS, 10);
-        Test::plot(loop, chronoCrossover, &parametersMap, "Connection_crossover", Dummy::SIZE, 100, 301, 100);
-        parametersMap.putNumber(Test::REPETITIONS, 1);
-        Test::plot(loop, chronoCalculateAndAddTo, &parametersMap, "Connection_calculateAndAddTo",
-                   Dummy::SIZE, 1000, 2001, 1000);
+        test.plot(loop, chronoMutate, "Connection_mutate", Dummy::SIZE, 250, 2000, 500);
+        test.parameters.putNumber(Test::REPETITIONS, 10);
+        test.plot(loop, chronoCrossover, "Connection_crossover", Dummy::SIZE, 100, 301, 100);
+        test.parameters.putNumber(Test::REPETITIONS, 1);
+        test.plot(loop, chronoCalculateAndAddTo, "Connection_calculateAndAddTo", Dummy::SIZE, 1000, 2001,
+                  1000);
 
         printf("Exit success.\n");
     } catch (std::string error) {

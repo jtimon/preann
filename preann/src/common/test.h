@@ -50,16 +50,17 @@ public:
 protected:
     static void createGnuPlotScript(Loop* loop, ParametersMap* parametersMap);
 public:
+    ParametersMap parameters;
+    Test();
+    ~Test();
     static unsigned char areEqual(float expected, float actual, BufferType bufferType);
     static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
     static unsigned assertEquals(Buffer* expected, Buffer* actual);
     static void checkEmptyMemory(ParametersMap* parametersMap);
 
-    static void test(Loop* loop, void(*func)(ParametersMap*), ParametersMap* parametersMap,
-                     std::string functionLabel);
-    static void plot(Loop* loop, void(*func)(ParametersMap*), ParametersMap* parametersMap,
-                     std::string functionLabel, std::string plotVarKey, float min, float max, float inc);
-    static void plotTask(Loop* loop, ParametersMap* parametersMap, unsigned maxGenerations);
+    void test(Loop* loop, void(*func)(ParametersMap*), std::string functionLabel);
+    void plot(Loop* loop, void(*func)(ParametersMap*), std::string functionLabel, std::string plotVarKey, float min, float max, float inc);
+    void plotTask(Loop* loop, unsigned maxGenerations);
 
 };
 

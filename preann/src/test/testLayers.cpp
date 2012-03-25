@@ -18,25 +18,24 @@ void testCalculateOutput(ParametersMap* parametersMap)
     Layer* layer = Dummy::layer(parametersMap, buffer);
 
     FILE* stream = fopen(path.data(), "w+b");
-	layer->save(stream);
-	layer->saveWeighs(stream);
+    layer->save(stream);
+    layer->saveWeighs(stream);
 
     stream = fopen(path.data(), "r+b");
-	Layer* layerC = new Layer(stream, IT_C);
+    Layer* layerC = new Layer(stream, IT_C);
 
-	unsigned numInputs = (unsigned)parametersMap->getNumber(Dummy::NUM_INPUTS);
-	for (unsigned i = 0; i < numInputs; ++i) {
-		layerC->addInput(bufferC);
-	}
-	layerC->loadWeighs(stream);
-	fclose(stream);
+    unsigned numInputs = (unsigned) parametersMap->getNumber(Dummy::NUM_INPUTS);
+    for (unsigned i = 0; i < numInputs; ++i) {
+        layerC->addInput(bufferC);
+    }
+    layerC->loadWeighs(stream);
+    fclose(stream);
 
     //test calculation
     layer->calculateOutput();
     layerC->calculateOutput();
 
-    differencesCounter += Test::assertEquals(layer->getOutput(),
-            layerC->getOutput());
+    differencesCounter += Test::assertEquals(layer->getOutput(), layerC->getOutput());
 
     delete (layerC);
     delete (bufferC);
@@ -52,25 +51,23 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Loop* loop;
-        ParametersMap parametersMap;
-        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
-        parametersMap.putNumber(Dummy::NUM_INPUTS, 2);
-        parametersMap.putString(LAYER_PATH, "/home/timon/layer.lay");
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION),
-                FT_IDENTITY);
+        Test test;
+        test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
+        test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
+        test.parameters.putString(LAYER_PATH, "/home/timon/layer.lay");
+        test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         loop = new RangeLoop(Dummy::SIZE, 1, 51, 49, NULL);
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(
-                ET_BUFFER), ET_BUFFER, loop, 3, BT_BIT, BT_SIGN, BT_FLOAT);
+        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop, 3,
+                                                BT_BIT, BT_SIGN, BT_FLOAT);
         loop = bufferTypeLoop;
 
-        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
-                ET_IMPLEMENTATION, loop);
+        loop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, loop);
         loop->print();
 
         //TODO arreglar
-        Test::test(loop, testCalculateOutput, &parametersMap, "Layer::calculateOutput");
+        test.test(loop, testCalculateOutput, "Layer::calculateOutput");
 
         printf("Exit success.\n");
     } catch (std::string error) {

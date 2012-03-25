@@ -7,6 +7,14 @@
 
 #include "test.h"
 
+Test::Test()
+{
+}
+
+Test::~Test()
+{
+}
+
 const string Test::DIFF_COUNT = "__differencesCounter";
 const string Test::MEM_LOSSES = "__memoryLosses";
 const string Test::REPETITIONS = "__repetitions";
@@ -118,13 +126,13 @@ void testAction(void(*f)(ParametersMap*), ParametersMap* parametersMap)
                 + parametersMap->getString(Loop::STATE) + " : " + e << endl;
     }
 }
-void Test::test(Loop* loop, void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel)
+void Test::test(Loop* loop, void(*func)(ParametersMap*), std::string functionLabel)
 {
     cout << "Testing... " << functionLabel << endl;
-    parametersMap->putString(Loop::LABEL, functionLabel);
+    parameters.putString(Loop::LABEL, functionLabel);
 
     loop->setCallerLoop(NULL);
-    loop->repeatActionImpl(testAction, func, parametersMap);
+    loop->repeatActionImpl(testAction, func, &parameters);
 }
 
 int mapPointType(unsigned value)
@@ -286,24 +294,24 @@ void plotFile(string path, string functionLabel)
     string syscommand = "gnuplot " + plotPath;
     system(syscommand.data());
 }
-void Test::plot(Loop* loop, void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel,
+void Test::plot(Loop* loop, void(*func)(ParametersMap*), std::string functionLabel,
                 std::string plotVarKey, float min, float max, float inc)
 {
     cout << "Plotting " << functionLabel << "...";
     Chronometer chrono;
     chrono.start();
-    parametersMap->putString(Loop::LABEL, functionLabel);
-    parametersMap->putString(PLOT_LOOP, plotVarKey);
-    parametersMap->putNumber(PLOT_MIN, min);
-    parametersMap->putNumber(PLOT_MAX, max);
-    parametersMap->putNumber(PLOT_INC, inc);
+    parameters.putString(Loop::LABEL, functionLabel);
+    parameters.putString(PLOT_LOOP, plotVarKey);
+    parameters.putNumber(PLOT_MIN, min);
+    parameters.putNumber(PLOT_MAX, max);
+    parameters.putNumber(PLOT_INC, inc);
 
-    createGnuPlotScript(loop, parametersMap);
+    createGnuPlotScript(loop, &parameters);
 
     loop->setCallerLoop(NULL);
-    loop->repeatActionImpl(plotAction, func, parametersMap);
+    loop->repeatActionImpl(plotAction, func, &parameters);
 
-    string path = parametersMap->getString(Test::PLOT_PATH);
+    string path = parameters.getString(Test::PLOT_PATH);
     plotFile(path, functionLabel);
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
@@ -338,30 +346,30 @@ void plotTaskFunction(ParametersMap* parametersMap)
                 + state + " : " + e << endl;
     }
 }
-void Test::plotTask(Loop* loop, ParametersMap* parametersMap, unsigned maxGenerations)
+void Test::plotTask(Loop* loop, unsigned maxGenerations)
 {
-    Task* task = (Task*) parametersMap->getPtr(Test::TASK);
+    Task* task = (Task*) parameters.getPtr(Test::TASK);
     string testedTask = task->toString();
-    parametersMap->putString(Loop::LABEL, testedTask);
+    parameters.putString(Loop::LABEL, testedTask);
     cout << "Plotting " << testedTask << " with goal " << task->getGoal() << "..." << endl;
     Chronometer chrono;
     chrono.start();
 
-    parametersMap->putNumber(Test::MAX_GENERATIONS, maxGenerations);
-    Individual* example = (Individual*) parametersMap->getPtr(Test::EXAMPLE_INDIVIDUAL);
-    unsigned populationSize = parametersMap->getNumber(Population::SIZE);
-    float weighsRange = parametersMap->getNumber(Dummy::WEIGHS_RANGE);
+    parameters.putNumber(Test::MAX_GENERATIONS, maxGenerations);
+    Individual* example = (Individual*) parameters.getPtr(Test::EXAMPLE_INDIVIDUAL);
+    unsigned populationSize = parameters.getNumber(Population::SIZE);
+    float weighsRange = parameters.getNumber(Dummy::WEIGHS_RANGE);
     Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
-    parametersMap->putPtr(Test::INITIAL_POPULATION, initialPopulation);
+    parameters.putPtr(Test::INITIAL_POPULATION, initialPopulation);
 
-    createGnuPlotScript(loop, parametersMap);
+    createGnuPlotScript(loop, &parameters);
 
     loop->setCallerLoop(NULL);
-    loop->repeatFunctionImpl(plotTaskFunction, parametersMap);
+    loop->repeatFunctionImpl(plotTaskFunction, &parameters);
 
     delete (initialPopulation);
 
-    string path = parametersMap->getString(Test::PLOT_PATH);
+    string path = parameters.getString(Test::PLOT_PATH);
     plotFile(path, testedTask);
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;

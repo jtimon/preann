@@ -10,25 +10,25 @@ using namespace std;
 
 #define COMMON                                                                          \
     Individual* example = task->getExample();                                           \
-    parametersMap->putPtr(Test::TASK, task);                                                \
-    parametersMap->putPtr(Test::EXAMPLE_INDIVIDUAL, example);                                          \
-    Test::plotTask(loop, parametersMap, maxGenerations);                                \
+    test->parameters.putPtr(Test::TASK, task);                                          \
+    test->parameters.putPtr(Test::EXAMPLE_INDIVIDUAL, example);                         \
+    test->plotTask(loop, maxGenerations);                                               \
     delete (example);                                                                   \
     delete (task);
 
-void chronoOr(Loop* loop, ParametersMap* parametersMap, unsigned vectorsSize, unsigned maxGenerations)
+void chronoOr(Loop* loop, Test* test, unsigned vectorsSize, unsigned maxGenerations)
 {
     Task* task = new BinaryTask(BO_OR, vectorsSize);
     COMMON
 }
 
-void chronoAnd(Loop* loop, ParametersMap* parametersMap, unsigned vectorsSize, unsigned maxGenerations)
+void chronoAnd(Loop* loop, Test* test, unsigned vectorsSize, unsigned maxGenerations)
 {
     Task* task = new BinaryTask(BO_AND, vectorsSize);
     COMMON
 }
 
-void chronoXor(Loop* loop, ParametersMap* parametersMap, unsigned vectorsSize, unsigned maxGenerations)
+void chronoXor(Loop* loop, Test* test, unsigned vectorsSize, unsigned maxGenerations)
 {
     Task* task = new BinaryTask(BO_XOR, vectorsSize);
     COMMON
@@ -52,30 +52,30 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        ParametersMap parametersMap;
-        parametersMap.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
-        parametersMap.putString(Test::PLOT_X_AXIS, "Generation");
-        parametersMap.putString(Test::PLOT_Y_AXIS, "Fitness");
-        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
+        Test test;
+        test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
+        test.parameters.putString(Test::PLOT_X_AXIS, "Generation");
+        test.parameters.putString(Test::PLOT_Y_AXIS, "Fitness");
+        test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         unsigned populationSize = 8;
-        parametersMap.putNumber(Population::SIZE, populationSize);
-        parametersMap.putNumber(Population::NUM_SELECTION, populationSize / 2);
-        parametersMap.putNumber(Population::NUM_CROSSOVER, populationSize / 2);
+        test.parameters.putNumber(Population::SIZE, populationSize);
+        test.parameters.putNumber(Population::NUM_SELECTION, populationSize / 2);
+        test.parameters.putNumber(Population::NUM_CROSSOVER, populationSize / 2);
 
-        parametersMap.putNumber(Population::UNIFORM_CROSS_PROB, 0.7);
-        parametersMap.putNumber(Population::MULTIPOINT_NUM, 3);
+        test.parameters.putNumber(Population::UNIFORM_CROSS_PROB, 0.7);
+        test.parameters.putNumber(Population::MULTIPOINT_NUM, 3);
 
-//        parametersMap.putNumber(Population::MUTATION_NUM, 4);
-        parametersMap.putNumber(Population::MUTATION_PROB, 0.3);
-        parametersMap.putNumber(Population::MUTATION_RANGE, 2);
+//        test.parameters.putNumber(Population::MUTATION_NUM, 4);
+        test.parameters.putNumber(Population::MUTATION_PROB, 0.3);
+        test.parameters.putNumber(Population::MUTATION_RANGE, 2);
 
         //TODO repetitions for plotTask
-        //        parametersMap.putNumber(Test::REPETITIONS, 100);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM), SA_TOURNAMENT);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
-//        parametersMap.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PER_INDIVIDUAL);
+        //        test.parameters.putNumber(Test::REPETITIONS, 100);
+        test.parameters.putNumber(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM), SA_TOURNAMENT);
+        test.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
+        test.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
+        test.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
+//        test.parameters.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PER_INDIVIDUAL);
 
         Loop* loop = NULL;
 
@@ -85,8 +85,8 @@ int main(int argc, char *argv[])
 
 
 
-//        parametersMap.putNumber(Population::NUM_RESETS, 2);
-//        parametersMap.putNumber(Population::RESET_PROB, 0.05);
+//        test.parameters.putNumber(Population::NUM_RESETS, 2);
+//        test.parameters.putNumber(Population::RESET_PROB, 0.05);
 //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG,
 //                                              loop);
 
@@ -100,16 +100,16 @@ int main(int argc, char *argv[])
 
         loop = resetAlgLoop;
 
-        parametersMap.putPtr(Test::LINE_COLOR, resetAlgLoop);
-        parametersMap.putPtr(Test::POINT_TYPE, resetProbLoop);
+        test.parameters.putPtr(Test::LINE_COLOR, resetAlgLoop);
+        test.parameters.putPtr(Test::POINT_TYPE, resetProbLoop);
 
         loop->print();
 
         unsigned vectorsSize = 2;
         unsigned maxGenerations = 200;
-//        chronoAnd(loop, &parametersMap, vectorsSize, maxGenerations);
-//        chronoOr(loop, &parametersMap, vectorsSize, maxGenerations);
-        chronoXor(loop, &parametersMap, vectorsSize, maxGenerations);
+//        chronoAnd(loop, &test, vectorsSize, maxGenerations);
+//        chronoOr(loop, &test, vectorsSize, maxGenerations);
+        chronoXor(loop, &test, vectorsSize, maxGenerations);
 
         printf("Exit success.\n");
     } catch (std::string error) {

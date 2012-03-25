@@ -69,13 +69,13 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        ParametersMap parametersMap;
-        parametersMap.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
-        parametersMap.putString(Test::PLOT_X_AXIS, "Size");
-        parametersMap.putString(Test::PLOT_Y_AXIS, "Time (seconds)");
-        parametersMap.putNumber(Dummy::WEIGHS_RANGE, 20);
-        parametersMap.putNumber(Test::REPETITIONS, 100);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        Test test;
+        test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
+        test.parameters.putString(Test::PLOT_X_AXIS, "Size");
+        test.parameters.putString(Test::PLOT_Y_AXIS, "Time (seconds)");
+        test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
+        test.parameters.putNumber(Test::REPETITIONS, 100);
+        test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         Loop* loop = NULL;
 
@@ -86,22 +86,20 @@ int main(int argc, char *argv[])
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, loop);
         loop = bufferTypeLoop;
 
-        parametersMap.putPtr(Test::LINE_COLOR, implTypeLoop);
-        parametersMap.putPtr(Test::POINT_TYPE, bufferTypeLoop);
+        test.parameters.putPtr(Test::LINE_COLOR, implTypeLoop);
+        test.parameters.putPtr(Test::POINT_TYPE, bufferTypeLoop);
 
         loop->print();
 
-        Test::plot(loop, chronoCopyToInterface, &parametersMap, "Buffer_copyToInterface", Dummy::SIZE, 2000,
-                   20001, 2000);
-        Test::plot(loop, chronoCopyFromInterface, &parametersMap, "Buffer_copyFromInterface", Dummy::SIZE, 2000,
-                   20001, 2000);
-        Test::plot(loop, chronoClone, &parametersMap, "Buffer_clone", Dummy::SIZE, 1000, 10001, 3000);
+        test.plot(loop, chronoCopyToInterface, "Buffer_copyToInterface", Dummy::SIZE, 2000, 20001, 2000);
+        test.plot(loop, chronoCopyFromInterface, "Buffer_copyFromInterface", Dummy::SIZE, 2000, 20001, 2000);
+        test.plot(loop, chronoClone, "Buffer_clone", Dummy::SIZE, 1000, 10001, 3000);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         loop->print();
 
-        Test::plot(loop, chronoActivation, &parametersMap, "Buffer_activation", Dummy::SIZE, 2000, 20001, 2000);
+        test.plot(loop, chronoActivation, "Buffer_activation", Dummy::SIZE, 2000, 20001, 2000);
 
         delete (loop);
 
