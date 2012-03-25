@@ -63,24 +63,25 @@ int main(int argc, char *argv[])
         parametersMap.putNumber(Population::NUM_CROSSOVER, populationSize / 2);
 
         parametersMap.putNumber(Population::UNIFORM_CROSS_PROB, 0.7);
-        parametersMap.putNumber(Population::NUM_POINTS, 3);
+        parametersMap.putNumber(Population::MULTIPOINT_NUM, 3);
 
-        parametersMap.putNumber(Population::MUTATION_NUM, 1);
+//        parametersMap.putNumber(Population::MUTATION_NUM, 4);
+        parametersMap.putNumber(Population::MUTATION_PROB, 0.3);
         parametersMap.putNumber(Population::MUTATION_RANGE, 2);
-        parametersMap.putNumber(Population::MUTATION_PROB, 0.1);
 
         //TODO repetitions for plotTask
         //        parametersMap.putNumber(Test::REPETITIONS, 100);
+        parametersMap.putNumber(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM), SA_TOURNAMENT);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
         parametersMap.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
-        parametersMap.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PER_INDIVIDUAL);
+//        parametersMap.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PER_INDIVIDUAL);
 
         Loop* loop = NULL;
 
-        EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
-                                              ET_SELECTION_ALGORITHM, loop);
-        loop = selecAlgLoop;
+//        EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
+//                                              ET_SELECTION_ALGORITHM, loop);
+//        loop = selecAlgLoop;
 
 
 
@@ -99,8 +100,8 @@ int main(int argc, char *argv[])
 
         loop = resetAlgLoop;
 
-        parametersMap.putPtr(Test::LINE_COLOR, selecAlgLoop);
-        parametersMap.putPtr(Test::POINT_TYPE, resetAlgLoop);
+        parametersMap.putPtr(Test::LINE_COLOR, resetAlgLoop);
+        parametersMap.putPtr(Test::POINT_TYPE, resetProbLoop);
 
         loop->print();
 

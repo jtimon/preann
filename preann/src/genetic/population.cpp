@@ -8,6 +8,7 @@
 #include "population.h"
 
 const string Population::SIZE = "__Population_size";
+const string Population::NUM_PRESERVE = "__Population_numPreserve";
 const string Population::NUM_SELECTION = "__Population_numSelection";
 const string Population::NUM_CROSSOVER = "__Population_numCrossover";
 
@@ -21,13 +22,11 @@ const string Population::NUM_RANKING = "__Population_numRanking";
 const string Population::RANKING_BASE = "__Population_rankingBase";
 const string Population::RANKING_STEP = "__Population_rankingStep";
 const string Population::UNIFORM_CROSS_PROB = "__Population_uniformCrossProb";
-const string Population::NUM_POINTS = "__Population_numPoints";
+const string Population::MULTIPOINT_NUM = "__Population_numPoints";
 const string Population::MUTATION_NUM = "__Population_mutationsPerIndividual";
 const string Population::MUTATION_RANGE = "__Population_mutationRange";
 const string Population::MUTATION_PROB = "__Population_mutationProb";
-const string Population::RESET_PER_IND_ENABLED = "__Population_resetPerIndividualEnabled";
 const string Population::RESET_NUM = "__Population_resetNumResets";
-const string Population::RESET_PROB_ENABLED = "__Population_resetProbabilisticEnabled";
 const string Population::RESET_PROB = "__Population_resetProb";
 
 Population::Population(Population* other)
@@ -74,7 +73,7 @@ void Population::setDefaults()
 {
     generation = 0;
 
-    nPreserve = 1;
+    params.putNumber(NUM_PRESERVE, 1);
 
     params.putNumber(NUM_ROULETTE_WHEEL, 0);
     params.putNumber(ROULETTE_WHEEL_BASE, 1);
@@ -96,10 +95,8 @@ void Population::setDefaults()
     params.putNumber(MUTATION_NUM, 0);
     params.putNumber(MUTATION_PROB, 0);
     params.putNumber(MUTATION_RANGE, 1);
-    params.putNumber(RESET_PER_IND_ENABLED, 0);
-    params.putNumber(RESET_NUM, 1);
-    params.putNumber(RESET_PROB_ENABLED, 0);
-    params.putNumber(RESET_PROB, 0.01);
+    params.putNumber(RESET_NUM, 0);
+    params.putNumber(RESET_PROB, 0);
 }
 
 void Population::putParam(string key, float number)
@@ -111,60 +108,71 @@ void Population::setParams(ParametersMap* parametersMap)
 {
     params.copyFrom(parametersMap);
 
-    unsigned numSelection = parametersMap->getNumber(NUM_SELECTION);
-    SelectionAlgorithm selectionAlgorithm = (SelectionAlgorithm) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM));
-    switch (selectionAlgorithm) {
-        case SA_ROULETTE_WHEEL:
-            params.putNumber(NUM_ROULETTE_WHEEL, numSelection);
-            break;
-        case SA_RANKING:
-            params.putNumber(NUM_RANKING, numSelection);
-            break;
-        case SA_TOURNAMENT:
-            params.putNumber(NUM_TOURNAMENT, numSelection);
-            break;
-        case SA_TRUNCATION:
-            params.putNumber(NUM_TRUNCATION, numSelection);
-            break;
+    try {
+        unsigned numSelection = parametersMap->getNumber(NUM_SELECTION);
+        SelectionAlgorithm selectionAlgorithm = (SelectionAlgorithm) parametersMap->getNumber(
+                Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM));
+        switch (selectionAlgorithm) {
+            case SA_ROULETTE_WHEEL:
+                params.putNumber(NUM_ROULETTE_WHEEL, numSelection);
+                break;
+            case SA_RANKING:
+                params.putNumber(NUM_RANKING, numSelection);
+                break;
+            case SA_TOURNAMENT:
+                params.putNumber(NUM_TOURNAMENT, numSelection);
+                break;
+            case SA_TRUNCATION:
+                params.putNumber(NUM_TRUNCATION, numSelection);
+                break;
+        }
+    } catch(...){
     }
 
-    unsigned numCrossover = parametersMap->getNumber(Population::NUM_CROSSOVER);
-    CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_CROSS_ALG));
-    CrossoverLevel crossoverLevel = (CrossoverLevel) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_CROSS_LEVEL));
-    switch (crossoverAlgorithm) {
-        case CA_UNIFORM:
-            this->setCrossoverUniformScheme(crossoverLevel, numCrossover,
-                                            parametersMap->getNumber(UNIFORM_CROSS_PROB));
-            break;
-        case CA_PROPORTIONAL:
-            this->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
-            break;
-        case CA_MULTIPOINT:
-            this->setCrossoverMultipointScheme(crossoverLevel, numCrossover,
-                                               parametersMap->getNumber(NUM_POINTS));
-            break;
+    try {
+        unsigned numCrossover = parametersMap->getNumber(Population::NUM_CROSSOVER);
+        CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm) parametersMap->getNumber(
+                Enumerations::enumTypeToString(ET_CROSS_ALG));
+        CrossoverLevel crossoverLevel = (CrossoverLevel) parametersMap->getNumber(
+                Enumerations::enumTypeToString(ET_CROSS_LEVEL));
+        switch (crossoverAlgorithm) {
+            case CA_UNIFORM:
+                this->setCrossoverUniformScheme(crossoverLevel, numCrossover,
+                                                parametersMap->getNumber(UNIFORM_CROSS_PROB));
+                break;
+            case CA_PROPORTIONAL:
+                this->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
+                break;
+            case CA_MULTIPOINT:
+                this->setCrossoverMultipointScheme(crossoverLevel, numCrossover,
+                                                   parametersMap->getNumber(MULTIPOINT_NUM));
+                break;
+        }
+    } catch(...){
     }
 
-    //TODO A+ refactorizar ¿Quitar MutationAlgorithm completamente?
-    MutationAlgorithm mutationAlgorithm = (MutationAlgorithm) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_MUTATION_ALG));
-    if (mutationAlgorithm == MA_PER_INDIVIDUAL) {
-        params.putNumber(MUTATION_NUM, parametersMap->getNumber(MUTATION_NUM));
-    } else if (mutationAlgorithm == MA_PROBABILISTIC) {
-        params.putNumber(MUTATION_NUM, parametersMap->getNumber(MUTATION_PROB));
+    try {
+        MutationAlgorithm mutationAlgorithm = (MutationAlgorithm) parametersMap->getNumber(
+                Enumerations::enumTypeToString(ET_MUTATION_ALG));
+        if (mutationAlgorithm == MA_PER_INDIVIDUAL) {
+            params.putNumber(MUTATION_NUM, parametersMap->getNumber(MUTATION_NUM));
+        } else if (mutationAlgorithm == MA_PROBABILISTIC) {
+            params.putNumber(MUTATION_NUM, parametersMap->getNumber(MUTATION_PROB));
+        }
+    } catch(...){
     }
 
-    ResetAlgorithm resetAlgorithm = (ResetAlgorithm) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_RESET_ALG));
-    if (resetAlgorithm == RA_PER_INDIVIDUAL) {
-        params.putNumber(RESET_PER_IND_ENABLED, 1);
-        params.putNumber(RESET_PROB_ENABLED, 0);
-    } else if (resetAlgorithm == RA_PROBABILISTIC) {
-        params.putNumber(RESET_PER_IND_ENABLED, 0);
-        params.putNumber(RESET_PROB_ENABLED, 1);
+    try {
+        ResetAlgorithm resetAlgorithm = (ResetAlgorithm) parametersMap->getNumber(
+                Enumerations::enumTypeToString(ET_RESET_ALG));
+        if (resetAlgorithm == RA_PER_INDIVIDUAL) {
+            params.putNumber(RESET_NUM, parametersMap->getNumber(RESET_NUM));
+            params.putNumber(RESET_PROB, 0);
+        } else if (resetAlgorithm == RA_PROBABILISTIC) {
+            params.putNumber(RESET_PROB, parametersMap->getNumber(RESET_PROB));
+            params.putNumber(RESET_NUM, 0);
+        }
+    } catch(...){
     }
 }
 
@@ -287,19 +295,17 @@ void Population::setMutationProbability(float probability, float range)
 
 void Population::setResetsPerIndividual(unsigned numResets)
 {
-    params.putNumber(RESET_PER_IND_ENABLED, 1);
     params.putNumber(RESET_NUM, numResets);
 }
 
 void Population::setResetProbability(float resetProb)
 {
-    params.putNumber(RESET_PROB_ENABLED, 1);
     params.putNumber(RESET_PROB, resetProb);
 }
 
 void Population::setPreservation(unsigned number)
 {
-    nPreserve = number;
+    params.putNumber(NUM_PRESERVE, number);
 }
 
 void Population::setSelectionRouletteWheel(unsigned number)
@@ -394,21 +400,23 @@ void Population::mutation()
 
 void Population::reset()
 {
-    if (params.getNumber(RESET_PER_IND_ENABLED) > 0) {
+    unsigned resetsPerIndividual = params.getNumber(RESET_NUM);
+    if (resetsPerIndividual > 0) {
         for (unsigned i = 0; i < offSpring.size(); i++) {
-            offSpring[i]->reset(params.getNumber(RESET_NUM));
+            offSpring[i]->reset(resetsPerIndividual);
         }
     }
-    if (params.getNumber(RESET_PROB_ENABLED) > 0) {
+    float resetProbability = params.getNumber(RESET_PROB);
+    if (resetProbability > 0) {
         for (unsigned i = 0; i < offSpring.size(); i++) {
-            offSpring[i]->reset(params.getNumber(RESET_PROB));
+            offSpring[i]->reset(resetProbability);
         }
     }
 }
 
 void Population::eliminateWorse()
 {
-    //	printf("individualsSize %d nPreserve %d \n", individuals.size(), nPreserve);
+    float nPreserve = params.getNumber(NUM_PRESERVE);
     while (individuals.size() > nPreserve) {
         //		printf("individualsSize %d nPreserve %d total_score %f \n", individuals.size(), nPreserve, total_score);
         delete (individuals.back());

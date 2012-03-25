@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
         parametersMap.putNumber(Population::NUM_CROSSOVER, populationSize / 2);
 
         parametersMap.putNumber(Population::UNIFORM_CROSS_PROB, 0.7);
-        parametersMap.putNumber(Population::NUM_POINTS, 3);
+        parametersMap.putNumber(Population::MULTIPOINT_NUM, 3);
 
         parametersMap.putNumber(Population::MUTATION_NUM, 1);
         parametersMap.putNumber(Population::MUTATION_RANGE, 2);

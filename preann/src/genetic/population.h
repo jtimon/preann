@@ -16,6 +16,7 @@ class Population
 {
 public:
     static const string SIZE;
+    static const string NUM_PRESERVE;
     static const string NUM_SELECTION;
     static const string NUM_CROSSOVER;
 
@@ -29,14 +30,12 @@ public:
     static const string RANKING_STEP;
 
     static const string UNIFORM_CROSS_PROB;
-    static const string NUM_POINTS;
+    static const string MULTIPOINT_NUM;
 
     static const string MUTATION_NUM;
     static const string MUTATION_RANGE;
     static const string MUTATION_PROB;
-    static const string RESET_PER_IND_ENABLED;
     static const string RESET_NUM;
-    static const string RESET_PROB_ENABLED;
     static const string RESET_PROB;
 
     ParametersMap params;
@@ -47,8 +46,6 @@ protected:
     list<Individual*> individuals;
     vector<Individual*> parents;
     vector<Individual*> offSpring;
-
-    unsigned nPreserve;
 
     unsigned numCrossover[CROSSOVER_ALGORITHM_DIM][CROSSOVER_LEVEL_DIM];
     float probabilityUniform[CROSSOVER_LEVEL_DIM];
