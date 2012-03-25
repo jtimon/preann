@@ -24,8 +24,11 @@ Loop* Test::getLoop()
 
 void Test::addLoop(Loop* loop)
 {
-    loop->setInnerLoop(this->tLoop);
-    this->tLoop = loop;
+    if (tLoop == NULL){
+        tLoop = loop;
+    } else {
+        tLoop->addInnerLoop(loop);
+    }
 }
 
 const string Test::DIFF_COUNT = "__differencesCounter";

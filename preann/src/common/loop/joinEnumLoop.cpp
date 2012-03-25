@@ -17,18 +17,27 @@ JoinEnumLoop::JoinEnumLoop(std::string key, EnumType enumType) :
 JoinEnumLoop::~JoinEnumLoop()
 {
     for (int i = 0; i < tInnerLoops.size(); ++i) {
-        tInnerLoops[i]->setInnerLoop(NULL);
+
+        Loop* itLoop = tInnerLoops[i];
+        while (itLoop->tInnerLoop != tInnerLoop && itLoop->tInnerLoop != NULL){
+            itLoop = itLoop->tInnerLoop;
+        }
+        itLoop->tInnerLoop = NULL;
         delete(tInnerLoops[i]);
     }
     tValueVector.clear();
     tInnerLoops.clear();
 }
 
-void JoinEnumLoop::setInnerLoop(Loop* innerLoop)
+void JoinEnumLoop::addInnerLoop(Loop* innerLoop)
 {
-    tInnerLoop = innerLoop;
-    for (int i = 0; i < tInnerLoops.size(); ++i) {
-        tInnerLoops[i]->setInnerLoop(tInnerLoop);
+    if (tInnerLoop == NULL){
+        tInnerLoop = innerLoop;
+        for (int i = 0; i < tInnerLoops.size(); ++i) {
+            tInnerLoops[i]->addInnerLoop(tInnerLoop);
+        }
+    } else {
+        tInnerLoop->addInnerLoop(innerLoop);
     }
 }
 
@@ -41,9 +50,12 @@ void JoinEnumLoop::addEnumLoop(unsigned enumValue, Loop* loop)
                 + to_string(enumValue);
         throw error;
     }
-    loop->setInnerLoop(tInnerLoop);
     tValueVector.push_back(enumValue);
     tInnerLoops.push_back(loop);
+
+    if (tInnerLoop != NULL){
+        loop->addInnerLoop(tInnerLoop);
+    }
 }
 
 unsigned JoinEnumLoop::valueToUnsigned()

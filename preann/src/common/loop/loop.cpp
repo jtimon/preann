@@ -36,9 +36,13 @@ string Loop::getKey()
     return tKey;
 }
 
-void Loop::setInnerLoop(Loop* innerLoop)
+void Loop::addInnerLoop(Loop* innerLoop)
 {
-    tInnerLoop = innerLoop;
+    if (tInnerLoop == NULL){
+        tInnerLoop = innerLoop;
+    } else {
+        tInnerLoop->addInnerLoop(innerLoop);
+    }
 }
 
 void Loop::setCallerLoop(Loop* callerLoop)

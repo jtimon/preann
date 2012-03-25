@@ -25,7 +25,6 @@ private:
 protected:
 
     std::string tKey;
-    Loop* tInnerLoop;
     Loop* tCallerLoop;
 
     void repeatFunctionBase(void (*func)(ParametersMap*), ParametersMap* parametersMap);
@@ -37,10 +36,11 @@ protected:
     Loop();
     Loop(std::string key);
 public:
+    Loop* tInnerLoop;
     virtual ~Loop();
 
     string getKey();
-    virtual void setInnerLoop(Loop* innerLoop);
+    virtual void addInnerLoop(Loop* innerLoop);
     void setCallerLoop(Loop* callerLoop);
 
     virtual unsigned valueToUnsigned();
