@@ -13,6 +13,7 @@ RangeLoop::RangeLoop(std::string key, float min, float max, float inc) :
     tMin = min;
     tMax = max;
     tInc = inc;
+    tUnsignedValue = 0;
 }
 
 RangeLoop::~RangeLoop()
@@ -24,18 +25,12 @@ void RangeLoop::resetRange(float min, float max, float inc)
     tMin = min;
     tMax = max;
     tInc = inc;
+    tUnsignedValue = 0;
 }
 
 unsigned RangeLoop::valueToUnsigned()
 {
-    unsigned toReturn = 0;
-    for (float auxValue = tMin; auxValue < tMax; auxValue += tInc) {
-        if (auxValue == tValue) {
-            return toReturn;
-        }
-        ++toReturn;
-    }
-    return toReturn;
+    return tUnsignedValue;
 }
 
 void RangeLoop::print()
@@ -55,7 +50,9 @@ std::string RangeLoop::valueToString()
 
 void RangeLoop::repeatFunctionImpl(void (*func)(ParametersMap*), ParametersMap* parametersMap)
 {
+    tUnsignedValue = 0;
     for (tValue = tMin; tValue < tMax; tValue += tInc) {
+        ++tUnsignedValue;
         parametersMap->putNumber(tKey, tValue);
         this->repeatFunctionBase(func, parametersMap);
     }
@@ -64,7 +61,9 @@ void RangeLoop::repeatFunctionImpl(void (*func)(ParametersMap*), ParametersMap* 
 void RangeLoop::repeatActionImpl(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap),
                                  void (*func)(ParametersMap*), ParametersMap* parametersMap)
 {
+    tUnsignedValue = 0;
     for (tValue = tMin; tValue < tMax; tValue += tInc) {
+        ++tUnsignedValue;
         parametersMap->putNumber(tKey, tValue);
         this->repeatActionBase(action, func, parametersMap);
     }

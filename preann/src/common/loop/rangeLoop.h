@@ -14,6 +14,7 @@ class RangeLoop : public Loop
 {
 protected:
     float tValue, tMin, tMax, tInc;
+    unsigned tUnsignedValue;
     virtual unsigned valueToUnsigned();
 
     virtual void repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap);
