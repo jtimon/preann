@@ -21,6 +21,7 @@ class Loop
 public:
     static const string LABEL;
     static const string STATE;
+    static const string VALUE_LEVEL;
 private:
 protected:
 
@@ -36,6 +37,8 @@ protected:
     Loop();
     Loop(std::string key);
 public:
+    //TODO ocultar más estos campos
+    unsigned tLevel;
     Loop* tInnerLoop;
     virtual ~Loop();
 
@@ -59,6 +62,8 @@ public:
     virtual void
     repeatActionImpl(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap),
                      void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
+
+    static std::string getLevelName(unsigned &level);
 };
 
 #endif /* LOOP_H_ */

@@ -35,8 +35,8 @@ public:
     static const string PLOT_MIN;
     static const string PLOT_MAX;
     static const string PLOT_INC;
-    static const string LINE_COLOR;
-    static const string POINT_TYPE;
+    static const string LINE_COLOR_LEVEL;
+    static const string POINT_TYPE_LEVEL;
     static const string PLOT_PATH;
     static const string PLOT_FILE;
     static const string FIRST_STATE;
@@ -46,7 +46,7 @@ public:
     static const string TASK;
     static const string MAX_GENERATIONS;
 protected:
-    static void createGnuPlotScript(Loop* loop, ParametersMap* parametersMap);
+    void createGnuPlotScript(ParametersMap* parametersMap);
     Loop* tLoop;
 public:
     ParametersMap parameters;

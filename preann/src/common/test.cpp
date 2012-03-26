@@ -41,8 +41,8 @@ const string Test::PLOT_Y_AXIS = "__LOOP__PLOT_Y_AXIS";
 const string Test::PLOT_MIN = "__LOOP__PLOT_MIN";
 const string Test::PLOT_MAX = "__LOOP__PLOT_MAX";
 const string Test::PLOT_INC = "__LOOP__PLOT_INC";
-const string Test::LINE_COLOR = "__LOOP__PLOT_LINE_COLOR";
-const string Test::POINT_TYPE = "__LOOP__PLOT_POINT_TYPE";
+const string Test::LINE_COLOR_LEVEL = "__LOOP__PLOT_LINE_COLOR";
+const string Test::POINT_TYPE_LEVEL = "__LOOP__PLOT_POINT_TYPE";
 const string Test::PLOT_PATH = "__plotPath";
 const string Test::PLOT_FILE = "__plotFile";
 const string Test::FIRST_STATE = "__firstState";
@@ -143,6 +143,8 @@ void Test::test(void (*func)(ParametersMap*), std::string functionLabel)
     cout << "Testing... " << functionLabel << endl;
     parameters.putString(Loop::LABEL, functionLabel);
 
+    //TODO usar la versión normal
+    tLoop->tLevel = 0;
     tLoop->setCallerLoop(NULL);
     tLoop->repeatActionImpl(testAction, func, &parameters);
 }
@@ -152,6 +154,7 @@ int mapPointType(unsigned value)
     // pt : 1=+, 2=X, 3=*, 4=square, 5=filled square, 6=circle,
     //            7=filled circle, 8=triangle, 9=filled triangle, etc.
     switch (value) {
+        default:
         case 0:
             return 2;
         case 1:
@@ -160,7 +163,6 @@ int mapPointType(unsigned value)
             return 4;
         case 3:
             return 8;
-        default:
         case 4:
             return 1;
         case 5:
@@ -171,6 +173,7 @@ int mapLineColor(unsigned value)
 {
     // lt is for color of the points: -1=black 1=red 2=grn 3=blue 4=purple 5=aqua 6=brn 7=orange 8=light-brn
     switch (value) {
+        default:
         case 0:
             return 1;
         case 1:
@@ -179,7 +182,6 @@ int mapLineColor(unsigned value)
             return 3;
         case 3:
             return 5;
-        default:
         case 4:
             return -1;
         case 5:
@@ -189,9 +191,44 @@ int mapLineColor(unsigned value)
     }
 }
 
+int getPointType(ParametersMap* parametersMap)
+{
+    unsigned pointTypeLevel = 1;
+    try {
+        pointTypeLevel = parametersMap->getNumber(Test::POINT_TYPE_LEVEL);
+    } catch (string e) {
+    };
+    unsigned pointTypeToMap = 1000;
+    try {
+        string levelName = Loop::getLevelName(pointTypeLevel);
+        cout << parametersMap->printNumber(levelName) << endl;
+        pointTypeToMap = parametersMap->getNumber(levelName);
+    } catch (string e) {
+    };
+    int pointType = mapPointType(pointTypeToMap);
+    return pointType;
+}
+
+int getLineColor(ParametersMap*& parametersMap)
+{
+    unsigned lineColorLevel = 0;
+    try {
+        lineColorLevel = parametersMap->getNumber(Test::LINE_COLOR_LEVEL);
+    } catch (string e) {
+    };
+    unsigned lineColorToMap = 1000;
+    try {
+        string levelName = Loop::getLevelName(lineColorLevel);
+        lineColorToMap = parametersMap->getNumber(levelName);
+    } catch (string e) {
+    };
+    int lineColor = mapLineColor(lineColorToMap);
+    return lineColor;
+}
+
 void preparePlotFunction(ParametersMap* parametersMap)
 {
-    FILE *plotFile = (FILE*) ((parametersMap->getPtr(Test::PLOT_FILE)));
+    FILE *plotFile = (FILE*) ((((parametersMap->getPtr(Test::PLOT_FILE)))));
     unsigned first = parametersMap->getNumber(Test::FIRST_STATE);
     if (first) {
         parametersMap->putNumber(Test::FIRST_STATE, 0);
@@ -202,31 +239,19 @@ void preparePlotFunction(ParametersMap* parametersMap)
     string subPath = parametersMap->getString(Test::SUB_PATH);
     string dataPath = subPath + state + ".DAT";
     string line = " \"" + dataPath + "\" using 1:2 title \"" + state + "\"";
-    Loop *lineColorLoop = NULL;
-    Loop *pointTypeLoop = NULL;
-    try {
-        lineColorLoop = (Loop*) ((parametersMap->getPtr(Test::LINE_COLOR)));
-    } catch (string e) {
-    };
-    try {
-        pointTypeLoop = (Loop*) ((parametersMap->getPtr(Test::POINT_TYPE)));
-    } catch (string e) {
-    };
 
-    int lineColor = mapLineColor(1000);
-    int pointType = mapPointType(1000);
-    if (lineColorLoop != NULL) {
-        lineColor = mapLineColor(lineColorLoop->valueToUnsigned());
-    }
-    if (lineColorLoop != NULL) {
-        pointType = mapPointType(pointTypeLoop->valueToUnsigned());
-    }
+//    parametersMap->print();
+    int lineColor = getLineColor(parametersMap);
+    int pointType = getPointType(parametersMap);
+
+    cout << "lineColor " << lineColor << " - pointType " << pointType << endl;
+
     line += " with linespoints lt " + to_string(lineColor);
     line += " pt " + to_string(pointType);
 
     fprintf(plotFile, "%s", line.data());
 }
-void Test::createGnuPlotScript(Loop* loop, ParametersMap* parametersMap)
+void Test::createGnuPlotScript(ParametersMap* parametersMap)
 {
     string path = parametersMap->getString(Test::PLOT_PATH);
     string functionLabel = parametersMap->getString(Loop::LABEL);
@@ -256,7 +281,10 @@ void Test::createGnuPlotScript(Loop* loop, ParametersMap* parametersMap)
     parametersMap->putNumber(Test::FIRST_STATE, 1);
 
     try {
-        loop->repeatFunctionImpl(preparePlotFunction, parametersMap);
+        //TODO usar la versión normal
+        tLoop->tLevel = 0;
+        tLoop->setCallerLoop(NULL);
+        tLoop->repeatFunctionImpl(preparePlotFunction, parametersMap);
     } catch (string e) {
         string error = " while repeating preparePlotFunction : " + e;
         throw error;
@@ -317,8 +345,10 @@ void Test::plot(void (*func)(ParametersMap*), std::string functionLabel, std::st
     parameters.putNumber(PLOT_MAX, max);
     parameters.putNumber(PLOT_INC, inc);
 
-    createGnuPlotScript(tLoop, &parameters);
+    createGnuPlotScript(&parameters);
 
+    //TODO usar la versión normal
+    tLoop->tLevel = 0;
     tLoop->setCallerLoop(NULL);
     tLoop->repeatActionImpl(plotAction, func, &parameters);
 
@@ -373,8 +403,10 @@ void Test::plotTask(unsigned maxGenerations)
     Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
     parameters.putPtr(Test::INITIAL_POPULATION, initialPopulation);
 
-    createGnuPlotScript(tLoop, &parameters);
+    createGnuPlotScript(&parameters);
 
+    //TODO usar la versión normal
+    tLoop->tLevel = 0;
     tLoop->setCallerLoop(NULL);
     tLoop->repeatFunctionImpl(plotTaskFunction, &parameters);
 

@@ -82,7 +82,13 @@ void JoinEnumLoop::print()
 
 void JoinEnumLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
+    string levelName = getLevelName(tLevel);
+
     for (tIndex = 0; tIndex < tValueVector.size(); ++tIndex) {
+        // It will not call to Loop::repeat__Base
+        parametersMap->putNumber(levelName, tValueVector[tIndex]);
+        tInnerLoops[tIndex]->tLevel = tLevel + 1;
+
         parametersMap->putNumber(tKey, tValueVector[tIndex]);
         tInnerLoops[tIndex]->setCallerLoop(this);
         tInnerLoops[tIndex]->repeatFunctionImpl(func, parametersMap);
@@ -92,7 +98,13 @@ void JoinEnumLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap
 void JoinEnumLoop::repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
                                     void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
+    string levelName = getLevelName(tLevel);
+
     for (tIndex = 0; tIndex < tValueVector.size(); ++tIndex) {
+        // It will not call to Loop::repeat__Base
+        parametersMap->putNumber(levelName, tValueVector[tIndex]);
+        tInnerLoops[tIndex]->tLevel = tLevel + 1;
+
         parametersMap->putNumber(tKey, tValueVector[tIndex]);
         tInnerLoops[tIndex]->setCallerLoop(this);
         tInnerLoops[tIndex]->repeatActionImpl(action, func, parametersMap);

@@ -9,6 +9,7 @@
 
 const string Loop::LABEL = "__LOOP_FUNCTION_NAME";
 const string Loop::STATE = "__LOOP__RUNNING_STATE";
+const string Loop::VALUE_LEVEL = "__LOOP__VALUE_LEVEL";
 
 Loop::Loop()
 {
@@ -50,9 +51,22 @@ void Loop::setCallerLoop(Loop* callerLoop)
     tCallerLoop = callerLoop;
 }
 
+std::string Loop::getLevelName(unsigned &level)
+{
+    string result;
+    std::stringstream sstm;
+    sstm << Loop::VALUE_LEVEL << level;
+    result = sstm.str();
+    return result;
+}
+
 void Loop::repeatFunctionBase(void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
+    string levelName = getLevelName(tLevel);
+    parametersMap->putNumber(levelName, this->valueToUnsigned());
+
     if (tInnerLoop) {
+        tInnerLoop->tLevel = tLevel + 1;
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->repeatFunctionImpl(func, parametersMap);
     } else {
@@ -66,7 +80,11 @@ void Loop::repeatFunctionBase(void(*func)(ParametersMap*), ParametersMap* parame
 void Loop::repeatActionBase(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
                             void(*func)(ParametersMap*), ParametersMap* parametersMap)
 {
+    string levelName = getLevelName(tLevel);
+    parametersMap->putNumber(levelName, this->valueToUnsigned());
+
     if (tInnerLoop) {
+        tInnerLoop->tLevel = tLevel + 1;
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->repeatActionImpl(action, func, parametersMap);
     } else {
@@ -82,6 +100,7 @@ void Loop::repeatFunction(void(*func)(ParametersMap*), ParametersMap* parameters
 {
     cout << "Repeating function... " << functionLabel << endl;
     parametersMap->putString(Loop::LABEL, functionLabel);
+    tLevel = 0;
     this->setCallerLoop(NULL);
     try {
         this->repeatFunctionImpl(func, parametersMap);
@@ -97,6 +116,7 @@ void Loop::repeatAction(void(*action)(void(*)(ParametersMap*), ParametersMap* pa
 {
     cout << "Repeating action... " << functionLabel << endl;
     parametersMap->putString(Loop::LABEL, functionLabel);
+    tLevel = 0;
     this->setCallerLoop(NULL);
     try {
         this->repeatActionImpl(action, func, parametersMap);
