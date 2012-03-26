@@ -14,8 +14,6 @@
 #include "common/dummy.h"
 #include "genetic/population.h"
 
-//TODO pasar a ctes de clase
-
 class Loop
 {
 public:

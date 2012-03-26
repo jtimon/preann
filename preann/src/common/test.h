@@ -46,7 +46,7 @@ public:
     static const string TASK;
     static const string MAX_GENERATIONS;
 protected:
-    void createGnuPlotScript(ParametersMap* parametersMap);
+    void createGnuPlotScript(ParametersMap* parametersMap, string functionLabel);
     Loop* tLoop;
 public:
     ParametersMap parameters;

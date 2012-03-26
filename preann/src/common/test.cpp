@@ -141,12 +141,7 @@ void testAction(void (*f)(ParametersMap*), ParametersMap* parametersMap)
 void Test::test(void (*func)(ParametersMap*), std::string functionLabel)
 {
     cout << "Testing... " << functionLabel << endl;
-    parameters.putString(Loop::LABEL, functionLabel);
-
-    //TODO usar la versión normal
-    tLoop->tLevel = 0;
-    tLoop->setCallerLoop(NULL);
-    tLoop->repeatActionImpl(testAction, func, &parameters);
+    tLoop->repeatAction(testAction, func, &parameters, functionLabel);
 }
 
 int mapPointType(unsigned value)
@@ -251,10 +246,9 @@ void preparePlotFunction(ParametersMap* parametersMap)
 
     fprintf(plotFile, "%s", line.data());
 }
-void Test::createGnuPlotScript(ParametersMap* parametersMap)
+void Test::createGnuPlotScript(ParametersMap* parametersMap, string functionLabel)
 {
     string path = parametersMap->getString(Test::PLOT_PATH);
-    string functionLabel = parametersMap->getString(Loop::LABEL);
     string xAxis = parametersMap->getString(PLOT_X_AXIS);
     string yAxis = parametersMap->getString(PLOT_Y_AXIS);
 
@@ -280,15 +274,7 @@ void Test::createGnuPlotScript(ParametersMap* parametersMap)
     parametersMap->putPtr(Test::PLOT_FILE, plotFile);
     parametersMap->putNumber(Test::FIRST_STATE, 1);
 
-    try {
-        //TODO usar la versión normal
-        tLoop->tLevel = 0;
-        tLoop->setCallerLoop(NULL);
-        tLoop->repeatFunctionImpl(preparePlotFunction, parametersMap);
-    } catch (string e) {
-        string error = " while repeating preparePlotFunction : " + e;
-        throw error;
-    }
+    tLoop->repeatFunction(preparePlotFunction, parametersMap, "preparePlotFunction");
 
     fprintf(plotFile, "\n");
     fclose(plotFile);
@@ -339,18 +325,14 @@ void Test::plot(void (*func)(ParametersMap*), std::string functionLabel, std::st
     cout << "Plotting " << functionLabel << "...";
     Chronometer chrono;
     chrono.start();
-    parameters.putString(Loop::LABEL, functionLabel);
     parameters.putString(PLOT_LOOP, plotVarKey);
     parameters.putNumber(PLOT_MIN, min);
     parameters.putNumber(PLOT_MAX, max);
     parameters.putNumber(PLOT_INC, inc);
 
-    createGnuPlotScript(&parameters);
+    createGnuPlotScript(&parameters, functionLabel);
 
-    //TODO usar la versión normal
-    tLoop->tLevel = 0;
-    tLoop->setCallerLoop(NULL);
-    tLoop->repeatActionImpl(plotAction, func, &parameters);
+    tLoop->repeatAction(plotAction, func, &parameters, functionLabel);
 
     string path = parameters.getString(Test::PLOT_PATH);
     plotFile(path, functionLabel);
@@ -391,7 +373,6 @@ void Test::plotTask(unsigned maxGenerations)
 {
     Task* task = (Task*) parameters.getPtr(Test::TASK);
     string testedTask = task->toString();
-    parameters.putString(Loop::LABEL, testedTask);
     cout << "Plotting " << testedTask << " with goal " << task->getGoal() << "..." << endl;
     Chronometer chrono;
     chrono.start();
@@ -403,12 +384,9 @@ void Test::plotTask(unsigned maxGenerations)
     Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
     parameters.putPtr(Test::INITIAL_POPULATION, initialPopulation);
 
-    createGnuPlotScript(&parameters);
+    createGnuPlotScript(&parameters, testedTask);
 
-    //TODO usar la versión normal
-    tLoop->tLevel = 0;
-    tLoop->setCallerLoop(NULL);
-    tLoop->repeatFunctionImpl(plotTaskFunction, &parameters);
+    tLoop->repeatFunction(plotTaskFunction, &parameters, testedTask);
 
     delete (initialPopulation);
 
