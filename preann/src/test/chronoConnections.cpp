@@ -81,8 +81,8 @@ int main(int argc, char *argv[])
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
         test.addLoop(bufferTypeLoop);
 
-        test.parameters.putPtr(Test::LINE_COLOR, implTypeLoop);
-        test.parameters.putPtr(Test::POINT_TYPE, bufferTypeLoop);
+        test.parameters.putNumber(Test::LINE_COLOR_LEVEL, 1);
+        test.parameters.putNumber(Test::POINT_TYPE_LEVEL, 2);
         test.getLoop()->print();
 
         test.plot(chronoMutate, "Connection_mutate", Dummy::SIZE, 250, 2000, 500);

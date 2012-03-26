@@ -84,8 +84,8 @@ int main(int argc, char *argv[])
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
         test.addLoop(bufferTypeLoop);
 
-        test.parameters.putPtr(Test::LINE_COLOR, implTypeLoop);
-        test.parameters.putPtr(Test::POINT_TYPE, bufferTypeLoop);
+        test.parameters.putNumber(Test::LINE_COLOR_LEVEL, 0);
+        test.parameters.putNumber(Test::POINT_TYPE_LEVEL, 1);
 
         test.getLoop()->print();
 

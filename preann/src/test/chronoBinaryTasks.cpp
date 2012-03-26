@@ -77,9 +77,9 @@ int main(int argc, char *argv[])
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
 //        test.parameters.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PER_INDIVIDUAL);
 
-        EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
-                                              ET_SELECTION_ALGORITHM);
-        test.addLoop(selecAlgLoop);
+//        EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
+//                                              ET_SELECTION_ALGORITHM);
+//        test.addLoop(selecAlgLoop);
 
 
         JoinEnumLoop* resetAlgLoop = new JoinEnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG);
@@ -91,8 +91,8 @@ int main(int argc, char *argv[])
         RangeLoop* resetProbLoop = new RangeLoop(Population::RESET_PROB, 0.05, 0.2, 0.1);
         resetAlgLoop->addEnumLoop(RA_PROBABILISTIC, resetProbLoop);
 
-        test.parameters.putPtr(Test::LINE_COLOR, resetAlgLoop);
-        test.parameters.putPtr(Test::POINT_TYPE, resetProbLoop);
+        test.parameters.putNumber(Test::LINE_COLOR_LEVEL, 0);
+        test.parameters.putNumber(Test::POINT_TYPE_LEVEL, 1);
 
         test.getLoop()->print();
 

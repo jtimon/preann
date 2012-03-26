@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
         //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
         //        loop = resetAlgLoop;
 
-        test.parameters.putPtr(Test::LINE_COLOR, rouletteWheelBaseLoop);
-        test.parameters.putPtr(Test::POINT_TYPE, selecAlgLoop);
+        test.parameters.putNumber(Test::LINE_COLOR_LEVEL, 1);
+        test.parameters.putNumber(Test::POINT_TYPE_LEVEL, 0);
 
         test.getLoop()->print();
 
