@@ -19,6 +19,7 @@ class Loop
 public:
     static const string LABEL;
     static const string STATE;
+    static const string LEAF;
     static const string VALUE_LEVEL;
 private:
 protected:
@@ -34,16 +35,21 @@ protected:
 
     Loop();
     Loop(std::string key);
-public:
-    //TODO ocultar más estos campos
     unsigned tLevel;
     Loop* tInnerLoop;
+    void setCallerLoop(Loop* callerLoop);
+
+    virtual void repeatFunctionImpl(void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
+    virtual void
+    repeatActionImpl(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap),
+                     void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
+public:
+    friend class JoinEnumLoop;
     virtual ~Loop();
 
     string getKey();
-    virtual void addInnerLoop(Loop* innerLoop);
-    void setCallerLoop(Loop* callerLoop);
 
+    virtual void addInnerLoop(Loop* innerLoop);
     virtual unsigned valueToUnsigned();
 
     virtual Loop* findLoop(std::string key);
@@ -56,10 +62,6 @@ public:
 
     virtual std::string valueToString() = 0;
     virtual std::string getState(bool longVersion);
-    virtual void repeatFunctionImpl(void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
-    virtual void
-    repeatActionImpl(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap),
-                     void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
 
     static std::string getLevelName(unsigned &level);
 };

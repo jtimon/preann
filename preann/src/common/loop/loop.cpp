@@ -9,6 +9,7 @@
 
 const string Loop::LABEL = "__LOOP_FUNCTION_NAME";
 const string Loop::STATE = "__LOOP__RUNNING_STATE";
+const string Loop::LEAF = "__LOOP__RUNNING_LEAF";
 const string Loop::VALUE_LEVEL = "__LOOP__VALUE_LEVEL";
 
 Loop::Loop()
@@ -70,10 +71,12 @@ void Loop::repeatFunctionBase(void(*func)(ParametersMap*), ParametersMap* parame
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->repeatFunctionImpl(func, parametersMap);
     } else {
-        cout<< this->getState(true) << endl;
         parametersMap->putString(Loop::STATE, this->getState(false));
 //        parametersMap->print();
         (*func)(parametersMap);
+        unsigned leaf = parametersMap->getNumber(Loop::LEAF);
+        cout<< this->getState(true) << " Leaf " << leaf << endl;
+        parametersMap->putNumber(Loop::LEAF, ++leaf);
     }
 }
 
@@ -88,10 +91,10 @@ void Loop::repeatActionBase(void(*action)(void(*)(ParametersMap*), ParametersMap
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->repeatActionImpl(action, func, parametersMap);
     } else {
-//        cout<< this->getState(true) << endl;
         parametersMap->putString(Loop::STATE, this->getState(false));
-//        parametersMap->print();
         (*action)(func, parametersMap);
+        unsigned leaf = parametersMap->getNumber(Loop::LEAF);
+        parametersMap->putNumber(Loop::LEAF, ++leaf);
     }
 }
 
@@ -100,6 +103,7 @@ void Loop::repeatFunction(void(*func)(ParametersMap*), ParametersMap* parameters
 {
     cout << "Repeating function... " << functionLabel << endl;
     parametersMap->putString(Loop::LABEL, functionLabel);
+    parametersMap->putNumber(Loop::LEAF, 0);
     tLevel = 0;
     this->setCallerLoop(NULL);
     try {
@@ -116,6 +120,7 @@ void Loop::repeatAction(void(*action)(void(*)(ParametersMap*), ParametersMap* pa
 {
     cout << "Repeating action... " << functionLabel << endl;
     parametersMap->putString(Loop::LABEL, functionLabel);
+    parametersMap->putNumber(Loop::LEAF, 0);
     tLevel = 0;
     this->setCallerLoop(NULL);
     try {
