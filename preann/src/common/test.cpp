@@ -52,6 +52,14 @@ const string Test::EXAMPLE_INDIVIDUAL = "__exampleIndividual";
 const string Test::TASK = "__task_to_plot";
 const string Test::MAX_GENERATIONS = "__generations_to_plot";
 
+void Test::check(bool condition, string message)
+{
+    if (condition){
+        cout << message << endl;
+        throw message;
+    }
+}
+
 unsigned char Test::areEqual(float expected, float actual, BufferType bufferType)
 {
     if (bufferType == BT_FLOAT) {
@@ -395,3 +403,5 @@ void Test::plotTask(unsigned maxGenerations)
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
 }
+
+

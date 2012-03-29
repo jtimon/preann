@@ -52,6 +52,7 @@ public:
     ParametersMap parameters;
     Test();
     ~Test();
+    static void check(bool condition, string message);
     static unsigned char areEqual(float expected, float actual, BufferType bufferType);
     static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
     static unsigned assertEquals(Buffer* expected, Buffer* actual);
