@@ -19,10 +19,7 @@ protected:
     unsigned tIndex;
     virtual unsigned valueToUnsigned();
 
-    virtual void repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap);
-    virtual void
-    repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
-                     void(*func)(ParametersMap*), ParametersMap* parametersMap);
+    virtual void repeatFunctionImpl(FunctionContainer &func, ParametersMap* parametersMap);
 public:
     JoinEnumLoop(std::string key, EnumType enumType);
     virtual ~JoinEnumLoop();

@@ -24,12 +24,14 @@ Loop* Test::getLoop()
 
 void Test::addLoop(Loop* loop)
 {
-    if (tLoop == NULL){
+    if (tLoop == NULL) {
         tLoop = loop;
     } else {
         tLoop->addInnerLoop(loop);
     }
 }
+
+const string Test::TEST_FUNCTION = "__testFunction";
 
 const string Test::DIFF_COUNT = "__differencesCounter";
 const string Test::MEM_LOSSES = "__memoryLosses";
@@ -54,7 +56,7 @@ const string Test::MAX_GENERATIONS = "__generations_to_plot";
 
 void Test::check(bool condition, string message)
 {
-    if (condition){
+    if (condition) {
         cout << message << endl;
         throw message;
     }
@@ -114,6 +116,18 @@ unsigned Test::assertEquals(Buffer* expected, Buffer* actual)
     return differencesCounter;
 }
 
+void Test::checkDifferences(ParametersMap* parametersMap)
+{
+    try {
+        unsigned differencesCounter = parametersMap->getNumber(Test::DIFF_COUNT);
+        if (differencesCounter > 0) {
+            string state = parametersMap->getString(Loop::STATE);
+            cout << state << " : " << differencesCounter << " differences detected." << endl;
+        }
+    } catch (string e) {
+    }
+}
+
 void Test::checkEmptyMemory(ParametersMap* parametersMap)
 {
     if (MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0) {
@@ -125,31 +139,28 @@ void Test::checkEmptyMemory(ParametersMap* parametersMap)
         MemoryManagement::printTotalAllocated();
         MemoryManagement::printTotalPointers();
         MemoryManagement::clear();
-        unsigned memoryLosses = parametersMap->getNumber(Test::MEM_LOSSES);
-        ++memoryLosses;
-        parametersMap->putNumber(Test::MEM_LOSSES, memoryLosses);
     }
 }
 
-void testAction(void (*f)(ParametersMap*), ParametersMap* parametersMap)
+void testAction(ParametersMap* parametersMap)
 {
     try {
-        f(parametersMap);
-        unsigned differencesCounter = parametersMap->getNumber(Test::DIFF_COUNT);
-        if (differencesCounter > 0) {
-            string state = parametersMap->getString(Loop::STATE);
-            cout << state << " : " << differencesCounter << " differences detected." << endl;
-        }
+        FunctionContainer* func = (FunctionContainer*) parametersMap->getPtr(Test::TEST_FUNCTION);
+        func->execute(parametersMap);
+        Test::checkDifferences(parametersMap);
+        Test::checkEmptyMemory(parametersMap);
     } catch (string e) {
         cout
                 << " while testing " + parametersMap->getString(Loop::LABEL) + " at state "
                         + parametersMap->getString(Loop::STATE) + " : " + e << endl;
     }
 }
-void Test::test(void (*func)(ParametersMap*), std::string functionLabel)
+void Test::test(FunctionPtr func, std::string functionLabel)
 {
     cout << "Testing... " << functionLabel << endl;
-    tLoop->repeatAction(testAction, func, &parameters, functionLabel);
+    FunctionContainer function(func);
+    parameters.putPtr(Test::TEST_FUNCTION, &function);
+    tLoop->repeatFunction(testAction, &parameters, functionLabel);
 }
 
 int mapPointType(unsigned value)
@@ -288,7 +299,7 @@ void Test::createGnuPlotScript(ParametersMap* parametersMap, string functionLabe
     fclose(plotFile);
 }
 
-void plotAction(void (*f)(ParametersMap*), ParametersMap* parametersMap)
+void plotAction(ParametersMap* parametersMap)
 {
     try {
         string path = parametersMap->getString(Test::PLOT_PATH);
@@ -308,7 +319,8 @@ void plotAction(void (*f)(ParametersMap*), ParametersMap* parametersMap)
         for (float i = min; i < max; i += inc) {
             parametersMap->putNumber(plotVar, i);
 
-            f(parametersMap);
+            FunctionContainer* func = (FunctionContainer*) parametersMap->getPtr(Test::TEST_FUNCTION);
+            func->execute(parametersMap);
 
             float totalTime = parametersMap->getNumber(Test::TIME_COUNT);
             fprintf(dataFile, " %f %f \n", i, totalTime / repetitions);
@@ -327,7 +339,7 @@ void plotFile(string path, string functionLabel)
     string syscommand = "gnuplot " + plotPath;
     system(syscommand.data());
 }
-void Test::plot(void (*func)(ParametersMap*), std::string functionLabel, std::string plotVarKey, float min,
+void Test::plot(FunctionPtr func, std::string functionLabel, std::string plotVarKey, float min,
                 float max, float inc)
 {
     cout << "Plotting " << functionLabel << "...";
@@ -340,7 +352,9 @@ void Test::plot(void (*func)(ParametersMap*), std::string functionLabel, std::st
 
     createGnuPlotScript(&parameters, functionLabel);
 
-    tLoop->repeatAction(plotAction, func, &parameters, functionLabel);
+    FunctionContainer function(func);
+    parameters.putPtr(Test::TEST_FUNCTION, &function);
+    tLoop->repeatFunction(plotAction, &parameters, functionLabel);
 
     string path = parameters.getString(Test::PLOT_PATH);
     plotFile(path, functionLabel);
@@ -403,5 +417,4 @@ void Test::plotTask(unsigned maxGenerations)
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
 }
-
 

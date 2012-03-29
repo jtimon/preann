@@ -20,10 +20,7 @@ protected:
     virtual unsigned valueToUnsigned();
     virtual unsigned reset(EnumType enumType);
 
-    virtual void repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap);
-    virtual void
-    repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
-                     void(*func)(ParametersMap*), ParametersMap* parametersMap);
+    virtual void repeatFunctionImpl(FunctionContainer &func, ParametersMap* parametersMap);
 public:
     EnumLoop(std::string key, EnumType enumType);
     EnumLoop(std::string key, EnumType enumType, unsigned count, ...);

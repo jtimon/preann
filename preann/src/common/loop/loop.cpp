@@ -40,7 +40,7 @@ string Loop::getKey()
 
 void Loop::addInnerLoop(Loop* innerLoop)
 {
-    if (tInnerLoop == NULL){
+    if (tInnerLoop == NULL) {
         tInnerLoop = innerLoop;
     } else {
         tInnerLoop->addInnerLoop(innerLoop);
@@ -61,7 +61,7 @@ std::string Loop::getLevelName(unsigned &level)
     return result;
 }
 
-void Loop::repeatFunctionBase(void(*func)(ParametersMap*), ParametersMap* parametersMap)
+void Loop::repeatFunctionBase(FunctionContainer &func, ParametersMap* parametersMap)
 {
     string levelName = getLevelName(tLevel);
     parametersMap->putNumber(levelName, this->valueToUnsigned());
@@ -73,32 +73,21 @@ void Loop::repeatFunctionBase(void(*func)(ParametersMap*), ParametersMap* parame
     } else {
         parametersMap->putString(Loop::STATE, this->getState(false));
 //        parametersMap->print();
-        (*func)(parametersMap);
+        func.execute(parametersMap);
         unsigned leaf = parametersMap->getNumber(Loop::LEAF);
-        cout<< this->getState(true) << " Leaf " << leaf << endl;
+        cout << this->getState(true) << " Leaf " << leaf << endl;
         parametersMap->putNumber(Loop::LEAF, ++leaf);
     }
 }
 
-void Loop::repeatActionBase(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
-                            void(*func)(ParametersMap*), ParametersMap* parametersMap)
+void Loop::repeatFunction(FunctionPtr func, ParametersMap* parametersMap,
+                          std::string functionLabel)
 {
-    string levelName = getLevelName(tLevel);
-    parametersMap->putNumber(levelName, this->valueToUnsigned());
-
-    if (tInnerLoop) {
-        tInnerLoop->tLevel = tLevel + 1;
-        tInnerLoop->setCallerLoop(this);
-        tInnerLoop->repeatActionImpl(action, func, parametersMap);
-    } else {
-        parametersMap->putString(Loop::STATE, this->getState(false));
-        (*action)(func, parametersMap);
-        unsigned leaf = parametersMap->getNumber(Loop::LEAF);
-        parametersMap->putNumber(Loop::LEAF, ++leaf);
-    }
+    FunctionContainer function(func);
+    repeatFunction(function, parametersMap, functionLabel);
 }
 
-void Loop::repeatFunction(void(*func)(ParametersMap*), ParametersMap* parametersMap,
+void Loop::repeatFunction(FunctionContainer &func, ParametersMap* parametersMap,
                           std::string functionLabel)
 {
     cout << "Repeating function... " << functionLabel << endl;
@@ -109,24 +98,7 @@ void Loop::repeatFunction(void(*func)(ParametersMap*), ParametersMap* parameters
     try {
         this->repeatFunctionImpl(func, parametersMap);
     } catch (string e) {
-        cout << "Error while repeating function... " << functionLabel << endl;
-    }
-
-    parametersMap->putString(Loop::LABEL, functionLabel);
-}
-
-void Loop::repeatAction(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
-                        void(*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel)
-{
-    cout << "Repeating action... " << functionLabel << endl;
-    parametersMap->putString(Loop::LABEL, functionLabel);
-    parametersMap->putNumber(Loop::LEAF, 0);
-    tLevel = 0;
-    this->setCallerLoop(NULL);
-    try {
-        this->repeatActionImpl(action, func, parametersMap);
-    } catch (string e) {
-        cout << "Error while repeating action... " << functionLabel << endl;
+        cout << "Error while repeating function... " << functionLabel << " : " << e << endl;
     }
 }
 

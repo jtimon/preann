@@ -25,6 +25,7 @@
 class Test
 {
 public:
+    static const string TEST_FUNCTION;
     static const string DIFF_COUNT;
     static const string MEM_LOSSES;
     static const string REPETITIONS;
@@ -56,14 +57,15 @@ public:
     static unsigned char areEqual(float expected, float actual, BufferType bufferType);
     static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
     static unsigned assertEquals(Buffer* expected, Buffer* actual);
+    static void checkDifferences(ParametersMap* parametersMap);
     static void checkEmptyMemory(ParametersMap* parametersMap);
 
-    void test(void(*func)(ParametersMap*), std::string functionLabel);
-    void plot(void(*func)(ParametersMap*), std::string functionLabel, std::string plotVarKey, float min, float max, float inc);
+    void test(FunctionPtr func, std::string functionLabel);
+    void plot(FunctionPtr func, std::string functionLabel, std::string plotVarKey, float min,
+              float max, float inc);
     void plotTask(unsigned maxGenerations);
     void addLoop(Loop* loop);
     Loop* getLoop();
-
 
 };
 

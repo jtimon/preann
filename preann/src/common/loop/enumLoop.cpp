@@ -8,7 +8,7 @@
 #include "enumLoop.h"
 
 EnumLoop::EnumLoop(std::string key, EnumType enumType) :
-    Loop(key)
+        Loop(key)
 {
     this->withAll(enumType);
 }
@@ -26,7 +26,7 @@ unsigned EnumLoop::reset(EnumType enumType)
 }
 
 EnumLoop::EnumLoop(std::string key, EnumType enumType, unsigned count, ...) :
-    Loop(key)
+        Loop(key)
 {
     if (count == 0) {
         string error = "EnumLoop : at least one enum value must be specified.";
@@ -133,7 +133,7 @@ std::string EnumLoop::valueToString()
     return Enumerations::toString(tEnumType, tValueVector[tIndex]);
 }
 
-void EnumLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap)
+void EnumLoop::repeatFunctionImpl(FunctionContainer &func, ParametersMap* parametersMap)
 {
     for (tIndex = 0; tIndex < tValueVector.size(); ++tIndex) {
         parametersMap->putNumber(tKey, tValueVector[tIndex]);
@@ -141,11 +141,3 @@ void EnumLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* pa
     }
 }
 
-void EnumLoop::repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
-                                void(*func)(ParametersMap*), ParametersMap* parametersMap)
-{
-    for (tIndex = 0; tIndex < tValueVector.size(); ++tIndex) {
-        parametersMap->putNumber(tKey, tValueVector[tIndex]);
-        this->repeatActionBase(action, func, parametersMap);
-    }
-}

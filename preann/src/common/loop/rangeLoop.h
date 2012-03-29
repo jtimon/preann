@@ -17,10 +17,7 @@ protected:
     unsigned tUnsignedValue;
     virtual unsigned valueToUnsigned();
 
-    virtual void repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap);
-    virtual void
-    repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
-                     void(*func)(ParametersMap*), ParametersMap* parametersMap);
+    virtual void repeatFunctionImpl(FunctionContainer &func, ParametersMap* parametersMap);
     virtual std::string valueToString();
 public:
     RangeLoop(std::string key, float min, float max, float inc);

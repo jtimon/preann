@@ -66,16 +66,16 @@ int main(int argc, char *argv[])
         test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
         test.parameters.putString(Test::PLOT_X_AXIS, "Size");
         test.parameters.putString(Test::PLOT_Y_AXIS, "Time (seconds)");
-        test.parameters.putNumber(Test::REPETITIONS, 1000);
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         test.addLoop(new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2));
 
-        EnumLoop* implTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
-                                              ET_IMPLEMENTATION);
-        test.addLoop(implTypeLoop);
+//        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+        test.addLoop(
+                new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C,
+                             IT_SSE2));
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
@@ -85,12 +85,12 @@ int main(int argc, char *argv[])
         test.parameters.putNumber(Test::POINT_TYPE_LEVEL, 2);
         test.getLoop()->print();
 
-        test.plot(chronoMutate, "Connection_mutate", Dummy::SIZE, 250, 2000, 500);
-        test.parameters.putNumber(Test::REPETITIONS, 10);
-        test.plot(chronoCrossover, "Connection_crossover", Dummy::SIZE, 100, 301, 100);
-        test.parameters.putNumber(Test::REPETITIONS, 1);
-        test.plot(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", Dummy::SIZE, 1000, 2001,
-                  1000);
+        test.parameters.putNumber(Test::REPETITIONS, 10000);
+        test.plot(chronoMutate, "Connection_mutate", Dummy::SIZE, 50000, 500000, 50000);
+//        test.parameters.putNumber(Test::REPETITIONS, 1000);
+//        test.plot(chronoCrossover, "Connection_crossover", Dummy::SIZE, 500, 5000, 500);
+//        test.parameters.putNumber(Test::REPETITIONS, 1000);
+//        test.plot(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", Dummy::SIZE, 500, 5000, 500);
 
         printf("Exit success.\n");
     } catch (std::string error) {

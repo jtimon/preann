@@ -13,6 +13,9 @@
 #include "common/parametersMap.h"
 #include "common/dummy.h"
 #include "genetic/population.h"
+#include "common/functionContainer.h"
+
+//TODO #define CALL_MAYBE(func, args...) do {if (func) (func)(## args);} while (0)
 
 class Loop
 {
@@ -27,9 +30,7 @@ protected:
     std::string tKey;
     Loop* tCallerLoop;
 
-    void repeatFunctionBase(void (*func)(ParametersMap*), ParametersMap* parametersMap);
-    void repeatActionBase(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap),
-                          void (*func)(ParametersMap*), ParametersMap* parametersMap);
+    void repeatFunctionBase(FunctionContainer &func, ParametersMap* parametersMap);
 
     void createGnuPlotScript(ParametersMap* parametersMap);
 
@@ -39,10 +40,7 @@ protected:
     Loop* tInnerLoop;
     void setCallerLoop(Loop* callerLoop);
 
-    virtual void repeatFunctionImpl(void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
-    virtual void
-    repeatActionImpl(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap),
-                     void (*func)(ParametersMap*), ParametersMap* parametersMap) = 0;
+    virtual void repeatFunctionImpl(FunctionContainer &func, ParametersMap* parametersMap) = 0;
 public:
     friend class JoinEnumLoop;
     virtual ~Loop();
@@ -55,10 +53,10 @@ public:
     virtual Loop* findLoop(std::string key);
     virtual void print() = 0;
 
-    void repeatFunction(void (*func)(ParametersMap*), ParametersMap* parametersMap,
+    void repeatFunction(FunctionPtr func, ParametersMap* parametersMap,
                         std::string functionLabel);
-    void repeatAction(void (*action)(void (*)(ParametersMap*), ParametersMap* parametersMap),
-                      void (*func)(ParametersMap*), ParametersMap* parametersMap, std::string functionLabel);
+    void repeatFunction(FunctionContainer &func, ParametersMap* parametersMap,
+                        std::string functionLabel);
 
     virtual std::string valueToString() = 0;
     virtual std::string getState(bool longVersion);

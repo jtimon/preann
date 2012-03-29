@@ -8,7 +8,7 @@
 #include "joinEnumLoop.h"
 
 JoinEnumLoop::JoinEnumLoop(std::string key, EnumType enumType) :
-    Loop(key)
+        Loop(key)
 {
     tEnumType = enumType;
     tIndex = 0;
@@ -19,11 +19,11 @@ JoinEnumLoop::~JoinEnumLoop()
     for (int i = 0; i < tInnerLoops.size(); ++i) {
 
         Loop* itLoop = tInnerLoops[i];
-        while (itLoop->tInnerLoop != tInnerLoop && itLoop->tInnerLoop != NULL){
+        while (itLoop->tInnerLoop != tInnerLoop && itLoop->tInnerLoop != NULL) {
             itLoop = itLoop->tInnerLoop;
         }
         itLoop->tInnerLoop = NULL;
-        delete(tInnerLoops[i]);
+        delete (tInnerLoops[i]);
     }
     tValueVector.clear();
     tInnerLoops.clear();
@@ -31,7 +31,7 @@ JoinEnumLoop::~JoinEnumLoop()
 
 void JoinEnumLoop::addInnerLoop(Loop* innerLoop)
 {
-    if (tInnerLoop == NULL){
+    if (tInnerLoop == NULL) {
         tInnerLoop = innerLoop;
         for (int i = 0; i < tInnerLoops.size(); ++i) {
             tInnerLoops[i]->addInnerLoop(tInnerLoop);
@@ -53,7 +53,7 @@ void JoinEnumLoop::addEnumLoop(unsigned enumValue, Loop* loop)
     tValueVector.push_back(enumValue);
     tInnerLoops.push_back(loop);
 
-    if (tInnerLoop != NULL){
+    if (tInnerLoop != NULL) {
         loop->addInnerLoop(tInnerLoop);
     }
 }
@@ -80,7 +80,7 @@ void JoinEnumLoop::print()
     cout << endl;
 }
 
-void JoinEnumLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap* parametersMap)
+void JoinEnumLoop::repeatFunctionImpl(FunctionContainer &func, ParametersMap* parametersMap)
 {
     string levelName = getLevelName(tLevel);
 
@@ -92,22 +92,6 @@ void JoinEnumLoop::repeatFunctionImpl(void(*func)(ParametersMap*), ParametersMap
         parametersMap->putNumber(tKey, tValueVector[tIndex]);
         tInnerLoops[tIndex]->setCallerLoop(this);
         tInnerLoops[tIndex]->repeatFunctionImpl(func, parametersMap);
-    }
-}
-
-void JoinEnumLoop::repeatActionImpl(void(*action)(void(*)(ParametersMap*), ParametersMap* parametersMap),
-                                    void(*func)(ParametersMap*), ParametersMap* parametersMap)
-{
-    string levelName = getLevelName(tLevel);
-
-    for (tIndex = 0; tIndex < tValueVector.size(); ++tIndex) {
-        // It will not call to Loop::repeat__Base
-        parametersMap->putNumber(levelName, tValueVector[tIndex]);
-        tInnerLoops[tIndex]->tLevel = tLevel + 1;
-
-        parametersMap->putNumber(tKey, tValueVector[tIndex]);
-        tInnerLoops[tIndex]->setCallerLoop(this);
-        tInnerLoops[tIndex]->repeatActionImpl(action, func, parametersMap);
     }
 }
 

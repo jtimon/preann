@@ -77,9 +77,10 @@ int main(int argc, char *argv[])
         test.parameters.putNumber(Test::REPETITIONS, 100);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        EnumLoop* implTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION),
-                                              ET_IMPLEMENTATION);
-        test.addLoop(implTypeLoop);
+//        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+        test.addLoop(
+                new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C,
+                             IT_SSE2));
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
         test.addLoop(bufferTypeLoop);

@@ -14,8 +14,6 @@ void testBuffer(ParametersMap* parametersMap)
     Buffer* buffer = Dummy::buffer(parametersMap);
     delete (buffer);
 //    unsigned* aa = (unsigned*)MemoryManagement::malloc(sizeof(unsigned) * 5);
-
-    Test::checkEmptyMemory(parametersMap);
 }
 
 void testConnection(ParametersMap* parametersMap)
@@ -25,8 +23,6 @@ void testConnection(ParametersMap* parametersMap)
 
     delete (connection);
     delete (buffer);
-
-    Test::checkEmptyMemory(parametersMap);
 }
 
 void testLayer(ParametersMap* parametersMap)
@@ -36,8 +32,6 @@ void testLayer(ParametersMap* parametersMap)
 
     delete (layer);
     delete (buffer);
-
-    Test::checkEmptyMemory(parametersMap);
 }
 
 void testNeuralNet(ParametersMap* parametersMap)
@@ -47,8 +41,6 @@ void testNeuralNet(ParametersMap* parametersMap)
 
     delete (net);
     delete (input);
-
-    Test::checkEmptyMemory(parametersMap);
 }
 
 void testPopulation(ParametersMap* parametersMap)
@@ -83,7 +75,6 @@ void testPopulation(ParametersMap* parametersMap)
     delete (example);
     delete (task);
     delete (input);
-    Test::checkEmptyMemory(parametersMap);
 }
 
 void testLoops(ParametersMap* parametersMap)
@@ -110,31 +101,32 @@ int main(int argc, char *argv[])
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
         test.addLoop(bufferTypeLoop);
 
-        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+//        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
 
         test.getLoop()->print();
 
-//        test.getLoop()->repeatFunction(testLoops, &parametersMap, "test loops");
+//        test.test(testLoops, &parametersMap, "test loops");
 
-        test.getLoop()->repeatFunction(testBuffer, &test.parameters, "Buffer::memory_test");
+        test.test(testBuffer, "Buffer::memory_test");
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         test.getLoop()->print();
 
-        test.getLoop()->repeatFunction(testConnection, &test.parameters, "Connection::memory_test");
+        test.test(testConnection, "Connection::memory_test");
 
         RangeLoop* numInputsLoop = new RangeLoop(Dummy::NUM_INPUTS, 1, 3, 1);
         test.addLoop(numInputsLoop);
         test.getLoop()->print();
 
-        test.getLoop()->repeatFunction(testLayer, &test.parameters, "Layer::memory_test");
+        test.test(testLayer, "Layer::memory_test");
 
         RangeLoop* numLayersLoop = new RangeLoop(Dummy::NUM_LAYERS, 1, 3, 1);
         test.addLoop(numLayersLoop);
         test.getLoop()->print();
 
-        test.getLoop()->repeatFunction(testNeuralNet, &test.parameters, "NeuralNet::memory_test");
+        test.test(testNeuralNet, "NeuralNet::memory_test");
 
         sizeLoop->resetRange(1, 3, 1);
         outputSizeLoop->resetRange(1, 1, 1);
@@ -142,10 +134,8 @@ int main(int argc, char *argv[])
         numLayersLoop->resetRange(1, 1, 1);
         test.getLoop()->print();
 
-        test.getLoop()->repeatFunction(testPopulation, &test.parameters, "Population::memory_test");
+        test.test(testPopulation, "Population::memory_test");
 
-        unsigned memoryLosses = test.parameters.getNumber(Test::MEM_LOSSES);
-        cout << "Total memory losses: " << memoryLosses << endl;
         MemoryManagement::printListOfPointers();
 
         printf("Exit success.\n", 1);
