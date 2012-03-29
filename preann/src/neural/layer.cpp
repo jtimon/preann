@@ -5,6 +5,14 @@ ImplementationType Layer::getImplementationType()
     return output->getImplementationType();
 }
 
+Layer::Layer()
+{
+    this->functionType = FT_IDENTITY;
+    output = NULL;
+    thresholds = NULL;
+    tOuputInterface = NULL;
+}
+
 Layer::Layer(unsigned size, BufferType outputType, FunctionType functionType,
              ImplementationType implementationType)
 {

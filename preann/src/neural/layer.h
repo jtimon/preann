@@ -7,10 +7,7 @@
 class Layer
 {
 protected:
-    Layer()
-    {
-    }
-    ;
+    Layer();
     std::vector<Connection*> connections;
 
     Connection* thresholds;

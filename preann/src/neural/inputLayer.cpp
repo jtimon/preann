@@ -1,12 +1,10 @@
 #include "inputLayer.h"
 #include "optimization/factory.h"
 
-InputLayer::InputLayer(Interface* interface,
-        ImplementationType implementationType)
+InputLayer::InputLayer(Interface* interface, ImplementationType implementationType)
 {
     tInput = interface;
-    output = Factory::newBuffer(interface->getSize(),
-            interface->getBufferType(), implementationType);
+    output = Factory::newBuffer(interface->getSize(), interface->getBufferType(), implementationType);
     //TODO un solo interfaz para entrada y salida
     tOuputInterface = NULL;
 
@@ -56,22 +54,18 @@ void InputLayer::randomWeighs(float range)
 void InputLayer::copyWeighs(Layer* sourceLayer)
 {
     if (connections.size() != sourceLayer->getNumberInputs()) {
-        std::string error =
-                "InputLayer::copyWeighs : Cannot copyWeighs from a layer with "
-                        + to_string(sourceLayer->getNumberInputs())
-                        + " connections to a layer with " + to_string(
-                        connections.size());
+        std::string error = "InputLayer::copyWeighs : Cannot copyWeighs from a layer with "
+                + to_string(sourceLayer->getNumberInputs()) + " connections to a layer with "
+                + to_string(connections.size());
         throw error;
     }
     if (this->getImplementationType() != sourceLayer->getImplementationType()) {
-        std::string
-                error =
-                        "InputLayer::copyWeighs : The layers are incompatible: the implementation is different.";
+        std::string error =
+                "InputLayer::copyWeighs : The layers are incompatible: the implementation is different.";
         throw error;
     }
     if (sourceLayer->getThresholds() != NULL) {
-        std::string error =
-                "InputLayer::copyWeighs : trying to copy from a non input layer";
+        std::string error = "InputLayer::copyWeighs : trying to copy from a non input layer";
         throw error;
     }
 }
