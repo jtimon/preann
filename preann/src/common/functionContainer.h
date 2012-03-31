@@ -10,6 +10,10 @@
 
 #include "parametersMap.h"
 
+#define EMPTY_FUNCTION __emptyFunction_
+
+void __emptyFunction_(ParametersMap* params);
+
 typedef void (*FunctionPtr)(ParametersMap*);
 
 class FunctionContainer

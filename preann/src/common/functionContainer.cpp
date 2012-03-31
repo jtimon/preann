@@ -7,6 +7,8 @@
 
 #include "functionContainer.h"
 
+void __emptyFunction_(ParametersMap* params){};
+
 FunctionContainer::FunctionContainer(FunctionPtr function)
 {
     tFunction = function;
