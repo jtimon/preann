@@ -23,6 +23,7 @@ public:
     static const string LABEL;
     static const string STATE;
     static const string LEAF;
+    static const string LAST_LEAF;
     static const string VALUE_LEVEL;
 private:
 protected:
@@ -48,7 +49,8 @@ public:
     string getKey();
 
     virtual void addInnerLoop(Loop* innerLoop);
-    virtual unsigned valueToUnsigned();
+    virtual unsigned valueToUnsigned() = 0;
+    unsigned getNumLeafs();
 
     virtual Loop* findLoop(std::string key);
     virtual void print() = 0;

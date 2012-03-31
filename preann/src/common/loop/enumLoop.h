@@ -11,6 +11,8 @@
 #include "loop.h"
 #include "common/enumerations.h"
 
+//TODO typeid(Param).name()
+
 class EnumLoop : public Loop
 {
 protected:
@@ -22,9 +24,10 @@ protected:
 
     virtual void repeatFunctionImpl(FunctionContainer &func, ParametersMap* parametersMap);
 public:
+    EnumLoop(EnumType enumType);
     EnumLoop(std::string key, EnumType enumType);
     EnumLoop(std::string key, EnumType enumType, unsigned count, ...);
-    EnumLoop(std::string key, bool include, EnumType enumType, unsigned count, ...);
+//    EnumLoop(std::string key, bool include, EnumType enumType, unsigned count, ...);
     virtual ~EnumLoop();
 
     void withAll(EnumType enumType);

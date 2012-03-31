@@ -465,6 +465,13 @@ std::string Population::toString()
     return task->toString() + "_" + to_string(maxSize);
 }
 
+void Population::learn(unsigned generations)
+{
+    while (this->generation < generations){
+        nextGeneration();
+    }
+}
+
 Individual* Population::getIndividual(unsigned pos)
 {
     unsigned index = 0;
@@ -495,7 +502,7 @@ float Population::getTotalScore()
     return total_score;
 }
 
-float Population::getAverageScore()
+float Population::getAverageFitness()
 {
     checkNotEmpty();
     return getTotalScore() / individuals.size();

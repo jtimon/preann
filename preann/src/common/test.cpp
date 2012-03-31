@@ -32,6 +32,10 @@ void Test::addLoop(Loop* loop)
 }
 
 const string Test::TEST_FUNCTION = "__testFunction";
+const string Test::X_TO_PLOT = "__xToPlotLoop";
+const string Test::TO_AVERAGE = "__toAverageLoop";
+const string Test::X_ARRAY = "__xArray";
+const string Test::Y_ARRAY = "__yArray";
 
 const string Test::DIFF_COUNT = "__differencesCounter";
 const string Test::MEM_LOSSES = "__memoryLosses";
@@ -49,7 +53,7 @@ const string Test::PLOT_PATH = "__plotPath";
 const string Test::PLOT_FILE = "__plotFile";
 const string Test::FIRST_STATE = "__firstState";
 const string Test::SUB_PATH = "__subPath";
-const string Test::INITIAL_POPULATION = "__initialPopulation";
+const string Test::POPULATION = "__initialPopulation";
 const string Test::EXAMPLE_INDIVIDUAL = "__exampleIndividual";
 const string Test::TASK = "__task_to_plot";
 const string Test::MAX_GENERATIONS = "__generations_to_plot";
@@ -339,8 +343,8 @@ void plotFile(string path, string functionLabel)
     string syscommand = "gnuplot " + plotPath;
     system(syscommand.data());
 }
-void Test::plot(FunctionPtr func, std::string functionLabel, std::string plotVarKey, float min,
-                float max, float inc)
+void Test::plot(FunctionPtr func, std::string functionLabel, std::string plotVarKey, float min, float max,
+                float inc)
 {
     cout << "Plotting " << functionLabel << "...";
     Chronometer chrono;
@@ -368,7 +372,7 @@ void plotTaskFunction(ParametersMap* parametersMap)
     try {
         string path = parametersMap->getString(Test::PLOT_PATH);
 
-        Population* initialPopulation = (Population*) parametersMap->getPtr(Test::INITIAL_POPULATION);
+        Population* initialPopulation = (Population*) parametersMap->getPtr(Test::POPULATION);
         Population* population = new Population(initialPopulation);
         population->setParams(parametersMap);
 
@@ -404,7 +408,7 @@ void Test::plotTask(unsigned maxGenerations)
     unsigned populationSize = parameters.getNumber(Population::SIZE);
     float weighsRange = parameters.getNumber(Dummy::WEIGHS_RANGE);
     Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
-    parameters.putPtr(Test::INITIAL_POPULATION, initialPopulation);
+    parameters.putPtr(Test::POPULATION, initialPopulation);
 
     createGnuPlotScript(&parameters, testedTask);
 
@@ -417,4 +421,146 @@ void Test::plotTask(unsigned maxGenerations)
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
 }
+
+void Test::plotTask2(std::string label, RangeLoop* xToPlot)
+{
+    Loop* auxLoop = new RangeLoop("aux_average", 1, 2, 1);
+    plotTask2(label, xToPlot, auxLoop);
+    delete(auxLoop);
+}
+
+void Test::createGnuPlotScriptTask(RangeLoop*& xToPlot, std::string& path, std::string& label)
+{
+    string plotPath = path + "gnuplot/" + label + ".plt";
+    FILE* plotFile = openFile(plotPath);
+
+    fprintf(plotFile, "set terminal png size 2048,1024 \n");
+    fprintf(plotFile, "set key below\n");
+    fprintf(plotFile, "set key box \n");
+
+    string outputPath = path + "images/" + label + ".png";
+    fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
+
+    string xAxis = xToPlot->getKey();
+    string yAxis = "Average Fitness";
+    fprintf(plotFile, "set title \"%s\" \n", label.data());
+    fprintf(plotFile, "set xlabel \"%s\" \n", xAxis.data());
+    fprintf(plotFile, "set ylabel \"%s\" \n", yAxis.data());
+
+    fprintf(plotFile, "plot ");
+    unsigned count = 0;
+    string subPath = path + "data/" + label + "_";
+    parameters.putString(Test::SUB_PATH, subPath);
+    parameters.putPtr(Test::PLOT_FILE, plotFile);
+    parameters.putNumber(Test::FIRST_STATE, 1);
+    tLoop->repeatFunction(preparePlotFunction, &parameters, "preparePlotFunction");
+    fprintf(plotFile, "\n");
+    fclose(plotFile);
+}
+
+void fillArrayX(ParametersMap* params)
+{
+    Loop* xToPlot = (Loop*) (params->getPtr(Test::X_TO_PLOT));
+    unsigned int pos = xToPlot->valueToUnsigned();
+    unsigned xValue = params->getNumber(xToPlot->getKey());
+
+    float* xArray = (float*) (params->getPtr(Test::X_ARRAY));
+    xArray[pos] = xValue;
+}
+
+void addResultsPopulation(ParametersMap* params)
+{
+    Loop* xToPlot = (Loop*) (params->getPtr(Test::X_TO_PLOT));
+    unsigned int pos = xToPlot->valueToUnsigned();
+    unsigned xValue = params->getNumber(xToPlot->getKey());
+
+    Population* population = (Population*) (params->getPtr(Test::POPULATION));
+    population->learn(xValue);
+
+    float* yArray = (float*) (params->getPtr(Test::Y_ARRAY));
+    yArray[pos] += population->getAverageFitness();
+}
+
+void forAveragesFunction(ParametersMap* params)
+{
+    try {
+        // create population
+        Task* task = (Task*) params->getPtr(Test::TASK);
+        Individual* example = task->getExample();
+        unsigned populationSize = params->getNumber(Population::SIZE);
+        float weighsRange = params->getNumber(Dummy::WEIGHS_RANGE);
+        Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
+        initialPopulation->setParams(params);
+        params->putPtr(Test::POPULATION, initialPopulation);
+
+        // create vector
+        Loop* xToPlot = (Loop*) params->getPtr(Test::X_TO_PLOT);
+        xToPlot->repeatFunction(addResultsPopulation, params, "addResults");
+
+        delete (initialPopulation);
+    } catch (string e) {
+        cout << " ERROR" << endl;
+        cout << " at forAveragesFunction while " + params->getString(Loop::LABEL);
+        cout << " at state " + params->getString(Loop::STATE) << endl;
+        cout << " : " + e << endl;
+    }
+}
+
+void forLinesFunction(ParametersMap* params)
+{
+    RangeLoop* xToPlot = (RangeLoop*) params->getPtr(Test::X_TO_PLOT);
+
+    // create vector
+    unsigned arraySize = xToPlot->getNumLeafs();
+    float* xArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
+    xToPlot->repeatFunction(fillArrayX, params, "fillArrayX");
+
+    float* yArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
+    for (unsigned i = 0; i < arraySize; ++i) {
+        yArray[i] = 0;
+    }
+    params->putPtr(Test::Y_ARRAY, yArray);
+
+    // repeat forAveragesFunction
+    Loop* toAverage = (Loop*) params->getPtr(Test::TO_AVERAGE);
+    toAverage->repeatFunction(forAveragesFunction, params, "forAveragesFunction");
+
+    // Create data file
+    Task* task = (Task*) params->getPtr(Test::TASK);
+    string state = params->getString(Loop::STATE);
+    string path = params->getString(Test::PLOT_PATH);
+    string dataPath = path + "data/" + task->toString() + "_" + state + ".DAT";
+    FILE* dataFile = openFile(dataPath);
+    string plotVar = "generation";
+    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+
+    unsigned divisor = toAverage->getNumLeafs();
+    for (unsigned i = 0; i < arraySize; ++i) {
+        float averagedResult = yArray[i] / divisor;
+        fprintf(dataFile, " %f %f \n", xArray[i], averagedResult);
+    }
+    fclose(dataFile);
+}
+
+void Test::plotTask2(std::string label, RangeLoop* xToPlot, Loop* toAverage)
+{
+    Chronometer chrono;
+    chrono.start();
+    string path = parameters.getString(Test::PLOT_PATH);
+    Task* task = (Task*) parameters.getPtr(Test::TASK);
+    string testedTask = task->toString();
+    label = testedTask + "_" + label;
+
+    createGnuPlotScriptTask(xToPlot, path, label);
+
+    parameters.putPtr(Test::X_TO_PLOT, xToPlot);
+    parameters.putPtr(Test::TO_AVERAGE, toAverage);
+    tLoop->repeatFunction(forLinesFunction, &parameters, label);
+
+    plotFile(path, testedTask);
+    chrono.stop();
+    cout << chrono.getSeconds() << " segundos." << endl;
+}
+
+
 

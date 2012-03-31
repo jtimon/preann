@@ -7,22 +7,16 @@
 
 #include "enumLoop.h"
 
-EnumLoop::EnumLoop(std::string key, EnumType enumType) :
-        Loop(key)
+EnumLoop::EnumLoop(EnumType enumType) :
+        Loop(Enumerations::enumTypeToString(enumType))
 {
     this->withAll(enumType);
 }
 
-unsigned EnumLoop::valueToUnsigned()
+EnumLoop::EnumLoop(std::string key, EnumType enumType) :
+        Loop(key)
 {
-    return tValueVector[tIndex];
-}
-
-unsigned EnumLoop::reset(EnumType enumType)
-{
-    tEnumType = enumType;
-    tValueVector.clear();
-    tIndex = 0;
+    this->withAll(enumType);
 }
 
 EnumLoop::EnumLoop(std::string key, EnumType enumType, unsigned count, ...) :
@@ -51,15 +45,21 @@ EnumLoop::EnumLoop(std::string key, EnumType enumType, unsigned count, ...) :
     va_end(ap);
 }
 
-EnumLoop::EnumLoop(std::string key, bool include, EnumType enumType, unsigned count, ...)
-{
-    //TODO
-//    this->
-}
-
 EnumLoop::~EnumLoop()
 {
     tValueVector.clear();
+}
+
+unsigned EnumLoop::valueToUnsigned()
+{
+    return tValueVector[tIndex];
+}
+
+unsigned EnumLoop::reset(EnumType enumType)
+{
+    tEnumType = enumType;
+    tValueVector.clear();
+    tIndex = 0;
 }
 
 void EnumLoop::withAll(EnumType enumType)

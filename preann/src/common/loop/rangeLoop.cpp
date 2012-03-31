@@ -52,9 +52,9 @@ void RangeLoop::repeatFunctionImpl(FunctionContainer &func, ParametersMap* param
 {
     tUnsignedValue = 0;
     for (tValue = tMin; tValue < tMax; tValue += tInc) {
-        ++tUnsignedValue;
         parametersMap->putNumber(tKey, tValue);
         this->repeatFunctionBase(func, parametersMap);
+        ++tUnsignedValue;
     }
 }
 

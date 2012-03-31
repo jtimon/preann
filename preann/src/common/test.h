@@ -26,6 +26,10 @@ class Test
 {
 public:
     static const string TEST_FUNCTION;
+    static const string X_TO_PLOT;
+    static const string TO_AVERAGE;
+    static const string X_ARRAY;
+    static const string Y_ARRAY;
     static const string DIFF_COUNT;
     static const string MEM_LOSSES;
     static const string REPETITIONS;
@@ -42,12 +46,13 @@ public:
     static const string PLOT_FILE;
     static const string FIRST_STATE;
     static const string SUB_PATH;
-    static const string INITIAL_POPULATION;
+    static const string POPULATION;
     static const string EXAMPLE_INDIVIDUAL;
     static const string TASK;
     static const string MAX_GENERATIONS;
 protected:
     void createGnuPlotScript(ParametersMap* parametersMap, string functionLabel);
+    void createGnuPlotScriptTask(RangeLoop*& xToPlot, std::string& path, std::string& label);
     Loop* tLoop;
 public:
     ParametersMap parameters;
@@ -61,9 +66,11 @@ public:
     static void checkEmptyMemory(ParametersMap* parametersMap);
 
     void test(FunctionPtr func, std::string functionLabel);
-    void plot(FunctionPtr func, std::string functionLabel, std::string plotVarKey, float min,
-              float max, float inc);
+    void plot(FunctionPtr func, std::string functionLabel, std::string plotVarKey, float min, float max,
+              float inc);
     void plotTask(unsigned maxGenerations);
+    void plotTask2(std::string functionLabel, RangeLoop* xToPlot);
+    void plotTask2(std::string functionLabel, RangeLoop* xToPlot, Loop* toAverage);
     void addLoop(Loop* loop);
     Loop* getLoop();
 

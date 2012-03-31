@@ -9,6 +9,7 @@
 
 const string Loop::LABEL = "__LOOP_FUNCTION_NAME";
 const string Loop::STATE = "__LOOP__RUNNING_STATE";
+const string Loop::LAST_LEAF = "__LOOP__LAST_LEAF";
 const string Loop::LEAF = "__LOOP__RUNNING_LEAF";
 const string Loop::VALUE_LEVEL = "__LOOP__VALUE_LEVEL";
 
@@ -92,7 +93,14 @@ void Loop::repeatFunction(FunctionContainer &func, ParametersMap* parametersMap,
 {
     cout << "Repeating function... " << functionLabel << endl;
     parametersMap->putString(Loop::LABEL, functionLabel);
+
+    unsigned previousLoopLeaf = 0;
+    try {
+        previousLoopLeaf = parametersMap->getNumber(Loop::LEAF);
+    } catch (string e) {
+    }
     parametersMap->putNumber(Loop::LEAF, 0);
+
     tLevel = 0;
     this->setCallerLoop(NULL);
     try {
@@ -100,12 +108,19 @@ void Loop::repeatFunction(FunctionContainer &func, ParametersMap* parametersMap,
     } catch (string e) {
         cout << "Error while repeating function... " << functionLabel << " : " << e << endl;
     }
+    parametersMap->putNumber(Loop::LEAF, previousLoopLeaf);
 }
 
-unsigned Loop::valueToUnsigned()
+void __putLastLeaf_(ParametersMap* params)
 {
-    string error = "valueToUnsigned not implemented for this kind of Loop.";
-    throw error;
+    params->putNumber(Loop::LAST_LEAF, params->getNumber(Loop::LEAF));
+}
+
+unsigned Loop::getNumLeafs()
+{
+    ParametersMap params;
+    repeatFunction(__putLastLeaf_, &params, "Loop::getNumLeafs()");
+    return params.getNumber(Loop::LAST_LEAF);
 }
 
 Loop* Loop::findLoop(std::string key)

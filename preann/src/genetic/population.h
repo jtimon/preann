@@ -103,12 +103,13 @@ public:
 
     void insertIndividual(Individual* individual);
     unsigned nextGeneration();
+    void learn(unsigned generations);
 
     unsigned getGeneration();
     Individual* getBestIndividual();
     float getBestIndividualScore();
     float getTotalScore();
-    float getAverageScore();
+    float getAverageFitness();
     float getWorstIndividualScore();
     Task* getTask();
     unsigned getSize();
