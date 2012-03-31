@@ -102,7 +102,9 @@ int main(int argc, char *argv[])
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
         test.addLoop(bufferTypeLoop);
 
-        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+        EnumLoop* implementationLoop = new EnumLoop(ET_IMPLEMENTATION);
+        implementationLoop->with(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2);
+        test.addLoop(implementationLoop);
 
         test.getLoop()->print();
 

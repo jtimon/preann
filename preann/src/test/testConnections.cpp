@@ -122,7 +122,9 @@ int main(int argc, char *argv[])
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
         test.addLoop(bufferTypeLoop);
 
-        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+        EnumLoop* implementationLoop = new EnumLoop(ET_IMPLEMENTATION);
+        implementationLoop->with(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2);
+        test.addLoop(implementationLoop);
 
         test.getLoop()->print();
 
