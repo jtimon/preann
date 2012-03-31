@@ -149,8 +149,8 @@ void Test::checkEmptyMemory(ParametersMap* parametersMap)
 void testAction(ParametersMap* parametersMap)
 {
     try {
-        FunctionContainer* func = (FunctionContainer*) parametersMap->getPtr(Test::TEST_FUNCTION);
-        func->execute(parametersMap);
+        ParamMapFunction* func = (ParamMapFunction*) parametersMap->getPtr(Test::TEST_FUNCTION);
+        func->execute();
         Test::checkDifferences(parametersMap);
         Test::checkEmptyMemory(parametersMap);
     } catch (string e) {
@@ -159,10 +159,10 @@ void testAction(ParametersMap* parametersMap)
                         + parametersMap->getString(Loop::STATE) + " : " + e << endl;
     }
 }
-void Test::test(FunctionPtr func, std::string functionLabel)
+void Test::test(ParamMapFuncPtr func, std::string functionLabel)
 {
     cout << "Testing... " << functionLabel << endl;
-    FunctionContainer function(func);
+    ParamMapFunction function(func, &parameters);
     parameters.putPtr(Test::TEST_FUNCTION, &function);
     tLoop->repeatFunction(testAction, &parameters, functionLabel);
 }
@@ -323,8 +323,8 @@ void plotAction(ParametersMap* parametersMap)
         for (float i = min; i < max; i += inc) {
             parametersMap->putNumber(plotVar, i);
 
-            FunctionContainer* func = (FunctionContainer*) parametersMap->getPtr(Test::TEST_FUNCTION);
-            func->execute(parametersMap);
+            ParamMapFunction* func = (ParamMapFunction*) parametersMap->getPtr(Test::TEST_FUNCTION);
+            func->execute();
 
             float totalTime = parametersMap->getNumber(Test::TIME_COUNT);
             fprintf(dataFile, " %f %f \n", i, totalTime / repetitions);
@@ -343,7 +343,7 @@ void plotFile(string path, string functionLabel)
     string syscommand = "gnuplot " + plotPath;
     system(syscommand.data());
 }
-void Test::plot(FunctionPtr func, std::string functionLabel, std::string plotVarKey, float min, float max,
+void Test::plot(ParamMapFuncPtr func, std::string functionLabel, std::string plotVarKey, float min, float max,
                 float inc)
 {
     cout << "Plotting " << functionLabel << "...";
@@ -356,7 +356,7 @@ void Test::plot(FunctionPtr func, std::string functionLabel, std::string plotVar
 
     createGnuPlotScript(&parameters, functionLabel);
 
-    FunctionContainer function(func);
+    ParamMapFunction function(func, &parameters);
     parameters.putPtr(Test::TEST_FUNCTION, &function);
     tLoop->repeatFunction(plotAction, &parameters, functionLabel);
 
@@ -513,6 +513,7 @@ void forLinesFunction(ParametersMap* params)
     // create vector
     unsigned arraySize = xToPlot->getNumLeafs();
     float* xArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
+    params->putPtr(Test::X_ARRAY, xArray);
     xToPlot->repeatFunction(fillArrayX, params, "fillArrayX");
 
     float* yArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
@@ -537,7 +538,7 @@ void forLinesFunction(ParametersMap* params)
     unsigned divisor = toAverage->getNumLeafs();
     for (unsigned i = 0; i < arraySize; ++i) {
         float averagedResult = yArray[i] / divisor;
-        fprintf(dataFile, " %f %f \n", xArray[i], averagedResult);
+        fprintf(dataFile, " %d %f \n", (unsigned)xArray[i], averagedResult);
     }
     fclose(dataFile);
 }
@@ -557,7 +558,7 @@ void Test::plotTask2(std::string label, RangeLoop* xToPlot, Loop* toAverage)
     parameters.putPtr(Test::TO_AVERAGE, toAverage);
     tLoop->repeatFunction(forLinesFunction, &parameters, label);
 
-    plotFile(path, testedTask);
+    plotFile(path, label);
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
 }

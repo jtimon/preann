@@ -65,8 +65,8 @@ public:
     static void checkDifferences(ParametersMap* parametersMap);
     static void checkEmptyMemory(ParametersMap* parametersMap);
 
-    void test(FunctionPtr func, std::string functionLabel);
-    void plot(FunctionPtr func, std::string functionLabel, std::string plotVarKey, float min, float max,
+    void test(ParamMapFuncPtr func, std::string functionLabel);
+    void plot(ParamMapFuncPtr func, std::string functionLabel, std::string plotVarKey, float min, float max,
               float inc);
     void plotTask(unsigned maxGenerations);
     void plotTask2(std::string functionLabel, RangeLoop* xToPlot);
