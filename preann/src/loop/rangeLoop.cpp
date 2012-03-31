@@ -48,7 +48,7 @@ std::string RangeLoop::valueToString()
     return to_string(tValue);
 }
 
-void RangeLoop::repeatFunctionImpl(ParamMapFunction &func, ParametersMap* parametersMap)
+void RangeLoop::repeatFunctionImpl(LoopFunction* func, ParametersMap* parametersMap)
 {
     tUnsignedValue = 0;
     for (tValue = tMin; tValue < tMax; tValue += tInc) {

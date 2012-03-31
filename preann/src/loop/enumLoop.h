@@ -22,7 +22,7 @@ protected:
     virtual unsigned valueToUnsigned();
     virtual unsigned reset(EnumType enumType);
 
-    virtual void repeatFunctionImpl(ParamMapFunction &func, ParametersMap* parametersMap);
+    virtual void repeatFunctionImpl(LoopFunction* func, ParametersMap* parametersMap);
 public:
     EnumLoop(EnumType enumType);
     EnumLoop(std::string key, EnumType enumType);

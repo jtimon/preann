@@ -7,7 +7,7 @@
 
 typedef void (*ParamMapFuncPtr)(ParametersMap*);
 
-class ParamMapFunction : LoopFunction
+class ParamMapFunction : public LoopFunction
 {
     ParamMapFuncPtr tFunction;
     ParametersMap* tParameters;

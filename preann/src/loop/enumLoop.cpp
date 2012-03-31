@@ -133,7 +133,7 @@ std::string EnumLoop::valueToString()
     return Enumerations::toString(tEnumType, tValueVector[tIndex]);
 }
 
-void EnumLoop::repeatFunctionImpl(ParamMapFunction &func, ParametersMap* parametersMap)
+void EnumLoop::repeatFunctionImpl(LoopFunction* func, ParametersMap* parametersMap)
 {
     for (tIndex = 0; tIndex < tValueVector.size(); ++tIndex) {
         parametersMap->putNumber(tKey, tValueVector[tIndex]);

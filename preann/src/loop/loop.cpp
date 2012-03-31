@@ -62,7 +62,7 @@ std::string Loop::getLevelName(unsigned &level)
     return result;
 }
 
-void Loop::repeatFunctionBase(ParamMapFunction &func, ParametersMap* parametersMap)
+void Loop::repeatFunctionBase(LoopFunction* func, ParametersMap* parametersMap)
 {
     string levelName = getLevelName(tLevel);
     parametersMap->putNumber(levelName, this->valueToUnsigned());
@@ -74,7 +74,7 @@ void Loop::repeatFunctionBase(ParamMapFunction &func, ParametersMap* parametersM
     } else {
         parametersMap->putString(Loop::STATE, this->getState(false));
 //        parametersMap->print();
-        func.execute();
+        func->execute();
         unsigned leaf = parametersMap->getNumber(Loop::LEAF);
         cout << this->getState(true) << " Leaf " << leaf << endl;
         parametersMap->putNumber(Loop::LEAF, ++leaf);
@@ -84,11 +84,12 @@ void Loop::repeatFunctionBase(ParamMapFunction &func, ParametersMap* parametersM
 void Loop::repeatFunction(ParamMapFuncPtr func, ParametersMap* parametersMap,
                           std::string functionLabel)
 {
-    ParamMapFunction function(func, parametersMap);
+    LoopFunction* function = new ParamMapFunction(func, parametersMap);
     repeatFunction(function, parametersMap, functionLabel);
+    delete(function);
 }
 
-void Loop::repeatFunction(ParamMapFunction &func, ParametersMap* parametersMap,
+void Loop::repeatFunction(LoopFunction* func, ParametersMap* parametersMap,
                           std::string functionLabel)
 {
     cout << "Repeating function... " << functionLabel << endl;
