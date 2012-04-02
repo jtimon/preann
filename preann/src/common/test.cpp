@@ -292,62 +292,84 @@ void Test::createGnuPlotScript(ParametersMap* parametersMap, string functionLabe
     fclose(plotFile);
 }
 
-void plotAction(LoopFunction* loopFunction)
-{
-    ParametersMap* parametersMap = loopFunction->getParameters();
-    Loop* callerLoop = loopFunction->getCallerLoop();
-    string state = callerLoop->getState(false);
-    string label = loopFunction->getLabel();
-
-    string path = parametersMap->getString(Test::PLOT_PATH);
-    unsigned repetitions = parametersMap->getNumber(Test::REPETITIONS);
-
-    string dataPath = path + "data/" + label + "_" + state + ".DAT";
-    FILE* dataFile = Util::openFile(dataPath);
-    string plotVar = parametersMap->getString(Test::PLOT_LOOP);
-    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
-
-    float min = parametersMap->getNumber(Test::PLOT_MIN);
-    float max = parametersMap->getNumber(Test::PLOT_MAX);
-    float inc = parametersMap->getNumber(Test::PLOT_INC);
-
-    for (float i = min; i < max; i += inc) {
-        parametersMap->putNumber(plotVar, i);
-
-        ParamMapFunction* func = (ParamMapFunction*) parametersMap->getPtr(Test::TEST_FUNCTION);
-        func->execute(callerLoop);
-
-        float totalTime = parametersMap->getNumber(Test::TIME_COUNT);
-        fprintf(dataFile, " %f %f \n", i, totalTime / repetitions);
-    }
-
-    fclose(dataFile);
-}
 void plotFile(string path, string functionLabel)
 {
     string plotPath = path + "gnuplot/" + functionLabel + ".plt";
     string syscommand = "gnuplot " + plotPath;
     system(syscommand.data());
 }
-void Test::plot(ParamMapFuncPtr func, std::string functionLabel, std::string plotVarKey, float min, float max,
-                float inc)
+
+class ChronoFunction : public LoopFunction
 {
-    cout << "Plotting " << functionLabel << "...";
+    FILE* tDataFile;
+    LoopFunction* tFunctionToChrono;
+    string tPlotVar;
+    unsigned tRepetitions;
+public:
+    ChronoFunction(ParametersMap* parameters, LoopFunction* functionToChrono, string plotVar,
+                   FILE* dataFile, unsigned repetitions)
+    {
+        tLabel = "ChronoFunction";
+        tDataFile = dataFile;
+        tParameters = parameters;
+        tPlotVar = plotVar;
+        tFunctionToChrono = functionToChrono;
+        tRepetitions = repetitions;
+    }
+    ;
+
+    virtual void __executeImpl()
+    {
+        tFunctionToChrono->execute(tCallerLoop);
+
+        float timeCount = tParameters->getNumber(Test::TIME_COUNT);
+        float xValue = tParameters->getNumber(tPlotVar);
+
+        fprintf(tDataFile, " %f %f \n", xValue, timeCount / tRepetitions);
+    }
+    ;
+
+};
+
+void plotAction(LoopFunction* loopFunction)
+{
+    ParametersMap* parametersMap = loopFunction->getParameters();
+    string state = loopFunction->getCallerLoop()->getState(false);
+
+    string path = parametersMap->getString(Test::PLOT_PATH);
+
+    RangeLoop* xToPlot = (RangeLoop*) parametersMap->getPtr(Test::X_TO_PLOT);
+    string plotVar = xToPlot->getKey();
+
+    string dataPath = path + "data/" + loopFunction->getLabel() + "_" + state + ".DAT";
+    FILE* dataFile = Util::openFile(dataPath);
+    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+
+
+    LoopFunction* func = (LoopFunction*) parametersMap->getPtr(Test::TEST_FUNCTION);
+    unsigned repetitions = parametersMap->getNumber(Test::REPETITIONS);
+
+    ChronoFunction chronoFunction(parametersMap, func, plotVar, dataFile, repetitions);
+    xToPlot->repeatFunction(&chronoFunction, parametersMap, "ChronoFunction");
+
+    fclose(dataFile);
+}
+
+void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot)
+{
+    cout << "Plotting " << label << "...";
     Chronometer chrono;
     chrono.start();
-    parameters.putString(PLOT_LOOP, plotVarKey);
-    parameters.putNumber(PLOT_MIN, min);
-    parameters.putNumber(PLOT_MAX, max);
-    parameters.putNumber(PLOT_INC, inc);
+    parameters.putPtr(Test::X_TO_PLOT, xToPlot);
 
-    createGnuPlotScript(&parameters, functionLabel);
+    createGnuPlotScript(&parameters, label);
 
     ParamMapFunction function(func, &parameters);
     parameters.putPtr(Test::TEST_FUNCTION, &function);
-    tLoop->repeatFunction(plotAction, &parameters, functionLabel);
+    tLoop->repeatFunction(plotAction, &parameters, label);
 
     string path = parameters.getString(Test::PLOT_PATH);
-    plotFile(path, functionLabel);
+    plotFile(path, label);
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
 }

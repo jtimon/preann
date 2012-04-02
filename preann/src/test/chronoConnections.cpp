@@ -85,12 +85,14 @@ int main(int argc, char *argv[])
         test.parameters.putNumber(Test::POINT_TYPE_LEVEL, 2);
         test.getLoop()->print();
 
+        RangeLoop xToPlot(Dummy::SIZE, 50000, 500000, 50000);
         test.parameters.putNumber(Test::REPETITIONS, 10000);
-        test.plot(chronoMutate, "Connection_mutate", Dummy::SIZE, 50000, 500000, 50000);
-//        test.parameters.putNumber(Test::REPETITIONS, 1000);
-//        test.plot(chronoCrossover, "Connection_crossover", Dummy::SIZE, 500, 5000, 500);
-//        test.parameters.putNumber(Test::REPETITIONS, 1000);
-//        test.plot(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", Dummy::SIZE, 500, 5000, 500);
+        test.plot(chronoMutate, "Connection_mutate", &xToPlot);
+
+        xToPlot.resetRange(500, 5000, 500);
+        test.parameters.putNumber(Test::REPETITIONS, 1000);
+        test.plot(chronoCrossover, "Connection_crossover", &xToPlot);
+        test.plot(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot);
 
         printf("Exit success.\n");
     } catch (std::string error) {

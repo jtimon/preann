@@ -90,15 +90,18 @@ int main(int argc, char *argv[])
 
         test.getLoop()->print();
 
-        test.plot(chronoCopyToInterface, "Buffer_copyToInterface", Dummy::SIZE, 2000, 20001, 2000);
-        test.plot(chronoCopyFromInterface, "Buffer_copyFromInterface", Dummy::SIZE, 2000, 20001, 2000);
-        test.plot(chronoClone, "Buffer_clone", Dummy::SIZE, 1000, 10001, 3000);
+        RangeLoop xToPlot(Dummy::SIZE, 2000, 20001, 2000);
+        test.plot(chronoCopyToInterface, "Buffer_copyToInterface", &xToPlot);
+        test.plot(chronoCopyFromInterface, "Buffer_copyFromInterface", &xToPlot);
+        xToPlot.resetRange(1000, 10001, 3000);
+        test.plot(chronoClone, "Buffer_clone", &xToPlot);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         test.getLoop()->print();
 
-        test.plot(chronoActivation, "Buffer_activation", Dummy::SIZE, 2000, 20001, 2000);
+        xToPlot.resetRange(2000, 20001, 2000);
+        test.plot(chronoActivation, "Buffer_activation", &xToPlot);
 
         printf("Exit success.\n");
     } catch (std::string error) {
