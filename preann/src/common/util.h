@@ -51,7 +51,14 @@ template<class T>
         return ss.str();
     }
 
-FILE* openFile(string path);
+ ;
+
+class Util
+{
+public:
+    static FILE* openFile(string path);
+    static void check(bool condition, std::string error);
+};
 
 class Random
 {

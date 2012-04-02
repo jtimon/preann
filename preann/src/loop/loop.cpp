@@ -8,9 +8,8 @@
 #include "loop.h"
 
 const string Loop::LABEL = "__LOOP_FUNCTION_NAME";
-const string Loop::STATE = "__LOOP__RUNNING_STATE";
-const string Loop::LAST_LEAF = "__LOOP__LAST_LEAF";
-const string Loop::LEAF = "__LOOP__RUNNING_LEAF";
+//const string Loop::LAST_LEAF = "__LOOP__LAST_LEAF";
+//const string Loop::LEAF = "__LOOP__RUNNING_LEAF";
 const string Loop::VALUE_LEVEL = "__LOOP__VALUE_LEVEL";
 
 Loop::Loop()
@@ -72,13 +71,15 @@ void Loop::repeatFunctionBase(LoopFunction* func, ParametersMap* parametersMap)
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->repeatFunctionImpl(func, parametersMap);
     } else {
-        parametersMap->putString(Loop::STATE, this->getState(false));
-//        parametersMap->print();
-        func->execute();
-        unsigned leaf = parametersMap->getNumber(Loop::LEAF);
-        cout << this->getState(true) << " Leaf " << leaf << endl;
-        parametersMap->putNumber(Loop::LEAF, ++leaf);
+        func->execute(this);
     }
+}
+
+void Loop::repeatFunction(LoopFuncPtr func, ParametersMap* parametersMap, std::string functionLabel)
+{
+    LoopFunction* function = new LoopFunction(func, functionLabel, parametersMap);
+    repeatFunction(function, parametersMap, functionLabel);
+    delete(function);
 }
 
 void Loop::repeatFunction(ParamMapFuncPtr func, ParametersMap* parametersMap,
@@ -95,33 +96,28 @@ void Loop::repeatFunction(LoopFunction* func, ParametersMap* parametersMap,
     cout << "Repeating function... " << functionLabel << endl;
     parametersMap->putString(Loop::LABEL, functionLabel);
 
-    unsigned previousLoopLeaf = 0;
-    try {
-        previousLoopLeaf = parametersMap->getNumber(Loop::LEAF);
-    } catch (string e) {
-    }
-    parametersMap->putNumber(Loop::LEAF, 0);
-
     tLevel = 0;
     this->setCallerLoop(NULL);
     try {
+        func->start();
         this->repeatFunctionImpl(func, parametersMap);
     } catch (string e) {
         cout << "Error while repeating function... " << functionLabel << " : " << e << endl;
     }
-    parametersMap->putNumber(Loop::LEAF, previousLoopLeaf);
 }
 
-void __putLastLeaf_(ParametersMap* params)
+void __emptyFunction_(ParametersMap* params)
 {
-    params->putNumber(Loop::LAST_LEAF, params->getNumber(Loop::LEAF));
 }
 
 unsigned Loop::getNumLeafs()
 {
     ParametersMap params;
-    repeatFunction(__putLastLeaf_, &params, "Loop::getNumLeafs()");
-    return params.getNumber(Loop::LAST_LEAF);
+    LoopFunction* function = new ParamMapFunction(__emptyFunction_, &params);
+    repeatFunction(function, &params, "Loop::getNumLeafs()");
+    unsigned lastLeafPlusOne = function->getLeaf();
+    delete(function);
+    return lastLeafPlusOne;
 }
 
 Loop* Loop::findLoop(std::string key)

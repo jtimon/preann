@@ -80,7 +80,7 @@ void JoinEnumLoop::print()
     cout << endl;
 }
 
-void JoinEnumLoop::repeatFunctionImpl(ParamMapFunction &func, ParametersMap* parametersMap)
+void JoinEnumLoop::repeatFunctionImpl(LoopFunction* func, ParametersMap* parametersMap)
 {
     string levelName = getLevelName(tLevel);
 

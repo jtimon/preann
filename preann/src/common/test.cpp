@@ -120,25 +120,27 @@ unsigned Test::assertEquals(Buffer* expected, Buffer* actual)
     return differencesCounter;
 }
 
-void Test::checkDifferences(ParametersMap* parametersMap)
+void testAction(LoopFunction* loopFunction)
 {
+    ParametersMap* parametersMap = loopFunction->getParameters();
+    Loop* callerLoop = loopFunction->getCallerLoop();
+    string state = callerLoop->getState(false);
+    string label = loopFunction->getLabel();
+
+    ParamMapFunction* func = (ParamMapFunction*) parametersMap->getPtr(Test::TEST_FUNCTION);
+    func->execute(callerLoop);
+
     try {
         unsigned differencesCounter = parametersMap->getNumber(Test::DIFF_COUNT);
         if (differencesCounter > 0) {
-            string state = parametersMap->getString(Loop::STATE);
-            cout << state << " : " << differencesCounter << " differences detected." << endl;
+            cout << differencesCounter
+                    << " differences detected while testing " + label + " at state " + state << endl;
         }
     } catch (string e) {
     }
-}
-
-void Test::checkEmptyMemory(ParametersMap* parametersMap)
-{
     if (MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0) {
 
-        cout
-                << "Memory loss detected while testing " + parametersMap->getString(Loop::LABEL)
-                        + " at state " + parametersMap->getString(Loop::STATE) << endl;
+        cout << "Memory loss detected while testing " + label + " at state " + state << endl;
 
         MemoryManagement::printTotalAllocated();
         MemoryManagement::printTotalPointers();
@@ -146,19 +148,6 @@ void Test::checkEmptyMemory(ParametersMap* parametersMap)
     }
 }
 
-void testAction(ParametersMap* parametersMap)
-{
-    try {
-        ParamMapFunction* func = (ParamMapFunction*) parametersMap->getPtr(Test::TEST_FUNCTION);
-        func->execute();
-        Test::checkDifferences(parametersMap);
-        Test::checkEmptyMemory(parametersMap);
-    } catch (string e) {
-        cout
-                << " while testing " + parametersMap->getString(Loop::LABEL) + " at state "
-                        + parametersMap->getString(Loop::STATE) + " : " + e << endl;
-    }
-}
 void Test::test(ParamMapFuncPtr func, std::string functionLabel)
 {
     cout << "Testing... " << functionLabel << endl;
@@ -244,8 +233,11 @@ int getLineColor(ParametersMap*& parametersMap)
     return lineColor;
 }
 
-void preparePlotFunction(ParametersMap* parametersMap)
+void preparePlotFunction(LoopFunction* loopFunction)
 {
+    ParametersMap* parametersMap = loopFunction->getParameters();
+    string state = loopFunction->getCallerLoop()->getState(false);
+
     FILE *plotFile = (FILE*) ((((parametersMap->getPtr(Test::PLOT_FILE)))));
     unsigned first = parametersMap->getNumber(Test::FIRST_STATE);
     if (first) {
@@ -253,20 +245,17 @@ void preparePlotFunction(ParametersMap* parametersMap)
     } else {
         fprintf(plotFile, " , \\\n\t");
     }
-    string state = parametersMap->getString(Loop::STATE);
     string subPath = parametersMap->getString(Test::SUB_PATH);
     string dataPath = subPath + state + ".DAT";
     string line = " \"" + dataPath + "\" using 1:2 title \"" + state + "\"";
 
-//    parametersMap->print();
     int lineColor = getLineColor(parametersMap);
     int pointType = getPointType(parametersMap);
-
-    cout << "lineColor " << lineColor << " - pointType " << pointType << endl;
 
     line += " with linespoints lt " + to_string(lineColor);
     line += " pt " + to_string(pointType);
 
+    printf(" %s \n", line.data());
     fprintf(plotFile, "%s", line.data());
 }
 void Test::createGnuPlotScript(ParametersMap* parametersMap, string functionLabel)
@@ -278,7 +267,7 @@ void Test::createGnuPlotScript(ParametersMap* parametersMap, string functionLabe
     string plotPath = path + "gnuplot/" + functionLabel + ".plt";
     string outputPath = path + "images/" + functionLabel + ".png";
 
-    FILE* plotFile = openFile(plotPath);
+    FILE* plotFile = Util::openFile(plotPath);
 
     fprintf(plotFile, "set terminal png size 2048,1024 \n");
     fprintf(plotFile, "set key below\n");
@@ -303,39 +292,36 @@ void Test::createGnuPlotScript(ParametersMap* parametersMap, string functionLabe
     fclose(plotFile);
 }
 
-void plotAction(ParametersMap* parametersMap)
+void plotAction(LoopFunction* loopFunction)
 {
-    try {
-        string path = parametersMap->getString(Test::PLOT_PATH);
-        string functionLabel = parametersMap->getString(Loop::LABEL);
-        string state = parametersMap->getString(Loop::STATE);
-        unsigned repetitions = parametersMap->getNumber(Test::REPETITIONS);
+    ParametersMap* parametersMap = loopFunction->getParameters();
+    Loop* callerLoop = loopFunction->getCallerLoop();
+    string state = callerLoop->getState(false);
+    string label = loopFunction->getLabel();
 
-        string dataPath = path + "data/" + functionLabel + "_" + state + ".DAT";
-        FILE* dataFile = openFile(dataPath);
-        string plotVar = parametersMap->getString(Test::PLOT_LOOP);
-        fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+    string path = parametersMap->getString(Test::PLOT_PATH);
+    unsigned repetitions = parametersMap->getNumber(Test::REPETITIONS);
 
-        float min = parametersMap->getNumber(Test::PLOT_MIN);
-        float max = parametersMap->getNumber(Test::PLOT_MAX);
-        float inc = parametersMap->getNumber(Test::PLOT_INC);
+    string dataPath = path + "data/" + label + "_" + state + ".DAT";
+    FILE* dataFile = Util::openFile(dataPath);
+    string plotVar = parametersMap->getString(Test::PLOT_LOOP);
+    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
-        for (float i = min; i < max; i += inc) {
-            parametersMap->putNumber(plotVar, i);
+    float min = parametersMap->getNumber(Test::PLOT_MIN);
+    float max = parametersMap->getNumber(Test::PLOT_MAX);
+    float inc = parametersMap->getNumber(Test::PLOT_INC);
 
-            ParamMapFunction* func = (ParamMapFunction*) parametersMap->getPtr(Test::TEST_FUNCTION);
-            func->execute();
+    for (float i = min; i < max; i += inc) {
+        parametersMap->putNumber(plotVar, i);
 
-            float totalTime = parametersMap->getNumber(Test::TIME_COUNT);
-            fprintf(dataFile, " %f %f \n", i, totalTime / repetitions);
-        }
+        ParamMapFunction* func = (ParamMapFunction*) parametersMap->getPtr(Test::TEST_FUNCTION);
+        func->execute(callerLoop);
 
-        fclose(dataFile);
-    } catch (string e) {
-        cout
-                << " while plotting " + parametersMap->getString(Loop::LABEL) + " at state "
-                        + parametersMap->getString(Loop::STATE) + " : " + e << endl;
+        float totalTime = parametersMap->getNumber(Test::TIME_COUNT);
+        fprintf(dataFile, " %f %f \n", i, totalTime / repetitions);
     }
+
+    fclose(dataFile);
 }
 void plotFile(string path, string functionLabel)
 {
@@ -366,34 +352,30 @@ void Test::plot(ParamMapFuncPtr func, std::string functionLabel, std::string plo
     cout << chrono.getSeconds() << " segundos." << endl;
 }
 
-void plotTaskFunction(ParametersMap* parametersMap)
+void plotTaskFunction(LoopFunction* loopFunction)
 {
-    string state = parametersMap->getString(Loop::STATE);
-    try {
-        string path = parametersMap->getString(Test::PLOT_PATH);
+    ParametersMap* parametersMap = loopFunction->getParameters();
+    string state = loopFunction->getCallerLoop()->getState(false);
+    string path = parametersMap->getString(Test::PLOT_PATH);
 
-        Population* initialPopulation = (Population*) parametersMap->getPtr(Test::POPULATION);
-        Population* population = new Population(initialPopulation);
-        population->setParams(parametersMap);
+    Population* initialPopulation = (Population*) parametersMap->getPtr(Test::POPULATION);
+    Population* population = new Population(initialPopulation);
+    population->setParams(parametersMap);
 
-        Task* task = population->getTask();
-        string dataPath = path + "data/" + task->toString() + "_" + state + ".DAT";
-        FILE* dataFile = openFile(dataPath);
-        string plotVar = "generation";
-        fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+    Task* task = population->getTask();
+    string dataPath = path + "data/" + task->toString() + "_" + state + ".DAT";
+    FILE* dataFile = Util::openFile(dataPath);
+    string plotVar = "generation";
+    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
-        float maxGenerations = parametersMap->getNumber(Test::MAX_GENERATIONS);
-        for (unsigned i = 0; i < maxGenerations; ++i) {
-            float fitness = population->getBestIndividualScore();
-            fprintf(dataFile, " %d %f \n", i, fitness);
-            population->nextGeneration();
-        }
-        fclose(dataFile);
-        delete (population);
-    } catch (string e) {
-        cout << " while plotting " + parametersMap->getString(Loop::LABEL) + " at state " + state + " : " + e
-                << endl;
+    float maxGenerations = parametersMap->getNumber(Test::MAX_GENERATIONS);
+    for (unsigned i = 0; i < maxGenerations; ++i) {
+        float fitness = population->getBestIndividualScore();
+        fprintf(dataFile, " %d %f \n", i, fitness);
+        population->nextGeneration();
     }
+    fclose(dataFile);
+    delete (population);
 }
 void Test::plotTask(unsigned maxGenerations)
 {
@@ -426,13 +408,13 @@ void Test::plotTask2(std::string label, RangeLoop* xToPlot)
 {
     Loop* auxLoop = new RangeLoop("aux_average", 1, 2, 1);
     plotTask2(label, xToPlot, auxLoop);
-    delete(auxLoop);
+    delete (auxLoop);
 }
 
 void Test::createGnuPlotScriptTask(RangeLoop*& xToPlot, std::string& path, std::string& label)
 {
     string plotPath = path + "gnuplot/" + label + ".plt";
-    FILE* plotFile = openFile(plotPath);
+    FILE* plotFile = Util::openFile(plotPath);
 
     fprintf(plotFile, "set terminal png size 2048,1024 \n");
     fprintf(plotFile, "set key below\n");
@@ -483,31 +465,28 @@ void addResultsPopulation(ParametersMap* params)
 
 void forAveragesFunction(ParametersMap* params)
 {
-    try {
-        // create population
-        Task* task = (Task*) params->getPtr(Test::TASK);
-        Individual* example = task->getExample();
-        unsigned populationSize = params->getNumber(Population::SIZE);
-        float weighsRange = params->getNumber(Dummy::WEIGHS_RANGE);
-        Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
-        initialPopulation->setParams(params);
-        params->putPtr(Test::POPULATION, initialPopulation);
+    // create population
+    Task* task = (Task*) params->getPtr(Test::TASK);
+    Individual* example = task->getExample();
+    unsigned populationSize = params->getNumber(Population::SIZE);
+    float weighsRange = params->getNumber(Dummy::WEIGHS_RANGE);
+    Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
+    initialPopulation->setParams(params);
+    params->putPtr(Test::POPULATION, initialPopulation);
 
-        // create vector
-        Loop* xToPlot = (Loop*) params->getPtr(Test::X_TO_PLOT);
-        xToPlot->repeatFunction(addResultsPopulation, params, "addResults");
+    // create vector
+    Loop* xToPlot = (Loop*) params->getPtr(Test::X_TO_PLOT);
+    xToPlot->repeatFunction(addResultsPopulation, params, "addResults");
 
-        delete (initialPopulation);
-    } catch (string e) {
-        cout << " ERROR" << endl;
-        cout << " at forAveragesFunction while " + params->getString(Loop::LABEL);
-        cout << " at state " + params->getString(Loop::STATE) << endl;
-        cout << " : " + e << endl;
-    }
+    delete (initialPopulation);
 }
 
-void forLinesFunction(ParametersMap* params)
+void forLinesFunction(LoopFunction* loopFunction)
 {
+    ParametersMap* params = loopFunction->getParameters();
+    string state = loopFunction->getCallerLoop()->getState(false);
+    string label = loopFunction->getLabel();
+
     RangeLoop* xToPlot = (RangeLoop*) params->getPtr(Test::X_TO_PLOT);
 
     // create vector
@@ -527,18 +506,17 @@ void forLinesFunction(ParametersMap* params)
     toAverage->repeatFunction(forAveragesFunction, params, "forAveragesFunction");
 
     // Create data file
-    Task* task = (Task*) params->getPtr(Test::TASK);
-    string state = params->getString(Loop::STATE);
     string path = params->getString(Test::PLOT_PATH);
-    string dataPath = path + "data/" + task->toString() + "_" + state + ".DAT";
-    FILE* dataFile = openFile(dataPath);
+    string dataPath = path + "data/" + label + "_" + state + ".DAT";
+    printf(" dataPath %s \n", dataPath.data());
+    FILE* dataFile = Util::openFile(dataPath);
     string plotVar = "generation";
     fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
     unsigned divisor = toAverage->getNumLeafs();
     for (unsigned i = 0; i < arraySize; ++i) {
         float averagedResult = yArray[i] / divisor;
-        fprintf(dataFile, " %d %f \n", (unsigned)xArray[i], averagedResult);
+        fprintf(dataFile, " %d %f \n", (unsigned) xArray[i], averagedResult);
     }
     fclose(dataFile);
 }
@@ -562,6 +540,4 @@ void Test::plotTask2(std::string label, RangeLoop* xToPlot, Loop* toAverage)
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
 }
-
-
 

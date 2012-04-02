@@ -76,4 +76,33 @@ public:
 
 };
 
+class TestAction : public LoopFunction
+{
+    ParametersMap* tParameters;
+    LoopFunction* tInnerFunction;
+    std::string tLabel;
+public:
+    TestAction(ParametersMap* parameters, LoopFunction* innerFunction, std::string label)
+    {
+        tParameters = parameters;
+        tInnerFunction = innerFunction;
+        tLabel = label;
+    }
+    ;
+    virtual ~TestAction()
+    {
+    }
+    ;
+    virtual void __executeImpl()
+    {
+        try {
+            tInnerFunction->execute(tCallerLoop);
+            Test::checkEmptyMemory(tParameters);
+        } catch (string e) {
+            cout << " while testing " + tLabel + " at state " + tCallerLoop->getState(true) << " : " << endl;
+            cout << e << endl;
+        }
+    };
+};
+
 #endif /* TEST_H_ */
