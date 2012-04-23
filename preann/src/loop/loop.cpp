@@ -8,8 +8,6 @@
 #include "loop.h"
 
 const string Loop::LABEL = "__LOOP_FUNCTION_NAME";
-//const string Loop::LAST_LEAF = "__LOOP__LAST_LEAF";
-//const string Loop::LEAF = "__LOOP__RUNNING_LEAF";
 const string Loop::VALUE_LEVEL = "__LOOP__VALUE_LEVEL";
 
 Loop::Loop()
@@ -64,7 +62,7 @@ std::string Loop::getLevelName(unsigned &level)
 void Loop::repeatFunctionBase(LoopFunction* func, ParametersMap* parametersMap)
 {
     string levelName = getLevelName(tLevel);
-    parametersMap->putNumber(levelName, this->valueToUnsigned());
+    parametersMap->putNumber(levelName, func->getLeaf());
 
     if (tInnerLoop) {
         tInnerLoop->tLevel = tLevel + 1;

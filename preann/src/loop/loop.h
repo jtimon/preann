@@ -24,9 +24,6 @@ class Loop
 public:
     //TODO quitar toda esta mierda
     static const string LABEL;
-    static const string STATE;
-//    static const string LEAF;
-//    static const string LAST_LEAF;
     static const string VALUE_LEVEL;
 private:
 protected:
@@ -121,7 +118,7 @@ public:
                     << endl;
             cout << e << endl;
         }
-        cout << tCallerLoop->getState(true) << " Leaf " << tLeaf << endl;
+//        cout << tCallerLoop->getState(true) << " Leaf " << tLeaf << endl;
         ++tLeaf;
     }
     ;
