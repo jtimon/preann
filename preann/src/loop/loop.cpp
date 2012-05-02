@@ -73,21 +73,21 @@ void Loop::repeatFunctionBase(LoopFunction* func, ParametersMap* parametersMap)
 void Loop::repeatFunction(LoopFuncPtr func, ParametersMap* parametersMap, std::string functionLabel)
 {
     LoopFunction* function = new LoopFunction(func, functionLabel, parametersMap);
-    repeatFunction(function, parametersMap, functionLabel);
+    repeatFunction(function, parametersMap);
     delete(function);
 }
 
 void Loop::repeatFunction(ParamMapFuncPtr func, ParametersMap* parametersMap,
                           std::string functionLabel)
 {
-    LoopFunction* function = new ParamMapFunction(func, parametersMap);
-    repeatFunction(function, parametersMap, functionLabel);
+    LoopFunction* function = new ParamMapFunction(func, parametersMap, functionLabel);
+    repeatFunction(function, parametersMap);
     delete(function);
 }
 
-void Loop::repeatFunction(LoopFunction* func, ParametersMap* parametersMap,
-                          std::string functionLabel)
+void Loop::repeatFunction(LoopFunction* func, ParametersMap* parametersMap)
 {
+    std::string functionLabel = func->getLabel();
     cout << "Repeating function... " << functionLabel << endl;
 
     tLevel = 0;
@@ -107,8 +107,8 @@ void __emptyFunction_(ParametersMap* params)
 unsigned Loop::getNumLeafs()
 {
     ParametersMap params;
-    LoopFunction* function = new ParamMapFunction(__emptyFunction_, &params);
-    repeatFunction(function, &params, "Loop::getNumLeafs()");
+    LoopFunction* function = new ParamMapFunction(__emptyFunction_, &params, "Loop::getNumLeafs()");
+    repeatFunction(function, &params);
     unsigned lastLeafPlusOne = function->getLeaf();
     delete(function);
     return lastLeafPlusOne;

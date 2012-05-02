@@ -52,7 +52,7 @@ public:
 
     void repeatFunction(ParamMapFuncPtr func, ParametersMap* parametersMap, std::string functionLabel);
     void repeatFunction(LoopFuncPtr func, ParametersMap* parametersMap, std::string functionLabel);
-    void repeatFunction(LoopFunction* func, ParametersMap* parametersMap, std::string functionLabel);
+    void repeatFunction(LoopFunction* func, ParametersMap* parametersMap);
 
     virtual std::string valueToString() = 0;
     virtual std::string getState(bool longVersion);
@@ -77,30 +77,26 @@ protected:
 
         tCallerLoop = NULL;
         tLeaf = 0;
-    };
+    }
     LoopFunction()
     {
-        initFields(NULL, "NO_LABELED_FUNCTION", NULL);
+        initFields(NULL, "NOT_LABELED_FUNCTION", NULL);
     }
-    ;
 public:
     LoopFunction(LoopFuncPtr functionPtr, string label, ParametersMap* parameters)
     {
         initFields(functionPtr, label, parameters);
     }
-    ;
 
     virtual void __executeImpl()
     {
         (tFunction)(this);
     }
-    ;
 
     void start()
     {
         tLeaf = 0;
     }
-    ;
 
     void execute(Loop* callerLoop)
     {
@@ -116,13 +112,11 @@ public:
 //        cout << tCallerLoop->getState(true) << " Leaf " << tLeaf << endl;
         ++tLeaf;
     }
-    ;
 
     ParametersMap* getParameters()
     {
         return tParameters;
     }
-    ;
     Loop* getCallerLoop()
     {
         return tCallerLoop;
@@ -135,30 +129,23 @@ public:
     {
         return tLeaf;
     }
-    ;
 };
 
 class ParamMapFunction : public LoopFunction
 {
     ParamMapFuncPtr tParamFunction;
 public:
-    ParamMapFunction(ParamMapFuncPtr function, ParametersMap* parameters)
+    ParamMapFunction(ParamMapFuncPtr function, ParametersMap* parameters, std::string functionLabel)
     {
         tParamFunction = function;
         tParameters = parameters;
+        tLabel = functionLabel;
     }
-
-    ;
-    virtual ~ParamMapFunction()
-    {
-    }
-    ;
-
+protected:
     virtual void __executeImpl()
     {
         (tParamFunction)(tParameters);
     }
-    ;
 };
 
 #endif /* LOOP_H_ */

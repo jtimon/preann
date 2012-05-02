@@ -143,7 +143,7 @@ void testAction(LoopFunction* loopFunction)
 void Test::test(ParamMapFuncPtr func, std::string functionLabel)
 {
     cout << "Testing... " << functionLabel << endl;
-    ParamMapFunction function(func, &parameters);
+    ParamMapFunction function(func, &parameters, functionLabel);
     parameters.putPtr(Test::TEST_FUNCTION, &function);
     tLoop->repeatFunction(testAction, &parameters, functionLabel);
 }
@@ -303,8 +303,7 @@ public:
         tFunctionToChrono = functionToChrono;
         tRepetitions = repetitions;
     }
-    ;
-
+protected:
     virtual void __executeImpl()
     {
         tFunctionToChrono->execute(tCallerLoop);
@@ -314,7 +313,6 @@ public:
 
         fprintf(tDataFile, " %f %f \n", xValue, timeCount / tRepetitions);
     }
-    ;
 };
 
 void plotAction(LoopFunction* loopFunction)
@@ -336,7 +334,7 @@ void plotAction(LoopFunction* loopFunction)
     unsigned repetitions = parametersMap->getNumber(Test::REPETITIONS);
 
     ChronoFunction chronoFunction(parametersMap, func, plotVar, dataFile, repetitions);
-    xToPlot->repeatFunction(&chronoFunction, parametersMap, "ChronoFunction");
+    xToPlot->repeatFunction(&chronoFunction, parametersMap);
 
     fclose(dataFile);
 }
@@ -354,7 +352,7 @@ void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, str
 
     createGnuPlotScript(path, label, xLabel, yLabel);
 
-    ParamMapFunction function(func, &parameters);
+    ParamMapFunction function(func, &parameters, label);
     parameters.putPtr(Test::TEST_FUNCTION, &function);
     tLoop->repeatFunction(plotAction, &parameters, label);
 
@@ -374,7 +372,6 @@ void Test::plotTask(std::string label, RangeLoop* xToPlot)
 class FillArrayFunction : public LoopFunction
 {
     float* tArray;
-
 public:
     FillArrayFunction(ParametersMap* parameters, float* array)
     {
@@ -382,14 +379,12 @@ public:
         tParameters = parameters;
         tArray = array;
     }
-    ;
-
+protected:
     virtual void __executeImpl()
     {
         unsigned xValue = tParameters->getNumber(tCallerLoop->getKey());
         tArray[tLeaf] = xValue;
     }
-    ;
 };
 
 void addResultsPopulation(ParametersMap* params)
@@ -436,7 +431,7 @@ void forLinesFunction(LoopFunction* loopFunction)
     float* xArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
     // Fill it
     FillArrayFunction fillArrayXFunc(params, xArray);
-    xToPlot->repeatFunction(&fillArrayXFunc, params, "FillArrayXFunction");
+    xToPlot->repeatFunction(&fillArrayXFunc, params);
 
     float* yArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
     for (unsigned i = 0; i < arraySize; ++i) {
