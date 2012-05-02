@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
         test.parameters.putPtr(Test::EXAMPLE_INDIVIDUAL, example);
 
         RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 100, 5);
-        test.plotTask2("chronoReversi", generationsLoop);
+        test.plotTask("chronoReversi", generationsLoop);
 
         delete (example);
         delete (task);

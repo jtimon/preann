@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 
 //        cout << "generationsLoop->getNumLeafs() " << generationsLoop->getNumLeafs() << endl;
 //        cout << "toAverageLoop->getNumLeafs() " << toAverageLoop->getNumLeafs() << endl;
-        test.plotTask2("selectionReversi", generationsLoop, toAverageLoop);
+        test.plotTask("selectionReversi", generationsLoop, toAverageLoop);
 
         delete (generationsLoop);
         delete (task);

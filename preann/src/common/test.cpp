@@ -374,62 +374,10 @@ void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot)
     cout << chrono.getSeconds() << " segundos." << endl;
 }
 
-//void plotTaskFunction(LoopFunction* loopFunction)
-//{
-//    ParametersMap* parametersMap = loopFunction->getParameters();
-//    string state = loopFunction->getCallerLoop()->getState(false);
-//    string path = parametersMap->getString(Test::PLOT_PATH);
-//
-//    Population* initialPopulation = (Population*) parametersMap->getPtr(Test::POPULATION);
-//    Population* population = new Population(initialPopulation);
-//    population->setParams(parametersMap);
-//
-//    Task* task = population->getTask();
-//    string dataPath = path + "data/" + task->toString() + "_" + state + ".DAT";
-//    FILE* dataFile = Util::openFile(dataPath);
-//    string plotVar = "generation";
-//    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
-//
-//    float maxGenerations = parametersMap->getNumber(Test::MAX_GENERATIONS);
-//    for (unsigned i = 0; i < maxGenerations; ++i) {
-//        float fitness = population->getBestIndividualScore();
-//        fprintf(dataFile, " %d %f \n", i, fitness);
-//        population->nextGeneration();
-//    }
-//    fclose(dataFile);
-//    delete (population);
-//}
-
-// void Test::plotTask(unsigned maxGenerations)
-// {
-//     Task* task = (Task*) parameters.getPtr(Test::TASK);
-//     string testedTask = task->toString();
-//     cout << "Plotting " << testedTask << " with goal " << task->getGoal() << "..." << endl;
-//     Chronometer chrono;
-//     chrono.start();
-
-//     parameters.putNumber(Test::MAX_GENERATIONS, maxGenerations);
-//     Individual* example = (Individual*) parameters.getPtr(Test::EXAMPLE_INDIVIDUAL);
-//     unsigned populationSize = parameters.getNumber(Population::SIZE);
-//     float weighsRange = parameters.getNumber(Dummy::WEIGHS_RANGE);
-//     Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
-//     parameters.putPtr(Test::POPULATION, initialPopulation);
-//     createGnuPlotScript(&parameters, testedTask);
-
-//     tLoop->repeatFunction(plotTaskFunction, &parameters, testedTask);
-
-//     delete (initialPopulation);
-
-//     string path = parameters.getString(Test::PLOT_PATH);
-//     plotFile(path, testedTask);
-//     chrono.stop();
-//     cout << chrono.getSeconds() << " segundos." << endl;
-// }
-
-void Test::plotTask2(std::string label, RangeLoop* xToPlot)
+void Test::plotTask(std::string label, RangeLoop* xToPlot)
 {
     Loop* auxLoop = new RangeLoop("aux_average", 1, 2, 1);
-    plotTask2(label, xToPlot, auxLoop);
+    plotTask(label, xToPlot, auxLoop);
     delete (auxLoop);
 }
 
@@ -543,7 +491,7 @@ void forLinesFunction(LoopFunction* loopFunction)
     fclose(dataFile);
 }
 
-void Test::plotTask2(std::string label, RangeLoop* xToPlot, Loop* toAverage)
+void Test::plotTask(std::string label, RangeLoop* xToPlot, Loop* toAverage)
 {
     Chronometer chrono;
     chrono.start();

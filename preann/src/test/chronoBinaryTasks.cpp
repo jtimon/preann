@@ -13,7 +13,7 @@ using namespace std;
   test->parameters.putPtr(Test::TASK, task);				\
   test->parameters.putPtr(Test::EXAMPLE_INDIVIDUAL, example);		\
   RangeLoop* generationsLoop = new RangeLoop("Generation", 0, maxGenerations, generationStep); \
-  test->plotTask2(stringTask, generationsLoop);		\
+  test->plotTask(stringTask, generationsLoop);		\
   delete (example);							\
   delete (task);
 

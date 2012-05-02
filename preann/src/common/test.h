@@ -67,9 +67,8 @@ public:
 
     void test(ParamMapFuncPtr func, std::string label);
     void plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot);
-    void plotTask(unsigned maxGenerations);
-    void plotTask2(std::string label, RangeLoop* xToPlot);
-    void plotTask2(std::string label, RangeLoop* xToPlot, Loop* toAverage);
+    void plotTask(std::string label, RangeLoop* xToPlot);
+    void plotTask(std::string label, RangeLoop* xToPlot, Loop* toAverage);
     void addLoop(Loop* loop);
     Loop* getLoop();
 
