@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
         test.parameters.putPtr(Test::TASK, task);
         test.parameters.putPtr(Test::EXAMPLE_INDIVIDUAL, example);
 
-        unsigned maxGenerations = 100;
-        test.plotTask(maxGenerations);
+        RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 100, 5);
+        test.plotTask2("chronoReversi", generationsLoop);
 
         delete (example);
         delete (task);

@@ -8,29 +8,36 @@ using namespace std;
 #include "genetic/population.h"
 #include "tasks/binaryTask.h"
 
-#define COMMON                                                                          \
-    Individual* example = task->getExample();                                           \
-    test->parameters.putPtr(Test::TASK, task);                                          \
-    test->parameters.putPtr(Test::EXAMPLE_INDIVIDUAL, example);                         \
-    test->plotTask(maxGenerations);                                                     \
-    delete (example);                                                                   \
-    delete (task);
+#define COMMON								\
+  Individual* example = task->getExample();				\
+  test->parameters.putPtr(Test::TASK, task);				\
+  test->parameters.putPtr(Test::EXAMPLE_INDIVIDUAL, example);		\
+  RangeLoop* generationsLoop = new RangeLoop("Generation", 0, maxGenerations, generationStep); \
+  test->plotTask2(stringTask, generationsLoop);		\
+  delete (example);							\
+  delete (task);
 
-void chronoOr(Test* test, unsigned vectorsSize, unsigned maxGenerations)
+void chronoOr(Test* test, unsigned vectorsSize, unsigned maxGenerations, unsigned generationStep)
 {
+    string stringTask = "chronoOr";
     Task* task = new BinaryTask(BO_OR, vectorsSize);
+
     COMMON
 }
 
-void chronoAnd(Test* test, unsigned vectorsSize, unsigned maxGenerations)
+void chronoAnd(Test* test, unsigned vectorsSize, unsigned maxGenerations, unsigned generationStep)
 {
+    string stringTask = "chronoAnd";
     Task* task = new BinaryTask(BO_AND, vectorsSize);
+
     COMMON
 }
 
-void chronoXor(Test* test, unsigned vectorsSize, unsigned maxGenerations)
+void chronoXor(Test* test, unsigned vectorsSize, unsigned maxGenerations, unsigned generationStep)
 {
+    string stringTask = "chronoXor";
     Task* task = new BinaryTask(BO_XOR, vectorsSize);
+
     COMMON
 }
 
@@ -98,9 +105,10 @@ int main(int argc, char *argv[])
 
         unsigned vectorsSize = 2;
         unsigned maxGenerations = 200;
-//        chronoAnd(&test, vectorsSize, maxGenerations);
-//        chronoOr(&test, vectorsSize, maxGenerations);
-        chronoXor(&test, vectorsSize, maxGenerations);
+        unsigned generationStep = 1;
+        chronoAnd(&test, vectorsSize, maxGenerations, generationStep);
+        chronoOr(&test, vectorsSize, maxGenerations, generationStep);
+        chronoXor(&test, vectorsSize, maxGenerations, generationStep);
 
         printf("Exit success.\n");
     } catch (std::string error) {

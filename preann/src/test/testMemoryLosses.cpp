@@ -112,19 +112,16 @@ int main(int argc, char *argv[])
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
-        test.getLoop()->print();
 
         test.test(testConnection, "Connection::memory_test");
 
         RangeLoop* numInputsLoop = new RangeLoop(Dummy::NUM_INPUTS, 1, 3, 1);
         test.addLoop(numInputsLoop);
-        test.getLoop()->print();
 
         test.test(testLayer, "Layer::memory_test");
 
         RangeLoop* numLayersLoop = new RangeLoop(Dummy::NUM_LAYERS, 1, 3, 1);
         test.addLoop(numLayersLoop);
-        test.getLoop()->print();
 
         test.test(testNeuralNet, "NeuralNet::memory_test");
 
@@ -132,7 +129,6 @@ int main(int argc, char *argv[])
         outputSizeLoop->resetRange(1, 1, 1);
         numInputsLoop->resetRange(1, 1, 1);
         numLayersLoop->resetRange(1, 1, 1);
-        test.getLoop()->print();
 
         test.test(testPopulation, "Population::memory_test");
 

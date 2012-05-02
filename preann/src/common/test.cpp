@@ -41,12 +41,12 @@ const string Test::DIFF_COUNT = "__differencesCounter";
 const string Test::MEM_LOSSES = "__memoryLosses";
 const string Test::REPETITIONS = "__repetitions";
 const string Test::TIME_COUNT = "__timeCount";
-const string Test::PLOT_LOOP = "__LOOP__PLOT_LOOP";
+// const string Test::PLOT_LOOP = "__LOOP__PLOT_LOOP";
 const string Test::PLOT_X_AXIS = "__LOOP__PLOT_X_AXIS";
 const string Test::PLOT_Y_AXIS = "__LOOP__PLOT_Y_AXIS";
-const string Test::PLOT_MIN = "__LOOP__PLOT_MIN";
-const string Test::PLOT_MAX = "__LOOP__PLOT_MAX";
-const string Test::PLOT_INC = "__LOOP__PLOT_INC";
+// const string Test::PLOT_MIN = "__LOOP__PLOT_MIN";
+// const string Test::PLOT_MAX = "__LOOP__PLOT_MAX";
+// const string Test::PLOT_INC = "__LOOP__PLOT_INC";
 const string Test::LINE_COLOR_LEVEL = "__LOOP__PLOT_LINE_COLOR";
 const string Test::POINT_TYPE_LEVEL = "__LOOP__PLOT_POINT_TYPE";
 const string Test::PLOT_PATH = "__plotPath";
@@ -374,57 +374,57 @@ void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot)
     cout << chrono.getSeconds() << " segundos." << endl;
 }
 
-void plotTaskFunction(LoopFunction* loopFunction)
-{
-    ParametersMap* parametersMap = loopFunction->getParameters();
-    string state = loopFunction->getCallerLoop()->getState(false);
-    string path = parametersMap->getString(Test::PLOT_PATH);
+//void plotTaskFunction(LoopFunction* loopFunction)
+//{
+//    ParametersMap* parametersMap = loopFunction->getParameters();
+//    string state = loopFunction->getCallerLoop()->getState(false);
+//    string path = parametersMap->getString(Test::PLOT_PATH);
+//
+//    Population* initialPopulation = (Population*) parametersMap->getPtr(Test::POPULATION);
+//    Population* population = new Population(initialPopulation);
+//    population->setParams(parametersMap);
+//
+//    Task* task = population->getTask();
+//    string dataPath = path + "data/" + task->toString() + "_" + state + ".DAT";
+//    FILE* dataFile = Util::openFile(dataPath);
+//    string plotVar = "generation";
+//    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+//
+//    float maxGenerations = parametersMap->getNumber(Test::MAX_GENERATIONS);
+//    for (unsigned i = 0; i < maxGenerations; ++i) {
+//        float fitness = population->getBestIndividualScore();
+//        fprintf(dataFile, " %d %f \n", i, fitness);
+//        population->nextGeneration();
+//    }
+//    fclose(dataFile);
+//    delete (population);
+//}
 
-    Population* initialPopulation = (Population*) parametersMap->getPtr(Test::POPULATION);
-    Population* population = new Population(initialPopulation);
-    population->setParams(parametersMap);
+// void Test::plotTask(unsigned maxGenerations)
+// {
+//     Task* task = (Task*) parameters.getPtr(Test::TASK);
+//     string testedTask = task->toString();
+//     cout << "Plotting " << testedTask << " with goal " << task->getGoal() << "..." << endl;
+//     Chronometer chrono;
+//     chrono.start();
 
-    Task* task = population->getTask();
-    string dataPath = path + "data/" + task->toString() + "_" + state + ".DAT";
-    FILE* dataFile = Util::openFile(dataPath);
-    string plotVar = "generation";
-    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+//     parameters.putNumber(Test::MAX_GENERATIONS, maxGenerations);
+//     Individual* example = (Individual*) parameters.getPtr(Test::EXAMPLE_INDIVIDUAL);
+//     unsigned populationSize = parameters.getNumber(Population::SIZE);
+//     float weighsRange = parameters.getNumber(Dummy::WEIGHS_RANGE);
+//     Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
+//     parameters.putPtr(Test::POPULATION, initialPopulation);
+//     createGnuPlotScript(&parameters, testedTask);
 
-    float maxGenerations = parametersMap->getNumber(Test::MAX_GENERATIONS);
-    for (unsigned i = 0; i < maxGenerations; ++i) {
-        float fitness = population->getBestIndividualScore();
-        fprintf(dataFile, " %d %f \n", i, fitness);
-        population->nextGeneration();
-    }
-    fclose(dataFile);
-    delete (population);
-}
-void Test::plotTask(unsigned maxGenerations)
-{
-    Task* task = (Task*) parameters.getPtr(Test::TASK);
-    string testedTask = task->toString();
-    cout << "Plotting " << testedTask << " with goal " << task->getGoal() << "..." << endl;
-    Chronometer chrono;
-    chrono.start();
+//     tLoop->repeatFunction(plotTaskFunction, &parameters, testedTask);
 
-    parameters.putNumber(Test::MAX_GENERATIONS, maxGenerations);
-    Individual* example = (Individual*) parameters.getPtr(Test::EXAMPLE_INDIVIDUAL);
-    unsigned populationSize = parameters.getNumber(Population::SIZE);
-    float weighsRange = parameters.getNumber(Dummy::WEIGHS_RANGE);
-    Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
-    parameters.putPtr(Test::POPULATION, initialPopulation);
+//     delete (initialPopulation);
 
-    createGnuPlotScript(&parameters, testedTask);
-
-    tLoop->repeatFunction(plotTaskFunction, &parameters, testedTask);
-
-    delete (initialPopulation);
-
-    string path = parameters.getString(Test::PLOT_PATH);
-    plotFile(path, testedTask);
-    chrono.stop();
-    cout << chrono.getSeconds() << " segundos." << endl;
-}
+//     string path = parameters.getString(Test::PLOT_PATH);
+//     plotFile(path, testedTask);
+//     chrono.stop();
+//     cout << chrono.getSeconds() << " segundos." << endl;
+// }
 
 void Test::plotTask2(std::string label, RangeLoop* xToPlot)
 {
@@ -482,7 +482,7 @@ void addResultsPopulation(ParametersMap* params)
     population->learn(xValue);
 
     float* yArray = (float*) (params->getPtr(Test::Y_ARRAY));
-    yArray[pos] += population->getAverageFitness();
+    yArray[pos] += population->getBestIndividualScore();
 }
 
 void forAveragesFunction(ParametersMap* params)
