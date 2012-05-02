@@ -64,8 +64,8 @@ int main(int argc, char *argv[])
     try {
         Test test;
         test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
-        test.parameters.putString(Test::PLOT_X_AXIS, "Size");
-        test.parameters.putString(Test::PLOT_Y_AXIS, "Time (seconds)");
+        test.parameters.putString(Test::X_LABEL, "Size");
+        test.parameters.putString(Test::Y_LABEL, "Time (seconds)");
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);

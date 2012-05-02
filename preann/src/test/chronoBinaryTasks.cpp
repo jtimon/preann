@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
     try {
         Test test;
         test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
-        test.parameters.putString(Test::PLOT_X_AXIS, "Generation");
-        test.parameters.putString(Test::PLOT_Y_AXIS, "Fitness");
+        test.parameters.putString(Test::X_LABEL, "Generation");
+        test.parameters.putString(Test::Y_LABEL, "Fitness");
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         unsigned populationSize = 8;
         test.parameters.putNumber(Population::SIZE, populationSize);

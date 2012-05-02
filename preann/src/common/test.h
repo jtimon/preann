@@ -35,8 +35,8 @@ public:
     static const string REPETITIONS;
     static const string TIME_COUNT;
     static const string PLOT_LOOP;
-    static const string PLOT_X_AXIS;
-    static const string PLOT_Y_AXIS;
+    static const string X_LABEL;
+    static const string Y_LABEL;
     static const string PLOT_MIN;
     static const string PLOT_MAX;
     static const string PLOT_INC;
@@ -51,8 +51,7 @@ public:
     static const string TASK;
     static const string MAX_GENERATIONS;
 protected:
-    void createGnuPlotScript(ParametersMap* parametersMap, string functionLabel);
-    void createGnuPlotScriptTask(RangeLoop*& xToPlot, std::string& path, std::string& label);
+    void createGnuPlotScript(string& path, string& title, string& xLabel, string& yLabel);
     Loop* tLoop;
 public:
     ParametersMap parameters;

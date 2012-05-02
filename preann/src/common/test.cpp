@@ -42,8 +42,8 @@ const string Test::MEM_LOSSES = "__memoryLosses";
 const string Test::REPETITIONS = "__repetitions";
 const string Test::TIME_COUNT = "__timeCount";
 // const string Test::PLOT_LOOP = "__LOOP__PLOT_LOOP";
-const string Test::PLOT_X_AXIS = "__LOOP__PLOT_X_AXIS";
-const string Test::PLOT_Y_AXIS = "__LOOP__PLOT_Y_AXIS";
+const string Test::X_LABEL = "__LOOP__PLOT_X_AXIS";
+const string Test::Y_LABEL = "__LOOP__PLOT_Y_AXIS";
 // const string Test::PLOT_MIN = "__LOOP__PLOT_MIN";
 // const string Test::PLOT_MAX = "__LOOP__PLOT_MAX";
 // const string Test::PLOT_INC = "__LOOP__PLOT_INC";
@@ -258,36 +258,31 @@ void preparePlotFunction(LoopFunction* loopFunction)
     printf(" %s \n", line.data());
     fprintf(plotFile, "%s", line.data());
 }
-void Test::createGnuPlotScript(ParametersMap* parametersMap, string functionLabel)
+void Test::createGnuPlotScript(string& path, string& title, string& xLabel, string& yLabel)
 {
-    string path = parametersMap->getString(Test::PLOT_PATH);
-    string xAxis = parametersMap->getString(PLOT_X_AXIS);
-    string yAxis = parametersMap->getString(PLOT_Y_AXIS);
-
-    string plotPath = path + "gnuplot/" + functionLabel + ".plt";
-    string outputPath = path + "images/" + functionLabel + ".png";
-
+    string plotPath = path + "gnuplot/" + title + ".plt";
     FILE* plotFile = Util::openFile(plotPath);
 
     fprintf(plotFile, "set terminal png size 2048,1024 \n");
     fprintf(plotFile, "set key below\n");
     fprintf(plotFile, "set key box \n");
 
-    fprintf(plotFile, "set title \"%s\" \n", functionLabel.data());
-    fprintf(plotFile, "set xlabel \"%s\" \n", xAxis.data());
-    fprintf(plotFile, "set ylabel \"%s\" \n", yAxis.data());
+    string outputPath = path + "images/" + title + ".png";
     fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
+
+    fprintf(plotFile, "set title \"%s\" \n", title.data());
+    fprintf(plotFile, "set xlabel \"%s\" \n", xLabel.data());
+    fprintf(plotFile, "set ylabel \"%s\" \n", yLabel.data());
     fprintf(plotFile, "plot ");
 
     unsigned count = 0;
-    string subPath = path + "data/" + functionLabel + "_";
+    string subPath = path + "data/" + title + "_";
 
-    parametersMap->putString(Test::SUB_PATH, subPath);
-    parametersMap->putPtr(Test::PLOT_FILE, plotFile);
-    parametersMap->putNumber(Test::FIRST_STATE, 1);
+    parameters.putString(Test::SUB_PATH, subPath);
+    parameters.putPtr(Test::PLOT_FILE, plotFile);
+    parameters.putNumber(Test::FIRST_STATE, 1);
 
-    tLoop->repeatFunction(preparePlotFunction, parametersMap, "preparePlotFunction");
-
+    tLoop->repeatFunction(preparePlotFunction, &parameters, "preparePlotFunction");
     fprintf(plotFile, "\n");
     fclose(plotFile);
 }
@@ -328,7 +323,6 @@ public:
         fprintf(tDataFile, " %f %f \n", xValue, timeCount / tRepetitions);
     }
     ;
-
 };
 
 void plotAction(LoopFunction* loopFunction)
@@ -360,15 +354,19 @@ void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot)
     cout << "Plotting " << label << "...";
     Chronometer chrono;
     chrono.start();
+    //TODO comprobar que esto no es completamente innecesario
     parameters.putPtr(Test::X_TO_PLOT, xToPlot);
 
-    createGnuPlotScript(&parameters, label);
+    string path = parameters.getString(Test::PLOT_PATH);
+    string xLabel = parameters.getString(X_LABEL);
+    string yLabel = parameters.getString(Y_LABEL);
+
+    createGnuPlotScript(path, label, xLabel, yLabel);
 
     ParamMapFunction function(func, &parameters);
     parameters.putPtr(Test::TEST_FUNCTION, &function);
     tLoop->repeatFunction(plotAction, &parameters, label);
 
-    string path = parameters.getString(Test::PLOT_PATH);
     plotFile(path, label);
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
@@ -379,35 +377,6 @@ void Test::plotTask(std::string label, RangeLoop* xToPlot)
     Loop* auxLoop = new RangeLoop("aux_average", 1, 2, 1);
     plotTask(label, xToPlot, auxLoop);
     delete (auxLoop);
-}
-
-void Test::createGnuPlotScriptTask(RangeLoop*& xToPlot, std::string& path, std::string& label)
-{
-    string plotPath = path + "gnuplot/" + label + ".plt";
-    FILE* plotFile = Util::openFile(plotPath);
-
-    fprintf(plotFile, "set terminal png size 2048,1024 \n");
-    fprintf(plotFile, "set key below\n");
-    fprintf(plotFile, "set key box \n");
-
-    string outputPath = path + "images/" + label + ".png";
-    fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
-
-    string xAxis = xToPlot->getKey();
-    string yAxis = "Average Fitness";
-    fprintf(plotFile, "set title \"%s\" \n", label.data());
-    fprintf(plotFile, "set xlabel \"%s\" \n", xAxis.data());
-    fprintf(plotFile, "set ylabel \"%s\" \n", yAxis.data());
-
-    fprintf(plotFile, "plot ");
-    unsigned count = 0;
-    string subPath = path + "data/" + label + "_";
-    parameters.putString(Test::SUB_PATH, subPath);
-    parameters.putPtr(Test::PLOT_FILE, plotFile);
-    parameters.putNumber(Test::FIRST_STATE, 1);
-    tLoop->repeatFunction(preparePlotFunction, &parameters, "preparePlotFunction");
-    fprintf(plotFile, "\n");
-    fclose(plotFile);
 }
 
 void fillArrayX(ParametersMap* params)
@@ -496,11 +465,14 @@ void Test::plotTask(std::string label, RangeLoop* xToPlot, Loop* toAverage)
     Chronometer chrono;
     chrono.start();
     string path = parameters.getString(Test::PLOT_PATH);
-    Task* task = (Task*) parameters.getPtr(Test::TASK);
+    Task* task = (Task*) (parameters.getPtr(Test::TASK));
     string testedTask = task->toString();
     label = testedTask + "_" + label;
 
-    createGnuPlotScriptTask(xToPlot, path, label);
+    string yLabel = "Fitness";
+    string xLabel = xToPlot->getKey();
+
+    createGnuPlotScript(path, label, xLabel, yLabel);
 
     parameters.putPtr(Test::X_TO_PLOT, xToPlot);
     parameters.putPtr(Test::TO_AVERAGE, toAverage);
