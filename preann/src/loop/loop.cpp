@@ -7,9 +7,6 @@
 
 #include "loop.h"
 
-const string Loop::LABEL = "__LOOP_FUNCTION_NAME";
-const string Loop::VALUE_LEVEL = "__LOOP__VALUE_LEVEL";
-
 Loop::Loop()
 {
     tKey = "Not Named Loop";
@@ -54,7 +51,7 @@ std::string Loop::getLevelName(unsigned &level)
 {
     string result;
     std::stringstream sstm;
-    sstm << Loop::VALUE_LEVEL << level;
+    sstm << "__Level_" << level;
     result = sstm.str();
     return result;
 }
@@ -92,7 +89,6 @@ void Loop::repeatFunction(LoopFunction* func, ParametersMap* parametersMap,
                           std::string functionLabel)
 {
     cout << "Repeating function... " << functionLabel << endl;
-    parametersMap->putString(Loop::LABEL, functionLabel);
 
     tLevel = 0;
     this->setCallerLoop(NULL);

@@ -21,11 +21,6 @@ typedef void (*LoopFuncPtr)(LoopFunction*);
 
 class Loop
 {
-public:
-    //TODO quitar toda esta mierda
-    static const string LABEL;
-    static const string VALUE_LEVEL;
-private:
 protected:
 
     std::string tKey;
