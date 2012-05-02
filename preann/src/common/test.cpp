@@ -33,7 +33,6 @@ void Test::addLoop(Loop* loop)
 
 const string Test::TEST_FUNCTION = "__testFunction";
 const string Test::X_TO_PLOT = "__xToPlotLoop";
-const string Test::TO_AVERAGE = "__toAverageLoop";
 
 const string Test::DIFF_COUNT = "__differencesCounter";
 const string Test::REPETITIONS = "__repetitions";
@@ -437,50 +436,58 @@ protected:
     }
 };
 
-void forLinesFunction(LoopFunction* loopFunction)
+class ForLinesFunc : public LoopFunction
 {
-    ParametersMap* params = loopFunction->getParameters();
-    string state = loopFunction->getCallerLoop()->getState(false);
-    string label = loopFunction->getLabel();
-
-    RangeLoop* xToPlot = (RangeLoop*) params->getPtr(Test::X_TO_PLOT);
-
-    // create X vector
-    unsigned arraySize = xToPlot->getNumLeafs();
-    float* xArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
-
-    // Fill X vector
-    FillArrayFunction fillArrayXFunc(params, xArray);
-    xToPlot->repeatFunction(&fillArrayXFunc, params);
-
-    // create Y vector
-    float* yArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
-    for (unsigned i = 0; i < arraySize; ++i) {
-        yArray[i] = 0;
+    Task* tTask;
+    RangeLoop* tToPlot;
+    Loop* tToAverage;
+    string tPlotPath;
+public:
+    ForLinesFunc(ParametersMap* parameters, Task* task, RangeLoop* xToPlot, Loop* toAverage, string plotPath)
+    {
+        tLabel = "ForLinesFunc";
+        tParameters = parameters;
+        tTask = task;
+        tToPlot = xToPlot;
+        tToAverage = toAverage;
+        tPlotPath = plotPath;
     }
+protected:
+    virtual void __executeImpl()
+    {
+        // create X vector
+        unsigned arraySize = tToPlot->getNumLeafs();
+        float* xArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
 
-    // Fill Y vector
-    Loop* toAverage = (Loop*) params->getPtr(Test::TO_AVERAGE);
-    Task* task = (Task*) params->getPtr(Test::TASK);
+        // Fill X vector
+        FillArrayFunction fillArrayXFunc(tParameters, xArray);
+        tToPlot->repeatFunction(&fillArrayXFunc, tParameters);
 
-    ForAveragesFunc forAveragesFunc(params, task, xToPlot, yArray);
-    toAverage->repeatFunction(&forAveragesFunc, params);
+        // create Y vector
+        float* yArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
+        for (unsigned i = 0; i < arraySize; ++i) {
+            yArray[i] = 0;
+        }
 
-    // Create data file
-    string path = params->getString(Test::PLOT_PATH);
-    string dataPath = path + "data/" + label + "_" + state + ".DAT";
-    printf(" dataPath %s \n", dataPath.data());
-    FILE* dataFile = Util::openFile(dataPath);
-    string plotVar = "generation";
-    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+        // Fill Y vector
+        ForAveragesFunc forAveragesFunc(tParameters, tTask, tToPlot, yArray);
+        tToAverage->repeatFunction(&forAveragesFunc, tParameters);
 
-    unsigned divisor = toAverage->getNumLeafs();
-    for (unsigned i = 0; i < arraySize; ++i) {
-        float averagedResult = yArray[i] / divisor;
-        fprintf(dataFile, " %d %f \n", (unsigned) xArray[i], averagedResult);
+        // Create data file
+        string state = tCallerLoop->getState(false);
+        string dataPath = tPlotPath + "data/" + tLabel + "_" + state + ".DAT";
+        FILE* dataFile = Util::openFile(dataPath);
+        string plotVar = tToPlot->getKey();
+        fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+
+        unsigned divisor = tToAverage->getNumLeafs();
+        for (unsigned i = 0; i < arraySize; ++i) {
+            float averagedResult = yArray[i] / divisor;
+            fprintf(dataFile, " %d %f \n", (unsigned) xArray[i], averagedResult);
+        }
+        fclose(dataFile);
     }
-    fclose(dataFile);
-}
+};
 
 void Test::plotTask(std::string label, RangeLoop* xToPlot, Loop* toAverage)
 {
@@ -496,9 +503,9 @@ void Test::plotTask(std::string label, RangeLoop* xToPlot, Loop* toAverage)
 
     createGnuPlotScript(path, label, xLabel, yLabel);
 
-    parameters.putPtr(Test::X_TO_PLOT, xToPlot);
-    parameters.putPtr(Test::TO_AVERAGE, toAverage);
-    tLoop->repeatFunction(forLinesFunction, &parameters, label);
+    ForLinesFunc forLinesFunc(&parameters, task, xToPlot, toAverage, path);
+    //TODO averiguar donde ha ido la label que antes se pasaba por aqui
+    tLoop->repeatFunction(&forLinesFunc, &parameters);
 
     plotFile(path, label);
     chrono.stop();
