@@ -24,6 +24,7 @@ public:
     virtual ~RangeLoop();
 
     void resetRange(float min, float max, float inc);
+    float getCurrentValue();
 
     virtual void print();
 };

@@ -28,6 +28,11 @@ void RangeLoop::resetRange(float min, float max, float inc)
     tUnsignedValue = 0;
 }
 
+float RangeLoop::getCurrentValue()
+{
+    return tValue;
+}
+
 unsigned RangeLoop::valueToUnsigned()
 {
     return tUnsignedValue;

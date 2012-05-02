@@ -382,23 +382,30 @@ public:
 protected:
     virtual void __executeImpl()
     {
-        unsigned xValue = tParameters->getNumber(tCallerLoop->getKey());
-        tArray[tLeaf] = xValue;
+        tArray[tLeaf] = ((RangeLoop*)tCallerLoop)->getCurrentValue();
     }
 };
 
-void addResultsPopulation(ParametersMap* params)
+class AddResultsPopulationFunc : public LoopFunction
 {
-    Loop* xToPlot = (Loop*) (params->getPtr(Test::X_TO_PLOT));
-    unsigned int pos = xToPlot->valueToUnsigned();
-    unsigned xValue = params->getNumber(xToPlot->getKey());
-
-    Population* population = (Population*) (params->getPtr(Test::POPULATION));
-    population->learn(xValue);
-
-    float* yArray = (float*) (params->getPtr(Test::Y_ARRAY));
-    yArray[pos] += population->getBestIndividualScore();
-}
+    Population* tPopulation;
+    float* tArray;
+public:
+    AddResultsPopulationFunc(ParametersMap* parameters, Population* population, float* array)
+    {
+        tLabel = "AddResultsPopulationFunc";
+        tParameters = parameters;
+        tPopulation = population;
+        tArray = array;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        unsigned xValue = ((RangeLoop*)tCallerLoop)->getCurrentValue();
+        tPopulation->learn(xValue);
+        tArray[tLeaf] += tPopulation->getBestIndividualScore();
+    }
+};
 
 void forAveragesFunction(ParametersMap* params)
 {
@@ -413,7 +420,10 @@ void forAveragesFunction(ParametersMap* params)
 
     // create vector
     Loop* xToPlot = (Loop*) params->getPtr(Test::X_TO_PLOT);
-    xToPlot->repeatFunction(addResultsPopulation, params, "addResults");
+    float* yArray = (float*) params->getPtr(Test::Y_ARRAY);
+
+    AddResultsPopulationFunc addResultsPopulationFunc(params, initialPopulation, yArray);
+    xToPlot->repeatFunction(&addResultsPopulationFunc, params);
 
     delete (initialPopulation);
 }
