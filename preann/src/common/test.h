@@ -31,15 +31,8 @@ public:
     static const string X_ARRAY;
     static const string Y_ARRAY;
     static const string DIFF_COUNT;
-    static const string MEM_LOSSES;
     static const string REPETITIONS;
     static const string TIME_COUNT;
-    static const string PLOT_LOOP;
-    static const string X_LABEL;
-    static const string Y_LABEL;
-    static const string PLOT_MIN;
-    static const string PLOT_MAX;
-    static const string PLOT_INC;
     static const string LINE_COLOR_LEVEL;
     static const string POINT_TYPE_LEVEL;
     static const string PLOT_PATH;
@@ -65,7 +58,7 @@ public:
     static void checkEmptyMemory(ParametersMap* parametersMap);
 
     void test(ParamMapFuncPtr func, std::string label);
-    void plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot);
+    void plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, string yLabel);
     void plotTask(std::string label, RangeLoop* xToPlot);
     void plotTask(std::string label, RangeLoop* xToPlot, Loop* toAverage);
     void addLoop(Loop* loop);

@@ -61,8 +61,6 @@ int main(int argc, char *argv[])
     try {
         Test test;
         test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
-        test.parameters.putString(Test::X_LABEL, "Generation");
-        test.parameters.putString(Test::Y_LABEL, "Fitness");
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         unsigned populationSize = 8;
         test.parameters.putNumber(Population::SIZE, populationSize);
@@ -106,8 +104,8 @@ int main(int argc, char *argv[])
         unsigned vectorsSize = 2;
         unsigned maxGenerations = 200;
         unsigned generationStep = 1;
-        chronoAnd(&test, vectorsSize, maxGenerations, generationStep);
-        chronoOr(&test, vectorsSize, maxGenerations, generationStep);
+//        chronoAnd(&test, vectorsSize, maxGenerations, generationStep);
+//        chronoOr(&test, vectorsSize, maxGenerations, generationStep);
         chronoXor(&test, vectorsSize, maxGenerations, generationStep);
 
         printf("Exit success.\n");

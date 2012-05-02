@@ -7,7 +7,7 @@
 
 #include "dummy.h"
 
-const string Dummy::SIZE = "__size";
+const string Dummy::SIZE = "Size";
 const string Dummy::WEIGHS_RANGE = "__initialWeighsRange";
 const string Dummy::OUTPUT_SIZE = "__outputSize";
 const string Dummy::NUM_INPUTS = "__numInputs";

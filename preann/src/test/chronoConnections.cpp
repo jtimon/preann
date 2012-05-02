@@ -64,8 +64,6 @@ int main(int argc, char *argv[])
     try {
         Test test;
         test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
-        test.parameters.putString(Test::X_LABEL, "Size");
-        test.parameters.putString(Test::Y_LABEL, "Time (seconds)");
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
@@ -86,13 +84,14 @@ int main(int argc, char *argv[])
         test.getLoop()->print();
 
         RangeLoop xToPlot(Dummy::SIZE, 50000, 500000, 50000);
+        string yLabel = "Time (seconds)";
         test.parameters.putNumber(Test::REPETITIONS, 10000);
-        test.plot(chronoMutate, "Connection_mutate", &xToPlot);
+        test.plot(chronoMutate, "Connection_mutate", &xToPlot, yLabel);
 
         xToPlot.resetRange(500, 5000, 500);
         test.parameters.putNumber(Test::REPETITIONS, 1000);
-        test.plot(chronoCrossover, "Connection_crossover", &xToPlot);
-        test.plot(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot);
+        test.plot(chronoCrossover, "Connection_crossover", &xToPlot, yLabel);
+        test.plot(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel);
 
         printf("Exit success.\n");
     } catch (std::string error) {

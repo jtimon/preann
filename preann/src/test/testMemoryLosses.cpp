@@ -89,7 +89,6 @@ int main(int argc, char *argv[])
     try {
         Test test;
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
-        test.parameters.putNumber(Test::MEM_LOSSES, 0);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         RangeLoop* sizeLoop = new RangeLoop(Dummy::SIZE, 100, 101, 100);

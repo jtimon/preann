@@ -71,8 +71,6 @@ int main(int argc, char *argv[])
     try {
         Test test;
         test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
-        test.parameters.putString(Test::X_LABEL, "Size");
-        test.parameters.putString(Test::Y_LABEL, "Time (seconds)");
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Test::REPETITIONS, 100);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
@@ -91,17 +89,18 @@ int main(int argc, char *argv[])
         test.getLoop()->print();
 
         RangeLoop xToPlot(Dummy::SIZE, 2000, 20001, 2000);
-        test.plot(chronoCopyToInterface, "Buffer_copyToInterface", &xToPlot);
-        test.plot(chronoCopyFromInterface, "Buffer_copyFromInterface", &xToPlot);
+        string yLabel = "Time (seconds)";
+        test.plot(chronoCopyToInterface, "Buffer_copyToInterface", &xToPlot, yLabel);
+        test.plot(chronoCopyFromInterface, "Buffer_copyFromInterface", &xToPlot, yLabel);
         xToPlot.resetRange(1000, 10001, 3000);
-        test.plot(chronoClone, "Buffer_clone", &xToPlot);
+        test.plot(chronoClone, "Buffer_clone", &xToPlot, yLabel);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         test.getLoop()->print();
 
         xToPlot.resetRange(2000, 20001, 2000);
-        test.plot(chronoActivation, "Buffer_activation", &xToPlot);
+        test.plot(chronoActivation, "Buffer_activation", &xToPlot, yLabel);
 
         printf("Exit success.\n");
     } catch (std::string error) {

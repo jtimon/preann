@@ -38,15 +38,8 @@ const string Test::X_ARRAY = "__xArray";
 const string Test::Y_ARRAY = "__yArray";
 
 const string Test::DIFF_COUNT = "__differencesCounter";
-const string Test::MEM_LOSSES = "__memoryLosses";
 const string Test::REPETITIONS = "__repetitions";
 const string Test::TIME_COUNT = "__timeCount";
-// const string Test::PLOT_LOOP = "__LOOP__PLOT_LOOP";
-const string Test::X_LABEL = "__LOOP__PLOT_X_AXIS";
-const string Test::Y_LABEL = "__LOOP__PLOT_Y_AXIS";
-// const string Test::PLOT_MIN = "__LOOP__PLOT_MIN";
-// const string Test::PLOT_MAX = "__LOOP__PLOT_MAX";
-// const string Test::PLOT_INC = "__LOOP__PLOT_INC";
 const string Test::LINE_COLOR_LEVEL = "__LOOP__PLOT_LINE_COLOR";
 const string Test::POINT_TYPE_LEVEL = "__LOOP__PLOT_POINT_TYPE";
 const string Test::PLOT_PATH = "__plotPath";
@@ -349,7 +342,7 @@ void plotAction(LoopFunction* loopFunction)
     fclose(dataFile);
 }
 
-void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot)
+void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, string yLabel)
 {
     cout << "Plotting " << label << "...";
     Chronometer chrono;
@@ -358,8 +351,7 @@ void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot)
     parameters.putPtr(Test::X_TO_PLOT, xToPlot);
 
     string path = parameters.getString(Test::PLOT_PATH);
-    string xLabel = parameters.getString(X_LABEL);
-    string yLabel = parameters.getString(Y_LABEL);
+    string xLabel = xToPlot->getKey();
 
     createGnuPlotScript(path, label, xLabel, yLabel);
 
@@ -469,8 +461,8 @@ void Test::plotTask(std::string label, RangeLoop* xToPlot, Loop* toAverage)
     string testedTask = task->toString();
     label = testedTask + "_" + label;
 
-    string yLabel = "Fitness";
     string xLabel = xToPlot->getKey();
+    string yLabel = "Fitness";
 
     createGnuPlotScript(path, label, xLabel, yLabel);
 
