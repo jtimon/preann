@@ -28,7 +28,6 @@ public:
     static const string TEST_FUNCTION;
     static const string X_TO_PLOT;
     static const string TO_AVERAGE;
-    static const string Y_ARRAY;
     static const string DIFF_COUNT;
     static const string REPETITIONS;
     static const string TIME_COUNT;
@@ -38,7 +37,6 @@ public:
     static const string PLOT_FILE;
     static const string FIRST_STATE;
     static const string SUB_PATH;
-    static const string POPULATION;
     static const string EXAMPLE_INDIVIDUAL;
     static const string TASK;
     static const string MAX_GENERATIONS;

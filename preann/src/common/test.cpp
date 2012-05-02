@@ -34,7 +34,6 @@ void Test::addLoop(Loop* loop)
 const string Test::TEST_FUNCTION = "__testFunction";
 const string Test::X_TO_PLOT = "__xToPlotLoop";
 const string Test::TO_AVERAGE = "__toAverageLoop";
-const string Test::Y_ARRAY = "__yArray";
 
 const string Test::DIFF_COUNT = "__differencesCounter";
 const string Test::REPETITIONS = "__repetitions";
@@ -45,7 +44,6 @@ const string Test::PLOT_PATH = "__plotPath";
 const string Test::PLOT_FILE = "__plotFile";
 const string Test::FIRST_STATE = "__firstState";
 const string Test::SUB_PATH = "__subPath";
-const string Test::POPULATION = "__initialPopulation";
 const string Test::EXAMPLE_INDIVIDUAL = "__exampleIndividual";
 const string Test::TASK = "__task_to_plot";
 const string Test::MAX_GENERATIONS = "__generations_to_plot";
@@ -407,26 +405,37 @@ protected:
     }
 };
 
-void forAveragesFunction(ParametersMap* params)
+class ForAveragesFunc : public LoopFunction
 {
-    // create population
-    Task* task = (Task*) params->getPtr(Test::TASK);
-    Individual* example = task->getExample();
-    unsigned populationSize = params->getNumber(Population::SIZE);
-    float weighsRange = params->getNumber(Dummy::WEIGHS_RANGE);
-    Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
-    initialPopulation->setParams(params);
-    params->putPtr(Test::POPULATION, initialPopulation);
+    Task* tTask;
+    RangeLoop* tToPlot;
+    float* tArray;
+public:
+    ForAveragesFunc(ParametersMap* parameters, Task* task, RangeLoop* xToPlot, float* yArray)
+    {
+        tLabel = "ForAveragesFunc";
+        tParameters = parameters;
+        tTask = task;
+        tToPlot = xToPlot;
+        tArray = yArray;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        unsigned populationSize = tParameters->getNumber(Population::SIZE);
+        float weighsRange = tParameters->getNumber(Dummy::WEIGHS_RANGE);
 
-    // create vector
-    Loop* xToPlot = (Loop*) params->getPtr(Test::X_TO_PLOT);
-    float* yArray = (float*) params->getPtr(Test::Y_ARRAY);
+        // create population
+        Individual* example = tTask->getExample();
+        Population* initialPopulation = new Population(tTask, example, populationSize, weighsRange);
+        initialPopulation->setParams(tParameters);
 
-    AddResultsPopulationFunc addResultsPopulationFunc(params, initialPopulation, yArray);
-    xToPlot->repeatFunction(&addResultsPopulationFunc, params);
+        AddResultsPopulationFunc addResultsPopulationFunc(tParameters, initialPopulation, tArray);
+        tToPlot->repeatFunction(&addResultsPopulationFunc, tParameters);
 
-    delete (initialPopulation);
-}
+        delete (initialPopulation);
+    }
+};
 
 void forLinesFunction(LoopFunction* loopFunction)
 {
@@ -436,22 +445,26 @@ void forLinesFunction(LoopFunction* loopFunction)
 
     RangeLoop* xToPlot = (RangeLoop*) params->getPtr(Test::X_TO_PLOT);
 
-    // create x vector
+    // create X vector
     unsigned arraySize = xToPlot->getNumLeafs();
     float* xArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
-    // Fill it
+
+    // Fill X vector
     FillArrayFunction fillArrayXFunc(params, xArray);
     xToPlot->repeatFunction(&fillArrayXFunc, params);
 
+    // create Y vector
     float* yArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
     for (unsigned i = 0; i < arraySize; ++i) {
         yArray[i] = 0;
     }
-    params->putPtr(Test::Y_ARRAY, yArray);
 
-    // repeat forAveragesFunction
+    // Fill Y vector
     Loop* toAverage = (Loop*) params->getPtr(Test::TO_AVERAGE);
-    toAverage->repeatFunction(forAveragesFunction, params, "forAveragesFunction");
+    Task* task = (Task*) params->getPtr(Test::TASK);
+
+    ForAveragesFunc forAveragesFunc(params, task, xToPlot, yArray);
+    toAverage->repeatFunction(&forAveragesFunc, params);
 
     // Create data file
     string path = params->getString(Test::PLOT_PATH);
