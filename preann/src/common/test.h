@@ -28,7 +28,6 @@ public:
     static const string TEST_FUNCTION;
     static const string X_TO_PLOT;
     static const string TO_AVERAGE;
-    static const string X_ARRAY;
     static const string Y_ARRAY;
     static const string DIFF_COUNT;
     static const string REPETITIONS;

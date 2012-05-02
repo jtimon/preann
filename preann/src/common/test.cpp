@@ -34,7 +34,6 @@ void Test::addLoop(Loop* loop)
 const string Test::TEST_FUNCTION = "__testFunction";
 const string Test::X_TO_PLOT = "__xToPlotLoop";
 const string Test::TO_AVERAGE = "__toAverageLoop";
-const string Test::X_ARRAY = "__xArray";
 const string Test::Y_ARRAY = "__yArray";
 
 const string Test::DIFF_COUNT = "__differencesCounter";
@@ -371,15 +370,27 @@ void Test::plotTask(std::string label, RangeLoop* xToPlot)
     delete (auxLoop);
 }
 
-void fillArrayX(ParametersMap* params)
-{
-    Loop* xToPlot = (Loop*) (params->getPtr(Test::X_TO_PLOT));
-    unsigned int pos = xToPlot->valueToUnsigned();
-    unsigned xValue = params->getNumber(xToPlot->getKey());
 
-    float* xArray = (float*) (params->getPtr(Test::X_ARRAY));
-    xArray[pos] = xValue;
-}
+class FillArrayFunction : public LoopFunction
+{
+    float* tArray;
+
+public:
+    FillArrayFunction(ParametersMap* parameters, float* array)
+    {
+        tLabel = "FillArrayXFunction";
+        tParameters = parameters;
+        tArray = array;
+    }
+    ;
+
+    virtual void __executeImpl()
+    {
+        unsigned xValue = tParameters->getNumber(tCallerLoop->getKey());
+        tArray[tLeaf] = xValue;
+    }
+    ;
+};
 
 void addResultsPopulation(ParametersMap* params)
 {
@@ -420,11 +431,12 @@ void forLinesFunction(LoopFunction* loopFunction)
 
     RangeLoop* xToPlot = (RangeLoop*) params->getPtr(Test::X_TO_PLOT);
 
-    // create vector
+    // create x vector
     unsigned arraySize = xToPlot->getNumLeafs();
     float* xArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
-    params->putPtr(Test::X_ARRAY, xArray);
-    xToPlot->repeatFunction(fillArrayX, params, "fillArrayX");
+    // Fill it
+    FillArrayFunction fillArrayXFunc(params, xArray);
+    xToPlot->repeatFunction(&fillArrayXFunc, params, "FillArrayXFunction");
 
     float* yArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
     for (unsigned i = 0; i < arraySize; ++i) {
