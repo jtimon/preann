@@ -25,7 +25,6 @@
 class Test
 {
 public:
-    static const string X_TO_PLOT;
     static const string DIFF_COUNT;
     static const string REPETITIONS;
     static const string TIME_COUNT;
@@ -53,7 +52,7 @@ public:
     static void checkEmptyMemory(ParametersMap* parametersMap);
 
     void test(ParamMapFuncPtr func, std::string label);
-    void plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, string yLabel);
+    void plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, string yLabel, unsigned repetitions);
     void plotTask(std::string label, RangeLoop* xToPlot);
     void plotTask(std::string label, RangeLoop* xToPlot, Loop* toAverage);
     void addLoop(Loop* loop);

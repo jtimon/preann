@@ -31,10 +31,9 @@ void Test::addLoop(Loop* loop)
     }
 }
 
-const string Test::X_TO_PLOT = "__xToPlotLoop";
-
 const string Test::DIFF_COUNT = "__differencesCounter";
 const string Test::REPETITIONS = "__repetitions";
+
 const string Test::TIME_COUNT = "__timeCount";
 const string Test::LINE_COLOR_LEVEL = "__LOOP__PLOT_LINE_COLOR";
 const string Test::POINT_TYPE_LEVEL = "__LOOP__PLOT_POINT_TYPE";
@@ -114,13 +113,14 @@ class TestParamMapAction : public LoopFunction
 public:
     TestParamMapAction(ParametersMap* parameters, ParamMapFuncPtr function, string label)
     {
-        tLabel = label;
+        tLabel = "TestParamMapAction";
         tParameters = parameters;
         tFunction = new ParamMapFunction(function, parameters, label);
     }
 protected:
     virtual void __executeImpl()
     {
+        string label = tFunction->getLabel();
         string state = tCallerLoop->getState(false);
 
         tFunction->execute(tCallerLoop);
@@ -129,13 +129,13 @@ protected:
             unsigned differencesCounter = tParameters->getNumber(Test::DIFF_COUNT);
             if (differencesCounter > 0) {
                 cout << differencesCounter
-                        << " differences detected while testing " + tLabel + " at state " + state << endl;
+                        << " differences detected while testing " + label + " at state " + state << endl;
             }
         } catch (string e) {
         }
         if (MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0) {
 
-            cout << "Memory loss detected while testing " + tLabel + " at state " + state << endl;
+            cout << "Memory loss detected while testing " + label + " at state " + state << endl;
 
             MemoryManagement::printTotalAllocated();
             MemoryManagement::printTotalPointers();
@@ -318,46 +318,55 @@ protected:
     }
 };
 
-void plotAction(LoopFunction* loopFunction)
+class PlotParamMapAction : public LoopFunction
 {
-    ParametersMap* parametersMap = loopFunction->getParameters();
-    string state = loopFunction->getCallerLoop()->getState(false);
+    ParamMapFunction* tFunction;
+    RangeLoop* tToPlot;
+    string tPlotpath;
+    unsigned tRepetitions;
+public:
+    PlotParamMapAction(ParametersMap* parameters, ParamMapFuncPtr function, RangeLoop* xToPlot, string plotPath, string label, unsigned repetitions)
+    {
+        tLabel = "PlotParamMapAction";
+        tParameters = parameters;
+        tFunction = new ParamMapFunction(function, parameters, label);
+        tToPlot = xToPlot;
+        tPlotpath = plotPath;
+        tRepetitions = repetitions;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        string label = tFunction->getLabel();
+        string state = tCallerLoop->getState(false);
 
-    string path = parametersMap->getString(Test::PLOT_PATH);
+        string plotVar = tToPlot->getKey();
 
-    RangeLoop* xToPlot = (RangeLoop*) parametersMap->getPtr(Test::X_TO_PLOT);
-    string plotVar = xToPlot->getKey();
+        string dataPath = tPlotpath + "data/" + label + "_" + state + ".DAT";
+        FILE* dataFile = Util::openFile(dataPath);
+        fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
-    string dataPath = path + "data/" + loopFunction->getLabel() + "_" + state + ".DAT";
-    FILE* dataFile = Util::openFile(dataPath);
-    fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+        ChronoFunction chronoFunction(tParameters, tFunction, plotVar, dataFile, tRepetitions);
+        tToPlot->repeatFunction(&chronoFunction, tParameters);
 
+        fclose(dataFile);
+    }
+};
 
-    LoopFunction* func = (LoopFunction*) parametersMap->getPtr(Test::TEST_FUNCTION);
-    unsigned repetitions = parametersMap->getNumber(Test::REPETITIONS);
-
-    ChronoFunction chronoFunction(parametersMap, func, plotVar, dataFile, repetitions);
-    xToPlot->repeatFunction(&chronoFunction, parametersMap);
-
-    fclose(dataFile);
-}
-
-void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, string yLabel)
+void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, string yLabel, unsigned repetitions)
 {
     cout << "Plotting " << label << "...";
     Chronometer chrono;
     chrono.start();
-    //TODO comprobar que esto no es completamente innecesario
-    parameters.putPtr(Test::X_TO_PLOT, xToPlot);
 
     string path = parameters.getString(Test::PLOT_PATH);
     string xLabel = xToPlot->getKey();
 
     createGnuPlotScript(path, label, xLabel, yLabel);
 
-    ParamMapFunction function(func, &parameters, label);
-    parameters.putPtr(Test::TEST_FUNCTION, &function);
-    tLoop->repeatFunction(plotAction, &parameters, label);
+    parameters.putNumber(Test::REPETITIONS, repetitions);
+    PlotParamMapAction plotAction(&parameters, func, xToPlot, path, label, repetitions);
+    tLoop->repeatFunction(&plotAction, &parameters);
 
     plotFile(path, label);
     chrono.stop();

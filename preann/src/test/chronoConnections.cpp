@@ -85,13 +85,12 @@ int main(int argc, char *argv[])
 
         RangeLoop xToPlot(Dummy::SIZE, 50000, 500000, 50000);
         string yLabel = "Time (seconds)";
-        test.parameters.putNumber(Test::REPETITIONS, 10000);
-        test.plot(chronoMutate, "Connection_mutate", &xToPlot, yLabel);
+        test.plot(chronoMutate, "Connection_mutate", &xToPlot, yLabel, 10000);
 
         xToPlot.resetRange(500, 5000, 500);
-        test.parameters.putNumber(Test::REPETITIONS, 1000);
-        test.plot(chronoCrossover, "Connection_crossover", &xToPlot, yLabel);
-        test.plot(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel);
+        unsigned repetitions = 1000;
+        test.plot(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, repetitions);
+        test.plot(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {
