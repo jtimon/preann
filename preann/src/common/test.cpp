@@ -38,7 +38,6 @@ const string Test::TIME_COUNT = "__timeCount";
 const string Test::LINE_COLOR_LEVEL = "__LOOP__PLOT_LINE_COLOR";
 const string Test::POINT_TYPE_LEVEL = "__LOOP__PLOT_POINT_TYPE";
 const string Test::PLOT_PATH = "__plotPath";
-const string Test::TASK = "__task_to_plot";
 const string Test::MAX_GENERATIONS = "__generations_to_plot";
 
 void Test::check(bool condition, string message)
@@ -375,10 +374,10 @@ void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, str
     cout << chrono.getSeconds() << " segundos." << endl;
 }
 
-void Test::plotTask(std::string label, RangeLoop* xToPlot)
+void Test::plotTask(Task* task, std::string label, RangeLoop* xToPlot)
 {
     Loop* auxLoop = new RangeLoop("aux_average", 1, 2, 1);
-    plotTask(label, xToPlot, auxLoop);
+    plotTask(task, label, xToPlot, auxLoop);
     delete (auxLoop);
 }
 
@@ -509,12 +508,11 @@ protected:
     }
 };
 
-void Test::plotTask(std::string label, RangeLoop* xToPlot, Loop* toAverage)
+void Test::plotTask(Task* task, std::string label, RangeLoop* xToPlot, Loop* toAverage)
 {
     Chronometer chrono;
     chrono.start();
     string path = parameters.getString(Test::PLOT_PATH);
-    Task* task = (Task*) (parameters.getPtr(Test::TASK));
     string testedTask = task->toString();
     label = testedTask + "_" + label;
 

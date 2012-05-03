@@ -31,7 +31,6 @@ public:
     static const string LINE_COLOR_LEVEL;
     static const string POINT_TYPE_LEVEL;
     static const string PLOT_PATH;
-    static const string TASK;
     static const string MAX_GENERATIONS;
 protected:
     void createGnuPlotScript(string& path, string& title, string& xLabel, string& yLabel);
@@ -49,8 +48,8 @@ public:
 
     void test(ParamMapFuncPtr func, std::string label);
     void plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, string yLabel, unsigned repetitions);
-    void plotTask(std::string label, RangeLoop* xToPlot);
-    void plotTask(std::string label, RangeLoop* xToPlot, Loop* toAverage);
+    void plotTask(Task* task, std::string label, RangeLoop* xToPlot);
+    void plotTask(Task* task, std::string label, RangeLoop* xToPlot, Loop* toAverage);
     void addLoop(Loop* loop);
     Loop* getLoop();
 

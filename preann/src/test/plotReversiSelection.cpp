@@ -56,13 +56,12 @@ int main(int argc, char *argv[])
         test.getLoop()->print();
 
         Task* task = new ReversiTask(4, 1);
-        test.parameters.putPtr(Test::TASK, task);
 
         RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 21, 5);
 
 //        cout << "generationsLoop->getNumLeafs() " << generationsLoop->getNumLeafs() << endl;
 //        cout << "toAverageLoop->getNumLeafs() " << toAverageLoop->getNumLeafs() << endl;
-        test.plotTask("selectionReversi", generationsLoop, toAverageLoop);
+        test.plotTask(task, "selectionReversi", generationsLoop, toAverageLoop);
 
         delete (generationsLoop);
         delete (task);

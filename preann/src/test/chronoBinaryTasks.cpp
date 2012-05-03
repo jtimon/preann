@@ -9,9 +9,8 @@ using namespace std;
 #include "tasks/binaryTask.h"
 
 #define COMMON								                        \
-  test->parameters.putPtr(Test::TASK, task);				                        \
   RangeLoop* generationsLoop = new RangeLoop("Generation", 0, maxGenerations, generationStep);  \
-  test->plotTask(stringTask, generationsLoop);		                                        \
+  test->plotTask(task, stringTask, generationsLoop);                                            \
   delete (task);
 
 void chronoOr(Test* test, unsigned vectorsSize, unsigned maxGenerations, unsigned generationStep)
