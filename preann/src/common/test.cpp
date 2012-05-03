@@ -101,6 +101,39 @@ unsigned Test::assertEquals(Buffer* expected, Buffer* actual)
     return differencesCounter;
 }
 
+class TestMemLossesFunction : public LoopFunction
+{
+    ParamMapFunction* tFunction;
+public:
+    TestMemLossesFunction(ParametersMap* parameters, ParamMapFuncPtr function, string label)
+    {
+        tLabel = "TestMemoryLosses " + label;
+        tFunction = new ParamMapFunction(function, parameters, label);
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        tFunction->execute(tCallerLoop);
+
+        if (MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0) {
+
+            string label = tFunction->getLabel();
+            string state = tCallerLoop->getState(false);
+            cout << "Memory loss detected while testing " + label + " at state " + state << endl;
+
+            MemoryManagement::printTotalAllocated();
+            MemoryManagement::printTotalPointers();
+            MemoryManagement::clear();
+        }
+    }
+};
+
+void Test::testMemoryLosses(ParamMapFuncPtr function, string label)
+{
+    TestMemLossesFunction testMemFunc(&parameters, function, label);
+    tLoop->repeatFunction(&testMemFunc, &parameters);
+}
+
 class TestParamMapAction : public LoopFunction
 {
     ParamMapFunction* tFunction;

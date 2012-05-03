@@ -82,101 +82,54 @@ void testLoops(ParametersMap* parametersMap)
     parametersMap->print();
 }
 
-class TestMemLossesFunction : public LoopFunction
-{
-    ParamMapFunction* tFunction;
-public:
-    TestMemLossesFunction(ParametersMap* parameters)
-    {
-        tParameters = parameters;
-        tFunction = NULL;
-    }
-    void setFunction(ParamMapFuncPtr function, string label)
-    {
-        tLabel = "TestMemoryLosses " + label;
-        tFunction = new ParamMapFunction(function, tParameters, label);
-    }
-protected:
-    virtual void __executeImpl()
-    {
-        if (tFunction == NULL){
-            string error = "TestMemLossesFunction::__executeImpl: tFunction is not defined.";
-            throw error;
-        }
-
-        tFunction->execute(tCallerLoop);
-
-        if (MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0) {
-
-            string label = tFunction->getLabel();
-            string state = tCallerLoop->getState(false);
-            cout << "Memory loss detected while testing " + label + " at state " + state << endl;
-
-            MemoryManagement::printTotalAllocated();
-            MemoryManagement::printTotalPointers();
-            MemoryManagement::clear();
-        }
-    }
-};
-
 int main(int argc, char *argv[])
 {
     Chronometer total;
     total.start();
     try {
-        ParametersMap parameters;
-        parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
-        parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        Test test;
+        test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
+        test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        Loop* loop;
         RangeLoop* sizeLoop = new RangeLoop(Dummy::SIZE, 100, 101, 100);
-        loop = sizeLoop;
+        test.addLoop(sizeLoop);
 
         RangeLoop* outputSizeLoop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2);
-        loop->addInnerLoop(outputSizeLoop);
+        test.addLoop(outputSizeLoop);
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
-        loop->addInnerLoop(bufferTypeLoop);
+        test.addLoop(bufferTypeLoop);
 
-//        loop->addInnerLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
-        loop->addInnerLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
+//        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
 
-        loop->print();
+        test.getLoop()->print();
 
-        TestMemLossesFunction testMemFunc(&parameters);
+//        test.testMemoryLosses(testLoops, &parametersMap, "test loops");
 
-//        testMemFunc.setFunction(testLoops, "test loops");
-//        loop->repeatFunction(&testMemFunc, &parameters);
-
-
-        testMemFunc.setFunction(testBuffer, "Buffer");
-        loop->repeatFunction(&testMemFunc, &parameters);
+        test.testMemoryLosses(testBuffer, "Buffer");
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
 
-        testMemFunc.setFunction(testConnection, "Connection");
-        loop->repeatFunction(&testMemFunc, &parameters);
+        test.testMemoryLosses(testConnection, "Connection");
 
         RangeLoop* numInputsLoop = new RangeLoop(Dummy::NUM_INPUTS, 1, 3, 1);
-        loop->addInnerLoop(numInputsLoop);
+        test.addLoop(numInputsLoop);
 
-        testMemFunc.setFunction(testLayer, "Layer");
-        loop->repeatFunction(&testMemFunc, &parameters);
+        test.testMemoryLosses(testLayer, "Layer");
 
         RangeLoop* numLayersLoop = new RangeLoop(Dummy::NUM_LAYERS, 1, 3, 1);
-        loop->addInnerLoop(numLayersLoop);
+        test.addLoop(numLayersLoop);
 
-        testMemFunc.setFunction(testNeuralNet, "NeuralNet");
-        loop->repeatFunction(&testMemFunc, &parameters);
+        test.testMemoryLosses(testNeuralNet, "NeuralNet");
 
         sizeLoop->resetRange(1, 3, 1);
         outputSizeLoop->resetRange(1, 1, 1);
         numInputsLoop->resetRange(1, 1, 1);
         numLayersLoop->resetRange(1, 1, 1);
 
-        testMemFunc.setFunction(testPopulation, "Population");
-        loop->repeatFunction(&testMemFunc, &parameters);
+        test.testMemoryLosses(testPopulation, "Population");
 
         MemoryManagement::printListOfPointers();
 

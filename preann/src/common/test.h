@@ -45,6 +45,7 @@ public:
     static void checkDifferences(ParametersMap* parametersMap);
     static void checkEmptyMemory(ParametersMap* parametersMap);
 
+    void testMemoryLosses(ParamMapFuncPtr function, string label);
     void test(ParamMapFuncPtr func, std::string label);
     void plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, string yLabel, unsigned repetitions);
     void plotTask(Task* task, std::string label, RangeLoop* xToPlot);
