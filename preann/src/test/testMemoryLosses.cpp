@@ -14,6 +14,7 @@ void testBuffer(ParametersMap* parametersMap)
     Buffer* buffer = Dummy::buffer(parametersMap);
     delete (buffer);
 //    unsigned* aa = (unsigned*)MemoryManagement::malloc(sizeof(unsigned) * 5);
+//    parametersMap->putNumber(Test::DIFF_COUNT, 1);
 }
 
 void testConnection(ParametersMap* parametersMap)

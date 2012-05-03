@@ -31,7 +31,6 @@ void Test::addLoop(Loop* loop)
     }
 }
 
-const string Test::TEST_FUNCTION = "__testFunction";
 const string Test::X_TO_PLOT = "__xToPlotLoop";
 
 const string Test::DIFF_COUNT = "__differencesCounter";
@@ -109,40 +108,47 @@ unsigned Test::assertEquals(Buffer* expected, Buffer* actual)
     return differencesCounter;
 }
 
-void testAction(LoopFunction* loopFunction)
+class TestParamMapAction : public LoopFunction
 {
-    ParametersMap* parametersMap = loopFunction->getParameters();
-    Loop* callerLoop = loopFunction->getCallerLoop();
-    string state = callerLoop->getState(false);
-    string label = loopFunction->getLabel();
+    ParamMapFunction* tFunction;
+public:
+    TestParamMapAction(ParametersMap* parameters, ParamMapFuncPtr function, string label)
+    {
+        tLabel = label;
+        tParameters = parameters;
+        tFunction = new ParamMapFunction(function, parameters, label);
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        string state = tCallerLoop->getState(false);
 
-    ParamMapFunction* func = (ParamMapFunction*) parametersMap->getPtr(Test::TEST_FUNCTION);
-    func->execute(callerLoop);
+        tFunction->execute(tCallerLoop);
 
-    try {
-        unsigned differencesCounter = parametersMap->getNumber(Test::DIFF_COUNT);
-        if (differencesCounter > 0) {
-            cout << differencesCounter
-                    << " differences detected while testing " + label + " at state " + state << endl;
+        try {
+            unsigned differencesCounter = tParameters->getNumber(Test::DIFF_COUNT);
+            if (differencesCounter > 0) {
+                cout << differencesCounter
+                        << " differences detected while testing " + tLabel + " at state " + state << endl;
+            }
+        } catch (string e) {
         }
-    } catch (string e) {
-    }
-    if (MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0) {
+        if (MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0) {
 
-        cout << "Memory loss detected while testing " + label + " at state " + state << endl;
+            cout << "Memory loss detected while testing " + tLabel + " at state " + state << endl;
 
-        MemoryManagement::printTotalAllocated();
-        MemoryManagement::printTotalPointers();
-        MemoryManagement::clear();
+            MemoryManagement::printTotalAllocated();
+            MemoryManagement::printTotalPointers();
+            MemoryManagement::clear();
+        }
     }
-}
+};
 
 void Test::test(ParamMapFuncPtr func, std::string functionLabel)
 {
     cout << "Testing... " << functionLabel << endl;
-    ParamMapFunction function(func, &parameters, functionLabel);
-    parameters.putPtr(Test::TEST_FUNCTION, &function);
-    tLoop->repeatFunction(testAction, &parameters, functionLabel);
+    TestParamMapAction testAction(&parameters, func, functionLabel);
+    tLoop->repeatFunction(&testAction, &parameters);
 }
 
 int mapPointType(unsigned value)
