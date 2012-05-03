@@ -38,7 +38,6 @@ const string Test::TIME_COUNT = "__timeCount";
 const string Test::LINE_COLOR_LEVEL = "__LOOP__PLOT_LINE_COLOR";
 const string Test::POINT_TYPE_LEVEL = "__LOOP__PLOT_POINT_TYPE";
 const string Test::PLOT_PATH = "__plotPath";
-const string Test::EXAMPLE_INDIVIDUAL = "__exampleIndividual";
 const string Test::TASK = "__task_to_plot";
 const string Test::MAX_GENERATIONS = "__generations_to_plot";
 
@@ -425,14 +424,16 @@ protected:
 class ForAveragesFunc : public LoopFunction
 {
     Task* tTask;
+    Individual* tExample;
     RangeLoop* tToPlot;
     float* tArray;
 public:
-    ForAveragesFunc(ParametersMap* parameters, Task* task, RangeLoop* xToPlot, float* yArray)
+    ForAveragesFunc(ParametersMap* parameters, Task* task, Individual* example, RangeLoop* xToPlot, float* yArray)
     {
         tLabel = "ForAveragesFunc";
         tParameters = parameters;
         tTask = task;
+        tExample = example;
         tToPlot = xToPlot;
         tArray = yArray;
     }
@@ -443,8 +444,7 @@ protected:
         float weighsRange = tParameters->getNumber(Dummy::WEIGHS_RANGE);
 
         // create population
-        Individual* example = tTask->getExample();
-        Population* initialPopulation = new Population(tTask, example, populationSize, weighsRange);
+        Population* initialPopulation = new Population(tTask, tExample, populationSize, weighsRange);
         initialPopulation->setParams(tParameters);
 
         AddResultsPopulationFunc addResultsPopulationFunc(tParameters, initialPopulation, tArray);
@@ -457,6 +457,7 @@ protected:
 class ForLinesFunc : public LoopFunction
 {
     Task* tTask;
+    Individual* tExample;
     RangeLoop* tToPlot;
     Loop* tToAverage;
     string tPlotPath;
@@ -466,6 +467,7 @@ public:
         tLabel = "ForLinesFunc";
         tParameters = parameters;
         tTask = task;
+        tExample = tTask->getExample();
         tToPlot = xToPlot;
         tToAverage = toAverage;
         tPlotPath = plotPath;
@@ -488,7 +490,7 @@ protected:
         }
 
         // Fill Y vector
-        ForAveragesFunc forAveragesFunc(tParameters, tTask, tToPlot, yArray);
+        ForAveragesFunc forAveragesFunc(tParameters, tTask, tExample, tToPlot, yArray);
         tToAverage->repeatFunction(&forAveragesFunc, tParameters);
 
         // Create data file

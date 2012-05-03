@@ -31,7 +31,6 @@ public:
     static const string LINE_COLOR_LEVEL;
     static const string POINT_TYPE_LEVEL;
     static const string PLOT_PATH;
-    static const string EXAMPLE_INDIVIDUAL;
     static const string TASK;
     static const string MAX_GENERATIONS;
 protected:

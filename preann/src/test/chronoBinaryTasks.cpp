@@ -8,13 +8,10 @@ using namespace std;
 #include "genetic/population.h"
 #include "tasks/binaryTask.h"
 
-#define COMMON								\
-  Individual* example = task->getExample();				\
-  test->parameters.putPtr(Test::TASK, task);				\
-  test->parameters.putPtr(Test::EXAMPLE_INDIVIDUAL, example);		\
-  RangeLoop* generationsLoop = new RangeLoop("Generation", 0, maxGenerations, generationStep); \
-  test->plotTask(stringTask, generationsLoop);		\
-  delete (example);							\
+#define COMMON								                        \
+  test->parameters.putPtr(Test::TASK, task);				                        \
+  RangeLoop* generationsLoop = new RangeLoop("Generation", 0, maxGenerations, generationStep);  \
+  test->plotTask(stringTask, generationsLoop);		                                        \
   delete (task);
 
 void chronoOr(Test* test, unsigned vectorsSize, unsigned maxGenerations, unsigned generationStep)

@@ -57,7 +57,6 @@ int main(int argc, char *argv[])
         Task* task = new ReversiTask(4, 1);
         Individual* example = task->getExample();
         test.parameters.putPtr(Test::TASK, task);
-        test.parameters.putPtr(Test::EXAMPLE_INDIVIDUAL, example);
 
         RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 100, 5);
         test.plotTask("chronoReversi", generationsLoop);
