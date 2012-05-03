@@ -8,14 +8,14 @@ using namespace std;
 #include "common/dummy.h"
 
 #define START                                                                           \
-    float differencesCounter = 0;                                                       \
+    unsigned differencesCounter = 0;                                                    \
     Buffer* buffer = Dummy::buffer(parametersMap);
 
 #define END                                                                             \
     delete (buffer);                                                                    \
-    parametersMap->putNumber(Test::DIFF_COUNT, differencesCounter);
+    return differencesCounter;
 
-void testActivation(ParametersMap* parametersMap)
+unsigned testActivation(ParametersMap* parametersMap)
 {
     START
 
@@ -38,7 +38,7 @@ void testActivation(ParametersMap* parametersMap)
     END
 }
 
-void testCopyFromInterface(ParametersMap* parametersMap)
+unsigned testCopyFromInterface(ParametersMap* parametersMap)
 {
     START
 
@@ -57,7 +57,7 @@ void testCopyFromInterface(ParametersMap* parametersMap)
     END
 }
 
-void testCopyToInterface(ParametersMap* parametersMap)
+unsigned testCopyToInterface(ParametersMap* parametersMap)
 {
     START
 
@@ -76,7 +76,7 @@ void testCopyToInterface(ParametersMap* parametersMap)
     END
 }
 
-void testClone(ParametersMap* parametersMap)
+unsigned testClone(ParametersMap* parametersMap)
 {
     START
 

@@ -31,7 +31,6 @@ void Test::addLoop(Loop* loop)
     }
 }
 
-const string Test::DIFF_COUNT = "__differencesCounter";
 const string Test::REPETITIONS = "__repetitions";
 
 const string Test::TIME_COUNT = "__timeCount";
@@ -134,42 +133,33 @@ void Test::testMemoryLosses(ParamMapFuncPtr function, string label)
     tLoop->repeatFunction(&testMemFunc, &parameters);
 }
 
-class TestParamMapAction : public LoopFunction
+class TestAction : public LoopFunction
 {
-    ParamMapFunction* tFunction;
+    TestFunctionPtr tFunction;
 public:
-    TestParamMapAction(ParametersMap* parameters, ParamMapFuncPtr function, string label)
+    TestAction(ParametersMap* parameters, TestFunctionPtr function, string label)
     {
-        tLabel = "TestParamMapAction " + label;
+        tLabel = "TestAction " + label;
         tParameters = parameters;
-        tFunction = new ParamMapFunction(function, parameters, label);
+        tFunction = function;
     }
 protected:
     virtual void __executeImpl()
     {
-        unsigned differencesCounter = 0;
+        unsigned differencesCounter = (tFunction)(tParameters);
 
-        tFunction->execute(tCallerLoop);
-
-        try {
-            differencesCounter = tParameters->getNumber(Test::DIFF_COUNT);
-        } catch (string e) {
-        }
         if (differencesCounter > 0) {
 
-            string label = tFunction->getLabel();
             string state = tCallerLoop->getState(false);
-
             cout << differencesCounter
-                    << " differences detected while testing " + label + " at state " + state << endl;
+                    << " differences detected while testing " + tLabel + " at state " + state << endl;
         }
     }
 };
 
-void Test::test(ParamMapFuncPtr func, std::string functionLabel)
+void Test::test(TestFunctionPtr func, std::string functionLabel)
 {
-    cout << "Testing... " << functionLabel << endl;
-    TestParamMapAction testAction(&parameters, func, functionLabel);
+    TestAction testAction(&parameters, func, functionLabel);
     tLoop->repeatFunction(&testAction, &parameters);
 }
 

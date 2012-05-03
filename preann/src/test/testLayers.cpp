@@ -9,7 +9,7 @@ using namespace std;
 
 const string LAYER_PATH = "layerPath";
 
-void testCalculateOutput(ParametersMap* parametersMap)
+unsigned testCalculateOutput(ParametersMap* parametersMap)
 {
     unsigned differencesCounter = 0;
     string path = parametersMap->getString(LAYER_PATH);
@@ -42,7 +42,7 @@ void testCalculateOutput(ParametersMap* parametersMap)
     delete (layer);
     delete (buffer);
 
-    parametersMap->putNumber(Test::DIFF_COUNT, differencesCounter);
+    return differencesCounter;
 }
 
 int main(int argc, char *argv[])

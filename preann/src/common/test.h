@@ -22,10 +22,12 @@
     chrono.stop();                                                                      \
     parametersMap->putNumber(Test::TIME_COUNT, chrono.getSeconds());
 
+typedef unsigned (*TestFunctionPtr)(ParametersMap*);
+typedef unsigned (*ChronoFunctionPtr)(ParametersMap*, unsigned);
+
 class Test
 {
 public:
-    static const string DIFF_COUNT;
     static const string REPETITIONS;
     static const string TIME_COUNT;
     static const string LINE_COLOR_LEVEL;
@@ -42,46 +44,15 @@ public:
     static unsigned char areEqual(float expected, float actual, BufferType bufferType);
     static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
     static unsigned assertEquals(Buffer* expected, Buffer* actual);
-    static void checkDifferences(ParametersMap* parametersMap);
-    static void checkEmptyMemory(ParametersMap* parametersMap);
 
     void testMemoryLosses(ParamMapFuncPtr function, string label);
-    void test(ParamMapFuncPtr func, std::string label);
+    void test(TestFunctionPtr func, std::string label);
     void plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, string yLabel, unsigned repetitions);
     void plotTask(Task* task, std::string label, RangeLoop* xToPlot);
     void plotTask(Task* task, std::string label, RangeLoop* xToPlot, Loop* toAverage);
     void addLoop(Loop* loop);
     Loop* getLoop();
 
-};
-
-class TestAction : public LoopFunction
-{
-    ParametersMap* tParameters;
-    LoopFunction* tInnerFunction;
-    std::string tLabel;
-public:
-    TestAction(ParametersMap* parameters, LoopFunction* innerFunction, std::string label)
-    {
-        tParameters = parameters;
-        tInnerFunction = innerFunction;
-        tLabel = label;
-    }
-    ;
-    virtual ~TestAction()
-    {
-    }
-    ;
-    virtual void __executeImpl()
-    {
-        try {
-            tInnerFunction->execute(tCallerLoop);
-            Test::checkEmptyMemory(tParameters);
-        } catch (string e) {
-            cout << " while testing " + tLabel + " at state " + tCallerLoop->getState(true) << " : " << endl;
-            cout << e << endl;
-        }
-    };
 };
 
 #endif /* TEST_H_ */

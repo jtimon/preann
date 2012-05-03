@@ -19,9 +19,9 @@ const string NUM_MUTATIONS = "__numMutations";
 #define END                                                                             \
     delete (connection);                                                                \
     delete (buffer);                                                                    \
-    parametersMap->putNumber(Test::DIFF_COUNT, differencesCounter);
+    return differencesCounter;
 
-void testCalculateAndAddTo(ParametersMap* parametersMap)
+unsigned testCalculateAndAddTo(ParametersMap* parametersMap)
 {
     START
 
@@ -46,7 +46,7 @@ void testCalculateAndAddTo(ParametersMap* parametersMap)
     END
 }
 
-void testMutate(ParametersMap* parametersMap)
+unsigned testMutate(ParametersMap* parametersMap)
 {
     START
 
@@ -73,7 +73,7 @@ void testMutate(ParametersMap* parametersMap)
     END
 }
 
-void testCrossover(ParametersMap* parametersMap)
+unsigned testCrossover(ParametersMap* parametersMap)
 {
     START
 
