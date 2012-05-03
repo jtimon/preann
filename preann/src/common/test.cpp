@@ -38,7 +38,6 @@ const string Test::TIME_COUNT = "__timeCount";
 const string Test::LINE_COLOR_LEVEL = "__LOOP__PLOT_LINE_COLOR";
 const string Test::POINT_TYPE_LEVEL = "__LOOP__PLOT_POINT_TYPE";
 const string Test::PLOT_PATH = "__plotPath";
-const string Test::MAX_GENERATIONS = "__generations_to_plot";
 
 void Test::check(bool condition, string message)
 {

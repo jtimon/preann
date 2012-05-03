@@ -31,7 +31,6 @@ public:
     static const string LINE_COLOR_LEVEL;
     static const string POINT_TYPE_LEVEL;
     static const string PLOT_PATH;
-    static const string MAX_GENERATIONS;
 protected:
     void createGnuPlotScript(string& path, string& title, string& xLabel, string& yLabel);
     Loop* tLoop;
