@@ -107,33 +107,28 @@ class TestParamMapAction : public LoopFunction
 public:
     TestParamMapAction(ParametersMap* parameters, ParamMapFuncPtr function, string label)
     {
-        tLabel = "TestParamMapAction";
+        tLabel = "TestParamMapAction " + label;
         tParameters = parameters;
         tFunction = new ParamMapFunction(function, parameters, label);
     }
 protected:
     virtual void __executeImpl()
     {
-        string label = tFunction->getLabel();
-        string state = tCallerLoop->getState(false);
+        unsigned differencesCounter = 0;
 
         tFunction->execute(tCallerLoop);
 
         try {
-            unsigned differencesCounter = tParameters->getNumber(Test::DIFF_COUNT);
-            if (differencesCounter > 0) {
-                cout << differencesCounter
-                        << " differences detected while testing " + label + " at state " + state << endl;
-            }
+            differencesCounter = tParameters->getNumber(Test::DIFF_COUNT);
         } catch (string e) {
         }
-        if (MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0) {
+        if (differencesCounter > 0) {
 
-            cout << "Memory loss detected while testing " + label + " at state " + state << endl;
+            string label = tFunction->getLabel();
+            string state = tCallerLoop->getState(false);
 
-            MemoryManagement::printTotalAllocated();
-            MemoryManagement::printTotalPointers();
-            MemoryManagement::clear();
+            cout << differencesCounter
+                    << " differences detected while testing " + label + " at state " + state << endl;
         }
     }
 };
