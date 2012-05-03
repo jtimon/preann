@@ -100,14 +100,13 @@ public:
 
     void execute(Loop* callerLoop)
     {
-        Util::check(callerLoop == NULL, "LoopFunction::execute the caller Loop cannot be null.");
+        Util::check(callerLoop == NULL, "LoopFunction::execute : The caller Loop cannot be null.");
         try {
             tCallerLoop = callerLoop;
             __executeImpl();
         } catch (string e) {
-            cout << " while executing " + tLabel + " at state " + tCallerLoop->getState(true) << " : "
-                    << endl;
-            cout << e << endl;
+            cout << " while executing " + tLabel + " at state " + tCallerLoop->getState(true) << " : ";
+            cout << endl << e << endl;
         }
 //        cout << tCallerLoop->getState(true) << " Leaf " << tLeaf << endl;
         ++tLeaf;

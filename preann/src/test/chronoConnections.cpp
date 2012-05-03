@@ -95,8 +95,6 @@ int main(int argc, char *argv[])
         printf("Exit success.\n");
     } catch (std::string error) {
         cout << "Error: " << error << endl;
-        //	} catch (...) {
-        //		printf("An error was thrown.\n", 1);
     }
 
     MemoryManagement::printTotalAllocated();

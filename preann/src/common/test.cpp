@@ -38,9 +38,6 @@ const string Test::TIME_COUNT = "__timeCount";
 const string Test::LINE_COLOR_LEVEL = "__LOOP__PLOT_LINE_COLOR";
 const string Test::POINT_TYPE_LEVEL = "__LOOP__PLOT_POINT_TYPE";
 const string Test::PLOT_PATH = "__plotPath";
-const string Test::PLOT_FILE = "__plotFile";
-const string Test::FIRST_STATE = "__firstState";
-const string Test::SUB_PATH = "__subPath";
 const string Test::EXAMPLE_INDIVIDUAL = "__exampleIndividual";
 const string Test::TASK = "__task_to_plot";
 const string Test::MAX_GENERATIONS = "__generations_to_plot";
@@ -228,31 +225,41 @@ int getLineColor(ParametersMap*& parametersMap)
     return lineColor;
 }
 
-void preparePlotFunction(LoopFunction* loopFunction)
+class PreparePlotFunction : public LoopFunction
 {
-    ParametersMap* parametersMap = loopFunction->getParameters();
-    string state = loopFunction->getCallerLoop()->getState(false);
-
-    FILE *plotFile = (FILE*) ((((parametersMap->getPtr(Test::PLOT_FILE)))));
-    unsigned first = parametersMap->getNumber(Test::FIRST_STATE);
-    if (first) {
-        parametersMap->putNumber(Test::FIRST_STATE, 0);
-    } else {
-        fprintf(plotFile, " , \\\n\t");
+    string tBasePath;
+    FILE* tPlotFile;
+    ParamMapFunction* tFunction;
+public:
+    PreparePlotFunction(ParametersMap* parameters, string subPath, FILE* plotFile)
+    {
+        tLabel = "PreparePlotFunction";
+        tParameters = parameters;
+        tBasePath = subPath;
+        tPlotFile = plotFile;
     }
-    string subPath = parametersMap->getString(Test::SUB_PATH);
-    string dataPath = subPath + state + ".DAT";
-    string line = " \"" + dataPath + "\" using 1:2 title \"" + state + "\"";
+protected:
+    virtual void __executeImpl()
+    {
+        string state = tCallerLoop->getState(false);
 
-    int lineColor = getLineColor(parametersMap);
-    int pointType = getPointType(parametersMap);
+        if (tLeaf > 0) {
+            fprintf(tPlotFile, " , \\\n\t");
+        }
+        string dataPath = tBasePath + state + ".DAT";
+        string line = " \"" + dataPath + "\" using 1:2 title \"" + state + "\"";
 
-    line += " with linespoints lt " + to_string(lineColor);
-    line += " pt " + to_string(pointType);
+        int lineColor = getLineColor(tParameters);
+        int pointType = getPointType(tParameters);
 
-    printf(" %s \n", line.data());
-    fprintf(plotFile, "%s", line.data());
-}
+        line += " with linespoints lt " + to_string(lineColor);
+        line += " pt " + to_string(pointType);
+
+//        printf(" %s \n", line.data());
+        fprintf(tPlotFile, "%s", line.data());
+    }
+};
+
 void Test::createGnuPlotScript(string& path, string& title, string& xLabel, string& yLabel)
 {
     string plotPath = path + "gnuplot/" + title + ".plt";
@@ -270,14 +277,10 @@ void Test::createGnuPlotScript(string& path, string& title, string& xLabel, stri
     fprintf(plotFile, "set ylabel \"%s\" \n", yLabel.data());
     fprintf(plotFile, "plot ");
 
-    unsigned count = 0;
     string subPath = path + "data/" + title + "_";
 
-    parameters.putString(Test::SUB_PATH, subPath);
-    parameters.putPtr(Test::PLOT_FILE, plotFile);
-    parameters.putNumber(Test::FIRST_STATE, 1);
-
-    tLoop->repeatFunction(preparePlotFunction, &parameters, "preparePlotFunction");
+    PreparePlotFunction preparePlotFunction(&parameters, subPath, plotFile);
+    tLoop->repeatFunction(&preparePlotFunction, &parameters);
     fprintf(plotFile, "\n");
     fclose(plotFile);
 }
