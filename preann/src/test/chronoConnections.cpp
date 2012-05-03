@@ -12,9 +12,10 @@
 
 #define END                                                                             \
     delete (connection);                                                                \
-    delete (buffer);
+    delete (buffer);                                                                    \
+    return chrono.getSeconds();
 
-void chronoCalculateAndAddTo(ParametersMap* parametersMap)
+float chronoCalculateAndAddTo(ParametersMap* parametersMap, unsigned repetitions)
 {
     START
 
@@ -28,7 +29,7 @@ void chronoCalculateAndAddTo(ParametersMap* parametersMap)
     END
 }
 
-void chronoMutate(ParametersMap* parametersMap)
+float chronoMutate(ParametersMap* parametersMap, unsigned repetitions)
 {
     START
 
@@ -41,7 +42,7 @@ void chronoMutate(ParametersMap* parametersMap)
     END
 }
 
-void chronoCrossover(ParametersMap* parametersMap)
+float chronoCrossover(ParametersMap* parametersMap, unsigned repetitions)
 {
     START
 
@@ -85,12 +86,12 @@ int main(int argc, char *argv[])
 
         RangeLoop xToPlot(Dummy::SIZE, 50000, 500000, 50000);
         string yLabel = "Time (seconds)";
-        test.plot(chronoMutate, "Connection_mutate", &xToPlot, yLabel, 10000);
+        test.plotChrono(chronoMutate, "Connection_mutate", &xToPlot, yLabel, 10000);
 
         xToPlot.resetRange(500, 5000, 500);
         unsigned repetitions = 1000;
-        test.plot(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, repetitions);
-        test.plot(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, repetitions);
+        test.plotChrono(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, repetitions);
+        test.plotChrono(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {

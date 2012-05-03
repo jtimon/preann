@@ -31,9 +31,6 @@ void Test::addLoop(Loop* loop)
     }
 }
 
-const string Test::REPETITIONS = "__repetitions";
-
-const string Test::TIME_COUNT = "__timeCount";
 const string Test::LINE_COLOR_LEVEL = "__LOOP__PLOT_LINE_COLOR";
 const string Test::POINT_TYPE_LEVEL = "__LOOP__PLOT_POINT_TYPE";
 const string Test::PLOT_PATH = "__plotPath";
@@ -307,30 +304,29 @@ void plotFile(string path, string functionLabel)
     system(syscommand.data());
 }
 
-class ChronoFunction : public LoopFunction
+typedef float (*ChronoFunctionPtr)(ParametersMap*, unsigned);
+
+class ChronoAction : public LoopFunction
 {
     FILE* tDataFile;
-    LoopFunction* tFunctionToChrono;
-    string tPlotVar;
+    ChronoFunctionPtr tFunctionToChrono;
     unsigned tRepetitions;
 public:
-    ChronoFunction(ParametersMap* parameters, LoopFunction* functionToChrono, string plotVar,
-                   FILE* dataFile, unsigned repetitions)
+    ChronoAction(ParametersMap* parameters, ChronoFunctionPtr functionToChrono, string label, FILE* dataFile,
+                 unsigned repetitions)
     {
-        tLabel = "ChronoFunction";
+        tLabel = "ChronoAction " + label;
         tDataFile = dataFile;
         tParameters = parameters;
-        tPlotVar = plotVar;
         tFunctionToChrono = functionToChrono;
         tRepetitions = repetitions;
     }
 protected:
     virtual void __executeImpl()
     {
-        tFunctionToChrono->execute(tCallerLoop);
+        float timeCount = (tFunctionToChrono)(tParameters, tRepetitions);
 
-        float timeCount = tParameters->getNumber(Test::TIME_COUNT);
-        float xValue = tParameters->getNumber(tPlotVar);
+        float xValue = ((RangeLoop*) tCallerLoop)->getCurrentValue();
 
         fprintf(tDataFile, " %f %f \n", xValue, timeCount / tRepetitions);
     }
@@ -338,16 +334,17 @@ protected:
 
 class PlotParamMapAction : public LoopFunction
 {
-    ParamMapFunction* tFunction;
+    ChronoFunctionPtr tFunction;
     RangeLoop* tToPlot;
     string tPlotpath;
     unsigned tRepetitions;
 public:
-    PlotParamMapAction(ParametersMap* parameters, ParamMapFuncPtr function, RangeLoop* xToPlot, string plotPath, string label, unsigned repetitions)
+    PlotParamMapAction(ParametersMap* parameters, ChronoFunctionPtr function, RangeLoop* xToPlot,
+                       string plotPath, string label, unsigned repetitions)
     {
-        tLabel = "PlotParamMapAction";
+        tLabel = label;
         tParameters = parameters;
-        tFunction = new ParamMapFunction(function, parameters, label);
+        tFunction = function;
         tToPlot = xToPlot;
         tPlotpath = plotPath;
         tRepetitions = repetitions;
@@ -355,23 +352,23 @@ public:
 protected:
     virtual void __executeImpl()
     {
-        string label = tFunction->getLabel();
         string state = tCallerLoop->getState(false);
 
         string plotVar = tToPlot->getKey();
 
-        string dataPath = tPlotpath + "data/" + label + "_" + state + ".DAT";
+        string dataPath = tPlotpath + "data/" + tLabel + "_" + state + ".DAT";
         FILE* dataFile = Util::openFile(dataPath);
         fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
-        ChronoFunction chronoFunction(tParameters, tFunction, plotVar, dataFile, tRepetitions);
-        tToPlot->repeatFunction(&chronoFunction, tParameters);
+        ChronoAction chronoAction(tParameters, tFunction, tLabel, dataFile, tRepetitions);
+        tToPlot->repeatFunction(&chronoAction, tParameters);
 
         fclose(dataFile);
     }
 };
 
-void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, string yLabel, unsigned repetitions)
+void Test::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToPlot, string yLabel,
+                      unsigned repetitions)
 {
     cout << "Plotting " << label << "...";
     Chronometer chrono;
@@ -382,7 +379,6 @@ void Test::plot(ParamMapFuncPtr func, std::string label, RangeLoop* xToPlot, str
 
     createGnuPlotScript(path, label, xLabel, yLabel);
 
-    parameters.putNumber(Test::REPETITIONS, repetitions);
     PlotParamMapAction plotAction(&parameters, func, xToPlot, path, label, repetitions);
     tLoop->repeatFunction(&plotAction, &parameters);
 
@@ -398,7 +394,6 @@ void Test::plotTask(Task* task, std::string label, RangeLoop* xToPlot)
     delete (auxLoop);
 }
 
-
 class FillArrayFunction : public LoopFunction
 {
     float* tArray;
@@ -412,7 +407,7 @@ public:
 protected:
     virtual void __executeImpl()
     {
-        tArray[tLeaf] = ((RangeLoop*)tCallerLoop)->getCurrentValue();
+        tArray[tLeaf] = ((RangeLoop*) tCallerLoop)->getCurrentValue();
     }
 };
 
@@ -431,7 +426,7 @@ public:
 protected:
     virtual void __executeImpl()
     {
-        unsigned xValue = ((RangeLoop*)tCallerLoop)->getCurrentValue();
+        unsigned xValue = ((RangeLoop*) tCallerLoop)->getCurrentValue();
         tPopulation->learn(xValue);
         tArray[tLeaf] += tPopulation->getBestIndividualScore();
     }
@@ -444,7 +439,8 @@ class ForAveragesFunc : public LoopFunction
     RangeLoop* tToPlot;
     float* tArray;
 public:
-    ForAveragesFunc(ParametersMap* parameters, Task* task, Individual* example, RangeLoop* xToPlot, float* yArray)
+    ForAveragesFunc(ParametersMap* parameters, Task* task, Individual* example, RangeLoop* xToPlot,
+                    float* yArray)
     {
         tLabel = "ForAveragesFunc";
         tParameters = parameters;

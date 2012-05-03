@@ -10,9 +10,10 @@ using namespace std;
     Buffer* buffer = Dummy::buffer(parametersMap);
 
 #define END                                                                             \
-    delete (buffer);
+    delete (buffer);                                                                    \
+    return chrono.getSeconds();
 
-void chronoCopyToInterface(ParametersMap* parametersMap)
+float chronoCopyToInterface(ParametersMap* parametersMap, unsigned repetitions)
 {
     START
 
@@ -24,7 +25,7 @@ void chronoCopyToInterface(ParametersMap* parametersMap)
     END
 }
 
-void chronoCopyFromInterface(ParametersMap* parametersMap)
+float chronoCopyFromInterface(ParametersMap* parametersMap, unsigned repetitions)
 {
     START
 
@@ -37,7 +38,7 @@ void chronoCopyFromInterface(ParametersMap* parametersMap)
     END
 }
 
-void chronoActivation(ParametersMap* parametersMap)
+float chronoActivation(ParametersMap* parametersMap, unsigned repetitions)
 {
     START
 
@@ -52,7 +53,7 @@ void chronoActivation(ParametersMap* parametersMap)
     END
 }
 
-void chronoClone(ParametersMap* parametersMap)
+float chronoClone(ParametersMap* parametersMap, unsigned repetitions)
 {
     START
 
@@ -90,17 +91,17 @@ int main(int argc, char *argv[])
         RangeLoop xToPlot(Dummy::SIZE, 2000, 20001, 2000);
         string yLabel = "Time (seconds)";
         unsigned repetitions = 100;
-        test.plot(chronoCopyToInterface, "Buffer_copyToInterface", &xToPlot, yLabel, repetitions);
-        test.plot(chronoCopyFromInterface, "Buffer_copyFromInterface", &xToPlot, yLabel, repetitions);
+        test.plotChrono(chronoCopyToInterface, "Buffer_copyToInterface", &xToPlot, yLabel, repetitions);
+        test.plotChrono(chronoCopyFromInterface, "Buffer_copyFromInterface", &xToPlot, yLabel, repetitions);
         xToPlot.resetRange(1000, 10001, 3000);
-        test.plot(chronoClone, "Buffer_clone", &xToPlot, yLabel, repetitions);
+        test.plotChrono(chronoClone, "Buffer_clone", &xToPlot, yLabel, repetitions);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         test.getLoop()->print();
 
         xToPlot.resetRange(2000, 20001, 2000);
-        test.plot(chronoActivation, "Buffer_activation", &xToPlot, yLabel, repetitions);
+        test.plotChrono(chronoActivation, "Buffer_activation", &xToPlot, yLabel, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {
