@@ -26,12 +26,7 @@ typedef float (*ChronoFunctionPtr)(ParametersMap*, unsigned);
 
 class Test
 {
-public:
-    static const string LINE_COLOR_LEVEL;
-    static const string POINT_TYPE_LEVEL;
-    static const string PLOT_PATH;
 protected:
-    void createGnuPlotScript(string& path, string& title, string& xLabel, string& yLabel);
     Loop* tLoop;
 public:
     ParametersMap parameters;
@@ -44,9 +39,7 @@ public:
 
     void testMemoryLosses(ParamMapFuncPtr function, string label);
     void test(TestFunctionPtr func, std::string label);
-    void plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToPlot, string yLabel, unsigned repetitions);
-    void plotTask(Task* task, std::string label, RangeLoop* xToPlot);
-    void plotTask(Task* task, std::string label, RangeLoop* xToPlot, Loop* toAverage);
+
     void addLoop(Loop* loop);
     Loop* getLoop();
 

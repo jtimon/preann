@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "loop/test.h"
+#include "loop/plot.h"
 #include "common/dummy.h"
 
 #define START                                                                           \
@@ -63,35 +63,35 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Test test;
-        test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
-        test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
-        test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
-        test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        Plot plotter;
+        plotter.parameters.putString(Plot::PLOT_PATH, PREANN_DIR + to_string("output/"));
+        plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
+        plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
+        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        test.addLoop(new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2));
+        plotter.addLoop(new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2));
 
-//        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
-        test.addLoop(
+//        plotter.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+        plotter.addLoop(
                 new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C,
                              IT_SSE2));
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
-        test.addLoop(bufferTypeLoop);
+        plotter.addLoop(bufferTypeLoop);
 
-        test.parameters.putNumber(Test::LINE_COLOR_LEVEL, 1);
-        test.parameters.putNumber(Test::POINT_TYPE_LEVEL, 2);
-        test.getLoop()->print();
+        plotter.parameters.putNumber(Plot::LINE_COLOR_LEVEL, 1);
+        plotter.parameters.putNumber(Plot::POINT_TYPE_LEVEL, 2);
+        plotter.getLoop()->print();
 
         RangeLoop xToPlot(Dummy::SIZE, 50000, 500000, 50000);
         string yLabel = "Time (seconds)";
-        test.plotChrono(chronoMutate, "Connection_mutate", &xToPlot, yLabel, 10000);
+        plotter.plotChrono(chronoMutate, "Connection_mutate", &xToPlot, yLabel, 10000);
 
         xToPlot.resetRange(500, 5000, 500);
         unsigned repetitions = 1000;
-        test.plotChrono(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, repetitions);
-        test.plotChrono(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, repetitions);
+        plotter.plotChrono(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, repetitions);
+        plotter.plotChrono(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {

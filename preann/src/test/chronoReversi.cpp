@@ -4,7 +4,7 @@
 using namespace std;
 
 #include "common/chronometer.h"
-#include "loop/test.h"
+#include "loop/plot.h"
 #include "genetic/population.h"
 #include "tasks/reversiTask.h"
 
@@ -13,52 +13,52 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Test test;
-        test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
-        test.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
+        Plot plotter;
+        plotter.parameters.putString(Plot::PLOT_PATH, PREANN_DIR + to_string("output/"));
+        plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
         unsigned populationSize = 8;
-        test.parameters.putNumber(Population::SIZE, populationSize);
-        test.parameters.putNumber(Population::NUM_SELECTION, populationSize / 2);
-        test.parameters.putNumber(Population::NUM_CROSSOVER, populationSize / 2);
+        plotter.parameters.putNumber(Population::SIZE, populationSize);
+        plotter.parameters.putNumber(Population::NUM_SELECTION, populationSize / 2);
+        plotter.parameters.putNumber(Population::NUM_CROSSOVER, populationSize / 2);
 
-        test.parameters.putNumber(Population::UNIFORM_CROSS_PROB, 0.7);
-        test.parameters.putNumber(Population::MULTIPOINT_NUM, 3);
+        plotter.parameters.putNumber(Population::UNIFORM_CROSS_PROB, 0.7);
+        plotter.parameters.putNumber(Population::MULTIPOINT_NUM, 3);
 
-        test.parameters.putNumber(Population::MUTATION_NUM, 1);
-        test.parameters.putNumber(Population::MUTATION_RANGE, 2);
-        test.parameters.putNumber(Population::MUTATION_PROB, 0.1);
+        plotter.parameters.putNumber(Population::MUTATION_NUM, 1);
+        plotter.parameters.putNumber(Population::MUTATION_RANGE, 2);
+        plotter.parameters.putNumber(Population::MUTATION_PROB, 0.1);
 
-        test.parameters.putNumber(Population::RESET_NUM, 2);
-        test.parameters.putNumber(Population::RESET_PROB, 0.05);
+        plotter.parameters.putNumber(Population::RESET_NUM, 2);
+        plotter.parameters.putNumber(Population::RESET_PROB, 0.05);
 
         //TODO repetitions for plotTask
-        //        test.parameters.putNumber(Test::REPETITIONS, 100);
-        test.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
-        test.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
-        test.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
-        test.parameters.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PROBABILISTIC);
-        test.parameters.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_PROBABILISTIC);
+        //        plotter.parameters.putNumber(Test::REPETITIONS, 100);
+        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
+        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
+        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
+        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PROBABILISTIC);
+        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_PROBABILISTIC);
 
         EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
                                               ET_SELECTION_ALGORITHM);
-        test.addLoop(selecAlgLoop);
+        plotter.addLoop(selecAlgLoop);
 
         RangeLoop* rouletteWheelBaseLoop = new RangeLoop(Population::ROULETTE_WHEEL_BASE, 1, 18, 4);
-        test.addLoop(rouletteWheelBaseLoop);
+        plotter.addLoop(rouletteWheelBaseLoop);
 
         //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
         //        loop = resetAlgLoop;
 
-        test.parameters.putNumber(Test::LINE_COLOR_LEVEL, 1);
-        test.parameters.putNumber(Test::POINT_TYPE_LEVEL, 0);
+        plotter.parameters.putNumber(Plot::LINE_COLOR_LEVEL, 1);
+        plotter.parameters.putNumber(Plot::POINT_TYPE_LEVEL, 0);
 
-        test.getLoop()->print();
+        plotter.getLoop()->print();
 
         Task* task = new ReversiTask(4, 1);
         Individual* example = task->getExample();
 
         RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 100, 5);
-        test.plotTask(task, "chronoReversi", generationsLoop);
+        plotter.plotTask(task, "chronoReversi", generationsLoop);
 
         delete (example);
         delete (task);

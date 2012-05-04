@@ -3,8 +3,10 @@
 
 using namespace std;
 
-#include "loop/test.h"
+#include "loop/plot.h"
 #include "common/dummy.h"
+#include "common/chronometer.h"
+
 
 #define START                                                                           \
     Buffer* buffer = Dummy::buffer(parametersMap);
@@ -70,38 +72,38 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Test test;
-        test.parameters.putString(Test::PLOT_PATH, PREANN_DIR + to_string("output/"));
-        test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
-        test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        Plot plotter;
+        plotter.parameters.putString(Plot::PLOT_PATH, PREANN_DIR + to_string("output/"));
+        plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
+        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-//        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
-        test.addLoop(
+//        plotter.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+        plotter.addLoop(
                 new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C,
                              IT_SSE2));
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
-        test.addLoop(bufferTypeLoop);
+        plotter.addLoop(bufferTypeLoop);
 
-        test.parameters.putNumber(Test::LINE_COLOR_LEVEL, 0);
-        test.parameters.putNumber(Test::POINT_TYPE_LEVEL, 1);
+        plotter.parameters.putNumber(Plot::LINE_COLOR_LEVEL, 0);
+        plotter.parameters.putNumber(Plot::POINT_TYPE_LEVEL, 1);
 
-        test.getLoop()->print();
+        plotter.getLoop()->print();
 
         RangeLoop xToPlot(Dummy::SIZE, 2000, 20001, 2000);
         string yLabel = "Time (seconds)";
         unsigned repetitions = 100;
-        test.plotChrono(chronoCopyToInterface, "Buffer_copyToInterface", &xToPlot, yLabel, repetitions);
-        test.plotChrono(chronoCopyFromInterface, "Buffer_copyFromInterface", &xToPlot, yLabel, repetitions);
+        plotter.plotChrono(chronoCopyToInterface, "Buffer_copyToInterface", &xToPlot, yLabel, repetitions);
+        plotter.plotChrono(chronoCopyFromInterface, "Buffer_copyFromInterface", &xToPlot, yLabel, repetitions);
         xToPlot.resetRange(1000, 10001, 3000);
-        test.plotChrono(chronoClone, "Buffer_clone", &xToPlot, yLabel, repetitions);
+        plotter.plotChrono(chronoClone, "Buffer_clone", &xToPlot, yLabel, repetitions);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
-        test.getLoop()->print();
+        plotter.getLoop()->print();
 
         xToPlot.resetRange(2000, 20001, 2000);
-        test.plotChrono(chronoActivation, "Buffer_activation", &xToPlot, yLabel, repetitions);
+        plotter.plotChrono(chronoActivation, "Buffer_activation", &xToPlot, yLabel, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {
