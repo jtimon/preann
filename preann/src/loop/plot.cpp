@@ -62,13 +62,8 @@ int mapLineColor(unsigned value)
     }
 }
 
-int getPointType(ParametersMap* parametersMap)
+int getPointType(unsigned pointTypeLevel, ParametersMap* parametersMap)
 {
-    unsigned pointTypeLevel = 1;
-    try {
-        pointTypeLevel = parametersMap->getNumber(Plot::POINT_TYPE_LEVEL);
-    } catch (string e) {
-    };
     unsigned pointTypeToMap = 1000;
     try {
         string levelName = Loop::getLevelName(pointTypeLevel);
@@ -80,13 +75,8 @@ int getPointType(ParametersMap* parametersMap)
     return pointType;
 }
 
-int getLineColor(ParametersMap*& parametersMap)
+int getLineColor(unsigned lineColorLevel, ParametersMap*& parametersMap)
 {
-    unsigned lineColorLevel = 0;
-    try {
-        lineColorLevel = parametersMap->getNumber(Plot::LINE_COLOR_LEVEL);
-    } catch (string e) {
-    };
     unsigned lineColorToMap = 1000;
     try {
         string levelName = Loop::getLevelName(lineColorLevel);
@@ -102,13 +92,17 @@ class PreparePlotFunction : public LoopFunction
     string tBasePath;
     FILE* tPlotFile;
     LoopFunction* tFunction;
+    unsigned tLineColorLevel;
+    unsigned tPointTypeLevel;
 public:
-    PreparePlotFunction(ParametersMap* parameters, string subPath, FILE* plotFile)
+    PreparePlotFunction(ParametersMap* parameters, string subPath, FILE* plotFile, unsigned lineColorLevel, unsigned pointTypeLevel)
     {
         tLabel = "PreparePlotFunction";
         tParameters = parameters;
         tBasePath = subPath;
         tPlotFile = plotFile;
+        tLineColorLevel = lineColorLevel;
+        tPointTypeLevel = pointTypeLevel;
     }
 protected:
     virtual void __executeImpl()
@@ -121,8 +115,8 @@ protected:
         string dataPath = tBasePath + state + ".DAT";
         string line = " \"" + dataPath + "\" using 1:2 title \"" + state + "\"";
 
-        int lineColor = getLineColor(tParameters);
-        int pointType = getPointType(tParameters);
+        int lineColor = getLineColor(tLineColorLevel, tParameters);
+        int pointType = getPointType(tPointTypeLevel, tParameters);
 
         line += " with linespoints lt " + to_string(lineColor);
         line += " pt " + to_string(pointType);
@@ -151,7 +145,17 @@ void Plot::createGnuPlotScript(string& title, string& xLabel, string& yLabel)
 
     string subPath = tPlotPath + "data/" + title + "_";
 
-    PreparePlotFunction preparePlotFunction(&parameters, subPath, plotFile);
+    unsigned lineColorLevel = 0;
+    try {
+        lineColorLevel = parameters.getNumber(Plot::LINE_COLOR_LEVEL);
+    } catch (string e) {
+    };
+    unsigned pointTypeLevel = 1;
+    try {
+        pointTypeLevel = parameters.getNumber(Plot::POINT_TYPE_LEVEL);
+    } catch (string e) {
+    };
+    PreparePlotFunction preparePlotFunction(&parameters, subPath, plotFile, lineColorLevel, pointTypeLevel);
     tLoop->repeatFunction(&preparePlotFunction, &parameters);
     fprintf(plotFile, "\n");
     fclose(plotFile);
