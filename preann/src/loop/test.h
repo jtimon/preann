@@ -1,15 +1,15 @@
 #ifndef TEST_H_
 #define TEST_H_
 
-#include "parametersMap.h"
-#include "chronometer.h"
-
-#include "loop/loop.h"
-#include "loop/rangeLoop.h"
-#include "loop/enumLoop.h"
-#include "loop/joinEnumLoop.h"
-
+#include "common/chronometer.h"
 #include "neural/buffer.h"
+
+#include "parametersMap.h"
+#include "loop.h"
+#include "rangeLoop.h"
+#include "enumLoop.h"
+#include "joinEnumLoop.h"
+
 
 typedef unsigned (*TestFunctionPtr)(ParametersMap*);
 typedef float (*ChronoFunctionPtr)(ParametersMap*, unsigned);

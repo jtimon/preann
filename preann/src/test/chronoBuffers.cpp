@@ -3,7 +3,7 @@
 
 using namespace std;
 
-#include "common/test.h"
+#include "loop/test.h"
 #include "common/dummy.h"
 
 #define START                                                                           \

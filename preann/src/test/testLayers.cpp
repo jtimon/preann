@@ -4,7 +4,7 @@
 using namespace std;
 
 #include "common/chronometer.h"
-#include "common/test.h"
+#include "loop/test.h"
 #include "common/dummy.h"
 
 const string LAYER_PATH = "layerPath";

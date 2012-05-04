@@ -8,7 +8,7 @@
 #ifndef PARAMETERSMAP_H_
 #define PARAMETERSMAP_H_
 
-#include "util.h"
+#include "common/util.h"
 
 class ParametersMap
 {

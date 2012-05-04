@@ -8,7 +8,6 @@
 #define FACTORY_H_
 
 #include "neural/connection.h"
-#include "common/parametersMap.h"
 
 class Factory
 {

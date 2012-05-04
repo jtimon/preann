@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "common/test.h"
+#include "loop/test.h"
 #include "common/dummy.h"
 
 #define START                                                                           \

@@ -8,7 +8,7 @@
 #ifndef DUMMY_H_
 #define DUMMY_H_
 
-#include "parametersMap.h"
+#include "loop/parametersMap.h"
 #include "neural/neuralNet.h"
 
 class Dummy
