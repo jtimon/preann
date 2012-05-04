@@ -184,15 +184,17 @@ class PlotParamMapRepeat : public LoopFunction
     RangeLoop* tToPlot;
     string tPlotpath;
     unsigned tRepetitions;
-    float* tArray;
+    float* tArrayX;
+    float* tArrayY;
 public:
     PlotParamMapRepeat(ChronoFunctionPtr function, ParametersMap* parameters, string label,
-                       RangeLoop* xToPlot, float* xArray, string plotPath, unsigned repetitions)
+                       RangeLoop* xToPlot, float* xArray, float* yArray, string plotPath, unsigned repetitions)
             : LoopFunction(parameters, label)
     {
         tFunction = function;
         tToPlot = xToPlot;
-        tArray = xArray;
+        tArrayX = xArray;
+        tArrayY = yArray;
         tPlotpath = plotPath;
         tRepetitions = repetitions;
     }
@@ -208,17 +210,15 @@ protected:
         fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
         unsigned arraySize = tToPlot->getNumBranches();
-        float* yArray = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
 
-        ChronoAction chronoAction(tFunction, tParameters, tLabel, yArray, tRepetitions);
+        ChronoAction chronoAction(tFunction, tParameters, tLabel, tArrayY, tRepetitions);
         tToPlot->repeatFunction(&chronoAction, tParameters);
 
         for (unsigned i = 0; i < arraySize; ++i) {
-            fprintf(dataFile, " %f %f \n", tArray[i], yArray[i]);
+            fprintf(dataFile, " %f %f \n", tArrayX[i], tArrayY[i]);
         }
 
         fclose(dataFile);
-        MemoryManagement::free(yArray);
     }
 };
 
@@ -232,10 +232,14 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToP
     createGnuPlotScript(label, xLabel, yLabel, lineColorLevel, pointTypeLevel);
 
     float* xArray = xToPlot->toArray();
-    PlotParamMapRepeat plotAction(func, &parameters, label, xToPlot, xArray, tPlotPath, repetitions);
+    float* yArray = xToPlot->toArray();
+
+    PlotParamMapRepeat plotAction(func, &parameters, label, xToPlot, xArray, yArray, tPlotPath, repetitions);
     tLoop->repeatFunction(&plotAction, &parameters);
 
     plotFile(label);
+    MemoryManagement::free(xArray);
+    MemoryManagement::free(yArray);
 }
 
 class AddResultsPopulationFunc : public LoopFunction
