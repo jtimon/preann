@@ -472,9 +472,9 @@ class ForLinesFunc : public LoopFunction
     Loop* tToAverage;
     string tPlotPath;
 public:
-    ForLinesFunc(ParametersMap* parameters, Task* task, RangeLoop* xToPlot, Loop* toAverage, string plotPath)
+    ForLinesFunc(ParametersMap* parameters, std::string label, Task* task, RangeLoop* xToPlot, Loop* toAverage, string plotPath)
     {
-        tLabel = "ForLinesFunc";
+        tLabel = label;
         tParameters = parameters;
         tTask = task;
         tExample = tTask->getExample();
@@ -532,7 +532,7 @@ void Test::plotTask(Task* task, std::string label, RangeLoop* xToPlot, Loop* toA
 
     createGnuPlotScript(path, label, xLabel, yLabel);
 
-    ForLinesFunc forLinesFunc(&parameters, task, xToPlot, toAverage, path);
+    ForLinesFunc forLinesFunc(&parameters, label, task, xToPlot, toAverage, path);
     //TODO averiguar donde ha ido la label que antes se pasaba por aqui
     tLoop->repeatFunction(&forLinesFunc, &parameters);
 
