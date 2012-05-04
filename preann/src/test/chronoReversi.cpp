@@ -13,8 +13,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Plot plotter;
-        plotter.parameters.putString(Plot::PLOT_PATH, PREANN_DIR + to_string("output/"));
+        Plot plotter(PREANN_DIR + to_string("output/"));
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
         unsigned populationSize = 8;
         plotter.parameters.putNumber(Population::SIZE, populationSize);

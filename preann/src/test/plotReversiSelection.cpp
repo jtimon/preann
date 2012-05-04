@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Plot plotter;
+        Plot plotter(PREANN_DIR + to_string("output/"));
 
         EnumLoop* toAverageLoop = new EnumLoop(ET_CROSS_ALG);
         toAverageLoop->exclude(ET_CROSS_ALG, 1, CA_PROPORTIONAL);
@@ -21,7 +21,6 @@ int main(int argc, char *argv[])
 //        toAverageLoop->addInnerLoop(new EnumLoop(ET_MUTATION_ALG));
 //        toAverageLoop->addInnerLoop(new EnumLoop(ET_RESET_ALG));
 
-        plotter.parameters.putString(Plot::PLOT_PATH, PREANN_DIR + to_string("output/"));
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
         unsigned populationSize = 8;
         plotter.parameters.putNumber(Population::SIZE, populationSize);

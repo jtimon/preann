@@ -9,17 +9,14 @@
 
 const string Plot::LINE_COLOR_LEVEL = "__LOOP__PLOT_LINE_COLOR";
 const string Plot::POINT_TYPE_LEVEL = "__LOOP__PLOT_POINT_TYPE";
-const string Plot::PLOT_PATH = "__plotPath";
 
-Plot::Plot()
+Plot::Plot(string plotPath)
 {
-    // TODO Auto-generated constructor stub
-
+    tPlotPath = plotPath;
 }
 
 Plot::~Plot()
 {
-    // TODO Auto-generated destructor stub
 }
 
 
@@ -135,16 +132,16 @@ protected:
     }
 };
 
-void Plot::createGnuPlotScript(string& path, string& title, string& xLabel, string& yLabel)
+void Plot::createGnuPlotScript(string& title, string& xLabel, string& yLabel)
 {
-    string plotPath = path + "gnuplot/" + title + ".plt";
-    FILE* plotFile = Util::openFile(plotPath);
+    string fullPath = tPlotPath + "gnuplot/" + title + ".plt";
+    FILE* plotFile = Util::openFile(fullPath);
 
     fprintf(plotFile, "set terminal png size 2048,1024 \n");
     fprintf(plotFile, "set key below\n");
     fprintf(plotFile, "set key box \n");
 
-    string outputPath = path + "images/" + title + ".png";
+    string outputPath = tPlotPath + "images/" + title + ".png";
     fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
 
     fprintf(plotFile, "set title \"%s\" \n", title.data());
@@ -152,7 +149,7 @@ void Plot::createGnuPlotScript(string& path, string& title, string& xLabel, stri
     fprintf(plotFile, "set ylabel \"%s\" \n", yLabel.data());
     fprintf(plotFile, "plot ");
 
-    string subPath = path + "data/" + title + "_";
+    string subPath = tPlotPath + "data/" + title + "_";
 
     PreparePlotFunction preparePlotFunction(&parameters, subPath, plotFile);
     tLoop->repeatFunction(&preparePlotFunction, &parameters);
@@ -160,10 +157,10 @@ void Plot::createGnuPlotScript(string& path, string& title, string& xLabel, stri
     fclose(plotFile);
 }
 
-void plotFile(string path, string functionLabel)
+void Plot::plotFile(string label)
 {
-    string plotPath = path + "gnuplot/" + functionLabel + ".plt";
-    string syscommand = "gnuplot " + plotPath;
+    string fullPath = tPlotPath + "gnuplot/" + label + ".plt";
+    string syscommand = "gnuplot " + fullPath;
     system(syscommand.data());
 }
 
@@ -235,15 +232,14 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToP
     Chronometer chrono;
     chrono.start();
 
-    string path = parameters.getString(Plot::PLOT_PATH);
     string xLabel = xToPlot->getKey();
 
-    createGnuPlotScript(path, label, xLabel, yLabel);
+    createGnuPlotScript(label, xLabel, yLabel);
 
-    PlotParamMapAction plotAction(func, &parameters, label, xToPlot, path, repetitions);
+    PlotParamMapAction plotAction(func, &parameters, label, xToPlot, tPlotPath, repetitions);
     tLoop->repeatFunction(&plotAction, &parameters);
 
-    plotFile(path, label);
+    plotFile(label);
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
 }
@@ -386,20 +382,19 @@ void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, Loop* toA
 {
     Chronometer chrono;
     chrono.start();
-    string path = parameters.getString(Plot::PLOT_PATH);
     string testedTask = task->toString();
     label = testedTask + "_" + label;
 
     string xLabel = xToPlot->getKey();
     string yLabel = "Fitness";
 
-    createGnuPlotScript(path, label, xLabel, yLabel);
+    createGnuPlotScript(label, xLabel, yLabel);
 
-    ForLinesFunc forLinesFunc(&parameters, label, task, xToPlot, toAverage, path);
+    ForLinesFunc forLinesFunc(&parameters, label, task, xToPlot, toAverage, tPlotPath);
     //TODO averiguar donde ha ido la label que antes se pasaba por aqui
     tLoop->repeatFunction(&forLinesFunc, &parameters);
 
-    plotFile(path, label);
+    plotFile(label);
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
 }

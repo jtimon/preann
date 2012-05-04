@@ -72,8 +72,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Plot plotter;
-        plotter.parameters.putString(Plot::PLOT_PATH, PREANN_DIR + to_string("output/"));
+        Plot plotter(PREANN_DIR + to_string("output/"));
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 

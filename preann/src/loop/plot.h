@@ -15,11 +15,12 @@ class Plot : public Test
 public:
     static const string LINE_COLOR_LEVEL;
     static const string POINT_TYPE_LEVEL;
-    static const string PLOT_PATH;
 protected:
-    void createGnuPlotScript(string& path, string& title, string& xLabel, string& yLabel);
+    string tPlotPath;
+    void createGnuPlotScript(string& title, string& xLabel, string& yLabel);
+    void plotFile(string label);
 public:
-    Plot();
+    Plot(string plotPath);
     virtual ~Plot();
 
     void plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToPlot, string yLabel,
