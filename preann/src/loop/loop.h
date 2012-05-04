@@ -26,9 +26,7 @@ protected:
     std::string tKey;
     Loop* tCallerLoop;
 
-    void repeatFunctionBase(LoopFunction* func, ParametersMap* parametersMap);
-
-    void createGnuPlotScript(ParametersMap* parametersMap);
+    void repeatFunctionBase(LoopFunction* func);
 
     Loop();
     Loop(std::string key);
@@ -36,7 +34,7 @@ protected:
     Loop* tInnerLoop;
     void setCallerLoop(Loop* callerLoop);
 
-    virtual void repeatFunctionImpl(LoopFunction* func, ParametersMap* parametersMap) = 0;
+    virtual void repeatFunctionImpl(LoopFunction* func) = 0;
 public:
     friend class JoinEnumLoop;
     virtual ~Loop();
@@ -69,14 +67,14 @@ protected:
     Loop* tCallerLoop;
     unsigned tLeaf;
 
-    LoopFunction()
+    LoopFunction(ParametersMap* parameters, string label)
     {
-        tParameters = NULL;
         tFunction = NULL;
-        tLabel = "NOT_LABELED_FUNCTION";
+        tLabel = label;
+        tParameters = parameters;
 
-        tCallerLoop = NULL;
         tLeaf = 0;
+        tCallerLoop = NULL;
     }
 public:
     LoopFunction(ParamMapFuncPtr functionPtr, ParametersMap* parameters, string label)

@@ -95,23 +95,22 @@ unsigned Test::assertEquals(Buffer* expected, Buffer* actual)
 
 class TestMemLossesFunction : public LoopFunction
 {
-    LoopFunction* tFunction;
+    string tFunctionLabel;
 public:
     TestMemLossesFunction(ParamMapFuncPtr function, ParametersMap* parameters, string label)
+            : LoopFunction(function, parameters, "TestMemoryLosses " + label)
     {
-        tLabel = "TestMemoryLosses " + label;
-        tFunction = new LoopFunction(function, parameters, label);
+        tFunctionLabel = label;
     }
 protected:
     virtual void __executeImpl()
     {
-        tFunction->execute(tCallerLoop);
+        (tFunction)(tParameters);
 
         if (MemoryManagement::getPtrCounter() > 0 || MemoryManagement::getTotalAllocated() > 0) {
 
-            string label = tFunction->getLabel();
             string state = tCallerLoop->getState(false);
-            cout << "Memory loss detected while testing " + label + " at state " + state << endl;
+            cout << "Memory loss detected while testing " + tFunctionLabel + " at state " + state << endl;
 
             MemoryManagement::printTotalAllocated();
             MemoryManagement::printTotalPointers();
@@ -131,9 +130,8 @@ class TestAction : public LoopFunction
     TestFunctionPtr tFunction;
 public:
     TestAction(TestFunctionPtr function, ParametersMap* parameters, string label)
+            : LoopFunction(parameters, "TestAction " + label)
     {
-        tLabel = "TestAction " + label;
-        tParameters = parameters;
         tFunction = function;
     }
 protected:

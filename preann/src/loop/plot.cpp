@@ -19,7 +19,6 @@ Plot::~Plot()
 {
 }
 
-
 int mapPointType(unsigned value)
 {
     // pt : 1=+, 2=X, 3=*, 4=square, 5=filled square, 6=circle,
@@ -95,10 +94,10 @@ class PreparePlotFunction : public LoopFunction
     unsigned tLineColorLevel;
     unsigned tPointTypeLevel;
 public:
-    PreparePlotFunction(ParametersMap* parameters, string subPath, FILE* plotFile, unsigned lineColorLevel, unsigned pointTypeLevel)
+    PreparePlotFunction(ParametersMap* parameters, string subPath, FILE* plotFile, unsigned lineColorLevel,
+                        unsigned pointTypeLevel)
+            : LoopFunction(parameters, "PreparePlotFunction")
     {
-        tLabel = "PreparePlotFunction";
-        tParameters = parameters;
         tBasePath = subPath;
         tPlotFile = plotFile;
         tLineColorLevel = lineColorLevel;
@@ -176,10 +175,9 @@ class ChronoAction : public LoopFunction
 public:
     ChronoAction(ChronoFunctionPtr functionToChrono, ParametersMap* parameters, string label, FILE* dataFile,
                  unsigned repetitions)
+            : LoopFunction(parameters, "ChronoAction " + label)
     {
-        tLabel = "ChronoAction " + label;
         tDataFile = dataFile;
-        tParameters = parameters;
         tFunctionToChrono = functionToChrono;
         tRepetitions = repetitions;
     }
@@ -203,9 +201,8 @@ class PlotParamMapAction : public LoopFunction
 public:
     PlotParamMapAction(ChronoFunctionPtr function, ParametersMap* parameters, string label,
                        RangeLoop* xToPlot, string plotPath, unsigned repetitions)
+            : LoopFunction(parameters, label)
     {
-        tLabel = label;
-        tParameters = parameters;
         tFunction = function;
         tToPlot = xToPlot;
         tPlotpath = plotPath;
@@ -260,9 +257,8 @@ class FillArrayFunction : public LoopFunction
     float* tArray;
 public:
     FillArrayFunction(ParametersMap* parameters, float* array)
+            : LoopFunction(parameters, "FillArrayXFunction")
     {
-        tLabel = "FillArrayXFunction";
-        tParameters = parameters;
         tArray = array;
     }
 protected:
@@ -278,9 +274,8 @@ class AddResultsPopulationFunc : public LoopFunction
     float* tArray;
 public:
     AddResultsPopulationFunc(ParametersMap* parameters, Population* population, float* array)
+            : LoopFunction(parameters, "AddResultsPopulationFunc")
     {
-        tLabel = "AddResultsPopulationFunc";
-        tParameters = parameters;
         tPopulation = population;
         tArray = array;
     }
@@ -302,9 +297,8 @@ class ForAveragesFunc : public LoopFunction
 public:
     ForAveragesFunc(ParametersMap* parameters, Task* task, Individual* example, RangeLoop* xToPlot,
                     float* yArray)
+            : LoopFunction(parameters, "ForAveragesFunc")
     {
-        tLabel = "ForAveragesFunc";
-        tParameters = parameters;
         tTask = task;
         tExample = example;
         tToPlot = xToPlot;
@@ -335,10 +329,10 @@ class ForLinesFunc : public LoopFunction
     Loop* tToAverage;
     string tPlotPath;
 public:
-    ForLinesFunc(ParametersMap* parameters, std::string label, Task* task, RangeLoop* xToPlot, Loop* toAverage, string plotPath)
+    ForLinesFunc(ParametersMap* parameters, std::string label, Task* task, RangeLoop* xToPlot,
+                 Loop* toAverage, string plotPath)
+            : LoopFunction(parameters, label)
     {
-        tLabel = label;
-        tParameters = parameters;
         tTask = task;
         tExample = tTask->getExample();
         tToPlot = xToPlot;
@@ -402,5 +396,4 @@ void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, Loop* toA
     chrono.stop();
     cout << chrono.getSeconds() << " segundos." << endl;
 }
-
 
