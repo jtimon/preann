@@ -21,20 +21,20 @@ typedef void (*ParamMapFuncPtr)(ParametersMap*);
 
 class Loop
 {
+private:
+    void setCallerLoop(Loop* callerLoop);
 protected:
 
     std::string tKey;
     Loop* tCallerLoop;
 
-    void repeatFunctionBase(LoopFunction* func);
-
     Loop();
     Loop(std::string key);
     unsigned tLevel;
     Loop* tInnerLoop;
-    void setCallerLoop(Loop* callerLoop);
 
-    virtual void repeatFunctionImpl(LoopFunction* func) = 0;
+    void __repeatBase(LoopFunction* func);
+    virtual void __repeatImpl(LoopFunction* func) = 0;
 public:
     friend class JoinEnumLoop;
     virtual ~Loop();

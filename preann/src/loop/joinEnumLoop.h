@@ -19,7 +19,7 @@ protected:
     unsigned tIndex;
     virtual unsigned valueToUnsigned();
 
-    virtual void repeatFunctionImpl(LoopFunction* func);
+    virtual void __repeatImpl(LoopFunction* func);
 public:
     JoinEnumLoop(std::string key, EnumType enumType);
     virtual ~JoinEnumLoop();

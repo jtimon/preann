@@ -53,13 +53,13 @@ std::string RangeLoop::valueToString()
     return to_string(tValue);
 }
 
-void RangeLoop::repeatFunctionImpl(LoopFunction* func)
+void RangeLoop::__repeatImpl(LoopFunction* func)
 {
     ParametersMap* parametersMap = func->getParameters();
     tUnsignedValue = 0;
     for (tValue = tMin; tValue < tMax; tValue += tInc) {
         parametersMap->putNumber(tKey, tValue);
-        this->repeatFunctionBase(func);
+        this->__repeatBase(func);
         ++tUnsignedValue;
     }
 }

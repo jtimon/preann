@@ -80,7 +80,7 @@ void JoinEnumLoop::print()
     cout << endl;
 }
 
-void JoinEnumLoop::repeatFunctionImpl(LoopFunction* func)
+void JoinEnumLoop::__repeatImpl(LoopFunction* func)
 {
     ParametersMap* parametersMap = func->getParameters();
     string levelName = getLevelName(tLevel);
@@ -92,7 +92,7 @@ void JoinEnumLoop::repeatFunctionImpl(LoopFunction* func)
 
         parametersMap->putNumber(tKey, tValueVector[tIndex]);
         tInnerLoops[tIndex]->setCallerLoop(this);
-        tInnerLoops[tIndex]->repeatFunctionImpl(func);
+        tInnerLoops[tIndex]->__repeatImpl(func);
     }
 }
 

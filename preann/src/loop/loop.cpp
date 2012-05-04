@@ -56,7 +56,7 @@ std::string Loop::getLevelName(unsigned &level)
     return result;
 }
 
-void Loop::repeatFunctionBase(LoopFunction* func)
+void Loop::__repeatBase(LoopFunction* func)
 {
     ParametersMap* parametersMap = func->getParameters();
     string levelName = getLevelName(tLevel);
@@ -65,7 +65,7 @@ void Loop::repeatFunctionBase(LoopFunction* func)
     if (tInnerLoop) {
         tInnerLoop->tLevel = tLevel + 1;
         tInnerLoop->setCallerLoop(this);
-        tInnerLoop->repeatFunctionImpl(func);
+        tInnerLoop->__repeatImpl(func);
     } else {
         func->execute(this);
     }
@@ -87,7 +87,7 @@ void Loop::repeatFunction(LoopFunction* func, ParametersMap* parametersMap)
     this->setCallerLoop(NULL);
     try {
         func->start();
-        this->repeatFunctionImpl(func);
+        this->__repeatImpl(func);
     } catch (string e) {
         cout << "Error while repeating function... " << functionLabel << " : " << e << endl;
     }
