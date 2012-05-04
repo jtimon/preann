@@ -17,7 +17,6 @@
 class LoopFunction;
 
 typedef void (*ParamMapFuncPtr)(ParametersMap*);
-typedef void (*LoopFuncPtr)(LoopFunction*);
 
 class Loop
 {
@@ -51,7 +50,6 @@ public:
     virtual void print() = 0;
 
     void repeatFunction(ParamMapFuncPtr func, ParametersMap* parametersMap, std::string functionLabel);
-    void repeatFunction(LoopFuncPtr func, ParametersMap* parametersMap, std::string functionLabel);
     void repeatFunction(LoopFunction* func, ParametersMap* parametersMap);
 
     virtual std::string valueToString() = 0;
@@ -63,34 +61,36 @@ public:
 class LoopFunction
 {
 protected:
-    ParametersMap* tParameters;
-    Loop* tCallerLoop;
-    LoopFuncPtr tFunction;
-    unsigned tLeaf;
+    ParamMapFuncPtr tFunction;
     std::string tLabel;
+    ParametersMap* tParameters;
 
-    void initFields(LoopFuncPtr functionPtr, string label, ParametersMap* parameters)
+    Loop* tCallerLoop;
+    unsigned tLeaf;
+
+    LoopFunction()
     {
-        tParameters = parameters;
-        tFunction = functionPtr;
-        tLabel = label;
+        tParameters = NULL;
+        tFunction = NULL;
+        tLabel = "NOT_LABELED_FUNCTION";
 
         tCallerLoop = NULL;
         tLeaf = 0;
     }
-    LoopFunction()
-    {
-        initFields(NULL, "NOT_LABELED_FUNCTION", NULL);
-    }
 public:
-    LoopFunction(LoopFuncPtr functionPtr, string label, ParametersMap* parameters)
+    LoopFunction(ParamMapFuncPtr functionPtr, ParametersMap* parameters, string label)
     {
-        initFields(functionPtr, label, parameters);
+        tFunction = functionPtr;
+        tLabel = label;
+        tParameters = parameters;
+
+        tCallerLoop = NULL;
+        tLeaf = 0;
     }
 
     virtual void __executeImpl()
     {
-        (tFunction)(this);
+        (tFunction)(tParameters);
     }
 
     void start()
@@ -127,23 +127,6 @@ public:
     unsigned getLeaf()
     {
         return tLeaf;
-    }
-};
-
-class ParamMapFunction : public LoopFunction
-{
-    ParamMapFuncPtr tParamFunction;
-public:
-    ParamMapFunction(ParamMapFuncPtr function, ParametersMap* parameters, std::string functionLabel)
-    {
-        tParamFunction = function;
-        tParameters = parameters;
-        tLabel = functionLabel;
-    }
-protected:
-    virtual void __executeImpl()
-    {
-        (tParamFunction)(tParameters);
     }
 };
 

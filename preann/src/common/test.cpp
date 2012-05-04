@@ -99,12 +99,12 @@ unsigned Test::assertEquals(Buffer* expected, Buffer* actual)
 
 class TestMemLossesFunction : public LoopFunction
 {
-    ParamMapFunction* tFunction;
+    LoopFunction* tFunction;
 public:
-    TestMemLossesFunction(ParametersMap* parameters, ParamMapFuncPtr function, string label)
+    TestMemLossesFunction(ParamMapFuncPtr function, ParametersMap* parameters, string label)
     {
         tLabel = "TestMemoryLosses " + label;
-        tFunction = new ParamMapFunction(function, parameters, label);
+        tFunction = new LoopFunction(function, parameters, label);
     }
 protected:
     virtual void __executeImpl()
@@ -126,7 +126,7 @@ protected:
 
 void Test::testMemoryLosses(ParamMapFuncPtr function, string label)
 {
-    TestMemLossesFunction testMemFunc(&parameters, function, label);
+    TestMemLossesFunction testMemFunc(function, &parameters, label);
     tLoop->repeatFunction(&testMemFunc, &parameters);
 }
 
@@ -134,7 +134,7 @@ class TestAction : public LoopFunction
 {
     TestFunctionPtr tFunction;
 public:
-    TestAction(ParametersMap* parameters, TestFunctionPtr function, string label)
+    TestAction(TestFunctionPtr function, ParametersMap* parameters, string label)
     {
         tLabel = "TestAction " + label;
         tParameters = parameters;
@@ -156,7 +156,7 @@ protected:
 
 void Test::test(TestFunctionPtr func, std::string functionLabel)
 {
-    TestAction testAction(&parameters, func, functionLabel);
+    TestAction testAction(func, &parameters, functionLabel);
     tLoop->repeatFunction(&testAction, &parameters);
 }
 
@@ -241,7 +241,7 @@ class PreparePlotFunction : public LoopFunction
 {
     string tBasePath;
     FILE* tPlotFile;
-    ParamMapFunction* tFunction;
+    LoopFunction* tFunction;
 public:
     PreparePlotFunction(ParametersMap* parameters, string subPath, FILE* plotFile)
     {
@@ -304,15 +304,13 @@ void plotFile(string path, string functionLabel)
     system(syscommand.data());
 }
 
-typedef float (*ChronoFunctionPtr)(ParametersMap*, unsigned);
-
 class ChronoAction : public LoopFunction
 {
     FILE* tDataFile;
     ChronoFunctionPtr tFunctionToChrono;
     unsigned tRepetitions;
 public:
-    ChronoAction(ParametersMap* parameters, ChronoFunctionPtr functionToChrono, string label, FILE* dataFile,
+    ChronoAction(ChronoFunctionPtr functionToChrono, ParametersMap* parameters, string label, FILE* dataFile,
                  unsigned repetitions)
     {
         tLabel = "ChronoAction " + label;
@@ -339,8 +337,8 @@ class PlotParamMapAction : public LoopFunction
     string tPlotpath;
     unsigned tRepetitions;
 public:
-    PlotParamMapAction(ParametersMap* parameters, ChronoFunctionPtr function, RangeLoop* xToPlot,
-                       string plotPath, string label, unsigned repetitions)
+    PlotParamMapAction(ChronoFunctionPtr function, ParametersMap* parameters, string label,
+                       RangeLoop* xToPlot, string plotPath, unsigned repetitions)
     {
         tLabel = label;
         tParameters = parameters;
@@ -360,7 +358,7 @@ protected:
         FILE* dataFile = Util::openFile(dataPath);
         fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
-        ChronoAction chronoAction(tParameters, tFunction, tLabel, dataFile, tRepetitions);
+        ChronoAction chronoAction(tFunction, tParameters, tLabel, dataFile, tRepetitions);
         tToPlot->repeatFunction(&chronoAction, tParameters);
 
         fclose(dataFile);
@@ -379,7 +377,7 @@ void Test::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToP
 
     createGnuPlotScript(path, label, xLabel, yLabel);
 
-    PlotParamMapAction plotAction(&parameters, func, xToPlot, path, label, repetitions);
+    PlotParamMapAction plotAction(func, &parameters, label, xToPlot, path, repetitions);
     tLoop->repeatFunction(&plotAction, &parameters);
 
     plotFile(path, label);
