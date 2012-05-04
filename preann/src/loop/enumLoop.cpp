@@ -114,6 +114,11 @@ void EnumLoop::exclude(EnumType enumType, unsigned count, ...)
     va_end(ap);
 }
 
+unsigned EnumLoop::getNumBranches()
+{
+    return tValueVector.size();
+}
+
 void EnumLoop::print()
 {
     cout << tKey << " (" << Enumerations::enumTypeToString(tEnumType) << ") : ";

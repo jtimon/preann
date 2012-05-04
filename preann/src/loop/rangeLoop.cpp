@@ -38,6 +38,27 @@ unsigned RangeLoop::valueToUnsigned()
     return tUnsignedValue;
 }
 
+unsigned RangeLoop::getNumBranches()
+{
+    unsigned i = 0;
+    for (float val = tMin; val < tMax; val += tInc) {
+        ++i;
+    }
+    return i;
+}
+
+float* RangeLoop::toArray()
+{
+    unsigned arraySize = getNumBranches();
+    float* array = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
+    unsigned i = 0;
+    for (float val = tMin; val < tMax; val += tInc) {
+        array[i++] = val;
+    }
+    return array;
+}
+
+
 void RangeLoop::print()
 {
     if (tMin + tInc < tMax) {

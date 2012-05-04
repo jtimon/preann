@@ -70,13 +70,14 @@ int main(int argc, char *argv[])
         unsigned pointTypeLevel = 1;
 
         Task* task;
-        task = new BinaryTask(BO_OR, vectorsSize);
-        plotter.plotTask(task, "chronoOr", generationsLoop, lineColorLevel, pointTypeLevel);
-        delete (task);
 
-        task = new BinaryTask(BO_AND, vectorsSize);
-        plotter.plotTask(task, "chronoAnd", generationsLoop, lineColorLevel, pointTypeLevel);
-        delete (task);
+//        task = new BinaryTask(BO_OR, vectorsSize);
+//        plotter.plotTask(task, "chronoOr", generationsLoop, lineColorLevel, pointTypeLevel);
+//        delete (task);
+//
+//        task = new BinaryTask(BO_AND, vectorsSize);
+//        plotter.plotTask(task, "chronoAnd", generationsLoop, lineColorLevel, pointTypeLevel);
+//        delete (task);
 
         task = new BinaryTask(BO_XOR, vectorsSize);
         plotter.plotTask(task, "chronoXor", generationsLoop, lineColorLevel, pointTypeLevel);

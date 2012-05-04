@@ -43,7 +43,9 @@ public:
 
     virtual void addInnerLoop(Loop* innerLoop);
     virtual unsigned valueToUnsigned() = 0;
+    virtual unsigned getNumBranches() = 0;
     unsigned getNumLeafs();
+    unsigned getDepth();
 
     virtual Loop* findLoop(std::string key);
     virtual void print() = 0;

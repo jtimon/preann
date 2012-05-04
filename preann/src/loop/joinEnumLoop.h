@@ -28,6 +28,7 @@ public:
     void addEnumLoop(unsigned enumValue, Loop* loop);
 
     virtual Loop* findLoop(std::string key);
+    virtual unsigned getNumBranches();
     virtual void print();
     virtual std::string valueToString();
 };

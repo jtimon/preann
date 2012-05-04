@@ -68,6 +68,11 @@ std::string JoinEnumLoop::valueToString()
     return Enumerations::toString(tEnumType, tValueVector[tIndex]);
 }
 
+unsigned JoinEnumLoop::getNumBranches()
+{
+    tValueVector.size();
+}
+
 void JoinEnumLoop::print()
 {
     cout << tKey << " (" << Enumerations::enumTypeToString(tEnumType) << ") : ";

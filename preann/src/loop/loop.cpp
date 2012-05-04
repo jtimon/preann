@@ -107,6 +107,14 @@ unsigned Loop::getNumLeafs()
     return lastLeafPlusOne;
 }
 
+unsigned Loop::getDepth()
+{
+    if (tInnerLoop == NULL){
+        return 1;
+    }
+    return 1 + tInnerLoop->getDepth();
+}
+
 Loop* Loop::findLoop(std::string key)
 {
     if (tKey.compare(key) == 0) {

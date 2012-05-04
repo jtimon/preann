@@ -34,6 +34,7 @@ public:
     void with(EnumType enumType, unsigned count, ...);
     void exclude(EnumType enumType, unsigned count, ...);
 
+    virtual unsigned getNumBranches();
     virtual void print();
     virtual std::string valueToString();
 };
