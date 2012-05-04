@@ -7,9 +7,6 @@
 
 #include "plot.h"
 
-const string Plot::LINE_COLOR_LEVEL = "__LOOP__PLOT_LINE_COLOR";
-const string Plot::POINT_TYPE_LEVEL = "__LOOP__PLOT_POINT_TYPE";
-
 Plot::Plot(string plotPath)
 {
     tPlotPath = plotPath;
@@ -66,7 +63,6 @@ int getPointType(unsigned pointTypeLevel, ParametersMap* parametersMap)
     unsigned pointTypeToMap = 1000;
     try {
         string levelName = Loop::getLevelName(pointTypeLevel);
-        cout << parametersMap->printNumber(levelName) << endl;
         pointTypeToMap = parametersMap->getNumber(levelName);
     } catch (string e) {
     };
@@ -125,7 +121,8 @@ protected:
     }
 };
 
-void Plot::createGnuPlotScript(string& title, string& xLabel, string& yLabel)
+void Plot::createGnuPlotScript(string& title, string& xLabel, string& yLabel, unsigned lineColorLevel,
+                               unsigned pointTypeLevel)
 {
     string fullPath = tPlotPath + "gnuplot/" + title + ".plt";
     FILE* plotFile = Util::openFile(fullPath);
@@ -144,16 +141,6 @@ void Plot::createGnuPlotScript(string& title, string& xLabel, string& yLabel)
 
     string subPath = tPlotPath + "data/" + title + "_";
 
-    unsigned lineColorLevel = 0;
-    try {
-        lineColorLevel = parameters.getNumber(Plot::LINE_COLOR_LEVEL);
-    } catch (string e) {
-    };
-    unsigned pointTypeLevel = 1;
-    try {
-        pointTypeLevel = parameters.getNumber(Plot::POINT_TYPE_LEVEL);
-    } catch (string e) {
-    };
     PreparePlotFunction preparePlotFunction(&parameters, subPath, plotFile, lineColorLevel, pointTypeLevel);
     tLoop->repeatFunction(&preparePlotFunction, &parameters);
     fprintf(plotFile, "\n");
@@ -227,7 +214,7 @@ protected:
 };
 
 void Plot::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToPlot, string yLabel,
-                      unsigned repetitions)
+                      unsigned lineColorLevel, unsigned pointTypeLevel, unsigned repetitions)
 {
     cout << "Plotting " << label << "...";
     Chronometer chrono;
@@ -235,7 +222,7 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToP
 
     string xLabel = xToPlot->getKey();
 
-    createGnuPlotScript(label, xLabel, yLabel);
+    createGnuPlotScript(label, xLabel, yLabel, lineColorLevel, pointTypeLevel);
 
     PlotParamMapAction plotAction(func, &parameters, label, xToPlot, tPlotPath, repetitions);
     tLoop->repeatFunction(&plotAction, &parameters);
@@ -245,10 +232,10 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToP
     cout << chrono.getSeconds() << " segundos." << endl;
 }
 
-void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot)
+void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned lineColorLevel, unsigned pointTypeLevel)
 {
     Loop* auxLoop = new RangeLoop("aux_average", 1, 2, 1);
-    plotTask(task, label, xToPlot, auxLoop);
+    plotTask(task, label, xToPlot, lineColorLevel, pointTypeLevel, auxLoop);
     delete (auxLoop);
 }
 
@@ -376,7 +363,7 @@ protected:
     }
 };
 
-void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, Loop* toAverage)
+void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned lineColorLevel, unsigned pointTypeLevel, Loop* toAverage)
 {
     Chronometer chrono;
     chrono.start();
@@ -386,7 +373,7 @@ void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, Loop* toA
     string xLabel = xToPlot->getKey();
     string yLabel = "Fitness";
 
-    createGnuPlotScript(label, xLabel, yLabel);
+    createGnuPlotScript(label, xLabel, yLabel, lineColorLevel, pointTypeLevel);
 
     ForLinesFunc forLinesFunc(&parameters, label, task, xToPlot, toAverage, tPlotPath);
     //TODO averiguar donde ha ido la label que antes se pasaba por aqui

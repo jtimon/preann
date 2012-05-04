@@ -48,8 +48,8 @@ int main(int argc, char *argv[])
         //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
         //        loop = resetAlgLoop;
 
-        plotter.parameters.putNumber(Plot::LINE_COLOR_LEVEL, 1);
-        plotter.parameters.putNumber(Plot::POINT_TYPE_LEVEL, 0);
+        unsigned lineColorLevel = 0;
+        unsigned pointTypeLevel = 1;
 
         plotter.getLoop()->print();
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
         Individual* example = task->getExample();
 
         RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 100, 5);
-        plotter.plotTask(task, "chronoReversi", generationsLoop);
+        plotter.plotTask(task, "chronoReversi", generationsLoop, lineColorLevel, pointTypeLevel);
 
         delete (example);
         delete (task);

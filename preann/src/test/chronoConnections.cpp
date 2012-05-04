@@ -79,18 +79,19 @@ int main(int argc, char *argv[])
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
         plotter.addLoop(bufferTypeLoop);
 
-        plotter.parameters.putNumber(Plot::LINE_COLOR_LEVEL, 1);
-        plotter.parameters.putNumber(Plot::POINT_TYPE_LEVEL, 2);
+        unsigned lineColorLevel = 0;
+        unsigned pointTypeLevel = 1;
+
         plotter.getLoop()->print();
 
         RangeLoop xToPlot(Dummy::SIZE, 50000, 500000, 50000);
         string yLabel = "Time (seconds)";
-        plotter.plotChrono(chronoMutate, "Connection_mutate", &xToPlot, yLabel, 10000);
+        plotter.plotChrono(chronoMutate, "Connection_mutate", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, 10000);
 
         xToPlot.resetRange(500, 5000, 500);
         unsigned repetitions = 1000;
-        plotter.plotChrono(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, repetitions);
-        plotter.plotChrono(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, repetitions);
+        plotter.plotChrono(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
+        plotter.plotChrono(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {

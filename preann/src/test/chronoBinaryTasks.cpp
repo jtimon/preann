@@ -8,35 +8,6 @@ using namespace std;
 #include "genetic/population.h"
 #include "tasks/binaryTask.h"
 
-#define COMMON								                        \
-  RangeLoop* generationsLoop = new RangeLoop("Generation", 0, maxGenerations, generationStep);  \
-  plotter->plotTask(task, stringTask, generationsLoop);                                            \
-  delete (task);
-
-void chronoOr(Plot* plotter, unsigned vectorsSize, unsigned maxGenerations, unsigned generationStep)
-{
-    string stringTask = "chronoOr";
-    Task* task = new BinaryTask(BO_OR, vectorsSize);
-
-    COMMON
-}
-
-void chronoAnd(Plot* plotter, unsigned vectorsSize, unsigned maxGenerations, unsigned generationStep)
-{
-    string stringTask = "chronoAnd";
-    Task* task = new BinaryTask(BO_AND, vectorsSize);
-
-    COMMON
-}
-
-void chronoXor(Plot* plotter, unsigned vectorsSize, unsigned maxGenerations, unsigned generationStep)
-{
-    string stringTask = "chronoXor";
-    Task* task = new BinaryTask(BO_XOR, vectorsSize);
-
-    COMMON
-}
-
 //TODO AA_REF methods must be all verbs
 //common
 //game
@@ -91,17 +62,25 @@ int main(int argc, char *argv[])
         RangeLoop* resetProbLoop = new RangeLoop(Population::RESET_PROB, 0.05, 0.2, 0.1);
         resetAlgLoop->addEnumLoop(RA_PROBABILISTIC, resetProbLoop);
 
-        plotter.parameters.putNumber(Plot::LINE_COLOR_LEVEL, 0);
-        plotter.parameters.putNumber(Plot::POINT_TYPE_LEVEL, 1);
-
         plotter.getLoop()->print();
 
+        RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 200, 1);
         unsigned vectorsSize = 2;
-        unsigned maxGenerations = 200;
-        unsigned generationStep = 1;
-//        chronoAnd(&plotter, vectorsSize, maxGenerations, generationStep);
-//        chronoOr(&plotter, vectorsSize, maxGenerations, generationStep);
-        chronoXor(&plotter, vectorsSize, maxGenerations, generationStep);
+        unsigned lineColorLevel = 0;
+        unsigned pointTypeLevel = 1;
+
+        Task* task;
+        task = new BinaryTask(BO_OR, vectorsSize);
+        plotter.plotTask(task, "chronoOr", generationsLoop, lineColorLevel, pointTypeLevel);
+        delete (task);
+
+        task = new BinaryTask(BO_AND, vectorsSize);
+        plotter.plotTask(task, "chronoAnd", generationsLoop, lineColorLevel, pointTypeLevel);
+        delete (task);
+
+        task = new BinaryTask(BO_XOR, vectorsSize);
+        plotter.plotTask(task, "chronoXor", generationsLoop, lineColorLevel, pointTypeLevel);
+        delete (task);
 
         printf("Exit success.\n");
     } catch (std::string error) {

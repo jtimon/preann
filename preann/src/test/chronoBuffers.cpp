@@ -84,25 +84,25 @@ int main(int argc, char *argv[])
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
         plotter.addLoop(bufferTypeLoop);
 
-        plotter.parameters.putNumber(Plot::LINE_COLOR_LEVEL, 0);
-        plotter.parameters.putNumber(Plot::POINT_TYPE_LEVEL, 1);
+        unsigned lineColorLevel = 0;
+        unsigned pointTypeLevel = 1;
 
         plotter.getLoop()->print();
 
         RangeLoop xToPlot(Dummy::SIZE, 2000, 20001, 2000);
         string yLabel = "Time (seconds)";
         unsigned repetitions = 100;
-        plotter.plotChrono(chronoCopyToInterface, "Buffer_copyToInterface", &xToPlot, yLabel, repetitions);
-        plotter.plotChrono(chronoCopyFromInterface, "Buffer_copyFromInterface", &xToPlot, yLabel, repetitions);
+        plotter.plotChrono(chronoCopyToInterface, "Buffer_copyToInterface", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
+        plotter.plotChrono(chronoCopyFromInterface, "Buffer_copyFromInterface", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
         xToPlot.resetRange(1000, 10001, 3000);
-        plotter.plotChrono(chronoClone, "Buffer_clone", &xToPlot, yLabel, repetitions);
+        plotter.plotChrono(chronoClone, "Buffer_clone", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         plotter.getLoop()->print();
 
         xToPlot.resetRange(2000, 20001, 2000);
-        plotter.plotChrono(chronoActivation, "Buffer_activation", &xToPlot, yLabel, repetitions);
+        plotter.plotChrono(chronoActivation, "Buffer_activation", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {

@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
         //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
         //        loop = resetAlgLoop;
 
-        plotter.parameters.putNumber(Plot::LINE_COLOR_LEVEL, 0);
-        plotter.parameters.putNumber(Plot::POINT_TYPE_LEVEL, 0);
+        unsigned lineColorLevel = 0;
+        unsigned pointTypeLevel = 0;
 
         plotter.getLoop()->print();
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
 //        cout << "generationsLoop->getNumLeafs() " << generationsLoop->getNumLeafs() << endl;
 //        cout << "toAverageLoop->getNumLeafs() " << toAverageLoop->getNumLeafs() << endl;
-        plotter.plotTask(task, "selectionReversi", generationsLoop, toAverageLoop);
+        plotter.plotTask(task, "selectionReversi", generationsLoop, lineColorLevel, pointTypeLevel, toAverageLoop);
 
         delete (generationsLoop);
         delete (task);
