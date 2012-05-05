@@ -178,25 +178,23 @@ protected:
     }
 };
 
-class PlotParamMapRepeat : public LoopFunction
+class GenericPlotFuncton : public LoopFunction
 {
-    ChronoFunctionPtr tFunction;
+    LoopFunction* tFillArrayAction;
     RangeLoop* tToPlot;
     string tPlotpath;
-    unsigned tRepetitions;
     float* tArrayX;
     float* tArrayY;
 public:
-    PlotParamMapRepeat(ChronoFunctionPtr function, ParametersMap* parameters, string label,
-                       RangeLoop* xToPlot, float* xArray, float* yArray, string plotPath, unsigned repetitions)
+    GenericPlotFuncton(LoopFunction* fillArrayAction, ParametersMap* parameters, string label,
+                       RangeLoop* xToPlot, float* xArray, float* yArray, string plotPath)
             : LoopFunction(parameters, label)
     {
-        tFunction = function;
+        tFillArrayAction = fillArrayAction;
         tToPlot = xToPlot;
         tArrayX = xArray;
         tArrayY = yArray;
         tPlotpath = plotPath;
-        tRepetitions = repetitions;
     }
 protected:
     virtual void __executeImpl()
@@ -211,8 +209,7 @@ protected:
 
         unsigned arraySize = tToPlot->getNumBranches();
 
-        ChronoAction chronoAction(tFunction, tParameters, tLabel, tArrayY, tRepetitions);
-        tToPlot->repeatFunction(&chronoAction, tParameters);
+        tToPlot->repeatFunction(tFillArrayAction, tParameters);
 
         for (unsigned i = 0; i < arraySize; ++i) {
             fprintf(dataFile, " %f %f \n", tArrayX[i], tArrayY[i]);
@@ -234,8 +231,9 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToP
     float* xArray = xToPlot->toArray();
     float* yArray = xToPlot->toArray();
 
-    PlotParamMapRepeat plotAction(func, &parameters, label, xToPlot, xArray, yArray, tPlotPath, repetitions);
-    tLoop->repeatFunction(&plotAction, &parameters);
+    ChronoAction chronoAction(func, &parameters, label, yArray, repetitions);
+    GenericPlotFuncton plotFunction(&chronoAction, &parameters, label, xToPlot, xArray, yArray, tPlotPath);
+    tLoop->repeatFunction(&plotFunction, &parameters);
 
     plotFile(label);
     MemoryManagement::free(xArray);
@@ -320,6 +318,22 @@ public:
 protected:
     virtual void __executeImpl()
     {
+        string state = tCallerLoop->getState(false);
+
+        string plotVar = tToPlot->getKey();
+
+        string dataPath = tPlotPath + "data/" + tLabel + "_" + state + ".DAT";
+        FILE* dataFile = Util::openFile(dataPath);
+        fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
+
+//        unsigned arraySize = tToPlot->getNumBranches();
+//
+//        tToPlot->repeatFunction(tFillArrayAction, tParameters);
+//
+//        for (unsigned i = 0; i < arraySize; ++i) {
+//            fprintf(dataFile, " %f %f \n", tArrayX[i], tArrayY[i]);
+//        }
+
         // Reset Y vector
         unsigned arraySize = tToPlot->getNumBranches();
         for (unsigned i = 0; i < arraySize; ++i) {
@@ -330,13 +344,6 @@ protected:
         ForAveragesFunc forAveragesFunc(tParameters, tTask, tExample, tToPlot, tArrayY);
         tToAverage->repeatFunction(&forAveragesFunc, tParameters);
 
-        // Create data file
-        string state = tCallerLoop->getState(false);
-        string dataPath = tPlotPath + "data/" + tLabel + "_" + state + ".DAT";
-        FILE* dataFile = Util::openFile(dataPath);
-        string plotVar = tToPlot->getKey();
-        fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
-
         unsigned divisor = tToAverage->getNumLeafs();
         for (unsigned i = 0; i < arraySize; ++i) {
             float averagedResult = tArrayY[i] / divisor;
@@ -345,6 +352,7 @@ protected:
         fclose(dataFile);
     }
 };
+
 
 void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned lineColorLevel,
                     unsigned pointTypeLevel)
