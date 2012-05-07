@@ -178,19 +178,38 @@ protected:
     }
 };
 
+class ChronoRepeater : public LoopFunction
+{
+    RangeLoop* tToPlot;
+    LoopFunction* tArrayFillerFunction;
+public:
+    ChronoRepeater(LoopFunction* arrayFillerAction, ParametersMap* parameters, string label, RangeLoop* xToPlot)
+            : LoopFunction(parameters, "ChronoRepeater " + label)
+    {
+        tParameters = parameters;
+        tArrayFillerFunction = arrayFillerAction;
+        tToPlot = xToPlot;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        tToPlot->repeatFunction(tArrayFillerFunction, tParameters);
+    }
+};
+
 class GenericPlotFuncton : public LoopFunction
 {
-    LoopFunction* tFillArrayAction;
+    LoopFunction* tFillArrayRepeater;
     RangeLoop* tToPlot;
     string tPlotpath;
     float* tArrayX;
     float* tArrayY;
 public:
-    GenericPlotFuncton(LoopFunction* fillArrayAction, ParametersMap* parameters, string label,
+    GenericPlotFuncton(LoopFunction* fillArrayRepeater, ParametersMap* parameters, string label,
                        RangeLoop* xToPlot, float* xArray, float* yArray, string plotPath)
             : LoopFunction(parameters, label)
     {
-        tFillArrayAction = fillArrayAction;
+        tFillArrayRepeater = fillArrayRepeater;
         tToPlot = xToPlot;
         tArrayX = xArray;
         tArrayY = yArray;
@@ -207,10 +226,9 @@ protected:
         FILE* dataFile = Util::openFile(dataPath);
         fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
+        tFillArrayRepeater->execute(tCallerLoop);
+
         unsigned arraySize = tToPlot->getNumBranches();
-
-        tToPlot->repeatFunction(tFillArrayAction, tParameters);
-
         for (unsigned i = 0; i < arraySize; ++i) {
             fprintf(dataFile, " %f %f \n", tArrayX[i], tArrayY[i]);
         }
@@ -232,7 +250,8 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToP
     float* yArray = xToPlot->toArray();
 
     ChronoAction chronoAction(func, &parameters, label, yArray, repetitions);
-    GenericPlotFuncton plotFunction(&chronoAction, &parameters, label, xToPlot, xArray, yArray, tPlotPath);
+    ChronoRepeater chronoRepeater(&chronoAction, &parameters, label, xToPlot);
+    GenericPlotFuncton plotFunction(&chronoRepeater, &parameters, label, xToPlot, xArray, yArray, tPlotPath);
     tLoop->repeatFunction(&plotFunction, &parameters);
 
     plotFile(label);
@@ -326,10 +345,9 @@ protected:
         FILE* dataFile = Util::openFile(dataPath);
         fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
-//        unsigned arraySize = tToPlot->getNumBranches();
-//
 //        tToPlot->repeatFunction(tFillArrayAction, tParameters);
 //
+//        unsigned arraySize = tToPlot->getNumBranches();
 //        for (unsigned i = 0; i < arraySize; ++i) {
 //            fprintf(dataFile, " %f %f \n", tArrayX[i], tArrayY[i]);
 //        }
