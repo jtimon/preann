@@ -183,7 +183,8 @@ class ChronoRepeater : public LoopFunction
     RangeLoop* tToPlot;
     LoopFunction* tArrayFillerFunction;
 public:
-    ChronoRepeater(LoopFunction* arrayFillerAction, ParametersMap* parameters, string label, RangeLoop* xToPlot)
+    ChronoRepeater(LoopFunction* arrayFillerAction, ParametersMap* parameters, string label,
+                   RangeLoop* xToPlot)
             : LoopFunction(parameters, "ChronoRepeater " + label)
     {
         tParameters = parameters;
@@ -259,13 +260,13 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToP
     MemoryManagement::free(yArray);
 }
 
-class AddResultsPopulationFunc : public LoopFunction
+class AddResultsPopAction : public LoopFunction
 {
     Population* tPopulation;
     float* tArray;
 public:
-    AddResultsPopulationFunc(ParametersMap* parameters, Population* population, float* array)
-            : LoopFunction(parameters, "AddResultsPopulationFunc")
+    AddResultsPopAction(ParametersMap* parameters, string label, Population* population, float* array)
+            : LoopFunction(parameters, "AddResultsPopAction " + label)
     {
         tPopulation = population;
         tArray = array;
@@ -273,25 +274,24 @@ public:
 protected:
     virtual void __executeImpl()
     {
-        unsigned xValue = ((RangeLoop*) tCallerLoop)->getCurrentValue();
+        float xValue = ((RangeLoop*) tCallerLoop)->getCurrentValue();
         tPopulation->learn(xValue);
         tArray[tLeaf] += tPopulation->getBestIndividualScore();
     }
 };
 
-class ForAveragesFunc : public LoopFunction
+class AddResultsPopRepeater : public LoopFunction
 {
     Task* tTask;
     Individual* tExample;
     RangeLoop* tToPlot;
     float* tArray;
 public:
-    ForAveragesFunc(ParametersMap* parameters, Task* task, Individual* example, RangeLoop* xToPlot,
-                    float* yArray)
-            : LoopFunction(parameters, "ForAveragesFunc")
+    AddResultsPopRepeater(ParametersMap* parameters, string label, Task* task, RangeLoop* xToPlot, float* yArray)
+            : LoopFunction(parameters, "AddResultsPopRepeater " + label)
     {
         tTask = task;
-        tExample = example;
+        tExample = tTask->getExample();
         tToPlot = xToPlot;
         tArray = yArray;
     }
@@ -305,72 +305,42 @@ protected:
         Population* initialPopulation = new Population(tTask, tExample, populationSize, weighsRange);
         initialPopulation->setParams(tParameters);
 
-        AddResultsPopulationFunc addResultsPopulationFunc(tParameters, initialPopulation, tArray);
-        tToPlot->repeatFunction(&addResultsPopulationFunc, tParameters);
+        AddResultsPopAction addResultsPopAction(tParameters, tLabel, initialPopulation, tArray);
+        tToPlot->repeatFunction(&addResultsPopAction, tParameters);
 
         delete (initialPopulation);
     }
 };
 
-class ForLinesFunc : public LoopFunction
+class ForAvergaesRepeater : public LoopFunction
 {
-    Task* tTask;
-    Individual* tExample;
-    RangeLoop* tToPlot;
-    float* tArrayX;
-    float* tArrayY;
+    LoopFunction* tArrayFillerFunction;
     Loop* tToAverage;
-    string tPlotPath;
+    float* tArray;
+    unsigned tArraySize;
 public:
-    ForLinesFunc(ParametersMap* parameters, std::string label, Task* task, RangeLoop* xToPlot, float* xArray, float* yArray,
-                 Loop* toAverage, string plotPath)
-            : LoopFunction(parameters, label)
+    ForAvergaesRepeater(LoopFunction* arrayFillerAction, ParametersMap* parameters, string label,
+                        Loop* toAverage, float* array, unsigned arraySize)
+            : LoopFunction(parameters, "ForAvergaesRepeater " + label)
     {
-        tTask = task;
-        tExample = tTask->getExample();
-        tToPlot = xToPlot;
-        tArrayX = xArray;
-        tArrayY = yArray;
+        tParameters = parameters;
+        tArrayFillerFunction = arrayFillerAction;
         tToAverage = toAverage;
-        tPlotPath = plotPath;
+        tArray = array;
+        tArraySize = arraySize;
     }
 protected:
     virtual void __executeImpl()
     {
-        string state = tCallerLoop->getState(false);
-
-        string plotVar = tToPlot->getKey();
-
-        string dataPath = tPlotPath + "data/" + tLabel + "_" + state + ".DAT";
-        FILE* dataFile = Util::openFile(dataPath);
-        fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
-
-//        tToPlot->repeatFunction(tFillArrayAction, tParameters);
-//
-//        unsigned arraySize = tToPlot->getNumBranches();
-//        for (unsigned i = 0; i < arraySize; ++i) {
-//            fprintf(dataFile, " %f %f \n", tArrayX[i], tArrayY[i]);
-//        }
-
         // Reset Y vector
-        unsigned arraySize = tToPlot->getNumBranches();
-        for (unsigned i = 0; i < arraySize; ++i) {
-            tArrayY[i] = 0;
+        for (unsigned i = 0; i < tArraySize; ++i) {
+            tArray[i] = 0;
         }
 
         // Fill Y vector
-        ForAveragesFunc forAveragesFunc(tParameters, tTask, tExample, tToPlot, tArrayY);
-        tToAverage->repeatFunction(&forAveragesFunc, tParameters);
-
-        unsigned divisor = tToAverage->getNumLeafs();
-        for (unsigned i = 0; i < arraySize; ++i) {
-            float averagedResult = tArrayY[i] / divisor;
-            fprintf(dataFile, " %d %f \n", (unsigned) tArrayX[i], averagedResult);
-        }
-        fclose(dataFile);
+        tToAverage->repeatFunction(tArrayFillerFunction, tParameters);
     }
 };
-
 
 void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned lineColorLevel,
                     unsigned pointTypeLevel)
@@ -398,12 +368,15 @@ void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned 
     // create Y vector
     float* yArray = xToPlot->toArray();
 
-    ForLinesFunc forLinesFunc(&parameters, label, task, xToPlot, xArray, yArray, toAverage, tPlotPath);
-    //TODO averiguar donde ha ido la label que antes se pasaba por aqui
-    tLoop->repeatFunction(&forLinesFunc, &parameters);
+    AddResultsPopRepeater addResultsPopRepeater(&parameters, label, task, xToPlot, yArray);
+    ForAvergaesRepeater forAvergaesRepeater(&addResultsPopRepeater, &parameters, label, toAverage, yArray, xToPlot->getNumBranches());
+    GenericPlotFuncton plotFunction(&forAvergaesRepeater, &parameters, label, xToPlot, xArray, yArray, tPlotPath);
+    tLoop->repeatFunction(&plotFunction, &parameters);
+
+//    ForLinesFunc forLinesFunc(&parameters, label, task, xToPlot, xArray, yArray, toAverage, tPlotPath);
+//    tLoop->repeatFunction(&forLinesFunc, &parameters);
 
     plotFile(label);
-
     MemoryManagement::free(xArray);
     MemoryManagement::free(yArray);
 }
