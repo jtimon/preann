@@ -64,7 +64,7 @@ int getPointType(unsigned pointTypeLevel, ParametersMap* parametersMap)
     try {
         string levelName = Loop::getLevelName(pointTypeLevel);
         pointTypeToMap = parametersMap->getNumber(levelName);
-    } catch (string e) {
+    } catch (string& e) {
     };
     int pointType = mapPointType(pointTypeToMap);
     return pointType;
@@ -76,7 +76,7 @@ int getLineColor(unsigned lineColorLevel, ParametersMap*& parametersMap)
     try {
         string levelName = Loop::getLevelName(lineColorLevel);
         lineColorToMap = parametersMap->getNumber(levelName);
-    } catch (string e) {
+    } catch (string& e) {
     };
     int lineColor = mapLineColor(lineColorToMap);
     return lineColor;
@@ -187,7 +187,6 @@ public:
                    RangeLoop* xToPlot)
             : LoopFunction(parameters, "ChronoRepeater " + label)
     {
-        tParameters = parameters;
         tArrayFillerFunction = arrayFillerAction;
         tToPlot = xToPlot;
     }
@@ -202,7 +201,7 @@ class GenericPlotFuncton : public LoopFunction
 {
     LoopFunction* tFillArrayRepeater;
     RangeLoop* tToPlot;
-    string tPlotpath;
+    string tPlotPath;
     float* tArrayX;
     float* tArrayY;
 public:
@@ -214,7 +213,7 @@ public:
         tToPlot = xToPlot;
         tArrayX = xArray;
         tArrayY = yArray;
-        tPlotpath = plotPath;
+        tPlotPath = plotPath;
     }
 protected:
     virtual void __executeImpl()
@@ -223,7 +222,7 @@ protected:
 
         string plotVar = tToPlot->getKey();
 
-        string dataPath = tPlotpath + "data/" + tLabel + "_" + state + ".DAT";
+        string dataPath = tPlotPath + "data/" + tLabel + "_" + state + ".DAT";
         FILE* dataFile = Util::openFile(dataPath);
         fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
@@ -238,24 +237,33 @@ protected:
     }
 };
 
+void Plot::genericPlot(std::string label, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
+                       unsigned lineColorLevel, unsigned pointTypeLevel, float* xArray, float* yArray)
+{
+    string xLabel = xToPlot->getKey();
+
+    createGnuPlotScript(label, xLabel, yLabel, lineColorLevel, pointTypeLevel);
+
+    GenericPlotFuncton plotFunction(fillArrayRepeater, &parameters, label, xToPlot, xArray, yArray,
+                                    tPlotPath);
+    tLoop->repeatFunction(&plotFunction, &parameters);
+
+    plotFile(label);
+}
+
 void Plot::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToPlot, string yLabel,
                       unsigned lineColorLevel, unsigned pointTypeLevel, unsigned repetitions)
 {
     check(xToPlot->getDepth() != 1, "Plot::plotChrono : xToPlot has to have a Depth equal to 1.");
-
-    string xLabel = xToPlot->getKey();
-
-    createGnuPlotScript(label, xLabel, yLabel, lineColorLevel, pointTypeLevel);
 
     float* xArray = xToPlot->toArray();
     float* yArray = xToPlot->toArray();
 
     ChronoAction chronoAction(func, &parameters, label, yArray, repetitions);
     ChronoRepeater chronoRepeater(&chronoAction, &parameters, label, xToPlot);
-    GenericPlotFuncton plotFunction(&chronoRepeater, &parameters, label, xToPlot, xArray, yArray, tPlotPath);
-    tLoop->repeatFunction(&plotFunction, &parameters);
 
-    plotFile(label);
+    genericPlot(label, &chronoRepeater, xToPlot, yLabel, lineColorLevel, pointTypeLevel, xArray, yArray);
+
     MemoryManagement::free(xArray);
     MemoryManagement::free(yArray);
 }
@@ -287,7 +295,8 @@ class AddResultsPopRepeater : public LoopFunction
     RangeLoop* tToPlot;
     float* tArray;
 public:
-    AddResultsPopRepeater(ParametersMap* parameters, string label, Task* task, RangeLoop* xToPlot, float* yArray)
+    AddResultsPopRepeater(ParametersMap* parameters, string label, Task* task, RangeLoop* xToPlot,
+                          float* yArray)
             : LoopFunction(parameters, "AddResultsPopRepeater " + label)
     {
         tTask = task;
@@ -323,7 +332,6 @@ public:
                         Loop* toAverage, float* array, unsigned arraySize)
             : LoopFunction(parameters, "ForAvergaesRepeater " + label)
     {
-        tParameters = parameters;
         tArrayFillerFunction = arrayFillerAction;
         tToAverage = toAverage;
         tArray = array;
@@ -339,6 +347,11 @@ protected:
 
         // Fill Y vector
         tToAverage->repeatFunction(tArrayFillerFunction, tParameters);
+
+        unsigned numLeafs = tToAverage->getNumLeafs();
+        for (unsigned i = 0; i < tArraySize; ++i) {
+            tArray[i] = tArray[i] / numLeafs;
+        }
     }
 };
 
@@ -356,12 +369,10 @@ void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned 
     check(xToPlot->getDepth() != 1, "Plot::plotTask : xToPlot has to have a Depth equal to 1.");
 
     string testedTask = task->toString();
-    label = testedTask + "_" + label;
+    label = label + "_" + testedTask;
 
     string xLabel = xToPlot->getKey();
     string yLabel = "Fitness";
-
-    createGnuPlotScript(label, xLabel, yLabel, lineColorLevel, pointTypeLevel);
 
     // create and fill X vector
     float* xArray = xToPlot->toArray();
@@ -369,21 +380,74 @@ void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned 
     float* yArray = xToPlot->toArray();
 
     AddResultsPopRepeater addResultsPopRepeater(&parameters, label, task, xToPlot, yArray);
-    ForAvergaesRepeater forAvergaesRepeater(&addResultsPopRepeater, &parameters, label, toAverage, yArray, xToPlot->getNumBranches());
-    GenericPlotFuncton plotFunction(&forAvergaesRepeater, &parameters, label, xToPlot, xArray, yArray, tPlotPath);
-    tLoop->repeatFunction(&plotFunction, &parameters);
+    ForAvergaesRepeater forAvergaesRepeater(&addResultsPopRepeater, &parameters, label, toAverage, yArray,
+                                            xToPlot->getNumBranches());
 
-//    ForLinesFunc forLinesFunc(&parameters, label, task, xToPlot, xArray, yArray, toAverage, tPlotPath);
-//    tLoop->repeatFunction(&forLinesFunc, &parameters);
+    genericPlot(label, &forAvergaesRepeater, xToPlot, yLabel, lineColorLevel, pointTypeLevel, xArray, yArray);
 
-    plotFile(label);
     MemoryManagement::free(xArray);
     MemoryManagement::free(yArray);
 }
 
+class ForFilesRepeater : public LoopFunction
+{
+    string tMainLabel;
+    Plot* tPlot;
+    LoopFunction* tFillArrayRepeater;
+    RangeLoop* tToPlot;
+    string tPlotpath;
+    float* tArrayX;
+    float* tArrayY;
+    string tLabelY;
+    unsigned tLineColorLevel;
+    unsigned tPointTypeLevel;
+public:
+    ForFilesRepeater(Plot* plot, std::string label, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
+                     unsigned lineColorLevel, unsigned pointTypeLevel, float* xArray, float* yArray)
+            : LoopFunction(&plot->parameters, "ForFilesRepeater " + label)
+    {
+        tPlot = plot;
+        tMainLabel = label;
+        tFillArrayRepeater = fillArrayRepeater;
+        tToPlot = xToPlot;
+        tLabelY = yLabel;
+        tLineColorLevel = lineColorLevel;
+        tPointTypeLevel = pointTypeLevel;
+        tArrayX = xArray;
+        tArrayY = yArray;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        string label = tMainLabel + "_" + tCallerLoop->getState(false);
+
+        tPlot->genericPlot(label, tFillArrayRepeater, tToPlot, tLabelY, tLineColorLevel, tPointTypeLevel, tArrayX, tArrayY);
+    }
+};
+
 void Plot::plotTask(Task* task, std::string label, Loop* filesLoop, RangeLoop* xToPlot,
                     unsigned lineColorLevel, unsigned pointTypeLevel, Loop* toAverage)
 {
+    check(xToPlot->getDepth() != 1, "Plot::plotTask : xToPlot has to have a Depth equal to 1.");
 
+    string testedTask = task->toString();
+    label = label + "_" + testedTask;
+
+    string xLabel = xToPlot->getKey();
+    string yLabel = "Fitness";
+
+    // create and fill X vector
+    float* xArray = xToPlot->toArray();
+    // create Y vector
+    float* yArray = xToPlot->toArray();
+
+    AddResultsPopRepeater addResultsPopRepeater(&parameters, label, task, xToPlot, yArray);
+    ForAvergaesRepeater forAvergaesRepeater(&addResultsPopRepeater, &parameters, label, toAverage, yArray,
+                                            xToPlot->getNumBranches());
+
+    ForFilesRepeater forFilesRepeater(this, label, &forAvergaesRepeater, xToPlot, yLabel, lineColorLevel, pointTypeLevel, xArray, yArray);
+    filesLoop->repeatFunction(&forFilesRepeater, &parameters);
+
+    MemoryManagement::free(xArray);
+    MemoryManagement::free(yArray);
 }
-

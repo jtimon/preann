@@ -23,9 +23,14 @@ public:
 
     void plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToPlot, string yLabel,
                     unsigned lineColorLevel, unsigned pointTypeLevel, unsigned repetitions);
-    void plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned lineColorLevel, unsigned pointTypeLevel);
-    void plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned lineColorLevel, unsigned pointTypeLevel, Loop* toAverage);
-    void plotTask(Task* task, std::string label, Loop* filesLoop, RangeLoop* xToPlot, unsigned lineColorLevel, unsigned pointTypeLevel, Loop* toAverage);
+    void plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned lineColorLevel,
+                  unsigned pointTypeLevel);
+    void plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned lineColorLevel,
+                  unsigned pointTypeLevel, Loop* toAverage);
+    void plotTask(Task* task, std::string label, Loop* filesLoop, RangeLoop* xToPlot, unsigned lineColorLevel,
+                  unsigned pointTypeLevel, Loop* toAverage);
+    void genericPlot(std::string label, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
+                           unsigned lineColorLevel, unsigned pointTypeLevel, float* xArray, float* yArray);
 };
 
 #endif /* PLOT_H_ */
