@@ -17,13 +17,22 @@ using namespace std;
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+//#include <string.h>
+#include <cstring>
+#include <string>
 #include <vector>
 #include <list>
 #include <math.h>
 #include <sstream>
 #include <map>
 #include <algorithm>
+//#include <stdexcept>
+
+        //TODO std::runtime_error // #include <stdexcept> //
+//        catch (exception& e)
+//          {
+//            cerr << "exception caught: " << e.what() << endl;
+//          }
 
 #define CLEAR_PTR_LIST(_typeClear, _listToClear) {list<_typeClear* >::iterator _iterClear; for (_iterClear = _listToClear.begin(); _iterClear != _listToClear.end(); ++_iterClear) { delete(*_iterClear); } _listToClear.clear();}
 #define CLEAR_PTR_VECTOR(_typeClear, _listToClear) {vector<_typeClear* >::iterator _iterClear; for (_iterClear = _listToClear.begin(); _iterClear != _listToClear.end(); ++_iterClear) { delete(*_iterClear); } _listToClear.clear();}
