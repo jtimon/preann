@@ -79,6 +79,7 @@ protected:
         tCallerLoop = NULL;
     }
 public:
+    virtual ~LoopFunction(){};
     LoopFunction(ParamMapFuncPtr functionPtr, ParametersMap* parameters, string label)
     {
         tFunction = functionPtr;
