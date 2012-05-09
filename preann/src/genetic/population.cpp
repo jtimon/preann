@@ -482,6 +482,7 @@ Individual* Population::getIndividual(unsigned pos)
         }
         ++index;
     }
+    return NULL;
 }
 
 void Population::checkNotEmpty()
@@ -588,6 +589,7 @@ void Population::oneCrossover(Individual* offSpringA, Individual* offSpringB,
             break;
         case CA_MULTIPOINT:
             offSpringA->multipointCrossover(crossoverLevel, offSpringB, numPointsMultipoint[crossoverLevel]);
+            break;
     }
 }
 
