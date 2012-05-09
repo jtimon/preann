@@ -88,7 +88,7 @@ void Loop::repeatFunction(LoopFunction* func, ParametersMap* parametersMap)
     try {
         func->start();
         this->__repeatImpl(func);
-    } catch (string e) {
+    } catch (string& e) {
         cout << "Error while repeating function... " << functionLabel << " : " << e << endl;
     }
 }

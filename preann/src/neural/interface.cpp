@@ -20,15 +20,16 @@ void Interface::reset()
     switch (bufferType) {
         case BT_FLOAT:
             for (unsigned i = 0; i < size; i++) {
-                ((float*)(data))[i] = 0;
+                ((float*) (data))[i] = 0;
             }
             break;
         case BT_BYTE:
         case BT_BIT:
         case BT_SIGN:
             for (unsigned i = 0; i < getByteSize(); i++) {
-                ((unsigned char*)(data))[i] = 0;
+                ((unsigned char*) (data))[i] = 0;
             }
+            break;
     }
 
 }
@@ -89,20 +90,20 @@ unsigned Interface::getSize()
 float Interface::getElement(unsigned pos)
 {
     if (pos >= size) {
-        std::string error = "Cannot get the element in position " + to_string(
-                pos) + ": the size of the buffer is " + to_string(size) + ".";
+        std::string error = "Cannot get the element in position " + to_string(pos)
+                + ": the size of the buffer is " + to_string(size) + ".";
         throw error;
     }
     switch (bufferType) {
         case BT_BYTE:
-            return ((unsigned char*)data)[pos];
+            return ((unsigned char*) data)[pos];
         case BT_FLOAT:
-            return ((float*)data)[pos];
+            return ((float*) data)[pos];
         case BT_BIT:
         case BT_SIGN:
             unsigned mask = 0x80000000 >> (pos % BITS_PER_UNSIGNED);
 
-            if (((unsigned*)data)[pos / BITS_PER_UNSIGNED] & mask) {
+            if (((unsigned*) data)[pos / BITS_PER_UNSIGNED] & mask) {
                 return 1;
             }
             if (bufferType == BT_BIT) {
@@ -115,26 +116,27 @@ float Interface::getElement(unsigned pos)
 void Interface::setElement(unsigned pos, float value)
 {
     if (pos >= size) {
-        std::string error = "Cannot set the element in position " + to_string(
-                pos) + ": the size of the buffer is " + to_string(size) + ".";
+        std::string error = "Cannot set the element in position " + to_string(pos)
+                + ": the size of the buffer is " + to_string(size) + ".";
         throw error;
     }
     switch (bufferType) {
         case BT_BYTE:
-            ((unsigned char*)data)[pos] = (unsigned char)value;
+            ((unsigned char*) data)[pos] = (unsigned char) value;
             break;
         case BT_FLOAT:
-            ((float*)data)[pos] = value;
+            ((float*) data)[pos] = value;
             break;
         case BT_BIT:
         case BT_SIGN:
             unsigned mask = 0x80000000 >> (pos % BITS_PER_UNSIGNED);
 
             if (value > 0) {
-                ((unsigned*)data)[pos / BITS_PER_UNSIGNED] |= mask;
+                ((unsigned*) data)[pos / BITS_PER_UNSIGNED] |= mask;
             } else {
-                ((unsigned*)data)[pos / BITS_PER_UNSIGNED] &= ~mask;
+                ((unsigned*) data)[pos / BITS_PER_UNSIGNED] &= ~mask;
             }
+            break;
     }
 }
 
@@ -160,10 +162,10 @@ void Interface::random(float range)
             if (range >= 128) {
                 charRange = 127;
             } else {
-                charRange = (unsigned)range;
+                charRange = (unsigned) range;
             }
             for (unsigned i = 0; i < size; i++) {
-                setElement(i, 128 + (unsigned char)Random::integer(charRange));
+                setElement(i, 128 + (unsigned char) Random::integer(charRange));
             }
             break;
         case BT_FLOAT:
@@ -195,13 +197,11 @@ void Interface::load(FILE* stream)
     fread(&bufferType2, sizeof(BufferType), 1, stream);
 
     if (size2 != size) {
-        std::string error =
-                "The size of the Interface is different than the size to load.";
+        std::string error = "The size of the Interface is different than the size to load.";
         throw error;
     }
     if (bufferType2 != bufferType) {
-        std::string error =
-                "The Type of the Interface is different than the Buffer Type to load.";
+        std::string error = "The Type of the Interface is different than the Buffer Type to load.";
         throw error;
     }
     fread(data, getByteSize(), 1, stream);
@@ -213,14 +213,15 @@ void Interface::print()
     for (unsigned i = 0; i < size; i++) {
         switch (bufferType) {
             case BT_BYTE:
-                printf("%d ", (int)((unsigned char)getElement(i) - 128));
+                printf("%d ", (int) ((unsigned char) getElement(i) - 128));
                 break;
             case BT_FLOAT:
                 printf("%f ", getElement(i));
                 break;
             case BT_BIT:
             case BT_SIGN:
-                printf("%d ", (int)getElement(i));
+                printf("%d ", (int) getElement(i));
+                break;
         }
     }
     printf("\n----------------\n", 1);
@@ -253,8 +254,8 @@ void Interface::copyFrom(Interface *other)
 void Interface::transposeMatrix(unsigned width)
 {
     if (size % width != 0) {
-        std::string error = "The interface cannot be a matrix of witdth "
-                + to_string(width) + ", it have size " + to_string(size) + ".";
+        std::string error = "The interface cannot be a matrix of witdth " + to_string(width)
+                + ", it have size " + to_string(size) + ".";
         throw error;
     }
 

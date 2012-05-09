@@ -106,7 +106,7 @@ public:
         try {
             tCallerLoop = callerLoop;
             __executeImpl();
-        } catch (string e) {
+        } catch (string& e) {
             cout << " while executing " + tLabel + " at state " + tCallerLoop->getState(true) << " : ";
             cout << endl << e << endl;
         }
