@@ -8,22 +8,7 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-using namespace std;
-
-#include <stdarg.h>
-#include <cstdlib>
-#include <iostream>
-#include <cstdlib>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <vector>
-#include <list>
-#include <math.h>
-#include <sstream>
-#include <map>
-#include <algorithm>
+#include "externalIncludes.h"
 
 #define CLEAR_PTR_LIST(_typeClear, _listToClear) {list<_typeClear* >::iterator _iterClear; for (_iterClear = _listToClear.begin(); _iterClear != _listToClear.end(); ++_iterClear) { delete(*_iterClear); } _listToClear.clear();}
 #define CLEAR_PTR_VECTOR(_typeClear, _listToClear) {vector<_typeClear* >::iterator _iterClear; for (_iterClear = _listToClear.begin(); _iterClear != _listToClear.end(); ++_iterClear) { delete(*_iterClear); } _listToClear.clear();}
