@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        plotter.addLoop(new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2));
+        Loop* averageLoop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2);
 
 //        plotter.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
         plotter.addLoop(
@@ -79,19 +79,16 @@ int main(int argc, char *argv[])
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
         plotter.addLoop(bufferTypeLoop);
 
-        unsigned lineColorLevel = 0;
-        unsigned pointTypeLevel = 1;
-
         plotter.getLoop()->print();
 
         RangeLoop xToPlot(Dummy::SIZE, 50000, 500000, 50000);
         string yLabel = "Time (seconds)";
-        plotter.plotChrono(chronoMutate, "Connection_mutate", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, 10000);
+        plotter.plotChrono(chronoMutate, "Connection_mutate", &xToPlot, yLabel, averageLoop, 10000);
 
         xToPlot.resetRange(500, 5000, 500);
         unsigned repetitions = 1000;
-        plotter.plotChrono(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
-        plotter.plotChrono(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
+        plotter.plotChrono(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, averageLoop, repetitions);
+        plotter.plotChrono(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, averageLoop, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {

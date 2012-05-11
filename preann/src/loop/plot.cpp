@@ -182,49 +182,6 @@ void Plot::plotFile(string label)
 
 // * VIEJO
 
-class ChronoAction : public LoopFunction
-{
-    float* tArray;
-    ChronoFunctionPtr tFunctionToChrono;
-    unsigned tRepetitions;
-public:
-    ChronoAction(ChronoFunctionPtr functionToChrono, ParametersMap* parameters, string label, float* array,
-                 unsigned repetitions)
-            : LoopFunction(parameters, "ChronoAction " + label)
-    {
-        tFunctionToChrono = functionToChrono;
-        tArray = array;
-        tRepetitions = repetitions;
-    }
-protected:
-    virtual void __executeImpl()
-    {
-        float timeCount = (tFunctionToChrono)(tParameters, tRepetitions);
-
-        unsigned pos = ((RangeLoop*) tCallerLoop)->valueToUnsigned();
-        tArray[pos] = timeCount / tRepetitions;
-    }
-};
-
-class ChronoRepeater : public LoopFunction
-{
-    RangeLoop* tToPlot;
-    LoopFunction* tArrayFillerFunction;
-public:
-    ChronoRepeater(LoopFunction* arrayFillerAction, ParametersMap* parameters, string label,
-                   RangeLoop* xToPlot)
-            : LoopFunction(parameters, "ChronoRepeater " + label)
-    {
-        tArrayFillerFunction = arrayFillerAction;
-        tToPlot = xToPlot;
-    }
-protected:
-    virtual void __executeImpl()
-    {
-        tToPlot->repeatFunction(tArrayFillerFunction, tParameters);
-    }
-};
-
 class GenericPlotAction : public LoopFunction
 {
     string tInnerLabel;
@@ -278,23 +235,6 @@ void Plot::genericPlotOld(std::string label, LoopFunction* fillArrayRepeater, Ra
     tLoop->repeatFunction(&plotFunction, &parameters);
 
     plotFile(label);
-}
-
-void Plot::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToPlot, string yLabel,
-                      unsigned lineColorLevel, unsigned pointTypeLevel, unsigned repetitions)
-{
-    check(xToPlot->getDepth() != 1, "Plot::plotChrono : xToPlot has to have a Depth equal to 1.");
-
-    float* xArray = xToPlot->toArray();
-    float* yArray = xToPlot->toArray();
-
-    ChronoAction chronoAction(func, &parameters, label, yArray, repetitions);
-    ChronoRepeater chronoRepeater(&chronoAction, &parameters, label, xToPlot);
-
-    genericPlotOld(label, &chronoRepeater, xToPlot, yLabel, lineColorLevel, pointTypeLevel, xArray, yArray);
-
-    MemoryManagement::free(xArray);
-    MemoryManagement::free(yArray);
 }
 
 // * NUEVO
@@ -419,11 +359,17 @@ void Plot::plot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xTo
     genericPlot(title, fillArrayAction, xToPlot, yLabel);
 }
 
-void Plot::averagedPlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot, string yLabel,
+void Plot::plot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot, string yLabel,
                         Loop* averagesLoop)
 {
     initPlotVars(xToPlot);
     genericAveragedPlot(title, addToArrayAction, xToPlot, yLabel, averagesLoop);
+}
+
+void Plot::plot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
+          Loop* filesLoop, Loop* averagesLoop)
+{
+    //TODO Plot::
 }
 
 // * CHRONO PLOTS
@@ -490,6 +436,12 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToP
     initPlotVars(xToPlot);
     ChronoAddAction chronoAction(func, &parameters, title, yArray, repetitions);
     genericAveragedPlot(title, &chronoAction, xToPlot, yLabel, averageLoop);
+}
+
+void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+                Loop* filesLoop, Loop* averagesLoop, unsigned repetitions)
+{
+    //TODO Plot::
 }
 
 class TaskAddAction : public LoopFunction
@@ -565,6 +517,11 @@ void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot)
 {
     RangeLoop auxLoop("aux_average", 1, 2, 1);
     plotTask(task, title, xToPlot, &auxLoop);
+}
+
+void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop, Loop* averageLoop)
+{
+    //TODO Plot::
 }
 
 // * NUEVO FIN
