@@ -42,6 +42,9 @@ public:
     string getKey();
 
     virtual void addInnerLoop(Loop* innerLoop);
+    Loop* getInnerLoop();
+    Loop* dropInnerLoop();
+
     virtual unsigned valueToUnsigned() = 0;
     virtual unsigned getNumBranches() = 0;
     unsigned getNumLeafs();

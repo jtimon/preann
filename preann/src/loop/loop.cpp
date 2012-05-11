@@ -42,6 +42,18 @@ void Loop::addInnerLoop(Loop* innerLoop)
     }
 }
 
+Loop* Loop::getInnerLoop()
+{
+    return tInnerLoop;
+}
+
+Loop* Loop::dropInnerLoop()
+{
+    Loop* toReturn = tInnerLoop;
+    tInnerLoop = NULL;
+    return toReturn;
+}
+
 void Loop::setCallerLoop(Loop* callerLoop)
 {
     tCallerLoop = callerLoop;
