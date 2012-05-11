@@ -121,8 +121,34 @@ protected:
     }
 };
 
-void Plot::createGnuPlotScript(string& title, string& xLabel, string& yLabel, unsigned lineColorLevel,
-                               unsigned pointTypeLevel)
+void Plot::createGnuPlotScript(string& title, string& xLabel, string& yLabel, Loop* linesLoop,
+                               unsigned lineColorLevel, unsigned pointTypeLevel)
+{
+    string fullPath = tPlotPath + "gnuplot/" + title + ".plt";
+    FILE* plotFile = Util::openFile(fullPath);
+
+    fprintf(plotFile, "set terminal png size 2048,1024 \n");
+    fprintf(plotFile, "set key below\n");
+    fprintf(plotFile, "set key box \n");
+
+    string outputPath = tPlotPath + "images/" + title + ".png";
+    fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
+
+    fprintf(plotFile, "set title \"%s\" \n", title.data());
+    fprintf(plotFile, "set xlabel \"%s\" \n", xLabel.data());
+    fprintf(plotFile, "set ylabel \"%s\" \n", yLabel.data());
+    fprintf(plotFile, "plot ");
+
+    string subPath = tPlotPath + "data/" + title + "_";
+
+    PreparePlotFunction preparePlotFunction(&parameters, subPath, plotFile, lineColorLevel, pointTypeLevel);
+    linesLoop->repeatFunction(&preparePlotFunction, &parameters);
+    fprintf(plotFile, "\n");
+    fclose(plotFile);
+}
+
+void Plot::createGnuPlotScriptOld(string& title, string& xLabel, string& yLabel, unsigned lineColorLevel,
+                                  unsigned pointTypeLevel)
 {
     string fullPath = tPlotPath + "gnuplot/" + title + ".plt";
     FILE* plotFile = Util::openFile(fullPath);
@@ -201,6 +227,7 @@ protected:
 
 class GenericPlotAction : public LoopFunction
 {
+    string tInnerLabel;
     LoopFunction* tFillArrayRepeater;
     RangeLoop* tToPlot;
     string tPlotPath;
@@ -208,9 +235,10 @@ class GenericPlotAction : public LoopFunction
     float* tArrayY;
 public:
     GenericPlotAction(LoopFunction* fillArrayRepeater, ParametersMap* parameters, string label,
-                       RangeLoop* xToPlot, float* xArray, float* yArray, string plotPath)
+                      RangeLoop* xToPlot, float* xArray, float* yArray, string plotPath)
             : LoopFunction(parameters, "GenericPlotAction " + label)
     {
+        tInnerLabel = label;
         tFillArrayRepeater = fillArrayRepeater;
         tToPlot = xToPlot;
         tArrayX = xArray;
@@ -224,7 +252,7 @@ protected:
 
         string plotVar = tToPlot->getKey();
 
-        string dataPath = tPlotPath + "data/" + tLabel + "_" + state + ".DAT";
+        string dataPath = tPlotPath + "data/" + tInnerLabel + "_" + state + ".DAT";
         FILE* dataFile = Util::openFile(dataPath);
         fprintf(dataFile, "# %s %s \n", plotVar.data(), state.data());
 
@@ -239,15 +267,14 @@ protected:
     }
 };
 
-void Plot::genericPlot(std::string label, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
+void Plot::genericPlotOld(std::string label, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
                        unsigned lineColorLevel, unsigned pointTypeLevel, float* xArray, float* yArray)
 {
     string xLabel = xToPlot->getKey();
 
-    createGnuPlotScript(label, xLabel, yLabel, lineColorLevel, pointTypeLevel);
+    createGnuPlotScriptOld(label, xLabel, yLabel, lineColorLevel, pointTypeLevel);
 
-    GenericPlotAction plotFunction(fillArrayRepeater, &parameters, label, xToPlot, xArray, yArray,
-                                    tPlotPath);
+    GenericPlotAction plotFunction(fillArrayRepeater, &parameters, label, xToPlot, xArray, yArray, tPlotPath);
     tLoop->repeatFunction(&plotFunction, &parameters);
 
     plotFile(label);
@@ -264,7 +291,7 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToP
     ChronoAction chronoAction(func, &parameters, label, yArray, repetitions);
     ChronoRepeater chronoRepeater(&chronoAction, &parameters, label, xToPlot);
 
-    genericPlot(label, &chronoRepeater, xToPlot, yLabel, lineColorLevel, pointTypeLevel, xArray, yArray);
+    genericPlotOld(label, &chronoRepeater, xToPlot, yLabel, lineColorLevel, pointTypeLevel, xArray, yArray);
 
     MemoryManagement::free(xArray);
     MemoryManagement::free(yArray);
@@ -353,50 +380,50 @@ void Plot::initPlotVars(RangeLoop* xToPlot)
     xLabel = xToPlot->getKey();
 }
 
-void Plot::genericPlot2(std::string title, LoopFunction* fillArrayAction, RangeLoop* xToPlot, string yLabel)
+void Plot::customPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel)
 {
-    createGnuPlotScript(title, xLabel, yLabel, lineColorLevel, pointTypeLevel);
+    createGnuPlotScript(title, xLabel, yLabel, tLoop, lineColorLevel, pointTypeLevel);
 
-    FillArrayGenericRepeater fillArrayRepeater(fillArrayAction, &parameters, title, xToPlot);
-
-    GenericPlotAction plotFunction(&fillArrayRepeater, &parameters, title, xToPlot, xArray, yArray,
-                                    tPlotPath);
+    GenericPlotAction plotFunction(fillArrayRepeater, &parameters, title, xToPlot, xArray, yArray,
+                                   tPlotPath);
     tLoop->repeatFunction(&plotFunction, &parameters);
 
     plotFile(title);
 }
 
-void Plot::genericAveragedPlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot, string yLabel, Loop* averagesLoop)
+void Plot::genericPlot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xToPlot, string yLabel)
+{
+    FillArrayGenericRepeater fillArrayRepeater(fillArrayAction, &parameters, title, xToPlot);
+
+    customPlot(title, &fillArrayRepeater, xToPlot, yLabel);
+}
+
+void Plot::genericAveragedPlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
+                               string yLabel, Loop* averagesLoop)
 {
     check(averagesLoop == NULL, "Plot::genericAveragedPlot : averagesLoop cannot be NULL.");
-
-    createGnuPlotScript(title, xLabel, yLabel, lineColorLevel, pointTypeLevel);
 
     FillArrayGenericRepeater fillArrayRepeater(addToArrayAction, &parameters, title, xToPlot);
 
     ForAveragesGenericRepeater forAvergaesRepeater(&fillArrayRepeater, &parameters, title, averagesLoop,
                                                    yArray, xToPlot->getNumBranches());
 
-    GenericPlotAction plotFunction(&forAvergaesRepeater, &parameters, title, xToPlot, xArray, yArray,
-                                    tPlotPath);
-    tLoop->repeatFunction(&plotFunction, &parameters);
-
-    plotFile(title);
+    customPlot(title, &forAvergaesRepeater, xToPlot, yLabel);
 }
 
 // * GENERIC PUBLIC PLOTS
 
-void Plot::plot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel)
+void Plot::plot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xToPlot, string yLabel)
 {
-//    RangeLoop auxLoop("aux_average", 1, 2, 1);
-    averagedPlot(title, fillArrayRepeater, xToPlot, yLabel, NULL);//&auxLoop);
+    initPlotVars(xToPlot);
+    genericPlot(title, fillArrayAction, xToPlot, yLabel);
 }
 
-void Plot::averagedPlot(std::string title, LoopFunction* addResultsAction, RangeLoop* xToPlot, string yLabel,
+void Plot::averagedPlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot, string yLabel,
                         Loop* averagesLoop)
 {
     initPlotVars(xToPlot);
-//    genericAveragedPlot(title, fillA)
+    genericAveragedPlot(title, addToArrayAction, xToPlot, yLabel, averagesLoop);
 }
 
 // * CHRONO PLOTS
@@ -407,8 +434,8 @@ class ChronoFillAction : public LoopFunction
     ChronoFunctionPtr tFunctionToChrono;
     unsigned tRepetitions;
 public:
-    ChronoFillAction(ChronoFunctionPtr functionToChrono, ParametersMap* parameters, string label, float* array,
-                 unsigned repetitions)
+    ChronoFillAction(ChronoFunctionPtr functionToChrono, ParametersMap* parameters, string label,
+                     float* array, unsigned repetitions)
             : LoopFunction(parameters, "ChronoFillAction " + label)
     {
         tFunctionToChrono = functionToChrono;
@@ -425,12 +452,12 @@ protected:
     }
 };
 
-void Plot::plotChrono2(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
                        unsigned repetitions)
 {
     initPlotVars(xToPlot);
     ChronoFillAction chronoAction(func, &parameters, title, yArray, repetitions);
-    genericPlot2(title, &chronoAction, xToPlot, yLabel);
+    genericPlot(title, &chronoAction, xToPlot, yLabel);
 }
 
 class ChronoAddAction : public LoopFunction
@@ -457,12 +484,87 @@ protected:
     }
 };
 
-void Plot::plotChrono2(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                       Loop* averagesLoop, unsigned repetitions)
+void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+                              Loop* averageLoop, unsigned repetitions)
 {
     initPlotVars(xToPlot);
     ChronoAddAction chronoAction(func, &parameters, title, yArray, repetitions);
-    genericAveragedPlot(title, &chronoAction, xToPlot, yLabel, averagesLoop);
+    genericAveragedPlot(title, &chronoAction, xToPlot, yLabel, averageLoop);
+}
+
+class TaskAddAction : public LoopFunction
+{
+    Population* tPopulation;
+    float* tArray;
+public:
+    TaskAddAction(ParametersMap* parameters, string label, Population* population, float* array)
+            : LoopFunction(parameters, "TaskAddAction " + label)
+    {
+        tPopulation = population;
+        tArray = array;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        float xValue = ((RangeLoop*) tCallerLoop)->getCurrentValue();
+        tPopulation->learn(xValue);
+        tArray[tLeaf] += tPopulation->getBestIndividualScore();
+    }
+};
+
+class TaskFillArrayRepeater : public LoopFunction
+{
+    Task* tTask;
+    Individual* tExample;
+    RangeLoop* tToPlot;
+    float* tArray;
+public:
+    TaskFillArrayRepeater(ParametersMap* parameters, string label, Task* task, RangeLoop* xToPlot,
+                          float* yArray)
+            : LoopFunction(parameters, "TaskFillArrayRepeater " + label)
+    {
+        tTask = task;
+        tExample = tTask->getExample();
+        tToPlot = xToPlot;
+        tArray = yArray;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        unsigned populationSize = tParameters->getNumber(Population::SIZE);
+        float weighsRange = tParameters->getNumber(Dummy::WEIGHS_RANGE);
+
+        // create population
+        Population* initialPopulation = new Population(tTask, tExample, populationSize, weighsRange);
+        initialPopulation->setParams(tParameters);
+
+        TaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tArray);
+        tToPlot->repeatFunction(&addToArrayAction, tParameters);
+
+        delete (initialPopulation);
+    }
+};
+
+void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot, Loop* averageLoop)
+{
+    check(averageLoop == NULL, "Plot::plotTaskAveraged : averagesLoop cannot be NULL.");
+
+    string yLabel = "Fitness";
+    title = title + "_" + task->toString();
+    initPlotVars(xToPlot);
+
+    TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, yArray);
+
+    ForAveragesGenericRepeater forAvergaesRepeater(&fillArrayRepeater, &parameters, title, averageLoop,
+                                                   yArray, xToPlot->getNumBranches());
+
+    customPlot(title, &forAvergaesRepeater, xToPlot, yLabel);
+}
+
+void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot)
+{
+    RangeLoop auxLoop("aux_average", 1, 2, 1);
+    plotTask(task, title, xToPlot, &auxLoop);
 }
 
 // * NUEVO FIN
@@ -583,7 +685,7 @@ void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned 
     ForAveragesRepeater forAvergaesRepeater(&addResultsPopRepeater, &parameters, label, toAverage, yArray,
                                             xToPlot->getNumBranches());
 
-    genericPlot(label, &forAvergaesRepeater, xToPlot, yLabel, lineColorLevel, pointTypeLevel, xArray, yArray);
+    genericPlotOld(label, &forAvergaesRepeater, xToPlot, yLabel, lineColorLevel, pointTypeLevel, xArray, yArray);
 
     MemoryManagement::free(xArray);
     MemoryManagement::free(yArray);
@@ -622,7 +724,7 @@ protected:
     {
         string label = tMainLabel + "_" + tCallerLoop->getState(false);
 
-        tPlot->genericPlot(label, tFillArrayRepeater, tToPlot, tLabelY, tLineColorLevel, tPointTypeLevel,
+        tPlot->genericPlotOld(label, tFillArrayRepeater, tToPlot, tLabelY, tLineColorLevel, tPointTypeLevel,
                            tArrayX, tArrayY);
     }
 };

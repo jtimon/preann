@@ -66,21 +66,19 @@ int main(int argc, char *argv[])
 
         RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 200, 1);
         unsigned vectorsSize = 2;
-        unsigned lineColorLevel = 0;
-        unsigned pointTypeLevel = 1;
 
         Task* task;
 
 //        task = new BinaryTask(BO_OR, vectorsSize);
-//        plotter.plotTask(task, "chronoOr", generationsLoop, lineColorLevel, pointTypeLevel);
+//        plotter.plotTask(task, "chronoOr", generationsLoop);
 //        delete (task);
 //
 //        task = new BinaryTask(BO_AND, vectorsSize);
-//        plotter.plotTask(task, "chronoAnd", generationsLoop, lineColorLevel, pointTypeLevel);
+//        plotter.plotTask(task, "chronoAnd", generationsLoop);
 //        delete (task);
 
         task = new BinaryTask(BO_XOR, vectorsSize);
-        plotter.plotTask(task, "chronoXor", generationsLoop, lineColorLevel, pointTypeLevel);
+        plotter.plotTask(task, "chronoXor", generationsLoop);
         delete (task);
 
         printf("Exit success.\n");
