@@ -16,6 +16,8 @@ Plot::~Plot()
 {
 }
 
+// * BASIC PLOTTING FUNCTIONS
+
 int mapPointType(unsigned value)
 {
     // pt : 1=+, 2=X, 3=*, 4=square, 5=filled square, 6=circle,
@@ -121,17 +123,17 @@ protected:
     }
 };
 
-void Plot::createGnuPlotScript(string& title, string& xLabel, string& yLabel, Loop* linesLoop,
-                               unsigned lineColorLevel, unsigned pointTypeLevel)
+void createGnuPlotScript(string& plotPath, Loop* linesLoop, ParametersMap* parameters, string& title, string& xLabel, string& yLabel,
+        unsigned lineColorLevel, unsigned pointTypeLevel)
 {
-    string fullPath = tPlotPath + "gnuplot/" + title + ".plt";
+    string fullPath = plotPath + "gnuplot/" + title + ".plt";
     FILE* plotFile = Util::openFile(fullPath);
 
     fprintf(plotFile, "set terminal png size 2048,1024 \n");
     fprintf(plotFile, "set key below\n");
     fprintf(plotFile, "set key box \n");
 
-    string outputPath = tPlotPath + "images/" + title + ".png";
+    string outputPath = plotPath + "images/" + title + ".png";
     fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
 
     fprintf(plotFile, "set title \"%s\" \n", title.data());
@@ -139,48 +141,50 @@ void Plot::createGnuPlotScript(string& title, string& xLabel, string& yLabel, Lo
     fprintf(plotFile, "set ylabel \"%s\" \n", yLabel.data());
     fprintf(plotFile, "plot ");
 
-    string subPath = tPlotPath + "data/" + title + "_";
+    string subPath = plotPath + "data/" + title + "_";
 
-    PreparePlotFunction preparePlotFunction(&parameters, subPath, plotFile, lineColorLevel, pointTypeLevel);
-    linesLoop->repeatFunction(&preparePlotFunction, &parameters);
+    PreparePlotFunction preparePlotFunction(parameters, subPath, plotFile, lineColorLevel, pointTypeLevel);
+    linesLoop->repeatFunction(&preparePlotFunction, parameters);
     fprintf(plotFile, "\n");
     fclose(plotFile);
 }
 
-void Plot::createGnuPlotScriptOld(string& title, string& xLabel, string& yLabel, unsigned lineColorLevel,
-                                  unsigned pointTypeLevel)
+void plotFile(string plotPath, string title)
 {
-    string fullPath = tPlotPath + "gnuplot/" + title + ".plt";
-    FILE* plotFile = Util::openFile(fullPath);
-
-    fprintf(plotFile, "set terminal png size 2048,1024 \n");
-    fprintf(plotFile, "set key below\n");
-    fprintf(plotFile, "set key box \n");
-
-    string outputPath = tPlotPath + "images/" + title + ".png";
-    fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
-
-    fprintf(plotFile, "set title \"%s\" \n", title.data());
-    fprintf(plotFile, "set xlabel \"%s\" \n", xLabel.data());
-    fprintf(plotFile, "set ylabel \"%s\" \n", yLabel.data());
-    fprintf(plotFile, "plot ");
-
-    string subPath = tPlotPath + "data/" + title + "_";
-
-    PreparePlotFunction preparePlotFunction(&parameters, subPath, plotFile, lineColorLevel, pointTypeLevel);
-    tLoop->repeatFunction(&preparePlotFunction, &parameters);
-    fprintf(plotFile, "\n");
-    fclose(plotFile);
-}
-
-void Plot::plotFile(string label)
-{
-    string fullPath = tPlotPath + "gnuplot/" + label + ".plt";
+    string fullPath = plotPath + "gnuplot/" + title + ".plt";
     string syscommand = "gnuplot " + fullPath;
     system(syscommand.data());
 }
 
-// * VIEJO
+// * GENERIC PLOTTING METHODS
+
+void Plot::initPlotVars(RangeLoop* xToPlot)
+{
+    // validations
+    check(xToPlot == NULL, "Plot::initPlotVars : xToPlot cannot be NULL.");
+    check(xToPlot->getDepth() != 1, "Plot::initPlotVars : xToPlot has to have a Depth equal to 1.");
+
+    check(tLoop == NULL, "Plot::initPlotVars : the plot Loop cannot be NULL.");
+    unsigned tLoopDepth = tLoop->getDepth();
+    check(tLoopDepth < 1 || tLoopDepth > 2,
+          "Plot::initPlotVars : the Loop has to have a Depth between 1 (colours) and 2 (points).");
+
+    // color and point level selection
+    if (tLoopDepth == 1) {
+        lineColorLevel = 0;
+        pointTypeLevel = 0;
+    } else {
+        lineColorLevel = 0;
+        pointTypeLevel = 1;
+    }
+
+    // create plotting arrays
+    xArray = xToPlot->toArray();
+    yArray = xToPlot->toArray();
+
+    // get xLabel
+    xLabel = xToPlot->getKey();
+}
 
 class GenericPlotAction : public LoopFunction
 {
@@ -224,20 +228,15 @@ protected:
     }
 };
 
-void Plot::genericPlotOld(std::string label, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
-                       unsigned lineColorLevel, unsigned pointTypeLevel, float* xArray, float* yArray)
+void Plot::customPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel)
 {
-    string xLabel = xToPlot->getKey();
+    createGnuPlotScript(tPlotPath, tLoop, &parameters, title, xLabel, yLabel, lineColorLevel, pointTypeLevel);
 
-    createGnuPlotScriptOld(label, xLabel, yLabel, lineColorLevel, pointTypeLevel);
-
-    GenericPlotAction plotFunction(fillArrayRepeater, &parameters, label, xToPlot, xArray, yArray, tPlotPath);
+    GenericPlotAction plotFunction(fillArrayRepeater, &parameters, title, xToPlot, xArray, yArray, tPlotPath);
     tLoop->repeatFunction(&plotFunction, &parameters);
 
-    plotFile(label);
+    plotFile(tPlotPath, title);
 }
-
-// * NUEVO
 
 class FillArrayGenericRepeater : public LoopFunction
 {
@@ -257,6 +256,13 @@ protected:
         tToPlot->repeatFunction(tArrayFillerAction, tParameters);
     }
 };
+
+void Plot::genericPlot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xToPlot, string yLabel)
+{
+    FillArrayGenericRepeater fillArrayRepeater(fillArrayAction, &parameters, title, xToPlot);
+
+    customPlot(title, &fillArrayRepeater, xToPlot, yLabel);
+}
 
 class ForAveragesGenericRepeater : public LoopFunction
 {
@@ -292,52 +298,6 @@ protected:
     }
 };
 
-void Plot::initPlotVars(RangeLoop* xToPlot)
-{
-    // validations
-    check(xToPlot == NULL, "Plot::initPlotVars : xToPlot cannot be NULL.");
-    check(xToPlot->getDepth() != 1, "Plot::initPlotVars : xToPlot has to have a Depth equal to 1.");
-
-    check(tLoop == NULL, "Plot::initPlotVars : the plot Loop cannot be NULL.");
-    unsigned tLoopDepth = tLoop->getDepth();
-    check(tLoopDepth < 1 || tLoopDepth > 2,
-          "Plot::initPlotVars : the Loop has to have a Depth between 1 (colours) and 2 (points).");
-
-    // color and point level selection
-    if (tLoopDepth == 1) {
-        lineColorLevel = 0;
-        pointTypeLevel = 0;
-    } else {
-        lineColorLevel = 0;
-        pointTypeLevel = 1;
-    }
-
-    // create plotting arrays
-    xArray = xToPlot->toArray();
-    yArray = xToPlot->toArray();
-
-    // get xLabel
-    xLabel = xToPlot->getKey();
-}
-
-void Plot::customPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel)
-{
-    createGnuPlotScript(title, xLabel, yLabel, tLoop, lineColorLevel, pointTypeLevel);
-
-    GenericPlotAction plotFunction(fillArrayRepeater, &parameters, title, xToPlot, xArray, yArray,
-                                   tPlotPath);
-    tLoop->repeatFunction(&plotFunction, &parameters);
-
-    plotFile(title);
-}
-
-void Plot::genericPlot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xToPlot, string yLabel)
-{
-    FillArrayGenericRepeater fillArrayRepeater(fillArrayAction, &parameters, title, xToPlot);
-
-    customPlot(title, &fillArrayRepeater, xToPlot, yLabel);
-}
-
 void Plot::genericAveragedPlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
                                string yLabel, Loop* averagesLoop)
 {
@@ -360,14 +320,14 @@ void Plot::plot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xTo
 }
 
 void Plot::plot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot, string yLabel,
-                        Loop* averagesLoop)
+                Loop* averagesLoop)
 {
     initPlotVars(xToPlot);
     genericAveragedPlot(title, addToArrayAction, xToPlot, yLabel, averagesLoop);
 }
 
 void Plot::plot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
-          Loop* filesLoop, Loop* averagesLoop)
+                Loop* filesLoop, Loop* averagesLoop)
 {
     //TODO Plot::
 }
@@ -399,7 +359,7 @@ protected:
 };
 
 void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                       unsigned repetitions)
+                      unsigned repetitions)
 {
     initPlotVars(xToPlot);
     ChronoFillAction chronoAction(func, &parameters, title, yArray, repetitions);
@@ -431,7 +391,7 @@ protected:
 };
 
 void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                              Loop* averageLoop, unsigned repetitions)
+                      Loop* averageLoop, unsigned repetitions)
 {
     initPlotVars(xToPlot);
     ChronoAddAction chronoAction(func, &parameters, title, yArray, repetitions);
@@ -439,7 +399,7 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToP
 }
 
 void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                Loop* filesLoop, Loop* averagesLoop, unsigned repetitions)
+                      Loop* filesLoop, Loop* averagesLoop, unsigned repetitions)
 {
     //TODO Plot::
 }
@@ -497,6 +457,13 @@ protected:
     }
 };
 
+void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot)
+{
+    RangeLoop auxLoop("aux_average", 1, 2, 1);
+
+    plotTask(task, title, xToPlot, &auxLoop);
+}
+
 void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot, Loop* averageLoop)
 {
     check(averageLoop == NULL, "Plot::plotTaskAveraged : averagesLoop cannot be NULL.");
@@ -513,12 +480,6 @@ void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot, Loop* ave
     customPlot(title, &forAvergaesRepeater, xToPlot, yLabel);
 }
 
-void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot)
-{
-    RangeLoop auxLoop("aux_average", 1, 2, 1);
-    plotTask(task, title, xToPlot, &auxLoop);
-}
-
 void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop, Loop* averageLoop)
 {
     //TODO Plot::
@@ -526,6 +487,46 @@ void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot, Loop* fil
 
 // * NUEVO FIN
 // * VIEJO
+
+void Plot::createGnuPlotScriptOld(string& title, string& xLabel, string& yLabel, unsigned lineColorLevel,
+                                  unsigned pointTypeLevel)
+{
+    string fullPath = tPlotPath + "gnuplot/" + title + ".plt";
+    FILE* plotFile = Util::openFile(fullPath);
+
+    fprintf(plotFile, "set terminal png size 2048,1024 \n");
+    fprintf(plotFile, "set key below\n");
+    fprintf(plotFile, "set key box \n");
+
+    string outputPath = tPlotPath + "images/" + title + ".png";
+    fprintf(plotFile, "set output \"%s\" \n", outputPath.data());
+
+    fprintf(plotFile, "set title \"%s\" \n", title.data());
+    fprintf(plotFile, "set xlabel \"%s\" \n", xLabel.data());
+    fprintf(plotFile, "set ylabel \"%s\" \n", yLabel.data());
+    fprintf(plotFile, "plot ");
+
+    string subPath = tPlotPath + "data/" + title + "_";
+
+    PreparePlotFunction preparePlotFunction(&parameters, subPath, plotFile, lineColorLevel, pointTypeLevel);
+    tLoop->repeatFunction(&preparePlotFunction, &parameters);
+    fprintf(plotFile, "\n");
+    fclose(plotFile);
+}
+
+void Plot::genericPlotOld(std::string label, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
+                          string yLabel, unsigned lineColorLevel, unsigned pointTypeLevel, float* xArray,
+                          float* yArray)
+{
+    string xLabel = xToPlot->getKey();
+
+    createGnuPlotScriptOld(label, xLabel, yLabel, lineColorLevel, pointTypeLevel);
+
+    GenericPlotAction plotFunction(fillArrayRepeater, &parameters, label, xToPlot, xArray, yArray, tPlotPath);
+    tLoop->repeatFunction(&plotFunction, &parameters);
+
+    plotFile(tPlotPath, label);
+}
 
 class AddResultsPopAction : public LoopFunction
 {
@@ -642,7 +643,8 @@ void Plot::plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned 
     ForAveragesRepeater forAvergaesRepeater(&addResultsPopRepeater, &parameters, label, toAverage, yArray,
                                             xToPlot->getNumBranches());
 
-    genericPlotOld(label, &forAvergaesRepeater, xToPlot, yLabel, lineColorLevel, pointTypeLevel, xArray, yArray);
+    genericPlotOld(label, &forAvergaesRepeater, xToPlot, yLabel, lineColorLevel, pointTypeLevel, xArray,
+                   yArray);
 
     MemoryManagement::free(xArray);
     MemoryManagement::free(yArray);
@@ -682,7 +684,7 @@ protected:
         string label = tMainLabel + "_" + tCallerLoop->getState(false);
 
         tPlot->genericPlotOld(label, tFillArrayRepeater, tToPlot, tLabelY, tLineColorLevel, tPointTypeLevel,
-                           tArrayX, tArrayY);
+                              tArrayX, tArrayY);
     }
 };
 

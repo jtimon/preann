@@ -20,11 +20,9 @@ protected:
     string xLabel;
 
     string tPlotPath;
-    void createGnuPlotScript(string& title, string& xLabel, string& yLabel, Loop* linesLoop,
-                             unsigned lineColorLevel, unsigned pointTypeLevel);
+
     void createGnuPlotScriptOld(string& title, string& xLabel, string& yLabel, unsigned lineColorLevel,
                                 unsigned pointTypeLevel);
-    void plotFile(string label);
     void initPlotVars(RangeLoop* xToPlot);
 
     void customPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel);
