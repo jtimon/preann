@@ -47,11 +47,33 @@ Loop* Loop::getInnerLoop()
     return tInnerLoop;
 }
 
-Loop* Loop::dropInnerLoop()
+Loop* Loop::dropFirstLoop()
 {
     Loop* toReturn = tInnerLoop;
     tInnerLoop = NULL;
     return toReturn;
+}
+
+Loop* Loop::dropLastLoop()
+{
+    if (tInnerLoop == NULL){
+        return NULL;
+    } else if (tInnerLoop->getInnerLoop() == NULL) {
+        return dropFirstLoop();
+    } else {
+        return tInnerLoop->dropLastLoop();
+    }
+}
+
+Loop* Loop::dropLoop(Loop* loop)
+{
+    if (tInnerLoop == NULL){
+        return NULL;
+    } else if (tInnerLoop == loop){
+        return dropFirstLoop();
+    } else {
+        return tInnerLoop->dropLoop(loop);
+    }
 }
 
 void Loop::setCallerLoop(Loop* callerLoop)
