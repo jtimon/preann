@@ -105,7 +105,8 @@ public:
 
     void execute(Loop* callerLoop)
     {
-        Util::check(callerLoop == NULL, "LoopFunction::execute : The caller Loop cannot be null.");
+//        cout << "Execute function... " << tLabel << endl;
+        Util::check(callerLoop == NULL, "LoopFunction::execute " + tLabel + " : The caller Loop cannot be null.");
         try {
             tCallerLoop = callerLoop;
             __executeImpl();
