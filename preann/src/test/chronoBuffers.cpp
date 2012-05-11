@@ -92,17 +92,17 @@ int main(int argc, char *argv[])
         RangeLoop xToPlot(Dummy::SIZE, 2000, 20001, 2000);
         string yLabel = "Time (seconds)";
         unsigned repetitions = 100;
-        plotter.plotChrono(chronoCopyToInterface, "Buffer_copyToInterface", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
-        plotter.plotChrono(chronoCopyFromInterface, "Buffer_copyFromInterface", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
+        plotter.plotChrono2(chronoCopyToInterface, "Buffer_copyToInterface", &xToPlot, yLabel, repetitions);
+        plotter.plotChrono2(chronoCopyFromInterface, "Buffer_copyFromInterface", &xToPlot, yLabel, repetitions);
         xToPlot.resetRange(1000, 10001, 3000);
-        plotter.plotChrono(chronoClone, "Buffer_clone", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
+        plotter.plotChrono2(chronoClone, "Buffer_clone", &xToPlot, yLabel, repetitions);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         plotter.getLoop()->print();
 
         xToPlot.resetRange(2000, 20001, 2000);
-        plotter.plotChrono(chronoActivation, "Buffer_activation", &xToPlot, yLabel, lineColorLevel, pointTypeLevel, repetitions);
+        plotter.plotChrono2(chronoActivation, "Buffer_activation", &xToPlot, yLabel, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {
