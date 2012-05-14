@@ -77,18 +77,21 @@ int main(int argc, char *argv[])
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
-        plotter.addLoop(bufferTypeLoop);
+//        plotter.addLoop(bufferTypeLoop);
 
         plotter.getLoop()->print();
 
+        Loop* forFilesLoop = bufferTypeLoop;
         RangeLoop xToPlot(Dummy::SIZE, 50000, 500000, 50000);
         string yLabel = "Time (seconds)";
-        plotter.plotChronoAveraged(chronoMutate, "Connection_mutate", &xToPlot, yLabel, averageLoop, 10000);
+        plotter.plotChronoFilesAveraged(chronoMutate, "Connection_mutate", &xToPlot, yLabel, forFilesLoop, averageLoop, 10000);
 
         xToPlot.resetRange(500, 5000, 500);
         unsigned repetitions = 1000;
-        plotter.plotChronoAveraged(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, averageLoop, repetitions);
-        plotter.plotChronoAveraged(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, averageLoop, repetitions);
+        plotter.plotChronoFilesAveraged(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, forFilesLoop, averageLoop, repetitions);
+        plotter.plotChronoFilesAveraged(chronoCalculateAndAddTo, "Connection_calculateAndAddTo_Averaged", &xToPlot, yLabel, forFilesLoop, averageLoop, repetitions);
+
+        plotter.plotChronoFiles(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, forFilesLoop, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {

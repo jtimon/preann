@@ -31,6 +31,12 @@ protected:
                             string yLabel, Loop* averagesLoop);
     void genericAveragedPlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
                              string yLabel, Loop* averagesLoop);
+    void genericMultiFilePlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
+                                    string yLabel, Loop* filesLoop);
+    void customMultiFileAveragedPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
+                                            string yLabel, Loop* filesLoop, Loop* averagesLoop);
+    void genericMultiFileAveragedPlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
+                                            string yLabel, Loop* filesLoop, Loop* averagesLoop);
 
 public:
     Plot(string plotPath);
@@ -51,21 +57,27 @@ public:
     //TODO Viejo Fin
 
     void plot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel);
-    void plot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
+    void plotAveraged(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
               Loop* averagesLoop);
-    void plot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
+    void plotFiles(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
+              Loop* filesLoop);
+    void plotFilesAveraged(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
               Loop* filesLoop, Loop* averagesLoop);
 
     void plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
                     unsigned repetitions);
-    void plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+    void plotChronoAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
                     Loop* averagesLoop, unsigned repetitions);
-    void plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+    void plotChronoFiles(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+                    Loop* filesLoop, unsigned repetitions);
+    void plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
                     Loop* filesLoop, Loop* averagesLoop, unsigned repetitions);
 
     void plotTask(Task* task, std::string title, RangeLoop* xToPlot);
-    void plotTask(Task* task, std::string title, RangeLoop* xToPlot, Loop* averageLoop);
-    void plotTask(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop, Loop* averageLoop);
+    void plotTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop);
+    void plotTaskFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop);
+    void plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop, Loop* averagesLoop);
+
 
 };
 

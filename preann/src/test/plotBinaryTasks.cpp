@@ -63,15 +63,13 @@ int main(int argc, char *argv[])
 
         RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 200, 1);
         unsigned vectorsSize = 2;
-        unsigned lineColorLevel = 0;
-        unsigned pointTypeLevel = 1;
 
         Task* task;
 
         task = new BinaryTask(BO_OR, vectorsSize);
         Loop* toAverageLoop = new RangeLoop(Dummy::WEIGHS_RANGE, 1, 21, 5);
         Loop* filesLoop = selecAlgLoop;
-        plotter.plotTask(task, "chronoOr", filesLoop, generationsLoop, lineColorLevel, pointTypeLevel, toAverageLoop);
+        plotter.plotTaskFilesAveraged(task, "chronoOr", generationsLoop, filesLoop, toAverageLoop);
         delete (task);
 
         printf("Exit success.\n");

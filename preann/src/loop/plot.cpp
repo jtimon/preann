@@ -123,8 +123,8 @@ protected:
     }
 };
 
-void createGnuPlotScript(string& plotPath, Loop* linesLoop, ParametersMap* parameters, string& title, string& xLabel, string& yLabel,
-        unsigned lineColorLevel, unsigned pointTypeLevel)
+void createGnuPlotScript(string& plotPath, Loop* linesLoop, ParametersMap* parameters, string& title,
+                         string& xLabel, string& yLabel, unsigned lineColorLevel, unsigned pointTypeLevel)
 {
     string fullPath = plotPath + "gnuplot/" + title + ".plt";
     FILE* plotFile = Util::openFile(fullPath);
@@ -311,6 +311,90 @@ void Plot::genericAveragedPlot(std::string title, LoopFunction* addToArrayAction
     customPlot(title, &forAvergaesRepeater, xToPlot, yLabel);
 }
 
+class ForFilesGenericRepeater : public LoopFunction
+{
+    string tMainLabel;
+    LoopFunction* tFillArrayRepeater;
+    Loop* tLinesLoop;
+    RangeLoop* tToPlot;
+    string tPlotPath;
+    float* tArrayX;
+    float* tArrayY;
+    string tLabelX;
+    string tLabelY;
+    unsigned tLineColorLevel;
+    unsigned tPointTypeLevel;
+public:
+    ForFilesGenericRepeater(LoopFunction* fillArrayRepeater, ParametersMap* parameters, std::string label,
+                            Loop* linesLoop, RangeLoop* xToPlot, string plotPath, float* xArray,
+                            float* yArray, string xLabel, string yLabel, unsigned lineColorLevel,
+                            unsigned pointTypeLevel)
+            : LoopFunction(parameters, "ForFilesGenericRepeater " + label)
+    {
+        tMainLabel = label;
+        tFillArrayRepeater = fillArrayRepeater;
+        tLinesLoop = linesLoop;
+        tToPlot = xToPlot;
+        tPlotPath = plotPath;
+        tArrayX = xArray;
+        tArrayY = yArray;
+        tLabelX = xLabel;
+        tLabelY = yLabel;
+        tLineColorLevel = lineColorLevel;
+        tPointTypeLevel = pointTypeLevel;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        string title = tMainLabel + "_" + tCallerLoop->getState(false);
+
+        createGnuPlotScript(tPlotPath, tLinesLoop, tParameters, title, tLabelX, tLabelY, tLineColorLevel,
+                            tPointTypeLevel);
+
+        GenericPlotAction plotFunction(tFillArrayRepeater, tParameters, title, tToPlot, tArrayX, tArrayY,
+                                       tPlotPath);
+        tLinesLoop->repeatFunction(&plotFunction, tParameters);
+
+        plotFile(tPlotPath, title);
+    }
+};
+
+void Plot::genericMultiFilePlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
+                                string yLabel, Loop* filesLoop)
+{
+    check(filesLoop == NULL, "Plot::genericMultiFilePlot : forFilesLoop cannot be NULL.");
+
+    FillArrayGenericRepeater fillArrayRepeater(addToArrayAction, &parameters, title, xToPlot);
+
+    ForFilesGenericRepeater forFilesRepeater(&fillArrayRepeater, &parameters, title, tLoop, xToPlot,
+                                             tPlotPath, xArray, yArray, xLabel, yLabel, lineColorLevel,
+                                             pointTypeLevel);
+    filesLoop->repeatFunction(&forFilesRepeater, &parameters);
+}
+
+void Plot::customMultiFileAveragedPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
+                                            string yLabel, Loop* filesLoop, Loop* averagesLoop)
+{
+    check(averagesLoop == NULL, "Plot::genericMultiFilePlot : averagesLoop cannot be NULL.");
+    check(filesLoop == NULL, "Plot::genericMultiFilePlot : forFilesLoop cannot be NULL.");
+
+    ForAveragesGenericRepeater forAvergaesRepeater(fillArrayRepeater, &parameters, title, averagesLoop,
+                                                   yArray, xToPlot->getNumBranches());
+
+    ForFilesGenericRepeater forFilesRepeater(&forAvergaesRepeater, &parameters, title, tLoop, xToPlot,
+                                             tPlotPath, xArray, yArray, xLabel, yLabel, lineColorLevel,
+                                             pointTypeLevel);
+    filesLoop->repeatFunction(&forFilesRepeater, &parameters);
+}
+
+void Plot::genericMultiFileAveragedPlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
+                                        string yLabel, Loop* filesLoop, Loop* averagesLoop)
+{
+    FillArrayGenericRepeater fillArrayRepeater(addToArrayAction, &parameters, title, xToPlot);
+
+    customMultiFileAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, filesLoop, averagesLoop);
+}
+
 // * GENERIC PUBLIC PLOTS
 
 void Plot::plot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xToPlot, string yLabel)
@@ -319,17 +403,25 @@ void Plot::plot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xTo
     genericPlot(title, fillArrayAction, xToPlot, yLabel);
 }
 
-void Plot::plot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot, string yLabel,
+void Plot::plotAveraged(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot, string yLabel,
                 Loop* averagesLoop)
 {
     initPlotVars(xToPlot);
     genericAveragedPlot(title, addToArrayAction, xToPlot, yLabel, averagesLoop);
 }
 
-void Plot::plot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
+void Plot::plotFiles(std::string title, LoopFunction* fillArrayAction, RangeLoop* xToPlot, string yLabel,
+                Loop* filesLoop)
+{
+    initPlotVars(xToPlot);
+    genericMultiFilePlot(title, fillArrayAction, xToPlot, yLabel, filesLoop);
+}
+
+void Plot::plotFilesAveraged(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot, string yLabel,
                 Loop* filesLoop, Loop* averagesLoop)
 {
-    //TODO Plot::
+    initPlotVars(xToPlot);
+    genericMultiFileAveragedPlot(title, addToArrayAction, xToPlot, yLabel, filesLoop, averagesLoop);
 }
 
 // * CHRONO PLOTS
@@ -390,7 +482,7 @@ protected:
     }
 };
 
-void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+void Plot::plotChronoAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
                       Loop* averageLoop, unsigned repetitions)
 {
     initPlotVars(xToPlot);
@@ -398,10 +490,20 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToP
     genericAveragedPlot(title, &chronoAction, xToPlot, yLabel, averageLoop);
 }
 
-void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                      Loop* filesLoop, Loop* averagesLoop, unsigned repetitions)
+void Plot::plotChronoFiles(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+                Loop* filesLoop, unsigned repetitions)
 {
-    //TODO Plot::
+    initPlotVars(xToPlot);
+    ChronoFillAction chronoAction(func, &parameters, title, yArray, repetitions);
+    genericMultiFilePlot(title, &chronoAction, xToPlot, yLabel, filesLoop);
+}
+
+void Plot::plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+                Loop* filesLoop, Loop* averagesLoop, unsigned repetitions)
+{
+    initPlotVars(xToPlot);
+    ChronoAddAction chronoAction(func, &parameters, title, yArray, repetitions);
+    genericMultiFileAveragedPlot(title, &chronoAction, xToPlot, yLabel, filesLoop, averagesLoop);
 }
 
 class TaskAddAction : public LoopFunction
@@ -461,10 +563,10 @@ void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot)
 {
     RangeLoop auxLoop("aux_average", 1, 2, 1);
 
-    plotTask(task, title, xToPlot, &auxLoop);
+    plotTaskAveraged(task, title, xToPlot, &auxLoop);
 }
 
-void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot, Loop* averageLoop)
+void Plot::plotTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averageLoop)
 {
     check(averageLoop == NULL, "Plot::plotTaskAveraged : averagesLoop cannot be NULL.");
 
@@ -480,9 +582,32 @@ void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot, Loop* ave
     customPlot(title, &forAvergaesRepeater, xToPlot, yLabel);
 }
 
-void Plot::plotTask(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop, Loop* averageLoop)
+void Plot::plotTaskFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop)
 {
-    //TODO Plot::
+    RangeLoop auxLoop("aux_average", 1, 2, 1);
+
+    plotTaskFilesAveraged(task, title, xToPlot, filesLoop, &auxLoop);
+}
+
+void Plot::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop, Loop* averagesLoop)
+{
+    check(averagesLoop == NULL, "Plot::genericMultiFilePlot : averagesLoop cannot be NULL.");
+    check(filesLoop == NULL, "Plot::genericMultiFilePlot : forFilesLoop cannot be NULL.");
+
+    string yLabel = "Fitness";
+    title = title + "_" + task->toString();
+    initPlotVars(xToPlot);
+
+    TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, yArray);
+
+    ForAveragesGenericRepeater forAvergaesRepeater(&fillArrayRepeater, &parameters, title, averagesLoop,
+                                                   yArray, xToPlot->getNumBranches());
+
+    ForFilesGenericRepeater forFilesRepeater(&forAvergaesRepeater, &parameters, title, tLoop, xToPlot,
+                                             tPlotPath, xArray, yArray, xLabel, yLabel, lineColorLevel,
+                                             pointTypeLevel);
+    filesLoop->repeatFunction(&forFilesRepeater, &parameters);
+
 }
 
 // * NUEVO FIN
