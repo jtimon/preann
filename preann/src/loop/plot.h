@@ -21,8 +21,6 @@ protected:
 
     string tPlotPath;
 
-    void createGnuPlotScriptOld(string& title, string& xLabel, string& yLabel, unsigned lineColorLevel,
-                                unsigned pointTypeLevel);
     void initPlotVars(RangeLoop* xToPlot);
 
     void customPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel);
@@ -41,20 +39,6 @@ protected:
 public:
     Plot(string plotPath);
     virtual ~Plot();
-
-    //TODO Viejo Inicio
-    void plotChrono(ChronoFunctionPtr func, std::string label, RangeLoop* xToPlot, string yLabel,
-                    unsigned lineColorLevel, unsigned pointTypeLevel, unsigned repetitions);
-
-    void plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned lineColorLevel,
-                  unsigned pointTypeLevel);
-    void plotTask(Task* task, std::string label, RangeLoop* xToPlot, unsigned lineColorLevel,
-                  unsigned pointTypeLevel, Loop* toAverage);
-    void plotTask(Task* task, std::string label, Loop* filesLoop, RangeLoop* xToPlot, unsigned lineColorLevel,
-                  unsigned pointTypeLevel, Loop* toAverage);
-    void genericPlotOld(std::string label, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
-                        unsigned lineColorLevel, unsigned pointTypeLevel, float* xArray, float* yArray);
-    //TODO Viejo Fin
 
     void plot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel);
     void plotAveraged(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,

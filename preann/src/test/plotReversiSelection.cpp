@@ -17,8 +17,8 @@ int main(int argc, char *argv[])
 
         EnumLoop* toAverageLoop = new EnumLoop(ET_CROSS_ALG);
         toAverageLoop->exclude(ET_CROSS_ALG, 1, CA_PROPORTIONAL);
-//        toAverageLoop->addInnerLoop(new EnumLoop(ET_CROSS_LEVEL));
-//        toAverageLoop->addInnerLoop(new EnumLoop(ET_MUTATION_ALG));
+        toAverageLoop->addInnerLoop(new EnumLoop(ET_CROSS_LEVEL));
+        toAverageLoop->addInnerLoop(new EnumLoop(ET_MUTATION_ALG));
 //        toAverageLoop->addInnerLoop(new EnumLoop(ET_RESET_ALG));
 
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
@@ -49,20 +49,16 @@ int main(int argc, char *argv[])
         //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
         //        loop = resetAlgLoop;
 
-        unsigned lineColorLevel = 0;
-        unsigned pointTypeLevel = 0;
-
         plotter.getLoop()->print();
 
-        Task* task = new ReversiTask(4, 1);
+        Task* task = new ReversiTask(6, 1);
 
-        RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 21, 5);
+        RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 51, 5);
 
-//        cout << "generationsLoop->getNumLeafs() " << generationsLoop->getNumLeafs() << endl;
-//        cout << "toAverageLoop->getNumLeafs() " << toAverageLoop->getNumLeafs() << endl;
-        plotter.plotTask(task, "selectionReversi", generationsLoop, lineColorLevel, pointTypeLevel, toAverageLoop);
+        plotter.plotTaskAveraged(task, "selectionReversi", generationsLoop, toAverageLoop);
 
         delete (generationsLoop);
+        delete (toAverageLoop);
         delete (task);
 
         printf("Exit success.\n");
