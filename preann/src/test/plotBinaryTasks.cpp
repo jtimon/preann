@@ -64,13 +64,22 @@ int main(int argc, char *argv[])
         RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 200, 1);
         unsigned vectorsSize = 2;
 
+        Loop* toAverageLoop = new RangeLoop(Dummy::WEIGHS_RANGE, 1, 21, 5);
+        Loop* filesLoop = selecAlgLoop;
         Task* task;
 
         task = new BinaryTask(BO_OR, vectorsSize);
-        Loop* toAverageLoop = new RangeLoop(Dummy::WEIGHS_RANGE, 1, 21, 5);
-        Loop* filesLoop = selecAlgLoop;
-        plotter.plotTaskFilesAveraged(task, "chronoOr", generationsLoop, filesLoop, toAverageLoop);
+        plotter.plotTaskFilesAveraged(task, "plotOr", generationsLoop, filesLoop, toAverageLoop);
         delete (task);
+//        task = new BinaryTask(BO_AND, vectorsSize);
+//        plotter.plotTaskFilesAveraged(task, "plotAnd", generationsLoop, filesLoop, toAverageLoop);
+//        delete (task);
+//        task = new BinaryTask(BO_XOR, vectorsSize);
+//        plotter.plotTaskFilesAveraged(task, "plotXor", generationsLoop, filesLoop, toAverageLoop);
+//        delete (task);
+
+        delete(filesLoop);
+        delete(toAverageLoop);
 
         printf("Exit success.\n");
     } catch (std::string error) {
