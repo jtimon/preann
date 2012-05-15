@@ -19,7 +19,6 @@ protected:
     EnumType tEnumType;
     vector<unsigned> tValueVector;
     unsigned tIndex;
-    virtual unsigned valueToUnsigned();
     virtual unsigned reset(EnumType enumType);
 
     virtual void __repeatImpl(LoopFunction* func);

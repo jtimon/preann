@@ -58,11 +58,6 @@ void JoinEnumLoop::addEnumLoop(unsigned enumValue, Loop* loop)
     }
 }
 
-unsigned JoinEnumLoop::valueToUnsigned()
-{
-    return tValueVector[tIndex];
-}
-
 std::string JoinEnumLoop::valueToString()
 {
     return Enumerations::toString(tEnumType, tValueVector[tIndex]);
@@ -105,16 +100,15 @@ void JoinEnumLoop::print()
 void JoinEnumLoop::__repeatImpl(LoopFunction* func)
 {
     ParametersMap* parametersMap = func->getParameters();
-    string levelName = getLevelName(tLevel);
+    tCurrentBranch = 0;
 
     for (tIndex = 0; tIndex < tValueVector.size(); ++tIndex) {
-        // It will not call to Loop::repeat__Base
-        parametersMap->putNumber(levelName, tValueVector[tIndex]);
-        tInnerLoops[tIndex]->tLevel = tLevel + 1;
 
         parametersMap->putNumber(tKey, tValueVector[tIndex]);
         tInnerLoops[tIndex]->setCallerLoop(this);
         tInnerLoops[tIndex]->__repeatImpl(func);
+        // It will not call to Loop::repeat__Base
+        ++tCurrentBranch;
     }
 }
 

@@ -30,7 +30,7 @@ protected:
 
     Loop();
     Loop(std::string key);
-    unsigned tLevel;
+    unsigned tCurrentBranch;
     Loop* tInnerLoop;
 
     void __repeatBase(LoopFunction* func);
@@ -47,7 +47,7 @@ public:
     Loop* dropLastLoop();
     Loop* dropLoop(Loop* loop);
 
-    virtual unsigned valueToUnsigned() = 0;
+    virtual unsigned getCurrentBranch();
     virtual unsigned getNumBranches() = 0;
     unsigned getNumLeafs();
     virtual unsigned getDepth();
@@ -60,8 +60,6 @@ public:
 
     virtual std::string valueToString() = 0;
     virtual std::string getState(bool longVersion);
-
-    static std::string getLevelName(unsigned &level);
 };
 
 class LoopFunction

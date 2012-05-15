@@ -14,7 +14,6 @@ class RangeLoop : public Loop
 {
 protected:
     float tValue, tMin, tMax, tInc;
-    unsigned tUnsignedValue;
 
     virtual void __repeatImpl(LoopFunction* func);
     virtual std::string valueToString();
@@ -28,7 +27,6 @@ public:
     virtual unsigned getNumBranches();
     float* toArray();
 
-    virtual unsigned valueToUnsigned();
     virtual void print();
 };
 

@@ -60,48 +60,22 @@ int mapLineColor(unsigned value)
     }
 }
 
-int getPointType(unsigned pointTypeLevel, ParametersMap* parametersMap)
-{
-    unsigned pointTypeToMap = 1000;
-    try {
-        string levelName = Loop::getLevelName(pointTypeLevel);
-        pointTypeToMap = parametersMap->getNumber(levelName);
-//        cout << "point " + levelName + "  " << pointTypeToMap << endl;
-    } catch (string& e) {
-    };
-    int pointType = mapPointType(pointTypeToMap);
-    return pointType;
-}
-
-int getLineColor(unsigned lineColorLevel, ParametersMap*& parametersMap)
-{
-    unsigned lineColorToMap = 1000;
-    try {
-        string levelName = Loop::getLevelName(lineColorLevel);
-        lineColorToMap = parametersMap->getNumber(levelName);
-//        cout << "colour " + levelName + "  " << lineColorToMap << endl;
-    } catch (string& e) {
-    };
-    int lineColor = mapLineColor(lineColorToMap);
-    return lineColor;
-}
-
 class PreparePlotFunction : public LoopFunction
 {
     string tBasePath;
     FILE* tPlotFile;
-    LoopFunction* tFunction;
-    unsigned tLineColorLevel;
-    unsigned tPointTypeLevel;
+    Loop* tLinesLoop;
+    unsigned tBasePointsToSubstract;
+    unsigned tPreviousTopBranch;
 public:
-    PreparePlotFunction(ParametersMap* parameters, string subPath, FILE* plotFile, unsigned lineColorLevel,
-                        unsigned pointTypeLevel)
+    PreparePlotFunction(ParametersMap* parameters, string basePath, FILE* plotFile, Loop* linesLoop)
             : LoopFunction(parameters, "PreparePlotFunction")
     {
-        tBasePath = subPath;
+        tBasePath = basePath;
         tPlotFile = plotFile;
-        tLineColorLevel = lineColorLevel;
-        tPointTypeLevel = pointTypeLevel;
+        tLinesLoop = linesLoop;
+        tPreviousTopBranch = 0;
+        tBasePointsToSubstract = 0;
     }
 protected:
     virtual void __executeImpl()
@@ -114,9 +88,17 @@ protected:
         string dataPath = tBasePath + state + ".DAT";
         string line = " \"" + dataPath + "\" using 1:2 title \"" + state + "\"";
 
-        int lineColor = getLineColor(tLineColorLevel, tParameters);
-        int pointType = getPointType(tPointTypeLevel, tParameters);
 
+        unsigned currentTopBranch = tLinesLoop->getCurrentBranch();
+        if (currentTopBranch != tPreviousTopBranch){
+            tBasePointsToSubstract = tLeaf;
+            tPreviousTopBranch = currentTopBranch;
+        }
+        unsigned colorValue = currentTopBranch;
+        unsigned pointValue = tLeaf - tBasePointsToSubstract;
+
+        int lineColor = mapLineColor(colorValue);
+        int pointType = mapPointType(pointValue);
         line += " with linespoints lt " + to_string(lineColor);
         line += " pt " + to_string(pointType);
 
@@ -126,7 +108,7 @@ protected:
 };
 
 void createGnuPlotScript(string& plotPath, Loop* linesLoop, ParametersMap* parameters, string& title,
-                         string& xLabel, string& yLabel, unsigned lineColorLevel, unsigned pointTypeLevel)
+                         string& xLabel, string& yLabel)
 {
     string fullPath = plotPath + "gnuplot/" + title + ".plt";
     FILE* plotFile = Util::openFile(fullPath);
@@ -145,7 +127,19 @@ void createGnuPlotScript(string& plotPath, Loop* linesLoop, ParametersMap* param
 
     string subPath = plotPath + "data/" + title + "_";
 
-    PreparePlotFunction preparePlotFunction(parameters, subPath, plotFile, lineColorLevel, pointTypeLevel);
+    // color and point level selection
+    /*
+    unsigned loopDepth = linesLoop->getDepth();
+    unsigned nonFirstLevelBranches;
+    if (loopDepth == 1) {
+        nonFirstLevelBranches = 0;
+    } else {
+        unsigned firstLevelBranches = linesLoop->getNumBranches();
+        unsigned totalLeafs = linesLoop->getNumLeafs();
+        nonFirstLevelBranches = totalLeafs / firstLevelBranches;
+    }*/
+
+    PreparePlotFunction preparePlotFunction(parameters, subPath, plotFile, linesLoop);
     linesLoop->repeatFunction(&preparePlotFunction, parameters);
     fprintf(plotFile, "\n");
     fclose(plotFile);
@@ -168,17 +162,8 @@ void Plot::initPlotVars(RangeLoop* xToPlot)
 
     check(tLoop == NULL, "Plot::initPlotVars : the plot Loop cannot be NULL.");
     unsigned tLoopDepth = tLoop->getDepth();
-    check(tLoopDepth < 1 || tLoopDepth > 2,
-          "Plot::initPlotVars : the Loop has to have a Depth between 1 (colours) and 2 (points).");
-
-    // color and point level selection
-    if (tLoopDepth == 1) {
-        lineColorLevel = 0;
-        pointTypeLevel = 0;
-    } else {
-        lineColorLevel = 0;
-        pointTypeLevel = 1;
-    }
+    check(tLoopDepth < 1,
+          "Plot::initPlotVars : the Loop has to have a at least Depth = 1.");
 
     // create plotting arrays
     xArray = xToPlot->toArray();
@@ -232,7 +217,7 @@ protected:
 
 void Plot::customPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel)
 {
-    createGnuPlotScript(tPlotPath, tLoop, &parameters, title, xLabel, yLabel, lineColorLevel, pointTypeLevel);
+    createGnuPlotScript(tPlotPath, tLoop, &parameters, title, xLabel, yLabel);
 
     GenericPlotAction plotFunction(fillArrayRepeater, &parameters, title, xToPlot, xArray, yArray, tPlotPath);
     tLoop->repeatFunction(&plotFunction, &parameters);
@@ -324,13 +309,10 @@ class ForFilesGenericRepeater : public LoopFunction
     float* tArrayY;
     string tLabelX;
     string tLabelY;
-    unsigned tLineColorLevel;
-    unsigned tPointTypeLevel;
 public:
     ForFilesGenericRepeater(LoopFunction* fillArrayRepeater, ParametersMap* parameters, std::string label,
                             Loop* linesLoop, RangeLoop* xToPlot, string plotPath, float* xArray,
-                            float* yArray, string xLabel, string yLabel, unsigned lineColorLevel,
-                            unsigned pointTypeLevel)
+                            float* yArray, string xLabel, string yLabel)
             : LoopFunction(parameters, "ForFilesGenericRepeater " + label)
     {
         tMainLabel = label;
@@ -342,16 +324,13 @@ public:
         tArrayY = yArray;
         tLabelX = xLabel;
         tLabelY = yLabel;
-        tLineColorLevel = lineColorLevel;
-        tPointTypeLevel = pointTypeLevel;
     }
 protected:
     virtual void __executeImpl()
     {
         string title = tMainLabel + "_" + tCallerLoop->getState(false);
 
-        createGnuPlotScript(tPlotPath, tLinesLoop, tParameters, title, tLabelX, tLabelY, tLineColorLevel,
-                            tPointTypeLevel);
+        createGnuPlotScript(tPlotPath, tLinesLoop, tParameters, title, tLabelX, tLabelY);
 
         GenericPlotAction plotFunction(tFillArrayRepeater, tParameters, title, tToPlot, tArrayX, tArrayY,
                                        tPlotPath);
@@ -369,8 +348,7 @@ void Plot::genericMultiFilePlot(std::string title, LoopFunction* addToArrayActio
     FillArrayGenericRepeater fillArrayRepeater(addToArrayAction, &parameters, title, xToPlot);
 
     ForFilesGenericRepeater forFilesRepeater(&fillArrayRepeater, &parameters, title, tLoop, xToPlot,
-                                             tPlotPath, xArray, yArray, xLabel, yLabel, lineColorLevel,
-                                             pointTypeLevel);
+                                             tPlotPath, xArray, yArray, xLabel, yLabel);
     filesLoop->repeatFunction(&forFilesRepeater, &parameters);
 }
 
@@ -384,8 +362,7 @@ void Plot::customMultiFileAveragedPlot(std::string title, LoopFunction* fillArra
                                                    yArray, xToPlot->getNumBranches());
 
     ForFilesGenericRepeater forFilesRepeater(&forAvergaesRepeater, &parameters, title, tLoop, xToPlot,
-                                             tPlotPath, xArray, yArray, xLabel, yLabel, lineColorLevel,
-                                             pointTypeLevel);
+                                             tPlotPath, xArray, yArray, xLabel, yLabel);
     filesLoop->repeatFunction(&forFilesRepeater, &parameters);
 }
 
@@ -447,7 +424,7 @@ protected:
     {
         float timeCount = (tFunctionToChrono)(tParameters, tRepetitions);
 
-        unsigned pos = ((RangeLoop*) tCallerLoop)->valueToUnsigned();
+        unsigned pos = ((RangeLoop*) tCallerLoop)->getCurrentBranch();
         tArray[pos] = timeCount / tRepetitions;
     }
 };
@@ -479,7 +456,7 @@ protected:
     {
         float timeCount = (tFunctionToChrono)(tParameters, tRepetitions);
 
-        unsigned pos = ((RangeLoop*) tCallerLoop)->valueToUnsigned();
+        unsigned pos = ((RangeLoop*) tCallerLoop)->getCurrentBranch();
         tArray[pos] += timeCount / tRepetitions;
     }
 };
@@ -606,8 +583,7 @@ void Plot::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPl
                                                    yArray, xToPlot->getNumBranches());
 
     ForFilesGenericRepeater forFilesRepeater(&forAvergaesRepeater, &parameters, title, tLoop, xToPlot,
-                                             tPlotPath, xArray, yArray, xLabel, yLabel, lineColorLevel,
-                                             pointTypeLevel);
+                                             tPlotPath, xArray, yArray, xLabel, yLabel);
     filesLoop->repeatFunction(&forFilesRepeater, &parameters);
 
 }

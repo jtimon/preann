@@ -13,7 +13,6 @@ RangeLoop::RangeLoop(std::string key, float min, float max, float inc) :
     tMin = min;
     tMax = max;
     tInc = inc;
-    tUnsignedValue = 0;
 }
 
 RangeLoop::~RangeLoop()
@@ -25,17 +24,11 @@ void RangeLoop::resetRange(float min, float max, float inc)
     tMin = min;
     tMax = max;
     tInc = inc;
-    tUnsignedValue = 0;
 }
 
 float RangeLoop::getCurrentValue()
 {
     return tValue;
-}
-
-unsigned RangeLoop::valueToUnsigned()
-{
-    return tUnsignedValue;
 }
 
 unsigned RangeLoop::getNumBranches()
@@ -77,11 +70,10 @@ std::string RangeLoop::valueToString()
 void RangeLoop::__repeatImpl(LoopFunction* func)
 {
     ParametersMap* parametersMap = func->getParameters();
-    tUnsignedValue = 0;
+    tCurrentBranch = 0;
     for (tValue = tMin; tValue < tMax; tValue += tInc) {
         parametersMap->putNumber(tKey, tValue);
         this->__repeatBase(func);
-        ++tUnsignedValue;
     }
 }
 

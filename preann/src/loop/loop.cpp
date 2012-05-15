@@ -81,28 +81,15 @@ void Loop::setCallerLoop(Loop* callerLoop)
     tCallerLoop = callerLoop;
 }
 
-std::string Loop::getLevelName(unsigned &level)
-{
-    string result;
-    std::stringstream sstm;
-    sstm << "__Level_" << level;
-    result = sstm.str();
-    return result;
-}
-
 void Loop::__repeatBase(LoopFunction* func)
 {
-    ParametersMap* parametersMap = func->getParameters();
-    string levelName = getLevelName(tLevel);
-    parametersMap->putNumber(levelName, func->getLeaf());
-
     if (tInnerLoop) {
-        tInnerLoop->tLevel = tLevel + 1;
         tInnerLoop->setCallerLoop(this);
         tInnerLoop->__repeatImpl(func);
     } else {
         func->execute(this);
     }
+    ++tCurrentBranch;
 }
 
 void Loop::repeatFunction(ParamMapFuncPtr func, ParametersMap* parametersMap, std::string functionLabel)
@@ -117,7 +104,6 @@ void Loop::repeatFunction(LoopFunction* func, ParametersMap* parametersMap)
     std::string functionLabel = func->getLabel();
     cout << "Repeating function... " << functionLabel << endl;
 
-    tLevel = 0;
     this->setCallerLoop(NULL);
     try {
         func->start();
@@ -125,6 +111,11 @@ void Loop::repeatFunction(LoopFunction* func, ParametersMap* parametersMap)
     } catch (string& e) {
         cout << "Error while repeating function... " << functionLabel << " : " << e << endl;
     }
+}
+
+unsigned Loop::getCurrentBranch()
+{
+    return tCurrentBranch;
 }
 
 void __emptyFunction_(ParametersMap* params)

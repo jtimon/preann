@@ -17,7 +17,6 @@ protected:
     vector<unsigned> tValueVector;
     vector<Loop*> tInnerLoops;
     unsigned tIndex;
-    virtual unsigned valueToUnsigned();
 
     virtual void __repeatImpl(LoopFunction* func);
 public:

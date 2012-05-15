@@ -50,11 +50,6 @@ EnumLoop::~EnumLoop()
     tValueVector.clear();
 }
 
-unsigned EnumLoop::valueToUnsigned()
-{
-    return tValueVector[tIndex];
-}
-
 unsigned EnumLoop::reset(EnumType enumType)
 {
     tEnumType = enumType;
@@ -141,6 +136,7 @@ std::string EnumLoop::valueToString()
 void EnumLoop::__repeatImpl(LoopFunction* func)
 {
     ParametersMap* parametersMap = func->getParameters();
+    tCurrentBranch = 0;
     for (tIndex = 0; tIndex < tValueVector.size(); ++tIndex) {
         parametersMap->putNumber(tKey, tValueVector[tIndex]);
         this->__repeatBase(func);

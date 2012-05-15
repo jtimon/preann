@@ -13,8 +13,6 @@
 class Plot : public Test
 {
 protected:
-    unsigned lineColorLevel;
-    unsigned pointTypeLevel;
     float* xArray;
     float* yArray;
     string xLabel;

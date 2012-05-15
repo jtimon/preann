@@ -84,7 +84,6 @@ cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	./bin/chronoConnectionsFiles.exe
 #	./bin/chronoBinaryTasks.exe 
 #	./bin/chronoReversi.exe
-# FIXME 
 #	./bin/plotReversiSelection.exe
 #	./bin/plotBinaryTasks.exe
 	./bin/plotCombBinaryTasks.exe
