@@ -66,6 +66,7 @@ int getPointType(unsigned pointTypeLevel, ParametersMap* parametersMap)
     try {
         string levelName = Loop::getLevelName(pointTypeLevel);
         pointTypeToMap = parametersMap->getNumber(levelName);
+//        cout << "point " + levelName + "  " << pointTypeToMap << endl;
     } catch (string& e) {
     };
     int pointType = mapPointType(pointTypeToMap);
@@ -78,6 +79,7 @@ int getLineColor(unsigned lineColorLevel, ParametersMap*& parametersMap)
     try {
         string levelName = Loop::getLevelName(lineColorLevel);
         lineColorToMap = parametersMap->getNumber(levelName);
+//        cout << "colour " + levelName + "  " << lineColorToMap << endl;
     } catch (string& e) {
     };
     int lineColor = mapLineColor(lineColorToMap);
@@ -609,3 +611,86 @@ void Plot::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPl
     filesLoop->repeatFunction(&forFilesRepeater, &parameters);
 
 }
+
+void separateLoops(Loop* topLoop)
+{
+    Loop* followingLoops;
+    while(topLoop != NULL){
+        topLoop = topLoop->dropFirstLoop();
+    }
+}
+
+void separateLoops(std::vector<Loop*>& loops, Loop* topLoop)
+{
+    Loop* followingLoops;
+    while(topLoop != NULL){
+        followingLoops = topLoop->dropFirstLoop();
+        loops.push_back(topLoop);
+        topLoop = followingLoops;
+    }
+}
+
+void Plot::plotTaskCombFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
+{
+    std::vector<Loop*> loops;
+
+    separateLoops(loops, tLoop);
+
+    Loop* filesLoop;
+
+    unsigned numLoops = loops.size();
+    for (unsigned i = 0; i < numLoops; ++i) {
+        Loop* coloursLoop = loops[i];
+
+        // Regular loop and not the last
+        if (coloursLoop->getDepth() == 1 && i < numLoops - 1){
+
+           for (unsigned j = i + 1; j < loops.size(); ++j) {
+               Loop* pointsLoop = loops[j];
+               //JoinEnumLoop with childs
+               if (pointsLoop->getDepth() > 1){
+                   break;
+               }
+
+               tLoop = coloursLoop;
+               tLoop->addInnerLoop(pointsLoop);
+
+               filesLoop = NULL;
+               for (unsigned k = 0; k < loops.size(); ++k) {
+                   if (k != i && k != j){
+                       if (filesLoop == NULL){
+                           filesLoop = loops[k];
+                       } else {
+                           filesLoop->addInnerLoop(loops[k]);
+                       }
+                   }
+               }
+               string tittleAux = title + "_" + coloursLoop->getKey() + "_" + pointsLoop->getKey();
+               plotTaskFilesAveraged(task, tittleAux, xToPlot, filesLoop, averagesLoop);
+               separateLoops(tLoop);
+               separateLoops(filesLoop);
+           }
+
+        //JoinEnumLoop with childs
+        } else if (coloursLoop->getDepth() > 1){
+
+            tLoop = coloursLoop;
+            filesLoop = NULL;
+            for (unsigned k = 0; k < loops.size(); ++k) {
+                if (k != i){
+                    if (filesLoop == NULL){
+                        filesLoop = loops[k];
+                    } else {
+                        filesLoop->addInnerLoop(loops[k]);
+                    }
+                }
+            }
+            string tittleAux = title + "_" + coloursLoop->getKey();
+            plotTaskFilesAveraged(task, tittleAux, xToPlot, filesLoop, averagesLoop);
+            separateLoops(tLoop);
+            separateLoops(filesLoop);
+        }
+    }
+
+}
+

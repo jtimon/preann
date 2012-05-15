@@ -73,6 +73,23 @@ unsigned JoinEnumLoop::getNumBranches()
     tValueVector.size();
 }
 
+unsigned JoinEnumLoop::getDepth()
+{
+    if (tValueVector.size() == 0 ){
+        if (tInnerLoop == NULL){
+            return 1;
+        } else {
+            return 1 + tInnerLoop->getDepth();
+        }
+    } else {
+        if (tInnerLoop == NULL){
+            return 2;
+        } else {
+            return 2 + tInnerLoop->getDepth();
+        }
+    }
+}
+
 void JoinEnumLoop::print()
 {
     cout << tKey << " (" << Enumerations::enumTypeToString(tEnumType) << ") : ";

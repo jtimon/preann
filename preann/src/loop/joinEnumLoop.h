@@ -31,6 +31,7 @@ public:
     virtual unsigned getNumBranches();
     virtual void print();
     virtual std::string valueToString();
+    virtual unsigned getDepth();
 };
 
 #endif /* JOINENUMLOOP_H_ */

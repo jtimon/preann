@@ -77,13 +77,17 @@ OBJ += $(FACT_OBJ)
 doc: $(DOC)
 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
 	./bin/testMemoryLosses.exe
-	./bin/testBuffers.exe 
+#	./bin/testBuffers.exe 
 #	./bin/testConnections.exe
-	./bin/chronoBuffers.exe
+#	./bin/chronoBuffers.exe
 #	./bin/chronoConnections.exe
-	./bin/chronoBinaryTasks.exe 
+#	./bin/chronoConnectionsFiles.exe
+#	./bin/chronoBinaryTasks.exe 
 #	./bin/chronoReversi.exe
-#	./bin/plotReversiSelection.exe 
+# FIXME 
+#	./bin/plotReversiSelection.exe
+#	./bin/plotBinaryTasks.exe
+	./bin/plotCombBinaryTasks.exe
 # FIXME 
 #	./bin/testLayers.exe 
 #	./bin/testMemoryLosses.exe > ./output/log/testMemoryLosses.log

@@ -61,6 +61,7 @@ public:
     void plotTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop);
     void plotTaskFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop);
     void plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop, Loop* averagesLoop);
+    void plotTaskCombFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop);
 
 
 };
