@@ -153,10 +153,10 @@ SquareState Board::opponent(SquareState player)
         std::string error = "Board::adversary : Empty square is not a player.";
         throw error;
     }
-    if (player == PLAYER_1) {
+    else if (player == PLAYER_1) {
         return PLAYER_2;
     }
-    if (player == PLAYER_2) {
+    else {
         return PLAYER_1;
     }
 }
