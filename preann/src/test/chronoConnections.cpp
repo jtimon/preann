@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "loop/plot.h"
+#include "loopTest/chronoPlotter.h"
 #include "common/dummy.h"
 
 #define START                                                                           \
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Plot plotter(PREANN_DIR + to_string("output/"));
+        ChronoPlotter plotter(PREANN_DIR + to_string("output/"));
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);

@@ -4,7 +4,7 @@
 using namespace std;
 
 #include "common/chronometer.h"
-#include "loop/plot.h"
+#include "loopTest/taskPlotter.h"
 #include "genetic/population.h"
 #include "tasks/binaryTask.h"
 
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Plot plotter(PREANN_DIR + to_string("output/"));
+        TaskPlotter plotter(PREANN_DIR + to_string("output/"));
 //        plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         unsigned populationSize = 4;
         plotter.parameters.putNumber(Population::SIZE, populationSize);
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
         EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM), ET_SELECTION_ALGORITHM, 2, SA_RANKING, SA_ROULETTE_WHEEL);
         plotter.addLoop(selecAlgLoop);
-        EnumLoop* crossAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_CROSS_ALG), ET_CROSS_ALG, 3, CA_UNIFORM, CA_MULTIPOINT, CA_PROPORTIONAL);
+        EnumLoop* crossAlgLoop = new EnumLoop(ET_CROSS_ALG);
         plotter.addLoop(crossAlgLoop);
 //        EnumLoop* crossLevelLoop = new EnumLoop(Enumerations::enumTypeToString(ET_CROSS_LEVEL), ET_CROSS_LEVEL, 2, CL_WEIGH, CL_NEURON);
 //        plotter.addLoop(crossLevelLoop);
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
         plotter.addLoop(mutAlglLoop);
 
 
-        JoinEnumLoop* resetAlgLoop = new JoinEnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG);
+        JoinEnumLoop* resetAlgLoop = new JoinEnumLoop(ET_RESET_ALG);
         plotter.addLoop(resetAlgLoop);
 
         RangeLoop* numResetsLoop = new RangeLoop(Population::RESET_NUM, 1, 4, 1);

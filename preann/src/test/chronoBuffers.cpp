@@ -3,7 +3,7 @@
 
 using namespace std;
 
-#include "loop/plot.h"
+#include "loopTest/chronoPlotter.h"
 #include "common/dummy.h"
 #include "common/chronometer.h"
 
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Plot plotter(PREANN_DIR + to_string("output/"));
+        ChronoPlotter plotter(PREANN_DIR + to_string("output/"));
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 

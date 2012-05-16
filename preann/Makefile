@@ -4,7 +4,7 @@
 
 SHELL = /bin/sh
 
-MODULES   = common loop neural genetic game tasks optimization 
+MODULES   = common optimization neural genetic game tasks loop loopTest   
 LIB_MODULES = $(MODULES) template  
 
 SRC_DIR   = $(addprefix src/,$(MODULES))  
@@ -87,7 +87,7 @@ cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	./bin/chronoReversi.exe
 #	./bin/plotReversiSelection.exe
 #	./bin/plotBinaryTasks.exe
-#	./bin/plotCombBinaryTasks.exe
+	./bin/plotCombBinaryTasks.exe
 #	./bin/testMemoryLosses.exe > ./output/log/testMemoryLosses.log
 #	./bin/testBuffers.exe > ./output/log/testBuffers.log
 #	./bin/testConnections.exe > ./output/log/testConnections.log

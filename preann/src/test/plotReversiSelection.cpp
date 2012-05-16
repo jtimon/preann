@@ -4,7 +4,7 @@
 using namespace std;
 
 #include "common/chronometer.h"
-#include "loop/plot.h"
+#include "loopTest/taskPlotter.h"
 #include "genetic/population.h"
 #include "tasks/reversiTask.h"
 
@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Plot plotter(PREANN_DIR + to_string("output/"));
+        TaskPlotter plotter(PREANN_DIR + to_string("output/"));
 
         EnumLoop* toAverageLoop = new EnumLoop(ET_CROSS_ALG);
         toAverageLoop->exclude(ET_CROSS_ALG, 1, CA_PROPORTIONAL);

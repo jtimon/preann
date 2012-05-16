@@ -4,7 +4,7 @@
 using namespace std;
 
 #include "common/chronometer.h"
-#include "loop/plot.h"
+#include "loopTest/taskPlotter.h"
 #include "genetic/population.h"
 #include "tasks/reversiTask.h"
 
@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Plot plotter(PREANN_DIR + to_string("output/"));
+        TaskPlotter plotter(PREANN_DIR + to_string("output/"));
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
         unsigned populationSize = 8;
         plotter.parameters.putNumber(Population::SIZE, populationSize);
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
                                               ET_SELECTION_ALGORITHM);
         plotter.addLoop(selecAlgLoop);
 
-        RangeLoop* rouletteWheelBaseLoop = new RangeLoop(Population::ROULETTE_WHEEL_BASE, 1, 18, 4);
+        RangeLoop* rouletteWheelBaseLoop = new RangeLoop(Population::ROULETTE_WHEEL_BASE, 1, 6, 4);
         plotter.addLoop(rouletteWheelBaseLoop);
 
         //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);

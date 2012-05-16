@@ -4,7 +4,7 @@
 using namespace std;
 
 #include "common/chronometer.h"
-#include "loop/plot.h"
+#include "loopTest/taskPlotter.h"
 #include "genetic/population.h"
 #include "tasks/binaryTask.h"
 
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Plot plotter(PREANN_DIR + to_string("output/"));
+        TaskPlotter plotter(PREANN_DIR + to_string("output/"));
 //        plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         unsigned populationSize = 8;
         plotter.parameters.putNumber(Population::SIZE, populationSize);
