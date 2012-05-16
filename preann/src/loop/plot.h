@@ -34,6 +34,9 @@ protected:
     void genericMultiFileAveragedPlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
                                             string yLabel, Loop* filesLoop, Loop* averagesLoop);
 
+    void plotTaskCombAverageOrFiles(bool loopFiles, Loop* averagesLoop, Task* task, string tittleAux,
+                                    RangeLoop* xToPlot, Loop* otherLoop);
+    void plotTaskComb(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop, bool loopFiles);
 public:
     Plot(string plotPath);
     virtual ~Plot();
@@ -60,6 +63,8 @@ public:
     void plotTaskFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop);
     void plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop, Loop* averagesLoop);
     void plotTaskCombFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop);
+    void plotTaskCombAverage(Task* task, std::string title, RangeLoop* xToPlot);
+    void plotTaskCombAverage(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop);
 
 
 };

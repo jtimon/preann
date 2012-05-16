@@ -41,6 +41,16 @@ void JoinEnumLoop::addInnerLoop(Loop* innerLoop)
     }
 }
 
+Loop* JoinEnumLoop::dropFirstLoop()
+{
+    Loop* toReturn = tInnerLoop;
+    for (int i = 0; i < tInnerLoops.size(); ++i) {
+        tInnerLoops[i]->dropLoop(tInnerLoop);
+    }
+    tInnerLoop = NULL;
+    return toReturn;
+}
+
 void JoinEnumLoop::addEnumLoop(unsigned enumValue, Loop* loop)
 {
     if (enumValue > Enumerations::enumTypeDim(tEnumType)) {

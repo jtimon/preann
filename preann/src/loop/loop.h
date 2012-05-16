@@ -43,7 +43,7 @@ public:
 
     virtual void addInnerLoop(Loop* innerLoop);
     Loop* getInnerLoop();
-    Loop* dropFirstLoop();
+    virtual Loop* dropFirstLoop();
     Loop* dropLastLoop();
     Loop* dropLoop(Loop* loop);
 

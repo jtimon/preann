@@ -88,9 +88,8 @@ protected:
         string dataPath = tBasePath + state + ".DAT";
         string line = " \"" + dataPath + "\" using 1:2 title \"" + state + "\"";
 
-
         unsigned currentTopBranch = tLinesLoop->getCurrentBranch();
-        if (currentTopBranch != tPreviousTopBranch){
+        if (currentTopBranch != tPreviousTopBranch) {
             tBasePointsToSubstract = tLeaf;
             tPreviousTopBranch = currentTopBranch;
         }
@@ -129,15 +128,15 @@ void createGnuPlotScript(string& plotPath, Loop* linesLoop, ParametersMap* param
 
     // color and point level selection
     /*
-    unsigned loopDepth = linesLoop->getDepth();
-    unsigned nonFirstLevelBranches;
-    if (loopDepth == 1) {
-        nonFirstLevelBranches = 0;
-    } else {
-        unsigned firstLevelBranches = linesLoop->getNumBranches();
-        unsigned totalLeafs = linesLoop->getNumLeafs();
-        nonFirstLevelBranches = totalLeafs / firstLevelBranches;
-    }*/
+     unsigned loopDepth = linesLoop->getDepth();
+     unsigned nonFirstLevelBranches;
+     if (loopDepth == 1) {
+     nonFirstLevelBranches = 0;
+     } else {
+     unsigned firstLevelBranches = linesLoop->getNumBranches();
+     unsigned totalLeafs = linesLoop->getNumLeafs();
+     nonFirstLevelBranches = totalLeafs / firstLevelBranches;
+     }*/
 
     PreparePlotFunction preparePlotFunction(parameters, subPath, plotFile, linesLoop);
     linesLoop->repeatFunction(&preparePlotFunction, parameters);
@@ -162,8 +161,7 @@ void Plot::initPlotVars(RangeLoop* xToPlot)
 
     check(tLoop == NULL, "Plot::initPlotVars : the plot Loop cannot be NULL.");
     unsigned tLoopDepth = tLoop->getDepth();
-    check(tLoopDepth < 1,
-          "Plot::initPlotVars : the Loop has to have a at least Depth = 1.");
+    check(tLoopDepth < 1, "Plot::initPlotVars : the Loop has to have a at least Depth = 1.");
 
     // create plotting arrays
     xArray = xToPlot->toArray();
@@ -353,7 +351,7 @@ void Plot::genericMultiFilePlot(std::string title, LoopFunction* addToArrayActio
 }
 
 void Plot::customMultiFileAveragedPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
-                                            string yLabel, Loop* filesLoop, Loop* averagesLoop)
+                                       string yLabel, Loop* filesLoop, Loop* averagesLoop)
 {
     check(averagesLoop == NULL, "Plot::genericMultiFilePlot : averagesLoop cannot be NULL.");
     check(filesLoop == NULL, "Plot::genericMultiFilePlot : forFilesLoop cannot be NULL.");
@@ -383,21 +381,21 @@ void Plot::plot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xTo
 }
 
 void Plot::plotAveraged(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot, string yLabel,
-                Loop* averagesLoop)
+                        Loop* averagesLoop)
 {
     initPlotVars(xToPlot);
     genericAveragedPlot(title, addToArrayAction, xToPlot, yLabel, averagesLoop);
 }
 
 void Plot::plotFiles(std::string title, LoopFunction* fillArrayAction, RangeLoop* xToPlot, string yLabel,
-                Loop* filesLoop)
+                     Loop* filesLoop)
 {
     initPlotVars(xToPlot);
     genericMultiFilePlot(title, fillArrayAction, xToPlot, yLabel, filesLoop);
 }
 
-void Plot::plotFilesAveraged(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot, string yLabel,
-                Loop* filesLoop, Loop* averagesLoop)
+void Plot::plotFilesAveraged(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
+                             string yLabel, Loop* filesLoop, Loop* averagesLoop)
 {
     initPlotVars(xToPlot);
     genericMultiFileAveragedPlot(title, addToArrayAction, xToPlot, yLabel, filesLoop, averagesLoop);
@@ -462,7 +460,7 @@ protected:
 };
 
 void Plot::plotChronoAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                      Loop* averageLoop, unsigned repetitions)
+                              Loop* averageLoop, unsigned repetitions)
 {
     initPlotVars(xToPlot);
     ChronoAddAction chronoAction(func, &parameters, title, yArray, repetitions);
@@ -470,15 +468,15 @@ void Plot::plotChronoAveraged(ChronoFunctionPtr func, std::string title, RangeLo
 }
 
 void Plot::plotChronoFiles(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                Loop* filesLoop, unsigned repetitions)
+                           Loop* filesLoop, unsigned repetitions)
 {
     initPlotVars(xToPlot);
     ChronoFillAction chronoAction(func, &parameters, title, yArray, repetitions);
     genericMultiFilePlot(title, &chronoAction, xToPlot, yLabel, filesLoop);
 }
 
-void Plot::plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                Loop* filesLoop, Loop* averagesLoop, unsigned repetitions)
+void Plot::plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
+                                   string yLabel, Loop* filesLoop, Loop* averagesLoop, unsigned repetitions)
 {
     initPlotVars(xToPlot);
     ChronoAddAction chronoAction(func, &parameters, title, yArray, repetitions);
@@ -568,7 +566,8 @@ void Plot::plotTaskFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop
     plotTaskFilesAveraged(task, title, xToPlot, filesLoop, &auxLoop);
 }
 
-void Plot::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop, Loop* averagesLoop)
+void Plot::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop,
+                                 Loop* averagesLoop)
 {
     check(averagesLoop == NULL, "Plot::genericMultiFilePlot : averagesLoop cannot be NULL.");
     check(filesLoop == NULL, "Plot::genericMultiFilePlot : forFilesLoop cannot be NULL.");
@@ -591,7 +590,7 @@ void Plot::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPl
 void separateLoops(Loop* topLoop)
 {
     Loop* followingLoops;
-    while(topLoop != NULL){
+    while (topLoop != NULL) {
         topLoop = topLoop->dropFirstLoop();
     }
 }
@@ -599,74 +598,101 @@ void separateLoops(Loop* topLoop)
 void separateLoops(std::vector<Loop*>& loops, Loop* topLoop)
 {
     Loop* followingLoops;
-    while(topLoop != NULL){
+    while (topLoop != NULL) {
         followingLoops = topLoop->dropFirstLoop();
         loops.push_back(topLoop);
         topLoop = followingLoops;
     }
 }
 
-void Plot::plotTaskCombFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
+void Plot::plotTaskCombAverageOrFiles(bool loopFiles, Loop* averagesLoop, Task* task, string tittleAux,
+                                RangeLoop* xToPlot, Loop* otherLoop)
+{
+    if (loopFiles) {
+        plotTaskFilesAveraged(task, tittleAux, xToPlot, otherLoop, averagesLoop);
+    } else {
+        if (averagesLoop == NULL) {
+            plotTaskAveraged(task, tittleAux, xToPlot, otherLoop);
+        } else {
+            otherLoop->addInnerLoop(averagesLoop);
+            plotTaskAveraged(task, tittleAux, xToPlot, otherLoop);
+            otherLoop->dropLoop(averagesLoop);
+        }
+    }
+    separateLoops (tLoop);
+    separateLoops(otherLoop);
+}
+
+void Plot::plotTaskComb(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop, bool loopFiles)
 {
     std::vector<Loop*> loops;
 
     separateLoops(loops, tLoop);
 
-    Loop* filesLoop;
+    Loop* otherLoop;
 
     unsigned numLoops = loops.size();
     for (unsigned i = 0; i < numLoops; ++i) {
         Loop* coloursLoop = loops[i];
 
         // Regular loop and not the last
-        if (coloursLoop->getDepth() == 1 && i < numLoops - 1){
+        if (coloursLoop->getDepth() == 1) {
 
-           for (unsigned j = i + 1; j < loops.size(); ++j) {
-               Loop* pointsLoop = loops[j];
-               //JoinEnumLoop with childs
-               if (pointsLoop->getDepth() > 1){
-                   break;
-               }
+            for (unsigned j = i + 1; j < loops.size(); ++j) {
+                Loop* pointsLoop = loops[j];
+                //if not JoinEnumLoop with childs
+                if (pointsLoop->getDepth() == 1) {
 
-               tLoop = coloursLoop;
-               tLoop->addInnerLoop(pointsLoop);
+                    tLoop = coloursLoop;
+                    tLoop->addInnerLoop(pointsLoop);
 
-               filesLoop = NULL;
-               for (unsigned k = 0; k < loops.size(); ++k) {
-                   if (k != i && k != j){
-                       if (filesLoop == NULL){
-                           filesLoop = loops[k];
-                       } else {
-                           filesLoop->addInnerLoop(loops[k]);
-                       }
-                   }
-               }
-               string tittleAux = title + "_" + coloursLoop->getKey() + "_" + pointsLoop->getKey();
-               plotTaskFilesAveraged(task, tittleAux, xToPlot, filesLoop, averagesLoop);
-               separateLoops(tLoop);
-               separateLoops(filesLoop);
-           }
+                    otherLoop = NULL;
+                    for (unsigned k = 0; k < loops.size(); ++k) {
+                        if (k != i && k != j) {
+                            if (otherLoop == NULL) {
+                                otherLoop = loops[k];
+                            } else {
+                                otherLoop->addInnerLoop(loops[k]);
+                            }
+                        }
+                    }
+                    string tittleAux = title + "_" + coloursLoop->getKey() + "_" + pointsLoop->getKey();
+                    plotTaskCombAverageOrFiles(loopFiles, averagesLoop, task, tittleAux, xToPlot, otherLoop);
+                }
+            }
 
-        //JoinEnumLoop with childs
-        } else if (coloursLoop->getDepth() > 1){
+            //JoinEnumLoop with childs
+        } else if (coloursLoop->getDepth() > 1) {
 
             tLoop = coloursLoop;
-            filesLoop = NULL;
+            otherLoop = NULL;
             for (unsigned k = 0; k < loops.size(); ++k) {
-                if (k != i){
-                    if (filesLoop == NULL){
-                        filesLoop = loops[k];
+                if (k != i) {
+                    if (otherLoop == NULL) {
+                        otherLoop = loops[k];
                     } else {
-                        filesLoop->addInnerLoop(loops[k]);
+                        otherLoop->addInnerLoop(loops[k]);
                     }
                 }
             }
             string tittleAux = title + "_" + coloursLoop->getKey();
-            plotTaskFilesAveraged(task, tittleAux, xToPlot, filesLoop, averagesLoop);
-            separateLoops(tLoop);
-            separateLoops(filesLoop);
+            plotTaskCombAverageOrFiles(loopFiles, averagesLoop, task, tittleAux, xToPlot, otherLoop);
         }
     }
 
 }
 
+void Plot::plotTaskCombFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
+{
+    plotTaskComb(task, title, xToPlot, averagesLoop, true);
+}
+
+void Plot::plotTaskCombAverage(Task* task, std::string title, RangeLoop* xToPlot)
+{
+    plotTaskComb(task, title, xToPlot, NULL, false);
+}
+
+void Plot::plotTaskCombAverage(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
+{
+    plotTaskComb(task, title, xToPlot, averagesLoop, false);
+}

@@ -54,14 +54,15 @@ int main(int argc, char *argv[])
         plotter.addLoop(mutAlglLoop);
 
 
-//        JoinEnumLoop* resetAlgLoop = new JoinEnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG);
-//        plotter.addLoop(resetAlgLoop);
-//
-//        RangeLoop* numResetsLoop = new RangeLoop(Population::RESET_NUM, 1, 4, 1);
-//        resetAlgLoop->addEnumLoop(RA_PER_INDIVIDUAL, numResetsLoop);
-//
-//        RangeLoop* resetProbLoop = new RangeLoop(Population::RESET_PROB, 0.05, 0.2, 0.1);
-//        resetAlgLoop->addEnumLoop(RA_PROBABILISTIC, resetProbLoop);
+        JoinEnumLoop* resetAlgLoop = new JoinEnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG);
+        plotter.addLoop(resetAlgLoop);
+
+        RangeLoop* numResetsLoop = new RangeLoop(Population::RESET_NUM, 1, 4, 1);
+        resetAlgLoop->addEnumLoop(RA_PER_INDIVIDUAL, numResetsLoop);
+
+
+        RangeLoop* resetProbLoop = new RangeLoop(Population::RESET_PROB, 0.05, 0.2, 0.1);
+        resetAlgLoop->addEnumLoop(RA_PROBABILISTIC, resetProbLoop);
 
         plotter.getLoop()->print();
 
@@ -69,10 +70,11 @@ int main(int argc, char *argv[])
         unsigned vectorsSize = 2;
 
         Loop* toAverageLoop = new RangeLoop(Dummy::WEIGHS_RANGE, 1, 6, 2);
+
         Task* task;
 
         task = new BinaryTask(BO_OR, vectorsSize);
-        plotter.plotTaskCombFiles(task, "plotCombOr", generationsLoop, toAverageLoop);
+        plotter.plotTaskCombAverage(task, "plotCombAverOr", generationsLoop, toAverageLoop);
         delete (task);
 //        task = new BinaryTask(BO_AND, vectorsSize);
 //        plotter.plotTaskCombFiles(task, "plotCombAnd", generationsLoop, toAverageLoop);
