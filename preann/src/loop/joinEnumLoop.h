@@ -20,6 +20,7 @@ protected:
 
     virtual void __repeatImpl(LoopFunction* func);
 public:
+    JoinEnumLoop(EnumType enumType);
     JoinEnumLoop(std::string key, EnumType enumType);
     virtual ~JoinEnumLoop();
 

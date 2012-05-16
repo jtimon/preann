@@ -7,6 +7,12 @@
 
 #include "joinEnumLoop.h"
 
+JoinEnumLoop::JoinEnumLoop(EnumType enumType) :
+        Loop(Enumerations::enumTypeToString(enumType))
+{
+    tEnumType = enumType;
+    tIndex = 0;
+}
 JoinEnumLoop::JoinEnumLoop(std::string key, EnumType enumType) :
         Loop(key)
 {
