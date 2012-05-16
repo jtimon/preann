@@ -69,6 +69,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                 default:
                     SetValueToAnArray<c_typeTempl> (data, byteSize
                             / sizeof(c_typeTempl), 0);
+                    break;
             }
         }
 
@@ -127,6 +128,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                             }
                         }
                     }
+                    break;
             }
         }
 
