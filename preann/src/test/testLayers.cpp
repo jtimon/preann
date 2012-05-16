@@ -20,6 +20,7 @@ unsigned testCalculateOutput(ParametersMap* parametersMap)
     FILE* stream = fopen(path.data(), "w+b");
     layer->save(stream);
     layer->saveWeighs(stream);
+    fclose(stream);
 
     stream = fopen(path.data(), "r+b");
     Layer* layerC = new Layer(stream, IT_C);
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
         Test test;
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
-        test.parameters.putString(LAYER_PATH, "/home/timon/layer.lay");
+        test.parameters.putString(LAYER_PATH, PREANN_DIR + to_string("data/layer.lay"));
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         test.addLoop(new RangeLoop(Dummy::SIZE, 1, 51, 49));
@@ -62,10 +63,9 @@ int main(int argc, char *argv[])
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
         test.addLoop(bufferTypeLoop);
 
-        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
         test.getLoop()->print();
 
-        //TODO arreglar
         test.test(testCalculateOutput, "Layer::calculateOutput");
 
         printf("Exit success.\n");

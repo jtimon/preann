@@ -38,6 +38,7 @@ void* MemoryManagement::malloc(unsigned size)
 
     ptrs.push_back(toReturn);
     sizes.push_back(size);
+//    cout << "reserved " << size << " bytes at " << toReturn << endl;
 
     return toReturn;
 }
@@ -98,7 +99,7 @@ void MemoryManagement::printTotalPointers()
 void MemoryManagement::printListOfPointers()
 {
     for (int i = 0; i < ptrs.size(); i++) {
-        printf(" %d mem_address %d  size = %d \n", i, (unsigned)ptrs[i], sizes[i]);
+        cout << "reserved " << sizes[i] << " bytes at " << ptrs[i] << endl;
     }
 }
 

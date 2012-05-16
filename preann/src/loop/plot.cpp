@@ -171,6 +171,12 @@ void Plot::initPlotVars(RangeLoop* xToPlot)
     xLabel = xToPlot->getKey();
 }
 
+void Plot::freePlotVars()
+{
+    MemoryManagement::free(xArray);
+    MemoryManagement::free(yArray);
+}
+
 class GenericPlotAction : public LoopFunction
 {
     string tInnerLabel;
@@ -378,6 +384,7 @@ void Plot::plot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xTo
 {
     initPlotVars(xToPlot);
     genericPlot(title, fillArrayAction, xToPlot, yLabel);
+    freePlotVars();
 }
 
 void Plot::plotAveraged(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot, string yLabel,
@@ -385,6 +392,7 @@ void Plot::plotAveraged(std::string title, LoopFunction* addToArrayAction, Range
 {
     initPlotVars(xToPlot);
     genericAveragedPlot(title, addToArrayAction, xToPlot, yLabel, averagesLoop);
+    freePlotVars();
 }
 
 void Plot::plotFiles(std::string title, LoopFunction* fillArrayAction, RangeLoop* xToPlot, string yLabel,
@@ -392,6 +400,7 @@ void Plot::plotFiles(std::string title, LoopFunction* fillArrayAction, RangeLoop
 {
     initPlotVars(xToPlot);
     genericMultiFilePlot(title, fillArrayAction, xToPlot, yLabel, filesLoop);
+    freePlotVars();
 }
 
 void Plot::plotFilesAveraged(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
@@ -399,6 +408,7 @@ void Plot::plotFilesAveraged(std::string title, LoopFunction* addToArrayAction, 
 {
     initPlotVars(xToPlot);
     genericMultiFileAveragedPlot(title, addToArrayAction, xToPlot, yLabel, filesLoop, averagesLoop);
+    freePlotVars();
 }
 
 // * CHRONO PLOTS
@@ -433,6 +443,7 @@ void Plot::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToP
     initPlotVars(xToPlot);
     ChronoFillAction chronoAction(func, &parameters, title, yArray, repetitions);
     genericPlot(title, &chronoAction, xToPlot, yLabel);
+    freePlotVars();
 }
 
 class ChronoAddAction : public LoopFunction
@@ -465,6 +476,7 @@ void Plot::plotChronoAveraged(ChronoFunctionPtr func, std::string title, RangeLo
     initPlotVars(xToPlot);
     ChronoAddAction chronoAction(func, &parameters, title, yArray, repetitions);
     genericAveragedPlot(title, &chronoAction, xToPlot, yLabel, averageLoop);
+    freePlotVars();
 }
 
 void Plot::plotChronoFiles(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
@@ -473,6 +485,7 @@ void Plot::plotChronoFiles(ChronoFunctionPtr func, std::string title, RangeLoop*
     initPlotVars(xToPlot);
     ChronoFillAction chronoAction(func, &parameters, title, yArray, repetitions);
     genericMultiFilePlot(title, &chronoAction, xToPlot, yLabel, filesLoop);
+    freePlotVars();
 }
 
 void Plot::plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
@@ -481,6 +494,7 @@ void Plot::plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, Ra
     initPlotVars(xToPlot);
     ChronoAddAction chronoAction(func, &parameters, title, yArray, repetitions);
     genericMultiFileAveragedPlot(title, &chronoAction, xToPlot, yLabel, filesLoop, averagesLoop);
+    freePlotVars();
 }
 
 class TaskAddAction : public LoopFunction
@@ -518,6 +532,10 @@ public:
         tExample = tTask->getExample();
         tToPlot = xToPlot;
         tArray = yArray;
+    }
+    ~TaskFillArrayRepeater()
+    {
+        delete(tExample);
     }
 protected:
     virtual void __executeImpl()
@@ -557,6 +575,7 @@ void Plot::plotTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, L
                                                    yArray, xToPlot->getNumBranches());
 
     customPlot(title, &forAvergaesRepeater, xToPlot, yLabel);
+    freePlotVars();
 }
 
 void Plot::plotTaskFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop)
@@ -585,6 +604,7 @@ void Plot::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPl
                                              tPlotPath, xArray, yArray, xLabel, yLabel);
     filesLoop->repeatFunction(&forFilesRepeater, &parameters);
 
+    freePlotVars();
 }
 
 void separateLoops(Loop* topLoop)
@@ -679,7 +699,6 @@ void Plot::plotTaskComb(Task* task, std::string title, RangeLoop* xToPlot, Loop*
             plotTaskCombAverageOrFiles(loopFiles, averagesLoop, task, tittleAux, xToPlot, otherLoop);
         }
     }
-
 }
 
 void Plot::plotTaskCombFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)

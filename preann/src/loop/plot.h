@@ -20,6 +20,7 @@ protected:
     string tPlotPath;
 
     void initPlotVars(RangeLoop* xToPlot);
+    void freePlotVars();
 
     void customPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel);
     void genericPlot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xToPlot, string yLabel);

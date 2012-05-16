@@ -79,6 +79,7 @@ cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe 
 #	./bin/testConnections.exe
+#	./bin/testLayers.exe 
 #	./bin/chronoBuffers.exe
 #	./bin/chronoConnections.exe
 #	./bin/chronoConnectionsFiles.exe
@@ -86,9 +87,7 @@ cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	./bin/chronoReversi.exe
 #	./bin/plotReversiSelection.exe
 #	./bin/plotBinaryTasks.exe
-	./bin/plotCombBinaryTasks.exe
-# FIXME 
-#	./bin/testLayers.exe 
+#	./bin/plotCombBinaryTasks.exe
 #	./bin/testMemoryLosses.exe > ./output/log/testMemoryLosses.log
 #	./bin/testBuffers.exe > ./output/log/testBuffers.log
 #	./bin/testConnections.exe > ./output/log/testConnections.log

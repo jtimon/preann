@@ -76,6 +76,27 @@ unsigned testCopyToInterface(ParametersMap* parametersMap)
     END
 }
 
+unsigned testSaveLoad(ParametersMap* parametersMap)
+{
+    START
+    ImplementationType implementationType = (ImplementationType)(parametersMap->getNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION)));
+
+    string path = PREANN_DIR + to_string("data/testBuffer.buf");
+    FILE* stream = fopen(path.data(), "w+b");
+    buffer->save(stream);
+    fclose(stream);
+
+
+    stream = fopen(path.data(), "r+b");
+    Buffer* loadedBuffer = Factory::newBuffer(stream, implementationType);
+
+    differencesCounter += Test::assertEquals(buffer, loadedBuffer);
+
+    delete (loadedBuffer);
+
+    END
+}
+
 unsigned testClone(ParametersMap* parametersMap)
 {
     START
@@ -111,6 +132,7 @@ int main(int argc, char *argv[])
         test.test(testClone, "Buffer::clone");
         test.test(testCopyFromInterface, "Buffer::copyFromInterface");
         test.test(testCopyToInterface, "Buffer::copyToInterface");
+        test.test(testSaveLoad, "Buffer::saveLoad");
 
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
         test.getLoop()->print();

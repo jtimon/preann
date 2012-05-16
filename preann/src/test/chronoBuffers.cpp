@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 
     MemoryManagement::printTotalAllocated();
     MemoryManagement::printTotalPointers();
-    //MemoryManagement::mem_printListOfPointers();
+    MemoryManagement::printListOfPointers();
     total.stop();
     printf("Total time spent: %f \n", total.getSeconds());
     return EXIT_SUCCESS;

@@ -691,6 +691,7 @@ void Population::selectTournament()
         }
         parents.push_back(*it);
     }
+    MemoryManagement::free(alreadyChosen);
 }
 
 void Population::selectTruncation()
