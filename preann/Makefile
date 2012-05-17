@@ -80,20 +80,24 @@ cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	./bin/testBuffers.exe 
 #	./bin/testConnections.exe
 #	./bin/testLayers.exe 
+	./bin/testPlot.exe 
 #	./bin/chronoBuffers.exe
 #	./bin/chronoConnections.exe
+#	./bin/chronoIndividual.exe
 #	./bin/chronoConnectionsFiles.exe
 #	./bin/chronoBinaryTasks.exe 
 #	./bin/chronoReversi.exe
 #	./bin/plotReversiSelection.exe
 #	./bin/plotBinaryTasks.exe
-	./bin/plotCombBinaryTasks.exe
+#	./bin/plotCombBinaryTasks.exe
+#	./bin/plotTimeBinaryTasks.exe
 #	./bin/testMemoryLosses.exe > ./output/log/testMemoryLosses.log
 #	./bin/testBuffers.exe > ./output/log/testBuffers.log
 #	./bin/testConnections.exe > ./output/log/testConnections.log
 #	./bin/testLayers.exe > ./output/log/testLayers.log
 #	./bin/chronoBuffers.exe > ./output/log/chronoBuffers.log
 #	./bin/chronoConnections.exe > ./output/log/chronoConnections.log
+#	./bin/chronoIndividual.exe > ./output/log/chronoIndividual.log
 #	./bin/chronoBinaryTasks.exe > ./output/log/chronoBinaryTasks.log
 
 #all: $(LOGS)

@@ -43,6 +43,15 @@ void testNeuralNet(ParametersMap* parametersMap)
     delete (input);
 }
 
+void testIndividual(ParametersMap* parametersMap)
+{
+    Interface* input = Dummy::interface(parametersMap);
+    Individual* individual = Dummy::individual(parametersMap, input);
+
+    delete (individual);
+    delete (input);
+}
+
 void testPopulation(ParametersMap* parametersMap)
 {
     BufferType bufferType = (BufferType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_BUFFER));
@@ -123,6 +132,7 @@ int main(int argc, char *argv[])
         test.addLoop(numLayersLoop);
 
         test.testMemoryLosses(testNeuralNet, "NeuralNet");
+        test.testMemoryLosses(testIndividual, "Individual");
 
         sizeLoop->resetRange(1, 3, 1);
         outputSizeLoop->resetRange(1, 1, 1);
@@ -134,7 +144,7 @@ int main(int argc, char *argv[])
         MemoryManagement::printListOfPointers();
 
         printf("Exit success.\n", 1);
-    } catch (string error) {
+    } catch (string& error) {
         cout << "Error: " << error << endl;
     } catch (...) {
         printf("An error was thrown.\n", 1);
