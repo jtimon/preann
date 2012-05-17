@@ -15,6 +15,7 @@ TaskPlotter::~TaskPlotter()
 {
 }
 
+// * basic methods
 
 class TaskAddAction : public LoopFunction
 {
@@ -95,98 +96,6 @@ void TaskPlotter::plotTaskAveraged(Task* task, std::string title, RangeLoop* xTo
     freePlotVars();
 }
 
-class ChronoTaskAddAction : public LoopFunction
-{
-    Population* tPopulation;
-    float* tArrayX;
-    float* tArrayY;
-public:
-    ChronoTaskAddAction(ParametersMap* parameters, string label, Population* population, float* xArray, float* yArray)
-            : LoopFunction(parameters, "TaskAddAction " + label)
-    {
-        tPopulation = population;
-        tArrayX = xArray;
-        tArrayY = yArray;
-    }
-protected:
-    virtual void __executeImpl()
-    {
-        float xValue = ((RangeLoop*) tCallerLoop)->getCurrentValue();
-
-        Chronometer chrono;
-        chrono.start();
-        tPopulation->learn(xValue);
-        chrono.stop();
-
-//        tArrayX[tLeaf] += tPopulation->getBestIndividualScore();
-        tArrayY[tLeaf] += chrono.getSeconds();
-    }
-};
-
-class ChronoTaskFillArrayRepeater : public LoopFunction
-{
-    Task* tTask;
-    Individual* tExample;
-    RangeLoop* tToPlot;
-    float* tArrayX;
-    float* tArrayY;
-public:
-    ChronoTaskFillArrayRepeater(ParametersMap* parameters, string label, Task* task, RangeLoop* xToPlot,
-                                float* xArray, float* yArray)
-            : LoopFunction(parameters, "TaskFillArrayRepeater " + label)
-    {
-        tTask = task;
-        tExample = tTask->getExample();
-        tToPlot = xToPlot;
-        tArrayX = xArray;
-        tArrayY = yArray;
-    }
-    ~ChronoTaskFillArrayRepeater()
-    {
-        delete(tExample);
-    }
-protected:
-    virtual void __executeImpl()
-    {
-        unsigned populationSize = tParameters->getNumber(Population::SIZE);
-        float weighsRange = tParameters->getNumber(Dummy::WEIGHS_RANGE);
-
-        // create population
-        Population* initialPopulation = new Population(tTask, tExample, populationSize, weighsRange);
-        initialPopulation->setParams(tParameters);
-
-        ChronoTaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tArrayX, tArrayY);
-        tToPlot->repeatFunction(&addToArrayAction, tParameters);
-
-        unsigned arraySize = tToPlot->getNumBranches();
-        for (unsigned i = 0; i < arraySize - 1; ++i) {
-            tArrayY[i + 1] += tArrayY[i];
-        }
-
-        delete (initialPopulation);
-    }
-};
-
-void TaskPlotter::plotChronoTask(Task* task, std::string title, RangeLoop* xToPlot)
-{
-    RangeLoop auxLoop("aux_average", 1, 2, 1);
-
-    plotChronoTaskAveraged(task, title, xToPlot, &auxLoop);
-}
-
-void TaskPlotter::plotChronoTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
-{
-    string yLabel = "Time";
-    title = title + "_" + task->toString();
-    initPlotVars(xToPlot);
-
-    ChronoTaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, xArray, yArray);
-
-    _customAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, averagesLoop);
-
-    freePlotVars();
-}
-
 void TaskPlotter::plotTaskFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop)
 {
     RangeLoop auxLoop("aux_average", 1, 2, 1);
@@ -207,6 +116,8 @@ void TaskPlotter::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop
 
     freePlotVars();
 }
+
+// * combinations
 
 void separateLoops(Loop* topLoop)
 {
@@ -315,4 +226,98 @@ void TaskPlotter::plotTaskCombAverage(Task* task, std::string title, RangeLoop* 
 void TaskPlotter::plotTaskCombAverage(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
 {
     plotTaskComb(task, title, xToPlot, averagesLoop, false);
+}
+
+// * ChronoTask
+
+class ChronoTaskAddAction : public LoopFunction
+{
+    Population* tPopulation;
+    float* tArrayX;
+    float* tArrayY;
+public:
+    ChronoTaskAddAction(ParametersMap* parameters, string label, Population* population, float* xArray, float* yArray)
+            : LoopFunction(parameters, "TaskAddAction " + label)
+    {
+        tPopulation = population;
+        tArrayX = xArray;
+        tArrayY = yArray;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        float xValue = ((RangeLoop*) tCallerLoop)->getCurrentValue();
+
+        Chronometer chrono;
+        chrono.start();
+        tPopulation->learn(xValue);
+        chrono.stop();
+
+//        tArrayX[tLeaf] += tPopulation->getBestIndividualScore();
+        tArrayY[tLeaf] += chrono.getSeconds();
+    }
+};
+
+class ChronoTaskFillArrayRepeater : public LoopFunction
+{
+    Task* tTask;
+    Individual* tExample;
+    RangeLoop* tToPlot;
+    float* tArrayX;
+    float* tArrayY;
+public:
+    ChronoTaskFillArrayRepeater(ParametersMap* parameters, string label, Task* task, RangeLoop* xToPlot,
+                                float* xArray, float* yArray)
+            : LoopFunction(parameters, "TaskFillArrayRepeater " + label)
+    {
+        tTask = task;
+        tExample = tTask->getExample();
+        tToPlot = xToPlot;
+        tArrayX = xArray;
+        tArrayY = yArray;
+    }
+    ~ChronoTaskFillArrayRepeater()
+    {
+        delete(tExample);
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        unsigned populationSize = tParameters->getNumber(Population::SIZE);
+        float weighsRange = tParameters->getNumber(Dummy::WEIGHS_RANGE);
+
+        // create population
+        Population* initialPopulation = new Population(tTask, tExample, populationSize, weighsRange);
+        initialPopulation->setParams(tParameters);
+
+        ChronoTaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tArrayX, tArrayY);
+        tToPlot->repeatFunction(&addToArrayAction, tParameters);
+
+        unsigned arraySize = tToPlot->getNumBranches();
+        for (unsigned i = 0; i < arraySize - 1; ++i) {
+            tArrayY[i + 1] += tArrayY[i];
+        }
+
+        delete (initialPopulation);
+    }
+};
+
+void TaskPlotter::plotChronoTask(Task* task, std::string title, RangeLoop* xToPlot)
+{
+    RangeLoop auxLoop("aux_average", 1, 2, 1);
+
+    plotChronoTaskAveraged(task, title, xToPlot, &auxLoop);
+}
+
+void TaskPlotter::plotChronoTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
+{
+    string yLabel = "Time";
+    title = title + "_" + task->toString();
+    initPlotVars(xToPlot);
+
+    ChronoTaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, xArray, yArray);
+
+    _customAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, averagesLoop);
+
+    freePlotVars();
 }
