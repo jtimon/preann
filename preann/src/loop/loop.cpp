@@ -92,7 +92,7 @@ void Loop::__repeatBase(LoopFunction* func)
     ++tCurrentBranch;
 }
 
-void Loop::repeatFunction(ParamMapFuncPtr func, ParametersMap* parametersMap, std::string functionLabel)
+void Loop::repeatFunction(GenericLoopFuncPtr func, ParametersMap* parametersMap, std::string functionLabel)
 {
     LoopFunction* function = new LoopFunction(func, parametersMap, functionLabel);
     repeatFunction(function, parametersMap);

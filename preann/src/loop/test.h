@@ -37,7 +37,7 @@ public:
     static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
     static unsigned assertEquals(Buffer* expected, Buffer* actual);
 
-    void testMemoryLosses(ParamMapFuncPtr function, string label);
+    void testMemoryLosses(GenericLoopFuncPtr function, string label);
     void test(TestFunctionPtr func, std::string label);
 
     void addLoop(Loop* loop);

@@ -17,7 +17,7 @@
 
 class LoopFunction;
 
-typedef void (*ParamMapFuncPtr)(ParametersMap*);
+typedef void (*GenericLoopFuncPtr)(ParametersMap*);
 
 class Loop
 {
@@ -55,7 +55,7 @@ public:
     virtual Loop* findLoop(std::string key);
     virtual void print() = 0;
 
-    void repeatFunction(ParamMapFuncPtr func, ParametersMap* parametersMap, std::string functionLabel);
+    void repeatFunction(GenericLoopFuncPtr func, ParametersMap* parametersMap, std::string functionLabel);
     void repeatFunction(LoopFunction* func, ParametersMap* parametersMap);
 
     virtual std::string valueToString() = 0;
@@ -65,7 +65,7 @@ public:
 class LoopFunction
 {
 protected:
-    ParamMapFuncPtr tFunction;
+    GenericLoopFuncPtr tFunction;
     std::string tLabel;
     ParametersMap* tParameters;
 
@@ -83,7 +83,7 @@ protected:
     }
 public:
     virtual ~LoopFunction(){};
-    LoopFunction(ParamMapFuncPtr functionPtr, ParametersMap* parameters, string label)
+    LoopFunction(GenericLoopFuncPtr functionPtr, ParametersMap* parameters, string label)
     {
         tFunction = functionPtr;
         tLabel = label;
@@ -108,6 +108,7 @@ public:
 //        cout << "Execute function... " << tLabel << endl;
         Util::check(callerLoop == NULL, "LoopFunction::execute " + tLabel + " : The caller Loop cannot be null.");
         try {
+//            cout << "--- executing " + tLabel + " at state " + tCallerLoop->getState(false) << endl;
             tCallerLoop = callerLoop;
             __executeImpl();
         } catch (string& e) {

@@ -97,7 +97,7 @@ class TestMemLossesFunction : public LoopFunction
 {
     string tFunctionLabel;
 public:
-    TestMemLossesFunction(ParamMapFuncPtr function, ParametersMap* parameters, string label)
+    TestMemLossesFunction(GenericLoopFuncPtr function, ParametersMap* parameters, string label)
             : LoopFunction(function, parameters, "TestMemoryLosses " + label)
     {
         tFunctionLabel = label;
@@ -119,7 +119,7 @@ protected:
     }
 };
 
-void Test::testMemoryLosses(ParamMapFuncPtr function, string label)
+void Test::testMemoryLosses(GenericLoopFuncPtr function, string label)
 {
     TestMemLossesFunction testMemFunc(function, &parameters, label);
     tLoop->repeatFunction(&testMemFunc, &parameters);
