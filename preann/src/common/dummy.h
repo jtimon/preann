@@ -10,13 +10,16 @@
 
 #include "loop/parametersMap.h"
 #include "neural/neuralNet.h"
+#include "genetic/individual.h"
 
 class Dummy
 {
+private:
     Dummy()
     {
     }
-    ;
+    static void addConnections(NeuralNet* net, Interface* input, unsigned numInputs, unsigned numLayers,
+                        unsigned size, BufferType bufferType, FunctionType functionType);
 public:
     static const string SIZE;
     static const string WEIGHS_RANGE;
@@ -29,6 +32,8 @@ public:
     static Connection* connection(ParametersMap* parametersMap, Buffer* buffer);
     static Layer* layer(ParametersMap* parametersMap, Buffer* input);
     static NeuralNet* neuralNet(ParametersMap* parametersMap, Interface* input);
+    static Individual* individual(ParametersMap* parametersMap, Interface* input);
+
 };
 
 #endif /* DUMMY_H_ */
