@@ -31,17 +31,9 @@ protected:
 
     void _customPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel);
     void _customAveragedPlot(std::string title, LoopFunction* addToArrayRepeater, RangeLoop* xToPlot,
-                            string yLabel, Loop* averagesLoop);
-    void _customMultiFileAveragedPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
-                                            string yLabel, Loop* filesLoop, Loop* averagesLoop);
-
-    void genericPlot(std::string title, LoopFunction* fillArrayAction, RangeLoop* xToPlot, string yLabel);
-    void genericAveragedPlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
                              string yLabel, Loop* averagesLoop);
-    void genericMultiFilePlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
-                                    string yLabel, Loop* filesLoop);
-    void genericMultiFileAveragedPlot(std::string title, LoopFunction* addToArrayAction, RangeLoop* xToPlot,
-                                            string yLabel, Loop* filesLoop, Loop* averagesLoop);
+    void _customMultiFileAveragedPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
+                                      string yLabel, Loop* filesLoop, Loop* averagesLoop);
 public:
     Plot(string plotPath);
     virtual ~Plot();
@@ -49,20 +41,24 @@ public:
     // generic plots
     void plot(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot, string yLabel);
     void plotAveraged(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot, string yLabel,
-              Loop* averagesLoop);
+                      Loop* averagesLoop);
     void plotFiles(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot, string yLabel,
-              Loop* filesLoop);
-    void plotFilesAveraged(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot, string yLabel,
-              Loop* filesLoop, Loop* averagesLoop);
+                   Loop* filesLoop);
+    void plotFilesAveraged(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
+                           string yLabel, Loop* filesLoop, Loop* averagesLoop);
 
     // custom plots
-    void customPlot(std::string title, GenericPlotFillAction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel);
-    void customPlotAveraged(std::string title, GenericPlotFillAction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
-              Loop* averagesLoop);
-    void customPlotFiles(std::string title, GenericPlotFillAction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
-              Loop* filesLoop);
-    void customPlotFilesAveraged(std::string title, GenericPlotFillAction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel,
-              Loop* filesLoop, Loop* averagesLoop);
+    void genericPlot(std::string title, GenericPlotFillAction* fillArrayAction, RangeLoop* xToPlot,
+                     string yLabel);
+    void genericAveragedPlot(std::string title, GenericPlotFillAction* fillArrayAction, RangeLoop* xToPlot,
+                             string yLabel, Loop* averagesLoop);
+
+    void genericMultiFilePlot(std::string title, GenericPlotFillAction* fillArrayAction, RangeLoop* xToPlot,
+                              string yLabel, Loop* filesLoop);
+
+    void genericMultiFileAveragedPlot(std::string title, GenericPlotFillAction* fillArrayAction,
+                                      RangeLoop* xToPlot, string yLabel, Loop* filesLoop, Loop* averagesLoop);
+
 };
 
 class GenericPlotFillAction : public LoopFunction
@@ -72,20 +68,19 @@ protected:
     float* tArray;
     bool tAverage;
 public:
-    GenericPlotFillAction(GenericPlotFunctionPtr functionPtr, ParametersMap* parameters, string label,
-                                  float* array)
+    GenericPlotFillAction(GenericPlotFunctionPtr functionPtr, ParametersMap* parameters, string label)
             : LoopFunction(parameters, "GenericPlotFillAction " + label)
     {
         tFunctionPtr = functionPtr;
-        tArray = array;
+        tArray = NULL;
         tAverage = false;
     }
     GenericPlotFillAction(GenericPlotFunctionPtr functionPtr, ParametersMap* parameters, string label,
-                                  float* array, bool average)
+                          bool average)
             : LoopFunction(parameters, "GenericPlotFillAction " + label)
     {
         tFunctionPtr = functionPtr;
-        tArray = array;
+        tArray = NULL;
         tAverage = average;
     }
     GenericPlotFillAction(ParametersMap* parameters, string label, bool average)
@@ -94,7 +89,8 @@ public:
         tArray = NULL;
         tAverage = average;
     }
-    void setArray(float* array){
+    void setArray(float* array)
+    {
         tArray = array;
     }
 protected:
@@ -103,13 +99,12 @@ protected:
         float y = (tFunctionPtr)(tParameters);
 
         unsigned pos = ((RangeLoop*) tCallerLoop)->getCurrentBranch();
-        if (tAverage){
+        if (tAverage) {
             tArray[pos] += y;
         } else {
             tArray[pos] = y;
         }
     }
 };
-
 
 #endif /* PLOT_H_ */

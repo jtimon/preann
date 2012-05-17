@@ -7,7 +7,8 @@
 
 #include "chronoPlotter.h"
 
-ChronoPlotter::ChronoPlotter(string plotPath) : Plot(plotPath)
+ChronoPlotter::ChronoPlotter(string plotPath)
+        : Plot(plotPath)
 {
 }
 
@@ -21,11 +22,10 @@ class ChronoFillAction : public GenericPlotFillAction
     unsigned tRepetitions;
 public:
     ChronoFillAction(ChronoFunctionPtr functionToChrono, ParametersMap* parameters, string label,
-                     float* array, bool average, unsigned repetitions)
+                     bool average, unsigned repetitions)
             : GenericPlotFillAction(parameters, "ChronoFillAction " + label, average)
     {
         tFunctionToChrono = functionToChrono;
-        tArray = array;
         tRepetitions = repetitions;
     }
 protected:
@@ -34,46 +34,39 @@ protected:
         float timeCount = (tFunctionToChrono)(tParameters, tRepetitions);
 
         unsigned pos = ((RangeLoop*) tCallerLoop)->getCurrentBranch();
-        if (tAverage){
+        if (tAverage) {
             tArray[pos] += timeCount / tRepetitions;
-        } else{
+        } else {
             tArray[pos] = timeCount / tRepetitions;
         }
     }
 };
 
 void ChronoPlotter::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                      unsigned repetitions)
+                               unsigned repetitions)
 {
-    initPlotVars(xToPlot);
-    ChronoFillAction chronoAction(func, &parameters, title, yArray, false, repetitions);
+    ChronoFillAction chronoAction(func, &parameters, title, false, repetitions);
     genericPlot(title, &chronoAction, xToPlot, yLabel);
-    freePlotVars();
 }
 
-void ChronoPlotter::plotChronoAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                              Loop* averagesLoop, unsigned repetitions)
+void ChronoPlotter::plotChronoAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
+                                       string yLabel, Loop* averagesLoop, unsigned repetitions)
 {
-    initPlotVars(xToPlot);
-    ChronoFillAction chronoAction(func, &parameters, title, yArray, true, repetitions);
+    ChronoFillAction chronoAction(func, &parameters, title, true, repetitions);
     genericAveragedPlot(title, &chronoAction, xToPlot, yLabel, averagesLoop);
-    freePlotVars();
 }
 
-void ChronoPlotter::plotChronoFiles(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                           Loop* filesLoop, unsigned repetitions)
+void ChronoPlotter::plotChronoFiles(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
+                                    string yLabel, Loop* filesLoop, unsigned repetitions)
 {
-    initPlotVars(xToPlot);
-    ChronoFillAction chronoAction(func, &parameters, title, yArray, false, repetitions);
+    ChronoFillAction chronoAction(func, &parameters, title, false, repetitions);
     genericMultiFilePlot(title, &chronoAction, xToPlot, yLabel, filesLoop);
-    freePlotVars();
 }
 
 void ChronoPlotter::plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
-                                   string yLabel, Loop* filesLoop, Loop* averagesLoop, unsigned repetitions)
+                                            string yLabel, Loop* filesLoop, Loop* averagesLoop,
+                                            unsigned repetitions)
 {
-    initPlotVars(xToPlot);
-    ChronoFillAction chronoAction(func, &parameters, title, yArray, true, repetitions);
+    ChronoFillAction chronoAction(func, &parameters, title, true, repetitions);
     genericMultiFileAveragedPlot(title, &chronoAction, xToPlot, yLabel, filesLoop, averagesLoop);
-    freePlotVars();
 }
