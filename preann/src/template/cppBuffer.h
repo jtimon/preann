@@ -41,18 +41,15 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         {
             return IT_C;
         }
-        ;
 
         virtual BufferType getBufferType()
         {
             return bufferTypeTempl;
         }
-        ;
 
         CppBuffer()
         {
         }
-        ;
 
         CppBuffer(unsigned size)
         {
