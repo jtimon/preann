@@ -19,6 +19,32 @@ EnumLoop::EnumLoop(std::string key, EnumType enumType) :
     this->withAll(enumType);
 }
 
+EnumLoop::EnumLoop(EnumType enumType, unsigned count, ...) :
+        Loop(Enumerations::enumTypeToString(enumType))
+{
+    if (count == 0) {
+        string error = "EnumLoop : at least one enum value must be specified.";
+        throw error;
+    }
+    this->reset(enumType);
+
+    va_list ap;
+    va_start(ap, count);
+
+    unsigned dim = Enumerations::enumTypeDim(enumType);
+    for (unsigned i = 0; i < count; i++) {
+        unsigned arg = va_arg (ap, unsigned);
+        if (arg > dim) {
+            string error = "EnumLoop : the enumType " + Enumerations::enumTypeToString(enumType)
+                    + " only has " + to_string(dim) + "possible values.";
+            throw error;
+        } else {
+            tValueVector.push_back(arg);
+        }
+    }
+    va_end(ap);
+}
+
 EnumLoop::EnumLoop(std::string key, EnumType enumType, unsigned count, ...) :
         Loop(key)
 {

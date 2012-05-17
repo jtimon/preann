@@ -25,6 +25,7 @@ protected:
 public:
     EnumLoop(EnumType enumType);
     EnumLoop(std::string key, EnumType enumType);
+    EnumLoop(EnumType enumType, unsigned count, ...);
     EnumLoop(std::string key, EnumType enumType, unsigned count, ...);
 //    EnumLoop(std::string key, bool include, EnumType enumType, unsigned count, ...);
     virtual ~EnumLoop();
