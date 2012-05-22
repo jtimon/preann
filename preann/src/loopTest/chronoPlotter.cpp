@@ -21,8 +21,8 @@ class ChronoFillAction : public GenericPlotFillAction
     ChronoFunctionPtr tFunctionToChrono;
     unsigned tRepetitions;
 public:
-    ChronoFillAction(ChronoFunctionPtr functionToChrono, ParametersMap* parameters, string label, PlotData* plotData,
-                     bool average, unsigned repetitions)
+    ChronoFillAction(ChronoFunctionPtr functionToChrono, ParametersMap* parameters, string label,
+                     PlotData* plotData, bool average, unsigned repetitions)
             : GenericPlotFillAction(parameters, "ChronoFillAction " + label, plotData, average)
     {
         tFunctionToChrono = functionToChrono;
@@ -69,4 +69,25 @@ void ChronoPlotter::plotChronoFilesAveraged(ChronoFunctionPtr func, std::string 
 {
     ChronoFillAction chronoAction(func, &parameters, title, &plotData, true, repetitions);
     genericMultiFileAveragedPlot(title, &chronoAction, xToPlot, yLabel, filesLoop, averagesLoop);
+}
+
+void ChronoPlotter::plotChronoCombFiles(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
+                                        string yLabel, Loop* averagesLoop, unsigned repetitions)
+{
+    ChronoFillAction chronoAction(func, &parameters, title, &plotData, true, repetitions);
+    _customCombinationsPlot(title, &chronoAction, xToPlot, yLabel, averagesLoop, true);
+}
+
+void ChronoPlotter::plotChronoCombAverage(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
+                                          string yLabel, unsigned repetitions)
+{
+    ChronoFillAction chronoAction(func, &parameters, title, &plotData, true, repetitions);
+    _customCombinationsPlot(title, &chronoAction, xToPlot, yLabel, NULL, false);
+}
+
+void ChronoPlotter::plotChronoCombAverage(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
+                                          string yLabel, Loop* averagesLoop, unsigned repetitions)
+{
+    ChronoFillAction chronoAction(func, &parameters, title, &plotData, true, repetitions);
+    _customCombinationsPlot(title, &chronoAction, xToPlot, yLabel, averagesLoop, false);
 }

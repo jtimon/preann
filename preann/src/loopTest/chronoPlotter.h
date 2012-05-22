@@ -19,11 +19,18 @@ public:
     void plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
                     unsigned repetitions);
     void plotChronoAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                    Loop* averagesLoop, unsigned repetitions);
+                            Loop* averagesLoop, unsigned repetitions);
     void plotChronoFiles(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                    Loop* filesLoop, unsigned repetitions);
+                         Loop* filesLoop, unsigned repetitions);
     void plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                    Loop* filesLoop, Loop* averagesLoop, unsigned repetitions);
+                                 Loop* filesLoop, Loop* averagesLoop, unsigned repetitions);
+
+    void plotChronoCombFiles(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+                             Loop* averagesLoop, unsigned repetitions);
+    void plotChronoCombAverage(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+                               unsigned repetitions);
+    void plotChronoCombAverage(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+                               Loop* averagesLoop, unsigned repetitions);
 };
 
 #endif /* CHRONOPLOTTER_H_ */
