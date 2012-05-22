@@ -105,7 +105,6 @@ void TaskPlotter::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop
 {
     string yLabel = "Fitness";
     title = title + "_" + task->toString();
-    initPlotVars(xToPlot, yLabel);
 
     TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
 
