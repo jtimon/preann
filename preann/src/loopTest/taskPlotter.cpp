@@ -20,20 +20,20 @@ TaskPlotter::~TaskPlotter()
 class TaskAddAction : public LoopFunction
 {
     Population* tPopulation;
-    float* tArray;
+    PlotData* tPlotData;
 public:
-    TaskAddAction(ParametersMap* parameters, string label, Population* population, float* array)
+    TaskAddAction(ParametersMap* parameters, string label, Population* population, PlotData* plotData)
             : LoopFunction(parameters, "TaskAddAction " + label)
     {
         tPopulation = population;
-        tArray = array;
+        tPlotData = plotData;
     }
 protected:
     virtual void __executeImpl()
     {
         float xValue = ((RangeLoop*) tCallerLoop)->getCurrentValue();
         tPopulation->learn(xValue);
-        tArray[tLeaf] += tPopulation->getBestIndividualScore();
+        tPlotData->yArray[tLeaf] += tPopulation->getBestIndividualScore();
     }
 };
 
@@ -42,16 +42,16 @@ class TaskFillArrayRepeater : public LoopFunction
     Task* tTask;
     Individual* tExample;
     RangeLoop* tToPlot;
-    float* tArray;
+    PlotData* tPlotData;
 public:
     TaskFillArrayRepeater(ParametersMap* parameters, string label, Task* task, RangeLoop* xToPlot,
-                          float* yArray)
+                          PlotData* plotData)
             : LoopFunction(parameters, "TaskFillArrayRepeater " + label)
     {
         tTask = task;
         tExample = tTask->getExample();
         tToPlot = xToPlot;
-        tArray = yArray;
+        tPlotData = plotData;
     }
     ~TaskFillArrayRepeater()
     {
@@ -67,7 +67,7 @@ protected:
         Population* initialPopulation = new Population(tTask, tExample, populationSize, weighsRange);
         initialPopulation->setParams(tParameters);
 
-        TaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tArray);
+        TaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tPlotData);
         tToPlot->repeatFunction(&addToArrayAction, tParameters);
 
         delete (initialPopulation);
@@ -87,9 +87,9 @@ void TaskPlotter::plotTaskAveraged(Task* task, std::string title, RangeLoop* xTo
 
     string yLabel = "Fitness";
     title = title + "_" + task->toString();
-    initPlotVars(xToPlot);
+    initPlotVars(xToPlot, yLabel);
 
-    TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, yArray);
+    TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
 
     _customAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, averageLoop);
 
@@ -108,9 +108,9 @@ void TaskPlotter::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop
 {
     string yLabel = "Fitness";
     title = title + "_" + task->toString();
-    initPlotVars(xToPlot);
+    initPlotVars(xToPlot, yLabel);
 
-    TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, yArray);
+    TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
 
     _customMultiFileAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, filesLoop, averagesLoop);
 
@@ -233,15 +233,13 @@ void TaskPlotter::plotTaskCombAverage(Task* task, std::string title, RangeLoop* 
 class ChronoTaskAddAction : public LoopFunction
 {
     Population* tPopulation;
-    float* tArrayX;
-    float* tArrayY;
+    PlotData* tPlotData;
 public:
-    ChronoTaskAddAction(ParametersMap* parameters, string label, Population* population, float* xArray, float* yArray)
+    ChronoTaskAddAction(ParametersMap* parameters, string label, Population* population, PlotData* plotData)
             : LoopFunction(parameters, "TaskAddAction " + label)
     {
         tPopulation = population;
-        tArrayX = xArray;
-        tArrayY = yArray;
+        tPlotData = plotData;
     }
 protected:
     virtual void __executeImpl()
@@ -253,8 +251,8 @@ protected:
         tPopulation->learn(xValue);
         chrono.stop();
 
-//        tArrayX[tLeaf] += tPopulation->getBestIndividualScore();
-        tArrayY[tLeaf] += chrono.getSeconds();
+//        tPlotData->xArray[tLeaf] += tPopulation->getBestIndividualScore();
+        tPlotData->yArray[tLeaf] += chrono.getSeconds();
     }
 };
 
@@ -263,18 +261,16 @@ class ChronoTaskFillArrayRepeater : public LoopFunction
     Task* tTask;
     Individual* tExample;
     RangeLoop* tToPlot;
-    float* tArrayX;
-    float* tArrayY;
+    PlotData* tPlotData;
 public:
     ChronoTaskFillArrayRepeater(ParametersMap* parameters, string label, Task* task, RangeLoop* xToPlot,
-                                float* xArray, float* yArray)
+                                PlotData* plotData)
             : LoopFunction(parameters, "TaskFillArrayRepeater " + label)
     {
         tTask = task;
         tExample = tTask->getExample();
         tToPlot = xToPlot;
-        tArrayX = xArray;
-        tArrayY = yArray;
+        tPlotData = plotData;
     }
     ~ChronoTaskFillArrayRepeater()
     {
@@ -290,12 +286,12 @@ protected:
         Population* initialPopulation = new Population(tTask, tExample, populationSize, weighsRange);
         initialPopulation->setParams(tParameters);
 
-        ChronoTaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tArrayX, tArrayY);
+        ChronoTaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tPlotData);
         tToPlot->repeatFunction(&addToArrayAction, tParameters);
 
         unsigned arraySize = tToPlot->getNumBranches();
         for (unsigned i = 0; i < arraySize - 1; ++i) {
-            tArrayY[i + 1] += tArrayY[i];
+            tPlotData->yArray[i + 1] += tPlotData->yArray[i];
         }
 
         delete (initialPopulation);
@@ -313,9 +309,9 @@ void TaskPlotter::plotChronoTaskAveraged(Task* task, std::string title, RangeLoo
 {
     string yLabel = "Time";
     title = title + "_" + task->toString();
-    initPlotVars(xToPlot);
+    initPlotVars(xToPlot, yLabel);
 
-    ChronoTaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, xArray, yArray);
+    ChronoTaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
 
     _customAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, averagesLoop);
 
