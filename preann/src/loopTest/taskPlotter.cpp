@@ -83,8 +83,6 @@ void TaskPlotter::plotTask(Task* task, std::string title, RangeLoop* xToPlot)
 
 void TaskPlotter::plotTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averageLoop)
 {
-    check(averageLoop == NULL, "TaskPlotter::plotTaskAveraged : averagesLoop cannot be NULL.");
-
     string yLabel = "Fitness";
     title = title + "_" + task->toString();
 
@@ -113,113 +111,34 @@ void TaskPlotter::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop
 
 // * combinations
 
-void separateLoops(Loop* topLoop)
-{
-    Loop* followingLoops;
-    while (topLoop != NULL) {
-        topLoop = topLoop->dropFirstLoop();
-    }
-}
-
-void separateLoops(std::vector<Loop*>& loops, Loop* topLoop)
-{
-    Loop* followingLoops;
-    while (topLoop != NULL) {
-        followingLoops = topLoop->dropFirstLoop();
-        loops.push_back(topLoop);
-        topLoop = followingLoops;
-    }
-}
-
-void TaskPlotter::plotTaskCombAverageOrFiles(bool loopFiles, Loop* averagesLoop, Task* task, string tittleAux,
-                                RangeLoop* xToPlot, Loop* otherLoop)
-{
-    if (loopFiles) {
-        plotTaskFilesAveraged(task, tittleAux, xToPlot, otherLoop, averagesLoop);
-    } else {
-        if (averagesLoop == NULL) {
-            plotTaskAveraged(task, tittleAux, xToPlot, otherLoop);
-        } else {
-            otherLoop->addInnerLoop(averagesLoop);
-            plotTaskAveraged(task, tittleAux, xToPlot, otherLoop);
-            otherLoop->dropLoop(averagesLoop);
-        }
-    }
-    separateLoops (tLoop);
-    separateLoops(otherLoop);
-}
-
-void TaskPlotter::plotTaskComb(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop, bool loopFiles)
-{
-    std::vector<Loop*> loops;
-
-    separateLoops(loops, tLoop);
-
-    Loop* otherLoop;
-
-    unsigned numLoops = loops.size();
-    for (unsigned i = 0; i < numLoops; ++i) {
-        Loop* coloursLoop = loops[i];
-
-        // Regular loop and not the last
-        if (coloursLoop->getDepth() == 1) {
-
-            for (unsigned j = i + 1; j < loops.size(); ++j) {
-                Loop* pointsLoop = loops[j];
-                //if not JoinEnumLoop with childs
-                if (pointsLoop->getDepth() == 1) {
-
-                    tLoop = coloursLoop;
-                    tLoop->addInnerLoop(pointsLoop);
-
-                    otherLoop = NULL;
-                    for (unsigned k = 0; k < loops.size(); ++k) {
-                        if (k != i && k != j) {
-                            if (otherLoop == NULL) {
-                                otherLoop = loops[k];
-                            } else {
-                                otherLoop->addInnerLoop(loops[k]);
-                            }
-                        }
-                    }
-                    string tittleAux = title + "_" + coloursLoop->getKey() + "_" + pointsLoop->getKey();
-                    plotTaskCombAverageOrFiles(loopFiles, averagesLoop, task, tittleAux, xToPlot, otherLoop);
-                }
-            }
-
-            //JoinEnumLoop with childs
-        } else if (coloursLoop->getDepth() > 1) {
-
-            tLoop = coloursLoop;
-            otherLoop = NULL;
-            for (unsigned k = 0; k < loops.size(); ++k) {
-                if (k != i) {
-                    if (otherLoop == NULL) {
-                        otherLoop = loops[k];
-                    } else {
-                        otherLoop->addInnerLoop(loops[k]);
-                    }
-                }
-            }
-            string tittleAux = title + "_" + coloursLoop->getKey();
-            plotTaskCombAverageOrFiles(loopFiles, averagesLoop, task, tittleAux, xToPlot, otherLoop);
-        }
-    }
-}
-
 void TaskPlotter::plotTaskCombFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
 {
-    plotTaskComb(task, title, xToPlot, averagesLoop, true);
+    string yLabel = "Fitness";
+    title = title + "_" + task->toString();
+
+    TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
+
+    _customCombinationsPlot(title, &fillArrayRepeater, xToPlot, yLabel, averagesLoop, true);
 }
 
 void TaskPlotter::plotTaskCombAverage(Task* task, std::string title, RangeLoop* xToPlot)
 {
-    plotTaskComb(task, title, xToPlot, NULL, false);
+    string yLabel = "Fitness";
+    title = title + "_" + task->toString();
+
+    TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
+
+    _customCombinationsPlot(title, &fillArrayRepeater, xToPlot, yLabel, NULL, false);
 }
 
 void TaskPlotter::plotTaskCombAverage(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
 {
-    plotTaskComb(task, title, xToPlot, averagesLoop, false);
+    string yLabel = "Fitness";
+    title = title + "_" + task->toString();
+
+    TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
+
+    _customCombinationsPlot(title, &fillArrayRepeater, xToPlot, yLabel, averagesLoop, false);
 }
 
 // * ChronoTask
@@ -292,18 +211,19 @@ protected:
     }
 };
 
-void TaskPlotter::plotChronoTask(Task* task, std::string title, RangeLoop* xToPlot)
+void TaskPlotter::plotChronoTask(Task* task, std::string title, RangeLoop* xToPlot, unsigned generations)
 {
     RangeLoop auxLoop("aux_average", 1, 2, 1);
 
-    plotChronoTaskAveraged(task, title, xToPlot, &auxLoop);
+    plotChronoTaskAveraged(task, title, xToPlot, &auxLoop, generations);
 }
 
-void TaskPlotter::plotChronoTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
+void TaskPlotter::plotChronoTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop, unsigned generations)
 {
     string yLabel = "Time";
     title = title + "_" + task->toString();
 
+    //TODO adaptar para que el xToPlot sea el tamaño de los vectores
     ChronoTaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
 
     _customAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, averagesLoop);

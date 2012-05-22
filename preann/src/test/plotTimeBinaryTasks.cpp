@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
         Task* task;
 
         task = new BinaryTask(BO_OR, vectorsSize);
-        plotter.plotChronoTaskAveraged(task, "chronoTimeoOr", generationsLoop, toAverageLoop);
+        plotter.plotChronoTaskAveraged(task, "chronoTimeoOr", generationsLoop, toAverageLoop, 20);
         delete (task);
 //        task = new BinaryTask(BO_AND, vectorsSize);
 //        plotter.plotTaskFilesAveraged(task, "plotAnd", generationsLoop, filesLoop, toAverageLoop);

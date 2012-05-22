@@ -365,6 +365,106 @@ void Plot::_customMultiFileAveragedPlot(std::string title, LoopFunction* fillArr
     freePlotVars();
 }
 
+void Plot::separateLoops(Loop* topLoop)
+{
+    Loop* followingLoops;
+    while (topLoop != NULL) {
+        topLoop = topLoop->dropFirstLoop();
+    }
+}
+
+void Plot::separateLoops(std::vector<Loop*>& loops, Loop* topLoop)
+{
+    Loop* followingLoops;
+    while (topLoop != NULL) {
+        followingLoops = topLoop->dropFirstLoop();
+        loops.push_back(topLoop);
+        topLoop = followingLoops;
+    }
+}
+
+void Plot::_customCombAverageOrFilesPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel, bool loopFiles,
+                                   Loop* averagesLoop, Loop* otherLoop)
+{
+    if (loopFiles) {
+        if (averagesLoop == NULL) {
+            RangeLoop auxLoop("aux_average", 1, 2, 1);
+            _customMultiFileAveragedPlot(title, fillArrayRepeater, xToPlot, yLabel, otherLoop, &auxLoop);
+        } else {
+            _customMultiFileAveragedPlot(title, fillArrayRepeater, xToPlot, yLabel, otherLoop, averagesLoop);
+        }
+    } else {
+        if (averagesLoop == NULL) {
+            _customAveragedPlot(title, fillArrayRepeater, xToPlot, yLabel, otherLoop);
+        } else {
+            otherLoop->addInnerLoop(averagesLoop);
+            _customAveragedPlot(title, fillArrayRepeater, xToPlot, yLabel, otherLoop);
+            otherLoop->dropLoop(averagesLoop);
+        }
+    }
+    separateLoops (tLoop);
+    separateLoops(otherLoop);
+}
+
+void Plot::_customCombinationsPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
+                                 string yLabel, Loop* averagesLoop, bool loopFiles)
+{
+    std::vector<Loop*> loops;
+
+    separateLoops(loops, tLoop);
+
+    Loop* otherLoop;
+
+    unsigned numLoops = loops.size();
+    for (unsigned i = 0; i < numLoops; ++i) {
+        Loop* coloursLoop = loops[i];
+
+        // Regular loop and not the last
+        if (coloursLoop->getDepth() == 1) {
+
+            for (unsigned j = i + 1; j < loops.size(); ++j) {
+                Loop* pointsLoop = loops[j];
+                //if not JoinEnumLoop with childs
+                if (pointsLoop->getDepth() == 1) {
+
+                    tLoop = coloursLoop;
+                    tLoop->addInnerLoop(pointsLoop);
+
+                    otherLoop = NULL;
+                    for (unsigned k = 0; k < loops.size(); ++k) {
+                        if (k != i && k != j) {
+                            if (otherLoop == NULL) {
+                                otherLoop = loops[k];
+                            } else {
+                                otherLoop->addInnerLoop(loops[k]);
+                            }
+                        }
+                    }
+                    string tittleAux = title + "_" + coloursLoop->getKey() + "_" + pointsLoop->getKey();
+                    _customCombAverageOrFilesPlot(tittleAux, fillArrayRepeater, xToPlot, yLabel, loopFiles, averagesLoop, otherLoop);
+                }
+            }
+
+            //JoinEnumLoop with childs
+        } else if (coloursLoop->getDepth() > 1) {
+
+            tLoop = coloursLoop;
+            otherLoop = NULL;
+            for (unsigned k = 0; k < loops.size(); ++k) {
+                if (k != i) {
+                    if (otherLoop == NULL) {
+                        otherLoop = loops[k];
+                    } else {
+                        otherLoop->addInnerLoop(loops[k]);
+                    }
+                }
+            }
+            string tittleAux = title + "_" + coloursLoop->getKey();
+            _customCombAverageOrFilesPlot(tittleAux, fillArrayRepeater, xToPlot, yLabel, loopFiles, averagesLoop, otherLoop);
+        }
+    }
+}
+
 // * CUSTOM PUBLIC PLOTS
 
 void Plot::genericPlot(std::string title, GenericPlotFillAction* fillArrayAction, RangeLoop* xToPlot,

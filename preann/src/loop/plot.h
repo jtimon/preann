@@ -40,6 +40,13 @@ protected:
                              string yLabel, Loop* averagesLoop);
     void _customMultiFileAveragedPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
                                       string yLabel, Loop* filesLoop, Loop* averagesLoop);
+
+    void _customCombAverageOrFilesPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel, bool loopFiles,
+                                       Loop* averagesLoop, Loop* otherLoop);
+    void _customCombinationsPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
+                                 string yLabel, Loop* averagesLoop, bool loopFiles);
+    void separateLoops(Loop* topLoop);
+    void separateLoops(std::vector<Loop*>& loops, Loop* topLoop);
 public:
     Plot(string plotPath);
     virtual ~Plot();
@@ -55,9 +62,9 @@ public:
 
     //TODO
     void plotCombAverage(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
-                         string yLabel, Loop* averagesLoop);
-    void plotCombAverage(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
                          string yLabel);
+    void plotCombAverage(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
+                         string yLabel, Loop* averagesLoop);
     void plotCombFiles(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot, string yLabel,
                        Loop* averagesLoop);
 

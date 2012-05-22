@@ -13,12 +13,6 @@
 class TaskPlotter : public Plot
 {
 public:
-
-protected:
-    void plotTaskCombAverageOrFiles(bool loopFiles, Loop* averagesLoop, Task* task, string tittleAux,
-                                    RangeLoop* xToPlot, Loop* otherLoop);
-    void plotTaskComb(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop, bool loopFiles);
-public:
     TaskPlotter(string plotPath);
     virtual ~TaskPlotter();
 
@@ -27,8 +21,8 @@ public:
     void plotTaskFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop);
     void plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop, Loop* averagesLoop);
 
-    void plotChronoTask(Task* task, std::string title, RangeLoop* xToPlot);
-    void plotChronoTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop);
+    void plotChronoTask(Task* task, std::string title, RangeLoop* xToPlot, unsigned generations);
+    void plotChronoTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop, unsigned generations);
 
     void plotTaskCombFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop);
     void plotTaskCombAverage(Task* task, std::string title, RangeLoop* xToPlot);
