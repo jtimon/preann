@@ -87,13 +87,10 @@ void TaskPlotter::plotTaskAveraged(Task* task, std::string title, RangeLoop* xTo
 
     string yLabel = "Fitness";
     title = title + "_" + task->toString();
-    initPlotVars(xToPlot, yLabel);
 
     TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
 
     _customAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, averageLoop);
-
-    freePlotVars();
 }
 
 void TaskPlotter::plotTaskFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop)
@@ -113,8 +110,6 @@ void TaskPlotter::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop
     TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
 
     _customMultiFileAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, filesLoop, averagesLoop);
-
-    freePlotVars();
 }
 
 // * combinations
@@ -309,11 +304,8 @@ void TaskPlotter::plotChronoTaskAveraged(Task* task, std::string title, RangeLoo
 {
     string yLabel = "Time";
     title = title + "_" + task->toString();
-    initPlotVars(xToPlot, yLabel);
 
     ChronoTaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
 
     _customAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, averagesLoop);
-
-    freePlotVars();
 }

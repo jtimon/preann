@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 
         plotter.getLoop()->print();
 
-        RangeLoop xToPlot(Dummy::SIZE, 50, 101, 50);
+        RangeLoop xToPlot(Dummy::SIZE, 50, 301, 50);
         string yLabel = "Time (seconds)";
         unsigned repetitions = 2;
 
