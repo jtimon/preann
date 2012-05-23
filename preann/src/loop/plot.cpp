@@ -507,32 +507,3 @@ void Plot::genericMultiFileAveragedPlot(std::string title, GenericPlotFillAction
 
     _customMultiFileAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, filesLoop, averagesLoop);
 }
-
-// * GENERIC PUBLIC PLOTS
-
-void Plot::plot(GenericPlotFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel)
-{
-    GenericPlotFillAction action(func, &parameters, title, &plotData, false);
-    genericPlot(title, &action, xToPlot, yLabel);
-}
-
-void Plot::plotAveraged(GenericPlotFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                        Loop* averagesLoop)
-{
-    GenericPlotFillAction action(func, &parameters, title, &plotData, true);
-    genericAveragedPlot(title, &action, xToPlot, yLabel, averagesLoop);
-}
-
-void Plot::plotFiles(GenericPlotFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                     Loop* filesLoop)
-{
-    GenericPlotFillAction action(func, &parameters, title, &plotData, false);
-    genericMultiFilePlot(title, &action, xToPlot, yLabel, filesLoop);
-}
-
-void Plot::plotFilesAveraged(GenericPlotFunctionPtr func, std::string title, RangeLoop* xToPlot,
-                             string yLabel, Loop* filesLoop, Loop* averagesLoop)
-{
-    GenericPlotFillAction action(func, &parameters, title, &plotData, true);
-    genericMultiFileAveragedPlot(title, &action, xToPlot, yLabel, filesLoop, averagesLoop);
-}

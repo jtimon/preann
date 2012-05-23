@@ -10,6 +10,8 @@
 
 #include "loop/plot.h"
 
+typedef float (*ChronoFunctionPtr)(ParametersMap*, unsigned);
+
 class ChronoPlotter : public Plot
 {
 public:

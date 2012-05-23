@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "loopTest/chronoPlotter.h"
+#include "loop/genericPlotter.h"
 
 float colorTest(ParametersMap* parametersMap)
 {
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        Plot plotter(PREANN_DIR + to_string("output/"));
+        GenericPlotter plotter(PREANN_DIR + to_string("output/"));
 
         RangeLoop* colorLoop = new RangeLoop("color", 0, PLOT_MAX_COLOR + 2, 1);
         plotter.addLoop(colorLoop);

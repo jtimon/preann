@@ -12,7 +12,6 @@
 
 
 typedef unsigned (*TestFunctionPtr)(ParametersMap*);
-typedef float (*ChronoFunctionPtr)(ParametersMap*, unsigned);
 
 #define START_CHRONO                                                                    \
     Chronometer chrono;                                                                 \
