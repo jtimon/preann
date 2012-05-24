@@ -27,12 +27,10 @@ public:
     void plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
                                  Loop* filesLoop, Loop* averagesLoop, unsigned repetitions);
 
-    void plotChronoCombFiles(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                             Loop* averagesLoop, unsigned repetitions);
-    void plotChronoCombAverage(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                               unsigned repetitions);
-    void plotChronoCombAverage(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
-                               Loop* averagesLoop, unsigned repetitions);
+    void plotCombinations(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
+                          string yLabel, bool differentFiles, unsigned repetitions);
+    void plotCombinations(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+                          Loop* averagesLoop, bool differentFiles, unsigned repetitions);
 };
 
 #endif /* CHRONOPLOTTER_H_ */

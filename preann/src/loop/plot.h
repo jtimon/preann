@@ -39,8 +39,8 @@ protected:
     void _customMultiFileAveragedPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
                                       string yLabel, Loop* filesLoop, Loop* averagesLoop);
 
-    void _customCombAverageOrFilesPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel, bool loopFiles,
-                                       Loop* averagesLoop, Loop* otherLoop);
+    void _customCombAverageOrFilesPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
+                                       string yLabel, bool loopFiles, Loop* averagesLoop, Loop* otherLoop);
     void _customCombinationsPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
                                  string yLabel, Loop* averagesLoop, bool loopFiles);
     void separateLoops(Loop* topLoop);
@@ -60,6 +60,10 @@ public:
 
     void genericMultiFileAveragedPlot(std::string title, GenericPlotFillAction* fillArrayAction,
                                       RangeLoop* xToPlot, string yLabel, Loop* filesLoop, Loop* averagesLoop);
+    void plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, RangeLoop* xToPlot,
+                          string yLabel, bool differentFiles);
+    void plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, RangeLoop* xToPlot,
+                          string yLabel, Loop* averagesLoop, bool differentFiles);
 };
 
 class GenericPlotFillAction : public LoopFunction

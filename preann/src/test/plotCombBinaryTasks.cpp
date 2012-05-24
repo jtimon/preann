@@ -74,13 +74,13 @@ int main(int argc, char *argv[])
         Task* task;
 
         task = new BinaryTask(BO_OR, vectorsSize);
-        plotter.plotTaskCombAverage(task, "plotCombAverOr", generationsLoop, toAverageLoop);
+        plotter.plotCombinations(task, "plotCombAverOr", generationsLoop, toAverageLoop, false);
         delete (task);
 //        task = new BinaryTask(BO_AND, vectorsSize);
-//        plotter.plotTaskCombFiles(task, "plotCombAnd", generationsLoop, toAverageLoop);
+//        plotter.plotCombinations(task, "plotCombAnd", generationsLoop, toAverageLoop, true);
 //        delete (task);
 //        task = new BinaryTask(BO_XOR, vectorsSize);
-//        plotter.plotTaskCombFiles(task, "plotCombXor", generationsLoop, toAverageLoop);
+//        plotter.plotCombinations(task, "plotCombXor", generationsLoop, toAverageLoop, true);
 //        delete (task);
 
         delete(toAverageLoop);

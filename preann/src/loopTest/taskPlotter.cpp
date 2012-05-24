@@ -111,34 +111,20 @@ void TaskPlotter::plotTaskFilesAveraged(Task* task, std::string title, RangeLoop
 
 // * combinations
 
-void TaskPlotter::plotTaskCombFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
+void TaskPlotter::plotCombinations(Task* task, std::string title, RangeLoop* xToPlot, bool differentFiles)
 {
-    string yLabel = "Fitness";
-    title = title + "_" + task->toString();
-
-    TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
-
-    _customCombinationsPlot(title, &fillArrayRepeater, xToPlot, yLabel, averagesLoop, true);
+    plotCombinations(task, title, xToPlot, NULL, differentFiles);
 }
 
-void TaskPlotter::plotTaskCombAverage(Task* task, std::string title, RangeLoop* xToPlot)
+void TaskPlotter::plotCombinations(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop,
+                      bool differentFiles)
 {
     string yLabel = "Fitness";
     title = title + "_" + task->toString();
 
     TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
 
-    _customCombinationsPlot(title, &fillArrayRepeater, xToPlot, yLabel, NULL, false);
-}
-
-void TaskPlotter::plotTaskCombAverage(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop)
-{
-    string yLabel = "Fitness";
-    title = title + "_" + task->toString();
-
-    TaskFillArrayRepeater fillArrayRepeater(&parameters, title, task, xToPlot, &plotData);
-
-    _customCombinationsPlot(title, &fillArrayRepeater, xToPlot, yLabel, averagesLoop, false);
+    _customCombinationsPlot(title, &fillArrayRepeater, xToPlot, yLabel, averagesLoop, differentFiles);
 }
 
 // * ChronoTask

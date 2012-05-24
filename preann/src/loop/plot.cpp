@@ -383,8 +383,9 @@ void Plot::separateLoops(std::vector<Loop*>& loops, Loop* topLoop)
     }
 }
 
-void Plot::_customCombAverageOrFilesPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel, bool loopFiles,
-                                   Loop* averagesLoop, Loop* otherLoop)
+void Plot::_customCombAverageOrFilesPlot(std::string title, LoopFunction* fillArrayRepeater,
+                                         RangeLoop* xToPlot, string yLabel, bool loopFiles,
+                                         Loop* averagesLoop, Loop* otherLoop)
 {
     if (loopFiles) {
         if (averagesLoop == NULL) {
@@ -402,12 +403,12 @@ void Plot::_customCombAverageOrFilesPlot(std::string title, LoopFunction* fillAr
             otherLoop->dropLoop(averagesLoop);
         }
     }
-    separateLoops (tLoop);
+    separateLoops(tLoop);
     separateLoops(otherLoop);
 }
 
 void Plot::_customCombinationsPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
-                                 string yLabel, Loop* averagesLoop, bool loopFiles)
+                                   string yLabel, Loop* averagesLoop, bool loopFiles)
 {
     std::vector<Loop*> loops;
 
@@ -441,7 +442,8 @@ void Plot::_customCombinationsPlot(std::string title, LoopFunction* fillArrayRep
                         }
                     }
                     string tittleAux = title + "_" + coloursLoop->getKey() + "_" + pointsLoop->getKey();
-                    _customCombAverageOrFilesPlot(tittleAux, fillArrayRepeater, xToPlot, yLabel, loopFiles, averagesLoop, otherLoop);
+                    _customCombAverageOrFilesPlot(tittleAux, fillArrayRepeater, xToPlot, yLabel, loopFiles,
+                                                  averagesLoop, otherLoop);
                 }
             }
 
@@ -460,7 +462,8 @@ void Plot::_customCombinationsPlot(std::string title, LoopFunction* fillArrayRep
                 }
             }
             string tittleAux = title + "_" + coloursLoop->getKey();
-            _customCombAverageOrFilesPlot(tittleAux, fillArrayRepeater, xToPlot, yLabel, loopFiles, averagesLoop, otherLoop);
+            _customCombAverageOrFilesPlot(tittleAux, fillArrayRepeater, xToPlot, yLabel, loopFiles,
+                                          averagesLoop, otherLoop);
         }
     }
 }
@@ -507,3 +510,17 @@ void Plot::genericMultiFileAveragedPlot(std::string title, GenericPlotFillAction
 
     _customMultiFileAveragedPlot(title, &fillArrayRepeater, xToPlot, yLabel, filesLoop, averagesLoop);
 }
+
+void Plot::plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, RangeLoop* xToPlot,
+                      string yLabel, bool differentFiles)
+{
+    plotCombinations(fillArrayAction, title, xToPlot, yLabel, NULL, differentFiles);
+}
+
+void Plot::plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, RangeLoop* xToPlot,
+                      string yLabel, Loop* averagesLoop, bool differentFiles)
+{
+    FillArrayGenericRepeater fillArrayRepeater(fillArrayAction, &parameters, title, xToPlot);
+    _customCombinationsPlot(title, &fillArrayRepeater, xToPlot, yLabel, averagesLoop, differentFiles);
+}
+

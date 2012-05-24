@@ -26,13 +26,10 @@ public:
     void plotFilesAveraged(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
                            string yLabel, Loop* filesLoop, Loop* averagesLoop);
 
-    //TODO
-    void plotCombAverage(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
-                         string yLabel);
-    void plotCombAverage(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
-                         string yLabel, Loop* averagesLoop);
-    void plotCombFiles(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot, string yLabel,
-                       Loop* averagesLoop);
+    void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
+                          string yLabel, bool differentFiles);
+    void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
+                          string yLabel, Loop* averagesLoop, bool differentFiles);
 
 
 };
