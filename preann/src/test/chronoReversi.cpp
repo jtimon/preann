@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        TaskPlotter plotter(PREANN_DIR + to_string("output/"));
+        TaskPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop("Generation", 0, 100, 5));
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
         unsigned populationSize = 8;
         plotter.parameters.putNumber(Population::SIZE, populationSize);
@@ -38,25 +38,21 @@ int main(int argc, char *argv[])
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PROBABILISTIC);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_PROBABILISTIC);
 
-        EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
+        EnumLoop linesLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
                                               ET_SELECTION_ALGORITHM);
-        plotter.addLoop(selecAlgLoop);
 
         RangeLoop* rouletteWheelBaseLoop = new RangeLoop(Population::ROULETTE_WHEEL_BASE, 1, 6, 4);
-        plotter.addLoop(rouletteWheelBaseLoop);
+        linesLoop.addInnerLoop(rouletteWheelBaseLoop);
 
         //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
         //        loop = resetAlgLoop;
 
-        plotter.getLoop()->print();
+        linesLoop.print();
 
         Task* task = new ReversiTask(4, 1);
-        Individual* example = task->getExample();
 
-        RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 100, 5);
-        plotter.plotTask(task, "chronoReversi", generationsLoop);
+        plotter.plotTask(task, "chronoReversi", &linesLoop);
 
-        delete (example);
         delete (task);
 
         printf("Exit success.\n");

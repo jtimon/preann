@@ -9,27 +9,13 @@
 
 Test::Test()
 {
-    tLoop = NULL;
 }
 
 Test::~Test()
 {
-    delete (tLoop);
 }
 
-Loop* Test::getLoop()
-{
-    return tLoop;
-}
-
-void Test::addLoop(Loop* loop)
-{
-    if (tLoop == NULL) {
-        tLoop = loop;
-    } else {
-        tLoop->addInnerLoop(loop);
-    }
-}
+// * Static Methods
 
 void Test::check(bool condition, string message)
 {
@@ -119,10 +105,12 @@ protected:
     }
 };
 
-void Test::testMemoryLosses(GenericLoopFuncPtr function, string label)
+// * Test Methods
+
+void Test::testMemoryLosses(GenericLoopFuncPtr function, string label, Loop* loop)
 {
     TestMemLossesFunction testMemFunc(function, &parameters, label);
-    tLoop->repeatFunction(&testMemFunc, &parameters);
+    loop->repeatFunction(&testMemFunc, &parameters);
 }
 
 class TestAction : public LoopFunction
@@ -148,8 +136,8 @@ protected:
     }
 };
 
-void Test::test(TestFunctionPtr func, std::string functionLabel)
+void Test::test(TestFunctionPtr func, std::string functionLabel, Loop* loop)
 {
     TestAction testAction(func, &parameters, functionLabel);
-    tLoop->repeatFunction(&testAction, &parameters);
+    loop->repeatFunction(&testAction, &parameters);
 }

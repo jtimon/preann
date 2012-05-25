@@ -18,6 +18,7 @@ class GenericPlotFillAction;
 struct PlotData
 {
     string plotPath;
+    RangeLoop* xToPlot;
     float* xArray;
     float* yArray;
     unsigned arraySize;
@@ -30,40 +31,40 @@ class Plot : public Test
 protected:
     PlotData plotData;
 
-    void initPlotVars(RangeLoop* xToPlot, string yLabel);
-    void freePlotVars();
+    void validateLinesLoop(Loop* linesLoop);
 
-    void _customPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot, string yLabel);
-    void _customAveragedPlot(std::string title, LoopFunction* addToArrayRepeater, RangeLoop* xToPlot,
-                             string yLabel, Loop* averagesLoop);
-    void _customMultiFileAveragedPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
-                                      string yLabel, Loop* filesLoop, Loop* averagesLoop);
+    void _customPlot(std::string title, LoopFunction* fillArrayRepeater, Loop* linesLoop);
+    void _customAveragedPlot(std::string title, LoopFunction* addToArrayRepeater, Loop* linesLoop,
+                             Loop* averagesLoop);
+    void _customMultiFileAveragedPlot(std::string title, LoopFunction* fillArrayRepeater, Loop* linesLoop,
+                                      Loop* filesLoop, Loop* averagesLoop);
 
-    void _customCombAverageOrFilesPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
-                                       string yLabel, bool loopFiles, Loop* averagesLoop, Loop* otherLoop);
-    void _customCombinationsPlot(std::string title, LoopFunction* fillArrayRepeater, RangeLoop* xToPlot,
-                                 string yLabel, Loop* averagesLoop, bool loopFiles);
+    void _customCombAverageOrFilesPlot(std::string title, LoopFunction* fillArrayRepeater, Loop* linesLoop,
+                                       bool loopFiles, Loop* averagesLoop, Loop* otherLoop);
+    void _customCombinationsPlot(std::string title, LoopFunction* fillArrayRepeater, Loop* linesLoop,
+                                 Loop* averagesLoop, bool loopFiles);
     void separateLoops(Loop* topLoop);
     void separateLoops(std::vector<Loop*>& loops, Loop* topLoop);
 public:
-    Plot(string plotPath);
+    Plot(string plotPath, RangeLoop* xToPlot, string yLabel);
     virtual ~Plot();
 
-    // custom plots
-    void genericPlot(std::string title, GenericPlotFillAction* fillArrayAction, RangeLoop* xToPlot,
-                     string yLabel);
-    void genericAveragedPlot(std::string title, GenericPlotFillAction* fillArrayAction, RangeLoop* xToPlot,
-                             string yLabel, Loop* averagesLoop);
+    void resetRangeX(float min, float max, float inc);
 
-    void genericMultiFilePlot(std::string title, GenericPlotFillAction* fillArrayAction, RangeLoop* xToPlot,
-                              string yLabel, Loop* filesLoop);
+    // custom plots
+    void genericPlot(std::string title, GenericPlotFillAction* fillArrayAction, Loop* linesLoop);
+    void genericAveragedPlot(std::string title, GenericPlotFillAction* fillArrayAction, Loop* linesLoop,
+                             Loop* averagesLoop);
+
+    void genericMultiFilePlot(std::string title, GenericPlotFillAction* fillArrayAction, Loop* linesLoop,
+                              Loop* filesLoop);
 
     void genericMultiFileAveragedPlot(std::string title, GenericPlotFillAction* fillArrayAction,
-                                      RangeLoop* xToPlot, string yLabel, Loop* filesLoop, Loop* averagesLoop);
-    void plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, RangeLoop* xToPlot,
-                          string yLabel, bool differentFiles);
-    void plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, RangeLoop* xToPlot,
-                          string yLabel, Loop* averagesLoop, bool differentFiles);
+                                      Loop* linesLoop, Loop* filesLoop, Loop* averagesLoop);
+    void plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, Loop* linesLoop,
+                          bool differentFiles);
+    void plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, Loop* linesLoop,
+                          Loop* averagesLoop, bool differentFiles);
 };
 
 class GenericPlotFillAction : public LoopFunction

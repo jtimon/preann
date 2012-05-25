@@ -101,45 +101,48 @@ int main(int argc, char *argv[])
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         RangeLoop* sizeLoop = new RangeLoop(Dummy::SIZE, 100, 101, 100);
-        test.addLoop(sizeLoop);
+        Loop* loop = sizeLoop;
 
         RangeLoop* outputSizeLoop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2);
-        test.addLoop(outputSizeLoop);
+        loop->addInnerLoop(outputSizeLoop);
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
-        test.addLoop(bufferTypeLoop);
+        loop->addInnerLoop(bufferTypeLoop);
 
-//        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
-        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
+//        sizeLoop->addInnerLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
+        loop->addInnerLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
 
-        test.getLoop()->print();
 
-//        test.testMemoryLosses(testLoops, &parametersMap, "test loops");
+        loop->print();
 
-        test.testMemoryLosses(testBuffer, "Buffer");
+//        test.testMemoryLosses(testLoops, &parametersMap, "test loops", &loop);
+
+        test.testMemoryLosses(testBuffer, "Buffer", loop);
 
         // exclude BYTE
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
 
-        test.testMemoryLosses(testConnection, "Connection");
+        test.testMemoryLosses(testConnection, "Connection", loop);
 
         RangeLoop* numInputsLoop = new RangeLoop(Dummy::NUM_INPUTS, 1, 3, 1);
-        test.addLoop(numInputsLoop);
+        loop->addInnerLoop(numInputsLoop);
 
-        test.testMemoryLosses(testLayer, "Layer");
+        test.testMemoryLosses(testLayer, "Layer", loop);
 
         RangeLoop* numLayersLoop = new RangeLoop(Dummy::NUM_LAYERS, 1, 3, 1);
-        test.addLoop(numLayersLoop);
+        loop->addInnerLoop(numLayersLoop);
 
-        test.testMemoryLosses(testNeuralNet, "NeuralNet");
-        test.testMemoryLosses(testIndividual, "Individual");
+        test.testMemoryLosses(testNeuralNet, "NeuralNet", loop);
+        test.testMemoryLosses(testIndividual, "Individual", loop);
 
         sizeLoop->resetRange(1, 3, 1);
         outputSizeLoop->resetRange(1, 1, 1);
         numInputsLoop->resetRange(1, 1, 1);
         numLayersLoop->resetRange(1, 1, 1);
 
-        test.testMemoryLosses(testPopulation, "Population");
+        test.testMemoryLosses(testPopulation, "Population", loop);
+
+        delete(loop);
 
         MemoryManagement::printListOfPointers();
 

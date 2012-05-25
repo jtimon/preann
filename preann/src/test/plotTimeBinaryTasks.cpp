@@ -26,6 +26,8 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
+        //TODO descomentar o borrar fichero
+        /*
         TaskPlotter plotter(PREANN_DIR + to_string("output/"));
 //        plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         unsigned populationSize = 8;
@@ -81,7 +83,8 @@ int main(int argc, char *argv[])
 //        delete(filesLoop);
         delete(toAverageLoop);
 
-        printf("Exit success.\n");
+        printf("Exit success.\n");*/
+
     } catch (std::string error) {
         cout << "Error: " << error << endl;
         //	} catch (...) {

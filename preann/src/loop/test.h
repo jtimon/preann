@@ -25,8 +25,6 @@ typedef unsigned (*TestFunctionPtr)(ParametersMap*);
 
 class Test
 {
-protected:
-    Loop* tLoop;
 public:
     ParametersMap parameters;
     Test();
@@ -36,11 +34,8 @@ public:
     static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
     static unsigned assertEquals(Buffer* expected, Buffer* actual);
 
-    void testMemoryLosses(GenericLoopFuncPtr function, string label);
-    void test(TestFunctionPtr func, std::string label);
-
-    void addLoop(Loop* loop);
-    Loop* getLoop();
+    void testMemoryLosses(GenericLoopFuncPtr function, string label, Loop* loop);
+    void test(TestFunctionPtr func, std::string label, Loop* loop);
 
 };
 

@@ -13,13 +13,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        TaskPlotter plotter(PREANN_DIR + to_string("output/"));
-
-        EnumLoop* toAverageLoop = new EnumLoop(ET_CROSS_ALG);
-        toAverageLoop->exclude(ET_CROSS_ALG, 1, CA_PROPORTIONAL);
-        toAverageLoop->addInnerLoop(new EnumLoop(ET_CROSS_LEVEL));
-        toAverageLoop->addInnerLoop(new EnumLoop(ET_MUTATION_ALG));
-//        toAverageLoop->addInnerLoop(new EnumLoop(ET_RESET_ALG));
+        TaskPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop("Generation", 0, 51, 5));
 
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
         unsigned populationSize = 8;
@@ -39,9 +33,8 @@ int main(int argc, char *argv[])
         plotter.parameters.putNumber(Population::RESET_NUM, 2);
         plotter.parameters.putNumber(Population::RESET_PROB, 0.05);
 
-        EnumLoop* selectionAlgorithmLoop = new EnumLoop(ET_SELECTION_ALGORITHM);
-        selectionAlgorithmLoop->exclude(ET_SELECTION_ALGORITHM, 2, SA_TOURNAMENT, SA_TRUNCATION);
-        plotter.addLoop(selectionAlgorithmLoop);
+        EnumLoop linesLoop(ET_SELECTION_ALGORITHM);
+        linesLoop.exclude(ET_SELECTION_ALGORITHM, 2, SA_TOURNAMENT, SA_TRUNCATION);
 
 //        RangeLoop* rouletteWheelBaseLoop = new RangeLoop(Population::ROULETTE_WHEEL_BASE, 5, 11, 5);
 //        plotter.addLoop(rouletteWheelBaseLoop);
@@ -49,16 +42,18 @@ int main(int argc, char *argv[])
         //        EnumLoop* resetAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG, loop);
         //        loop = resetAlgLoop;
 
-        plotter.getLoop()->print();
+        linesLoop.print();
+
+        EnumLoop averageLoop(ET_CROSS_ALG);
+        averageLoop.exclude(ET_CROSS_ALG, 1, CA_PROPORTIONAL);
+        averageLoop.addInnerLoop(new EnumLoop(ET_CROSS_LEVEL));
+        averageLoop.addInnerLoop(new EnumLoop(ET_MUTATION_ALG));
+        averageLoop.addInnerLoop(new EnumLoop(ET_RESET_ALG));
 
         Task* task = new ReversiTask(6, 1);
 
-        RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 51, 5);
+        plotter.plotTaskAveraged(task, "selectionReversi", &linesLoop, &averageLoop);
 
-        plotter.plotTaskAveraged(task, "selectionReversi", generationsLoop, toAverageLoop);
-
-        delete (generationsLoop);
-        delete (toAverageLoop);
         delete (task);
 
         printf("Exit success.\n");

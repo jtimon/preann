@@ -115,22 +115,16 @@ int main(int argc, char *argv[])
         test.parameters.putNumber(NUM_MUTATIONS, 10);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        test.addLoop(new RangeLoop(Dummy::SIZE, 2, 13, 10));
-        test.addLoop(new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2));
+        RangeLoop loop(Dummy::SIZE, 2, 13, 10);
+        loop.addInnerLoop(new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2));
+        loop.addInnerLoop(new EnumLoop(ET_BUFFER, 3, BT_BIT, BT_SIGN, BT_FLOAT));
+        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
-                                                BT_BIT, BT_SIGN, BT_FLOAT);
-        test.addLoop(bufferTypeLoop);
+        loop.print();
 
-        EnumLoop* implementationLoop = new EnumLoop(ET_IMPLEMENTATION);
-        implementationLoop->with(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2);
-        test.addLoop(implementationLoop);
-
-        test.getLoop()->print();
-
-        test.test(testCalculateAndAddTo, "Connection::calculateAndAddTo");
-        test.test(testMutate, "Connection::mutate");
-        test.test(testCrossover, "Connection::crossover");
+        test.test(testCalculateAndAddTo, "Connection::calculateAndAddTo", &loop);
+        test.test(testMutate, "Connection::mutate", &loop);
+        test.test(testCrossover, "Connection::crossover", &loop);
 
         printf("Exit success.\n");
     } catch (std::string error) {

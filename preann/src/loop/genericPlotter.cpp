@@ -7,8 +7,8 @@
 
 #include "genericPlotter.h"
 
-GenericPlotter::GenericPlotter(string plotPath)
-        : Plot(plotPath)
+GenericPlotter::GenericPlotter(string plotPath, RangeLoop* xToPlot, string yLabel)
+        : Plot(plotPath, xToPlot, yLabel)
 {
 }
 
@@ -41,42 +41,42 @@ protected:
     }
 };
 
-void GenericPlotter::plot(GenericPlotFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel)
+void GenericPlotter::plot(GenericPlotFunctionPtr func, std::string title, Loop* linesLoop)
 {
     GenericPlotFillAction2 action(func, &parameters, title, &plotData, false);
-    genericPlot(title, &action, xToPlot, yLabel);
+    genericPlot(title, &action, linesLoop);
 }
 
-void GenericPlotter::plotAveraged(GenericPlotFunctionPtr func, std::string title, RangeLoop* xToPlot,
-                                  string yLabel, Loop* averagesLoop)
+void GenericPlotter::plotAveraged(GenericPlotFunctionPtr func, std::string title, Loop* linesLoop,
+                                  Loop* averagesLoop)
 {
     GenericPlotFillAction2 action(func, &parameters, title, &plotData, true);
-    genericAveragedPlot(title, &action, xToPlot, yLabel, averagesLoop);
+    genericAveragedPlot(title, &action, linesLoop, averagesLoop);
 }
 
-void GenericPlotter::plotFiles(GenericPlotFunctionPtr func, std::string title, RangeLoop* xToPlot,
-                               string yLabel, Loop* filesLoop)
+void GenericPlotter::plotFiles(GenericPlotFunctionPtr func, std::string title, Loop* linesLoop,
+                               Loop* filesLoop)
 {
     GenericPlotFillAction2 action(func, &parameters, title, &plotData, false);
-    genericMultiFilePlot(title, &action, xToPlot, yLabel, filesLoop);
+    genericMultiFilePlot(title, &action, linesLoop, filesLoop);
 }
 
-void GenericPlotter::plotFilesAveraged(GenericPlotFunctionPtr func, std::string title, RangeLoop* xToPlot,
-                                       string yLabel, Loop* filesLoop, Loop* averagesLoop)
+void GenericPlotter::plotFilesAveraged(GenericPlotFunctionPtr func, std::string title, Loop* linesLoop,
+                                       Loop* filesLoop, Loop* averagesLoop)
 {
     GenericPlotFillAction2 action(func, &parameters, title, &plotData, true);
-    genericMultiFileAveragedPlot(title, &action, xToPlot, yLabel, filesLoop, averagesLoop);
+    genericMultiFileAveragedPlot(title, &action, linesLoop, filesLoop, averagesLoop);
 }
 
-void GenericPlotter::plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
-                                      string yLabel, bool differentFiles)
+void GenericPlotter::plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
+                                      bool differentFiles)
 {
-    plotCombinations(yFunction, title, xToPlot, yLabel, NULL, differentFiles);
+    plotCombinations(yFunction, title, linesLoop, NULL, differentFiles);
 }
 
-void GenericPlotter::plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
-                                      string yLabel, Loop* averagesLoop, bool differentFiles)
+void GenericPlotter::plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
+                                      Loop* averagesLoop, bool differentFiles)
 {
     GenericPlotFillAction2 action(yFunction, &parameters, title, &plotData, true);
-    _customCombinationsPlot(title, &action, xToPlot, yLabel, averagesLoop, differentFiles);
+    _customCombinationsPlot(title, &action, linesLoop, averagesLoop, differentFiles);
 }

@@ -118,26 +118,23 @@ int main(int argc, char *argv[])
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        test.addLoop(new RangeLoop(Dummy::SIZE, 100, 101, 100));
+        RangeLoop loop(Dummy::SIZE, 100, 101, 100);
+        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
-        test.addLoop(bufferTypeLoop);
+        EnumLoop* bufferTypeLoop = new EnumLoop(ET_BUFFER);
+        loop.addInnerLoop(bufferTypeLoop);
 
-        EnumLoop* implementationLoop = new EnumLoop(ET_IMPLEMENTATION);
-        implementationLoop->with(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2);
-        test.addLoop(implementationLoop);
+        loop.print();
 
-        test.getLoop()->print();
-
-        test.test(testClone, "Buffer::clone");
-        test.test(testCopyFromInterface, "Buffer::copyFromInterface");
-        test.test(testCopyToInterface, "Buffer::copyToInterface");
-        test.test(testSaveLoad, "Buffer::saveLoad");
+        test.test(testClone, "Buffer::clone", &loop);
+        test.test(testCopyFromInterface, "Buffer::copyFromInterface", &loop);
+        test.test(testCopyToInterface, "Buffer::copyToInterface", &loop);
+        test.test(testSaveLoad, "Buffer::saveLoad", &loop);
 
         bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
-        test.getLoop()->print();
+        loop.print();
 
-        test.test(testActivation, "Buffer::activation");
+        test.test(testActivation, "Buffer::activation", &loop);
 
         printf("Exit success.\n");
     } catch (std::string error) {

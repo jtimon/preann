@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        TaskPlotter plotter(PREANN_DIR + to_string("output/"));
+        TaskPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop("Generation", 0, 200, 1));
 //        plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         unsigned populationSize = 8;
         plotter.parameters.putNumber(Population::SIZE, populationSize);
@@ -43,43 +43,32 @@ int main(int argc, char *argv[])
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
-//        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PER_INDIVIDUAL);
 
-        EnumLoop* selecAlgLoop = new EnumLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM),
-                                              ET_SELECTION_ALGORITHM);
-//        plotter.addLoop(selecAlgLoop);
-
-
-        JoinEnumLoop* resetAlgLoop = new JoinEnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG);
-        plotter.addLoop(resetAlgLoop);
+        JoinEnumLoop linesLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG);
 
         RangeLoop* numResetsLoop = new RangeLoop(Population::RESET_NUM, 1, 4, 1);
-        resetAlgLoop->addEnumLoop(RA_PER_INDIVIDUAL, numResetsLoop);
+        linesLoop.addEnumLoop(RA_PER_INDIVIDUAL, numResetsLoop);
 
         RangeLoop* resetProbLoop = new RangeLoop(Population::RESET_PROB, 0.05, 0.2, 0.1);
-        resetAlgLoop->addEnumLoop(RA_PROBABILISTIC, resetProbLoop);
+        linesLoop.addEnumLoop(RA_PROBABILISTIC, resetProbLoop);
 
-        plotter.getLoop()->print();
+        linesLoop.print();
 
-        RangeLoop* generationsLoop = new RangeLoop("Generation", 0, 200, 1);
+        RangeLoop toAverageLoop(Dummy::WEIGHS_RANGE, 1, 21, 5);
+        EnumLoop filesLoop(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM), ET_SELECTION_ALGORITHM);
+
         unsigned vectorsSize = 2;
-
-        Loop* toAverageLoop = new RangeLoop(Dummy::WEIGHS_RANGE, 1, 21, 5);
-        Loop* filesLoop = selecAlgLoop;
         Task* task;
 
         task = new BinaryTask(BO_OR, vectorsSize);
-        plotter.plotTaskFilesAveraged(task, "plotOr", generationsLoop, filesLoop, toAverageLoop);
+        plotter.plotTaskFilesAveraged(task, "plotOr", &linesLoop, &filesLoop, &toAverageLoop);
         delete (task);
 //        task = new BinaryTask(BO_AND, vectorsSize);
-//        plotter.plotTaskFilesAveraged(task, "plotAnd", generationsLoop, filesLoop, toAverageLoop);
+//        plotter.plotTaskFilesAveraged(task, "plotAnd", &linesLoop, &filesLoop, &toAverageLoop);
 //        delete (task);
 //        task = new BinaryTask(BO_XOR, vectorsSize);
-//        plotter.plotTaskFilesAveraged(task, "plotXor", generationsLoop, filesLoop, toAverageLoop);
+//        plotter.plotTaskFilesAveraged(task, "plotXor", &linesLoop, &filesLoop, &toAverageLoop);
 //        delete (task);
-
-        delete(filesLoop);
-        delete(toAverageLoop);
 
         printf("Exit success.\n");
     } catch (std::string error) {

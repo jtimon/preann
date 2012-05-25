@@ -13,22 +13,23 @@
 class TaskPlotter : public Plot
 {
 public:
-    TaskPlotter(string plotPath);
+    TaskPlotter(string plotPath, RangeLoop* xToPlot);
     virtual ~TaskPlotter();
 
-    void plotTask(Task* task, std::string title, RangeLoop* xToPlot);
-    void plotTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop);
-    void plotTaskFiles(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop);
-    void plotTaskFilesAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* filesLoop,
+    void plotTask(Task* task, std::string title, Loop* linesLoop);
+    void plotTaskAveraged(Task* task, std::string title, Loop* linesLoop, Loop* averagesLoop);
+    void plotTaskFiles(Task* task, std::string title, Loop* linesLoop, Loop* filesLoop);
+    void plotTaskFilesAveraged(Task* task, std::string title, Loop* linesLoop, Loop* filesLoop,
                                Loop* averagesLoop);
 
-    void plotCombinations(Task* task, std::string title, RangeLoop* xToPlot, bool differentFiles);
-    void plotCombinations(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop,
+    void plotCombinations(Task* task, std::string title, Loop* linesLoop, bool differentFiles);
+    void plotCombinations(Task* task, std::string title, Loop* linesLoop, Loop* averagesLoop,
                           bool differentFiles);
 
-    void plotChronoTask(Task* task, std::string title, RangeLoop* xToPlot, unsigned generations);
-    void plotChronoTaskAveraged(Task* task, std::string title, RangeLoop* xToPlot, Loop* averagesLoop,
-                                unsigned generations);
+    //TODO borrar
+//    void plotChronoTask(Task* task, std::string title, Loop* linesLoop, unsigned generations);
+//    void plotChronoTaskAveraged(Task* task, std::string title, Loop* linesLoop, Loop* averagesLoop,
+//                                unsigned generations);
 };
 
 #endif /* TASKPLOTTER_H_ */

@@ -63,35 +63,35 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        ChronoPlotter plotter(PREANN_DIR + to_string("output/"));
+        ChronoPlotter plotter(PREANN_DIR + to_string("output/"),
+                              new RangeLoop(Dummy::SIZE, 50000, 500000, 50000), "Time (seconds)");
+
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        Loop* averageLoop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2);
 
-//        plotter.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
-        plotter.addLoop(
-                new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C,
-                             IT_SSE2));
+        EnumLoop linesLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C,
+                           IT_SSE2);
+        linesLoop.print();
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
                                                 BT_BIT, BT_SIGN, BT_FLOAT);
-//        plotter.addLoop(bufferTypeLoop);
-
-        plotter.getLoop()->print();
-
         Loop* forFilesLoop = bufferTypeLoop;
-        RangeLoop xToPlot(Dummy::SIZE, 50000, 500000, 50000);
-        string yLabel = "Time (seconds)";
-        plotter.plotChronoFilesAveraged(chronoMutate, "Connection_mutate", &xToPlot, yLabel, forFilesLoop, averageLoop, 10000);
+        Loop* averageLoop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2);
 
-        xToPlot.resetRange(500, 5000, 500);
-        unsigned repetitions = 1000;
-        plotter.plotChronoFilesAveraged(chronoCrossover, "Connection_crossover", &xToPlot, yLabel, forFilesLoop, averageLoop, repetitions);
-        plotter.plotChronoFilesAveraged(chronoCalculateAndAddTo, "Connection_calculateAndAddTo_Averaged", &xToPlot, yLabel, forFilesLoop, averageLoop, repetitions);
 
-        plotter.plotChronoFiles(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &xToPlot, yLabel, forFilesLoop, repetitions);
+        plotter.plotChronoFilesAveraged(chronoMutate, "Connection_mutate", &linesLoop, forFilesLoop,
+                                        averageLoop, 10000);
+
+        plotter.resetRangeX(500, 5000, 500);
+        plotter.plotChronoFilesAveraged(chronoCrossover, "Connection_crossover", &linesLoop,
+                                        forFilesLoop, averageLoop, 1000);
+        plotter.plotChronoFilesAveraged(chronoCalculateAndAddTo, "Connection_calculateAndAddTo_Averaged",
+                                        &linesLoop, forFilesLoop, averageLoop, 1000);
+
+        plotter.plotChronoFiles(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &linesLoop,
+                                forFilesLoop, 1000);
 
         printf("Exit success.\n");
     } catch (std::string error) {

@@ -7,8 +7,8 @@
 
 #include "chronoPlotter.h"
 
-ChronoPlotter::ChronoPlotter(string plotPath)
-        : Plot(plotPath)
+ChronoPlotter::ChronoPlotter(string plotPath, RangeLoop* xToPlot, string yLabel)
+        : Plot(plotPath, xToPlot, yLabel)
 {
 }
 
@@ -42,45 +42,39 @@ protected:
     }
 };
 
-void ChronoPlotter::plotChrono(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot, string yLabel,
+void ChronoPlotter::plotChrono(ChronoFunctionPtr func, std::string title, Loop* linesLoop,
                                unsigned repetitions)
 {
     ChronoFillAction chronoAction(func, &parameters, title, &plotData, false, repetitions);
-    genericPlot(title, &chronoAction, xToPlot, yLabel);
+    genericPlot(title, &chronoAction, linesLoop);
 }
 
-void ChronoPlotter::plotChronoAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
-                                       string yLabel, Loop* averagesLoop, unsigned repetitions)
+void ChronoPlotter::plotChronoAveraged(ChronoFunctionPtr func, std::string title, Loop* linesLoop, Loop* averagesLoop, unsigned repetitions)
 {
     ChronoFillAction chronoAction(func, &parameters, title, &plotData, true, repetitions);
-    genericAveragedPlot(title, &chronoAction, xToPlot, yLabel, averagesLoop);
+    genericAveragedPlot(title, &chronoAction, linesLoop, averagesLoop);
 }
 
-void ChronoPlotter::plotChronoFiles(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
-                                    string yLabel, Loop* filesLoop, unsigned repetitions)
+void ChronoPlotter::plotChronoFiles(ChronoFunctionPtr func, std::string title, Loop* linesLoop, Loop* filesLoop, unsigned repetitions)
 {
     ChronoFillAction chronoAction(func, &parameters, title, &plotData, false, repetitions);
-    genericMultiFilePlot(title, &chronoAction, xToPlot, yLabel, filesLoop);
+    genericMultiFilePlot(title, &chronoAction, linesLoop, filesLoop);
 }
 
-void ChronoPlotter::plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
-                                            string yLabel, Loop* filesLoop, Loop* averagesLoop,
-                                            unsigned repetitions)
+void ChronoPlotter::plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, Loop* linesLoop, Loop* filesLoop, Loop* averagesLoop, unsigned repetitions)
 {
     ChronoFillAction chronoAction(func, &parameters, title, &plotData, true, repetitions);
-    genericMultiFileAveragedPlot(title, &chronoAction, xToPlot, yLabel, filesLoop, averagesLoop);
+    genericMultiFileAveragedPlot(title, &chronoAction, linesLoop, filesLoop, averagesLoop);
 }
 
-void ChronoPlotter::plotCombinations(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
-                                     string yLabel, bool differentFiles, unsigned repetitions)
+void ChronoPlotter::plotCombinations(ChronoFunctionPtr func, std::string title, Loop* linesLoop, bool differentFiles, unsigned repetitions)
 {
-    plotCombinations(func, title, xToPlot, yLabel, NULL, differentFiles, repetitions);
+    plotCombinations(func, title, linesLoop, NULL, differentFiles, repetitions);
 }
 
-void ChronoPlotter::plotCombinations(ChronoFunctionPtr func, std::string title, RangeLoop* xToPlot,
-                                     string yLabel, Loop* averagesLoop, bool differentFiles,
+void ChronoPlotter::plotCombinations(ChronoFunctionPtr func, std::string title, Loop* linesLoop, Loop* averagesLoop, bool differentFiles,
                                      unsigned repetitions)
 {
     ChronoFillAction chronoAction(func, &parameters, title, &plotData, true, repetitions);
-    _customCombinationsPlot(title, &chronoAction, xToPlot, yLabel, averagesLoop, differentFiles);
+    _customCombinationsPlot(title, &chronoAction, linesLoop, averagesLoop, differentFiles);
 }

@@ -33,32 +33,28 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        GenericPlotter plotter(PREANN_DIR + to_string("output/"));
+        GenericPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop("x", 0, 10, 1), "y");
 
         RangeLoop* colorLoop = new RangeLoop("color", 0, PLOT_MAX_COLOR + 2, 1);
-        plotter.addLoop(colorLoop);
-
-        RangeLoop xToPlot("x", 0, 10, 1);
-
-        plotter.plot(colorTest, "Plot_testColours", &xToPlot, "y");
+        plotter.plot(colorTest, "Plot_testColours", colorLoop);
 
         colorLoop->resetRange(1, 2, 1);
         RangeLoop* pointLoop = new RangeLoop("pointType", 0, PLOT_MAX_POINT + 2, 1);
-        plotter.addLoop(pointLoop);
+        colorLoop->addInnerLoop(pointLoop);
 
-        plotter.plot(pointTest, "Plot_testPoints", &xToPlot, "y");
+        plotter.plot(pointTest, "Plot_testPoints", colorLoop);
 
         colorLoop->resetRange(0, PLOT_MAX_COLOR + 1, 1);
         pointLoop->resetRange(0, PLOT_MAX_COLOR + 1, 1);
 
-        plotter.plot(colorPointTest, "Plot_testColourPoints", &xToPlot, "y");
+        plotter.plot(colorPointTest, "Plot_testColourPoints", colorLoop);
 
         colorLoop->resetRange(0, 4, 1);
         pointLoop->resetRange(0, 4, 1);
 
         RangeLoop averagesLoop("average", 0, 5, 1);
 
-        plotter.plotAveraged(colorPointTest, "Plot_testPlotAveraged", &xToPlot, "y", &averagesLoop);
+        plotter.plotAveraged(colorPointTest, "Plot_testPlotAveraged", colorLoop, &averagesLoop);
 
 //        RangeLoop filesLoop();
 //        plotter.plotAveraged(colorPointTest, "Plot_testPlotAveraged", &xToPlot, "y", &averagesLoop);
@@ -66,7 +62,6 @@ int main(int argc, char *argv[])
 //                  Loop* filesLoop);
 //        void plotFilesAveraged(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot, string yLabel,
 //                  Loop* filesLoop, Loop* averagesLoop);
-
 
         printf("Exit success.\n");
     } catch (std::string& error) {

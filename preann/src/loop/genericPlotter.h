@@ -15,22 +15,20 @@ typedef float (*GenericPlotFunctionPtr)(ParametersMap*);
 class GenericPlotter : public Plot
 {
 public:
-    GenericPlotter(string plotPath);
+    GenericPlotter(string plotPath, RangeLoop* xToPlot, string yLabel);
     virtual ~GenericPlotter();
 
-    void plot(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot, string yLabel);
-    void plotAveraged(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot, string yLabel,
+    void plot(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop);
+    void plotAveraged(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
                       Loop* averagesLoop);
-    void plotFiles(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot, string yLabel,
-                   Loop* filesLoop);
-    void plotFilesAveraged(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
-                           string yLabel, Loop* filesLoop, Loop* averagesLoop);
+    void plotFiles(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop, Loop* filesLoop);
+    void plotFilesAveraged(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
+                           Loop* filesLoop, Loop* averagesLoop);
 
-    void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
-                          string yLabel, bool differentFiles);
-    void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, RangeLoop* xToPlot,
-                          string yLabel, Loop* averagesLoop, bool differentFiles);
-
+    void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
+                          bool differentFiles);
+    void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
+                          Loop* averagesLoop, bool differentFiles);
 
 };
 

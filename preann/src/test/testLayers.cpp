@@ -57,16 +57,13 @@ int main(int argc, char *argv[])
         test.parameters.putString(LAYER_PATH, PREANN_DIR + to_string("data/layer.lay"));
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        test.addLoop(new RangeLoop(Dummy::SIZE, 1, 51, 49));
+        RangeLoop loop(Dummy::SIZE, 1, 51, 49);
+        loop.addInnerLoop(new EnumLoop(ET_BUFFER, 3, BT_BIT, BT_SIGN, BT_FLOAT));
+        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
-                                                BT_BIT, BT_SIGN, BT_FLOAT);
-        test.addLoop(bufferTypeLoop);
+        loop.print();
 
-        test.addLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
-        test.getLoop()->print();
-
-        test.test(testCalculateOutput, "Layer::calculateOutput");
+        test.test(testCalculateOutput, "Layer::calculateOutput", &loop);
 
         printf("Exit success.\n");
     } catch (std::string error) {
