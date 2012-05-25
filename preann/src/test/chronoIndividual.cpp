@@ -57,9 +57,84 @@ float chronoCrossover(ParametersMap* parametersMap, unsigned repetitions)
     END
 }
 
-float colorPointTest(ParametersMap* parametersMap, unsigned repetitions)
+float chronoMutations(ParametersMap* parametersMap, unsigned repetitions)
 {
-    return parametersMap->getNumber(Dummy::SIZE) + parametersMap->getNumber("testValue");
+    START
+
+    MutationAlgorithm mutationAlgorithm = (MutationAlgorithm) parametersMap->getNumber(
+                Enumerations::enumTypeToString(ET_MUTATION_ALG));
+
+    float range = 0;
+    try {
+        range =parametersMap->getNumber(Dummy::WEIGHS_RANGE);
+    } catch (string& e) {
+        cout << "Warning : " + e <<endl;
+    }
+    unsigned numMutations = 0;
+    try {
+        numMutations =parametersMap->getNumber(Population::MUTATION_NUM);
+    } catch (string& e) {
+        cout << "Warning : " + e <<endl;
+    }
+    float probability = 0;
+    try {
+        probability =parametersMap->getNumber(Population::MUTATION_PROB);
+    } catch (string& e) {
+        cout << "Warning : " + e <<endl;
+    }
+
+    START_CHRONO
+    switch (mutationAlgorithm) {
+        case MA_PER_INDIVIDUAL:
+            individual->mutate(numMutations, range);
+            break;
+        case MA_PROBABILISTIC:
+            individual->mutate(probability, range);
+            break;
+    }
+    STOP_CHRONO
+
+    END
+}
+
+float chronoReset(ParametersMap* parametersMap, unsigned repetitions)
+{
+    START
+
+    ResetAlgorithm resetAlgorithm = (ResetAlgorithm) parametersMap->getNumber(
+                Enumerations::enumTypeToString(ET_RESET_ALG));
+
+    float range = 0;
+    try {
+        range =parametersMap->getNumber(Dummy::WEIGHS_RANGE);
+    } catch (string& e) {
+        cout << "Warning : " + e <<endl;
+    }
+    unsigned numMutations = 0;
+    try {
+        numMutations =parametersMap->getNumber(Population::RESET_NUM);
+    } catch (string& e) {
+        cout << "Warning : " + e <<endl;
+    }
+    float probability = 0;
+    try {
+        probability =parametersMap->getNumber(Population::RESET_PROB);
+    } catch (string& e) {
+        cout << "Warning : " + e <<endl;
+    }
+
+    START_CHRONO
+    switch (resetAlgorithm) {
+        case RA_PER_INDIVIDUAL:
+            individual->mutate(numMutations, range);
+            break;
+        case RA_PROBABILISTIC:
+            individual->mutate(probability, range);
+            break;
+    }
+    STOP_CHRONO
+
+    END
 }
 
 int main(int argc, char *argv[])
@@ -72,6 +147,9 @@ int main(int argc, char *argv[])
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_C);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
+
+        plotter.parameters.putNumber(Population::MUTATION_PROB, 0.3);
+        plotter.parameters.putNumber(Population::MUTATION_RANGE, 2);
 
 //        plotter.parameters.putNumber(Population::UNIFORM_CROSS_PROB, 0.1);
 
@@ -100,10 +178,6 @@ int main(int argc, char *argv[])
         unsigned repetitions = 2;
 
         plotter.plotChronoAveraged(chronoCrossover, "Individual_crossover", &xToPlot, yLabel, averageLoop, repetitions);
-
-        ChronoPlotter plotter2(PREANN_DIR + to_string("output/"));
-        plotter2.addLoop(new RangeLoop("testValue", 0, 21, 1));
-        plotter2.plotChrono(colorPointTest, "colorTest", &xToPlot, yLabel, repetitions);
 
         delete(averageLoop);
 
