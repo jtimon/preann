@@ -25,11 +25,13 @@ JoinEnumLoop::~JoinEnumLoop()
     for (int i = 0; i < tInnerLoops.size(); ++i) {
 
         Loop* itLoop = tInnerLoops[i];
-        while (itLoop->tInnerLoop != tInnerLoop && itLoop->tInnerLoop != NULL) {
-            itLoop = itLoop->tInnerLoop;
+        if (itLoop != NULL) {
+            while (itLoop->tInnerLoop != tInnerLoop && itLoop->tInnerLoop != NULL) {
+                itLoop = itLoop->tInnerLoop;
+            }
+            itLoop->tInnerLoop = NULL;
+            delete (tInnerLoops[i]);
         }
-        itLoop->tInnerLoop = NULL;
-        delete (tInnerLoops[i]);
     }
     tValueVector.clear();
     tInnerLoops.clear();
@@ -40,7 +42,10 @@ void JoinEnumLoop::addInnerLoop(Loop* innerLoop)
     if (tInnerLoop == NULL) {
         tInnerLoop = innerLoop;
         for (int i = 0; i < tInnerLoops.size(); ++i) {
-            tInnerLoops[i]->addInnerLoop(tInnerLoop);
+            Loop* currentLoop = tInnerLoops[i];
+            if (currentLoop != NULL){
+                currentLoop->addInnerLoop(tInnerLoop);
+            }
         }
     } else {
         tInnerLoop->addInnerLoop(innerLoop);
@@ -69,7 +74,8 @@ void JoinEnumLoop::addEnumLoop(unsigned enumValue, Loop* loop)
     tValueVector.push_back(enumValue);
     tInnerLoops.push_back(loop);
 
-    if (tInnerLoop != NULL) {
+
+    if (tInnerLoop != NULL && loop != NULL) {
         loop->addInnerLoop(tInnerLoop);
     }
 }
@@ -121,8 +127,15 @@ void JoinEnumLoop::__repeatImpl(LoopFunction* func)
     for (tIndex = 0; tIndex < tValueVector.size(); ++tIndex) {
 
         parametersMap->putNumber(tKey, tValueVector[tIndex]);
-        tInnerLoops[tIndex]->setCallerLoop(this);
-        tInnerLoops[tIndex]->__repeatImpl(func);
+
+        Loop* currentLoop = tInnerLoops[tIndex];
+        if (currentLoop != NULL){
+            currentLoop->setCallerLoop(this);
+            currentLoop->__repeatImpl(func);
+        } else if (tInnerLoop != NULL) {
+            tInnerLoop->setCallerLoop(this);
+            tInnerLoop->__repeatImpl(func);
+        }
         // It will not call to Loop::repeat__Base
         ++tCurrentBranch;
     }

@@ -48,7 +48,7 @@ public:
             : LoopFunction(parameters, "TaskFillArrayRepeater " + label)
     {
         tTask = task;
-        tExample = tTask->getExample();
+        tExample = tTask->getExample(parameters);
         tPlotData = plotData;
     }
     ~TaskFillArrayRepeater()

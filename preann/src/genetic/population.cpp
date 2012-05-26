@@ -73,7 +73,7 @@ void Population::setDefaults()
 {
     generation = 0;
 
-    params.putNumber(NUM_PRESERVE, 1);
+    params.putNumber(NUM_PRESERVE, -1);
 
     params.putNumber(NUM_ROULETTE_WHEEL, 0);
     params.putNumber(ROULETTE_WHEEL_BASE, 1);
@@ -416,11 +416,12 @@ void Population::reset()
 
 void Population::eliminateWorse()
 {
-    float nPreserve = params.getNumber(NUM_PRESERVE);
-    while (individuals.size() > nPreserve) {
-        //		printf("individualsSize %d nPreserve %d total_score %f \n", individuals.size(), nPreserve, total_score);
-        delete (individuals.back());
-        individuals.pop_back();
+    int nPreserve = params.getNumber(NUM_PRESERVE);
+    if (nPreserve >= 0){
+        while (individuals.size() > nPreserve) {
+            delete (individuals.back());
+            individuals.pop_back();
+        }
     }
 }
 
