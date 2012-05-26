@@ -114,8 +114,8 @@ void BinaryTask::doOperation()
                     tOutput->setElement(i, 0);
                 break;
             case BO_XOR:
-                if ((tInput1->getElement(i) && tInput2->getElement(i)) || (!tInput1->getElement(i)
-                        && !tInput2->getElement(i)))
+                if ((tInput1->getElement(i) && tInput2->getElement(i))
+                        || (!tInput1->getElement(i) && !tInput2->getElement(i)))
                     tOutput->setElement(i, 0);
                 else
                     tOutput->setElement(i, 1);
@@ -126,22 +126,41 @@ void BinaryTask::doOperation()
     }
 }
 
-Individual* BinaryTask::getExample()
+Individual* BinaryTask::getExample(ParametersMap* parameters)
 {
-    Individual* example = new Individual(IT_C);
+    BufferType bufferType;
+    try {
+        bufferType = (BufferType) parameters->getNumber(Enumerations::enumTypeToString(ET_BUFFER));
+    } catch (string& e) {
+        bufferType = BT_BIT;
+    }
+    ImplementationType implementationType;
+    try {
+        implementationType = (ImplementationType) parameters->getNumber(
+                Enumerations::enumTypeToString(ET_IMPLEMENTATION));
+    } catch (string& e) {
+        implementationType = IT_C;
+    }
+    FunctionType functionType;
+    try {
+        functionType = (FunctionType) parameters->getNumber(Enumerations::enumTypeToString(ET_FUNCTION));
+    } catch (string& e) {
+        functionType = FT_IDENTITY;
+    }
+    Individual* example = new Individual(implementationType);
     this->setInputs(example);
 
     unsigned vectorsSize = tOutput->getSize();
     switch (tBinaryOperation) {
         case BO_AND:
         case BO_OR:
-            example->addLayer(vectorsSize, BT_BIT, FT_IDENTITY);
+            example->addLayer(vectorsSize, bufferType, functionType);
             example->addInputConnection(0, 0);
             example->addInputConnection(1, 0);
             break;
         case BO_XOR:
-            example->addLayer(vectorsSize * 2, BT_BIT, FT_IDENTITY);
-            example->addLayer(vectorsSize, BT_BIT, FT_IDENTITY);
+            example->addLayer(vectorsSize * 2, bufferType, functionType);
+            example->addLayer(vectorsSize, bufferType, functionType);
             example->addInputConnection(0, 0);
             example->addInputConnection(1, 0);
             example->addLayersConnection(0, 1);

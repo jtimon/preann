@@ -64,14 +64,34 @@ void ReversiTask::setInputs(Individual* individual)
     individual->addInputLayer(tBoard->getInterface());
 }
 
-Individual* ReversiTask::getExample()
+Individual* ReversiTask::getExample(ParametersMap* parameters)
 {
+    BufferType bufferType;
+    try {
+        bufferType = (BufferType) parameters->getNumber(Enumerations::enumTypeToString(ET_BUFFER));
+    } catch (string& e) {
+        bufferType = BT_BIT;
+    }
+    ImplementationType implementationType;
+    try {
+        implementationType = (ImplementationType) parameters->getNumber(
+                Enumerations::enumTypeToString(ET_IMPLEMENTATION));
+    } catch (string& e) {
+        implementationType = IT_C;
+    }
+    FunctionType functionType;
+    try {
+        functionType = (FunctionType) parameters->getNumber(Enumerations::enumTypeToString(ET_FUNCTION));
+    } catch (string& e) {
+        functionType = FT_IDENTITY;
+    }
+
     unsigned boardSize = tBoard->getSize();
-    Individual* example = new Individual(IT_C);
+    Individual* example = new Individual(implementationType);
     this->setInputs(example);
-    example->addLayer(boardSize, BT_BIT, FT_IDENTITY);
-    example->addLayer(boardSize, BT_BIT, FT_IDENTITY);
-    example->addLayer(1, BT_FLOAT, FT_IDENTITY);
+    example->addLayer(boardSize, bufferType, functionType);
+    example->addLayer(boardSize, bufferType, functionType);
+    example->addLayer(1, BT_FLOAT, functionType);
     example->addInputConnection(0, 0);
     example->addLayersConnection(0, 1);
     example->addLayersConnection(0, 2);

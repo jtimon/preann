@@ -22,7 +22,7 @@ public:
     virtual ~ClassificationTask();
     virtual void test(Individual* individual);
     virtual string toString();
-    virtual Individual* getExample();
+    virtual Individual* getExample(ParametersMap* parameters);
 };
 
 #endif /* CLASSIFICATIONTASK_H_ */

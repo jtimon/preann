@@ -39,7 +39,7 @@ void ClassificationTask::test(Individual* individual)
     individual->setFitness(-accumulation);
 }
 
-Individual* ClassificationTask::getExample()
+Individual* ClassificationTask::getExample(ParametersMap* parameters)
 {
     string error = "ClassificationTask::getExample not implemented.";
     throw error;

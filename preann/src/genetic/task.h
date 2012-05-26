@@ -9,6 +9,7 @@
 #define TASK_H_
 
 #include "individual.h"
+#include "loop/parametersMap.h"
 
 class Task
 {
@@ -21,9 +22,8 @@ public:
     virtual void test(Individual* individual) = 0;
     virtual void setInputs(Individual* individual) = 0;
     virtual string toString() = 0;
-    virtual Individual* getExample() = 0;
+    virtual Individual* getExample(ParametersMap* parameters) = 0;
     //virtual float test(neuralNet* net, unsigned episodes);
-    virtual float getGoal() = 0;
 };
 
 #endif /* TASK_H_ */
