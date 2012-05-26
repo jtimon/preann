@@ -108,6 +108,8 @@ std::string Enumerations::crossoverAlgorithmToString(
 std::string Enumerations::resetAlgorithmToString(unsigned resetAlgorithm)
 {
     switch ((ResetAlgorithm)resetAlgorithm) {
+        case RA_DISABLED:
+            return "DISABLED";
         case RA_PER_INDIVIDUAL:
             return "PER_INDIVIDUAL";
         case RA_PROBABILISTIC:

@@ -49,9 +49,9 @@ typedef enum
 #define MUTATION_ALGORITHM_DIM 3
 typedef enum
 {
-    RA_PER_INDIVIDUAL, RA_PROBABILISTIC
+    RA_DISABLED, RA_PER_INDIVIDUAL, RA_PROBABILISTIC
 } ResetAlgorithm;
-#define RESET_ALGORITHM_DIM 2
+#define RESET_ALGORITHM_DIM 3
 typedef enum
 {
     BO_OR, BO_AND, BO_XOR
