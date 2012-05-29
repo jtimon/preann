@@ -57,13 +57,18 @@ typedef enum
     BO_OR, BO_AND, BO_XOR
 } BinaryOperation;
 #define BINARY_OPERATION_DIM 3
+typedef enum
+{
+    TT_BIN_OR, TT_BIN_AND, TT_BIN_XOR, TT_REVERSI
+} TestTask;
+#define TEST_TASKS_DIM 4
 
 typedef enum
 {
     ET_BUFFER, ET_IMPLEMENTATION, ET_FUNCTION, ET_SELECTION_ALGORITHM, ET_CROSS_LEVEL, ET_CROSS_ALG,
-    ET_MUTATION_ALG, ET_BINARY_OPERATION, ET_RESET_ALG
+    ET_MUTATION_ALG, ET_RESET_ALG, ET_BINARY_OPERATION, ET_TEST_TASKS
 } EnumType;
-#define ENUM_TYPE_DIM 9
+#define ENUM_TYPE_DIM 10
 
 class Enumerations
 {
@@ -89,6 +94,7 @@ public:
     static std::string enumTypeToString(EnumType enumType);
     static std::string functionTypeToString(unsigned functionType);
     static std::string binaryOperationToString(unsigned binaryOperation);
+    static std::string testTaskToString(unsigned testTask);
 };
 
 #endif /* ENUMERATIONS_H_ */

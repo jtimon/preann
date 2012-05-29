@@ -26,6 +26,10 @@ unsigned Enumerations::enumTypeDim(EnumType enumType)
             return MUTATION_ALGORITHM_DIM;
         case ET_RESET_ALG:
             return RESET_ALGORITHM_DIM;
+        case ET_BINARY_OPERATION:
+            return BINARY_OPERATION_DIM;
+        case ET_TEST_TASKS:
+            return TEST_TASKS_DIM;
     }
     string error = "enumTypeDim EnumType " + to_string(enumType) + "not found.";
     throw error;
@@ -52,8 +56,27 @@ std::string Enumerations::toString(EnumType enumType, unsigned enumValue)
             return Enumerations::resetAlgorithmToString(enumValue);
         case ET_BINARY_OPERATION:
             return Enumerations::binaryOperationToString(enumValue);
+        case ET_TEST_TASKS:
+            return Enumerations::testTaskToString(enumValue);
     }
     string error = " Enumerations::toString EnumType not found";
+    throw error;
+}
+
+std::string Enumerations::testTaskToString(unsigned testTask)
+{
+    switch ((TestTask)testTask) {
+        case TT_BIN_AND:
+            return "AND";
+        case TT_BIN_OR:
+            return "OR";
+        case TT_BIN_XOR:
+            return "XOR";
+        case TT_REVERSI:
+            return "REVERSI";
+    }
+    string error =
+            " Enumerations::testTaskToString TestTask not found";
     throw error;
 }
 
@@ -212,8 +235,6 @@ std::string Enumerations::selectionAlgorithmToString(
 std::string Enumerations::enumTypeToString(EnumType enumType)
 {
     switch (enumType) {
-        case ET_BINARY_OPERATION:
-            return "Binary_operation";
         case ET_BUFFER:
             return "Buffer_type";
         case ET_SELECTION_ALGORITHM:
@@ -230,6 +251,10 @@ std::string Enumerations::enumTypeToString(EnumType enumType)
             return "Mutation_algorithm";
         case ET_RESET_ALG:
             return "Reset_algorithm";
+        case ET_BINARY_OPERATION:
+            return "Binary_operation";
+        case ET_TEST_TASKS:
+            return "Task";
     }
     string error = " Enumerations::enumTypeToString EnumType not found";
     throw error;
