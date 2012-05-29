@@ -10,6 +10,7 @@
 Individual::Individual(ImplementationType implementationType) :
     NeuralNet(implementationType)
 {
+    fitness = 0;
 }
 
 Individual::~Individual()
