@@ -7,27 +7,27 @@
 
 #include "population.h"
 
-const string Population::SIZE = "__Population_size";
-const string Population::NUM_PRESERVE = "__Population_numPreserve";
-const string Population::NUM_SELECTION = "__Population_numSelection";
-const string Population::NUM_CROSSOVER = "__Population_numCrossover";
+const string Population::SIZE = "populationSize";
+const string Population::NUM_PRESERVE = "populationNumPreserve";
+const string Population::NUM_SELECTION = "populationNumSelection";
+const string Population::NUM_CROSSOVER = "populationNumCrossover";
 
-const string Population::NUM_ROULETTE_WHEEL = "__Population_numRouletteWheel";
-const string Population::ROULETTE_WHEEL_BASE = "__Population_rouletteWheelBase";
-const string Population::NUM_TRUNCATION = "__Population_numTruncation";
-const string Population::NUM_TOURNAMENT = "__Population_numTournament";
-const string Population::TOURNAMENT_SIZE = "__Population_tournamentSize";
-const string Population::NUM_RANKING = "__Population_numRanking";
-//const string Population::AAAAAAAA = "__Population_AAAA";
-const string Population::RANKING_BASE = "__Population_rankingBase";
-const string Population::RANKING_STEP = "__Population_rankingStep";
-const string Population::UNIFORM_CROSS_PROB = "__Population_uniformCrossProb";
-const string Population::MULTIPOINT_NUM = "__Population_numPoints";
-const string Population::MUTATION_NUM = "__Population_mutationsPerIndividual";
-const string Population::MUTATION_RANGE = "__Population_mutationRange";
-const string Population::MUTATION_PROB = "__Population_mutationProb";
-const string Population::RESET_NUM = "__Population_resetNumResets";
-const string Population::RESET_PROB = "__Population_resetProb";
+const string Population::NUM_ROULETTE_WHEEL = "populationNumRouletteWheel";
+const string Population::ROULETTE_WHEEL_BASE = "populationRouletteWheelBase";
+const string Population::NUM_TRUNCATION = "populationNumTruncation";
+const string Population::NUM_TOURNAMENT = "populationNumTournament";
+const string Population::TOURNAMENT_SIZE = "populationTournamentSize";
+const string Population::NUM_RANKING = "populationNumRanking";
+//const string Population::AAAAAAAA = "population_AAAA";
+const string Population::RANKING_BASE = "populationRankingBase";
+const string Population::RANKING_STEP = "populationRankingStep";
+const string Population::UNIFORM_CROSS_PROB = "populationUniformCrossProb";
+const string Population::MULTIPOINT_NUM = "populationNumPoints";
+const string Population::MUTATION_NUM = "populationMutationsPerIndividual";
+const string Population::MUTATION_RANGE = "populationMutationRange";
+const string Population::MUTATION_PROB = "populationMutationProb";
+const string Population::RESET_NUM = "populationResetNumResets";
+const string Population::RESET_PROB = "populationResetProb";
 
 Population::Population(Population* other)
 {
