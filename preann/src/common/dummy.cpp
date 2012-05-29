@@ -6,12 +6,15 @@
  */
 
 #include "dummy.h"
+#include "tasks/binaryTask.h"
+#include "tasks/reversiTask.h"
 
 const string Dummy::SIZE = "Size";
 const string Dummy::WEIGHS_RANGE = "__initialWeighsRange";
 const string Dummy::OUTPUT_SIZE = "__outputSize";
 const string Dummy::NUM_INPUTS = "__numInputs";
 const string Dummy::NUM_LAYERS = "__numLayers";
+const string Dummy::NUM_TESTS = "__numTests";
 
 Interface* Dummy::interface(ParametersMap* parametersMap)
 {
@@ -132,5 +135,34 @@ Individual* Dummy::individual(ParametersMap* parametersMap, Interface* input)
     addConnections(individual, input, numInputs, numLayers, size, bufferType, functionType);
 
     return individual;
+}
+
+Task* Dummy::task(ParametersMap* parametersMap)
+{
+    Task* task;
+    TestTask testTask = (TestTask) parametersMap->getNumber(Enumerations::enumTypeToString(ET_TEST_TASKS));
+    unsigned size = (unsigned) (parametersMap->getNumber(Dummy::SIZE));
+    unsigned numTest;
+
+    switch (testTask) {
+        case TT_BIN_OR:
+            task = new BinaryTask(BO_OR, size);
+            break;
+        case TT_BIN_AND:
+            task = new BinaryTask(BO_AND, size);
+            break;
+        case TT_BIN_XOR:
+            task = new BinaryTask(BO_XOR, size);
+            break;
+        case TT_REVERSI:
+            numTest = (unsigned) (parametersMap->getNumber(Dummy::NUM_TESTS));
+            task = new ReversiTask(size, numTest);
+            break;
+        default:
+            string error = "Dummy::task not suported task " + to_string(testTask);
+            throw error;
+    }
+
+    return task;
 }
 

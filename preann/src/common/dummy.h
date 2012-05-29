@@ -10,7 +10,7 @@
 
 #include "loop/parametersMap.h"
 #include "neural/neuralNet.h"
-#include "genetic/individual.h"
+#include "genetic/task.h"
 
 class Dummy
 {
@@ -26,6 +26,7 @@ public:
     static const string OUTPUT_SIZE;
     static const string NUM_INPUTS;
     static const string NUM_LAYERS;
+    static const string NUM_TESTS;
 
     static Interface* interface(ParametersMap* parametersMap);
     static Buffer* buffer(ParametersMap* parametersMap);
@@ -33,6 +34,7 @@ public:
     static Layer* layer(ParametersMap* parametersMap, Buffer* input);
     static NeuralNet* neuralNet(ParametersMap* parametersMap, Interface* input);
     static Individual* individual(ParametersMap* parametersMap, Interface* input);
+    static Task* task(ParametersMap* parametersMap);
 
 };
 
