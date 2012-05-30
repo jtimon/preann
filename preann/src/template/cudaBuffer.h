@@ -28,13 +28,13 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             }
         }
 
-        virtual void copyFromImpl(Interface *interface)
+        virtual void _copyFrom(Interface *interface)
         {
             cuda_copyToDevice(data, interface->getDataPointer(),
                     interface->getByteSize());
         }
 
-        virtual void copyToImpl(Interface *interface)
+        virtual void _copyTo(Interface *interface)
         {
             cuda_copyToHost(interface->getDataPointer(), data,
                     this->getByteSize());

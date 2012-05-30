@@ -26,12 +26,12 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             }
         }
 
-        virtual void copyFromImpl(Interface* interface)
+        virtual void _copyFrom(Interface* interface)
         {
             memcpy(data, interface->getDataPointer(), interface->getByteSize());
         }
 
-        virtual void copyToImpl(Interface* interface)
+        virtual void _copyTo(Interface* interface)
         {
             memcpy(interface->getDataPointer(), data, this->getByteSize());
         }

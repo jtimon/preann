@@ -9,7 +9,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             bufferTypeTempl, c_typeTempl>
     {
     protected:
-        virtual void copyFromImpl(Interface* interface)
+        virtual void _copyFrom(Interface* interface)
         {
             unsigned offsetPerInput =
                     XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(
@@ -43,13 +43,13 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                 case BT_SIGN:
                     {
                         std::string error =
-                                "XmmConnection::copyFromImpl is not implemented for BufferType BIT nor SIGN.";
+                                "XmmConnection::_copyFrom is not implemented for BufferType BIT nor SIGN.";
                         throw error;
                     }
             }
         }
 
-        virtual void copyToImpl(Interface* interface)
+        virtual void _copyTo(Interface* interface)
         {
             unsigned offsetPerInput =
                     XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(
@@ -83,7 +83,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                 case BT_SIGN:
                     {
                         std::string error =
-                                "XmmConnection::copyToImpl is not implemented for BufferType BIT nor SIGN.";
+                                "XmmConnection::_copyTo is not implemented for BufferType BIT nor SIGN.";
                         throw error;
                     }
             }

@@ -41,8 +41,8 @@ protected:
     {
     }
     ;
-    virtual void copyFromImpl(Interface* interface) = 0;
-    virtual void copyToImpl(Interface* interface) = 0;
+    virtual void _copyFrom(Interface* interface) = 0;
+    virtual void _copyTo(Interface* interface) = 0;
 public:
     virtual ~Buffer()
     {
@@ -51,7 +51,9 @@ public:
     virtual ImplementationType getImplementationType() = 0;
     virtual BufferType getBufferType() = 0;
 
-    virtual Buffer* clone() = 0;
+    virtual void reset() = 0;
+
+    //TODO mover a Connection
     virtual void activation(Buffer* results, FunctionType functionType) = 0;
 
     void copyFromInterface(Interface* interface);
@@ -74,13 +76,13 @@ public:
     template<class c_typeTempl>
         c_typeTempl* getDataPointer2()
         {
-            return (c_typeTempl*)data;
+            return (c_typeTempl*) data;
         }
 protected:
     template<class c_typeTempl>
         void SetValueToAnArray(void* array, unsigned size, c_typeTempl value)
         {
-            c_typeTempl* castedArray = (c_typeTempl*)array;
+            c_typeTempl* castedArray = (c_typeTempl*) array;
             for (unsigned i = 0; i < size; i++) {
                 castedArray[i] = value;
             }

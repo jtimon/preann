@@ -18,7 +18,7 @@ void Buffer::copyFromInterface(Interface* interface)
                 "The Type of the Interface is different than the Buffer Type.";
         throw error;
     }
-    copyFromImpl(interface);
+    _copyFrom(interface);
 }
 
 void Buffer::copyToInterface(Interface* interface)
@@ -32,7 +32,7 @@ void Buffer::copyToInterface(Interface* interface)
                 "The Type of the Interface is different than the Buffer Type.";
         throw error;
     }
-    copyToImpl(interface);
+    _copyTo(interface);
 }
 
 void* Buffer::getDataPointer()
@@ -48,7 +48,7 @@ unsigned Buffer::getSize()
 Interface* Buffer::toInterface()
 {
     Interface* toReturn = new Interface(getSize(), this->getBufferType());
-    this->copyToImpl(toReturn);
+    this->_copyTo(toReturn);
     return toReturn;
 }
 
@@ -103,7 +103,7 @@ void Buffer::random(float range)
 {
     Interface* interface = this->toInterface();
     interface->random(range);
-    this->copyFromImpl(interface);
+    this->_copyFrom(interface);
     delete (interface);
 }
 

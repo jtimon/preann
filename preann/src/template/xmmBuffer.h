@@ -87,7 +87,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             }
         }
 
-        virtual void copyFromImpl(Interface* interface)
+        virtual void _copyFrom(Interface* interface)
         {
             switch (bufferTypeTempl) {
                 default:
@@ -101,7 +101,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             }
         }
 
-        virtual void copyToImpl(Interface* interface)
+        virtual void _copyTo(Interface* interface)
         {
             switch (bufferTypeTempl) {
                 default:

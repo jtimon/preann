@@ -10,15 +10,15 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
     {
     protected:
         //redefined from CudaBuffer
-        virtual void copyFromImpl(Interface* interface)
+        virtual void _copyFrom(Interface* interface)
         {
             interface->transposeMatrix(tInput->getSize());
-            CudaBuffer<bufferTypeTempl, c_typeTempl>::copyFromImpl(interface);
+            CudaBuffer<bufferTypeTempl, c_typeTempl>::_copyFrom(interface);
         }
 
-        virtual void copyToImpl(Interface* interface)
+        virtual void _copyTo(Interface* interface)
         {
-            CudaBuffer<bufferTypeTempl, c_typeTempl>::copyToImpl(interface);
+            CudaBuffer<bufferTypeTempl, c_typeTempl>::_copyTo(interface);
             interface->transposeMatrix(tSize / tInput->getSize());
         }
 
