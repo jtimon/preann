@@ -32,7 +32,7 @@ InputLayer::~InputLayer()
 
 ImplementationType InputLayer::getImplementationType()
 {
-    output->getImplementationType();
+    return output->getImplementationType();
 }
 
 void InputLayer::addInput(Buffer *input)
