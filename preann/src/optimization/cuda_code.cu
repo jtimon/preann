@@ -258,7 +258,7 @@ void mutateByteKernel(unsigned char* buffer, unsigned pos, int mutation)
     }
 }
 
-extern "C" void cuda_mutate(void* buffer, unsigned pos, float mutation,
+extern "C" void cuda_mutateWeigh(void* buffer, unsigned pos, float mutation,
         BufferType bufferType)
 {
     switch (bufferType) {
@@ -272,13 +272,13 @@ extern "C" void cuda_mutate(void* buffer, unsigned pos, float mutation,
         case BT_SIGN:
             {
                 std::string error =
-                        "cuda_mutate is not implemented for BufferType BIT nor SIGN.";
+                        "cuda_mutateWeigh is not implemented for BufferType BIT nor SIGN.";
                 throw error;
             }
     }
 }
 
-extern "C" void cuda_reset(void* buffer, unsigned pos, BufferType bufferType)
+extern "C" void cuda_resetWeigh(void* buffer, unsigned pos, BufferType bufferType)
 {
     switch (bufferType) {
         case BT_BYTE:
@@ -291,7 +291,7 @@ extern "C" void cuda_reset(void* buffer, unsigned pos, BufferType bufferType)
         case BT_SIGN:
             {
                 std::string error =
-                        "cuda_reset is not implemented for BufferType BIT nor SIGN.";
+                        "cuda_resetWeigh is not implemented for BufferType BIT nor SIGN.";
                 throw error;
             }
     }

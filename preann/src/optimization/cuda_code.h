@@ -31,9 +31,9 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr,
         unsigned input_size, BufferType inputType, unsigned output_size,
         void* weighs, float* results, unsigned block_size);
 
-extern "C" void cuda_mutate(void* buffer, unsigned pos, float mutation,
+extern "C" void cuda_mutateWeigh(void* buffer, unsigned pos, float mutation,
         BufferType bufferType);
-extern "C" void cuda_reset(void* buffer, unsigned pos, BufferType bufferType);
+extern "C" void cuda_resetWeigh(void* buffer, unsigned pos, BufferType bufferType);
 extern "C" void cuda_crossover(void* buffer1, void* buffer2,
         unsigned* bitBuffer, unsigned size, BufferType bufferType,
         unsigned block_size);
