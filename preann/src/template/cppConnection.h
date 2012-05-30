@@ -8,7 +8,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
     class CppConnection : public virtual FullConnection, public CppBuffer<bufferTypeTempl, c_typeTempl>
     {
     protected:
-        virtual void mutateImpl(unsigned pos, float mutation)
+        virtual void _mutateWeigh(unsigned pos, float mutation)
         {
             switch (bufferTypeTempl) {
                 case BT_BYTE:
@@ -37,7 +37,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             }
         }
 
-        virtual void resetConnectionImpl(unsigned pos)
+        virtual void _resetWeigh(unsigned pos)
         {
             switch (bufferTypeTempl) {
                 case BT_BYTE:
@@ -58,14 +58,14 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             }
         }
 
-        virtual void crossoverImpl(Buffer* other, Interface* bitBuffer)
+        virtual void _crossover(Buffer* other, Interface* bitBuffer)
         {
             switch (bufferTypeTempl) {
                 case BT_BIT:
                 case BT_SIGN:
                     {
                         std::string error =
-                                "CppBuffer::crossoverImpl is not implemented for BufferType BIT nor SIGN.";
+                                "CppBuffer::_crossover is not implemented for BufferType BIT nor SIGN.";
                         throw error;
                     }
                 default:
@@ -99,7 +99,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             tInput = input;
         }
 
-        virtual void calculateAndAddTo(Buffer* resultsVect)
+        virtual void _calculateAndAddTo(Buffer* resultsVect)
         {
             float* results = (float*) resultsVect->getDataPointer();
             unsigned inputSize = tInput->getSize();

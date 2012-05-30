@@ -8,25 +8,22 @@ class Connection : virtual public Buffer
 protected:
     Buffer* tInput;
 
-    virtual void mutateImpl(unsigned pos, float mutation) = 0;
-    virtual void resetConnectionImpl(unsigned pos) = 0;
-    virtual void crossoverImpl(Buffer* other, Interface* bitBuffer) = 0;
+    virtual void _calculateAndAddTo(Buffer* results) = 0;
+    virtual void _crossover(Buffer* other, Interface* bitBuffer) = 0;
+    virtual void _mutateWeigh(unsigned pos, float mutation) = 0;
+    virtual void _resetWeigh(unsigned pos) = 0;
 public:
-    Connection()
-    {
-    }
-    ;
-    virtual ~Connection()
-    {
-    }
-    ;
+    Connection();
+//    Connection(Buffer* input);
+//    Connection(Buffer* input, bool oneToOne);
+    virtual ~Connection();
 
     Buffer* getInput();
 
-    virtual void calculateAndAddTo(Buffer* results) = 0;
+    void calculateAndAddTo(Buffer* results);
+    void crossover(Connection* other, Interface* bitBuffer);
     void mutate(unsigned pos, float mutation);
     void reset(unsigned pos);
-    void crossover(Connection* other, Interface* bitBuffer);
 };
 
 #endif /* CONNECTION_H_ */

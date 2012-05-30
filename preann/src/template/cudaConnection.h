@@ -16,17 +16,17 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             bufferTypeTempl, c_typeTempl>
     {
     protected:
-        virtual void mutateImpl(unsigned pos, float mutation)
+        virtual void _mutateWeigh(unsigned pos, float mutation)
         {
-            cuda_mutate(data, pos, mutation, bufferTypeTempl);
+            cuda_mutateWeigh(data, pos, mutation, bufferTypeTempl);
         }
 
-        virtual void resetConnectionImpl(unsigned pos)
+        virtual void _resetWeigh(unsigned pos)
         {
-            cuda_reset(data, pos, bufferTypeTempl);
+            cuda_resetWeigh(data, pos, bufferTypeTempl);
         }
 
-        virtual void crossoverImpl(Buffer* other, Interface* bitBuffer)
+        virtual void _crossover(Buffer* other, Interface* bitBuffer)
         {
             CudaBuffer<bufferTypeTempl, c_typeTempl> cudaBitBuffer(bitBuffer,
                     Cuda_Threads_Per_Block);
@@ -48,7 +48,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         }
         ;
 
-        virtual void calculateAndAddTo(Buffer* results)
+        virtual void _calculateAndAddTo(Buffer* results)
         {
             void* inputWeighs = this->getDataPointer();
             float* resultsPtr = (float*)results->getDataPointer();

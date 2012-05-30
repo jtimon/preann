@@ -31,17 +31,17 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             return outputPos + (inputPos * outputSize);
         }
 
-        virtual void mutateImpl(unsigned pos, float mutation)
+        virtual void _mutateWeigh(unsigned pos, float mutation)
         {
-            cuda_mutate(data, invertPos(pos), mutation, bufferTypeTempl);
+            cuda_mutateWeigh(data, invertPos(pos), mutation, bufferTypeTempl);
         }
 
-        virtual void resetConnectionImpl(unsigned pos)
+        virtual void _resetWeigh(unsigned pos)
         {
-            cuda_reset(data, invertPos(pos), bufferTypeTempl);
+            cuda_resetWeigh(data, invertPos(pos), bufferTypeTempl);
         }
 
-        virtual void crossoverImpl(Buffer* other, Interface* bitBuffer)
+        virtual void _crossover(Buffer* other, Interface* bitBuffer)
         {
             Interface invertedBitBuffer = Interface(bitBuffer);
             invertedBitBuffer.transposeMatrix(tInput->getSize());
@@ -72,7 +72,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         }
         ;
 
-        virtual void calculateAndAddTo(Buffer* results)
+        virtual void _calculateAndAddTo(Buffer* results)
         {
             void* inputWeighs = this->getDataPointer();
             float* resultsPtr = (float*)results->getDataPointer();

@@ -31,7 +31,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         }
         ;
 
-        virtual void calculateAndAddTo(Buffer* results)
+        virtual void _calculateAndAddTo(Buffer* results)
         {
             void* inputWeighs = this->getDataPointer();
             float* resultsPtr = (float*)results->getDataPointer();
