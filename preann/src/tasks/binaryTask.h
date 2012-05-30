@@ -20,6 +20,7 @@ protected:
     Interface* tOutput;
 
     bool bitVectorIncrement(Interface* bitVector);
+    unsigned outputDiff(Interface* individualOutput);
     virtual float getGoal();
 public:
     BinaryTask(BinaryOperation binaryOperation, unsigned size);

@@ -67,9 +67,31 @@ float BinaryTask::getGoal()
     }
 }
 
+unsigned BinaryTask::outputDiff(Interface* individualOutput)
+{
+    unsigned differences = 0;
+
+    unsigned size = tOutput->getSize();
+    for (unsigned i = 0; i < size; ++i) {
+        if (tOutput->getElement(i) == 0) {
+            if (individualOutput->getElement(i) >= 0.5) {
+                ++differences;
+            }
+        } else {
+            if (individualOutput->getElement(i) < 0.5) {
+                ++differences;
+            }
+        }
+    }
+
+    return differences;
+}
+
 void BinaryTask::test(Individual *individual)
 {
     float points = getGoal();
+    Interface* individualOutput = individual->getOutput(individual->getNumLayers() - 1);
+
     if (tNumTests == 0) {
 
         tInput1->reset();
@@ -78,8 +100,7 @@ void BinaryTask::test(Individual *individual)
             do {
                 doOperation();
                 individual->calculateOutput();
-                Interface* individualOut = individual->getOutput(individual->getNumLayers() - 1);
-                points -= individualOut->compareTo(tOutput);
+                points -= outputDiff(individualOutput);
 
             } while (bitVectorIncrement(tInput2));
         } while (bitVectorIncrement(tInput1));
@@ -88,12 +109,13 @@ void BinaryTask::test(Individual *individual)
         for (unsigned i = 0; i < tNumTests; ++i) {
             tInput1->random(1);
             tInput2->random(1);
+
             doOperation();
             individual->calculateOutput();
-            Interface* individualOut = individual->getOutput(individual->getNumLayers() - 1);
-            points -= individualOut->compareTo(tOutput);
+            points -= outputDiff(individualOutput);
         }
     }
+//    cout << " Goal " << getGoal() << " Fitness " << points << endl;
     individual->setFitness(points);
 }
 
