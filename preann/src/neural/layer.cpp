@@ -2,13 +2,13 @@
 
 ImplementationType Layer::getImplementationType()
 {
-    return output->getImplementationType();
+    return tOutput->getImplementationType();
 }
 
 Layer::Layer()
 {
     this->functionType = FT_IDENTITY;
-    output = NULL;
+    tOutput = NULL;
     thresholds = NULL;
     tOuputInterface = NULL;
 }
@@ -17,23 +17,23 @@ Layer::Layer(unsigned size, BufferType outputType, FunctionType functionType,
              ImplementationType implementationType)
 {
     this->functionType = functionType;
-    output = Factory::newBuffer(size, outputType, implementationType);
-    thresholds = Factory::newThresholds(output, implementationType);
+    tOutput = Factory::newBuffer(size, outputType, implementationType);
+    thresholds = Factory::newThresholds(tOutput, implementationType);
     tOuputInterface = NULL;
 }
 
 Layer::Layer(FILE* stream, ImplementationType implementationType)
 {
     fread(&functionType, sizeof(FunctionType), 1, stream);
-    output = Factory::newBuffer(stream, implementationType);
-    thresholds = Factory::newThresholds(output, implementationType);
+    tOutput = Factory::newBuffer(stream, implementationType);
+    thresholds = Factory::newThresholds(tOutput, implementationType);
     tOuputInterface = NULL;
 }
 
 void Layer::save(FILE* stream)
 {
     fwrite(&functionType, sizeof(FunctionType), 1, stream);
-    output->save(stream);
+    tOutput->save(stream);
 }
 
 Layer::~Layer()
@@ -42,8 +42,8 @@ Layer::~Layer()
     if (thresholds) {
         delete (thresholds);
     }
-    if (output) {
-        delete (output);
+    if (tOutput) {
+        delete (tOutput);
     }
     if (tOuputInterface) {
         delete (tOuputInterface);
@@ -77,15 +77,15 @@ void Layer::saveWeighs(FILE* stream)
 Interface* Layer::getOutputInterface()
 {
     if (tOuputInterface == NULL) {
-        tOuputInterface = new Interface(output->getSize(), output->getBufferType());
-        output->copyToInterface(tOuputInterface);
+        tOuputInterface = new Interface(tOutput->getSize(), tOutput->getBufferType());
+        tOutput->copyToInterface(tOuputInterface);
     }
     return tOuputInterface;
 }
 
 void Layer::calculateOutput()
 {
-    if (!output) {
+    if (!tOutput) {
         std::string error = "Cannot calculate the output of a Layer without output.";
         throw error;
     }
@@ -97,17 +97,17 @@ void Layer::calculateOutput()
         connections[i]->calculateAndAddTo(results);
     }
 
-    output->activation(results, functionType);
+    tOutput->activation(results, functionType);
     //	thresholds->activation(results, functionType, output);
     if (tOuputInterface != NULL) {
-        output->copyToInterface(tOuputInterface);
+        tOutput->copyToInterface(tOuputInterface);
     }
     delete (results);
 }
 
 void Layer::addInput(Buffer* input)
 {
-    Connection* newConnection = Factory::newConnection(input, output->getSize());
+    Connection* newConnection = Factory::newConnection(input, tOutput->getSize());
     connections.push_back(newConnection);
 }
 
@@ -118,7 +118,7 @@ void Layer::randomWeighs(float range)
         aux.random(range);
         connections[i]->copyFromInterface(&aux);
     }
-    Interface aux(output->getSize(), BT_FLOAT);
+    Interface aux(tOutput->getSize(), BT_FLOAT);
     aux.random(range);
     thresholds->copyFromInterface(&aux);
 }
@@ -135,7 +135,7 @@ Buffer* Layer::getInput(unsigned pos)
 
 Buffer* Layer::getOutput()
 {
-    return output;
+    return tOutput;
 }
 
 Connection* Layer::getThresholds()

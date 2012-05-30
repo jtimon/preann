@@ -11,7 +11,7 @@ protected:
     std::vector<Connection*> connections;
 
     Connection* thresholds;
-    Buffer* output;
+    Buffer* tOutput;
     Interface* tOuputInterface;
     FunctionType functionType;
 public:
