@@ -261,6 +261,8 @@ class ForAveragesGenericRepeater : public LoopFunction
     LoopFunction* tFillArrayRepeater;
     Loop* tToAverage;
     PlotData* tPlotData;
+    unsigned tToAverageLeafs;
+
 public:
     ForAveragesGenericRepeater(LoopFunction* fillArrayRepeater, ParametersMap* parameters, string label,
                                Loop* toAverage, PlotData* plotData)
@@ -269,6 +271,7 @@ public:
         tFillArrayRepeater = fillArrayRepeater;
         tToAverage = toAverage;
         tPlotData = plotData;
+        tToAverageLeafs = tToAverage->getNumLeafs();
     }
 protected:
     virtual void __executeImpl()
@@ -281,9 +284,8 @@ protected:
         // Fill Y vector
         tToAverage->repeatFunction(tFillArrayRepeater, tParameters);
 
-        unsigned numLeafs = tToAverage->getNumLeafs();
         for (unsigned i = 0; i < tPlotData->arraySize; ++i) {
-            tPlotData->yArray[i] = tPlotData->yArray[i] / numLeafs;
+            tPlotData->yArray[i] = tPlotData->yArray[i] / tToAverageLeafs;
         }
     }
 };
@@ -365,6 +367,9 @@ void Plot::separateLoops(std::vector<Loop*>& loops, Loop* topLoop)
 void Plot::_customCombAverageOrFilesPlot(std::string title, LoopFunction* fillArrayRepeater, Loop* linesLoop,
                                          bool loopFiles, Loop* averagesLoop, Loop* otherLoop)
 {
+    check(otherLoop == NULL,
+          "Plot::_customCombAverageOrFilesPlot otherLoop cannot be null, there must be more than one combination possible.");
+
     if (loopFiles) {
         if (averagesLoop == NULL) {
             RangeLoop auxLoop("aux_average", 1, 2, 1);
@@ -420,6 +425,7 @@ void Plot::_customCombinationsPlot(std::string title, LoopFunction* fillArrayRep
                         }
                     }
                     string tittleAux = title + "_" + coloursLoop->getKey() + "_" + pointsLoop->getKey();
+                    cout << "tittleAux " << tittleAux << endl;
                     _customCombAverageOrFilesPlot(tittleAux, fillArrayRepeater, linesLoop, loopFiles,
                                                   averagesLoop, otherLoop);
                 }
