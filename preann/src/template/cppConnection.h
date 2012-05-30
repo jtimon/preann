@@ -1,11 +1,11 @@
 #ifndef CPPCONNECTION_H_
 #define CPPCONNECTION_H_
 
-#include "neural/fullConnection.h"
+#include "neural/connection.h"
 #include "cppBuffer.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
-    class CppConnection : public virtual FullConnection, public CppBuffer<bufferTypeTempl, c_typeTempl>
+    class CppConnection : public virtual Connection, public CppBuffer<bufferTypeTempl, c_typeTempl>
     {
     protected:
         virtual void _mutateWeigh(unsigned pos, float mutation)

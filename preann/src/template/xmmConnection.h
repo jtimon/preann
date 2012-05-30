@@ -5,15 +5,13 @@
 #include "xmmBuffer.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
-    class XmmConnection : virtual public FullConnection, public XmmBuffer<
-            bufferTypeTempl, c_typeTempl>
+    class XmmConnection : virtual public Connection, public XmmBuffer<bufferTypeTempl, c_typeTempl>
     {
     protected:
         virtual void _copyFrom(Interface* interface)
         {
-            unsigned offsetPerInput =
-                    XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(
-                            tInput->getSize(), bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
+                                                                                           bufferTypeTempl);
             unsigned offset = 0;
             unsigned inputSize = tInput->getSize();
             unsigned outputSize = tSize / inputSize;
@@ -23,8 +21,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                 case BT_BYTE:
                     for (unsigned j = 0; j < outputSize; j++) {
                         for (unsigned i = 0; i < inputSize; i++) {
-                            ((c_typeTempl*)(data) + offset)[i]
-                                    = interface->getElement(elem++);
+                            ((c_typeTempl*) (data) + offset)[i] = interface->getElement(elem++);
                         }
                         offset += offsetPerInput;
                     }
@@ -33,8 +30,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
                     for (unsigned j = 0; j < outputSize; j++) {
                         for (unsigned i = 0; i < inputSize; i++) {
-                            ((float*)(data) + offset)[i]
-                                    = interface->getElement(elem++);
+                            ((float*) (data) + offset)[i] = interface->getElement(elem++);
                         }
                         offset += offsetPerInput;
                     }
@@ -51,9 +47,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual void _copyTo(Interface* interface)
         {
-            unsigned offsetPerInput =
-                    XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(
-                            tInput->getSize(), bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
+                                                                                           bufferTypeTempl);
             unsigned offset = 0;
             unsigned inputSize = tInput->getSize();
             unsigned outputSize = tSize / inputSize;
@@ -63,8 +58,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                 case BT_BYTE:
                     for (unsigned j = 0; j < outputSize; j++) {
                         for (unsigned i = 0; i < inputSize; i++) {
-                            interface->setElement(elem++, ((c_typeTempl*)(data)
-                                    + offset)[i]);
+                            interface->setElement(elem++, ((c_typeTempl*) (data) + offset)[i]);
                         }
                         offset += offsetPerInput;
                     }
@@ -73,8 +67,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
                     for (unsigned j = 0; j < outputSize; j++) {
                         for (unsigned i = 0; i < inputSize; i++) {
-                            interface->setElement(elem++, ((c_typeTempl*)(data)
-                                    + offset)[i]);
+                            interface->setElement(elem++, ((c_typeTempl*) (data) + offset)[i]);
                         }
                         offset += offsetPerInput;
                     }
@@ -91,9 +84,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual void _mutateWeigh(unsigned pos, float mutation)
         {
-            unsigned offsetPerInput =
-                    XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(
-                            tInput->getSize(), bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
+                                                                                           bufferTypeTempl);
             unsigned outputPos = pos / tInput->getSize();
             unsigned inputPos = pos % tInput->getSize();
             unsigned elem = (outputPos * offsetPerInput) + inputPos;
@@ -101,8 +93,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             switch (bufferTypeTempl) {
                 case BT_BYTE:
                     {
-                        c_typeTempl *weigh = &(((c_typeTempl*)(data))[elem]);
-                        int result = (int)(mutation) + *weigh;
+                        c_typeTempl *weigh = &(((c_typeTempl*) (data))[elem]);
+                        int result = (int) (mutation) + *weigh;
                         if (result <= 0) {
                             *weigh = 0;
                         } else {
@@ -118,7 +110,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                 case BT_FLOAT:
                     offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
                     elem = (outputPos * offsetPerInput) + inputPos;
-                    ((c_typeTempl*)(data))[elem] += mutation;
+                    ((c_typeTempl*) (data))[elem] += mutation;
                     break;
                 case BT_BIT:
                 case BT_SIGN:
@@ -130,29 +122,27 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual void _resetWeigh(unsigned pos)
         {
-            unsigned offsetPerInput =
-                    XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(
-                            tInput->getSize(), bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
+                                                                                           bufferTypeTempl);
             unsigned outputPos = pos / tInput->getSize();
             unsigned inputPos = pos % tInput->getSize();
             unsigned elem = (outputPos * offsetPerInput) + inputPos;
 
             switch (bufferTypeTempl) {
                 case BT_BYTE:
-                    ((c_typeTempl*)data)[elem] = 128;
+                    ((c_typeTempl*) data)[elem] = 128;
                     break;
                 case BT_FLOAT:
                     {
                         offsetPerInput = offsetPerInput / sizeof(c_typeTempl);
                         elem = (outputPos * offsetPerInput) + inputPos;
-                        ((c_typeTempl*)(data))[elem] = 0;
+                        ((c_typeTempl*) (data))[elem] = 0;
                     }
                     break;
                 case BT_BIT:
                 case BT_SIGN:
-                    std::string
-                            error =
-                                    "XmmConnection::resetConnection is not implemented for BufferType BIT nor SIGN.";
+                    std::string error =
+                            "XmmConnection::resetConnection is not implemented for BufferType BIT nor SIGN.";
                     throw error;
             }
         }
@@ -161,9 +151,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         {
             void* otherWeighs = other->getDataPointer();
 
-            unsigned offsetPerInput =
-                    XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(
-                            tInput->getSize(), bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
+                                                                                           bufferTypeTempl);
             unsigned offset = 0;
             unsigned inputSize = tInput->getSize();
             unsigned outputSize = tSize / inputSize;
@@ -177,12 +166,10 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                         for (unsigned i = 0; i < inputSize; i++) {
 
                             if (bitBuffer->getElement(elem++)) {
-                                auxChar = ((unsigned char*)(data) + offset)[i];
-                                ((unsigned char*)(data) + offset)[i]
-                                        = ((unsigned char*)(otherWeighs)
-                                                + offset)[i];
-                                ((unsigned char*)(otherWeighs) + offset)[i]
-                                        = auxChar;
+                                auxChar = ((unsigned char*) (data) + offset)[i];
+                                ((unsigned char*) (data) + offset)[i] = ((unsigned char*) (otherWeighs)
+                                        + offset)[i];
+                                ((unsigned char*) (otherWeighs) + offset)[i] = auxChar;
                             }
                         }
                         offset += offsetPerInput;
@@ -196,10 +183,9 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                         for (unsigned i = 0; i < inputSize; i++) {
 
                             if (bitBuffer->getElement(elem++)) {
-                                auxFloat = ((float*)(data) + offset)[i];
-                                ((float*)(data) + offset)[i]
-                                        = ((float*)(otherWeighs) + offset)[i];
-                                ((float*)(otherWeighs) + offset)[i] = auxFloat;
+                                auxFloat = ((float*) (data) + offset)[i];
+                                ((float*) (data) + offset)[i] = ((float*) (otherWeighs) + offset)[i];
+                                ((float*) (otherWeighs) + offset)[i] = auxFloat;
                             }
                         }
                         offset += offsetPerInput;
@@ -218,23 +204,22 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             tInput = input;
             this->tSize = input->getSize() * outputSize;
 
-            unsigned byteSize =
-                    XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(
-                            input->getSize(), bufferTypeTempl);
+            unsigned byteSize = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(input->getSize(),
+                                                                                     bufferTypeTempl);
             byteSize *= outputSize;
             data = MemoryManagement::malloc(byteSize);
 
             switch (bufferTypeTempl) {
 
                 case BT_BYTE:
-                    SetValueToAnArray<unsigned char> (data, byteSize, 128);
+                    SetValueToAnArray<unsigned char>(data, byteSize, 128);
                     break;
                 case BT_FLOAT:
-                    SetValueToAnArray<float> (data, byteSize / sizeof(float), 0);
+                    SetValueToAnArray<float>(data, byteSize / sizeof(float), 0);
                     break;
                 case BT_BIT:
                 case BT_SIGN:
-                    SetValueToAnArray<unsigned> (data, byteSize, 0);
+                    SetValueToAnArray<unsigned>(data, byteSize, 0);
                     break;
             }
         }
@@ -247,13 +232,12 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         virtual void _calculateAndAddTo(Buffer* resultsVect)
         {
             void* inputWeighs = this->getDataPointer();
-            float* results = (float*)resultsVect->getDataPointer();
+            float* results = (float*) resultsVect->getDataPointer();
             void* inputPtr = tInput->getDataPointer();
 
             unsigned numLoops;
-            unsigned offsetPerInput =
-                    XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(
-                            tInput->getSize(), bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
+                                                                                           bufferTypeTempl);
             unsigned weighPos = 0;
 
             switch (tInput->getBufferType()) {
@@ -262,8 +246,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     numLoops = ((tInput->getSize() - 1) / FLOATS_PER_BLOCK) + 1;
                     for (unsigned j = 0; j < resultsVect->getSize(); j++) {
                         float auxResult;
-                        XMMreal(inputPtr, numLoops, (((float*)inputWeighs)
-                                + weighPos), auxResult);
+                        XMMreal(inputPtr, numLoops, (((float*) inputWeighs) + weighPos), auxResult);
                         results[j] += auxResult;
                         weighPos += offsetPerInput;
                     }
@@ -272,7 +255,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     numLoops = ((tInput->getSize() - 1) / BYTES_PER_BLOCK) + 1;
                     for (unsigned j = 0; j < resultsVect->getSize(); j++) {
                         results[j] += XMMbinario(inputPtr, numLoops,
-                                (((unsigned char*)inputWeighs) + weighPos));
+                                                 (((unsigned char*) inputWeighs) + weighPos));
                         weighPos += offsetPerInput;
                     }
                     break;
@@ -280,7 +263,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     numLoops = ((tInput->getSize() - 1) / BYTES_PER_BLOCK) + 1;
                     for (unsigned j = 0; j < resultsVect->getSize(); j++) {
                         results[j] += XMMbipolar(inputPtr, numLoops,
-                                (((unsigned char*)inputWeighs) + weighPos));
+                                                 (((unsigned char*) inputWeighs) + weighPos));
                         weighPos += offsetPerInput;
                     }
                     break;
