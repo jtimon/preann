@@ -72,25 +72,26 @@ protected:
     Loop* tCallerLoop;
     unsigned tLeaf;
 
-    LoopFunction(ParametersMap* parameters, string label)
+    void init(ParametersMap* parameters, string label)
     {
-        tFunction = NULL;
         tLabel = label;
         tParameters = parameters;
-
         tLeaf = 0;
         tCallerLoop = NULL;
     }
+
+    LoopFunction(ParametersMap* parameters, string label)
+    {
+        tFunction = NULL;
+
+        init(parameters, label);
+    }
 public:
-    virtual ~LoopFunction(){};
     LoopFunction(GenericLoopFuncPtr functionPtr, ParametersMap* parameters, string label)
     {
         tFunction = functionPtr;
-        tLabel = label;
-        tParameters = parameters;
 
-        tCallerLoop = NULL;
-        tLeaf = 0;
+        init(parameters, label);
     }
 
     virtual void __executeImpl()
@@ -105,17 +106,16 @@ public:
 
     void execute(Loop* callerLoop)
     {
-//        cout << "Execute function... " << tLabel << endl;
-        Util::check(callerLoop == NULL, "LoopFunction::execute " + tLabel + " : The caller Loop cannot be null.");
+//        cout << "Execute function... " << tLabel << " at state " << callerLoop->getState(true) << " Leaf " << tLeaf << endl;
+        Util::check(callerLoop == NULL,
+                    "LoopFunction::execute " + tLabel + " : The caller Loop cannot be null.");
         try {
-//            cout << "--- executing " + tLabel + " at state " + tCallerLoop->getState(false) << endl;
             tCallerLoop = callerLoop;
             __executeImpl();
         } catch (string& e) {
             cout << " while executing " + tLabel + " at state " + tCallerLoop->getState(true) << " : ";
             cout << endl << e << endl;
         }
-//        cout << tCallerLoop->getState(true) << " Leaf " << tLeaf << endl;
         ++tLeaf;
     }
 
