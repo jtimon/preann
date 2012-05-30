@@ -11,8 +11,8 @@ Plot::Plot(string plotPath, RangeLoop* xToPlot, string yLabel)
 {
     plotData.plotPath = plotPath;
 
-    check(xToPlot == NULL, "Plot::initPlotVars : xToPlot cannot be NULL.");
-    check(xToPlot->getDepth() != 1, "Plot::initPlotVars : xToPlot has to have a Depth equal to 1.");
+    Util::check(xToPlot == NULL, "Plot::initPlotVars : xToPlot cannot be NULL.");
+    Util::check(xToPlot->getDepth() != 1, "Plot::initPlotVars : xToPlot has to have a Depth equal to 1.");
 
     plotData.xToPlot = xToPlot;
 
@@ -35,8 +35,9 @@ Plot::~Plot()
 void Plot::validateLinesLoop(Loop* linesLoop)
 {
     // validations
-    check(linesLoop == NULL, "Plot::validateLinesLoop : linesLoop cannot be NULL.");
-    check(linesLoop->getDepth() < 1, "Plot::validateLinesLoop : linesLoop has to have a at least Depth = 1.");
+    Util::check(linesLoop == NULL, "Plot::validateLinesLoop : linesLoop cannot be NULL.");
+    Util::check(linesLoop->getDepth() < 1,
+                "Plot::validateLinesLoop : linesLoop has to have a at least Depth = 1.");
 }
 
 void Plot::resetRangeX(float min, float max, float inc)
@@ -146,6 +147,9 @@ public:
         tPreviousTopBranch = 0;
         tBasePointsToSubstract = 0;
     }
+    virtual ~PreparePlotFunction()
+    {
+    }
 protected:
     virtual void __executeImpl()
     {
@@ -224,6 +228,9 @@ public:
         tFillArrayRepeater = fillArrayRepeater;
         tPlotData = plotData;
     }
+    virtual ~GenericPlotAction()
+    {
+    }
 protected:
     virtual void __executeImpl()
     {
@@ -273,6 +280,9 @@ public:
         tPlotData = plotData;
         tToAverageLeafs = tToAverage->getNumLeafs();
     }
+    virtual ~ForAveragesGenericRepeater()
+    {
+    }
 protected:
     virtual void __executeImpl()
     {
@@ -293,7 +303,7 @@ protected:
 void Plot::_customAveragedPlot(std::string title, LoopFunction* addToArrayRepeater, Loop* linesLoop,
                                Loop* averagesLoop)
 {
-    check(averagesLoop == NULL, "Plot::customAveragedPlot : averagesLoop cannot be NULL.");
+    Util::check(averagesLoop == NULL, "Plot::customAveragedPlot : averagesLoop cannot be NULL.");
 
     ForAveragesGenericRepeater forAvergaesRepeater(addToArrayRepeater, &parameters, title, averagesLoop,
                                                    &plotData);
@@ -317,6 +327,9 @@ public:
         tLinesLoop = linesLoop;
         tPlotData = plotData;
     }
+    virtual ~ForFilesGenericRepeater()
+    {
+    }
 protected:
     virtual void __executeImpl()
     {
@@ -336,8 +349,8 @@ void Plot::_customMultiFileAveragedPlot(std::string title, LoopFunction* fillArr
 {
     validateLinesLoop(linesLoop);
 
-    check(averagesLoop == NULL, "Plot::genericMultiFilePlot : averagesLoop cannot be NULL.");
-    check(filesLoop == NULL, "Plot::genericMultiFilePlot : forFilesLoop cannot be NULL.");
+    Util::check(averagesLoop == NULL, "Plot::genericMultiFilePlot : averagesLoop cannot be NULL.");
+    Util::check(filesLoop == NULL, "Plot::genericMultiFilePlot : forFilesLoop cannot be NULL.");
 
     ForAveragesGenericRepeater forAvergaesRepeater(fillArrayRepeater, &parameters, title, averagesLoop,
                                                    &plotData);
@@ -367,8 +380,9 @@ void Plot::separateLoops(std::vector<Loop*>& loops, Loop* topLoop)
 void Plot::_customCombAverageOrFilesPlot(std::string title, LoopFunction* fillArrayRepeater, Loop* linesLoop,
                                          bool loopFiles, Loop* averagesLoop, Loop* otherLoop)
 {
-    check(otherLoop == NULL,
-          "Plot::_customCombAverageOrFilesPlot otherLoop cannot be null, there must be more than one combination possible.");
+    Util::check(
+            otherLoop == NULL,
+            "Plot::_customCombAverageOrFilesPlot otherLoop cannot be null, there must be more than one combination possible.");
 
     if (loopFiles) {
         if (averagesLoop == NULL) {
@@ -466,6 +480,9 @@ public:
         tArrayFillerAction = arrayFillerAction;
         tToPlot = xToPlot;
     }
+    virtual ~FillArrayGenericRepeater()
+    {
+    }
 protected:
     virtual void __executeImpl()
     {
@@ -493,7 +510,7 @@ void Plot::genericMultiFilePlot(std::string title, GenericPlotFillAction* fillAr
 {
     validateLinesLoop(linesLoop);
 
-    check(filesLoop == NULL, "Plot::genericMultiFilePlot : forFilesLoop cannot be NULL.");
+    Util::check(filesLoop == NULL, "Plot::genericMultiFilePlot : forFilesLoop cannot be NULL.");
 
     FillArrayGenericRepeater fillArrayRepeater(fillArrayAction, &parameters, title, plotData.xToPlot);
 
