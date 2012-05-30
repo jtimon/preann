@@ -21,10 +21,11 @@ FILE* Util::openFile(string path)
     return dataFile;
 }
 
-void Util::check(bool condition, std::string error)
+void Util::check(bool condition, std::string message)
 {
     if (condition){
-        throw error;
+        cout << message << endl;
+        throw message;
     }
 }
 

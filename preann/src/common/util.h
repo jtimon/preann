@@ -66,7 +66,7 @@ class Util
 {
 public:
     static FILE* openFile(string path);
-    static void check(bool condition, std::string error);
+    static void check(bool condition, std::string message);
 };
 
 class Random

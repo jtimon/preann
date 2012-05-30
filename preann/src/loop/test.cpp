@@ -17,14 +17,6 @@ Test::~Test()
 
 // * Static Methods
 
-void Test::check(bool condition, string message)
-{
-    if (condition) {
-        cout << message << endl;
-        throw message;
-    }
-}
-
 unsigned char Test::areEqual(float expected, float actual, BufferType bufferType)
 {
     if (bufferType == BT_FLOAT) {
@@ -88,6 +80,9 @@ public:
     {
         tFunctionLabel = label;
     }
+    virtual ~TestMemLossesFunction()
+    {
+    }
 protected:
     virtual void __executeImpl()
     {
@@ -121,6 +116,9 @@ public:
             : LoopFunction(parameters, "TestAction " + label)
     {
         tFunction = function;
+    }
+    virtual ~TestAction()
+    {
     }
 protected:
     virtual void __executeImpl()
