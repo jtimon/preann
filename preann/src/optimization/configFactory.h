@@ -25,7 +25,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         switch (implementationType) {
             case IT_C:
 #ifdef CPP_IMPL
-                return new CppBuffer<bufferTypeTempl, c_typeTempl> (size);
+                return new CppBuffer<bufferTypeTempl, c_typeTempl>(size);
 #else
                 {
                     std::string error = "Implementation CPP is not allowed.";
@@ -34,7 +34,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 #endif
             case IT_SSE2:
 #ifdef SSE2_IMPL
-                return new XmmBuffer<bufferTypeTempl, c_typeTempl> (size);
+                return new XmmBuffer<bufferTypeTempl, c_typeTempl>(size);
 #else
                 {
                     std::string error = "Implementation SSE2 is not allowed.";
@@ -45,7 +45,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             case IT_CUDA_REDUC:
             case IT_CUDA_INV:
 #ifdef CUDA_IMPL
-                return new CudaBuffer<bufferTypeTempl, c_typeTempl> (size);
+                return new CudaBuffer<bufferTypeTempl, c_typeTempl>(size);
 #else
                 {
                     std::string error = "Implementation CUDA is not allowed.";
@@ -61,14 +61,12 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
     }
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
-    Connection* func_newConnection(Buffer* input, unsigned outputSize,
-            ImplementationType implementationType)
+    Connection* func_newConnection(Buffer* input, unsigned outputSize, ImplementationType implementationType)
     {
         switch (implementationType) {
             case IT_C:
 #ifdef CPP_IMPL
-                return new CppConnection<bufferTypeTempl, c_typeTempl> (input,
-                        outputSize);
+                return new CppConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
                 {
                     std::string error = "Implementation CPP is not allowed.";
@@ -77,8 +75,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 #endif
             case IT_SSE2:
 #ifdef SSE2_IMPL
-                return new XmmConnection<bufferTypeTempl, c_typeTempl> (input,
-                        outputSize);
+                return new XmmConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
                 {
                     std::string error = "Implementation SSE2 is not allowed.";
@@ -87,14 +84,11 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 #endif
 #ifdef CUDA_IMPL
             case IT_CUDA:
-                return new CudaConnection<bufferTypeTempl, c_typeTempl> (input,
-                        outputSize);
+                return new CudaConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
             case IT_CUDA_REDUC:
-                return new Cuda2Connection<bufferTypeTempl, c_typeTempl> (
-                        input, outputSize);
+                return new Cuda2Connection<bufferTypeTempl, c_typeTempl>(input, outputSize);
             case IT_CUDA_INV:
-                return new CudaInvertedConnection<bufferTypeTempl, c_typeTempl> (
-                        input, outputSize);
+                return new CudaInvertedConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
                 case IT_CUDA:
                 case IT_CUDA_REDUC:
