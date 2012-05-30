@@ -6,6 +6,7 @@
  */
 
 #include "buffer.h"
+#include "optimization/factory.h"
 
 void Buffer::copyFromInterface(Interface* interface)
 {
@@ -64,6 +65,13 @@ void Buffer::copyTo(Buffer* buffer)
     Interface* interface = this->toInterface();
     buffer->copyFromInterface(interface);
     delete (interface);
+}
+
+Buffer* Buffer::clone()
+{
+    Buffer* clone = Factory::newBuffer(this, getImplementationType());
+    copyTo(clone);
+    return clone;
 }
 
 void Buffer::save(FILE* stream)

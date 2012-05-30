@@ -23,21 +23,18 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     return tSize * sizeof(float);
                 case BT_BIT:
                 case BT_SIGN:
-                    return (((tSize - 1) / BITS_PER_UNSIGNED) + 1)
-                            * sizeof(unsigned);
+                    return (((tSize - 1) / BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
             }
         }
 
         virtual void _copyFrom(Interface *interface)
         {
-            cuda_copyToDevice(data, interface->getDataPointer(),
-                    interface->getByteSize());
+            cuda_copyToDevice(data, interface->getDataPointer(), interface->getByteSize());
         }
 
         virtual void _copyTo(Interface *interface)
         {
-            cuda_copyToHost(interface->getDataPointer(), data,
-                    this->getByteSize());
+            cuda_copyToHost(interface->getDataPointer(), data, this->getByteSize());
         }
     public:
 
@@ -45,12 +42,11 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         {
             return IT_CUDA;
         }
-        ;
+
         virtual BufferType getBufferType()
         {
             return bufferTypeTempl;
         }
-        ;
 
         CudaBuffer(unsigned size)
         {
@@ -59,22 +55,21 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             unsigned byte_sz = getByteSize();
             data = cuda_malloc(byte_sz);
 
-            cuda_setZero(data, byte_sz, bufferTypeTempl, CUDA_THREADS_PER_BLOCK);
+            reset();
         }
+
         //special constructor for bit coalescing buffers
         CudaBuffer(Interface* bitBuffer, unsigned block_size)
         {
             if (bitBuffer->getBufferType() != BT_BIT) {
-                std::string error =
-                        "The Buffer type must be BIT to use a BitBuffer CudaBuffer constructor.";
+                std::string error = "The Buffer type must be BIT to use a BitBuffer CudaBuffer constructor.";
                 throw error;
             }
             unsigned bitBufferSize = bitBuffer->getSize();
             unsigned maxWeighsPerBlock = BITS_PER_UNSIGNED * block_size;
 
             tSize = (bitBufferSize / maxWeighsPerBlock) * maxWeighsPerBlock;
-            tSize += min(bitBufferSize % maxWeighsPerBlock, block_size)
-                    * BITS_PER_UNSIGNED;
+            tSize += min(bitBufferSize % maxWeighsPerBlock, block_size) * BITS_PER_UNSIGNED;
 
             Interface interfaceOrderedByBlockSize = Interface(tSize, BT_BIT);
             unsigned byteSize = interfaceOrderedByBlockSize.getByteSize();
@@ -83,11 +78,9 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             unsigned bit = 0, thread = 0, block_offset = 0;
             for (unsigned i = 0; i < bitBufferSize; i++) {
 
-                unsigned weighPos = (thread * BITS_PER_UNSIGNED) + bit
-                        + block_offset;
+                unsigned weighPos = (thread * BITS_PER_UNSIGNED) + bit + block_offset;
                 thread++;
-                interfaceOrderedByBlockSize.setElement(weighPos,
-                        bitBuffer->getElement(i));
+                interfaceOrderedByBlockSize.setElement(weighPos, bitBuffer->getElement(i));
 
                 if (thread == block_size) {
                     thread = 0;
@@ -98,8 +91,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     }
                 }
             }
-            cuda_copyToDevice(data,
-                    interfaceOrderedByBlockSize.getDataPointer(), byteSize);
+            cuda_copyToDevice(data, interfaceOrderedByBlockSize.getDataPointer(), byteSize);
         }
         virtual ~CudaBuffer()
         {
@@ -109,18 +101,17 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             }
         }
 
-        virtual Buffer* clone()
+        virtual void reset()
         {
-            Buffer* clone = new CudaBuffer(tSize);
-            copyTo(clone);
-            return clone;
+            unsigned byte_sz = getByteSize();
+
+            cuda_setZero(data, byte_sz, bufferTypeTempl, CUDA_THREADS_PER_BLOCK);
         }
 
         virtual void activation(Buffer* resultsVect, FunctionType functionType)
         {
-            float* results = (float*)resultsVect->getDataPointer();
-            cuda_activation(data, tSize, bufferTypeTempl, results,
-                    functionType, CUDA_THREADS_PER_BLOCK);
+            float* results = (float*) resultsVect->getDataPointer();
+            cuda_activation(data, tSize, bufferTypeTempl, results, functionType, CUDA_THREADS_PER_BLOCK);
         }
 
     };

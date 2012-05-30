@@ -91,13 +91,13 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         {
             switch (bufferTypeTempl) {
                 default:
-                    memcpy(data, interface->getDataPointer(),
-                            interface->getByteSize());
+                    memcpy(data, interface->getDataPointer(), interface->getByteSize());
                     break;
                 case BT_BIT:
                 case BT_SIGN:
-                    unsigned char* bufferData = (unsigned char*)(data);
+                    unsigned char* bufferData = (unsigned char*) (data);
                     bitCopyFrom(bufferData, interface);
+                    break;
             }
         }
 
@@ -105,12 +105,11 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         {
             switch (bufferTypeTempl) {
                 default:
-                    memcpy(interface->getDataPointer(), data,
-                            interface->getByteSize());
+                    memcpy(interface->getDataPointer(), data, interface->getByteSize());
                     break;
                 case BT_BIT:
                 case BT_SIGN:
-                    unsigned char* bufferData = (unsigned char*)(data);
+                    unsigned char* bufferData = (unsigned char*) (data);
                     bitCopyTo(bufferData, interface);
                     break;
             }
@@ -136,24 +135,12 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         XmmBuffer(unsigned size)
         {
-            this->tSize = size;
+            tSize = size;
 
             size_t byteSize = getByteSize(size, bufferTypeTempl);
             data = MemoryManagement::malloc(byteSize);
 
-            switch (bufferTypeTempl) {
-
-                case BT_BYTE:
-                    SetValueToAnArray<unsigned char> (data, byteSize, 128);
-                    break;
-                case BT_FLOAT:
-                    SetValueToAnArray<float> (data, byteSize / sizeof(float), 0);
-                    break;
-                case BT_BIT:
-                case BT_SIGN:
-                    SetValueToAnArray<unsigned char> (data, byteSize, 0);
-                    break;
-            }
+            reset();
         }
 
         ~XmmBuffer()
@@ -164,37 +151,47 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             }
         }
 
-        virtual Buffer* clone()
+        virtual void reset()
         {
-            Buffer* clone = new XmmBuffer<bufferTypeTempl, c_typeTempl> (tSize);
-            copyTo(clone);
-            return clone;
+            size_t byteSize = getByteSize(tSize, bufferTypeTempl);
+
+            switch (bufferTypeTempl) {
+
+                case BT_BYTE:
+                    SetValueToAnArray<unsigned char>(data, byteSize, 128);
+                    break;
+                case BT_FLOAT:
+                    SetValueToAnArray<float>(data, byteSize / sizeof(float), 0);
+                    break;
+                case BT_BIT:
+                case BT_SIGN:
+                    SetValueToAnArray<unsigned char>(data, byteSize, 0);
+                    break;
+            }
         }
 
         virtual void activation(Buffer* resultsVect, FunctionType functionType)
         {
-            float* results = (float*)resultsVect->getDataPointer();
+            float* results = (float*) resultsVect->getDataPointer();
 
             switch (bufferTypeTempl) {
                 case BT_BYTE:
                     {
-                        std::string error =
-                                "XmmBuffer::activation is not implemented for BufferType BYTE.";
+                        std::string error = "XmmBuffer::activation is not implemented for BufferType BYTE.";
                         throw error;
                     }
                     break;
                 case BT_FLOAT:
                     {
                         for (unsigned i = 0; i < tSize; i++) {
-                            ((c_typeTempl*)data)[i] = Function<c_typeTempl> (
-                                    results[i], functionType);
+                            ((c_typeTempl*) data)[i] = Function<c_typeTempl>(results[i], functionType);
                         }
                     }
                     break;
                 case BT_BIT:
                 case BT_SIGN:
                     {
-                        unsigned char* bufferData = (unsigned char*)data;
+                        unsigned char* bufferData = (unsigned char*) data;
 
                         unsigned blockOffset = 0;
                         unsigned bytePos = 0;
@@ -205,8 +202,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                             if (results[i] > 0) {
                                 bufferData[blockOffset + bytePos] |= bufferMask;
                             } else {
-                                bufferData[blockOffset + bytePos]
-                                        &= ~bufferMask;
+                                bufferData[blockOffset + bytePos] &= ~bufferMask;
                             }
 
                             if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK - 1)) {
@@ -222,6 +218,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                             }
                         }
                     }
+                    break;
             }
         }
     };

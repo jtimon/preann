@@ -58,16 +58,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             size_t byteSize = getByteSize();
             data = MemoryManagement::malloc(byteSize);
 
-            switch (bufferTypeTempl) {
-                case BT_BYTE:
-                    SetValueToAnArray<c_typeTempl> (data, byteSize
-                            / sizeof(c_typeTempl), 128);
-                    break;
-                default:
-                    SetValueToAnArray<c_typeTempl> (data, byteSize
-                            / sizeof(c_typeTempl), 0);
-                    break;
-            }
+            reset();
         }
 
         ~CppBuffer()
@@ -78,11 +69,20 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             }
         }
 
-        virtual Buffer* clone()
+        virtual void reset()
         {
-            Buffer* clone = new CppBuffer<bufferTypeTempl, c_typeTempl> (tSize);
-            copyTo(clone);
-            return clone;
+            size_t byteSize = getByteSize();
+
+            switch (bufferTypeTempl) {
+                case BT_BYTE:
+                    SetValueToAnArray<c_typeTempl> (data, byteSize
+                            / sizeof(c_typeTempl), 128);
+                    break;
+                default:
+                    SetValueToAnArray<c_typeTempl> (data, byteSize
+                            / sizeof(c_typeTempl), 0);
+                    break;
+            }
         }
 
         virtual void activation(Buffer* resultsVect, FunctionType functionType)
