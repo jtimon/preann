@@ -76,14 +76,19 @@ OBJ += $(FACT_OBJ)
 
 doc: $(DOC)
 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
-	./bin/testMemoryLosses.exe
+#	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe 
 #	./bin/testConnections.exe
 #	./bin/testLayers.exe 
-	./bin/testPlot.exe 
+#	./bin/testPlot.exe 
 #	./bin/chronoBuffers.exe
 #	./bin/chronoConnections.exe
 #	./bin/chronoIndividual.exe
+#	./bin/chronoPopulation.exe
+#	./bin/learnMutation.exe
+#	./bin/learnCrossover.exe
+#	./bin/learnBufferType.exe
+#	./bin/learnTasks.exe
 #	./bin/chronoConnectionsFiles.exe
 #	./bin/chronoBinaryTasks.exe 
 #	./bin/chronoReversi.exe
@@ -99,6 +104,7 @@ cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	./bin/chronoConnections.exe > ./output/log/chronoConnections.log
 #	./bin/chronoIndividual.exe > ./output/log/chronoIndividual.log
 #	./bin/chronoBinaryTasks.exe > ./output/log/chronoBinaryTasks.log
+#	./bin/learnTasks.exe > ./output/log/learnTasks.log
 
 #all: $(LOGS)
 checkdirs: $(BUILD_DIR)
