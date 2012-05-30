@@ -119,6 +119,82 @@ void TaskPlotter::plotCombinations(Task* task, std::string title, Loop* linesLoo
     _customCombinationsPlot(title, &fillArrayRepeater, linesLoop, averagesLoop, differentFiles);
 }
 
+// * Enumerated Tasks
+
+class EnumTaskFillArrayRepeater : public LoopFunction
+{
+    PlotData* tPlotData;
+public:
+    EnumTaskFillArrayRepeater(ParametersMap* parameters, string label, PlotData* plotData)
+            : LoopFunction(parameters, "EnumTaskFillArrayRepeater " + label)
+    {
+        tPlotData = plotData;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        unsigned populationSize = tParameters->getNumber(Population::SIZE);
+        float weighsRange = tParameters->getNumber(Dummy::WEIGHS_RANGE);
+
+        Task* task = Dummy::task(tParameters);
+        Individual* example = task->getExample(tParameters);
+
+        // create population
+        Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
+        initialPopulation->setParams(tParameters);
+
+        TaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tPlotData);
+        tPlotData->xToPlot->repeatFunction(&addToArrayAction, tParameters);
+
+        delete (initialPopulation);
+        delete (example);
+        delete (task);
+    }
+};
+
+void TaskPlotter::plotTask(std::string title, Loop* linesLoop)
+{
+    RangeLoop auxLoop("aux_average", 1, 2, 1);
+
+    plotTaskAveraged(title, linesLoop, &auxLoop);
+}
+
+void TaskPlotter::plotTaskAveraged(std::string title, Loop* linesLoop, Loop* averageLoop)
+{
+    EnumTaskFillArrayRepeater fillArrayRepeater(&parameters, title, &plotData);
+
+    _customAveragedPlot(title, &fillArrayRepeater, linesLoop, averageLoop);
+}
+
+void TaskPlotter::plotTaskFiles(std::string title, Loop* linesLoop, Loop* filesLoop)
+{
+    RangeLoop auxLoop("aux_average", 1, 2, 1);
+
+    plotTaskFilesAveraged(title, linesLoop, filesLoop, &auxLoop);
+}
+
+void TaskPlotter::plotTaskFilesAveraged(std::string title, Loop* linesLoop, Loop* filesLoop,
+                                        Loop* averagesLoop)
+{
+    EnumTaskFillArrayRepeater fillArrayRepeater(&parameters, title, &plotData);
+
+    _customMultiFileAveragedPlot(title, &fillArrayRepeater, linesLoop, filesLoop, averagesLoop);
+}
+
+void TaskPlotter::plotCombinations(std::string title, Loop* linesLoop, bool differentFiles)
+{
+    plotCombinations(title, linesLoop, NULL, differentFiles);
+}
+
+void TaskPlotter::plotCombinations(std::string title, Loop* linesLoop, Loop* averagesLoop,
+                                   bool differentFiles)
+{
+    EnumTaskFillArrayRepeater fillArrayRepeater(&parameters, title, &plotData);
+
+    _customCombinationsPlot(title, &fillArrayRepeater, linesLoop, averagesLoop, differentFiles);
+}
+
+
 // * ChronoTask
 /*
  class ChronoTaskAddAction : public LoopFunction

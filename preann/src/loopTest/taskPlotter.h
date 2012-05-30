@@ -26,6 +26,13 @@ public:
     void plotCombinations(Task* task, std::string title, Loop* linesLoop, Loop* averagesLoop,
                           bool differentFiles);
 
+    void plotTask(std::string title, Loop* linesLoop);
+    void plotTaskAveraged(std::string title, Loop* linesLoop, Loop* averagesLoop);
+    void plotTaskFiles(std::string title, Loop* linesLoop, Loop* filesLoop);
+    void plotTaskFilesAveraged(std::string title, Loop* linesLoop, Loop* filesLoop, Loop* averagesLoop);
+    void plotCombinations(std::string title, Loop* linesLoop, bool differentFiles);
+    void plotCombinations(std::string title, Loop* linesLoop, Loop* averagesLoop, bool differentFiles);
+
     //TODO borrar
 //    void plotChronoTask(Task* task, std::string title, Loop* linesLoop, unsigned generations);
 //    void plotChronoTaskAveraged(Task* task, std::string title, Loop* linesLoop, Loop* averagesLoop,
