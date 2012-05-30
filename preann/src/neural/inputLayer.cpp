@@ -4,9 +4,9 @@
 InputLayer::InputLayer(Interface* interface, ImplementationType implementationType)
 {
     tInput = interface;
-    tOutput = Factory::newBuffer(interface->getSize(), interface->getBufferType(), implementationType);
+    output = Factory::newBuffer(interface->getSize(), interface->getBufferType(), implementationType);
     //TODO un solo interfaz para entrada y salida
-    tOuputInterface = NULL;
+    outputInterface = NULL;
 
     thresholds = NULL;
     functionType = FT_IDENTITY;
@@ -14,16 +14,16 @@ InputLayer::InputLayer(Interface* interface, ImplementationType implementationTy
 
 InputLayer::InputLayer(FILE* stream, ImplementationType implementationType)
 {
-    tOutput = Factory::newBuffer(stream, implementationType);
-    tInput = new Interface(tOutput->getSize(), tOutput->getBufferType());
-    tOuputInterface = NULL;
+    output = Factory::newBuffer(stream, implementationType);
+    tInput = new Interface(output->getSize(), output->getBufferType());
+    outputInterface = NULL;
     thresholds = NULL;
     functionType = FT_IDENTITY;
 }
 
 void InputLayer::save(FILE* stream)
 {
-    tOutput->save(stream);
+    output->save(stream);
 }
 
 InputLayer::~InputLayer()
@@ -32,7 +32,7 @@ InputLayer::~InputLayer()
 
 ImplementationType InputLayer::getImplementationType()
 {
-    return tOutput->getImplementationType();
+    return output->getImplementationType();
 }
 
 void InputLayer::addInput(Buffer *input)
@@ -43,7 +43,7 @@ void InputLayer::addInput(Buffer *input)
 
 void InputLayer::calculateOutput()
 {
-    tOutput->copyFromInterface(tInput);
+    output->copyFromInterface(tInput);
 }
 
 void InputLayer::randomWeighs(float range)

@@ -11,8 +11,8 @@ protected:
     std::vector<Connection*> connections;
 
     Connection* thresholds;
-    Buffer* tOutput;
-    Interface* tOuputInterface;
+    Buffer* output;
+    Interface* outputInterface;
     FunctionType functionType;
 public:
     Layer(unsigned size, BufferType outputType, FunctionType functionType,
