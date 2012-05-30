@@ -102,7 +102,7 @@ void Loop::repeatFunction(GenericLoopFuncPtr func, ParametersMap* parametersMap,
 void Loop::repeatFunction(LoopFunction* func, ParametersMap* parametersMap)
 {
     std::string functionLabel = func->getLabel();
-    cout << "Repeating function... " << functionLabel << endl;
+//    cout << "Repeating function... " << functionLabel << endl;
 
     this->setCallerLoop(NULL);
     try {
