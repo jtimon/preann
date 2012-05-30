@@ -79,16 +79,15 @@ int main(int argc, char *argv[])
         EnumLoop linesLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C,
                            IT_SSE2);
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
+        EnumLoop* bufferTypeLoop = new EnumLoop(ET_BUFFER);
         linesLoop.addInnerLoop(bufferTypeLoop);
 
         linesLoop.print();
 
-        unsigned repetitions = 100;
+        unsigned repetitions = 1000;
         plotter.plotChrono(chronoCopyToInterface, "Buffer_copyToInterface", &linesLoop, repetitions);
         plotter.plotChrono(chronoCopyFromInterface, "Buffer_copyFromInterface", &linesLoop, repetitions);
 
-        plotter.resetRangeX(1000, 10001, 3000);
         plotter.plotChrono(chronoClone, "Buffer_clone", &linesLoop, repetitions);
 
         // exclude BYTE
