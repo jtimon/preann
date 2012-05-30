@@ -56,7 +56,10 @@ Loop* JoinEnumLoop::dropFirstLoop()
 {
     Loop* toReturn = tInnerLoop;
     for (int i = 0; i < tInnerLoops.size(); ++i) {
-        tInnerLoops[i]->dropLoop(tInnerLoop);
+        Loop* currentLoop = tInnerLoops[i];
+        if (currentLoop != NULL){
+            currentLoop->dropLoop(tInnerLoop);
+        }
     }
     tInnerLoop = NULL;
     return toReturn;
@@ -135,6 +138,8 @@ void JoinEnumLoop::__repeatImpl(LoopFunction* func)
         } else if (tInnerLoop != NULL) {
             tInnerLoop->setCallerLoop(this);
             tInnerLoop->__repeatImpl(func);
+        } else {
+            func->execute(this);
         }
         // It will not call to Loop::repeat__Base
         ++tCurrentBranch;
