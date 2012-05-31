@@ -109,7 +109,6 @@ void Layer::calculateOutput()
     if (outputInterface != NULL) {
         output->copyToInterface(outputInterface);
     }
-    delete (results);
 }
 
 void Layer::addInput(Buffer* input)
