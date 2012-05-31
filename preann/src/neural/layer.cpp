@@ -8,8 +8,9 @@ ImplementationType Layer::getImplementationType()
 Layer::Layer()
 {
     this->functionType = FT_IDENTITY;
-    output = NULL;
+    results = NULL;
     thresholds = NULL;
+    output = NULL;
     outputInterface = NULL;
 }
 
@@ -17,8 +18,9 @@ Layer::Layer(unsigned size, BufferType outputType, FunctionType functionType,
              ImplementationType implementationType)
 {
     this->functionType = functionType;
+    results = Factory::newBuffer(size, BT_FLOAT, implementationType);
+    thresholds = Factory::newConnection(results, 1);
     output = Factory::newBuffer(size, outputType, implementationType);
-    thresholds = Factory::newThresholds(output, implementationType);
     outputInterface = NULL;
 }
 
@@ -26,7 +28,8 @@ Layer::Layer(FILE* stream, ImplementationType implementationType)
 {
     fread(&functionType, sizeof(FunctionType), 1, stream);
     output = Factory::newBuffer(stream, implementationType);
-    thresholds = Factory::newThresholds(output, implementationType);
+    results = Factory::newBuffer(output->getSize(), BT_FLOAT, implementationType);
+    thresholds = Factory::newConnection(results, 1);
     outputInterface = NULL;
 }
 
@@ -39,6 +42,9 @@ void Layer::save(FILE* stream)
 Layer::~Layer()
 {
     CLEAR_PTR_VECTOR(Connection, connections)
+    if (results) {
+        delete (results);
+    }
     if (thresholds) {
         delete (thresholds);
     }
@@ -91,14 +97,15 @@ void Layer::calculateOutput()
     }
     //TODO B do not use clone on the thresholds, compare with them in activation (one write less)
     //	Buffer* results = newBuffer(thresholds->getSize(), thresholds->getBufferType());
-    Buffer* results = thresholds->clone();
+//    results->reset();
+    results->copyFrom(thresholds);
 
     for (unsigned i = 0; i < connections.size(); i++) {
         connections[i]->calculateAndAddTo(results);
     }
 
     output->activation(results, functionType);
-    //	thresholds->activation(results, functionType, output);
+//    thresholds->activation(output, functionType);
     if (outputInterface != NULL) {
         output->copyToInterface(outputInterface);
     }

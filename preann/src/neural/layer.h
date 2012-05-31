@@ -10,6 +10,7 @@ protected:
     Layer();
     std::vector<Connection*> connections;
 
+    Buffer* results;
     Connection* thresholds;
     Buffer* output;
     Interface* outputInterface;
