@@ -5,7 +5,7 @@ void checkCUDAError(const char *msg)
     cudaError_t err = cudaGetLastError();
     if (cudaSuccess != err) {
         printf("Cuda error: %s : %s.\n", msg, cudaGetErrorString(err));
-        exit( EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -40,16 +40,17 @@ float Func(float number, FunctionType functionType)
 }
 
 __global__
-void activation_float_kernel(float* results, float* output, unsigned output_sz,
-        FunctionType functionType)
+void activation_float_kernel(float* results, float* thresholds, float* output, unsigned output_sz,
+                             FunctionType functionType)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < output_sz)
-        output[idx] = Func(results[idx], functionType);
+    if (idx < output_sz) {
+        output[idx] = Func(results[idx] - thresholds[idx], functionType);
+    }
 }
 
 __global__
-void activation_bit_kernel(float* results, unsigned* output, unsigned output_sz)
+void activation_bit_kernel(float* results, float* thresholds, unsigned* output, unsigned output_sz)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     unsigned offset = idx * BITS_PER_UNSIGNED;
@@ -61,7 +62,8 @@ void activation_bit_kernel(float* results, unsigned* output, unsigned output_sz)
         unsigned mask = 0x80000000;
 
         for (unsigned i = 0; i < toRead; i++) {
-            if (results[offset + i] > 0) {
+            unsigned pos = offset + i;
+            if (results[pos] - thresholds[pos] > 0) {
                 threadOutput |= mask;
             } else {
                 threadOutput &= ~mask;
@@ -72,30 +74,28 @@ void activation_bit_kernel(float* results, unsigned* output, unsigned output_sz)
     }
 }
 
-extern "C" void cuda_activation(void* data, unsigned size,
-        BufferType bufferType, float* results, FunctionType functionType,
-        unsigned block_size)
+extern "C" void cuda_activation(void* output, unsigned size, BufferType bufferType, float* results,
+                                float* thresholds, FunctionType functionType, unsigned block_size)
 {
     unsigned grid_size;
 
     switch (bufferType) {
         case BT_BYTE:
             {
-                std::string error =
-                        "cuda_activation is not implemented for BufferType BYTE.";
+                std::string error = "cuda_activation is not implemented for BufferType BYTE.";
                 throw error;
             }
         case BT_FLOAT:
             {
                 grid_size = ((size - 1) / block_size) + 1;
-activation_float_kernel            <<< grid_size, block_size >>>(results, (float*)data, size, functionType);
+                activation_float_kernel<<< grid_size, block_size >>>(results, thresholds, (float*)output, size, functionType);
         }
         break;
         case BT_BIT:
         case BT_SIGN:
         {
             grid_size = ((size - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
-            activation_bit_kernel<<< grid_size, block_size >>>(results, (unsigned*)data, size);
+            activation_bit_kernel<<< grid_size, block_size >>>(results, thresholds, (unsigned*)output, size);
         }
         break;
     }
@@ -107,7 +107,7 @@ activation_float_kernel            <<< grid_size, block_size >>>(results, (float
 extern "C" void* cuda_malloc(unsigned byteSize)
 {
     void* ptr;
-    cudaMalloc((void**)&(ptr), byteSize);
+    cudaMalloc((void**) &(ptr), byteSize);
 
     checkCUDAError("malloc");
     return ptr;
@@ -142,8 +142,7 @@ void SetValueToAnArrayKernel(bufferType* data, unsigned size, bufferType value)
     data[idx] = value;
 }
 
-extern "C" void cuda_setZero(void* data, unsigned byteSize,
-        BufferType bufferType, unsigned block_size)
+extern "C" void cuda_setZero(void* data, unsigned byteSize, BufferType bufferType, unsigned block_size)
 {
     unsigned grid_size;
     unsigned size;
@@ -192,9 +191,8 @@ void crossoverKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned
     }
 }
 
-extern "C" void cuda_crossover(void* buffer1, void* buffer2,
-        unsigned* bitBuffer, unsigned size, BufferType bufferType,
-        unsigned block_size)
+extern "C" void cuda_crossover(void* buffer1, void* buffer2, unsigned* bitBuffer, unsigned size,
+                               BufferType bufferType, unsigned block_size)
 {
     unsigned grid_size = ((size - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
 
@@ -211,8 +209,7 @@ extern "C" void cuda_crossover(void* buffer1, void* buffer2,
         case BT_BIT:
         case BT_SIGN:
             {
-                std::string error =
-                        "cuda_crossover is not implemented for BufferType BIT nor SIGN.";
+                std::string error = "cuda_crossover is not implemented for BufferType BIT nor SIGN.";
                 throw error;
             }
     }
@@ -253,13 +250,12 @@ void mutateByteKernel(unsigned char* buffer, unsigned pos, int mutation)
         } else if (result >= 255) {
             buffer[pos] = 255;
         } else {
-            buffer[pos] = (unsigned char)result;
+            buffer[pos] = (unsigned char) result;
         }
     }
 }
 
-extern "C" void cuda_mutateWeigh(void* buffer, unsigned pos, float mutation,
-        BufferType bufferType)
+extern "C" void cuda_mutateWeigh(void* buffer, unsigned pos, float mutation, BufferType bufferType)
 {
     switch (bufferType) {
         case BT_BYTE:
@@ -271,8 +267,7 @@ extern "C" void cuda_mutateWeigh(void* buffer, unsigned pos, float mutation,
         case BT_BIT:
         case BT_SIGN:
             {
-                std::string error =
-                        "cuda_mutateWeigh is not implemented for BufferType BIT nor SIGN.";
+                std::string error = "cuda_mutateWeigh is not implemented for BufferType BIT nor SIGN.";
                 throw error;
             }
     }
@@ -290,8 +285,7 @@ extern "C" void cuda_resetWeigh(void* buffer, unsigned pos, BufferType bufferTyp
         case BT_BIT:
         case BT_SIGN:
             {
-                std::string error =
-                        "cuda_resetWeigh is not implemented for BufferType BIT nor SIGN.";
+                std::string error = "cuda_resetWeigh is not implemented for BufferType BIT nor SIGN.";
                 throw error;
             }
     }
@@ -300,8 +294,8 @@ extern "C" void cuda_resetWeigh(void* buffer, unsigned pos, BufferType bufferTyp
 // CL_LAYER CALCULATION
 
 __global__
-void SumFloatsConnectionsKernel(float* inputs, unsigned input_size,
-        unsigned output_size, float* weighs, float* results)
+void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned output_size, float* weighs,
+                                float* results)
 {
     extern __shared__ float sdata[];
 
@@ -405,8 +399,8 @@ void SumBitsConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned ou
 }
 
 __global__
-void SumFloatsInvertedConnectionsKernel(float* inputs, unsigned input_size,
-        float* weighs, float* results, unsigned output_size)
+void SumFloatsInvertedConnectionsKernel(float* inputs, unsigned input_size, float* weighs, float* results,
+                                        unsigned output_size)
 {
     extern __shared__ float sdata[];
 
@@ -480,16 +474,14 @@ void SumBitsInvertedConnectionsKernel(unsigned* inputs, unsigned input_size, uns
     }
 }
 
-extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size,
-        BufferType inputType, unsigned output_size, void* weighs,
-        float* results, unsigned block_size)
+extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, BufferType inputType,
+                                      unsigned output_size, void* weighs, float* results, unsigned block_size)
 {
     unsigned grid_size = ((output_size - 1) / block_size) + 1;
     unsigned shared_mem_size;
 
     if (inputType == BT_BYTE) {
-        std::string error =
-                "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
+        std::string error = "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
         throw error;
     } else if (inputType == BT_FLOAT) {
         if (input_size > 4032) {
@@ -515,25 +507,23 @@ SumFloatsConnectionsKernel    <<< grid_size, block_size, shared_mem_size >>>((fl
 }
 }
 
-extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr,
-        unsigned input_size, BufferType inputType, unsigned output_size,
-        void* weighs, float* results, unsigned block_size)
+extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned input_size, BufferType inputType,
+                                                    unsigned output_size, void* weighs, float* results,
+                                                    unsigned block_size)
 {
     unsigned grid_size = ((output_size - 1) / block_size) + 1;
     unsigned shared_mem_size;
 
     if (inputType == BT_BYTE) {
-        std::string error =
-                "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
+        std::string error = "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
         throw error;
     } else if (inputType == BT_FLOAT) {
         while (input_size > CUDA_MAX_SHARED_FLOATS) {
 
             shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(float);
             SumFloatsInvertedConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, CUDA_MAX_SHARED_FLOATS, (float*)weighs, results, output_size);
-            inputPtr = (void*)((float*)inputPtr + CUDA_MAX_SHARED_FLOATS);
-            weighs = (void*)((float*)weighs + (CUDA_MAX_SHARED_FLOATS
-                    * output_size));
+            inputPtr = (void*) ((float*) inputPtr + CUDA_MAX_SHARED_FLOATS);
+            weighs = (void*) ((float*) weighs + (CUDA_MAX_SHARED_FLOATS * output_size));
             input_size -= CUDA_MAX_SHARED_FLOATS;
         }
         shared_mem_size = input_size * sizeof(float);
@@ -639,16 +629,15 @@ void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned output_s
     }
 }
 
-extern "C" void cuda_inputCalculationReduction(void* inputPtr,
-        unsigned input_size, BufferType inputType, unsigned output_size,
-        void* weighs, float* results, unsigned block_size)
+extern "C" void cuda_inputCalculationReduction(void* inputPtr, unsigned input_size, BufferType inputType,
+                                               unsigned output_size, void* weighs, float* results,
+                                               unsigned block_size)
 {
     unsigned grid_size = output_size;
     unsigned shared_mem_size = block_size * sizeof(float);
 
     if (inputType == BT_BYTE) {
-        std::string error =
-                "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
+        std::string error = "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
         throw error;
     } else if (inputType == BT_FLOAT) {
         switch (block_size) {

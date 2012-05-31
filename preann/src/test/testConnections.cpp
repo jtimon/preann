@@ -46,6 +46,36 @@ unsigned testCalculateAndAddTo(ParametersMap* parametersMap)
     END
 }
 
+unsigned testActivation(ParametersMap* parametersMap)
+{
+    float differencesCounter = 0;
+
+    FunctionType functionType = (FunctionType) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_FUNCTION));
+
+    Buffer* output = Dummy::buffer(parametersMap);
+    Buffer* results = Factory::newBuffer(output->getSize(), BT_FLOAT, output->getImplementationType());
+    results->random(parametersMap->getNumber(Dummy::WEIGHS_RANGE));
+    Connection* thresholds = Factory::newConnection(results, 1);
+
+    Buffer* cOutput = Factory::newBuffer(output->getSize(), output->getBufferType(), IT_C);
+    Buffer* cResults = Factory::newBuffer(results, IT_C);
+    Connection* cThresholds = Factory::newConnection(cResults, 1);
+
+    thresholds->activation(output, functionType);
+    cThresholds->activation(cOutput, functionType);
+    differencesCounter += Test::assertEquals(cOutput, output);
+
+    delete (thresholds);
+    delete (results);
+    delete (output);
+    delete (cThresholds);
+    delete (cResults);
+    delete (cOutput);
+
+    return differencesCounter;
+}
+
 unsigned testMutate(ParametersMap* parametersMap)
 {
     START
@@ -125,6 +155,7 @@ int main(int argc, char *argv[])
         test.test(testCalculateAndAddTo, "Connection::calculateAndAddTo", &loop);
         test.test(testMutate, "Connection::mutate", &loop);
         test.test(testCrossover, "Connection::crossover", &loop);
+        test.test(testActivation, "Connection::activation", &loop);
 
         printf("Exit success.\n");
     } catch (std::string error) {

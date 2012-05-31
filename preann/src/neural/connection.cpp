@@ -26,9 +26,26 @@ Buffer* Connection::getInput()
 void Connection::calculateAndAddTo(Buffer* results)
 {
     Util::check(
-            tSize % results->getSize() != tInput->getSize(),
-            "Connection::calculateAndAddTo the size of the connection equal to the size of the input multiplied by the size of the results Buffer.");
+            tSize != tInput->getSize() * results->getSize(),
+            "Connection::calculateAndAddTo the size of the Connection must be equal to the size of the input multiplied by the size of the results Buffer.");
     _calculateAndAddTo(results);
+}
+
+void Connection::activation(Buffer* output, FunctionType functionType)
+{
+    Util::check(
+            this->getBufferType() != BT_FLOAT,
+            "Connection::activation the type of the thresholdConnection must be BT_FLOAT.");
+    Util::check(
+            tSize != tInput->getSize(),
+            "Connection::activation the size of the thresholdConnection must be equal to the size of the input.");
+    Util::check(
+            tInput->getBufferType() != BT_FLOAT,
+            "Connection::activation the type of the input must be BT_FLOAT.");
+    Util::check(
+            tSize != output->getSize(),
+            "Connection::activation the size of the thresholdConnection must be equal to the size of the output.");
+    _activation(output, functionType);
 }
 
 void Connection::crossover(Connection* other, Interface* bitBuffer)

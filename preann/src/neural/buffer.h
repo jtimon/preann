@@ -50,11 +50,7 @@ public:
     ;
     virtual ImplementationType getImplementationType() = 0;
     virtual BufferType getBufferType() = 0;
-
     virtual void reset() = 0;
-
-    //TODO mover a Connection
-    virtual void activation(Buffer* results, FunctionType functionType) = 0;
 
     void copyFromInterface(Interface* interface);
     void copyToInterface(Interface* interface);

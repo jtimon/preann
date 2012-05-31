@@ -9,6 +9,7 @@ protected:
     Buffer* tInput;
 
     virtual void _calculateAndAddTo(Buffer* results) = 0;
+    virtual void _activation(Buffer* output, FunctionType functionType) = 0;
     virtual void _crossover(Buffer* other, Interface* bitBuffer) = 0;
     virtual void _mutateWeigh(unsigned pos, float mutation) = 0;
     virtual void _resetWeigh(unsigned pos) = 0;
@@ -21,6 +22,7 @@ public:
     Buffer* getInput();
 
     void calculateAndAddTo(Buffer* results);
+    void activation(Buffer* output, FunctionType functionType);
     void crossover(Connection* other, Interface* bitBuffer);
     void mutate(unsigned pos, float mutation);
     void reset(unsigned pos);

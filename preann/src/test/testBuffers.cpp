@@ -15,29 +15,6 @@ using namespace std;
     delete (buffer);                                                                    \
     return differencesCounter;
 
-unsigned testActivation(ParametersMap* parametersMap)
-{
-    START
-
-    FunctionType functionType = (FunctionType) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_FUNCTION));
-    Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT, buffer->getImplementationType());
-    results->random(parametersMap->getNumber(Dummy::WEIGHS_RANGE));
-
-    Buffer* cResults = Factory::newBuffer(results, IT_C);
-    Buffer* cBuffer = Factory::newBuffer(buffer->getSize(), buffer->getBufferType(), IT_C);
-
-    buffer->activation(results, functionType);
-    cBuffer->activation(cResults, functionType);
-    differencesCounter += Test::assertEquals(cBuffer, buffer);
-
-    delete (results);
-    delete (cBuffer);
-    delete (cResults);
-
-    END
-}
-
 unsigned testCopyFromInterface(ParametersMap* parametersMap)
 {
     START
@@ -130,11 +107,6 @@ int main(int argc, char *argv[])
         test.test(testCopyFromInterface, "Buffer::copyFromInterface", &loop);
         test.test(testCopyToInterface, "Buffer::copyToInterface", &loop);
         test.test(testSaveLoad, "Buffer::saveLoad", &loop);
-
-        bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
-        loop.print();
-
-        test.test(testActivation, "Buffer::activation", &loop);
 
         printf("Exit success.\n");
     } catch (std::string error) {

@@ -82,6 +82,157 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             }
         }
 
+        virtual void _calculateAndAddTo(Buffer* resultsVect)
+        {
+            void* inputWeighs = this->getDataPointer();
+            float* results = (float*) resultsVect->getDataPointer();
+            void* inputPtr = tInput->getDataPointer();
+
+            unsigned numLoops;
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
+                                                                                           bufferTypeTempl);
+            unsigned weighPos = 0;
+
+            switch (tInput->getBufferType()) {
+                case BT_FLOAT:
+                    offsetPerInput = offsetPerInput / sizeof(float);
+                    numLoops = ((tInput->getSize() - 1) / FLOATS_PER_BLOCK) + 1;
+                    for (unsigned j = 0; j < resultsVect->getSize(); j++) {
+                        float auxResult;
+                        XMMreal(inputPtr, numLoops, (((float*) inputWeighs) + weighPos), auxResult);
+                        results[j] += auxResult;
+                        weighPos += offsetPerInput;
+                    }
+                    break;
+                case BT_BIT:
+                    numLoops = ((tInput->getSize() - 1) / BYTES_PER_BLOCK) + 1;
+                    for (unsigned j = 0; j < resultsVect->getSize(); j++) {
+                        results[j] += XMMbinario(inputPtr, numLoops,
+                                                 (((unsigned char*) inputWeighs) + weighPos));
+                        weighPos += offsetPerInput;
+                    }
+                    break;
+                case BT_SIGN:
+                    numLoops = ((tInput->getSize() - 1) / BYTES_PER_BLOCK) + 1;
+                    for (unsigned j = 0; j < resultsVect->getSize(); j++) {
+                        results[j] += XMMbipolar(inputPtr, numLoops,
+                                                 (((unsigned char*) inputWeighs) + weighPos));
+                        weighPos += offsetPerInput;
+                    }
+                    break;
+                case BT_BYTE:
+                    std::string error =
+                            "CppBuffer::inputCalculation is not implemented for BufferType BYTE as input.";
+                    throw error;
+            }
+        }
+
+        virtual void _activation(Buffer* output, FunctionType functionType)
+        {
+            float* results = (float*) tInput->getDataPointer();
+            float* threesholds = (float*) data;
+
+            switch (output->getBufferType()) {
+                case BT_BYTE:
+                    {
+                        std::string error = "XmmBuffer::activation is not implemented for BufferType BYTE.";
+                        throw error;
+                    }
+                    break;
+                case BT_FLOAT:
+                    {
+                        float* outputData = (float*) output->getDataPointer();
+                        for (unsigned i = 0; i < tSize; i++) {
+                            outputData[i] = Function<c_typeTempl>(results[i] - threesholds[i], functionType);
+                        }
+                    }
+                    break;
+                case BT_BIT:
+                case BT_SIGN:
+                    {
+                        unsigned char* outputData = (unsigned char*) output->getDataPointer();
+
+                        unsigned blockOffset = 0;
+                        unsigned bytePos = 0;
+                        unsigned char bufferMask = 128;
+
+                        for (unsigned i = 0; i < tSize; i++) {
+
+                            if (results[i] - threesholds[i] > 0) {
+                                outputData[blockOffset + bytePos] |= bufferMask;
+                            } else {
+                                outputData[blockOffset + bytePos] &= ~bufferMask;
+                            }
+
+                            if (i % BYTES_PER_BLOCK == (BYTES_PER_BLOCK - 1)) {
+                                bytePos = 0;
+                                if (i % BITS_PER_BLOCK == (BITS_PER_BLOCK - 1)) {
+                                    blockOffset += BYTES_PER_BLOCK;
+                                    bufferMask = 128;
+                                } else {
+                                    bufferMask >>= 1;
+                                }
+                            } else {
+                                ++bytePos;
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+
+        virtual void _crossover(Buffer* other, Interface* bitBuffer)
+        {
+            void* otherWeighs = other->getDataPointer();
+
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
+                                                                                           bufferTypeTempl);
+            unsigned offset = 0;
+            unsigned inputSize = tInput->getSize();
+            unsigned outputSize = tSize / inputSize;
+            unsigned elem = 0;
+
+            switch (bufferTypeTempl) {
+                case BT_BYTE:
+                    unsigned char auxChar;
+
+                    for (unsigned j = 0; j < outputSize; j++) {
+                        for (unsigned i = 0; i < inputSize; i++) {
+
+                            if (bitBuffer->getElement(elem++)) {
+                                auxChar = ((unsigned char*) (data) + offset)[i];
+                                ((unsigned char*) (data) + offset)[i] = ((unsigned char*) (otherWeighs)
+                                        + offset)[i];
+                                ((unsigned char*) (otherWeighs) + offset)[i] = auxChar;
+                            }
+                        }
+                        offset += offsetPerInput;
+                    }
+                    break;
+                case BT_FLOAT:
+                    float auxFloat;
+                    offsetPerInput = offsetPerInput / sizeof(float);
+
+                    for (unsigned j = 0; j < outputSize; j++) {
+                        for (unsigned i = 0; i < inputSize; i++) {
+
+                            if (bitBuffer->getElement(elem++)) {
+                                auxFloat = ((float*) (data) + offset)[i];
+                                ((float*) (data) + offset)[i] = ((float*) (otherWeighs) + offset)[i];
+                                ((float*) (otherWeighs) + offset)[i] = auxFloat;
+                            }
+                        }
+                        offset += offsetPerInput;
+                    }
+                    break;
+                case BT_BIT:
+                case BT_SIGN:
+                    std::string error =
+                            "XmmConnection::_crossover is not implemented for BufferType BIT nor SIGN.";
+                    throw error;
+            }
+        }
+
         virtual void _mutateWeigh(unsigned pos, float mutation)
         {
             unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
@@ -147,57 +298,6 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             }
         }
 
-        virtual void _crossover(Buffer* other, Interface* bitBuffer)
-        {
-            void* otherWeighs = other->getDataPointer();
-
-            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
-                                                                                           bufferTypeTempl);
-            unsigned offset = 0;
-            unsigned inputSize = tInput->getSize();
-            unsigned outputSize = tSize / inputSize;
-            unsigned elem = 0;
-
-            switch (bufferTypeTempl) {
-                case BT_BYTE:
-                    unsigned char auxChar;
-
-                    for (unsigned j = 0; j < outputSize; j++) {
-                        for (unsigned i = 0; i < inputSize; i++) {
-
-                            if (bitBuffer->getElement(elem++)) {
-                                auxChar = ((unsigned char*) (data) + offset)[i];
-                                ((unsigned char*) (data) + offset)[i] = ((unsigned char*) (otherWeighs)
-                                        + offset)[i];
-                                ((unsigned char*) (otherWeighs) + offset)[i] = auxChar;
-                            }
-                        }
-                        offset += offsetPerInput;
-                    }
-                    break;
-                case BT_FLOAT:
-                    float auxFloat;
-                    offsetPerInput = offsetPerInput / sizeof(float);
-
-                    for (unsigned j = 0; j < outputSize; j++) {
-                        for (unsigned i = 0; i < inputSize; i++) {
-
-                            if (bitBuffer->getElement(elem++)) {
-                                auxFloat = ((float*) (data) + offset)[i];
-                                ((float*) (data) + offset)[i] = ((float*) (otherWeighs) + offset)[i];
-                                ((float*) (otherWeighs) + offset)[i] = auxFloat;
-                            }
-                        }
-                        offset += offsetPerInput;
-                    }
-                    break;
-                case BT_BIT:
-                case BT_SIGN:
-                    std::string error =
-                            "XmmConnection::_crossover is not implemented for BufferType BIT nor SIGN.";
-                    throw error;
-            }
-        }
     public:
         XmmConnection(Buffer* input, unsigned outputSize)
         {
@@ -227,53 +327,6 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         virtual ~XmmConnection()
         {
         }
-        ;
-
-        virtual void _calculateAndAddTo(Buffer* resultsVect)
-        {
-            void* inputWeighs = this->getDataPointer();
-            float* results = (float*) resultsVect->getDataPointer();
-            void* inputPtr = tInput->getDataPointer();
-
-            unsigned numLoops;
-            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
-                                                                                           bufferTypeTempl);
-            unsigned weighPos = 0;
-
-            switch (tInput->getBufferType()) {
-                case BT_FLOAT:
-                    offsetPerInput = offsetPerInput / sizeof(float);
-                    numLoops = ((tInput->getSize() - 1) / FLOATS_PER_BLOCK) + 1;
-                    for (unsigned j = 0; j < resultsVect->getSize(); j++) {
-                        float auxResult;
-                        XMMreal(inputPtr, numLoops, (((float*) inputWeighs) + weighPos), auxResult);
-                        results[j] += auxResult;
-                        weighPos += offsetPerInput;
-                    }
-                    break;
-                case BT_BIT:
-                    numLoops = ((tInput->getSize() - 1) / BYTES_PER_BLOCK) + 1;
-                    for (unsigned j = 0; j < resultsVect->getSize(); j++) {
-                        results[j] += XMMbinario(inputPtr, numLoops,
-                                                 (((unsigned char*) inputWeighs) + weighPos));
-                        weighPos += offsetPerInput;
-                    }
-                    break;
-                case BT_SIGN:
-                    numLoops = ((tInput->getSize() - 1) / BYTES_PER_BLOCK) + 1;
-                    for (unsigned j = 0; j < resultsVect->getSize(); j++) {
-                        results[j] += XMMbipolar(inputPtr, numLoops,
-                                                 (((unsigned char*) inputWeighs) + weighPos));
-                        weighPos += offsetPerInput;
-                    }
-                    break;
-                case BT_BYTE:
-                    std::string error =
-                            "CppBuffer::inputCalculation is not implemented for BufferType BYTE as input.";
-                    throw error;
-            }
-        }
-
     };
 
 #endif /* XMMCONNECTION_H_ */

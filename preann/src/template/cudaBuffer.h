@@ -108,12 +108,6 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             cuda_setZero(data, byte_sz, bufferTypeTempl, CUDA_THREADS_PER_BLOCK);
         }
 
-        virtual void activation(Buffer* resultsVect, FunctionType functionType)
-        {
-            float* results = (float*) resultsVect->getDataPointer();
-            cuda_activation(data, tSize, bufferTypeTempl, results, functionType, CUDA_THREADS_PER_BLOCK);
-        }
-
     };
 
 #endif /* CUDABUFFER_H_ */

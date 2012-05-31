@@ -5,8 +5,8 @@
 #include "cudaBuffer.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
-    class CudaInvertedConnection : public virtual FullConnection,
-            public CudaBuffer<bufferTypeTempl, c_typeTempl>
+    class CudaInvertedConnection : public virtual FullConnection, public CudaBuffer<bufferTypeTempl,
+                                           c_typeTempl>
     {
     protected:
         //redefined from CudaBuffer
@@ -22,6 +22,16 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             interface->transposeMatrix(tSize / tInput->getSize());
         }
 
+        virtual void _calculateAndAddTo(Buffer* results)
+        {
+            void* inputWeighs = this->getDataPointer();
+            float* resultsPtr = (float*) results->getDataPointer();
+
+            cuda_inputCalculationInvertedMatrix(tInput->getDataPointer(), tInput->getSize(),
+                                                tInput->getBufferType(), results->getSize(), inputWeighs,
+                                                resultsPtr, Cuda_Threads_Per_Block);
+        }
+
         unsigned invertPos(unsigned pos)
         {
             //TODO z simplificar cuentas
@@ -29,6 +39,19 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             unsigned inputPos = (pos % tInput->getSize());
             unsigned outputSize = tSize / tInput->getSize();
             return outputPos + (inputPos * outputSize);
+        }
+
+        virtual void _crossover(Buffer* other, Interface* bitBuffer)
+        {
+            Interface invertedBitBuffer = Interface(bitBuffer);
+            invertedBitBuffer.transposeMatrix(tInput->getSize());
+
+            CudaBuffer<bufferTypeTempl, c_typeTempl> cudaBitBuffer(&invertedBitBuffer,
+                                                                   Cuda_Threads_Per_Block);
+
+            cuda_crossover(this->getDataPointer(), other->getDataPointer(),
+                           (unsigned*) cudaBitBuffer.getDataPointer(), tSize, bufferTypeTempl,
+                           Cuda_Threads_Per_Block);
         }
 
         virtual void _mutateWeigh(unsigned pos, float mutation)
@@ -41,22 +64,9 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             cuda_resetWeigh(data, invertPos(pos), bufferTypeTempl);
         }
 
-        virtual void _crossover(Buffer* other, Interface* bitBuffer)
-        {
-            Interface invertedBitBuffer = Interface(bitBuffer);
-            invertedBitBuffer.transposeMatrix(tInput->getSize());
-
-            CudaBuffer<bufferTypeTempl, c_typeTempl> cudaBitBuffer(
-                    &invertedBitBuffer, Cuda_Threads_Per_Block);
-
-            cuda_crossover(this->getDataPointer(), other->getDataPointer(),
-                    (unsigned*)cudaBitBuffer.getDataPointer(), tSize,
-                    bufferTypeTempl, Cuda_Threads_Per_Block);
-        }
     public:
-        CudaInvertedConnection(Buffer* input, unsigned outputSize) :
-            CudaBuffer<bufferTypeTempl, c_typeTempl> (input->getSize()
-                    * outputSize)
+        CudaInvertedConnection(Buffer* input, unsigned outputSize)
+                : CudaBuffer<bufferTypeTempl, c_typeTempl>(input->getSize() * outputSize)
         {
             tInput = input;
         }
@@ -64,25 +74,11 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         virtual ~CudaInvertedConnection()
         {
         }
-        ;
 
         virtual ImplementationType getImplementationType()
         {
             return IT_CUDA_INV;
         }
-        ;
-
-        virtual void _calculateAndAddTo(Buffer* results)
-        {
-            void* inputWeighs = this->getDataPointer();
-            float* resultsPtr = (float*)results->getDataPointer();
-
-            cuda_inputCalculationInvertedMatrix(tInput->getDataPointer(),
-                    tInput->getSize(), tInput->getBufferType(),
-                    results->getSize(), inputWeighs, resultsPtr,
-                    Cuda_Threads_Per_Block);
-        }
-
     };
 
 #endif /* CUDAINVERTEDCONNECTION_H_ */

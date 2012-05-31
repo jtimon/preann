@@ -39,21 +39,6 @@ float chronoCopyFromInterface(ParametersMap* parametersMap, unsigned repetitions
     END
 }
 
-float chronoActivation(ParametersMap* parametersMap, unsigned repetitions)
-{
-    START
-
-    Buffer* results = Factory::newBuffer(buffer->getSize(), BT_FLOAT, buffer->getImplementationType());
-
-    START_CHRONO
-        buffer->activation(results, FT_IDENTITY);
-    STOP_CHRONO
-
-    delete (results);
-
-    END
-}
-
 float chronoClone(ParametersMap* parametersMap, unsigned repetitions)
 {
     START
@@ -89,12 +74,6 @@ int main(int argc, char *argv[])
         plotter.plotChrono(chronoCopyFromInterface, "Buffer_copyFromInterface", &linesLoop, repetitions);
 
         plotter.plotChrono(chronoClone, "Buffer_clone", &linesLoop, repetitions);
-
-        // exclude BYTE
-        bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
-        linesLoop.print();
-        plotter.resetRangeX(2000, 20001, 2000);
-        plotter.plotChrono(chronoActivation, "Buffer_activation", &linesLoop, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {

@@ -11,125 +11,75 @@
 #include "neural/buffer.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
-    class CppBuffer : virtual public Buffer
+class CppBuffer : virtual public Buffer
+{
+protected:
+    unsigned getByteSize()
     {
-    protected:
-        unsigned getByteSize()
-        {
-            switch (bufferTypeTempl) {
-                case BT_BIT:
-                case BT_SIGN:
-                    return (((tSize - 1) / BITS_PER_UNSIGNED) + 1)
-                            * sizeof(unsigned);
-                default:
-                    return tSize * sizeof(c_typeTempl);
-            }
+        switch (bufferTypeTempl) {
+            case BT_BIT:
+            case BT_SIGN:
+                return (((tSize - 1) / BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
+            default:
+                return tSize * sizeof(c_typeTempl);
         }
+    }
 
-        virtual void _copyFrom(Interface* interface)
-        {
-            memcpy(data, interface->getDataPointer(), interface->getByteSize());
+    virtual void _copyFrom(Interface* interface)
+    {
+        memcpy(data, interface->getDataPointer(), interface->getByteSize());
+    }
+
+    virtual void _copyTo(Interface* interface)
+    {
+        memcpy(interface->getDataPointer(), data, this->getByteSize());
+    }
+public:
+    CppBuffer()
+    {
+    }
+    CppBuffer(unsigned size)
+    {
+        this->tSize = size;
+
+        size_t byteSize = getByteSize();
+        data = MemoryManagement::malloc(byteSize);
+
+        reset();
+    }
+
+    ~CppBuffer()
+    {
+        if (data) {
+            MemoryManagement::free(data);
+            data = NULL;
         }
+    }
 
-        virtual void _copyTo(Interface* interface)
-        {
-            memcpy(interface->getDataPointer(), data, this->getByteSize());
+    virtual ImplementationType getImplementationType()
+    {
+        return IT_C;
+    }
+
+    virtual BufferType getBufferType()
+    {
+        return bufferTypeTempl;
+    }
+
+    virtual void reset()
+    {
+        size_t byteSize = getByteSize();
+
+        switch (bufferTypeTempl) {
+            case BT_BYTE:
+                SetValueToAnArray<c_typeTempl>(data, byteSize / sizeof(c_typeTempl), 128);
+                break;
+            default:
+                SetValueToAnArray<c_typeTempl>(data, byteSize / sizeof(c_typeTempl), 0);
+                break;
         }
-    public:
-
-        virtual ImplementationType getImplementationType()
-        {
-            return IT_C;
-        }
-
-        virtual BufferType getBufferType()
-        {
-            return bufferTypeTempl;
-        }
-
-        CppBuffer()
-        {
-        }
-
-        CppBuffer(unsigned size)
-        {
-            this->tSize = size;
-
-            size_t byteSize = getByteSize();
-            data = MemoryManagement::malloc(byteSize);
-
-            reset();
-        }
-
-        ~CppBuffer()
-        {
-            if (data) {
-                MemoryManagement::free(data);
-                data = NULL;
-            }
-        }
-
-        virtual void reset()
-        {
-            size_t byteSize = getByteSize();
-
-            switch (bufferTypeTempl) {
-                case BT_BYTE:
-                    SetValueToAnArray<c_typeTempl> (data, byteSize
-                            / sizeof(c_typeTempl), 128);
-                    break;
-                default:
-                    SetValueToAnArray<c_typeTempl> (data, byteSize
-                            / sizeof(c_typeTempl), 0);
-                    break;
-            }
-        }
-
-        virtual void activation(Buffer* resultsVect, FunctionType functionType)
-        {
-            float* results = (float*)resultsVect->getDataPointer();
-
-            switch (bufferTypeTempl) {
-                case BT_BYTE:
-                    {
-                        std::string error =
-                                "CppBuffer::activation is not implemented for BufferType BYTE.";
-                        throw error;
-                    }
-                    break;
-                case BT_FLOAT:
-                    {
-                        for (unsigned i = 0; i < tSize; i++) {
-                            ((c_typeTempl*)data)[i] = Function<c_typeTempl> (
-                                    results[i], functionType);
-                        }
-                    }
-                    break;
-                case BT_BIT:
-                case BT_SIGN:
-                    {
-                        unsigned* bufferData = (unsigned*)data;
-                        unsigned mask;
-                        for (unsigned i = 0; i < tSize; i++) {
-
-                            if (i % BITS_PER_UNSIGNED == 0) {
-                                mask = 0x80000000;
-                            } else {
-                                mask >>= 1;
-                            }
-
-                            if (results[i] > 0) {
-                                bufferData[i / BITS_PER_UNSIGNED] |= mask;
-                            } else {
-                                bufferData[i / BITS_PER_UNSIGNED] &= ~mask;
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-
-    };
+    }
+};
 
 //TODO template specialization for BT_BYTE, BT_BIT and BT_SIGN
 //template <class c_typeTempl>

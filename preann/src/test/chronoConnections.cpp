@@ -29,6 +29,25 @@ float chronoCalculateAndAddTo(ParametersMap* parametersMap, unsigned repetitions
     END
 }
 
+float chronoActivation(ParametersMap* parametersMap, unsigned repetitions)
+{
+    Buffer* output = Dummy::buffer(parametersMap);
+    Buffer* results = Factory::newBuffer(output->getSize(), BT_FLOAT, output->getImplementationType());
+    Connection* thresholds = Factory::newConnection(results, 1);
+
+    FunctionType functionType = (FunctionType) parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_FUNCTION));
+    START_CHRONO
+        thresholds->activation(output, functionType);
+    STOP_CHRONO
+
+    delete (thresholds);
+    delete (results);
+    delete (output);
+
+    return chrono.getSeconds();
+}
+
 float chronoMutate(ParametersMap* parametersMap, unsigned repetitions)
 {
     START
@@ -37,6 +56,18 @@ float chronoMutate(ParametersMap* parametersMap, unsigned repetitions)
     float mutation = Random::floatNum(initialWeighsRange);
     START_CHRONO
         connection->mutate(pos, mutation);
+    STOP_CHRONO
+
+    END
+}
+
+float chronoReset(ParametersMap* parametersMap, unsigned repetitions)
+{
+    START
+
+    unsigned pos = Random::positiveInteger(connection->getSize());
+    START_CHRONO
+        connection->reset(pos);
     STOP_CHRONO
 
     END
@@ -74,19 +105,23 @@ int main(int argc, char *argv[])
                            IT_SSE2);
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
-                                                BT_BIT, BT_SIGN, BT_FLOAT);
+                                                BT_FLOAT, BT_BIT, BT_SIGN);
         linesLoop.addInnerLoop(bufferTypeLoop);
 
         linesLoop.print();
 
         RangeLoop averageLoop(Dummy::OUTPUT_SIZE, 1, 4, 2);
 
-        plotter.plotChronoAveraged(chronoMutate, "Connection_mutate", &linesLoop, &averageLoop, 10000);
+        plotter.plotChronoAveraged(chronoMutate, "Connection_mutate", &linesLoop, &averageLoop, 50000);
+        plotter.plotChronoAveraged(chronoReset, "Connection_reset", &linesLoop, &averageLoop, 50000);
 
         plotter.resetRangeX(500, 5000, 500);
         plotter.plotChronoAveraged(chronoCrossover, "Connection_crossover", &linesLoop, &averageLoop, 1000);
         plotter.plotChronoAveraged(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &linesLoop,
                                    &averageLoop, 1000);
+
+        plotter.resetRangeX(2000, 20001, 2000);
+        plotter.plotChrono(chronoActivation, "Connection_activation", &linesLoop, 5000);
 
         printf("Exit success.\n");
     } catch (std::string error) {

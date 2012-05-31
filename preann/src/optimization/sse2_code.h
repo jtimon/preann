@@ -15,11 +15,8 @@
 #define FLOATS_PER_BLOCK (BYTES_PER_BLOCK/sizeof(float))
 
 //extern "IT_C" void XMMbinario (void* bufferEntrada, unsigned numeroBloques, unsigned char* pesos, int &resultado);
-extern "C" int XMMbinario(void* bufferEntrada, unsigned numeroBloques,
-        unsigned char* pesos);
-extern "C" int XMMbipolar(void* bufferEntrada, unsigned numeroBloques,
-        unsigned char* pesos);
-extern "C" void XMMreal(void* bufferEntrada, unsigned numeroBloques,
-        float* pesos, float &resultado);
+extern "C" int XMMbinario(void* bufferEntrada, unsigned numeroBloques, unsigned char* pesos);
+extern "C" int XMMbipolar(void* bufferEntrada, unsigned numeroBloques, unsigned char* pesos);
+extern "C" void XMMreal(void* bufferEntrada, unsigned numeroBloques, float* pesos, float &resultado);
 
 #endif /* XMM_DEFINITIONS_H_ */

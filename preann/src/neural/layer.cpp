@@ -97,15 +97,15 @@ void Layer::calculateOutput()
     }
     //TODO B do not use clone on the thresholds, compare with them in activation (one write less)
     //	Buffer* results = newBuffer(thresholds->getSize(), thresholds->getBufferType());
-//    results->reset();
-    results->copyFrom(thresholds);
+    results->reset();
+//    results->copyFrom(thresholds);
 
     for (unsigned i = 0; i < connections.size(); i++) {
         connections[i]->calculateAndAddTo(results);
     }
 
-    output->activation(results, functionType);
-//    thresholds->activation(output, functionType);
+//    output->activation(results, functionType);
+    thresholds->activation(output, functionType);
     if (outputInterface != NULL) {
         output->copyToInterface(outputInterface);
     }

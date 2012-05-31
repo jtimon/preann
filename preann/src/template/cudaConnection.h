@@ -15,14 +15,23 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
     class CudaConnection : public virtual Connection, public CudaBuffer<bufferTypeTempl, c_typeTempl>
     {
     protected:
-        virtual void _mutateWeigh(unsigned pos, float mutation)
+        virtual void _calculateAndAddTo(Buffer* results)
         {
-            cuda_mutateWeigh(data, pos, mutation, bufferTypeTempl);
+            void* inputWeighs = this->getDataPointer();
+            float* resultsPtr = (float*) results->getDataPointer();
+            // TODO TCC este método no funciona correctamente para BT_SIGN
+            cuda_inputCalculation(tInput->getDataPointer(), tInput->getSize(), tInput->getBufferType(),
+                                  results->getSize(), inputWeighs, resultsPtr, Cuda_Threads_Per_Block);
         }
 
-        virtual void _resetWeigh(unsigned pos)
+        virtual void _activation(Buffer* output, FunctionType functionType)
         {
-            cuda_resetWeigh(data, pos, bufferTypeTempl);
+            void* outputData = output->getDataPointer();
+            float* results = (float*) tInput->getDataPointer();
+            float* thresholds = (float*) data;
+
+            cuda_activation(outputData, tSize, bufferTypeTempl, results, thresholds, functionType,
+                            CUDA_THREADS_PER_BLOCK);
         }
 
         virtual void _crossover(Buffer* other, Interface* bitBuffer)
@@ -33,6 +42,16 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                            (unsigned*) cudaBitBuffer.getDataPointer(), tSize, bufferTypeTempl,
                            Cuda_Threads_Per_Block);
         }
+
+        virtual void _mutateWeigh(unsigned pos, float mutation)
+        {
+            cuda_mutateWeigh(data, pos, mutation, bufferTypeTempl);
+        }
+
+        virtual void _resetWeigh(unsigned pos)
+        {
+            cuda_resetWeigh(data, pos, bufferTypeTempl);
+        }
     public:
         CudaConnection(Buffer* input, unsigned outputSize)
                 : CudaBuffer<bufferTypeTempl, c_typeTempl>(input->getSize() * outputSize)
@@ -42,16 +61,6 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual ~CudaConnection()
         {
-        }
-        ;
-
-        virtual void _calculateAndAddTo(Buffer* results)
-        {
-            void* inputWeighs = this->getDataPointer();
-            float* resultsPtr = (float*) results->getDataPointer();
-            // TODO TCC este método no funciona correctamente para BT_SIGN
-            cuda_inputCalculation(tInput->getDataPointer(), tInput->getSize(), tInput->getBufferType(),
-                                  results->getSize(), inputWeighs, resultsPtr, Cuda_Threads_Per_Block);
         }
 
     };
