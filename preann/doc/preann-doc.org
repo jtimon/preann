@@ -18,11 +18,15 @@
 #+LATEX_HEADER:     linkcolor=blue,%
 #+LATEX_HEADER:     urlcolor=blue
 #+LATEX_HEADER: }
-#+OPTIONS:     toc:nil
+#+OPTIONS:     toc:nil H:5
 #+BIND: org-export-latex-title-command ""
 
-# Título, abstract e índice
+# definiciones propias
 #+begin_latex
+
+\setcounter{secnumdepth}{5}
+\counterwithin{figure}{section}
+\setcounter{tocdepth}{5}
 
 \newcommand{\mail}[1][timon.elviejo@gmail.com]{%
 e-mail: \href{mailto:#1} {#1}
@@ -49,7 +53,10 @@ e-mail: \href{mailto:#1} {#1}
 \end{list}
 }%
 
-\counterwithin{figure}{section}
+#+end_latex
+
+# Tï¿½tulo, abstract e ï¿½ndice
+#+begin_latex
 
 \begin{titlepage}
 
@@ -88,7 +95,6 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
 \tableofcontents
 
 \newpage
-
 #+end_latex
 
 * Introducci\'on
@@ -111,8 +117,9 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
  Los problemas en los que aplicamos nuestro desarrollo, aunque no son realistas, se consideran interesantes para la rob\'otica y/o para la inteligencia artificial. Los tipos de problemas tienen que ver con la clasificaci\'on, los juegos considerados como deportes mentales, el control autom\'atico, la toma de decisiones en tiempo real y la colaboraci\'on de m\'ultiples agentes en tiempo real; pudiendo estar relacionados estos \'ultimos con la
 [[http://es.wikipedia.org/wiki/Vida_artificial][vida artificial]]. En la mayor\'ia de los problemas, el agente se enfrenta a pruebas gen\'ericas que pueden tener factores aleatorios y/o agentes directamente programados. En algunos problemas, sin embargo, los agentes de la poblaci\'on pueden enfrentarse entre ellos para obtener una valoraci\'on.
 
- En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado \flqq Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos\frqq, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados \ref{resul} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
+ En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado \flqq Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos\frqq, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados \ref{resultados} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
 
+\newpage
 * Base te\'orica
   #+LaTeX: \label{baseTeorica}
 
@@ -193,6 +200,7 @@ Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de 
 
  Uno de los problemas a los que se enfrenta la evoluci\'on de redes neuronales es el problema de la permutaci\'on. Es causado por el mapeado "muchos-a-uno" desde la representaci\'on en el cromosoma a la red que es construida. Con dos cromosomas distintos se pueden generar redes equivalentes como se muestra en las figuras \ref{figGrafo1} y \ref{figGrafo2}. Se puede solucionar dando m\'as importancia al operador de mutaci\'on que al de cruza (que es el que sufre con este problema) o con otros m\'etodos matem\'aticos \cite[Gomez, Miikkulainen 2003]{GomezMiikkulainen2003}. 
 
+\newpage
 * An\'alisis del problema
   #+LaTeX: \label{analisis}
 ** Fortalezas y deficiencias
@@ -263,6 +271,7 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
 
 \end{enumerate}
 
+\newpage
 * Dise\~no e implementaci\'on
   #+LaTeX: \label{diseno}
 ** Implementaciones paralelas de las redes neuronales
@@ -275,78 +284,160 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
   #+LaTeX: \label{disenoGene}
 ** Interfaz del programador
   #+LaTeX: \label{disenoInterfProgr}
+\newpage
 * Experimentaci\'on
   #+LaTeX: \label{experimentacion}
 ** Tareas de clasificaci\'on
   #+LaTeX: \label{}
 ** Juegos de estrategia abstractos
   #+LaTeX: \label{}
+\newpage
+
 * Resultados
-  #+LaTeX: \label{resul}
-** Rendimiento de las implementaciones paralelas de red neuronal
-  #+LaTeX: \label{resulImpl}
+  #+LaTeX: \label{resultados}
+** Rendimiento
+  #+LaTeX: \label{rendimiento}
 
-*** Acumulación de resultados
+En esta secciï¿½n se analizan resultados de rendimiento en tiempo de ejecuciï¿½n.
 
-En la figura \ref{grafImplCalculate}, puede apreciarse que la implementación con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a la implementación de referencia en lenguaje C, especialmente para los tipos de Buffer BIT y SIGN.
+*** Rendimiento de las implementaciones paralelas de red neuronal
+  #+LaTeX: \label{rendImpl}
 
-#+CAPTION:    Método de acumulación de resultados (Connection::calculateAndAdd).
+En esta secciï¿½n se presentan los resultados en tiempo de ejecuciï¿½n de los mï¿½todos que se ejecutan de forma diferente con cada implementaciï¿½n.
+
+**** Acumulaciï¿½n de resultados
+
+En la figura \ref{grafImplCalculate}, puede apreciarse que la implementaciï¿½n con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a la implementaciï¿½n de referencia en lenguaje C, especialmente para los tipos de Buffer BIT y SIGN.
+
+#+CAPTION:    Mï¿½todo de acumulaciï¿½n de resultados (Connection::calculateAndAdd).
 #+LABEL:      grafImplCalculate
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Connection_calculateAndAddTo.png]]
 \newpage
 
-*** Activación
+**** Activaciï¿½n
 
-#+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Buffer::activation).
+De la figura \ref{grafImplActivation} se extraen varias conclusiones. No mucha diferencia de rendimiento entre las implementaciones y prï¿½cticamente ninguna cuando las neuronas son de tipo FLOAT. Esto era de esperar porque ambas implementaciones son idï¿½nticas: no se han hecho optimizaciones SSE2 para la funciï¿½n de activaciï¿½n.
+
+Para los tipos BIT y SIGN, la implementaciï¿½n en C es ligeramente mï¿½s rï¿½pida que para el tipo FLOAT y la  escrita en SSE2 es ligeremante mï¿½s lenta que la FLOAT. En la implementaciï¿½n SSE2 de BIT y SIGN no se ponen los bits en el orden normal, si no en la representaciï¿½n especial de SSE2, para que el mï¿½todo de acumulaciï¿½n de resultados pueda ser ï¿½ptimo.
+
+#+CAPTION:    Mï¿½todo que ejecuta la funciï¿½n de activaciï¿½n para las salidas de una capa (Connection::activation).
 #+LABEL:      grafImplActivation
 #+ATTR_LaTeX: width=\textwidth
-[[./img/Buffer_activation.png]]
+[[./img/Connection_activation.png]]
 \newpage
 
-*** Crossover
+**** Cruza
 
-#+CAPTION:    Método que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).
+No hay una diferencia sustancial de rendimiento entre las diferentes implementaciones y tipos de neuronas para el operador gï¿½nï¿½tico de crossover, como se muestra en la figura \ref{grafImplCrossover}. Como el mï¿½todo de activaciï¿½n, la cruza de SSE2 se ve ligeramente penalizada al traducir el vector de bits con los pesos a cruzar para que tenga se adapte a la posiciï¿½n especial de los pesos en SSE2.
+
+#+CAPTION:    Mï¿½todo que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).
 #+LABEL:      grafImplCrossover
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Connection_crossover.png]]
 \newpage
 
-*** Mutation
+**** Mutaciï¿½n
 
-#+CAPTION:    Método que implementa el operador genético de mutación (Connection::mutate).
+De la figura \ref{grafImplMutation} se puede deducir que el operador de mutaciï¿½n tiene un coste mï¿½nimo y constante respecto al tamaï¿½o de la conexiï¿½n para todas las implementaciones.
+
+#+CAPTION:    Mï¿½todo que implementa el operador genï¿½tico de mutaciï¿½n (Connection::mutate).
 #+LABEL:      grafImplMutation
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Connection_mutate.png]]
 \newpage
 
-*** Copiar desde y hacia Interfaz
+**** Olvido
 
-Estos métodos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementación concreta escogida. Cada implementación debe mapear correctamente desde la representación genérica (Interfaz) hacia su propia representación interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
+De manera similar a la operaciï¿½n de mutaciï¿½n, el olvido (figura \ref{grafImplReset}) tiene un coste constante y mï¿½nimo.
 
-#+CAPTION:    Método que implementa la copia a un Buffer con una implementación determinada desde un Buffer genérico de la clase Interfaz (Buffer::copyFromInterface).
+#+CAPTION:    Mï¿½todo que implementa el operador genï¿½tico de olvido (Connection::reset).
+#+LABEL:      grafImplReset
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Connection_reset.png]]
+\newpage
+
+**** Copiar desde y hacia Interfaz
+
+Estos mï¿½todos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementaciï¿½n concreta escogida. Cada implementaciï¿½n debe mapear correctamente desde la representaciï¿½n genï¿½rica (Interfaz) hacia su propia representaciï¿½n interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
+
+#+CAPTION:    Mï¿½todo que implementa la copia a un Buffer con una implementaciï¿½n determinada desde un Buffer genï¿½rico de la clase Interfaz (Buffer::copyFromInterface).
 #+LABEL:      grafImplCopyFrom
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Buffer_copyFromInterface.png]]
-#+CAPTION:    Método que implementa la copia de un Buffer con una implementación determinada a un Buffer genérico de la clase Interfaz (Buffer::copyToInterface).
+
+En ambos casos se observa que el coste es muy pequeï¿½o excepto para la implementaciï¿½n SSE2 de los tipos BIT y SIGN, por razones similares a las de Activaciï¿½n.
+
+#+CAPTION:    Mï¿½todo que implementa la copia de un Buffer con una implementaciï¿½n determinada a un Buffer genï¿½rico de la clase Interfaz (Buffer::copyToInterface).
 #+LABEL:      grafImplCopyTo
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Buffer_copyToInterface.png]]
 \newpage
 
-** Comparaci\'on entre redes discretas y lineales
-  #+LaTeX: \label{}
+*** Rendimiento de los diferentes operadores genï¿½ticos
+   #+LaTeX: \label{rendOperadores}
 
-*** seguir
+En esta secciï¿½n se cronometran los operadores de selecciï¿½n. Algunos ya se habï¿½an analizado en la secciï¿½n \ref{rendImpl}, pero a un nivel mï¿½s bajo, del que dependen las implementaciones. Ahora lo que nos interesa es principalmente el coste de los operadores dependiendo de las diferentes formas de usarlo a mï¿½s alto nivel. Nos abstraemos por ello de la implementaciï¿½n concreta y usamos la implementaciï¿½n C para todas estas pruebas.
 
-** Comparaci\'on de operadores gen\'eticos
-  #+LaTeX: \label{}
+**** Selecciï¿½n
+
+figura \ref{rendGenSelect}
+
+#+CAPTION:    a
+#+LABEL:      rendGenSelect
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Population_Selection.png]]
+\newpage
+
+**** Cruza
+
+figura \ref{rendGenCruza}
+
+#+CAPTION:    a
+#+LABEL:      rendGenCruza
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Individual_crossover.png]]
+\newpage
+
+**** Mutaciï¿½n
+
+figura \ref{rendGenMutation}
+
+#+CAPTION:    a
+#+LABEL:      rendGenMutation
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Individual_mutate.png]]
+\newpage
+
+**** Olvido
+
+figura \ref{rendGenOlvido}
+
+#+CAPTION:    a
+#+LABEL:      rendGenOlvido
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Individual_reset.png]]
+\newpage
+
+** Aprendizaje
+  #+LaTeX: \label{aprendizaje}
+
+En esta secciï¿½n se muestran resultados de aprendizaje en tï¿½rminos del mejor fitness de la poblaciï¿½n en cada generaciï¿½n.
+
+*** Comparaci\'on entre redes discretas y lineales
+   #+LaTeX: \label{}
+
+**** seguir
+
+*** Comparaci\'on de operadores gen\'eticos
+   #+LaTeX: \label{}
 
 * Conclusiones
   #+LaTeX: \label{conclusiones}
 
 \newpage
-#Bibliografía 
+
+#Bibliografï¿½a 
 \cleardoublepage\phantomsection
 \addcontentsline{toc}{chapter}{\bibname}
 \begin{thebibliography}{9}
