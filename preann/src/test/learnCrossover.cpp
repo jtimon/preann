@@ -27,7 +27,8 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        TaskPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop("Generation", 1, 100, 5));
+        Util::check(argv[1] == NULL, "You must specify an output directory.");
+        TaskPlotter plotter(argv[1], new RangeLoop("Generation", 1, 100, 5));
 
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_SSE2);
         plotter.parameters.putNumber(Dummy::NUM_TESTS, 0);

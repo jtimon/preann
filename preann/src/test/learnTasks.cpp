@@ -33,8 +33,9 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        TaskPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop("Generation", 1, 3, 1));
-//        GenericPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop("Generation", 0, 3, 1), "Prueba");
+        Util::check(argv[1] == NULL, "You must specify an output directory.");
+        TaskPlotter plotter(argv[1], new RangeLoop("Generation", 1, 3, 1));
+//        GenericPlotter plotter(argv[1], new RangeLoop("Generation", 0, 3, 1), "Prueba");
 
         plotter.parameters.putNumber(Dummy::NUM_TESTS, 0);
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);

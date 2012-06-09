@@ -56,7 +56,8 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        ChronoPlotter plotter(PREANN_DIR + to_string("output/"),
+        Util::check(argv[1] == NULL, "You must specify an output directory.");
+        ChronoPlotter plotter(argv[1],
                               new RangeLoop(Dummy::SIZE, 2000, 20001, 2000), "Time (seconds)");
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);

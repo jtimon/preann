@@ -26,7 +26,8 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        TaskPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop("Generation", 0, 200, 1));
+        Util::check(argv[1] == NULL, "You must specify an output directory.");
+        TaskPlotter plotter(argv[1], new RangeLoop("Generation", 0, 200, 1));
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         unsigned populationSize = 8;
         plotter.parameters.putNumber(Population::SIZE, populationSize);
@@ -52,8 +53,8 @@ int main(int argc, char *argv[])
 //                                              ET_SELECTION_ALGORITHM);
 //        plotter.addLoop(selecAlgLoop);
 
-
-        JoinEnumLoop* resetAlgLoop = new JoinEnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG), ET_RESET_ALG);
+        JoinEnumLoop* resetAlgLoop = new JoinEnumLoop(Enumerations::enumTypeToString(ET_RESET_ALG),
+                                                      ET_RESET_ALG);
         Loop* linesLoop = resetAlgLoop;
 
         RangeLoop* numResetsLoop = new RangeLoop(Population::RESET_NUM, 1, 4, 1);
@@ -79,7 +80,7 @@ int main(int argc, char *argv[])
         plotter.plotTask(task, "chronoXor", linesLoop);
         delete (task);
 
-        delete(linesLoop);
+        delete (linesLoop);
 
         printf("Exit success.\n");
     } catch (std::string error) {

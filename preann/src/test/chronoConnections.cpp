@@ -94,7 +94,8 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        ChronoPlotter plotter(PREANN_DIR + to_string("output/"),
+        Util::check(argv[1] == NULL, "You must specify an output directory.");
+        ChronoPlotter plotter(argv[1],
                               new RangeLoop(Dummy::SIZE, 50000, 500000, 50000), "Time (seconds)");
 
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);

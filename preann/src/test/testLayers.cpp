@@ -51,10 +51,11 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
+        Util::check(argv[1] == NULL, "You must specify a directory.");
         Test test;
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Dummy::NUM_INPUTS, 2);
-        test.parameters.putString(LAYER_PATH, PREANN_DIR + to_string("data/layer.lay"));
+        test.parameters.putString(LAYER_PATH, argv[1] + to_string("/data/layer.lay"));
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         RangeLoop loop(Dummy::SIZE, 1, 51, 49);

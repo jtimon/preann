@@ -13,7 +13,8 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        TaskPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop("Generation", 0, 51, 5));
+        Util::check(argv[1] == NULL, "You must specify an output directory.");
+        TaskPlotter plotter(argv[1], new RangeLoop("Generation", 0, 51, 5));
 
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
         unsigned populationSize = 8;

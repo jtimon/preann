@@ -27,10 +27,10 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        TaskPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop("Generation", 1, 100, 5));
+        Util::check(argv[1] == NULL, "You must specify an output directory.");
+        TaskPlotter plotter(argv[1], new RangeLoop("Generation", 1, 100, 5));
 
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_SSE2);
-        plotter.parameters.putNumber(Dummy::NUM_TESTS, 0);
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
         plotter.parameters.putNumber(Population::MUTATION_RANGE, 2);
 
@@ -42,13 +42,8 @@ int main(int argc, char *argv[])
 //        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_BUFFER), BT_BIT);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_DISABLED);
 
-        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_TEST_TASKS), TT_BIN_OR);
-        plotter.parameters.putNumber(Dummy::SIZE, 3);
-
         EnumLoop linesLoop(ET_BUFFER, 3, BT_BIT, BT_SIGN, BT_FLOAT);
-
-//        EnumLoop filesLoop(ET_TEST_TASKS, 2, TT_BIN_OR, TT_BIN_XOR);//TT_BIN_AND, TT_BIN_XOR, TT_REVERSI);
-//        filesLoop.addInnerLoop(new RangeLoop(Dummy::SIZE, 4, 5, 2));
+        linesLoop.addInnerLoop(new RangeLoop(Dummy::NUM_TESTS, 0, 4, 1));
 
         EnumLoop averageLoop(ET_CROSS_LEVEL);
 //        averageLoop.addInnerLoop(new RangeLoop(Population::SIZE, 400, 501, 100));
@@ -72,8 +67,19 @@ int main(int argc, char *argv[])
         mutationLoop->addEnumLoop(MA_PROBABILISTIC, new RangeLoop(Population::MUTATION_PROB, 0.05, 0.30, 0.05));
         averageLoop.addInnerLoop(mutationLoop);
 
-        plotter.plotTaskAveraged("BufferTypes", &linesLoop, &averageLoop);
-//        plotter.plotTaskFilesAveraged("Mutations", &linesLoop, &filesLoop, &averageLoop);
+
+        plotter.parameters.putNumber(Dummy::SIZE, 2);
+//        plotter.parameters.putNumber(Dummy::NUM_TESTS, 2);
+//        EnumLoop filesLoop(ET_TEST_TASKS, 3, TT_BIN_OR, TT_BIN_AND, TT_BIN_XOR);
+        EnumLoop filesLoop(ET_TEST_TASKS, 1, TT_BIN_XOR);
+
+        plotter.plotTaskFilesAveraged("BufferTypes", &linesLoop, &filesLoop, &averageLoop);
+
+//        plotter.parameters.putNumber(Dummy::SIZE, 4);
+//        plotter.parameters.putNumber(Dummy::NUM_TESTS, 2);
+//        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_TEST_TASKS), TT_REVERSI);
+//
+//        plotter.plotTaskFilesAveraged("BufferTypes_REVERSI", &linesLoop, &averageLoop);
 
         printf("Exit success.\n");
     } catch (std::string error) {
@@ -83,7 +89,6 @@ int main(int argc, char *argv[])
     }
     MemoryManagement::printTotalAllocated();
     MemoryManagement::printTotalPointers();
-//    MemoryManagement::printListOfPointers();
 
     total.stop();
     printf("Total time spent: %f \n", total.getSeconds());

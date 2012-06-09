@@ -63,13 +63,12 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        ChronoPlotter plotter(PREANN_DIR + to_string("output/"),
-                              new RangeLoop(Dummy::SIZE, 50000, 500000, 50000), "Time (seconds)");
+        Util::check(argv[1] == NULL, "You must specify an output directory.");
+        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 50000, 500000, 50000), "Time (seconds)");
 
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
-
 
         EnumLoop linesLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C,
                            IT_SSE2);
@@ -80,13 +79,12 @@ int main(int argc, char *argv[])
         Loop* forFilesLoop = bufferTypeLoop;
         Loop* averageLoop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2);
 
-
         plotter.plotChronoFilesAveraged(chronoMutate, "Connection_mutate", &linesLoop, forFilesLoop,
                                         averageLoop, 10000);
 
         plotter.resetRangeX(500, 5000, 500);
-        plotter.plotChronoFilesAveraged(chronoCrossover, "Connection_crossover", &linesLoop,
-                                        forFilesLoop, averageLoop, 1000);
+        plotter.plotChronoFilesAveraged(chronoCrossover, "Connection_crossover", &linesLoop, forFilesLoop,
+                                        averageLoop, 1000);
         plotter.plotChronoFilesAveraged(chronoCalculateAndAddTo, "Connection_calculateAndAddTo_Averaged",
                                         &linesLoop, forFilesLoop, averageLoop, 1000);
 

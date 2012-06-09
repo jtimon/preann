@@ -56,13 +56,13 @@ unsigned testCopyToInterface(ParametersMap* parametersMap)
 unsigned testSaveLoad(ParametersMap* parametersMap)
 {
     START
-    ImplementationType implementationType = (ImplementationType)(parametersMap->getNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION)));
+    ImplementationType implementationType = (ImplementationType) (parametersMap->getNumber(
+            Enumerations::enumTypeToString(ET_IMPLEMENTATION)));
 
-    string path = PREANN_DIR + to_string("data/testBuffer.buf");
+    string path = parametersMap->getString("path") + to_string("data/testBuffer.buf");
     FILE* stream = fopen(path.data(), "w+b");
     buffer->save(stream);
     fclose(stream);
-
 
     stream = fopen(path.data(), "r+b");
     Buffer* loadedBuffer = Factory::newBuffer(stream, implementationType);
@@ -91,7 +91,9 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
+        Util::check(argv[1] == NULL, "You must specify a directory.");
         Test test;
+        test.parameters.putString("path", argv[1] + to_string("/data/layer.lay"));
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 

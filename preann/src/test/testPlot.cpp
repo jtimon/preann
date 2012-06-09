@@ -33,7 +33,8 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        GenericPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop("x", 0, 10, 1), "y");
+        Util::check(argv[1] == NULL, "You must specify an output directory.");
+        GenericPlotter plotter(argv[1], new RangeLoop("x", 0, 10, 1), "y");
 
         RangeLoop* colorLoop = new RangeLoop("color", 0, PLOT_MAX_COLOR + 2, 1);
         plotter.plot(colorTest, "Plot_testColours", colorLoop);
