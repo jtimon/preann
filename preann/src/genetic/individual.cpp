@@ -429,6 +429,22 @@ float Individual::getFitness()
     return fitness;
 }
 
+unsigned Individual::getNumGenes()
+{
+    unsigned numGenes = 0;
+
+    for (unsigned i = 0; i < layers.size(); ++i) {
+        Layer* itLayer = layers[i];
+
+        numGenes += itLayer->getThresholds()->getSize();
+        unsigned numInputs = itLayer->getNumberInputs();
+        for (unsigned j = 0; j < numInputs; ++j) {
+            numGenes += itLayer->getConnection(j)->getSize();
+        }
+    }
+    return numGenes;
+}
+
 void Individual::checkCrossoverCompatibility(Individual* other)
 {
     if (layers.size() != other->getNumLayers() || inputs.size()

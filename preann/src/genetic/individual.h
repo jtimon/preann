@@ -26,12 +26,10 @@ protected:
     void applyUniform(vector<Interface*>* bitmaps, float probability);
     void applyMultipoint(vector<Interface*>* bitmaps, unsigned numPoints);
 
-    void crossover(CrossoverLevel crossoverLevel, Individual* other, vector<
-            Interface*>* bitmaps);
+    void crossover(CrossoverLevel crossoverLevel, Individual* other, vector<Interface*>* bitmaps);
     void crossoverWeighs(Individual* other, vector<Interface*>* bitmaps);
     void crossoverNeurons(Individual* other, vector<Interface*>* bitmaps);
-    void crossoverNeuronsInverted(Individual* other,
-            vector<Interface*>* bitmaps);
+    void crossoverNeuronsInverted(Individual* other, vector<Interface*>* bitmaps);
     void crossoverLayers(Individual* other, vector<Interface*>* bitmaps);
 
     void freeBitmaps(vector<Interface*>* bitmaps);
@@ -46,16 +44,13 @@ public:
     void mutate(float probability, float mutationRange);
     void reset(unsigned numResets);
     void reset(float probability);
-    void uniformCrossover(CrossoverLevel crossoverLevel, Individual* other,
-            float probability);
-    void
-            proportionalCrossover(CrossoverLevel crossoverLevel,
-                    Individual* other);
-    void multipointCrossover(CrossoverLevel crossoverLevel, Individual* other,
-            unsigned numPoints);
+    void uniformCrossover(CrossoverLevel crossoverLevel, Individual* other, float probability);
+    void proportionalCrossover(CrossoverLevel crossoverLevel, Individual* other);
+    void multipointCrossover(CrossoverLevel crossoverLevel, Individual* other, unsigned numPoints);
 
     float getFitness();
     void setFitness(float fitness);
+    unsigned getNumGenes();
 };
 
 #endif /* INDIVIDUAL_H_ */
