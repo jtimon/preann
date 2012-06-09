@@ -62,7 +62,7 @@ float chronoMutations(ParametersMap* parametersMap, unsigned repetitions)
     float probability = parametersMap->getNumber(PROBABILITY);
 
     unsigned size = parametersMap->getNumber(Dummy::SIZE);
-    unsigned numTimes = size * probability;
+    unsigned numTimes = individual->getNumGenes() * probability;
 
     START_CHRONO
         switch (mutationAlgorithm) {
@@ -72,7 +72,8 @@ float chronoMutations(ParametersMap* parametersMap, unsigned repetitions)
             case MA_PROBABILISTIC:
                 individual->mutate(probability, range);
                 break;
-        }STOP_CHRONO
+        }
+    STOP_CHRONO
 
     END
 }
@@ -87,7 +88,7 @@ float chronoReset(ParametersMap* parametersMap, unsigned repetitions)
     float probability = parametersMap->getNumber(PROBABILITY);
 
     unsigned size = parametersMap->getNumber(Dummy::SIZE);
-    unsigned numTimes = size * probability;
+    unsigned numTimes = individual->getNumGenes() * probability;
 
     START_CHRONO
         switch (resetAlgorithm) {
@@ -107,7 +108,8 @@ int main(int argc, char *argv[])
     Chronometer total;
     total.start();
     try {
-        ChronoPlotter plotter(PREANN_DIR + to_string("output/"), new RangeLoop(Dummy::SIZE, 50, 301, 50),
+        Util::check(argv[1] == NULL, "You must specify an output directory.");
+        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 50, 301, 50),
                               "Time (seconds)");
 
         plotter.parameters.putNumber(PROBABILITY, 0);
