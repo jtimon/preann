@@ -377,13 +377,15 @@ En ambos casos se observa que el coste es muy pequeño excepto para la implement
 *** Rendimiento de los diferentes operadores genéticos
    #+LaTeX: \label{rendOperadores}
 
-En esta sección se cronometran los operadores de selección. Algunos ya se habían analizado en la sección \ref{rendImpl}, pero a un nivel más bajo, del que dependen las implementaciones. Ahora lo que nos interesa es principalmente el coste de los operadores dependiendo de las diferentes formas de usarlo a más alto nivel. Nos abstraemos por ello de la implementación concreta y usamos la implementación C para todas estas pruebas.
+En esta sección se cronometran los operadores genéticos. Algunos ya se habían analizado en la sección \ref{rendImpl}, pero a un nivel más bajo, del que dependen las implementaciones. Ahora lo que nos interesa es principalmente el coste de los operadores dependiendo de las diferentes formas de usarlo a más alto nivel. Nos abstraemos por ello de la implementación concreta y usamos la implementación SSE2 para todas estas pruebas.
 
 **** Selección
 
 figura \ref{rendGenSelect}
 
-#+CAPTION:    a
+Aunque no se aprecia bien en la figura \ref{rendGenSelect}, las selecciones de ruleta y truncado tienen un coste mínimo y bastante independiente tanto del tamaño total de la población como del número de individuos a seleccionar en comparación con los otros dos esquemas de selección. La selección por ranking es la más costosa y además la que más depende del tamaño total de la población. La selección por torneo es algo menos costosa y depende más del tamaño del torneo que del tamaño total de la población.
+
+#+CAPTION:    Rendimiento de los distintos operadores de selección en función del número de individuos a seleccionar. Cada operador se prueba con tamaños totales de población 400 y 500. Además, para la selección por torneo se muestran los resultados con varios tamaños de torneo.
 #+LABEL:      rendGenSelect
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Population_Selection.png]]
@@ -393,7 +395,11 @@ figura \ref{rendGenSelect}
 
 figura \ref{rendGenCruza}
 
-#+CAPTION:    a
+Como muestra la figura \ref{rendGenCruza} el nivel de cruza más costoso es el propio peso, el más barato es el nivel de capa completa y los niveles de neurona tienen rendimientos intermedios y parecidos independientemente de cómo se interprete qué pesos pertenecen a una neurona (si los pesos de entrada a la neurona o los pesos de salida de la misma).
+
+En general, parece que el cruce uniforme es más costoso que el multi-punto y también es más costoso cuanto más se acerque al 50\% la probabilidad de coger el peso de un padre o de otro. El algoritmo multi-punto, sin embargo, no presenta diferencias de rendimiento significativas para 1 punto o 6 puntos de corte.
+
+#+CAPTION:    Rendimiento de los distintos operadores genéticos de cruza en función del tamaño de las capas de neuronas internas.
 #+LABEL:      rendGenCruza
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Individual_crossover.png]]
@@ -401,9 +407,9 @@ figura \ref{rendGenCruza}
 
 **** Mutación
 
-figura \ref{rendGenMutation}
+Según la figura \ref{rendGenMutation}, ambos tipos de mutación son más costosos cuánto mayor es la probabilidad, tal y cómo era de esperar, pues más mutaciones son más escrituras. Además, la mutación probabilística es en general más costosa que la mutación determinística (un número constante de mutaciones por individuo) salvo cuando la probabilidad es muy grande (muchas mutaciones por individuo). Aunque la interfaz determinística es más rápida, también se hace más lenta comprativamente cuanto mayor es la probabilidad. La explicación es que la opción probabilística tiene un coste fijo elevado (un número aleatorio por gen) mientras que en la determinística el coste sube con el número de mutaciones (varios números aleatorios por cada mutación a realizar).
 
-#+CAPTION:    a
+#+CAPTION:    Rendimiento de los distintos operadores genéticos de mutación para diferentes probabilidades. Para el operador no probabilístico, se ha calculado el número de mutaciones por individuo multiplicando la probabilidad por el número de genes (pesos y umbrales), para poder compararlo en igualdad con el operador probabilístico en cuanto al número de escrituras en los pesos.
 #+LABEL:      rendGenMutation
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Individual_mutate.png]]
@@ -411,9 +417,9 @@ figura \ref{rendGenMutation}
 
 **** Olvido
 
-figura \ref{rendGenOlvido}
+El nuevo operador de olvido/reset presenta otra vez unos resultados similares a los de la mutación y se pueden extraer conclusiones semejantes como muestra la figura \ref{rendGenOlvido}.
 
-#+CAPTION:    a
+#+CAPTION:    Rendimiento de los distintas interfaces del nuevo operador genético de olvido para diferentes probabilidades. Para el operador no probabilístico, se ha calculado el número de mutaciones por individuo multiplicando la probabilidad por el número de genes (pesos y umbrales), para poder compararlo en igualdad con el operador probabilístico en cuanto al número de escrituras en los pesos.
 #+LABEL:      rendGenOlvido
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Individual_reset.png]]
@@ -424,14 +430,23 @@ figura \ref{rendGenOlvido}
 
 En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación.
 
+*** Comparación de distintos tamaños de población número de individuos conservados por generación
+
+\newpage
 *** Comparaci\'on entre redes discretas y lineales
    #+LaTeX: \label{}
 
-**** seguir
+A continuación compararemos los posibles efectos beneficiosos o perjudiciales al aprendizaje que se pueden obtener a partir de renunciar a las funciones derivables en favor de neuronas de tipo BIT (salida 0 ó 1)  o SIGN (salida -1 ó 1) y de pesos discretos y más reducidos (1 Byte en lugar de los 4 bytes de un float).
+**** Operaciones binarias (OR/AND/XOR)
 
+\newpage
+**** Reversi
+
+\newpage
 *** Comparaci\'on de operadores gen\'eticos
    #+LaTeX: \label{}
 
+\newpage
 * Conclusiones
   #+LaTeX: \label{conclusiones}
 
