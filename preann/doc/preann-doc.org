@@ -55,7 +55,7 @@ e-mail: \href{mailto:#1} {#1}
 
 #+end_latex
 
-# T�tulo, abstract e �ndice
+# Título, abstract e índice
 #+begin_latex
 
 \begin{titlepage}
@@ -298,30 +298,30 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
 ** Rendimiento
   #+LaTeX: \label{rendimiento}
 
-En esta secci�n se analizan resultados de rendimiento en tiempo de ejecuci�n.
+En esta sección se analizan resultados de rendimiento en tiempo de ejecución.
 
 *** Rendimiento de las implementaciones paralelas de red neuronal
   #+LaTeX: \label{rendImpl}
 
-En esta secci�n se presentan los resultados en tiempo de ejecuci�n de los m�todos que se ejecutan de forma diferente con cada implementaci�n.
+En esta sección se presentan los resultados en tiempo de ejecución de los métodos que se ejecutan de forma diferente con cada implementación.
 
-**** Acumulaci�n de resultados
+**** Acumulación de resultados
 
-En la figura \ref{grafImplCalculate}, puede apreciarse que la implementaci�n con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a la implementaci�n de referencia en lenguaje C, especialmente para los tipos de Buffer BIT y SIGN.
+En la figura \ref{grafImplCalculate}, puede apreciarse que la implementación con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a la implementación de referencia en lenguaje C, especialmente para los tipos de Buffer BIT y SIGN.
 
-#+CAPTION:    M�todo de acumulaci�n de resultados (Connection::calculateAndAdd).
+#+CAPTION:    Método de acumulación de resultados (Connection::calculateAndAdd).
 #+LABEL:      grafImplCalculate
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Connection_calculateAndAddTo.png]]
 \newpage
 
-**** Activaci�n
+**** Activación
 
-De la figura \ref{grafImplActivation} se extraen varias conclusiones. No mucha diferencia de rendimiento entre las implementaciones y pr�cticamente ninguna cuando las neuronas son de tipo FLOAT. Esto era de esperar porque ambas implementaciones son id�nticas: no se han hecho optimizaciones SSE2 para la funci�n de activaci�n.
+De la figura \ref{grafImplActivation} se extraen varias conclusiones. No mucha diferencia de rendimiento entre las implementaciones y prácticamente ninguna cuando las neuronas son de tipo FLOAT. Esto era de esperar porque ambas implementaciones son idénticas: no se han hecho optimizaciones SSE2 para la función de activación.
 
-Para los tipos BIT y SIGN, la implementaci�n en C es ligeramente m�s r�pida que para el tipo FLOAT y la  escrita en SSE2 es ligeremante m�s lenta que la FLOAT. En la implementaci�n SSE2 de BIT y SIGN no se ponen los bits en el orden normal, si no en la representaci�n especial de SSE2, para que el m�todo de acumulaci�n de resultados pueda ser �ptimo.
+Para los tipos BIT y SIGN, la implementación en C es ligeramente más rápida que para el tipo FLOAT y la  escrita en SSE2 es ligeremante más lenta que la FLOAT. En la implementación SSE2 de BIT y SIGN no se ponen los bits en el orden normal, si no en la representación especial de SSE2, para que el método de acumulación de resultados pueda ser óptimo.
 
-#+CAPTION:    M�todo que ejecuta la funci�n de activaci�n para las salidas de una capa (Connection::activation).
+#+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation).
 #+LABEL:      grafImplActivation
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Connection_activation.png]]
@@ -329,19 +329,19 @@ Para los tipos BIT y SIGN, la implementaci�n en C es ligeramente m�s r�pid
 
 **** Cruza
 
-No hay una diferencia sustancial de rendimiento entre las diferentes implementaciones y tipos de neuronas para el operador g�n�tico de crossover, como se muestra en la figura \ref{grafImplCrossover}. Como el m�todo de activaci�n, la cruza de SSE2 se ve ligeramente penalizada al traducir el vector de bits con los pesos a cruzar para que tenga se adapte a la posici�n especial de los pesos en SSE2.
+No hay una diferencia sustancial de rendimiento entre las diferentes implementaciones y tipos de neuronas para el operador genético de crossover, como se muestra en la figura \ref{grafImplCrossover}. Como el método de activación, la cruza de SSE2 se ve ligeramente penalizada al traducir el vector de bits con los pesos a cruzar para que tenga se adapte a la posición especial de los pesos en SSE2.
 
-#+CAPTION:    M�todo que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).
+#+CAPTION:    Método que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).
 #+LABEL:      grafImplCrossover
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Connection_crossover.png]]
 \newpage
 
-**** Mutaci�n
+**** Mutación
 
-De la figura \ref{grafImplMutation} se puede deducir que el operador de mutaci�n tiene un coste m�nimo y constante respecto al tama�o de la conexi�n para todas las implementaciones.
+De la figura \ref{grafImplMutation} se puede deducir que el operador de mutación tiene un coste mínimo y constante respecto al tamaño de la conexión para todas las implementaciones.
 
-#+CAPTION:    M�todo que implementa el operador gen�tico de mutaci�n (Connection::mutate).
+#+CAPTION:    Método que implementa el operador genético de mutación (Connection::mutate).
 #+LABEL:      grafImplMutation
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Connection_mutate.png]]
@@ -349,9 +349,9 @@ De la figura \ref{grafImplMutation} se puede deducir que el operador de mutaci�
 
 **** Olvido
 
-De manera similar a la operaci�n de mutaci�n, el olvido (figura \ref{grafImplReset}) tiene un coste constante y m�nimo.
+De manera similar a la operación de mutación, el olvido (figura \ref{grafImplReset}) tiene un coste constante y mínimo.
 
-#+CAPTION:    M�todo que implementa el operador gen�tico de olvido (Connection::reset).
+#+CAPTION:    Método que implementa el operador genético de olvido (Connection::reset).
 #+LABEL:      grafImplReset
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Connection_reset.png]]
@@ -359,27 +359,27 @@ De manera similar a la operaci�n de mutaci�n, el olvido (figura \ref{grafImp
 
 **** Copiar desde y hacia Interfaz
 
-Estos m�todos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementaci�n concreta escogida. Cada implementaci�n debe mapear correctamente desde la representaci�n gen�rica (Interfaz) hacia su propia representaci�n interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
+Estos métodos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementación concreta escogida. Cada implementación debe mapear correctamente desde la representación genérica (Interfaz) hacia su propia representación interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
 
-#+CAPTION:    M�todo que implementa la copia a un Buffer con una implementaci�n determinada desde un Buffer gen�rico de la clase Interfaz (Buffer::copyFromInterface).
+#+CAPTION:    Método que implementa la copia a un Buffer con una implementación determinada desde un Buffer genérico de la clase Interfaz (Buffer::copyFromInterface).
 #+LABEL:      grafImplCopyFrom
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Buffer_copyFromInterface.png]]
 
-En ambos casos se observa que el coste es muy peque�o excepto para la implementaci�n SSE2 de los tipos BIT y SIGN, por razones similares a las de Activaci�n.
+En ambos casos se observa que el coste es muy pequeño excepto para la implementación SSE2 de los tipos BIT y SIGN, por razones similares a las de Activación.
 
-#+CAPTION:    M�todo que implementa la copia de un Buffer con una implementaci�n determinada a un Buffer gen�rico de la clase Interfaz (Buffer::copyToInterface).
+#+CAPTION:    Método que implementa la copia de un Buffer con una implementación determinada a un Buffer genérico de la clase Interfaz (Buffer::copyToInterface).
 #+LABEL:      grafImplCopyTo
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Buffer_copyToInterface.png]]
 \newpage
 
-*** Rendimiento de los diferentes operadores gen�ticos
+*** Rendimiento de los diferentes operadores genéticos
    #+LaTeX: \label{rendOperadores}
 
-En esta secci�n se cronometran los operadores de selecci�n. Algunos ya se hab�an analizado en la secci�n \ref{rendImpl}, pero a un nivel m�s bajo, del que dependen las implementaciones. Ahora lo que nos interesa es principalmente el coste de los operadores dependiendo de las diferentes formas de usarlo a m�s alto nivel. Nos abstraemos por ello de la implementaci�n concreta y usamos la implementaci�n C para todas estas pruebas.
+En esta sección se cronometran los operadores de selección. Algunos ya se habían analizado en la sección \ref{rendImpl}, pero a un nivel más bajo, del que dependen las implementaciones. Ahora lo que nos interesa es principalmente el coste de los operadores dependiendo de las diferentes formas de usarlo a más alto nivel. Nos abstraemos por ello de la implementación concreta y usamos la implementación C para todas estas pruebas.
 
-**** Selecci�n
+**** Selección
 
 figura \ref{rendGenSelect}
 
@@ -399,7 +399,7 @@ figura \ref{rendGenCruza}
 [[./img/Individual_crossover.png]]
 \newpage
 
-**** Mutaci�n
+**** Mutación
 
 figura \ref{rendGenMutation}
 
@@ -422,7 +422,7 @@ figura \ref{rendGenOlvido}
 ** Aprendizaje
   #+LaTeX: \label{aprendizaje}
 
-En esta secci�n se muestran resultados de aprendizaje en t�rminos del mejor fitness de la poblaci�n en cada generaci�n.
+En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación.
 
 *** Comparaci\'on entre redes discretas y lineales
    #+LaTeX: \label{}
@@ -437,7 +437,7 @@ En esta secci�n se muestran resultados de aprendizaje en t�rminos del mejor 
 
 \newpage
 
-#Bibliograf�a 
+#Bibliografía 
 \cleardoublepage\phantomsection
 \addcontentsline{toc}{chapter}{\bibname}
 \begin{thebibliography}{9}
