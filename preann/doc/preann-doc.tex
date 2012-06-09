@@ -1,6 +1,6 @@
-% Created 2012-05-29 Tue 18:57
+% Created 2012-06-05 Tue 11:55
 \documentclass[11pt]{article}
-\usepackage[latin1]{inputenc}
+\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{fixltx2e}
 \usepackage{graphicx}
@@ -46,6 +46,10 @@ urlcolor=blue
 
 
 
+\setcounter{secnumdepth}{5}
+\counterwithin{figure}{section}
+\setcounter{tocdepth}{5}
+
 \newcommand{\mail}[1][timon.elviejo@gmail.com]{%
 e-mail: \href{mailto:#1} {#1}
 }
@@ -71,7 +75,7 @@ e-mail: \href{mailto:#1} {#1}
 \end{list}
 }%
 
-\counterwithin{figure}{section}
+
 
 \begin{titlepage}
 
@@ -111,7 +115,6 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
 
 \newpage
 
-
 \section{Introducci\'on}
 \label{sec-1}
 
@@ -134,7 +137,9 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
  Los problemas en los que aplicamos nuestro desarrollo, aunque no son realistas, se consideran interesantes para la rob\'otica y/o para la inteligencia artificial. Los tipos de problemas tienen que ver con la clasificaci\'on, los juegos considerados como deportes mentales, el control autom\'atico, la toma de decisiones en tiempo real y la colaboraci\'on de m\'ultiples agentes en tiempo real; pudiendo estar relacionados estos \'ultimos con la
 \href{http://es.wikipedia.org/wiki/Vida_artificial}{vida artificial}. En la mayor\'ia de los problemas, el agente se enfrenta a pruebas gen\'ericas que pueden tener factores aleatorios y/o agentes directamente programados. En algunos problemas, sin embargo, los agentes de la poblaci\'on pueden enfrentarse entre ellos para obtener una valoraci\'on.
 
- En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado \flqq Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos\frqq, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados \ref{resul} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
+ En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado \flqq Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos\frqq, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados \ref{resultados} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
+
+\newpage
 \section{Base te\'orica}
 \label{sec-2}
 
@@ -221,6 +226,8 @@ Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de 
 \end{figure}
 
  Uno de los problemas a los que se enfrenta la evoluci\'on de redes neuronales es el problema de la permutaci\'on. Es causado por el mapeado ``muchos-a-uno'' desde la representaci\'on en el cromosoma a la red que es construida. Con dos cromosomas distintos se pueden generar redes equivalentes como se muestra en las figuras \ref{figGrafo1} y \ref{figGrafo2}. Se puede solucionar dando m\'as importancia al operador de mutaci\'on que al de cruza (que es el que sufre con este problema) o con otros m\'etodos matem\'aticos \cite[Gomez, Miikkulainen 2003]{GomezMiikkulainen2003}. 
+
+\newpage
 \section{An\'alisis del problema}
 \label{sec-3}
 
@@ -297,6 +304,8 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
  \item  ?`Para qu\'e tipo de problemas resulta m\'as adecuado el m\'etodo propuesto? 
 
 \end{enumerate}
+
+\newpage
 \section{Dise\~no e implementaci\'on}
 \label{sec-4}
 
@@ -321,6 +330,7 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
 \label{sec-4-3}
 
   \label{disenoInterfProgr}
+\newpage
 \section{Experimentaci\'on}
 \label{sec-5}
 
@@ -333,89 +343,205 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
 \label{sec-5-2}
 
   \label{}
+\newpage
 \section{Resultados}
 \label{sec-6}
 
-  \label{resul}
-\subsection{Rendimiento de las implementaciones paralelas de red neuronal}
+  \label{resultados}
+\subsection{Rendimiento}
 \label{sec-6-1}
 
-  \label{resulImpl}
-\subsubsection{Acumulaci髇 de resultados}
+  \label{rendimiento}
+
+En esta secci贸n se analizan resultados de rendimiento en tiempo de ejecuci贸n.
+\subsubsection{Rendimiento de las implementaciones paralelas de red neuronal}
 \label{sec-6-1-1}
 
+  \label{rendImpl}
 
-En la figura \ref{grafImplCalculate}, puede apreciarse que la implementaci髇 con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a la implementaci髇 de referencia en lenguaje C, especialmente para los tipos de Buffer BIT y SIGN.
+En esta secci贸n se presentan los resultados en tiempo de ejecuci贸n de los m茅todos que se ejecutan de forma diferente con cada implementaci贸n.
+\paragraph{Acumulaci贸n de resultados}
+\label{sec-6-1-1-1}
+
+
+En la figura \ref{grafImplCalculate}, puede apreciarse que la implementaci贸n con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a la implementaci贸n de referencia en lenguaje C, especialmente para los tipos de Buffer BIT y SIGN.
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=\textwidth]{./img/Connection_calculateAndAddTo.png}
-\caption{\label{grafImplCalculate}M閠odo de acumulaci髇 de resultados (Connection::calculateAndAdd).}
+\caption{\label{grafImplCalculate}M茅todo de acumulaci贸n de resultados (Connection::calculateAndAdd).}
 \end{figure}
 \newpage
-\subsubsection{Activaci髇}
-\label{sec-6-1-2}
+\paragraph{Activaci贸n}
+\label{sec-6-1-1-2}
 
+
+De la figura \ref{grafImplActivation} se extraen varias conclusiones. No mucha diferencia de rendimiento entre las implementaciones y pr谩cticamente ninguna cuando las neuronas son de tipo FLOAT. Esto era de esperar porque ambas implementaciones son id茅nticas: no se han hecho optimizaciones SSE2 para la funci贸n de activaci贸n.
+
+Para los tipos BIT y SIGN, la implementaci贸n en C es ligeramente m谩s r谩pida que para el tipo FLOAT y la  escrita en SSE2 es ligeremante m谩s lenta que la FLOAT. En la implementaci贸n SSE2 de BIT y SIGN no se ponen los bits en el orden normal, si no en la representaci贸n especial de SSE2, para que el m茅todo de acumulaci贸n de resultados pueda ser 贸ptimo.
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=\textwidth]{./img/Buffer_activation.png}
-\caption{\label{grafImplActivation}M閠odo que ejecuta la funci髇 de activaci髇 para las salidas de una capa (Buffer::activation).}
+\includegraphics[width=\textwidth]{./img/Connection_activation.png}
+\caption{\label{grafImplActivation}M茅todo que ejecuta la funci贸n de activaci贸n para las salidas de una capa (Connection::activation).}
 \end{figure}
 \newpage
-\subsubsection{Crossover}
-\label{sec-6-1-3}
+\paragraph{Cruza}
+\label{sec-6-1-1-3}
 
+
+No hay una diferencia sustancial de rendimiento entre las diferentes implementaciones y tipos de neuronas para el operador gen茅tico de crossover, como se muestra en la figura \ref{grafImplCrossover}. Como el m茅todo de activaci贸n, la cruza de SSE2 se ve ligeramente penalizada al traducir el vector de bits con los pesos a cruzar para que tenga se adapte a la posici贸n especial de los pesos en SSE2.
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=\textwidth]{./img/Connection_crossover.png}
-\caption{\label{grafImplCrossover}M閠odo que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).}
+\caption{\label{grafImplCrossover}M茅todo que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).}
 \end{figure}
 \newpage
-\subsubsection{Mutation}
-\label{sec-6-1-4}
+\paragraph{Mutaci贸n}
+\label{sec-6-1-1-4}
 
+
+De la figura \ref{grafImplMutation} se puede deducir que el operador de mutaci贸n tiene un coste m铆nimo y constante respecto al tama帽o de la conexi贸n para todas las implementaciones.
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=\textwidth]{./img/Connection_mutate.png}
-\caption{\label{grafImplMutation}M閠odo que implementa el operador gen閠ico de mutaci髇 (Connection::mutate).}
+\caption{\label{grafImplMutation}M茅todo que implementa el operador gen茅tico de mutaci贸n (Connection::mutate).}
 \end{figure}
 \newpage
-\subsubsection{Copiar desde y hacia Interfaz}
-\label{sec-6-1-5}
+\paragraph{Olvido}
+\label{sec-6-1-1-5}
 
 
-Estos m閠odos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementaci髇 concreta escogida. Cada implementaci髇 debe mapear correctamente desde la representaci髇 gen閞ica (Interfaz) hacia su propia representaci髇 interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
+De manera similar a la operaci贸n de mutaci贸n, el olvido (figura \ref{grafImplReset}) tiene un coste constante y m铆nimo.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{./img/Connection_reset.png}
+\caption{\label{grafImplReset}M茅todo que implementa el operador gen茅tico de olvido (Connection::reset).}
+\end{figure}
+\newpage
+\paragraph{Copiar desde y hacia Interfaz}
+\label{sec-6-1-1-6}
+
+
+Estos m茅todos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementaci贸n concreta escogida. Cada implementaci贸n debe mapear correctamente desde la representaci贸n gen茅rica (Interfaz) hacia su propia representaci贸n interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=\textwidth]{./img/Buffer_copyFromInterface.png}
-\caption{\label{grafImplCopyFrom}M閠odo que implementa la copia a un Buffer con una implementaci髇 determinada desde un Buffer gen閞ico de la clase Interfaz (Buffer::copyFromInterface).}
+\caption{\label{grafImplCopyFrom}M茅todo que implementa la copia a un Buffer con una implementaci贸n determinada desde un Buffer gen茅rico de la clase Interfaz (Buffer::copyFromInterface).}
 \end{figure}
+
+En ambos casos se observa que el coste es muy peque帽o excepto para la implementaci贸n SSE2 de los tipos BIT y SIGN, por razones similares a las de Activaci贸n.
+
 \begin{figure}[htb]
 \centering
 \includegraphics[width=\textwidth]{./img/Buffer_copyToInterface.png}
-\caption{\label{grafImplCopyTo}M閠odo que implementa la copia de un Buffer con una implementaci髇 determinada a un Buffer gen閞ico de la clase Interfaz (Buffer::copyToInterface).}
+\caption{\label{grafImplCopyTo}M茅todo que implementa la copia de un Buffer con una implementaci贸n determinada a un Buffer gen茅rico de la clase Interfaz (Buffer::copyToInterface).}
 \end{figure}
 \newpage
-\subsection{Comparaci\'on entre redes discretas y lineales}
+\newpage
+\subsubsection{Rendimiento de los diferentes operadores gen茅ticos}
+\label{sec-6-1-2}
+
+   \label{rendOperadores}
+
+En esta secci贸n se cronometran los operadores de selecci贸n. Algunos ya se hab铆an analizado en la secci贸n \ref{rendImpl}, pero a un nivel m谩s bajo, del que dependen las implementaciones. Ahora lo que nos interesa es principalmente el coste de los operadores dependiendo de las diferentes formas de usarlo a m谩s alto nivel. Nos abstraemos por ello de la implementaci贸n concreta y usamos la implementaci贸n C para todas estas pruebas.
+\paragraph{Selecci贸n}
+\label{sec-6-1-2-1}
+
+
+Aunque no se aprecia bien en la figura \ref{rendGenSelect}, las selecciones de ruleta y truncado tienen un coste m铆nimo y bastante independiente tanto del tama帽o total de la poblaci贸n como del n煤mero de individuos a seleccionar en comparaci贸n con los otros dos esquemas de selecci贸n. La selecci贸n por ranking es la m谩s costosa y adem谩s la que m谩s depende del tama帽o total de la poblaci贸n. La selecci贸n por torneo es algo menos costosa y depende m谩s del tama帽o del torneo que del tama帽o total de la poblaci贸n.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{./img/Population_Selection.png}
+\caption{\label{rendGenSelect}Rendimiento de los distintos operadores de selecci贸n en funci贸n del n煤mero de individuos a seleccionar. Cada operador se prueba con tama帽os totales de poblaci贸n 400 y 500. Adem谩s, para la selecci贸n por torneo se muestran los resultados con varios tama帽os de torneo.}
+\end{figure}
+\newpage
+\paragraph{Cruza}
+\label{sec-6-1-2-2}
+
+
+Como muestra la figura \ref{rendGenCruza} el nivel de cruza m谩s costoso es el propio peso, el m谩s barato es el nivel de capa completa y los niveles de neurona tienen rendimientos intermedios y parecidos independientemente de c贸mo se interprete qu茅 pesos pertenecen a una neurona (si los pesos de entrada a la neurona o los pesos de salida de la misma).
+
+En general, parece que el cruce uniforme es m谩s costoso que el multi-punto y tambi茅n es m谩s costoso cuanto m谩s se acerque al 50\% la probabilidad de coger el peso de un padre o de otro. El algoritmo multi-punto, sin embargo, no presenta diferencias de rendimiento significativas para 1 punto o 6 puntos de corte.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{./img/Individual_crossover.png}
+\caption{\label{rendGenCruza}Rendimiento de los distintos operadores gen茅ticos de cruza en funci贸n del tama帽o de las capas de neuronas internas.}
+\end{figure}
+\newpage
+\paragraph{Mutaci贸n}
+\label{sec-6-1-2-3}
+
+
+Seg煤n la figura \ref{rendGenMutation}, ambos tipos de mutaci贸n son m谩s costosos cu谩nto mayor es la probabilidad, tal y c贸mo era de esperar, pues m谩s mutaciones son m谩s escrituras. Adem谩s, la mutaci贸n probabil铆stica es en general m谩s costosa que la mutaci贸n determin铆stica (un n煤mero constante de mutaciones por individuo) salvo cuando la probabilidad es muy grande (muchas mutaciones por individuo). Aunque la interfaz determin铆stica es m谩s r谩pida, tambi茅n se hace m谩s lenta comprativamente cuanto mayor es la probabilidad. La explicaci贸n es que la opci贸n probabil铆stica tiene un coste fijo elevado (un n煤mero aleatorio por gen) mientras que en la determin铆stica el coste sube con el n煤mero de mutaciones (varios n煤meros aleatorios por cada mutaci贸n a realizar).
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{./img/Individual_mutate.png}
+\caption{\label{rendGenMutation}Rendimiento de los distintos operadores gen茅ticos de mutaci贸n para diferentes probabilidades. Para el operador no probabil铆stico, se ha calculado el n煤mero de mutaciones por individuo multiplicando la probabilidad por el n煤mero de genes (pesos y umbrales), para poder compararlo en igualdad con el operador probabil铆stico en cuanto al n煤mero de escrituras en los pesos.}
+\end{figure}
+\newpage
+\paragraph{Olvido}
+\label{sec-6-1-2-4}
+
+
+El nuevo operador de olvido/reset presenta otra vez unos resultados similares a los de la mutaci贸n y se pueden extraer conclusiones semejantes como muestra la figura \ref{rendGenOlvido}.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{./img/Individual_reset.png}
+\caption{\label{rendGenOlvido}Rendimiento de los distintas interfaces del nuevo operador gen茅tico de olvido para diferentes probabilidades. Para el operador no probabil铆stico, se ha calculado el n煤mero de mutaciones por individuo multiplicando la probabilidad por el n煤mero de genes (pesos y umbrales), para poder compararlo en igualdad con el operador probabil铆stico en cuanto al n煤mero de escrituras en los pesos.}
+\end{figure}
+\newpage
+\subsection{Aprendizaje}
 \label{sec-6-2}
 
-  \label{}
-\subsubsection{seguir}
-\label{sec-6-2-1}
-\subsection{Comparaci\'on de operadores gen\'eticos}
-\label{sec-6-3}
+  \label{aprendizaje}
 
-  \label{}
+En esta secci贸n se muestran resultados de aprendizaje en t茅rminos del mejor fitness de la poblaci贸n en cada generaci贸n.
+\subsubsection{Comparaci贸n de distintos tama帽os de poblaci贸n n煤mero de individuos conservados por generaci贸n}
+\label{sec-6-2-1}
+
+   \label{}
+
+\newpage
+\subsubsection{Comparaci\'on entre redes discretas y lineales}
+\label{sec-6-2-2}
+
+   \label{}
+
+A continuaci贸n compararemos los posibles efectos beneficiosos o perjudiciales al aprendizaje que se pueden obtener a partir de renunciar a las funciones derivables en favor de neuronas de tipo BIT (salida 0 贸 1)  o SIGN (salida -1 贸 1) y de pesos discretos y m谩s reducidos (1 Byte en lugar de los 4 bytes de un float).
+\paragraph{OR/AND/XOR}
+\label{sec-6-2-2-1}
+
+
+
+
+\newpage
+\paragraph{Reversi}
+\label{sec-6-2-2-2}
+
+
+\newpage
+\subsubsection{Comparaci\'on de operadores gen\'eticos}
+\label{sec-6-2-3}
+
+   \label{}
+
+\newpage
 \section{Conclusiones}
 \label{sec-7}
 
   \label{conclusiones}
 
 \newpage
+
 \cleardoublepage\phantomsection
 \addcontentsline{toc}{chapter}{\bibname}
 \begin{thebibliography}{9}
