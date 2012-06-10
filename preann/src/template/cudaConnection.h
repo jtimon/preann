@@ -30,7 +30,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             float* results = (float*) tInput->getDataPointer();
             float* thresholds = (float*) data;
 
-            cuda_activation(outputData, tSize, bufferTypeTempl, results, thresholds, functionType,
+            cuda_activation(outputData, tSize, output->getBufferType(), results, thresholds, functionType,
                             CUDA_THREADS_PER_BLOCK);
         }
 
