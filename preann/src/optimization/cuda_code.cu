@@ -490,21 +490,21 @@ extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, Buffe
         }
         shared_mem_size = input_size * sizeof(float);
 
-SumFloatsConnectionsKernel    <<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, output_size, (float*)weighs, results);
-} else {
-
-    shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
-    if (shared_mem_size > 16128) {
-        //16128 * 8
-        string error = "The maximum bit/sign input size is 129024.";
-        throw error;
-    }
-    if (inputType == BT_BIT) {
-        SumBitsConnectionsKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+        SumFloatsConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, output_size, (float*)weighs, results);
     } else {
-        SumBitsConnectionsKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+
+        shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
+        if (shared_mem_size > 16128) {
+            //16128 * 8
+            string error = "The maximum bit/sign input size is 129024.";
+            throw error;
+        }
+        if (inputType == BT_BIT) {
+            SumBitsConnectionsKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+        } else {
+            SumBitsConnectionsKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+        }
     }
-}
 }
 
 extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned input_size, BufferType inputType,
@@ -527,32 +527,32 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
             input_size -= CUDA_MAX_SHARED_FLOATS;
         }
         shared_mem_size = input_size * sizeof(float);
-SumFloatsInvertedConnectionsKernel    <<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, (float*)weighs, results, output_size);
-} else {
-    //TODO TCC esta parte no funciona bien
-    while (input_size > CUDA_MAX_SHARED_BITS) {
-
-        shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(unsigned);
-        // TODO TCC probar sin emulación
-        //			printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
-        if (inputType == BT_BIT) {
-            SumBitsInvertedConnectionsKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
-        } else {
-            SumBitsInvertedConnectionsKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
-        }
-        inputPtr = (void*)((float*)inputPtr + CUDA_MAX_SHARED_FLOATS);
-        weighs = (void*)((float*)weighs + (CUDA_MAX_SHARED_BITS * output_size));
-        input_size -= CUDA_MAX_SHARED_BITS;
-    }
-    shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
-    // TODO TCC probar sin emulación
-    //printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
-    if (inputType == BT_BIT) {
-        SumBitsInvertedConnectionsKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+        SumFloatsInvertedConnectionsKernel    <<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, (float*)weighs, results, output_size);
     } else {
-        SumBitsInvertedConnectionsKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+        //TODO TCC esta parte no funciona bien
+        while (input_size > CUDA_MAX_SHARED_BITS) {
+
+            shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(unsigned);
+            // TODO TCC probar sin emulación
+            //			printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
+            if (inputType == BT_BIT) {
+                SumBitsInvertedConnectionsKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
+            } else {
+                SumBitsInvertedConnectionsKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
+            }
+            inputPtr = (void*)((float*)inputPtr + CUDA_MAX_SHARED_FLOATS);
+            weighs = (void*)((float*)weighs + (CUDA_MAX_SHARED_BITS * output_size));
+            input_size -= CUDA_MAX_SHARED_BITS;
+        }
+        shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
+        // TODO TCC probar sin emulación
+        //printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
+        if (inputType == BT_BIT) {
+            SumBitsInvertedConnectionsKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+        } else {
+            SumBitsInvertedConnectionsKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+        }
     }
-}
 }
 
 template <unsigned int blockSize, BufferType inputType>
