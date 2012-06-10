@@ -21,9 +21,8 @@ public:
     static Buffer* newBuffer(Buffer* buffer, ImplementationType implementationType);
     static Buffer* newBuffer(unsigned size, BufferType bufferType, ImplementationType implementationType);
     static Connection* newConnection(Buffer* input, unsigned outputSize);
-    static Connection* newThresholds(Buffer* output, ImplementationType implementationType);
-    static Connection
-            * newConnection(FILE* stream, unsigned outputSize, ImplementationType implementationType);
+    static Connection* newConnection(FILE* stream, unsigned outputSize,
+                                     ImplementationType implementationType);
 
 };
 

@@ -51,13 +51,6 @@ Buffer* Factory::newBuffer(unsigned size, BufferType bufferType,
     }
 }
 
-Connection* Factory::newThresholds(Buffer* output,
-        ImplementationType implementationType)
-{
-    return func_newConnection<BT_FLOAT, FLOAT_STORAGE> (output, 1,
-            implementationType);
-}
-
 BufferType Factory::weighForInput(BufferType inputType)
 {
     switch (inputType) {
