@@ -11,7 +11,7 @@
 #include "cudaConnection.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
-    class Cuda2Connection : virtual public FullConnection, public CudaConnection<bufferTypeTempl, c_typeTempl>
+    class CudaReductionConnection : virtual public Connection, public CudaConnection<bufferTypeTempl, c_typeTempl>
     {
     protected:
         virtual void _calculateAndAddTo(Buffer* results)
@@ -25,12 +25,12 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         }
 
     public:
-        Cuda2Connection(Buffer* input, unsigned outputSize)
+        CudaReductionConnection(Buffer* input, unsigned outputSize)
                 : CudaConnection<bufferTypeTempl, c_typeTempl>(input, outputSize)
         {
         }
 
-        virtual ~Cuda2Connection()
+        virtual ~CudaReductionConnection()
         {
         }
 

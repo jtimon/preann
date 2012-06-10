@@ -15,7 +15,7 @@
 #include "template/xmmConnection.h"
 #endif
 #ifdef CUDA_IMPL
-#include "template/cuda2Connection.h"
+#include "template/cudaReductionConnection.h"
 #include "template/cudaInvertedConnection.h"
 #endif
 
@@ -86,7 +86,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             case IT_CUDA:
                 return new CudaConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
             case IT_CUDA_REDUC:
-                return new Cuda2Connection<bufferTypeTempl, c_typeTempl>(input, outputSize);
+                return new CudaReductionConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
             case IT_CUDA_INV:
                 return new CudaInvertedConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
