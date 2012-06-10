@@ -2,10 +2,10 @@
 #define CUDAINVERTEDCONNECTION_H_
 
 #include "neural/connection.h"
-#include "cudaBuffer.h"
+#include "cudaConnection.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
-    class CudaInvertedConnection : public virtual FullConnection, public CudaBuffer<bufferTypeTempl,
+    class CudaInvertedConnection : public virtual Connection, public CudaConnection<bufferTypeTempl,
                                            c_typeTempl>
     {
     protected:
@@ -66,9 +66,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
     public:
         CudaInvertedConnection(Buffer* input, unsigned outputSize)
-                : CudaBuffer<bufferTypeTempl, c_typeTempl>(input->getSize() * outputSize)
+                : CudaConnection<bufferTypeTempl, c_typeTempl>(input, outputSize)
         {
-            tInput = input;
         }
 
         virtual ~CudaInvertedConnection()
