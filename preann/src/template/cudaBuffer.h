@@ -11,7 +11,6 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         CudaBuffer()
         {
         }
-        ;
     protected:
         unsigned getByteSize()
         {
