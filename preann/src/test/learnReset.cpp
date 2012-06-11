@@ -43,12 +43,10 @@ int main(int argc, char *argv[])
 //        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_BUFFER), BT_BIT);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_DISABLED);
 
-        EnumLoop linesLoop(ET_CROSS_LEVEL);
-        JoinEnumLoop* crossAlgLoop = new JoinEnumLoop(ET_CROSS_ALG);
-        crossAlgLoop->addEnumLoop(CA_UNIFORM, new RangeLoop(Population::UNIFORM_CROSS_PROB, 0.2, 0.5, 0.2));
-        crossAlgLoop->addEnumLoop(CA_MULTIPOINT, new RangeLoop(Population::MULTIPOINT_NUM, 1, 10, 5));
-        crossAlgLoop->addEnumLoop(CA_PROPORTIONAL, NULL);
-        linesLoop.addInnerLoop(crossAlgLoop);
+        JoinEnumLoop linesLoop(ET_MUTATION_ALG);
+        linesLoop.addEnumLoop(MA_DISABLED, NULL);
+        linesLoop.addEnumLoop(MA_PER_INDIVIDUAL, new RangeLoop(Population::MUTATION_NUM, 1, 6, 1));
+        linesLoop.addEnumLoop(MA_PROBABILISTIC, new RangeLoop(Population::MUTATION_PROB, 0.05, 0.30, 0.05));
 
         EnumLoop averageLoop(ET_BUFFER, 2, BT_FLOAT, BT_BIT);
 
@@ -59,23 +57,31 @@ int main(int argc, char *argv[])
         selectionLoop->addEnumLoop(SA_TRUNCATION, NULL);
         averageLoop.addInnerLoop(selectionLoop);
 
+        JoinEnumLoop* crossAlgLoop = new JoinEnumLoop(ET_CROSS_ALG);
+        crossAlgLoop->addEnumLoop(CA_UNIFORM, new RangeLoop(Population::UNIFORM_CROSS_PROB, 0.2, 0.5, 0.2));
+        crossAlgLoop->addEnumLoop(CA_MULTIPOINT, new RangeLoop(Population::MULTIPOINT_NUM, 1, 10, 5));
+        crossAlgLoop->addEnumLoop(CA_PROPORTIONAL, NULL);
+        averageLoop.addInnerLoop(crossAlgLoop);
+
+        averageLoop.addInnerLoop(new EnumLoop(ET_CROSS_LEVEL));
+
         JoinEnumLoop* mutationLoop = new JoinEnumLoop(ET_MUTATION_ALG);
-//        mutationLoop->addEnumLoop(MA_DISABLED, NULL);
-        mutationLoop->addEnumLoop(MA_PER_INDIVIDUAL, new RangeLoop(Population::MUTATION_NUM, 1, 4, 2));
-//        mutationLoop->addEnumLoop(MA_PROBABILISTIC, new RangeLoop(Population::MUTATION_PROB, 0.05, 0.2, 0.1));
+        mutationLoop.addEnumLoop(MA_DISABLED, NULL);
+        mutationLoop.addEnumLoop(MA_PER_INDIVIDUAL, new RangeLoop(Population::MUTATION_NUM, 1, 6, 1));
+        mutationLoop.addEnumLoop(MA_PROBABILISTIC, new RangeLoop(Population::MUTATION_PROB, 0.05, 0.30, 0.05));
         averageLoop.addInnerLoop(mutationLoop);
 
         plotter.parameters.putNumber(Dummy::SIZE, 3);
         plotter.parameters.putNumber(Dummy::NUM_TESTS, 0);
         EnumLoop filesLoop(ET_TEST_TASKS, 3, TT_BIN_OR, TT_BIN_AND, TT_BIN_XOR);
 
-        plotter.plotTaskFilesAveraged("Crossover", &linesLoop, &filesLoop, &averageLoop);
+        plotter.plotTaskFilesAveraged("Reset", &linesLoop, &filesLoop, &averageLoop);
 
         plotter.parameters.putNumber(Dummy::SIZE, 6);
         plotter.parameters.putNumber(Dummy::NUM_TESTS, 2);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_TEST_TASKS), TT_REVERSI);
-//
-        plotter.plotTaskAveraged("Crossover_REVERSI", &linesLoop, &averageLoop);
+
+        plotter.plotTaskAveraged("Reset_REVERSI", &linesLoop, &averageLoop);
 
         printf("Exit success.\n");
     } catch (std::string error) {
