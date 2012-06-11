@@ -278,6 +278,7 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
   #+LaTeX: \label{disenoParal}
 *** Utilizaci\'on del coprocesador XMM
   #+LaTeX: \label{disenoParalXMM}
+
 *** Utilizaci\'on de la arquitectura CUDA
   #+LaTeX: \label{disenoParalCUDA}
 ** Dise\~no del algoritmo gen\'etico
@@ -429,22 +430,60 @@ El nuevo operador de olvido/reset presenta otra vez unos resultados similares a 
   #+LaTeX: \label{aprendizaje}
 
 En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación.
+*** Comparación entre distintas funciones de activación
 
-*** Comparación de distintos tamaños de población número de individuos conservados por generación
-
-\newpage
 *** Comparaci\'on entre redes discretas y lineales
-   #+LaTeX: \label{}
+   #+LaTeX: \label{aprendDiscretLineales}
 
 A continuación compararemos los posibles efectos beneficiosos o perjudiciales al aprendizaje que se pueden obtener a partir de renunciar a las funciones derivables en favor de neuronas de tipo BIT (salida 0 ó 1)  o SIGN (salida -1 ó 1) y de pesos discretos y más reducidos (1 Byte en lugar de los 4 bytes de un float).
-**** Operaciones binarias (OR/AND/XOR)
+
+**** OR
+
+#+CAPTION:    Aprendizaje de la tarea lógica Or con los distintos tipos de neuronas (Binarias, bipolares y lineales).
+#+LABEL:      aprenDiscretOr
+#+ATTR_LaTeX: width=\textwidth
+[[./img/BufferTypes_OR.png]]
+
+\newpage
+**** AND
+
+#+CAPTION:    Aprendizaje de la tarea lógica And con los distintos tipos de neuronas (Binarias, bipolares y lineales).
+#+LABEL:      aprenDiscretAnd
+#+ATTR_LaTeX: width=\textwidth
+[[./img/BufferTypes_AND.png]]
+
+\newpage
+**** XOR
+
+#+CAPTION:    Aprendizaje de la tarea lógica Xor con los distintos tipos de neuronas (Binarias, bipolares y lineales).
+#+LABEL:      aprenDiscretXor
+#+ATTR_LaTeX: width=\textwidth
+[[./img/BufferTypes_XOR.png]]
 
 \newpage
 **** Reversi
 
+#+CAPTION:    Aprendizaje de la tarea Reversi con los distintos tipos de neuronas (Binarias, bipolares y lineales).
+#+LABEL:      aprenDiscretReversi
+#+ATTR_LaTeX: width=\textwidth
+[[./img/BufferTypes_REVERSI.png]]
+
 \newpage
 *** Comparaci\'on de operadores gen\'eticos
    #+LaTeX: \label{}
+**** Selección
+
+\newpage
+**** Cruza
+
+\newpage
+**** Mutación
+
+\newpage
+**** Operador de olvido
+
+\newpage
+*** Comparación de distintos tamaños de población número de individuos conservados por generación
 
 \newpage
 * Conclusiones

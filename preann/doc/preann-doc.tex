@@ -1,4 +1,4 @@
-% Created 2012-06-05 Tue 11:55
+% Created 2012-06-09 Sat 14:09
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -442,16 +442,17 @@ En ambos casos se observa que el coste es muy pequeño excepto para la implement
 \caption{\label{grafImplCopyTo}Método que implementa la copia de un Buffer con una implementación determinada a un Buffer genérico de la clase Interfaz (Buffer::copyToInterface).}
 \end{figure}
 \newpage
-\newpage
 \subsubsection{Rendimiento de los diferentes operadores genéticos}
 \label{sec-6-1-2}
 
    \label{rendOperadores}
 
-En esta sección se cronometran los operadores de selección. Algunos ya se habían analizado en la sección \ref{rendImpl}, pero a un nivel más bajo, del que dependen las implementaciones. Ahora lo que nos interesa es principalmente el coste de los operadores dependiendo de las diferentes formas de usarlo a más alto nivel. Nos abstraemos por ello de la implementación concreta y usamos la implementación C para todas estas pruebas.
+En esta sección se cronometran los operadores genéticos. Algunos ya se habían analizado en la sección \ref{rendImpl}, pero a un nivel más bajo, del que dependen las implementaciones. Ahora lo que nos interesa es principalmente el coste de los operadores dependiendo de las diferentes formas de usarlo a más alto nivel. Nos abstraemos por ello de la implementación concreta y usamos la implementación SSE2 para todas estas pruebas.
 \paragraph{Selección}
 \label{sec-6-1-2-1}
 
+
+figura \ref{rendGenSelect}
 
 Aunque no se aprecia bien en la figura \ref{rendGenSelect}, las selecciones de ruleta y truncado tienen un coste mínimo y bastante independiente tanto del tamaño total de la población como del número de individuos a seleccionar en comparación con los otros dos esquemas de selección. La selección por ranking es la más costosa y además la que más depende del tamaño total de la población. La selección por torneo es algo menos costosa y depende más del tamaño del torneo que del tamaño total de la población.
 
@@ -464,6 +465,8 @@ Aunque no se aprecia bien en la figura \ref{rendGenSelect}, las selecciones de r
 \paragraph{Cruza}
 \label{sec-6-1-2-2}
 
+
+figura \ref{rendGenCruza}
 
 Como muestra la figura \ref{rendGenCruza} el nivel de cruza más costoso es el propio peso, el más barato es el nivel de capa completa y los niveles de neurona tienen rendimientos intermedios y parecidos independientemente de cómo se interprete qué pesos pertenecen a una neurona (si los pesos de entrada a la neurona o los pesos de salida de la misma).
 
@@ -508,7 +511,6 @@ En esta sección se muestran resultados de aprendizaje en términos del mejor fi
 \subsubsection{Comparación de distintos tamaños de población número de individuos conservados por generación}
 \label{sec-6-2-1}
 
-   \label{}
 
 \newpage
 \subsubsection{Comparaci\'on entre redes discretas y lineales}
@@ -517,10 +519,8 @@ En esta sección se muestran resultados de aprendizaje en términos del mejor fi
    \label{}
 
 A continuación compararemos los posibles efectos beneficiosos o perjudiciales al aprendizaje que se pueden obtener a partir de renunciar a las funciones derivables en favor de neuronas de tipo BIT (salida 0 ó 1)  o SIGN (salida -1 ó 1) y de pesos discretos y más reducidos (1 Byte en lugar de los 4 bytes de un float).
-\paragraph{OR/AND/XOR}
+\paragraph{Operaciones binarias (OR/AND/XOR)}
 \label{sec-6-2-2-1}
-
-
 
 
 \newpage
