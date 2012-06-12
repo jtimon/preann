@@ -9,6 +9,7 @@ LIB_MODULES = $(MODULES) template
 
 SRC_DIR   = $(addprefix src/,$(MODULES))  
 BUILD_DIR = $(addprefix build/,$(MODULES)) build/test/
+OUTPUT_DIR = $(CURDIR)/output/
 
 SRC       = $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
 
@@ -23,8 +24,6 @@ INCLUDES  = -I src/
 PROGRAMS = $(wildcard src/test/*.cpp)
 EXE      = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,bin/%.exe,$(main)))
 LOGS     = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,output/log/%.log,$(main)))
-DOCUMENTS =	$(wildcard doc/*.tex)
-DOC		 = $(foreach docu, $(DOCUMENTS), $(patsubst doc/%.tex,doc/%.pdf,$(docu)))
 
 CXX = $(CXX_BASE) -ggdb $(INCLUDES) $(FACT_FLAGS)
 CXX_LINK = $(CXX_BASE)
@@ -32,8 +31,6 @@ NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES) $(FACT_FLAGS)
 NVCC_LINK = $(NVCC) -L/usr/local/cuda/lib -lcudart 
 NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11  
 NASM = nasm -f elf
-LATEX = pdflatex -output-directory=doc/output
-DVIPDFM = dvipdfm
 
 ifeq (cpp, $(MAKECMDGOALS))
 	CXX_BASE = g++
@@ -71,24 +68,25 @@ endif
 
 OBJ += $(FACT_OBJ)
 
-.PHONY: all clean checkdirs cpp sse2 cuda doc clean_doc cuda_emu all_emu
+.PHONY: all clean checkdirs cpp sse2 cuda cuda_emu all_emu
 .SECONDARY:
 
-doc: $(DOC)
 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
 #	./bin/testMemoryLosses.exe
-#	./bin/testBuffers.exe 
+#	./bin/testBuffers.exe $(CURDIR)/
 #	./bin/testConnections.exe
-#	./bin/testLayers.exe 
-#	./bin/testPlot.exe 
-#	./bin/chronoBuffers.exe
-#	./bin/chronoConnections.exe
-#	./bin/chronoIndividual.exe
-#	./bin/chronoPopulation.exe
-#	./bin/learnMutation.exe
-#	./bin/learnCrossover.exe
-#	./bin/learnBufferType.exe
-#	./bin/learnTasks.exe
+#	./bin/testLayers.exe $(CURDIR)/
+#	./bin/testPlot.exe $(OUTPUT_DIR)
+#	./bin/chronoBuffers.exe $(OUTPUT_DIR)
+#	./bin/chronoConnections.exe $(OUTPUT_DIR)
+#	./bin/chronoIndividual.exe $(OUTPUT_DIR)
+#	./bin/chronoPopulation.exe $(OUTPUT_DIR)
+	./bin/learnBufferType.exe $(OUTPUT_DIR)
+	./bin/learnFunctionTypes.exe $(OUTPUT_DIR)
+	./bin/learnMutation.exe $(OUTPUT_DIR)
+	./bin/learnReset.exe $(OUTPUT_DIR)
+	./bin/learnCrossover.exe $(OUTPUT_DIR)
+#	./bin/learnTasks.exe $(OUTPUT_DIR)
 #	./bin/chronoConnectionsFiles.exe
 #	./bin/chronoBinaryTasks.exe 
 #	./bin/chronoReversi.exe
@@ -111,9 +109,6 @@ checkdirs: $(BUILD_DIR)
 
 $(BUILD_DIR):
 	mkdir -p $@
-
-doc/%.pdf: doc/%.tex
-	$(LATEX) $<
 
 output/log/%.log: bin/%.exe
 	./$< > $@
@@ -139,9 +134,6 @@ build/common/loop/joinEnumLoop.o build/common/loop/enumLoop.o build/common/loop/
 clean: 
 	rm -rf $(BUILD_DIR)
 	rm bin/*.exe
-
-clean_doc:
-	rm doc/output/*
 
 #       Only use these programs directly
 #    awk cat cmp cp diff echo egrep expr false grep install-info ln ls
