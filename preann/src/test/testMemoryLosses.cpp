@@ -109,8 +109,8 @@ int main(int argc, char *argv[])
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
         loop->addInnerLoop(bufferTypeLoop);
 
-//        sizeLoop->addInnerLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION));
-        loop->addInnerLoop(new EnumLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
+//        loop->addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
+        sizeLoop->addInnerLoop(new EnumLoop(ET_IMPLEMENTATION));
 
 
         loop->print();
