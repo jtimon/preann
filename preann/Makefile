@@ -10,6 +10,7 @@ LIB_MODULES = $(MODULES) template
 SRC_DIR   = $(addprefix src/,$(MODULES))  
 BUILD_DIR = $(addprefix build/,$(MODULES)) build/test/
 OUTPUT_DIR = $(CURDIR)/output/
+LOG_DIR = $(CURDIR)/output/log/
 
 SRC       = $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
 
@@ -79,14 +80,14 @@ cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	./bin/testPlot.exe $(OUTPUT_DIR)
 #	./bin/chronoBuffers.exe $(OUTPUT_DIR)
 #	./bin/chronoConnections.exe $(OUTPUT_DIR)
-	./bin/chronoFunctions.exe $(OUTPUT_DIR)
+#	./bin/chronoFunctions.exe $(OUTPUT_DIR)
 #	./bin/chronoIndividual.exe $(OUTPUT_DIR)
 #	./bin/chronoPopulation.exe $(OUTPUT_DIR)
 #	./bin/learnBufferType.exe $(OUTPUT_DIR)
 #	./bin/learnFunctionTypes.exe $(OUTPUT_DIR)
 #	./bin/learnMutation.exe $(OUTPUT_DIR)
 #	./bin/learnReset.exe $(OUTPUT_DIR)
-	./bin/learnSelection.exe $(OUTPUT_DIR)
+#	./bin/learnSelection.exe $(OUTPUT_DIR)
 #	./bin/learnCrossover.exe $(OUTPUT_DIR)
 #	./bin/learnTasks.exe $(OUTPUT_DIR)
 #	./bin/chronoConnectionsFiles.exe
@@ -96,15 +97,15 @@ cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	./bin/plotBinaryTasks.exe
 #	./bin/plotCombBinaryTasks.exe
 #	./bin/plotTimeBinaryTasks.exe
-#	./bin/testMemoryLosses.exe > ./output/log/testMemoryLosses.log
-#	./bin/testBuffers.exe > ./output/log/testBuffers.log
-#	./bin/testConnections.exe > ./output/log/testConnections.log
-#	./bin/testLayers.exe > ./output/log/testLayers.log
-#	./bin/chronoBuffers.exe > ./output/log/chronoBuffers.log
-#	./bin/chronoConnections.exe > ./output/log/chronoConnections.log
-#	./bin/chronoIndividual.exe > ./output/log/chronoIndividual.log
-#	./bin/chronoBinaryTasks.exe > ./output/log/chronoBinaryTasks.log
-#	./bin/learnTasks.exe > ./output/log/learnTasks.log
+#	./bin/testMemoryLosses.exe > $(LOG_DIR)testMemoryLosses.log
+#	./bin/testBuffers.exe > $(LOG_DIR)testBuffers.log
+#	./bin/testConnections.exe > $(LOG_DIR)testConnections.log
+#	./bin/testLayers.exe > $(LOG_DIR)testLayers.log
+#	./bin/chronoBuffers.exe > $(LOG_DIR)chronoBuffers.log
+#	./bin/chronoConnections.exe > $(LOG_DIR)chronoConnections.log
+#	./bin/chronoIndividual.exe > $(LOG_DIR)chronoIndividual.log
+#	./bin/chronoBinaryTasks.exe > $(LOG_DIR)chronoBinaryTasks.log
+#	./bin/learnTasks.exe > $(LOG_DIR)learnTasks.log
 
 #all: $(LOGS)
 checkdirs: $(BUILD_DIR)
