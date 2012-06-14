@@ -95,15 +95,14 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
-        ChronoPlotter plotter(argv[1],
-                              new RangeLoop(Dummy::SIZE, 50000, 500000, 50000), "Time (seconds)");
+        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 50000, 500000, 50000), "Time (seconds)");
 
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        EnumLoop linesLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C,
-                           IT_SSE2);
+        EnumLoop linesLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2);
+//        EnumLoop linesLoop(ET_IMPLEMENTATION);
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
                                                 BT_FLOAT, BT_BIT, BT_SIGN);
@@ -116,12 +115,11 @@ int main(int argc, char *argv[])
         plotter.plotChronoAveraged(chronoMutate, "Connection_mutate", &linesLoop, &averageLoop, 50000);
         plotter.plotChronoAveraged(chronoReset, "Connection_reset", &linesLoop, &averageLoop, 50000);
 
-        plotter.resetRangeX(500, 5000, 500);
-        plotter.plotChronoAveraged(chronoCrossover, "Connection_crossover", &linesLoop, &averageLoop, 1000);
-        plotter.plotChronoAveraged(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &linesLoop,
-                                   &averageLoop, 1000);
-
         plotter.resetRangeX(2000, 20001, 2000);
+        plotter.plotChronoAveraged(chronoCrossover, "Connection_crossover", &linesLoop, &averageLoop, 5000);
+        plotter.plotChronoAveraged(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &linesLoop,
+                                   &averageLoop, 5000);
+
         plotter.plotChrono(chronoActivation, "Connection_activation", &linesLoop, 5000);
 
         printf("Exit success.\n");
