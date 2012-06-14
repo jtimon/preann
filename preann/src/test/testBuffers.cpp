@@ -59,7 +59,7 @@ unsigned testSaveLoad(ParametersMap* parametersMap)
     ImplementationType implementationType = (ImplementationType) (parametersMap->getNumber(
             Enumerations::enumTypeToString(ET_IMPLEMENTATION)));
 
-    string path = parametersMap->getString("path") + to_string("data/testBuffer.buf");
+    string path = parametersMap->getString("path");
     FILE* stream = fopen(path.data(), "w+b");
     buffer->save(stream);
     fclose(stream);
@@ -93,12 +93,13 @@ int main(int argc, char *argv[])
     try {
         Util::check(argv[1] == NULL, "You must specify a directory.");
         Test test;
-        test.parameters.putString("path", argv[1] + to_string("/data/layer.lay"));
+        test.parameters.putString("path", argv[1] + to_string("data/testBuffer.buf"));
         test.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         test.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         RangeLoop loop(Dummy::SIZE, 100, 101, 100);
-        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
+//        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
+        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION));
 
         EnumLoop* bufferTypeLoop = new EnumLoop(ET_BUFFER);
         loop.addInnerLoop(bufferTypeLoop);
