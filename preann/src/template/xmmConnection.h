@@ -10,8 +10,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
     protected:
         virtual void _copyFrom(Interface* interface)
         {
-            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
-                                                                                           bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize());
             unsigned offset = 0;
             unsigned inputSize = tInput->getSize();
             unsigned outputSize = tSize / inputSize;
@@ -47,8 +46,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual void _copyTo(Interface* interface)
         {
-            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
-                                                                                           bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize());
             unsigned offset = 0;
             unsigned inputSize = tInput->getSize();
             unsigned outputSize = tSize / inputSize;
@@ -89,8 +87,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             void* inputPtr = tInput->getDataPointer();
 
             unsigned numLoops;
-            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
-                                                                                           bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize());
             unsigned weighPos = 0;
 
             switch (tInput->getBufferType()) {
@@ -185,8 +182,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         {
             void* otherWeighs = other->getDataPointer();
 
-            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
-                                                                                           bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize());
             unsigned offset = 0;
             unsigned inputSize = tInput->getSize();
             unsigned outputSize = tSize / inputSize;
@@ -235,8 +231,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual void _mutateWeigh(unsigned pos, float mutation)
         {
-            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
-                                                                                           bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize());
             unsigned outputPos = pos / tInput->getSize();
             unsigned inputPos = pos % tInput->getSize();
             unsigned elem = (outputPos * offsetPerInput) + inputPos;
@@ -273,8 +268,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual void _resetWeigh(unsigned pos)
         {
-            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize(),
-                                                                                           bufferTypeTempl);
+            unsigned offsetPerInput = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(tInput->getSize());
             unsigned outputPos = pos / tInput->getSize();
             unsigned inputPos = pos % tInput->getSize();
             unsigned elem = (outputPos * offsetPerInput) + inputPos;
@@ -304,8 +298,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             tInput = input;
             this->tSize = input->getSize() * outputSize;
 
-            unsigned byteSize = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(input->getSize(),
-                                                                                     bufferTypeTempl);
+            unsigned byteSize = XmmBuffer<bufferTypeTempl, c_typeTempl>::getByteSize(input->getSize());
             byteSize *= outputSize;
             data = MemoryManagement::malloc(byteSize);
 

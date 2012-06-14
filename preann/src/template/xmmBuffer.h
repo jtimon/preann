@@ -15,10 +15,10 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
     class XmmBuffer : virtual public Buffer
     {
     protected:
-        static unsigned getByteSize(unsigned size, BufferType bufferType)
+        static unsigned getByteSize(unsigned size)
         {
             unsigned numBlocks;
-            switch (bufferType) {
+            switch (bufferTypeTempl) {
                 case BT_BYTE:
                     numBlocks = ((size - 1) / BYTES_PER_BLOCK) + 1;
                     break;
@@ -123,7 +123,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         {
             tSize = size;
 
-            size_t byteSize = getByteSize(size, bufferTypeTempl);
+            size_t byteSize = getByteSize(size);
             data = MemoryManagement::malloc(byteSize);
 
             reset();
@@ -149,7 +149,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual void reset()
         {
-            size_t byteSize = getByteSize(tSize, bufferTypeTempl);
+            size_t byteSize = getByteSize(tSize);
 
             switch (bufferTypeTempl) {
 
