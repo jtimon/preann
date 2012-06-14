@@ -49,21 +49,23 @@ unsigned testCalculateAndAddTo(ParametersMap* parametersMap)
 unsigned testActivation(ParametersMap* parametersMap)
 {
     float differencesCounter = 0;
+    float weighsRange = parametersMap->getNumber(Dummy::WEIGHS_RANGE);
 
-    FunctionType functionType = (FunctionType) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_FUNCTION));
-
+    FunctionType functionType = (FunctionType)(parametersMap->getNumber(Enumerations::enumTypeToString(ET_FUNCTION)));
     Buffer* output = Dummy::buffer(parametersMap);
     Buffer* results = Factory::newBuffer(output->getSize(), BT_FLOAT, output->getImplementationType());
-    results->random(parametersMap->getNumber(Dummy::WEIGHS_RANGE));
+    results->random(weighsRange);
     Connection* thresholds = Factory::newConnection(results, 1);
+    thresholds->random(weighsRange);
 
     Buffer* cOutput = Factory::newBuffer(output->getSize(), output->getBufferType(), IT_C);
     Buffer* cResults = Factory::newBuffer(results, IT_C);
     Connection* cThresholds = Factory::newConnection(cResults, 1);
+    cThresholds->copyFrom(thresholds);
 
     thresholds->activation(output, functionType);
     cThresholds->activation(cOutput, functionType);
+
     differencesCounter += Test::assertEquals(cOutput, output);
 
     delete (thresholds);
@@ -148,7 +150,8 @@ int main(int argc, char *argv[])
         RangeLoop loop(Dummy::SIZE, 2, 13, 10);
         loop.addInnerLoop(new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2));
         loop.addInnerLoop(new EnumLoop(ET_BUFFER, 3, BT_BIT, BT_SIGN, BT_FLOAT));
-        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
+//        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
+        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION));
 
         loop.print();
 
