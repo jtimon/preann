@@ -40,13 +40,10 @@ int main(int argc, char *argv[])
         plotter.parameters.putNumber(Population::NUM_SELECTION, populationSize / 2);
         plotter.parameters.putNumber(Population::NUM_CROSSOVER, populationSize / 2);
 
-//        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_BUFFER), BT_BIT);
-        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_DISABLED);
-
-        JoinEnumLoop linesLoop(ET_MUTATION_ALG);
-        linesLoop.addEnumLoop(MA_DISABLED, NULL);
-        linesLoop.addEnumLoop(MA_PER_INDIVIDUAL, new RangeLoop(Population::MUTATION_NUM, 1, 6, 1));
-        linesLoop.addEnumLoop(MA_PROBABILISTIC, new RangeLoop(Population::MUTATION_PROB, 0.05, 0.30, 0.05));
+        JoinEnumLoop linesLoop(ET_RESET_ALG);
+        linesLoop.addEnumLoop(RA_DISABLED, NULL);
+        linesLoop.addEnumLoop(RA_PER_INDIVIDUAL, new RangeLoop(Population::RESET_NUM, 1, 6, 1));
+        linesLoop.addEnumLoop(RA_PROBABILISTIC, new RangeLoop(Population::RESET_PROB, 0.05, 0.30, 0.05));
 
         EnumLoop averageLoop(ET_BUFFER, 2, BT_FLOAT, BT_BIT);
 
@@ -66,9 +63,9 @@ int main(int argc, char *argv[])
         averageLoop.addInnerLoop(new EnumLoop(ET_CROSS_LEVEL));
 
         JoinEnumLoop* mutationLoop = new JoinEnumLoop(ET_MUTATION_ALG);
-        mutationLoop.addEnumLoop(MA_DISABLED, NULL);
-        mutationLoop.addEnumLoop(MA_PER_INDIVIDUAL, new RangeLoop(Population::MUTATION_NUM, 1, 6, 1));
-        mutationLoop.addEnumLoop(MA_PROBABILISTIC, new RangeLoop(Population::MUTATION_PROB, 0.05, 0.30, 0.05));
+        mutationLoop->addEnumLoop(MA_DISABLED, NULL);
+        mutationLoop->addEnumLoop(MA_PER_INDIVIDUAL, new RangeLoop(Population::MUTATION_NUM, 1, 6, 1));
+        mutationLoop->addEnumLoop(MA_PROBABILISTIC, new RangeLoop(Population::MUTATION_PROB, 0.05, 0.30, 0.05));
         averageLoop.addInnerLoop(mutationLoop);
 
         plotter.parameters.putNumber(Dummy::SIZE, 3);
