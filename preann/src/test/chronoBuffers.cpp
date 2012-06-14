@@ -57,13 +57,12 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
-        ChronoPlotter plotter(argv[1],
-                              new RangeLoop(Dummy::SIZE, 2000, 20001, 2000), "Time (seconds)");
+        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 2000, 20001, 2000), "Time (seconds)");
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        EnumLoop linesLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C,
-                           IT_SSE2);
+//        EnumLoop linesLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2);
+        EnumLoop linesLoop(ET_IMPLEMENTATION, 3, IT_C, IT_SSE2, IT_CUDA);
 
         EnumLoop* bufferTypeLoop = new EnumLoop(ET_BUFFER);
         linesLoop.addInnerLoop(bufferTypeLoop);
