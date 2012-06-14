@@ -1,4 +1,4 @@
-% Created 2012-06-09 Sat 14:09
+% Created 2012-06-14 Thu 12:35
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -376,7 +376,7 @@ En la figura \ref{grafImplCalculate}, puede apreciarse que la implementación co
 \label{sec-6-1-1-2}
 
 
-De la figura \ref{grafImplActivation} se extraen varias conclusiones. No mucha diferencia de rendimiento entre las implementaciones y prácticamente ninguna cuando las neuronas son de tipo FLOAT. Esto era de esperar porque ambas implementaciones son idénticas: no se han hecho optimizaciones SSE2 para la función de activación.
+De la figura \ref{grafImplActivation} se extraen varias conclusiones. No mucha diferencia de rendimiento entre las implementaciones y prácticamente ninguna cuando las neuronas son de tipo FLOAT. Esto era de esperar porque ambas implementaciones son idénticas: no se han hecho optimizaciones SSE2 para la función de activación para el tipo FLOAT.
 
 Para los tipos BIT y SIGN, la implementación en C es ligeramente más rápida que para el tipo FLOAT y la  escrita en SSE2 es ligeremante más lenta que la FLOAT. En la implementación SSE2 de BIT y SIGN no se ponen los bits en el orden normal, si no en la representación especial de SSE2, para que el método de acumulación de resultados pueda ser óptimo.
 
@@ -386,8 +386,22 @@ Para los tipos BIT y SIGN, la implementación en C es ligeramente más rápida q
 \caption{\label{grafImplActivation}Método que ejecuta la función de activación para las salidas de una capa (Connection::activation).}
 \end{figure}
 \newpage
-\paragraph{Cruza}
+\paragraph{Funciones de activación}
 \label{sec-6-1-1-3}
+
+
+Si en la figura \ref{grafImplActivation} se comparaba el rendimiento de los distintos tipos de neurona (BIT, SIGN y FLOAT con la función de activación IDENTITY), en la figura \ref{grafImplActivationFunc} se comparan los rendimientos de los distintos tipos de funciones para el tipo de neurona FLOAT. Con el tipo de neurona BIT, la función de activación siempre es BINARY$_{\mathrm{STEP}}$ y con el tipo SIGN la activación siempre es BIPOLAR$_{\mathrm{STEP}}$, por ello podemos excluir estos tipos de esta gráfica. Además, la implementación SSE2 de la activación para FLOAT es idéntica a la de C, por lo que tampoco se muestran los resultados de la activación SSE2 en este caso.
+
+Se puede ver como, en general, la función más lenta es la sigmoide, seguida de la sigmoide bipolar. La tangente hiperbólica sólo es ligeramente más lenta que el resto, cuyo rendimiento es similar al de la función identidad (que no hace nada).
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{./img/Activation_functions.png}
+\caption{\label{grafImplActivationFunc}Método que ejecuta la función de activación para las salidas de una capa (Connection::activation) con tipo de Buffer FLOAT y las diferentes funciones de activación implementadas.}
+\end{figure}
+\newpage
+\paragraph{Cruza}
+\label{sec-6-1-1-4}
 
 
 No hay una diferencia sustancial de rendimiento entre las diferentes implementaciones y tipos de neuronas para el operador genético de crossover, como se muestra en la figura \ref{grafImplCrossover}. Como el método de activación, la cruza de SSE2 se ve ligeramente penalizada al traducir el vector de bits con los pesos a cruzar para que tenga se adapte a la posición especial de los pesos en SSE2.
@@ -399,7 +413,7 @@ No hay una diferencia sustancial de rendimiento entre las diferentes implementac
 \end{figure}
 \newpage
 \paragraph{Mutación}
-\label{sec-6-1-1-4}
+\label{sec-6-1-1-5}
 
 
 De la figura \ref{grafImplMutation} se puede deducir que el operador de mutación tiene un coste mínimo y constante respecto al tamaño de la conexión para todas las implementaciones.
@@ -411,7 +425,7 @@ De la figura \ref{grafImplMutation} se puede deducir que el operador de mutació
 \end{figure}
 \newpage
 \paragraph{Olvido}
-\label{sec-6-1-1-5}
+\label{sec-6-1-1-6}
 
 
 De manera similar a la operación de mutación, el olvido (figura \ref{grafImplReset}) tiene un coste constante y mínimo.
@@ -423,7 +437,7 @@ De manera similar a la operación de mutación, el olvido (figura \ref{grafImplR
 \end{figure}
 \newpage
 \paragraph{Copiar desde y hacia Interfaz}
-\label{sec-6-1-1-6}
+\label{sec-6-1-1-7}
 
 
 Estos métodos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementación concreta escogida. Cada implementación debe mapear correctamente desde la representación genérica (Interfaz) hacia su propia representación interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
@@ -508,31 +522,85 @@ El nuevo operador de olvido/reset presenta otra vez unos resultados similares a 
   \label{aprendizaje}
 
 En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación.
-\subsubsection{Comparación de distintos tamaños de población número de individuos conservados por generación}
+\subsubsection{Comparación entre distintas funciones de activación}
 \label{sec-6-2-1}
-
-
-\newpage
 \subsubsection{Comparaci\'on entre redes discretas y lineales}
 \label{sec-6-2-2}
 
-   \label{}
+   \label{aprendDiscretLineales}
 
 A continuación compararemos los posibles efectos beneficiosos o perjudiciales al aprendizaje que se pueden obtener a partir de renunciar a las funciones derivables en favor de neuronas de tipo BIT (salida 0 ó 1)  o SIGN (salida -1 ó 1) y de pesos discretos y más reducidos (1 Byte en lugar de los 4 bytes de un float).
-\paragraph{Operaciones binarias (OR/AND/XOR)}
+\paragraph{OR}
 \label{sec-6-2-2-1}
 
 
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{./img/BufferTypes_OR.png}
+\caption{\label{aprenDiscretOr}Aprendizaje de la tarea lógica Or con los distintos tipos de neuronas (Binarias, bipolares y lineales).}
+\end{figure}
+
 \newpage
-\paragraph{Reversi}
+\paragraph{AND}
 \label{sec-6-2-2-2}
 
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{./img/BufferTypes_AND.png}
+\caption{\label{aprenDiscretAnd}Aprendizaje de la tarea lógica And con los distintos tipos de neuronas (Binarias, bipolares y lineales).}
+\end{figure}
+
+\newpage
+\paragraph{XOR}
+\label{sec-6-2-2-3}
+
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{./img/BufferTypes_XOR.png}
+\caption{\label{aprenDiscretXor}Aprendizaje de la tarea lógica Xor con los distintos tipos de neuronas (Binarias, bipolares y lineales).}
+\end{figure}
+
+\newpage
+\paragraph{Reversi}
+\label{sec-6-2-2-4}
+
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{./img/BufferTypes_REVERSI.png}
+\caption{\label{aprenDiscretReversi}Aprendizaje de la tarea Reversi con los distintos tipos de neuronas (Binarias, bipolares y lineales).}
+\end{figure}
 
 \newpage
 \subsubsection{Comparaci\'on de operadores gen\'eticos}
 \label{sec-6-2-3}
 
    \label{}
+\paragraph{Selección}
+\label{sec-6-2-3-1}
+
+
+\newpage
+\paragraph{Cruza}
+\label{sec-6-2-3-2}
+
+
+\newpage
+\paragraph{Mutación}
+\label{sec-6-2-3-3}
+
+
+\newpage
+\paragraph{Operador de olvido}
+\label{sec-6-2-3-4}
+
+
+\newpage
+\subsubsection{Comparación de distintos tamaños de población número de individuos conservados por generación}
+\label{sec-6-2-4}
+
 
 \newpage
 \section{Conclusiones}

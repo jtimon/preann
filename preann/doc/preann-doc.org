@@ -318,9 +318,9 @@ En la figura \ref{grafImplCalculate}, puede apreciarse que la implementación co
 
 **** Activación
 
-De la figura \ref{grafImplActivation} se extraen varias conclusiones. No mucha diferencia de rendimiento entre las implementaciones y prácticamente ninguna cuando las neuronas son de tipo FLOAT. Esto era de esperar porque ambas implementaciones son idénticas: no se han hecho optimizaciones SSE2 para la función de activación.
+De la figura \ref{grafImplActivation} se extraen varias conclusiones. No mucha diferencia de rendimiento entre las implementaciones y prácticamente ninguna cuando las neuronas son de tipo FLOAT. Esto era de esperar porque ambas implementaciones son idénticas: no se han hecho optimizaciones SSE2 para la función de activación y para el tipo FLOAT el algoritmo es idéntico al de C.
 
-Para los tipos BIT y SIGN, la implementación en C es ligeramente más rápida que para el tipo FLOAT y la  escrita en SSE2 es ligeremante más lenta que la FLOAT. En la implementación SSE2 de BIT y SIGN no se ponen los bits en el orden normal, si no en la representación especial de SSE2, para que el método de acumulación de resultados pueda ser óptimo.
+Para los tipos BIT y SIGN, la implementación en C es ligeramente más rápida que para el tipo FLOAT y la  escrita en SSE2 es ligeremante más lenta que la FLOAT. En la implementación SSE2 de BIT y SIGN no se almacenan los bits en el orden normal, si no en la representación especial de SSE2, para que el método de acumulación de resultados pueda ser óptimo.
 
 #+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation).
 #+LABEL:      grafImplActivation
@@ -328,9 +328,20 @@ Para los tipos BIT y SIGN, la implementación en C es ligeramente más rápida q
 [[./img/Connection_activation.png]]
 \newpage
 
+**** Funciones de activación
+
+Si en la figura \ref{grafImplActivation} se comparaba el rendimiento de los distintos tipos de neurona (BIT, SIGN y FLOAT con la función de activación IDENTITY), en la figura \ref{grafImplActivationFunc} se comparan los rendimientos de los distintos tipos de funciones para el tipo de neurona FLOAT. Con el tipo de neurona BIT, la función de activación siempre es BINARY_STEP y con el tipo SIGN la activación siempre es BIPOLAR_STEP, por ello podemos excluir estos tipos de esta gráfica. Además, la implementación SSE2 de la activación para FLOAT es idéntica a la de C, por lo que tampoco se muestran los resultados de la activación SSE2 en este caso.
+
+Se puede ver como, en general, la función más lenta es la sigmoide, seguida de la sigmoide bipolar. La tangente hiperbólica sólo es ligeramente más lenta que el resto, cuyo rendimiento es similar al de la función identidad (que no hace nada).
+
+#+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation) con tipo de Buffer FLOAT y las diferentes funciones de activación implementadas.
+#+LABEL:      grafImplActivationFunc
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Activation_functions.png]]
+\newpage
 **** Cruza
 
-No hay una diferencia sustancial de rendimiento entre las diferentes implementaciones y tipos de neuronas para el operador genético de crossover, como se muestra en la figura \ref{grafImplCrossover}. Como el método de activación, la cruza de SSE2 se ve ligeramente penalizada al traducir el vector de bits con los pesos a cruzar para que tenga se adapte a la posición especial de los pesos en SSE2.
+No hay una diferencia sustancial de rendimiento entre las diferentes implementaciones y tipos de neuronas para el operador genético de crossover, como se muestra en la figura \ref{grafImplCrossover}. Como en el método de activación, la cruza de SSE2 se ve ligeramente penalizada. En este caso se debe al almacenamiento especial de los pesos para SSE2, que usa bloques de pesos en vez de pesos individuales.
 
 #+CAPTION:    Método que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).
 #+LABEL:      grafImplCrossover
