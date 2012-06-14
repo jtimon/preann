@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
         JoinEnumLoop linesLoop(ET_SELECTION_ALGORITHM);
         linesLoop.addEnumLoop(SA_ROULETTE_WHEEL, NULL);
         linesLoop.addEnumLoop(SA_RANKING, NULL);
-        linesLoop.addEnumLoop(SA_TOURNAMENT, new RangeLoop(Population::TOURNAMENT_SIZE, 2, 5, 4));
+        linesLoop.addEnumLoop(SA_TOURNAMENT, new RangeLoop(Population::TOURNAMENT_SIZE, 2, 5, 2));
         linesLoop.addEnumLoop(SA_TRUNCATION, NULL);
 
         EnumLoop averageLoop(ET_BUFFER, 2, BT_FLOAT, BT_BIT, BT_SIGN);
