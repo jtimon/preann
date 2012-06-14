@@ -307,6 +307,7 @@ En esta sección se analizan resultados de rendimiento en tiempo de ejecución.
 En esta sección se presentan los resultados en tiempo de ejecución de los métodos que se ejecutan de forma diferente con cada implementación.
 
 **** Acumulación de resultados
+  #+LaTeX: \label{rendImplAcumul}
 
 En la figura \ref{grafImplCalculate}, puede apreciarse que la implementación con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a la implementación de referencia en lenguaje C, especialmente para los tipos de Buffer BIT y SIGN.
 
@@ -341,7 +342,7 @@ Se puede ver como, en general, la función más lenta es la sigmoide, seguida de
 \newpage
 **** Cruza
 
-No hay una diferencia sustancial de rendimiento entre las diferentes implementaciones y tipos de neuronas para el operador genético de crossover, como se muestra en la figura \ref{grafImplCrossover}. Como en el método de activación, la cruza de SSE2 se ve ligeramente penalizada. En este caso se debe al almacenamiento especial de los pesos para SSE2, que usa bloques de pesos en vez de pesos individuales.
+No hay una diferencia sustancial de rendimiento entre las diferentes implementaciones y tipos de neuronas para el operador genético de crossover, como se muestra en la figura \ref{grafImplCrossover}. Como en el método de activación, la cruza de SSE2 se ve ligeramente penalizada. En este caso se debe al almacenamiento especial de los pesos para SSE2, que usa bloques de pesos en vez de pesos individuales. La penalización es ligeramente superior para FLOAT.
 
 #+CAPTION:    Método que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).
 #+LABEL:      grafImplCrossover
@@ -441,14 +442,60 @@ El nuevo operador de olvido/reset presenta otra vez unos resultados similares a 
   #+LaTeX: \label{aprendizaje}
 
 En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación.
-*** Comparación entre distintas funciones de activación
+*** Comparación entre las distintas funciones de activación
+   #+LaTeX: \label{aprendFunc}
+
+A continuación observamos cómo influyen las diferentes funciones de activación para las tareas implementadas.
+
+**** OR
+
+Para la tarea Or, no se observan diferencias sustanciales con diferentes funciones de activación al mirar la figura \ref{aprenFuncOr}.
+
+#+CAPTION:    Aprendizaje de la tarea lógica Or con las distintas funciones de activación.
+#+LABEL:      aprenFuncOr
+#+ATTR_LaTeX: width=\textwidth
+[[./img/FunctionTypes_OR.png]]
+
+\newpage
+**** AND
+
+Según la gráfica \ref{aprenFuncAnd} la función de activación Sigmoide bipolar es ligeramente superior al resto para la tarea lógica AND.
+
+#+CAPTION:    Aprendizaje de la tarea lógica And las distintas funciones de activación.
+#+LABEL:      aprenFuncAnd
+#+ATTR_LaTeX: width=\textwidth
+[[./img/FunctionTypes_AND.png]]
+
+\newpage
+**** XOR
+
+Para la tarea XOR - cuyas redes neuronales tienen 2 capas - la figura \ref{aprenFuncXor} muestra diferencias de en el aprendizaje dependiendo de la función de activación. La función identidad es superior a la mayoría y la de escalón binario inferior. La sigmoide empiza como la mayoría, pero se va haciendo peor según avanza el aprendizaje.
+
+#+CAPTION:    Aprendizaje de la tarea lógica Xor las distintas funciones de activación.
+#+LABEL:      aprenFuncXor
+#+ATTR_LaTeX: width=\textwidth
+[[./img/FunctionTypes_XOR.png]]
+
+\newpage
+**** Reversi
+
+Para la tarea Reversi igual que pasaba con la tarea Or, no se observan diferencias sustanciales con diferentes funciones de activación a pesar de que en este caso también se tienen varias capas en la red neuronal (figura \ref{aprenFuncReversi}).
+
+#+CAPTION:    Aprendizaje de la tarea Reversi las distintas funciones de activación.
+#+LABEL:      aprenFuncReversi
+#+ATTR_LaTeX: width=\textwidth
+[[./img/FunctionTypes_REVERSI.png]]
+
+\newpage
 
 *** Comparaci\'on entre redes discretas y lineales
    #+LaTeX: \label{aprendDiscretLineales}
 
-A continuación compararemos los posibles efectos beneficiosos o perjudiciales al aprendizaje que se pueden obtener a partir de renunciar a las funciones derivables en favor de neuronas de tipo BIT (salida 0 ó 1)  o SIGN (salida -1 ó 1) y de pesos discretos y más reducidos (1 Byte en lugar de los 4 bytes de un float).
+A continuación compararemos los posibles efectos beneficiosos o perjudiciales al aprendizaje que se pueden obtener a partir de renunciar a las funciones derivables en favor de neuronas de tipo BIT (salida 0 ó 1) ó SIGN (salida -1 ó 1) y de pesos discretos y más reducidos (1 Byte en lugar de los 4 bytes de un float). También se incluyen las funciones de activación BINARY_STEP y BIPOLAR_STEP para FLOAT para ver el caso en que los pesos siguen siendo igual de grandes y las neuronas se comportan como BIT o SIGN (para poder analizar el efecto de los pesos discretos y menores por separado).
 
 **** OR
+
+Para la tarea Or, la función IDENTITY es la mejor opción con muy poca diferencia (figura \ref{aprenDiscretOr}).
 
 #+CAPTION:    Aprendizaje de la tarea lógica Or con los distintos tipos de neuronas (Binarias, bipolares y lineales).
 #+LABEL:      aprenDiscretOr
@@ -458,6 +505,8 @@ A continuación compararemos los posibles efectos beneficiosos o perjudiciales a
 \newpage
 **** AND
 
+Para la tarea And, también con poca diferencia, las funciones bipolares son la opción superior independientemente de si los pesos son almacenados como Floats o cómo Bytes (figura \ref{aprenDiscretAnd}).
+
 #+CAPTION:    Aprendizaje de la tarea lógica And con los distintos tipos de neuronas (Binarias, bipolares y lineales).
 #+LABEL:      aprenDiscretAnd
 #+ATTR_LaTeX: width=\textwidth
@@ -466,6 +515,8 @@ A continuación compararemos los posibles efectos beneficiosos o perjudiciales a
 \newpage
 **** XOR
 
+De nuevo observamos más diferencias en la tarea Xor (figura \ref{aprenDiscretXor}). Como en AND, la opciones bipolares son superiores durante todo el aprendizaje. Seguidas de la activación linear, que se va haciendo menos efectiva conforme avanza el aprendizaje, cuando es superada por las versiones binarias. Tanto como para las binarias como para las bipolares, se aprecia una diferencia mínima en favor de las versiones cuyos pesos se alamacenan como floats, pero que no compensan las grandes diferencias de rendimiento comentadas en la sección \ref{rendImplAcumul}.
+
 #+CAPTION:    Aprendizaje de la tarea lógica Xor con los distintos tipos de neuronas (Binarias, bipolares y lineales).
 #+LABEL:      aprenDiscretXor
 #+ATTR_LaTeX: width=\textwidth
@@ -473,6 +524,8 @@ A continuación compararemos los posibles efectos beneficiosos o perjudiciales a
 
 \newpage
 **** Reversi
+
+Para la tarea Reversi todos los tipos de neuronas obtienen resultados bastante semejantes en la gráfica \ref{aprenDiscretReversi}.
 
 #+CAPTION:    Aprendizaje de la tarea Reversi con los distintos tipos de neuronas (Binarias, bipolares y lineales).
 #+LABEL:      aprenDiscretReversi
