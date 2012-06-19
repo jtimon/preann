@@ -39,6 +39,14 @@ float Func(float number, FunctionType functionType)
     }
 }
 
+__device__
+unsigned device_min(unsigned a, unsigned b)
+{
+    if (a < b)
+        return a;
+    return b;
+}
+
 __global__
 void activation_float_kernel(float* results, float* thresholds, float* output, unsigned output_sz,
                              FunctionType functionType)
@@ -57,7 +65,7 @@ void activation_bit_kernel(float* results, float* thresholds, unsigned* output, 
 
     if (output_sz > offset) {
 
-        unsigned toRead = min((unsigned)BITS_PER_UNSIGNED, (unsigned)(output_sz - offset));
+        unsigned toRead = device_min(BITS_PER_UNSIGNED, output_sz - offset);
         unsigned threadOutput = 0;
         unsigned mask = 0x80000000;
 
@@ -172,8 +180,8 @@ __global__
 void crossoverKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
 {
     unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
-    unsigned maxPosForThisBlock = min ( (unsigned)((blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED),
-                                        (unsigned)size);
+    unsigned maxPosForThisBlock = device_min ( (blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED,
+                                        size);
     unsigned bitsForTheThread, mask;
     if (weighPos < maxPosForThisBlock) {
         bitsForTheThread = bitBuffer[(blockIdx.x * blockDim.x) + threadIdx.x];
@@ -336,7 +344,7 @@ void SumFloatsConnectionsKernel(float* inputs, unsigned input_size, unsigned out
          result += sdata[pos] * weighs[weighsOffset + pos];
          ++pos;
          }
-         unsigned newMax = min(tid, input_size);
+         unsigned newMax = device_min(tid, input_size);
          pos = 0;
          while (pos < newMax){
          result += sdata[pos] * weighs[weighsOffset + pos];
@@ -377,7 +385,7 @@ void SumBitsConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned ou
         for (unsigned i=0; i < input_blocks_to_read; i++) {
 
             //TODO TCC check performance penalty (this is just for BT_SIGN)
-            unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
+            unsigned maxBits = device_min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
             unsigned input_block = shared_inputs[i];
             unsigned mask = 0x80000000;
@@ -452,7 +460,7 @@ void SumBitsInvertedConnectionsKernel(unsigned* inputs, unsigned input_size, uns
         for (unsigned i=0; i < input_blocks_to_read; i++) {
 
             //TODO TCC check performance penalty (this is just for BT_SIGN)
-            unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
+            unsigned maxBits = device_min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
             unsigned weighsOffset = (i * BITS_PER_UNSIGNED * output_size) + outputNeuron;
             unsigned input_block = shared_inputs[i];
@@ -578,7 +586,7 @@ void SumConnectionsKernel(void* inputPtr, unsigned input_size, unsigned output_s
         while (i < input_blocks_to_read) {
 
             //TODO TCC check performance penalty (this is just for BT_SIGN)
-            unsigned maxBits = min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
+            unsigned maxBits = device_min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
             unsigned mask = 0x80000000;
             unsigned currentInput = ((unsigned*)inputPtr)[i];
