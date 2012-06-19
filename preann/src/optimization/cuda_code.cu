@@ -1,5 +1,8 @@
 #include "cuda_code.h"
 
+#undef _GLIBCXX_ATOMIC_BUILTINS
+#undef _GLIBCXX_USE_INT128
+
 void checkCUDAError(const char *msg)
 {
     cudaError_t err = cudaGetLastError();
