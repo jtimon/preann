@@ -57,7 +57,7 @@ void activation_bit_kernel(float* results, float* thresholds, unsigned* output, 
 
     if (output_sz > offset) {
 
-        unsigned toRead = min(BITS_PER_UNSIGNED, output_sz - offset);
+        unsigned toRead = min((unsigned)BITS_PER_UNSIGNED, (unsigned)(output_sz - offset));
         unsigned threadOutput = 0;
         unsigned mask = 0x80000000;
 
@@ -172,8 +172,8 @@ __global__
 void crossoverKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
 {
     unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
-    unsigned maxPosForThisBlock = min ( (blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED,
-            size);
+    unsigned maxPosForThisBlock = min ( (unsigned)((blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED),
+                                        (unsigned)size);
     unsigned bitsForTheThread, mask;
     if (weighPos < maxPosForThisBlock) {
         bitsForTheThread = bitBuffer[(blockIdx.x * blockDim.x) + threadIdx.x];
