@@ -253,11 +253,15 @@ Un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algori
 ** Objetivos
   #+LaTeX: \label{anaObjetivos}
 
+*** Implementación de la librería
+
 En el presente proyecto se pretende construir una librer\'ia de programaci\'on en C++ para la utilizaci\'on de redes neuronales con entrenamiento mediante algoritmos gen\'eticos. Se quiere que sea lo m\'as flexible posible en cuanto a la estructura de la red, para poder, en un futuro, determinar la topolog\'ia tambi\'en de forma gen\'etica. Por tanto, con la librer\'ia implementada debe ser posible crear una cualquier red con una arquitectura arbitraria. Deben ser posibles conexiones recurrentes y conectar capas con tipos de datos diferentes (por ejemplo, que una capa cuya salida son n\'umeros en coma flotante debe poder usar como entrada una capa que tiene bits como salida).
 
  Como los entrenamientos pueden ser costosos en tiempo de ejecuci\'on, la librer\'ia debe estar paralelizada internamente al menos para la ejecuci\'on de redes neuronales. Esta paralelizaci\'on debe poder aprovecharse por los sistemas m\'as extendidos para que pueda ser utilizada en proyectos que aprovechen la computaci\'on voluntaria.
 
- Adem\'as, se probar\'a la librer\'ia en casos concretos con el fin de contestar a las siguientes cuestiones:
+*** Investigación
+
+ Se probar\'a la librer\'ia en casos concretos con el fin de contestar a las siguientes cuestiones:
 
 \begin{enumerate}
  
@@ -283,6 +287,7 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
   #+LaTeX: \label{disenoParalCUDA}
 ** Dise\~no del algoritmo gen\'etico
   #+LaTeX: \label{disenoGene}
+
 ** Interfaz del programador
   #+LaTeX: \label{disenoInterfProgr}
 \newpage
@@ -534,17 +539,182 @@ Para la tarea Reversi todos los tipos de neuronas obtienen resultados bastante s
 
 \newpage
 *** Comparaci\'on de operadores gen\'eticos
-   #+LaTeX: \label{}
+   #+LaTeX: \label{aprendOperGen}
+
+Para estudiar el aprendizaje con los distintos operadores genéticos, se han probado cada una de las 4 tareas implementadas y se han generado gráficas de cada una de ellas por separado. Se ha utilizado un tamaño de población de 8 individuos, de los cuales se seleccionan 4 en cada iteración, que se cruzan, se mutan se prueban los nuevos individuos generados para insertarlos ordenadamente en la población anterior, quedando de nuevo 8. De esta manera, se desechan los 4 peores de entre los 8 que había y los 4 nuevos generados. En caso de empate se favorece a los nuevos, siguiendo el criterio de búsqueda neutral (TODO falta referencia bibliográfica aquí). Cada población utiliza un esquema de selección, cruza y mutación concretos, pero para cada gráfica se hace la media de todos los esquemas posibles (salvo para el operador concreto que se esté estudiando en cada gráfica). El operador de olvido sólo se usa al generar sus propias gráficas, haciendo la media con el todas las posibilidades en el resto de operadores.
+
 **** Selección
+
+Como esquemas de selección se utilizan los operadores de truncado (se selecciona directamente a los mejores), ruleta (con valor base=1), ranking (con valores por defecto base=9 step=6) y torneo (con tamaños de torneo 2 y 4).
+
+***** OR
+
+(figura \ref{aprenSelectOr}).
+
+#+CAPTION:    Aprendizaje de la tarea lógica Or con los distintos esquemas de selección.
+#+LABEL:      aprenSelectOr
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Selection_OR.png]]
+
+\newpage
+***** AND
+
+(figura \ref{aprenSelectAnd}).
+
+#+CAPTION:    Aprendizaje de la tarea lógica And con los distintos esquemas de selección.
+#+LABEL:      aprenSelectAnd
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Selection_AND.png]]
+
+\newpage
+***** XOR
+
+(figura \ref{aprenSelectXor}). 
+
+#+CAPTION:    Aprendizaje de la tarea lógica Xor con los distintos esquemas de selección.
+#+LABEL:      aprenSelectXor
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Selection_XOR.png]]
+
+\newpage
+***** Reversi
+
+ gráfica \ref{aprenSelectReversi}.
+
+#+CAPTION:    Aprendizaje de la tarea Reversi con los distintos esquemas de selección.
+#+LABEL:      aprenSelectReversi
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Selection_REVERSI.png]]
+
 
 \newpage
 **** Cruza
 
+
+***** OR
+
+(figura \ref{aprenCrossOr}).
+
+#+CAPTION:    Aprendizaje de la tarea lógica Or con los distintos esquemas y niveles de cruza.
+#+LABEL:      aprenCrossOr
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Crossover_OR.png]]
+
+\newpage
+***** AND
+
+(figura \ref{aprenCrossAnd}).
+
+#+CAPTION:    Aprendizaje de la tarea lógica And con los distintos esquemas y niveles de cruza.
+#+LABEL:      aprenCrossAnd
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Crossover_AND.png]]
+
+\newpage
+***** XOR
+
+(figura \ref{aprenCrossXor}). 
+
+#+CAPTION:    Aprendizaje de la tarea lógica Xor con los distintos esquemas y niveles de cruza.
+#+LABEL:      aprenCrossXor
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Crossover_XOR.png]]
+
+\newpage
+***** Reversi
+
+ gráfica \ref{aprenCrossReversi}.
+
+#+CAPTION:    Aprendizaje de la tarea Reversi con los distintos esquemas y niveles de cruza.
+#+LABEL:      aprenCrossReversi
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Crossover_REVERSI.png]]
+
 \newpage
 **** Mutación
 
+
+***** OR
+
+(figura \ref{aprenMutOr}).
+
+#+CAPTION:    Aprendizaje de la tarea lógica Or con los distintos configuraciones de mutación.
+#+LABEL:      aprenMutOr
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Mutations_OR.png]]
+
+\newpage
+***** AND
+
+(figura \ref{aprenMutAnd}).
+
+#+CAPTION:    Aprendizaje de la tarea lógica And con los distintos configuraciones de mutación.
+#+LABEL:      aprenMutAnd
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Mutations_AND.png]]
+
+\newpage
+***** XOR
+
+(figura \ref{aprenMutXor}). 
+
+#+CAPTION:    Aprendizaje de la tarea lógica Xor con los distintos configuraciones de mutación.
+#+LABEL:      aprenMutXor
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Mutations_XOR.png]]
+
+\newpage
+***** Reversi
+
+ gráfica \ref{aprenMutReversi}.
+
+#+CAPTION:    Aprendizaje de la tarea Reversi con los distintos configuraciones de mutación.
+#+LABEL:      aprenMutReversi
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Mutations_REVERSI.png]]
+
 \newpage
 **** Operador de olvido
+
+
+***** OR
+
+(figura \ref{aprenResetOr}).
+
+#+CAPTION:    Aprendizaje de la tarea lógica Or con los distintos configuraciones de olvido (reset).
+#+LABEL:      aprenResetOr
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Reset_OR.png]]
+
+\newpage
+***** AND
+
+(figura \ref{aprenResetAnd}).
+
+#+CAPTION:    Aprendizaje de la tarea lógica And con los distintos configuraciones de olvido (reset).
+#+LABEL:      aprenResetAnd
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Reset_AND.png]]
+
+\newpage
+***** XOR
+
+(figura \ref{aprenResetXor}). 
+
+#+CAPTION:    Aprendizaje de la tarea lógica Xor con los distintos configuraciones de olvido (reset).
+#+LABEL:      aprenResetXor
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Reset_XOR.png]]
+
+\newpage
+***** Reversi
+
+ gráfica \ref{aprenResetReversi}.
+
+#+CAPTION:    Aprendizaje de la tarea Reversi con los distintos configuraciones de olvido (reset).
+#+LABEL:      aprenResetReversi
+#+ATTR_LaTeX: width=\textwidth
+[[./img/Reset_REVERSI.png]]
 
 \newpage
 *** Comparación de distintos tamaños de población número de individuos conservados por generación
