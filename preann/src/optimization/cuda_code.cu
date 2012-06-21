@@ -1,7 +1,7 @@
-#include "cuda_code.h"
-
 #undef _GLIBCXX_ATOMIC_BUILTINS
 #undef _GLIBCXX_USE_INT128
+
+#include "cuda_code.h"
 
 void checkCUDAError(const char *msg)
 {
