@@ -1,6 +1,8 @@
 # Project: Paralel Reinforcement Evolutionary Artificial Neural Networks
 
 # --------------- VARIABLES ---------------------
+# for emulation cuda v2.3
+# make 3.81
 
 SHELL = /bin/sh
 
@@ -87,7 +89,7 @@ cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	./bin/learnFunctionTypes.exe $(OUTPUT_DIR)
 #	./bin/learnMutation.exe $(OUTPUT_DIR)
 #	./bin/learnReset.exe $(OUTPUT_DIR)
-#	./bin/learnSelection.exe $(OUTPUT_DIR)
+	./bin/learnSelection.exe $(OUTPUT_DIR)
 #	./bin/learnCrossover.exe $(OUTPUT_DIR)
 #	./bin/learnTasks.exe $(OUTPUT_DIR)
 #	./bin/chronoConnectionsFiles.exe
