@@ -20,6 +20,10 @@ float chronoCalculateAndAddTo(ParametersMap* parametersMap, unsigned repetitions
 {
     START
 
+#ifdef CUDA_IMPL
+    Cuda_Threads_Per_Block = parametersMap->getNumber("cuda block size");
+#endif
+
     Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT, connection->getImplementationType());
     START_CHRONO
         connection->calculateAndAddTo(results);
@@ -32,6 +36,11 @@ float chronoCalculateAndAddTo(ParametersMap* parametersMap, unsigned repetitions
 
 float chronoActivation(ParametersMap* parametersMap, unsigned repetitions)
 {
+
+#ifdef CUDA_IMPL
+    Cuda_Threads_Per_Block = parametersMap->getNumber("cuda block size");
+#endif
+
     Buffer* output = Dummy::buffer(parametersMap);
     Buffer* results = Factory::newBuffer(output->getSize(), BT_FLOAT, output->getImplementationType());
     Connection* thresholds = Factory::newConnection(results, 1);
@@ -52,6 +61,10 @@ float chronoActivation(ParametersMap* parametersMap, unsigned repetitions)
 float chronoCrossover(ParametersMap* parametersMap, unsigned repetitions)
 {
     START
+
+#ifdef CUDA_IMPL
+    Cuda_Threads_Per_Block = parametersMap->getNumber("cuda block size");
+#endif
 
     Connection* other = Factory::newConnection(connection->getInput(), outputSize);
     Interface bitVector(connection->getSize(), BT_BIT);
