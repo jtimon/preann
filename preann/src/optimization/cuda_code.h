@@ -6,7 +6,7 @@
 #define CUDA_MAX_SHARED_FLOATS (4032)
 #define CUDA_MAX_SHARED_BITS (CUDA_MAX_SHARED_FLOATS * CUDA_MAX_SHARED_FLOATS)
 
-static unsigned Cuda_Threads_Per_Block = 512;
+static unsigned Cuda_Threads_Per_Block = 256;
 
 extern "C" void* cuda_malloc(unsigned byteSize);
 extern "C" void cuda_free(void* d_ptr);
