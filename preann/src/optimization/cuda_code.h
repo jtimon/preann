@@ -3,8 +3,6 @@
 
 #include "common/enumerations.h"
 
-#define CUDA_THREADS_PER_BLOCK 64
-
 #define CUDA_MAX_SHARED_FLOATS (4032)
 #define CUDA_MAX_SHARED_BITS (CUDA_MAX_SHARED_FLOATS * CUDA_MAX_SHARED_FLOATS)
 

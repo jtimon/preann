@@ -31,7 +31,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             float* thresholds = (float*) data;
 
             cuda_activation(outputData, tSize, output->getBufferType(), results, thresholds, functionType,
-                            CUDA_THREADS_PER_BLOCK);
+                            Cuda_Threads_Per_Block);
         }
 
         virtual void _crossover(Buffer* other, Interface* bitBuffer)

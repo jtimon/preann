@@ -104,7 +104,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         {
             unsigned byte_sz = getByteSize();
 
-            cuda_setZero(data, byte_sz, bufferTypeTempl, CUDA_THREADS_PER_BLOCK);
+            cuda_setZero(data, byte_sz, bufferTypeTempl, Cuda_Threads_Per_Block);
         }
 
     };
