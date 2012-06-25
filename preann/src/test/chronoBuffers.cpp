@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
         linesLoop.print();
 
-        unsigned repetitions = 1000;
+        unsigned repetitions = 50000;
         plotter.plotChrono(chronoCopyToInterface, "Buffer_copyToInterface", &linesLoop, repetitions);
         plotter.plotChrono(chronoCopyFromInterface, "Buffer_copyFromInterface", &linesLoop, repetitions);
 

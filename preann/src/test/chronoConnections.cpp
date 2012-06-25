@@ -101,26 +101,25 @@ int main(int argc, char *argv[])
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        EnumLoop linesLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2);
-//        EnumLoop linesLoop(ET_IMPLEMENTATION);
+//        EnumLoop linesLoop(ET_IMPLEMENTATION, 4, IT_C, IT_CUDA, IT_CUDA_REDUC, IT_CUDA_INV);
+        EnumLoop linesLoop(ET_IMPLEMENTATION);
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
-                                                BT_FLOAT, BT_BIT, BT_SIGN);
-        linesLoop.addInnerLoop(bufferTypeLoop);
+        linesLoop.addInnerLoop(new EnumLoop(ET_BUFFER, 3, BT_FLOAT, BT_BIT, BT_SIGN));
 
         linesLoop.print();
 
-        RangeLoop averageLoop(Dummy::OUTPUT_SIZE, 1, 4, 2);
+        RangeLoop averageLoop(Dummy::OUTPUT_SIZE, 100, 401, 100);
 
         plotter.plotChronoAveraged(chronoMutate, "Connection_mutate", &linesLoop, &averageLoop, 50000);
         plotter.plotChronoAveraged(chronoReset, "Connection_reset", &linesLoop, &averageLoop, 50000);
 
         plotter.resetRangeX(2000, 20001, 2000);
-        plotter.plotChronoAveraged(chronoCrossover, "Connection_crossover", &linesLoop, &averageLoop, 5000);
         plotter.plotChronoAveraged(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &linesLoop,
                                    &averageLoop, 5000);
 
-        plotter.plotChrono(chronoActivation, "Connection_activation", &linesLoop, 5000);
+        linesLoop.with(ET_IMPLEMENTATION, 3, IT_C, IT_SSE2, IT_CUDA);
+        plotter.plotChronoAveraged(chronoCrossover, "Connection_crossover", &linesLoop, &averageLoop, 5000);
+        plotter.plotChrono(chronoActivation, "Connection_activation", &linesLoop, 50000);
 
         printf("Exit success.\n");
     } catch (std::string error) {

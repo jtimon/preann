@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 
         linesLoop.print();
 
-        plotter.plotChrono(chronoActivation, "Activation_functions", &linesLoop, 5000);
+        plotter.plotChrono(chronoActivation, "Activation_functions", &linesLoop, 50000);
 
         printf("Exit success.\n");
     } catch (std::string error) {
