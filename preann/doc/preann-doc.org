@@ -272,17 +272,13 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
 
  Se probar\'a la librer\'ia en casos concretos con el fin de contestar a las siguientes cuestiones:
 
-\begin{enumerate}
- 
- \item  ?`Qu\'e ventajas en el rendimiento se pueden obtener gracias a la paralelizaci\'on?
+1) ?`Qu\'e ventajas en el rendimiento se pueden obtener gracias a la paralelizaci\'on?
 
- \item  ?`Se puede simplificar la estructura de las redes neuronales para mejorar la paralelizaci\'on? ?`Qu\'e efecto tienen las funciones de tipo escal\'on (que permiten codificar la salida de cada neurona como un bit en vez de como un n\'umero real) tanto en el rendimiento como en el aprendizaje? ?`Qu\'e efecto tiene la codificaci\'on de los pesos en estructuras discretas (en lugar de n\'umeros reales) tanto en el rendimiento como en el aprendizaje?
+2) ?`Se puede simplificar la estructura de las redes neuronales para mejorar la paralelizaci\'on? ?`Qu\'e efecto tienen las funciones de tipo escal\'on (que permiten codificar la salida de cada neurona como un bit en vez de como un n\'umero real) tanto en el rendimiento como en el aprendizaje? ?`Qu\'e efecto tiene la codificaci\'on de los pesos en estructuras discretas (en lugar de n\'umeros reales) tanto en el rendimiento como en el aprendizaje?
 
- \item  ?`Qu\'e operadores gen\'eticos resultan m\'as adecuados para el entrenamiento en diferentes problemas? ?`Qu\'e valores de los par\'ametros del algoritmo gen\'etico resultan m\'as adecuados para el entrenamiento en diferentes problemas?
+3) ?`Qu\'e operadores gen\'eticos resultan m\'as adecuados para el entrenamiento en diferentes problemas? ?`Qu\'e valores de los par\'ametros del algoritmo gen\'etico resultan m\'as adecuados para el entrenamiento en diferentes problemas?
 
- \item  ?`Para qu\'e tipo de problemas resulta m\'as adecuado el m\'etodo propuesto? 
-
-\end{enumerate}
+4) ?`Para qu\'e tipo de problemas resulta m\'as adecuado el m\'etodo propuesto? 
 
 \newpage
 * TODO Dise\~no e implementaci\'on [0/3]
@@ -294,16 +290,55 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
 
 *** TODO Utilizaci\'on de la arquitectura CUDA
   #+LaTeX: \label{disenoParalCUDA}
-** TODO Dise\~no del algoritmo gen\'etico [0/5]
+** TODO Dise\~no del algoritmo gen\'etico [0/4]
   #+LaTeX: \label{disenoGene}
-*** TODO Aproximación generacional y de estado estacionario
+*** Funcionamiento general
+  #+LaTeX: \label{disenoGeneFunc}
 
+Como se vió en la sección \ref{basTeoGenetEstan} existen enfoques en cuanto a la gestión de la población de individuos. El algoritmo genético original adoptaba la política de reemplazo generacional [biblio], con el que la población completa es reemplazada en cada generación. En cambio, la política de estado estacionario [biblio], adoptada por varios algoritmos genéticos posteriores, reemplaza la población selectivamente. Es posible, por ejemplo, que mantener uno o varios miembros de la población por varias generaciones, siempre que estos mantengan su puntuación por encima de otros individuos de la población. Nuestra gestión de la población debe permitir ambas posibilidades de forma configurable.
 
+Para ello, mantendremos a la población como una lista ordenada en la que se irán insertando (también ordenadamente) los nuevos individuos producidos. Si tras una inserción se tienen más individuos que el tamaño máximo, el peor individuo (sea el nuevo o no) será desechado. Si dos individuos comparten la misma puntuación al ser comparados durante una inserción, se le dará ventaja al nuevo individuo siguiendo el criterio de busqueda neutral [biblio]. Este comportamiento es el propio del estado estacionario. Para obtener el comportamiento generacional, así como diferentes híbridos entre las dos posibilidades, definiremos una variable configurable para la población. Tras generar a los individuos de la siguiente generación, el sistema mirará esta variable para saber cuantos de los antiguos individuos debe conservar para competir con los nuevos y simplemente elimina al resto. Si el numéro de individuos a preservar es 0, el comportamiento será el generacional puro. Si el número de individuos a preservar es igual al tamaño máximo de la población (o es un número negativo), no se eliminará a ningún individuo de la generación anterior y todos ellos tendrán la oportunidad de sobrevivir compitiendo con los de la nueva generación. Si el número es algo intermedio entre 0 y el tamaño máximo de la población, estaremos usando un híbrido entre las políticas de reemplazo generacional y la de estado estacionario.
 
-*** TODO Operadores de selección
+En general, para cada nueva generación se realiza la siguiente secuencia de acciones:
+
+1) Selección: se puede definir una cantidad independiente de individuos a seleccionar con cada operador de selección. De esta manera, se pueden utilizar varios operadores de selección simultaneamente y combinarlos de infinidad de formas. Se deben seleccionar un mínimo de dos progenitores en cada generación para que el siguiente fallo no resulte en error.
+
+2) Cruza: una vez seleccionados los progenitores, se genera a partir de ellos la descendencia, los nuevos individuos. Los progenitores se van eligiendo aleatoriamente y si van marcando para no ser usados dos veces. Si se han seleccionado menos individuos de los que se quieren generar mediante cruza, cuando todos hayan sido usados una vez se desmarcarán para poder ser reutilizados y continuar con la generación de la descendencia mediante la cruza. Por tanto, el número de nuevos individuos por generación puede ser tanto mayor como menor al número de progenitores seleccionados. Además, como ocurría en la selección, varios operadores de cruza diferentes pueden combinarse también. En este caso, cada operador de cruza puede ser aplicado a un nivel de cruza diferente (ver sección \ref{disenoGeneNiv}) y cada una de estas combinaciones se le puede asignar un número independiente de individuos a generar por cruza. Por tanto, en este caso las posibilidades son aún más abundantes que para la selección.
+
+3) Olvido: a cada uno de los individuos de la descendencia se le aplica el operador de olvido determinístico o probabilístico (o los dos, aunque no tenga mucho sentido) como se detalla en la sección \ref{disenoGeneMut}.
+
+4) Mutación: de forma similar al paso anterior, sobre cada uno de los individuos de la descendencia se le aplica el operador de mutación determinístico o probabilístico (o los dos, aunque de nuevo no tenga mucho sentido) como se detalla en la sección \ref{disenoGeneMut}.
+
+5) Preservación de individuos antiguos: como se ha comentado antes, se puede definir un número de individuos antiguos a conservar en cada generación. Se mirará la variable "individuos a preservar" para conservar a los mejores y se eliminarán los que sean peores. Si la variable contiene un cero, se estará aplicando la política de reemplazo generacional, pues en tal caso se eliminarían en este paso todos los individuos antiguos.
+
+6) Se probarán e insertarán ordenadamente en la población los individuos de la descendencia. Puede que alguno no llegue a estar en la población como tal si no hay hueco para él. Nótese que se han podido generar más descendientes en el paso 2 de lo que se haya definido como el tamaño máximo de la población. Y, además, puede que estos individuos tengan que competir no sólo con los individuos de su generación, sino con los conservados en el paso 5.
+
+Para generar la popblación inicial, se tomará un individuo de ejemplo del que se copiará la estructura de la red neuronal para generar individuos aleatorios (con pesos y umbrales aleatorios) que se irán insertando ordenadamente en la población (lo que implica evaluarlos) hasta completar el tamaño máximo de la población.
+
+*** TODO Operadores de selección [0/4]
+  #+LaTeX: \label{disenoGeneSel}
+Los operadores de selección que se han implementado son los siguientes: ruleta, ranking, torneo y truncado.
+
+**** TODO Ruleta
+  #+LaTeX: \label{disenoGeneSelRule}
+
+**** TODO Ranking
+  #+LaTeX: \label{disenoGeneSelRank}
+
+**** TODO Por torneo
+  #+LaTeX: \label{disenoGeneSelTorn}
+
+**** TODO Elitísta o por truncado
+  #+LaTeX: \label{disenoGeneSelTrunc}
+
 *** TODO Operadores de cruza
+  #+LaTeX: \label{disenoGeneCruz}
+
 *** TODO Niveles de cruza
+  #+LaTeX: \label{disenoGeneNiv}
+
 *** TODO Mutación y olvido
+  #+LaTeX: \label{disenoGeneMut}
 
 ** TODO Interfaz del programador
   #+LaTeX: \label{disenoInterfProgr}
