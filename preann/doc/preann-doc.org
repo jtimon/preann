@@ -171,6 +171,15 @@ Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de 
 
  En nuestro caso, el cromosoma de cada individuo lo forman los pesos de la red que utiliza ese individuo. Para calcular el fitness del individuo, se construir\'a la red con los pesos del cromosoma y se realizar\'an varias pruebas (para reducir el ruido generado por los posibles factores aleatorios de \'estas) sobre el individuo, sumando las recompensas de todas y obteniendo el citado fitness.
 
+*** Algoritmo genético estándar y variaciones
+  #+LaTeX: \label{basTeoGenetEstan}
+
+*** Operadores de selección
+  #+LaTeX: \label{basTeoGenetSel}
+
+*** Operadores de cruza
+  #+LaTeX: \label{basTeoGenetCruz}
+
 ** Neuro-evoluci\'on
   #+LaTeX: \label{basTeoNeuro}
 
