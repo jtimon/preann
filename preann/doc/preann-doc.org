@@ -120,7 +120,7 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
  En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado \flqq Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos\frqq, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados \ref{resultados} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
 
 \newpage
-* Base te\'orica
+* TODO Base te\'orica
   #+LaTeX: \label{baseTeorica}
 
 Tanto las redes neuronales como los algoritmos gen\'eticos est\'an inspirados en la naturaleza y han sido utilizados desde largo tiempo atr\'as. Las redes neuronales est\'an inspiradas en el funcionamiento del cerebro, como un sistema de procesamiento de informaci\'on distribuido. Por su parte, los algoritmos gen\'eticos se basan en la teor\'ia de la evoluci\'on de Darwin, por la que la evoluci\'on se produce a trav\'es de dos principios b\'asicos: los individuos que no se adaptan suficientemente al medio perecen, mientras que los que s\'i lo hacen transmiten sus genes con cierta variabilidad. Esta variabilidad puede proceder de dos fuentes: la cruza de genes entre individuos \'o la mutaci\'on directa de genes.
@@ -210,7 +210,7 @@ Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de 
  Uno de los problemas a los que se enfrenta la evoluci\'on de redes neuronales es el problema de la permutaci\'on. Es causado por el mapeado "muchos-a-uno" desde la representaci\'on en el cromosoma a la red que es construida. Con dos cromosomas distintos se pueden generar redes equivalentes como se muestra en las figuras \ref{figGrafo1} y \ref{figGrafo2}. Se puede solucionar dando m\'as importancia al operador de mutaci\'on que al de cruza (que es el que sufre con este problema) o con otros m\'etodos matem\'aticos \cite[Gomez, Miikkulainen 2003]{GomezMiikkulainen2003}. 
 
 \newpage
-* An\'alisis del problema
+* TODO An\'alisis del problema
   #+LaTeX: \label{analisis}
 ** Fortalezas y deficiencias
   #+LaTeX: \label{anaFortYDeb}
@@ -285,22 +285,33 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
 \end{enumerate}
 
 \newpage
-* Dise\~no e implementaci\'on
+* TODO Dise\~no e implementaci\'on [0/3]
   #+LaTeX: \label{diseno}
-** Implementaciones paralelas de las redes neuronales
+** TODO Implementaciones paralelas de las redes neuronales
   #+LaTeX: \label{disenoParal}
-*** Utilizaci\'on del coprocesador XMM
+*** TODO Utilizaci\'on del coprocesador XMM
   #+LaTeX: \label{disenoParalXMM}
 
-*** Utilizaci\'on de la arquitectura CUDA
+*** TODO Utilizaci\'on de la arquitectura CUDA
   #+LaTeX: \label{disenoParalCUDA}
-** Dise\~no del algoritmo gen\'etico
+** TODO Dise\~no del algoritmo gen\'etico [0/5]
   #+LaTeX: \label{disenoGene}
+*** TODO Aproximación generacional y de estado estacionario
 
-** Interfaz del programador
+
+
+*** TODO Operadores de selección
+*** TODO Operadores de cruza
+*** TODO Niveles de cruza
+*** TODO Mutación y olvido
+
+** TODO Interfaz del programador
   #+LaTeX: \label{disenoInterfProgr}
+*** Guia de instalación
+*** Uso general
+*** Interfaces extensibles
 \newpage
-* Experimentaci\'on
+* TODO Experimentaci\'on
   #+LaTeX: \label{experimentacion}
 ** Tareas de clasificaci\'on
   #+LaTeX: \label{}
@@ -308,7 +319,7 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
   #+LaTeX: \label{}
 \newpage
 
-* Resultados
+* TODO Resultados
   #+LaTeX: \label{resultados}
 ** Rendimiento
   #+LaTeX: \label{rendimiento}
@@ -729,7 +740,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 *** Comparación de distintos tamaños de población número de individuos conservados por generación
 
 \newpage
-* Conclusiones
+* TODO Conclusiones
   #+LaTeX: \label{conclusiones}
 
 \newpage
