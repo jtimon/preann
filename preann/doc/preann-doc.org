@@ -322,6 +322,8 @@ Los operadores de selección que se han implementado son los siguientes: ruleta,
 **** TODO Ruleta
   #+LaTeX: \label{disenoGeneSelRule}
 
+El algoritmo de selección por ruleta depende de una variable configurable que llamaremos "base para la ruleta".
+
 **** TODO Ranking
   #+LaTeX: \label{disenoGeneSelRank}
 
