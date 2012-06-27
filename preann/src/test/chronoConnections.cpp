@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
-        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 50000, 500000, 50000), "Time (seconds)");
+        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 2000, 20001, 2000), "Time (seconds)");
 
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
@@ -110,10 +110,9 @@ int main(int argc, char *argv[])
 
         RangeLoop averageLoop(Dummy::OUTPUT_SIZE, 100, 401, 100);
 
-        plotter.plotChronoAveraged(chronoMutate, "Connection_mutate", &linesLoop, &averageLoop, 50000);
-        plotter.plotChronoAveraged(chronoReset, "Connection_reset", &linesLoop, &averageLoop, 50000);
+        plotter.plotChronoAveraged(chronoMutate, "Connection_mutate", &linesLoop, &averageLoop, 90000);
+        plotter.plotChronoAveraged(chronoReset, "Connection_reset", &linesLoop, &averageLoop, 90000);
 
-        plotter.resetRangeX(2000, 20001, 2000);
         plotter.plotChronoAveraged(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &linesLoop,
                                    &averageLoop, 5000);
 
