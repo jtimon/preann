@@ -137,31 +137,15 @@ void Individual::proportionalCrossover(CrossoverLevel crossoverLevel,
     float otherFitness = other->getFitness();
     float probability = 0;
 
-    if (fitness == 0) {
-        if (otherFitness == 0) {
-            probability = 0.5;
-        } else if (otherFitness > 0) {
-            probability = 0;
-        } else {
-            probability = 1;
-        }
-    } else if (otherFitness == 0) {
-        if (fitness > 0) {
-            probability = 0;
-        } else {
-            probability = 1;
-        }
-    } else if ((fitness < 0 && otherFitness > 0) || (fitness > 0
-            && otherFitness < 0)) {
-        std::string
-                error =
-                        "The fitness of the individuals have different sign: cannot crossover them proportionally.";
-        throw error;
+    if (fitness == 0 && otherFitness == 0) {
+        probability = 0.5;
+    } else if (fitness > 0 && otherFitness <= 0){
+        probability = 1;
+    } else if (fitness <= 0 && otherFitness > 0){
+        probability = 0;
+    } else if (fitness < 0 && otherFitness < 0) {
+        probability = (-otherFitness) / -(fitness + otherFitness);
     } else {
-        if (fitness < 0) {
-            otherFitness = -fitness;
-            fitness = -otherFitness;
-        }
         probability = fitness / (fitness + otherFitness);
     }
 
