@@ -22,7 +22,6 @@ public:
     static const string NUM_CROSSOVER;
 
     static const string NUM_ROULETTE_WHEEL;
-    static const string ROULETTE_WHEEL_BASE;
     static const string NUM_TRUNCATION;
     static const string NUM_TOURNAMENT;
     static const string TOURNAMENT_SIZE;
@@ -84,7 +83,6 @@ public:
     void setParams(ParametersMap* parametersMap);
     void setPreservation(unsigned number);
     void setSelectionRouletteWheel(unsigned number);
-    void setSelectionRouletteWheel(unsigned number, float minFitness);
     void setSelectionTruncation(unsigned number);
     void setSelectionTournament(unsigned number, unsigned tourSize);
     void setSelectionRanking(unsigned number, float base, float step);

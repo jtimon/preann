@@ -13,7 +13,6 @@ const string Population::NUM_SELECTION = "populationNumSelection";
 const string Population::NUM_CROSSOVER = "populationNumCrossover";
 
 const string Population::NUM_ROULETTE_WHEEL = "populationNumRouletteWheel";
-const string Population::ROULETTE_WHEEL_BASE = "populationRouletteWheelBase";
 const string Population::NUM_TRUNCATION = "populationNumTruncation";
 const string Population::NUM_TOURNAMENT = "populationNumTournament";
 const string Population::TOURNAMENT_SIZE = "populationTournamentSize";
@@ -76,17 +75,16 @@ void Population::setDefaults()
     params.putNumber(NUM_PRESERVE, -1);
 
     params.putNumber(NUM_ROULETTE_WHEEL, 0);
-    params.putNumber(ROULETTE_WHEEL_BASE, 1);
     params.putNumber(NUM_RANKING, 0);
-    params.putNumber(RANKING_BASE, 9);
-    params.putNumber(RANKING_STEP, 6);
+    params.putNumber(RANKING_BASE, 0);
+    params.putNumber(RANKING_STEP, 1);
     params.putNumber(NUM_TOURNAMENT, 0);
     params.putNumber(TOURNAMENT_SIZE, 2);
     params.putNumber(NUM_TRUNCATION, 0);
 
     for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; crossLevel++) {
-        probabilityUniform[crossLevel] = 0;
-        numPointsMultipoint[crossLevel] = 0;
+        probabilityUniform[crossLevel] = 0.7;
+        numPointsMultipoint[crossLevel] = 1;
         for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg) {
             numCrossover[crossAlg][crossLevel] = 0;
         }
@@ -108,47 +106,61 @@ void Population::setParams(ParametersMap* parametersMap)
 {
     params.copyFrom(parametersMap);
 
+    unsigned numSelection = 0;
     try {
-        unsigned numSelection = parametersMap->getNumber(NUM_SELECTION);
-        SelectionAlgorithm selectionAlgorithm = (SelectionAlgorithm) parametersMap->getNumber(
-                Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM));
-        switch (selectionAlgorithm) {
-            case SA_ROULETTE_WHEEL:
-                params.putNumber(NUM_ROULETTE_WHEEL, numSelection);
-                break;
-            case SA_RANKING:
-                params.putNumber(NUM_RANKING, numSelection);
-                break;
-            case SA_TOURNAMENT:
-                params.putNumber(NUM_TOURNAMENT, numSelection);
-                break;
-            case SA_TRUNCATION:
-                params.putNumber(NUM_TRUNCATION, numSelection);
-                break;
+        numSelection = parametersMap->getNumber(NUM_SELECTION);
+        if (numSelection > 0) {
+            SelectionAlgorithm selectionAlgorithm = (SelectionAlgorithm) parametersMap->getNumber(
+                    Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM));
+            switch (selectionAlgorithm) {
+                case SA_ROULETTE_WHEEL:
+                    params.putNumber(NUM_ROULETTE_WHEEL, numSelection);
+                    break;
+                case SA_RANKING:
+                    params.putNumber(NUM_RANKING, numSelection);
+                    break;
+                case SA_TOURNAMENT:
+                    params.putNumber(NUM_TOURNAMENT, numSelection);
+                    break;
+                case SA_TRUNCATION:
+                    params.putNumber(NUM_TRUNCATION, numSelection);
+                    break;
+            }
         }
-    } catch(...){
+    } catch (...) {
     }
 
+    unsigned numCrossover;
     try {
-        unsigned numCrossover = parametersMap->getNumber(Population::NUM_CROSSOVER);
-        CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm) parametersMap->getNumber(
-                Enumerations::enumTypeToString(ET_CROSS_ALG));
-        CrossoverLevel crossoverLevel = (CrossoverLevel) parametersMap->getNumber(
-                Enumerations::enumTypeToString(ET_CROSS_LEVEL));
-        switch (crossoverAlgorithm) {
-            case CA_UNIFORM:
-                this->setCrossoverUniformScheme(crossoverLevel, numCrossover,
-                                                parametersMap->getNumber(UNIFORM_CROSS_PROB));
-                break;
-            case CA_PROPORTIONAL:
-                this->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
-                break;
-            case CA_MULTIPOINT:
-                this->setCrossoverMultipointScheme(crossoverLevel, numCrossover,
-                                                   parametersMap->getNumber(MULTIPOINT_NUM));
-                break;
+        numCrossover = parametersMap->getNumber(Population::NUM_CROSSOVER);
+    } catch (string e) {
+        if (numSelection != 0) {
+            numCrossover = numSelection;
+        } else {
+            numCrossover = 0;
         }
-    } catch(...){
+    }
+    try {
+        if (numCrossover > 0) {
+            CrossoverAlgorithm crossoverAlgorithm = (CrossoverAlgorithm) parametersMap->getNumber(
+                    Enumerations::enumTypeToString(ET_CROSS_ALG));
+            CrossoverLevel crossoverLevel = (CrossoverLevel) parametersMap->getNumber(
+                    Enumerations::enumTypeToString(ET_CROSS_LEVEL));
+            switch (crossoverAlgorithm) {
+                case CA_UNIFORM:
+                    this->setCrossoverUniformScheme(crossoverLevel, numCrossover,
+                                                    parametersMap->getNumber(UNIFORM_CROSS_PROB));
+                    break;
+                case CA_PROPORTIONAL:
+                    this->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
+                    break;
+                case CA_MULTIPOINT:
+                    this->setCrossoverMultipointScheme(crossoverLevel, numCrossover,
+                                                       parametersMap->getNumber(MULTIPOINT_NUM));
+                    break;
+            }
+        }
+    } catch (...) {
     }
 
     try {
@@ -159,7 +171,7 @@ void Population::setParams(ParametersMap* parametersMap)
         } else if (mutationAlgorithm == MA_PROBABILISTIC) {
             params.putNumber(MUTATION_NUM, parametersMap->getNumber(MUTATION_PROB));
         }
-    } catch(...){
+    } catch (...) {
     }
 
     try {
@@ -172,7 +184,7 @@ void Population::setParams(ParametersMap* parametersMap)
             params.putNumber(RESET_PROB, parametersMap->getNumber(RESET_PROB));
             params.putNumber(RESET_NUM, 0);
         }
-    } catch(...){
+    } catch (...) {
     }
 }
 
@@ -313,12 +325,6 @@ void Population::setSelectionRouletteWheel(unsigned number)
     params.putNumber(NUM_ROULETTE_WHEEL, number);
 }
 
-void Population::setSelectionRouletteWheel(unsigned number, float minFitness)
-{
-    params.putNumber(NUM_ROULETTE_WHEEL, number);
-    params.putNumber(ROULETTE_WHEEL_BASE, minFitness);
-}
-
 void Population::setSelectionTruncation(unsigned number)
 {
     params.putNumber(NUM_TRUNCATION, number);
@@ -417,7 +423,7 @@ void Population::reset()
 void Population::eliminateWorse()
 {
     int nPreserve = params.getNumber(NUM_PRESERVE);
-    if (nPreserve >= 0){
+    if (nPreserve >= 0) {
         while (individuals.size() > nPreserve) {
             delete (individuals.back());
             individuals.pop_back();
@@ -468,7 +474,7 @@ std::string Population::toString()
 
 void Population::learn(unsigned generations)
 {
-    while (this->generation < generations){
+    while (this->generation < generations) {
         nextGeneration();
     }
 }
@@ -597,22 +603,18 @@ void Population::oneCrossover(Individual* offSpringA, Individual* offSpringB,
 void Population::selectRouletteWheel()
 {
     unsigned numRouletteWheel = params.getNumber(NUM_ROULETTE_WHEEL);
-    float rouletteWheelBase = params.getNumber(ROULETTE_WHEEL_BASE);
 
     float total_score = getTotalScore();
-    float window = 0;
 
-    float minFitness = individuals.back()->getFitness();
-    if (minFitness <= 0) {
-        window = rouletteWheelBase - minFitness;
-        total_score += window * individuals.size();
-    }
+    Util::check(
+            individuals.back()->getFitness() <= 0,
+            "Population::selectRouletteWheel all the individuals must have a positive fitness to apply reoulette wheel selection.");
 
     for (unsigned i = 0; i < numRouletteWheel; i++) {
         list<Individual*>::iterator itIndividuals = individuals.begin();
         float chosen_point = Random::positiveFloat(total_score);
         while (chosen_point) {
-            float fitness = (*itIndividuals)->getFitness() + window;
+            float fitness = (*itIndividuals)->getFitness();
             if (fitness > chosen_point) {
                 parents.push_back(*itIndividuals);
                 chosen_point = 0;
@@ -660,7 +662,8 @@ void Population::selectTournament()
     unsigned tournamentSize = params.getNumber(TOURNAMENT_SIZE);
 
     if (tournamentSize > individuals.size()) {
-        std::string error = "Population::selectTournament: The tournament size cannot be grater than the population size.";
+        std::string error =
+                "Population::selectTournament: The tournament size cannot be grater than the population size.";
         throw error;
     }
 
