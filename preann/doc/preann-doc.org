@@ -291,7 +291,7 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
 *** TODO Utilizaci\'on de la arquitectura CUDA
   #+LaTeX: \label{disenoParalCUDA}
 ** Dise\~no del algoritmo gen\'etico 
-  #+LaTeX: \label{disenoGene}
+   #+LaTeX: \label{disenoGene}
 *** Funcionamiento general
   #+LaTeX: \label{disenoGeneFunc}
 
@@ -454,11 +454,11 @@ En este caso en lugar de determinar probabilisticamente y peso por peso si un pe
 
 Para activar cualquiera de las dos modalidades en cualquiera de los dos operadores, basta con dar un valor positivo a las variables "probabilidad de mutación", "probabilidad de olvido", "número de mutaciones" y "número de olvidos". Como es habitual, se pueden emplear simultaneamente las varias opciones. En este caso también puede no activarse ningún tipo de mutación ni de olvido.
 
-** TODO Interfaz del programador
+** TODO Interfaz del programador [0/3]
   #+LaTeX: \label{disenoInterfProgr}
-*** Guia de instalación
-*** Uso general
-*** Interfaces extensibles
+*** TODO Guia de instalación
+*** TODO Uso general
+*** TODO Interfaces extensibles
 \newpage
 * TODO Experimentaci\'on
   #+LaTeX: \label{experimentacion}
