@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
-        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 2000, 20001, 2000), "Time (seconds)");
+        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 100, 1001, 100), "Time (seconds)");
 
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
@@ -99,19 +99,19 @@ int main(int argc, char *argv[])
 
         linesLoop.print();
 
-        RangeLoop averageLoop(Dummy::OUTPUT_SIZE, 100, 401, 100);
+        RangeLoop averageLoop(Dummy::OUTPUT_SIZE, 100, 151, 50);
 
-        plotter.plotChrono(chronoActivation, "BlockSizes_activation", &linesLoop, 50000);
-        plotter.plotChronoAveraged(chronoCrossover, "BlockSizes_crossover", &linesLoop, &averageLoop, 5000);
+        plotter.plotChrono(chronoActivation, "BlockSizes_activation", &linesLoop, 90000);
+        plotter.plotChronoAveraged(chronoCrossover, "BlockSizes_crossover", &linesLoop, &averageLoop, 50000);
 
         plotter.plotChronoAveraged(chronoCalculateAndAddTo, "BlockSizes_calculateAndAddTo_CUDA", &linesLoop,
-                                   &averageLoop, 5000);
+                                   &averageLoop, 50000);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_CUDA_REDUC);
         plotter.plotChronoAveraged(chronoCalculateAndAddTo, "BlockSizes_calculateAndAddTo_CUDA_REDUC", &linesLoop,
-                                   &averageLoop, 5000);
+                                   &averageLoop, 50000);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_CUDA_INV);
         plotter.plotChronoAveraged(chronoCalculateAndAddTo, "BlockSizes_calculateAndAddTo_CUDA_INV", &linesLoop,
-                                   &averageLoop, 5000);
+                                   &averageLoop, 50000);
 
         printf("Exit success.\n");
     } catch (std::string error) {
