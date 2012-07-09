@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        plotter.parameters.putNumber(Dummy::INPUTS, 100);
 //        plotter.parameters.putNumber(Dummy::OUTPUT_SIZE, 100);
 
 //        EnumLoop linesLoop(ET_IMPLEMENTATION, 4, IT_C, IT_CUDA, IT_CUDA_REDUC, IT_CUDA_INV);
@@ -49,10 +50,7 @@ int main(int argc, char *argv[])
 
         linesLoop.print();
 
-        RangeLoop averageLoop(Dummy::SIZE, 100, 151, 50);
-
-        plotter.plotChronoAveraged(chronoCalculateAndAddTo, "CalculateAndAddTo_outputSize", &linesLoop,
-                                   &averageLoop, 50000);
+        plotter.plotChronoAveraged(chronoCalculateAndAddTo, "CalculateAndAddTo_outputSize", &linesLoop, 5000);
 
         printf("Exit success.\n");
     } catch (std::string error) {
