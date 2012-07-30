@@ -281,7 +281,7 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
 4) ?`Para qu\'e tipo de problemas resulta m\'as adecuado el m\'etodo propuesto? 
 
 \newpage
-* TODO Dise\~no e implementaci\'on [0/2]
+* TODO Dise\~no e implementaci\'on [1/3]
   #+LaTeX: \label{diseno}
 ** TODO Implementaciones paralelas de las redes neuronales
   #+LaTeX: \label{disenoParal}
@@ -290,7 +290,7 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
 
 *** TODO Utilizaci\'on de la arquitectura CUDA
   #+LaTeX: \label{disenoParalCUDA}
-** Dise\~no del algoritmo gen\'etico 
+** DONE Dise\~no del algoritmo gen\'etico 
    #+LaTeX: \label{disenoGene}
 *** Funcionamiento general
   #+LaTeX: \label{disenoGeneFunc}
@@ -456,7 +456,7 @@ Para activar cualquiera de las dos modalidades en cualquiera de los dos operador
 
 ** TODO Interfaz del programador [0/3]
   #+LaTeX: \label{disenoInterfProgr}
-*** TODO Guia de instalación
+*** TODO Guia de instalaci\'on
 *** TODO Uso general
 *** TODO Interfaces extensibles
 \newpage
@@ -890,13 +890,14 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 \newpage
 * TODO Conclusiones
+
   #+LaTeX: \label{conclusiones}
 
 \newpage
 
 #Bibliografía 
 \cleardoublepage\phantomsection
-\addcontentsline{toc}{chapter}{\bibname}
+\addcontentsline{toc}{subsection}{\bibname}
 \begin{thebibliography}{9}
  
 %\cite[texto]{etiqueta}
