@@ -96,7 +96,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     numLoops = ((tInput->getSize() - 1) / FLOATS_PER_BLOCK) + 1;
                     for (unsigned j = 0; j < resultsVect->getSize(); j++) {
                         float auxResult;
-                        XMMreal(inputPtr, numLoops, (((float*) inputWeighs) + weighPos), auxResult);
+                        XMMreal((float*)inputPtr, numLoops, (((float*) inputWeighs) + weighPos), auxResult);
                         results[j] += auxResult;
                         weighPos += offsetPerInput;
                     }
