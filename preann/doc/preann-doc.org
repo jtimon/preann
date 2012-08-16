@@ -1,5 +1,5 @@
 #+TITLE:       Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos
-#+AUTHOR:      Jorge Tim\'on Morillo-Velarde \\ href{mailto:jtimonmv@gmail.com}{jtimonmv@gmail.com}
+#+AUTHOR:      Jorge Tim\'on Morillo-Velarde
 #+EMAIL:       jtimonmv@gmail.com
 #+KEYWORDS:    Redes neuronales, algoritmos gen\'eticos, redes neuronales evolutivas, aprendizaje por refuerzo, CUDA, entornos artificiales, juegos multi-agente.
 #+LANGUAGE:    es
@@ -28,8 +28,8 @@
 \counterwithin{figure}{section}
 \setcounter{tocdepth}{5}
 
-\newcommand{\mail}[1][timon.elviejo@gmail.com]{%
-e-mail: \href{mailto:#1} {#1}
+\newcommand{\mail}[1][jtimonmv@gmail.com]{%
+     \href{mailto:#1} {#1}
 }
 
 \newcommand{\definicion}[1]{%
@@ -58,6 +58,7 @@ e-mail: \href{mailto:#1} {#1}
 # Título, abstract e índice
 #+begin_latex
 
+
 \begin{titlepage}
 
 \title{Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos}
@@ -77,10 +78,9 @@ e-mail: \href{mailto:#1} {#1}
 }
 
 \date{\today}
-
 \maketitle
-\newpage
 
+\newpage
 \begin{abstract}
 
 En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de redes neuronales con conexi\'on hacia delante. Se utiliza un algoritmo gen\'etico para ajustar los pesos de la red neuronal. Se eval\'ua el uso de diferentes tipos de neuronas (con salida real o binaria) para comparar sus rendimientos utilizando diferentes implementaciones paralelas (para el coprocesador XMM y para la arquitectura CUDA). Se prueban variaciones de los operadores gen\'eticos y se mide su efectividad en el entrenamiento. Se enfrenta el algoritmo a diferentes tipos de problemas de aprendizaje por refuerzo y se medita sobre la idoneidad del mismo para cada problema.
@@ -98,9 +98,9 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
 #+end_latex
 
 * Introducci\'on
-  #+LaTeX: \label{intro}
+#+LaTeX: \label{intro}
 
- El aprendizaje autom\'atico es una rama de la inteligencia artificial que trata de construir sistemas inform\'aticos que optimicen un criterio de rendimiento utilizando datos o experiencia previa. Dentro del aprendizaje autom\'atico, las t\'ecnicas se clasifican en base a su entrenamiento como supervisado o no supervisado. En el primero, al sistema se le suministran ejemplos de entradas con sus correspondientes salidas deseadas. En el entrenamiento no supervisado, no se tienen a priori ejemplos de c\'omo deber\'ia comportarse el sistema. El aprendizaje por refuerzo es un caso especial de aprendizaje supervisado en que la salida deseada exacta es desconocida. Se basa s\'olo en informaci\'on sobre si la salida actual es correcta o no. Al agente que se quiere que aprenda se le provee informaci\'on sobre lo bien o lo mal que est\'a actuando. Esta se\~nal de recompensa puede serle indicada bien cada vez que el agente act\'ua, bien al final de una prueba completa durante la que realiza varias acciones.
+ El /aprendizaje autom\'atico/ es una rama de la inteligencia artificial que trata de construir sistemas inform\'aticos que optimicen un criterio de rendimiento utilizando datos o experiencia previa. Dentro del aprendizaje autom\'atico, las t\'ecnicas se clasifican en base a su entrenamiento como supervisado o no supervisado. En el primero, al sistema se le suministran ejemplos de entradas con sus correspondientes salidas deseadas. En el entrenamiento no supervisado, no se tienen a priori ejemplos de c\'omo deber\'ia comportarse el sistema. El aprendizaje por refuerzo es un caso especial de aprendizaje supervisado en que la salida deseada exacta es desconocida. Se basa s\'olo en informaci\'on sobre si la salida actual es correcta o no. Al agente que se quiere que aprenda se le provee informaci\'on sobre lo bien o lo mal que est\'a actuando. Esta se\~nal de recompensa puede serle indicada bien cada vez que el agente act\'ua, bien al final de una prueba completa durante la que realiza varias acciones.
 
  Los algoritmos que tienen su origen en la observaci\'on de la naturaleza se denominan bio-inspirados. Entre ellos se encuentran las redes neuronales y los algoritmos gen\'eticos. 
 
@@ -117,11 +117,11 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
  Los problemas en los que aplicamos nuestro desarrollo, aunque no son realistas, se consideran interesantes para la rob\'otica y/o para la inteligencia artificial. Los tipos de problemas tienen que ver con la clasificaci\'on, los juegos considerados como deportes mentales, el control autom\'atico, la toma de decisiones en tiempo real y la colaboraci\'on de m\'ultiples agentes en tiempo real; pudiendo estar relacionados estos \'ultimos con la
 [[http://es.wikipedia.org/wiki/Vida_artificial][vida artificial]]. En la mayor\'ia de los problemas, el agente se enfrenta a pruebas gen\'ericas que pueden tener factores aleatorios y/o agentes directamente programados. En algunos problemas, sin embargo, los agentes de la poblaci\'on pueden enfrentarse entre ellos para obtener una valoraci\'on.
 
- En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado \flqq Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos\frqq, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados \ref{resultados} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
+ En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado \flqq Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos\frqq, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. Los rendimientos obtenidos con las diferentes implementaciones paralelas y opciones en el algortimo genético se muestran en el capítulo \ref{rendimiento}.En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados de aprendizaje \ref{aprendizaje} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
 
 \newpage
 * TODO Base te\'orica
-  #+LaTeX: \label{baseTeorica}
+#+LaTeX: \label{baseTeorica}
 
 Tanto las redes neuronales como los algoritmos gen\'eticos est\'an inspirados en la naturaleza y han sido utilizados desde largo tiempo atr\'as. Las redes neuronales est\'an inspiradas en el funcionamiento del cerebro, como un sistema de procesamiento de informaci\'on distribuido. Por su parte, los algoritmos gen\'eticos se basan en la teor\'ia de la evoluci\'on de Darwin, por la que la evoluci\'on se produce a trav\'es de dos principios b\'asicos: los individuos que no se adaptan suficientemente al medio perecen, mientras que los que s\'i lo hacen transmiten sus genes con cierta variabilidad. Esta variabilidad puede proceder de dos fuentes: la cruza de genes entre individuos \'o la mutaci\'on directa de genes.
 
@@ -130,7 +130,7 @@ Tanto las redes neuronales como los algoritmos gen\'eticos est\'an inspirados en
  A continuaci\'on explicaremos m\'as detalladamente las bases te\'oricas de las tres t\'ecnicas: redes neuronales, algoritmos gen\'eticos y neuro-evoluci\'on. Nos centraremos principalmente en los algoritmos y estructuras que m\'as se asemejan a los implementamos en nuestra librer\'ia.
 
 ** Redes neuronales
-  #+LaTeX: \label{basTeoRedes}
+#+LaTeX: \label{basTeoRedes}
 
 Las redes neuronales constan de un conjunto de elementos de procesamiento - conocidos como nodos o neuronas - interconectados entre s\'i. Pueden ser descritas mediante un grafo dirigido en el que cada neurona  \(i\) usa una funci\'on de activaci\'on de la forma:
 
@@ -157,7 +157,7 @@ donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada n\'umero \
  En nuestro caso, utilizamos aprendizaje por refuerzo y no necesitamos una colecci\'on de ejemplos (aunque se podr\'ia utilizar para calcular el refuerzo). Los pesos los ajustar\'a un algoritmo gen\'etico. La estructura de la red se definir\'a de forma previa para cada problema y s\'olo evolucionar\'an los pesos (y umbrales).
 
 ** Algoritmos gen\'eticos
-  #+LaTeX: \label{basTeoGenet}
+#+LaTeX: \label{basTeoGenet}
 
 Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de problemas de b\'usqueda y optimizaci\'on que aplican a \'estos los principios de la evoluci\'on biol\'ogica: selecci\'on basada en la poblaci\'on, reproducci\'on sexual y mutaci\'on.
 
@@ -172,16 +172,16 @@ Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de 
  En nuestro caso, el cromosoma de cada individuo lo forman los pesos de la red que utiliza ese individuo. Para calcular el fitness del individuo, se construir\'a la red con los pesos del cromosoma y se realizar\'an varias pruebas (para reducir el ruido generado por los posibles factores aleatorios de \'estas) sobre el individuo, sumando las recompensas de todas y obteniendo el citado fitness.
 
 *** Algoritmo genético estándar y variaciones
-  #+LaTeX: \label{basTeoGenetEstan}
+#+LaTeX: \label{basTeoGenetEstan}
 
 *** Operadores de selección
-  #+LaTeX: \label{basTeoGenetSel}
+#+LaTeX: \label{basTeoGenetSel}
 
 *** Operadores de cruza
-  #+LaTeX: \label{basTeoGenetCruz}
+#+LaTeX: \label{basTeoGenetCruz}
 
 ** Neuro-evoluci\'on
-  #+LaTeX: \label{basTeoNeuro}
+#+LaTeX: \label{basTeoNeuro}
 
  La evoluci\'on se ha aplicado las redes neuronales artificiales en tres niveles muy diferentes: a los pesos de las conexiones, la arquitectura de la red y a las reglas de aprendizaje. La evoluci\'on de los pesos de las conexiones introduce una aproximaci\'on global y adaptable al entrenamiento, especialmente para el aprendizaje por refuerzo o para el entrenamiento de redes recursivas, donde los m\'etodos basados en el gradiente experimentan grandes dificultades. La evoluci\'on de las arquitecturas permite a las redes neuronales adaptar su topolog\'ia a diferentes problemas sin intervenci\'on humana y con esto se consigue un dise\~no autom\'atico de redes neuronales, dado que tanto la arquitectura como los pesos pueden ser evolucionados. La evoluci\'on de las reglas de aprendizaje puede ser considerada como un proceso de \textquotedblleft aprender a aprender\textquotedblright en redes neuronales donde la adaptaci\'on de las reglas de aprendizaje se consigue mediante la evoluci\'on. Tambi\'en puede ser contemplada como un proceso de descubrimiento autom\'atico de nuevas reglas de aprendizaje. Nos centraremos en la evoluci\'on de los pesos de las conexiones, por ser la evoluci\'on que utilizaremos.
 
@@ -210,15 +210,15 @@ Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de 
  Uno de los problemas a los que se enfrenta la evoluci\'on de redes neuronales es el problema de la permutaci\'on. Es causado por el mapeado "muchos-a-uno" desde la representaci\'on en el cromosoma a la red que es construida. Con dos cromosomas distintos se pueden generar redes equivalentes como se muestra en las figuras \ref{figGrafo1} y \ref{figGrafo2}. Se puede solucionar dando m\'as importancia al operador de mutaci\'on que al de cruza (que es el que sufre con este problema) o con otros m\'etodos matem\'aticos \cite[Gomez, Miikkulainen 2003]{GomezMiikkulainen2003}. 
 
 \newpage
-* TODO An\'alisis del problema
-  #+LaTeX: \label{analisis}
-** Fortalezas y deficiencias
-  #+LaTeX: \label{anaFortYDeb}
+* TODO [0/4] An\'alisis del problema
+#+LaTeX: \label{analisis}
+** TODO Fortalezas y deficiencias
+#+LaTeX: \label{anaFortYDeb}
 
  Tanto las redes neuronales como los algoritmos gen\'eticos tienen fortalezas que nuestro m\'etodo aprovecha y debilidades que se pueden, en parte, minimizar por la combinaci\'on de ambos m\'etodos.
 
 *** Redes neuronales
-  #+LaTeX: \label{anaFortYDebRedes}
+#+LaTeX: \label{anaFortYDebRedes}
 
  Las redes neuronales con conexi\'on hacia delante en general son un importante m\'etodo de aproximaci\'on de funciones [Kim, 1992]. El perceptr\'on multicapa es un tipo de red neuronal con conexiones hacia delante. La topolog\'ia de un perceptr\'on multicapa esta definida por un conjunto de capas ocultas, una capa de entrada y una de salida. No existen restricciones sobre la funci\'on de activaci\'on aunque en general se suelen utilizar funciones sigmoideas. Existen demostraciones te\'oricas [Funahashi, 1989] de que un perceptr\'on multicapa cuya funci\'on de activaci\'on sea no constante, acotada y mon\'otona creciente es un aproximador universal de funciones. En [Hornik et alt, 1989] se llega a un resultado similar utilizando funciones de activaci\'on sigmoideas, no necesariamente continuas. Esto es un punto muy fuerte de las redes neuronales. 
 
@@ -255,12 +255,12 @@ Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de 
  Usando un algoritmo gen\'etico como m\'etodo de entrenamiento de la red, se solucionan algunos de estos problemas y otros se mitigan en cierto grado. Con el algoritmo gen\'etico, se puede usar el aprendizaje por refuerzo y se pueden entrenar redes recurrentes sin problema. No se tienen requerimientos para la funci\'on de activaci\'on, por lo que aumenta su adaptabilidad. Se cambia la dependencia de los par\'ametros de ese algoritmo y ahora depende de los par\'ametros del algoritmo gen\'etico, estos par\'ametros son m\'as flexibles y se pueden alterar en medio del entrenamiento. El algoritmo gen\'etico es mucho menos tendente a estancarse en m\'inimos locales porque no utiliza la informaci\'on del gradiente y porque explora varios puntos (tantos como individuos tenga la poblaci\'on) del espacio de b\'usqueda simult\'aneamente. El fen\'omeno de saturaci\'on se produce cuando una neurona alcanza un m\'aximo o un m\'inimo. En este caso, la derivada de la funci\'on de activaci\'on se hace nula, y los pesos de la red permanecen invariables. Como el m\'etodo propuesto no hace uso de la derivada de la funci\'on de activaci\'on, el efecto de este fen\'omeno es completamente eliminado. Los valores iniciales de los pesos tambi\'en pueden afectar al algoritmo gen\'etico, en especial si son muy altos (ya sean positivos o negativos), pero existen experimentos que permiten afirmar que el m\'etodo propuesto es menos dependiente de los valores iniciales que el algoritmo backpropagation \cite[Bertona2005]{Bertona2005}.
 
 *** Algoritmos gen\'eticos
-  #+LaTeX: \label{anaFortYGene}
+#+LaTeX: \label{anaFortYGene}
 
 Un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algoritmo robusto, por ser \'util para cualquier problema, pero a la vez d\'ebil, pues no est\'a especializado en ninguno. Hay que elegir la codificaci\'on de los cromosomas para cada caso concreto. Sin embargo, con nuestro m\'etodo siempre c\'odificaremos los cromosomas de manera similar (con una red neuronal) y s\'olo ser\'a necesario definir la funci\'on de fitness, elegir la topolog\'ia de la red, codificar las entradas y las salidas. Aunque la codificaci\'on de \'estas pueda admitir varias posibilidades (y algunas puedan ser m\'as ventajosas que otras) la red debe aprender a interpretar las correctas relaciones entre entradas y salidas por s\'i misma.
 
-** Objetivos
-  #+LaTeX: \label{anaObjetivos}
+** TODO Objetivos
+#+LaTeX: \label{anaObjetivos}
 
 *** Implementación de la librería
 
@@ -281,21 +281,16 @@ En el presente proyecto se pretende construir una librer\'ia de programaci\'on e
 4) ?`Para qu\'e tipo de problemas resulta m\'as adecuado el m\'etodo propuesto? 
 
 \newpage
-* TODO Dise\~no e implementaci\'on [1/3]
-  #+LaTeX: \label{diseno}
-** TODO Implementaciones paralelas de las redes neuronales
-  #+LaTeX: \label{disenoParal}
-*** TODO Utilizaci\'on del coprocesador XMM
-  #+LaTeX: \label{disenoParalXMM}
+** TODO Especificaciones de la librería a implementar
+#+LaTeX: \label{anaEspec}
+** TODO Consideraciones generales de diseño
+#+LaTeX: \label{diseno}
+* Dise\~no del algoritmo gen\'etico 
+#+LaTeX: \label{disenoGene}
+** Funcionamiento general
+#+LaTeX: \label{disenoGeneFunc}
 
-*** TODO Utilizaci\'on de la arquitectura CUDA
-  #+LaTeX: \label{disenoParalCUDA}
-** DONE Dise\~no del algoritmo gen\'etico 
-   #+LaTeX: \label{disenoGene}
-*** Funcionamiento general
-  #+LaTeX: \label{disenoGeneFunc}
-
-Como se vió en la sección \ref{basTeoGenetEstan} existen enfoques en cuanto a la gestión de la población de individuos. El algoritmo genético original adoptaba la política de reemplazo generacional [biblio], con el que la población completa es reemplazada en cada generación. En cambio, la política de estado estacionario [biblio], adoptada por varios algoritmos genéticos posteriores, reemplaza la población selectivamente. Es posible, por ejemplo, que mantener uno o varios miembros de la población por varias generaciones, siempre que estos mantengan su puntuación por encima de otros individuos de la población. Nuestra gestión de la población debe permitir ambas posibilidades de forma configurable.
+Como se vió en la sección \ref{basTeoGenetEstan} existen diferentes enfoques en cuanto a la gestión de la población de individuos. El algoritmo genético original adoptaba la política de reemplazo generacional [biblio], con el que la población completa es reemplazada en cada generación. En cambio, la política de estado estacionario [biblio], adoptada por varios algoritmos genéticos posteriores, reemplaza la población selectivamente. Es posible, por ejemplo, que mantener uno o varios miembros de la población por varias generaciones, siempre que estos mantengan su puntuación por encima de otros individuos de la población. Nuestra gestión de la población debe permitir ambas posibilidades de forma configurable.
 
 Para ello, mantendremos a la población como una lista ordenada en la que se irán insertando (también ordenadamente) los nuevos individuos producidos. Si tras una inserción se tienen más individuos que el tamaño máximo, el peor individuo (sea el nuevo o no) será desechado. Si dos individuos comparten la misma puntuación al ser comparados durante una inserción, se le dará ventaja al nuevo individuo siguiendo el criterio de busqueda neutral [biblio]. Este comportamiento es el propio del estado estacionario. Para obtener el comportamiento generacional, así como diferentes híbridos entre las dos posibilidades, definiremos una variable configurable para la población. Tras generar a los individuos de la siguiente generación, el sistema mirará esta variable para saber cuantos de los antiguos individuos debe conservar para competir con los nuevos y simplemente elimina al resto. Si el numéro de individuos a preservar es 0, el comportamiento será el generacional puro. Si el número de individuos a preservar es igual al tamaño máximo de la población (o es un número negativo), no se eliminará a ningún individuo de la generación anterior y todos ellos tendrán la oportunidad de sobrevivir compitiendo con los de la nueva generación. Si el número es algo intermedio entre 0 y el tamaño máximo de la población, estaremos usando un híbrido entre las políticas de reemplazo generacional y la de estado estacionario.
 
@@ -315,12 +310,12 @@ En general, para cada nueva generación se realiza la siguiente secuencia de acc
 
 Para generar la popblación inicial, se tomará un individuo de ejemplo del que se copiará la estructura de la red neuronal para generar individuos aleatorios (con pesos y umbrales aleatorios) que se irán insertando ordenadamente en la población (lo que implica evaluarlos) hasta completar el tamaño máximo de la población. El criterio que se ha elegido es el de maximizar el fitness. La tarea debe ser diseñada de tal forma que un individuo con un fitness mayor sea mejor que uno con fitness menor.
 
-*** Operadores de selección
-  #+LaTeX: \label{disenoGeneSel}
+** Operadores de selección
+#+LaTeX: \label{disenoGeneSel}
 Los operadores de selección que se han implementado son los siguientes: ruleta, ranking, torneo y truncado.
 
-**** Ruleta
-  #+LaTeX: \label{disenoGeneSelRule}
+*** Ruleta
+#+LaTeX: \label{disenoGeneSelRule}
 
 Este tipo de selección sólo admite individuos con fitness mayor que cero, si el peor individuo no cumple esta condición se lanczará un error.
 Para la selección por ruleta lo primero que hay que hacer es sumar el fitness de todos los individuos (S).
@@ -330,16 +325,16 @@ Luego, por cada individuo a seleccionar por este método:
 
 2) Se recorre la población desde el mejor individuo. Si el fitness del individuo (más el fitness de los individuos anteriores) es mayor que E, se selecciona ese individuo. Si no, se pasa al siguiente, acumulando el fitness de este individuo para la siguiente comparación.
 
-**** Ranking
-  #+LaTeX: \label{disenoGeneSelRank}
+*** Ranking
+#+LaTeX: \label{disenoGeneSelRank}
 
 Para la selección por ranking se puntuan los individuos dependiendo de su posición en la población.
 Tradicionalmente se asigna N (el máximo de la población) al mejor, N-1 al segundo mejor, y así sucesivamente hasta llegar al peor individuo al que se asigna un fitness de 1. En nuestro caso hemos querido que sea más configurable y hemos añadido dos variables configurables: el "salto para el ranking" y la "base para el ranking". El salto para el ranking es la diferencia de fitness entre un individuo y el siguiente, en el ejemplo anterior era 1, pero podemos aumentar la presión selectiva incrementando este número. La "base para el ranking" se suma al fitness de toda la población. Por ello, para utilizar el ranking tradicional, los valores por defecto son "salto para el ranking" = 1 y "base para el ranking" = 0.
 
 Una vez tenemos estos fitness auxiliares, se realiza la selección siguiendo un método similar al de la ruleta, pero con estas puntuaciones en lugar de los fitness originales.
 
-**** Por torneo
-  #+LaTeX: \label{disenoGeneSelTorn}
+*** Por torneo
+#+LaTeX: \label{disenoGeneSelTorn}
 
 Para la selección por torneo se cuenta con una variable configurable "tamaño del torneo" que no puede ser menor que el tamaño máximo de la población. En caso contrario se generará un error. Para cada individuo a seleccionar por este método:
 
@@ -349,28 +344,28 @@ Para la selección por torneo se cuenta con una variable configurable "tamaño d
 
 El tamaño típico y, por ello, el valor por defecto que hemos seleccionado para el tamaño del torneo es 2.
 
-**** Elitísta o por truncado
-  #+LaTeX: \label{disenoGeneSelTrunc}
+*** Elitísta o por truncado
+#+LaTeX: \label{disenoGeneSelTrunc}
 
 La selección elitista es la más sencilla de todas. Simplemente se cogen los N (donde N es el número de individuos a seleccionar por este método) más aptos desde el principio de la lista ordenada de la población.
 
-*** Operadores de cruza
-  #+LaTeX: \label{disenoGeneCruz}
+** Operadores de cruza
+#+LaTeX: \label{disenoGeneCruz}
 
 Aunque aceptamos varias definiciones de gen, como se explica en la sección \ref{disenoGeneNiv}, en esta sección trataremos las formas en que se pueden cruzar dos individuos, produciendo dos descencientes con los genes de los progenitores combinados de forma complementaria (todos los genes de los progenitores irán a un descendiente o a otro, aunque puede que uno de los descendientes se deseche si sobra). 
 
 Todos los esquemas de cruce se aplican primero sobre un vetor de bits (cada bit representa un gen) y luego se aplica el crossover usando ese vector. Esto permite compartir una sóla interfaz para la cruza a bajo nivel. Dada la diversidad de implementaciones de las redes neuronales, la cantidad de código se multiplicaría con los distintos esquemas de cruza de forma que el código sería mucho más complicado de desarrollar y mantener. Esto, además, permite extender nuestro algoritmo genético con nuevos esquemas de cruza sin necesidad de modificar las distintas implementaciones (C, SEE2, CUDA). También es posible crear una nueva implementación (por ejemplo, usando openCL) sin necesidad de implementar por separado cada uno de los esquemas de cruza.
 
-**** Uniforme
-  #+LaTeX: \label{disenoGeneCruzUni}
+*** Uniforme
+#+LaTeX: \label{disenoGeneCruzUni}
 
 Para la cruza uniforme, se debe indicar un parámetro "probabilidad", que puede ser configurado independientemente para cada nivel de cruza.
 Para generar el hijo A, por cada gen de los progenitores, se elige un número aleatorio en el intervalo (0, 1). Si el número es menor que la probabilidad, se cogerá el gen del progenitor B, en caso contrario, el del progenitor A. Para generar el hijo B, se utilizan los genes que no se hayan utilizado para el descendiente A.
 
 La probabilidad por defecto para todos los niveles es 0.7.
 
-**** Proporcional
-  #+LaTeX: \label{disenoGeneCruzProp}
+*** Proporcional
+#+LaTeX: \label{disenoGeneCruzProp}
 
 Este modo de cruza funciona de forma similar al anterior, con la diferencia de que la probabilidad no es especificada por el usuario, sino que se calcula a partir de los fitness de los progenitores. Tradicionalmente, se usa la siguiente fórmula:
 
@@ -396,8 +391,8 @@ Esta fórmula sólo admite finess positivos, pero en nuestro caso hemos admitido
 
 Aunque contemplar estos casos especiales puede parecer una complicación innecesaria, nos permite que este tipo de cruza sea compatible con tareas que admiten fitness negativos en lugar de tener que lanzar un error.
 
-**** Multi-punto
-  #+LaTeX: \label{disenoGeneCruzMulti}
+*** Multi-punto
+#+LaTeX: \label{disenoGeneCruzMulti}
 
 En la literatura convencional, frecuentemente se mencionan la "cruza de un punto" o la "cruza de dos puntos", pero en realidad son casos concretos de la más general "cruza multipunto". Por ello, se ha decido implementar sólo esta última, creando un parámetro "número de puntos" que puede ser configurado independientemente para cada nivel de cruza. El número de puntos por defecto para todos los niveles es 1.
 
@@ -409,79 +404,321 @@ El funcionamiento general es el siguiente:
 
 De esta manera, se va alternando el progenitor en cada punto. Como siempre, el decendiente B usará los genes que no haya usado el descendiente A.
 
-*** Niveles de cruza
-  #+LaTeX: \label{disenoGeneNiv}
+** Niveles de cruza
+#+LaTeX: \label{disenoGeneNiv}
 
-**** Pesos y umbrales
-  #+LaTeX: \label{disenoGeneNivPes}
+*** Pesos y umbrales
+#+LaTeX: \label{disenoGeneNivPes}
 
 Este es el nivel de cruza más pesado y sensible de todos. Todas las capas se colocan una detrás de otra con sus pesos seguidos de sus umbrales. Cada peso o umbral es un gen.
 
-**** Neurona
-  #+LaTeX: \label{disenoGeneNivNeu}
+*** Neurona
+#+LaTeX: \label{disenoGeneNivNeu}
 
 En este caso cada gen es una neurona, con todos sus pesos y con su umbral. Los pesos son los que se multiplican por las entradas a esta neurona.
 Se colocan en orden todas las capas y todas las neuronas de cada capa.
 
-**** Neurona invertida
-  #+LaTeX: \label{disenoGeneNivNeuInv}
+*** Neurona invertida
+#+LaTeX: \label{disenoGeneNivNeuInv}
 
 Este caso es muy similar al anterior, pero se cambia la definición de lo que se considera una neurona. En este caso, junto con el umbral, forman parte del mismo gen los pesos que se multiplican por la salida de esta neurona, en lugar de los que utiliza esta neurona para calcular su estado. Esta representación ha sido también denominada "neurona en fregona" [biblio].
 
-**** Capa
-  #+LaTeX: \label{disenoGeneNivCap}
+*** Capa
+#+LaTeX: \label{disenoGeneNivCap}
 
 Para el nivel de capa, cada capa, valga la redundancia, es considerada un gen. Una capa incluye todas sus neuronas con sus pesos y umbrales, entendiendo una neurona como se hace en el apartado \ref{disenoGeneNivNeu} y no como la neurona invertida.
 
 Aunque intuitivamente se puede pensar que este tipo de cruza no será muy útil si las capas son muy pocas o muy grandes, se ha decido implementar también este nivel de cruza para comparar el aprendizaje.
 
-*** Mutación y olvido
-  #+LaTeX: \label{disenoGeneMut}
+** Mutación y olvido
+#+LaTeX: \label{disenoGeneMut}
 
 La forma en que se implementan el operador de mutación y el de olvido son muy similares. La principal diferencia es que mientras el operador de olvido o reset simplemente pone a cero el peso o umbral que toque, el de mutación le suma un número aleatorio del intervalo (-X, X), donde X es un parámetro configurable que llamaremos "rango de mutación", que por defecto toma el valor 1. En cierto sentido, se podría considerar al operador de olvido como un tipo especial demutación.
 
 Por lo demás, los dos operadores tienen dos formas de ser empleados: probabilística y determinista.
 
-**** Probabilística
+*** Probabilística
 
 Esta forma de mutación es la más habitual en los algoritmos genéticos. Se usa una probabilidad parámetro ("probabilidad de mutación" o "probabilidad de olvido", ambas 0 por defecto) para calcular con cada peso y umbral si será mutado o no. Se elige un número aleatorio entre 0 y 1 y si el número es menor que la probabilidad, se realiza la acción correspondiente. Si es mutación sumar al peso la mutación que se obtiene a partir del rango como se ha comentado anteriormente y si es olvido el peso se iguala directamente a cero.
 
-**** Determinista
+*** Determinista
 
 Para evitar repetir el calculo de la probabilidad tantas veces y mejorar el rendimiento, se ofrece esta otra modalidad de mutación, con la esperanza de que el aprendizaje no se vea afectado negativamente.
 
 En este caso en lugar de determinar probabilisticamente y peso por peso si un peso debe mutar o no, se configura un número determinado de mutaciones (u olvidos) que se aplicarán a cada individuo. Las variables "número de mutaciones" y "número de olvidos" tienen ambas por defecto el valor 0. Sabiendo el número de mutaciones que se van a realizar, sólo queda determinar aleatoriamente qué pesos y/o umbrales concretos serán mutados (u olvidados).
 
 Para activar cualquiera de las dos modalidades en cualquiera de los dos operadores, basta con dar un valor positivo a las variables "probabilidad de mutación", "probabilidad de olvido", "número de mutaciones" y "número de olvidos". Como es habitual, se pueden emplear simultaneamente las varias opciones. En este caso también puede no activarse ningún tipo de mutación ni de olvido.
+* TODO [2/3] Paralelizaciones en las redes neuronales
+#+LaTeX: \label{disenoParal}
+** DONE Introducción
 
-** TODO Interfaz del programador [0/3]
-  #+LaTeX: \label{disenoInterfProgr}
-*** TODO Guia de instalaci\'on
-*** TODO Uso general
-*** TODO Interfaces extensibles
+Tanto los algoritmos genéticos como las redes neuronales requieren cálculos que presentan paralelismos inherentes. Para este proyecto se ha escogido explotar exclusivamente los de las redes neuronales. Por ejemplo, con múltiples CPUs y GPUs. pero la implementación se podría extender para aprovechar también los de los algoritmos genéticos, aunque esto requeriría cambios no triviales en el modo en que las poblaciones son procesadas cada generación si se quiere extender la librería en ese sentido. Nuestras paralelizaciones solamente usan una CPU simultáneamente. Se han optado por dos alternativas que se comparan.
+
+Gracias al diseño modular por el que se ha optado, es posible añadir otras implementaciones paralelas de las redes neuronales (por ejemplo, usando el lenguaje OpenCL) tan sólo implementando unos pocos métodos en un par de clases que extiendan las clases Fachada (TODO nota al pie sobre el patrón de diseño) que contienen toda la parte susceptible de ser cambiada para obtener mejor rendimiento.
+
+La primera alternativa implementada es la utilización del conjunto ampliado de instrucciones SSE2 para acceder al co-procesador XMM. Este co-procesador está presente en todos los computadores recientes de la familia x86 liderada por Intel, que es probablemente la arquitectura más extendida en el mundo. La arquitectura vectorial del co-procesador multimedia permite operar sobre varios datos similares al mismo tiempo. En la sección \ref{disenoParalXMM} se explica con más detalle la arquitectura del mismo y como se ha utilizado para paralelizar nuestro algoritmo.
+
+La segunda paralelización obedece a una tendencia bastante más reciente y en alza conocida como GPGPU (General Purpose Graphic Processor Units), que consiste en utilizar las terjetas especializadas en procesar gráficos para procesar otros cálculos que posiblemente nada tengan que ver con los gráficos. Debido a la gran demanda proveniente de diseñadores gráficos y, sobre todo, aficionados a los videojuegos, estos dispositivos comenzaron a tener unas especificaciones que resultaban muy atractivas a gran variedad de investigadores como físicos o bioquímicos. Al principio los investigadores dependian de su ingenio para mapear sus problemas específicos a un algoritmo que usase primitivas gráficas, pero con el creciente interés de esta técnica, los fabricantes decidieron ampliar su mercado de consumidores creando lenguajes específicos para este fin mucho más amigables y con facilidades para la optimización. El lenguaje C CUDA de NVIDIA, con el que desarrollamos la paralelización descrita en la sección \ref{disenoParalCUDA} es un ejemplo de estos lenguajes. Más tarde las compañías decidieron crear un lenguaje común que sirviese para todas las GPUs sin importar la marca llamado OpenCL. Hoy en día muchas de los supercomputadores más potentes del mundo utilizan múltiples GPUs para obtener los altos rendimientos que requieren.
+** DONE Utilizaci\'on del coprocesador XMM
+#+LaTeX: \label{disenoParalXMM}
+*** Introducción al coprocesador XMM
+#+LaTeX: \label{disenoParalXMMintro}
+
+Como ya se ha mencionado, el coprocesador XMM utiliza una arquitectura vectorial (SIMD, Single Instruction Multiple Data, figura \ref{SIMDexecutionModel}). Esto significa que tiene varias ALUs que pueden realizar la misma operación sobre múltiples datos en paralelo. Como veremos, la tecnología XMM parmite algunas cosas más como operaciones de reducción sobre el vector de datos. XMM es una extensión de MMX (que introducía el célebre procesador Pentium XMM) en la que se dobla el tamaño máximo de los vectores (de 64 a 128 bits) y se añaden algunas instrucciones. Este coprocesador es utilizado también para las operaciones habituales con números de doble precisión, por lo que alternar frecuentemente entre los dos usos puede resultar en serias penalizaciones al rendimiento.
+
+#+CAPTION:    Modelo de ejecución SIMD. En nuestro caso el destino se almacena en el mismo registro de origen 1.
+#+LABEL:      SIMDexecutionModel
+#+ATTR_LaTeX: scale=0.4
+[[./img/SIMD_Execution_Model.jpg]]
+
+El tamaño de los registros-vectores depende del tipo de datos a procesar: se pueden tener 2 números en doble precisión, 4 números en coma flotante, 4 enteros (con o sin signo), 8 enteros cortos (short), 16 bytes, 128 bits para operaciones lógicas, etc. La figura \ref{XMMregister} lo ilustra con más detalle. 
+
+#+CAPTION:    Posibles usos vectoriales de los 128 bits de un registro XMM.
+#+LABEL:      XMMregister
+#+ATTR_LaTeX: width=\textwidth
+[[./img/XMMregisters.jpg]]
+
+No es preciso indicar qué tipo de datos contiene cada registro vector, los datos de cada registro XMM serán interpretados de una manera u otra dependiendo de la operación que se aplique sobre ellos. El compilador o en este caso el programador es responsable de mantener la integridad de los mismos. Por ejemplo, la instrucción PADDB, sumará dos registros interpretándolos como Bytes idependientes, PADDW sumará palabras (2 Bytes) y PADDD los tomará como palabras dobles (4 Bytes, el tamaño del típico int de C). Si queremos saturación con o sin signo debemos utilizar instrucciones que lo indiquen como PADDSB (saturación con signo) o PADDUSB
+ (saturación sin signo). ADDPS para números en coma flotante con precisión simple (4 bytes), etc. Las instrucciones para usar registros MMX pertenecen al conjunto extendido SSE y las que operan sobre registros XMM pertenecen a SSE2.
+
+*** Operaciones vectoriales con números en coma flotante
+#+LaTeX: \label{disenoParalXMMfloat}
+
+La función desarrollada para XMM para optimizar los cálculos de una red neuronal o capa de tipo float (sin optimizar la activación) puede ser llamado desde C/C++ usando el siguiente prototipo:
+
+#+begin_src c
+    void XMMreal(float* bufferEntrada, unsigned numeroBloques,
+                 float* pesos, float &resultado);
+#+end_src
+
+Para calcular el estado de una neurona de tipo float se escribirá en la variable de salida resultado (sobre la que se tendrá que aplicar posteriormente la activación), tomamos como entrada dos vectores y un entero. Los arrays son el buffer de entrada (la salida de una capa de tipo float) y otro con los pesos asociados a esa entrada para esta neurona de salida concreta. El entero nos indica el número de bloques de entrada que han de ser procesados. Como se trada de números flotantes en precisión simple, podemos operar con cuatro de ellos simultáneamente en el coprocesador XMM. Por tanto los bloques son de tamaño 4 y los ambos arrays deben reservar un tamaño en memoria que sea múltiplo de cuatro floats. Los números sobrantes también serán procesados, por lo que es preciso anular las entradas y/o los pesos para evitar que estos valores sobrantes no afecten al resultado final.
+
+Internamente, se van recorriendo ambos vectores, multiplicándo los elementos y acumulando los resultados. El núcleo del bucle contiene estas dos instrucciones:
+
+#+begin_src asm
+ 	MULPS XMM0, XMM1
+	ADDPS XMM3, XMM0
+#+end_src
+
+La primera multiplica 4 entradas contenidas en XMM0 por sus pesos correspondientes contenidos en XMM1. La segunda instrucción va acumulando los resultados en XXM3. Al final sólo hay que sumar los 4 subtotales que hay en cada uno de los elementos de XMM3 y devolver el resultado en la variable resultado.
+
+*** Operaciones vectoriales con Bytes
+#+LaTeX: \label{disenoParalXMMbyte}
+
+Para poder aprovechar al máximo las capacidades del coprocesador XMM, se decide implementar un tipo de capa con unas características concretas.
+La primera es que el estado de las neuronas será almacenado en bits, ya se trate de neuronas binarias cuyos estados pertenecen al conjunto {0, 1} o de neuronas de tipo bipolar cuyos estados pueden ser {-1, 1}. Esto nos ahorrará mucho espacio en memoria y, sobre todo, muchas lecturas de memoria para procesar el mismo número de neuronas de entrada.
+
+La segunda característica es que los pesos tendrán valores pertenecientes al conjunto de enteros [-128, 127] y, por tanto, cada peso ocupará un byte en memoria. Esto significa que, además de leer menos datos de memoria como ocurre con las entradas, podremos procesar los pesos de 16 en 16 (los bytes que caben en un registro XMM de 128 bits) en lugar de hacerlo de 4 en 4 como en la función anterior que operaba con números en copa flotante con precisión simple. El hecho de que los pesos puedan tomar menos valores nos permitirá además reducir el espacio de búsqueda en el algoritmo genético, pero a la vez impone mutaciones enteras y, por tanto, cambios más bruscos. Los resultados en términos de aprendizaje al comparar los dos tipos de pesos se encuentran en el apartado \ref{aprendDiscretLineales}.
+
+Las funciones para las capas de tipo binario y las de tipo bipolar son muy similares, sus prototipos son:
+
+#+begin_src c
+    int XMMbinario(void* bufferEntrada, unsigned numeroBloques, unsigned char* pesos);
+    int XMMbipolar(void* bufferEntrada, unsigned numeroBloques, unsigned char* pesos);
+#+end_src
+
+Se ha escogido en este caso devolver el resultado directamente en lugar de usar un parámetro de salida, pero la decisión no tiene consecuencias trascendentes. Se explicará primero como funciona internamente la primera de las funciones y luego, para la segunda, sólo se explicarán las partes que la hacen diferente. Para una mayor claridad a la hora de presentar porciones de código, usaremos nombres descriptivos (similares a nombres de variables en lenguajes de más alto nivel) en lugar de los nombres de los registros XMM que se han utilizado en el código real: XMM0, XMM1...XM7.
+
+Como en el caso en coma flotante, las entradas y los pesos se procesarán por bloques y se deberán rellenar adecuadamente los pesos y entradas para evitar que se sumen cálculos no desados. Para el caso bipolar es imprescindible anular los pesos, no basta con anular las entradas pues los bits nulos serán interpretados por el algortimo como -1 en vez de como 0. Para las entradas, los bloques contendran 128 bits, cada uno representando a una neurona de entrada. 
+
+Para los pesos, los bloques serán de 16 bytes, uno para cada peso. De este modo, por cada bloque de entrada completo se requerirán 8 bloques de pesos (8 * 16 = 128). El número de bloques que se recibe por parámetro se refiere al número de bloques de pesos. Así, si no se van a usar todas las neuronas de entrada en el último bloque, no hay que seguir leyendo pesos que se sabe que deben ser nulos para el funcionamiento correcto. Esos bloques sobrantes no han de procesarse, ni siquiera almacenarse en memoria. Lo importante es que dentro del bucle principal que recorre las entradas (que se irán almacenando en el registro XMMentrada), hay un sub-bucle que se ejecuta hasta ocho veces, una vez por cada 16 pesos que se requieran, que se irán almacenando en el registro XMMpesos.
+
+Para acceder a los bits de un bloque de entrada de 16 en 16 (el número de pesos que se van a procesar en cada vuelta del bucle de pesos), usaremos el registro XMMmascara que tendrá un bit activo por cada uno de los 16 bytes del bloque. La máscará se inicializará por cada bloque de entrada con 16 bytes iguales a 128 (el primer bit activo y todos los demás nulos en binario) y luego se irá deplazando todo el registro una posición a la derecha por cada nueva lectura hacia XMMpesos que no suponga también una lectura en XMMentradas y, por tanto la inicialización de la máscara. Los 16 byes con un 128 vienen de una constante en memoria. Para evitar la penalización que supondría leer esta constante por cada 8 bloques de pesos leídos, se reservará el registro XMM128 de los 8 disponibles (con arquitecturas de 64 bits, el coprocesador XMM dispone de 16 registros en vez de 8) y que en todo momento contendrá dicha constante leída de memoria una sola vez al principio de la función. Para ello se usará la siguiente instrucción (la misma que se usa para leer entradas y pesos):
+
+#+begin_src asm
+	MOVDQU XMM128, [cte_mascara_en_mem];
+#+end_src
+
+Cuando se quiera inicializar la máscara simplemente se utilizará la siguiente instrucción, que copia el contenido de un registro a otro y es mucho menos costosa que la anterior:
+
+#+begin_src asm
+	MOVDQA XMMmascara, XMM128
+#+end_src
+
+Para no estropear la mascará, previamente se ha copiado su contenido a XMMaux, sobre el que se harán varias operaciones. Ahora para acceder a cada uno de los bits en la posición que toque de las ocho, bastará con hacer un AND lógico con el registro de entradas. 
+
+#+begin_src asm
+	PAND XMMaux, XMMentradas
+#+end_src
+
+Ahora dependiendo de si el byte tiene algún bit activo o no, se sumará o no el peso correspondiente. Esta colocación de los bits con respecto al orden en que se cogen los pesos no es igual a la del algoritmo equivalente implementado en C, por tanto la función de activación de los tipos binario y bipolar para la implementación SSE2 (aunque esté escrita en C), debe tener en cuenta la disposición especial de los bits de entrada que espera esta función. Lo mismo sucede para los métodos que copian vectores de bits desde los Buffer dependientes de la implementación a los vectores más generales de la clase Interface que usamos para acceder a las entradas y salidas de la red neuronal desde el exterior, independizando así el manejo de estos datos de la representación interna que pueda tener cada implementación, como ya se ha descrito en la sección \ref{anaEspec}.
+
+¿Cómo llegamos a partir de lo que tenemos en XMMaux (cada byte tiene en bit activo o no, dependiendo del estado de la neurona de entrada procesada) y en XMMpesos a un registro en el que sólo se tengan los pesos que correspondan a neuronas activas y que tenga anulados los pesos que corresponden a neuronas inactivas? Son necesarios algunos trucos de bastante bajo nivel que son realmente la parte más interesante de las funciones. Primero ejecutaremos la siguiente instrucción:
+
+#+begin_src asm
+    PCMPEQB XMMaux, XMMnulo
+#+end_src
+
+PCMPEQB compara cada byte de ambos registros y, si son iguales, pone a 255 (todos los bits activos) del byte en el primer registro (XMMaux). Si son distintos, pone cero (todos los bits inactivos) en ese mismo byte. En nuestro caso lo estamos comparando con un registro en el que todos los bits son nulos. Por ello, los bytes de XMMaux que tuviesen un bit activo se anularán enteros (por ser distintos a cero) y los que no tuviesen ninguno activo tomarán el valor 255 (por haber sido iguales a cero). Pero nosotros queríamos justamente lo contrario, por lo que invertimos completamente XMMaux para obtener el resultado deseado.Para invertir un registro, ejecutamos XOR contra un registro que tenga todos los bits activos (XMM255):
+
+#+begin_src asm
+    PXOR XMMaux, XMM255
+#+end_src
+
+Para iniciar los registros XMMnulo y XMM255 no se requieren constantes en memoria. Basta con usar de nuevo instrucciones lógicas:
+
+#+begin_src asm
+    PXOR XMM255, XMM255
+#+end_src
+
+Como cualquier registro independientemente de su contenido inicial es "igual a sí mismo", la comparación activará el registro por completo.
+
+#+begin_src asm
+    PXOR XMMnulo, XMMnulo
+#+end_src
+
+Como XOR requiere uno y sólo uno de los bits de entrada activos para activar la salida y como de nuevo el registro es "igual a sí mismo", el registro se anulará todos sus bits.
+
+Una vez que tenemos en XMMaux cada byte a 255 ó 0 dependiendo del estado del bit correspondiente a cada una de las 16 neuronas de entrada procesadas, podemos desechar los pesos que no deban sumarse con un simple AND:
+
+#+begin_src asm
+    PAND XMMaux, XMMpesos
+#+end_src
+
+En la figura \ref{mascaraBinariaXMM} se trata de ilustrar la forma de acceso a los bits individuales. 
+
+#+CAPTION:    Ejemplo ilustrativo del acceso paralelo a los bits individuales.
+#+LABEL:      mascaraBinariaXMM
+#+ATTR_LaTeX: width=\textwidth
+[[./img/ejemploXMM.jpg]]
+
+Todavía tenemos que sumar los pesos entre sí y acumularlos. Este es el paso que consigue una mayor mejora en las optimizaciones binaria y bipolar con respecto a la flotante. Aunque no hay ninguna instrucción que nos permita sumar todos los bytes de un registro XMM directamente, existe otra que nos es muy útil porque hace una reducción similar. Se trata de PSADBW. Con registros MMX (de 64 bits en vez de 128), calcula la diferencia absoluta entre los bytes de cada registro operando y suma todas esas diferencias, dejando el resultado en los 4 bytes bajos del registro MMX. Con registros XMM, opera de forma similar pero dejando dos resultados: uno en la los 4 bytes bajos de los 8 bajos y otro en los 4 bajos  de los  8 altos. Es decir, duplica la operación. 
+
+#+begin_src asm
+    PSADBW XMMaux, XMMnulo
+#+end_src
+
+Si uno de los operandos es un registro nulo, la diferencia absoluta entre 0 y un número siempre es ese mismo número, por lo que simplemente sumara los bytes. Surge aquí un pequeño problema dado que suma los bytes sin tener en cuenta su signo, como si todos fueran positivos. Cómo queriamos los pesos pertenecientes a [­128, 127], debemos hacer algo al respecto.
+
+Antes de ejecutar la instrucción anterior, ejecutaremos: 
+
+#+begin_src asm
+    PAND XMMaux128, XMMaux
+#+end_src
+
+Y así tendremos 128 en los bytes cuyos bits estaban activos. Después, en lugar de sólo una instrucción de reducción, ejecutamos:
+
+#+begin_src asm
+    PSADBW XMMaux, XMMnulo
+    PSADBW XMMaux128, XMMnulo
+    PSUBD XMMaux, XMM128
+#+end_src
+
+Esto equivale a restarle 128 a cada byte que fuesemos a sumar, porque se suman con PSADBW tantos 128 como pesos haya. Hay que tener en cuenta que los pesos pueden ser [­128, 127] pero no equivalen, por ejemplo, a los char de C++. En C++, los números se representan en complemento a dos mientras que en nuestra representación alternativa el 0 es el ­128, el 128 es el 0, el 129 el 1, etc. Realmente no es importante, siempre y cuando lo tengamos presente. Ya sólo queda sumar las dos partes. Después, se repite el proceso hasta completar los 8 bits por bytes, cargando cada vez 16 pesos nuevos. Luego se reinicia la máscara, se lee el siguiente bloquede entrada y se repite todo hasta que hayamos completado en número de bloques.
+
+Al final, hay que sumar las dos partes (alta y baja) que se están acumulando en un registro XMM. Esto se omite, como la gestión del bucle, porque no tiene demasiado interés en lo que a nuestros esfuerzos de optimización se refiere.
+
+La explicación que se ha dado se refería al algoritmo para neuronas binarias, que pueden tomar los valores {0, 1}. Para las neuronas bipolares que pueden tomar los valores {-1, 1}, el código es bastante similar, aunque ligeramnte más complicado. En este caso, todos los pesos se utilizan, simplemente unos cambian su signo y otros no. Ahora, cuando invertimos XMMaux, también conservamos el original y también lo operamos con AND con los pesos. El resultado son los pesos que tendrán que ser restados en vez de sumados. También lo operamos el registro auxiliar invertido con el XMM128, pues por cada peso restado se tendrá que sumar 128 (en vez de restarlo). Por ejemplo, 129 es sólo 1 en nuestra representación, por tanto, para restar 1 (restar un peso igual a uno), restamos 129 y sumamos 128.
+
+Recordamos resumadiamente lo que hacíamos en el núecleo de la versión binaria para luego señalar las diferencias.
+
+#+begin_src asm
+	MOVDQA XMMaux, XMMmascara      ;copiamos la máscara en una mascara auxiliar
+
+	PAND XMMaux, XMMentradas       ;obtenemos el valor del bit a procesar en cada byte
+    PCMPEQB XMMaux, XMMnulo        ;si el bit estaba activo->se pone a 0 todo el byte, 
+                                   ;si no-> se pone a 1 todo el byte (255)
+	PCMPEQB XMM255, XMM255         ;ponemos 255 en todos los byes del registro XMM255
+    PXOR XMMaux, XMM255            ;invertimos XMMaux 
+                                   ;(ahora hay 255 en los bytes que tenian el bit que tocaba activo)
+
+	MOVDQU XMMaux128, XMM128       ;128 en todos los bytes de XMMaux128
+	PAND XMMaux128, XMMaux         ;128 sólo en los bytes que estaban activos
+
+	MOVDQU XMMpesos, [ptrPesos]    ;leemos el bloque actual de pesos
+	PAND XMMaux, XMMpesos          ;asi tenemos el peso de cada conexión 
+                                   ;solamente en los bytes con el bit activo
+
+	PSADBW XMMaux, XMMnulo         ;sumamos todos los bytes (los que estaban activos)
+	PSADBW XMMaux128, XMMnulo      ;sumamos 128 por cada byte que estaba activo
+
+	PADDD XMMacumulador, XMMaux    ;sumamos estos pesos a los ya sumados previamente
+	PSUBD XMMacumulador, XMMaux128 ;sustraemos 128 por cada bit que estaba activo
+#+end_src
+
+En el caso bipolar se hacen más cálculos. Además de los dos primeros, como en el caso binario, para el caso bipolar se hacen los dos últimos cálculos descritos en esta lista:
+
+1) Se suman todos los pesos de las neuronas activas
+2) Se resta 128 por cada neurona activa
+3) Se restan todos los pesos de las neuronas inactivas
+4) Se suma 128 por cada neurona inactiva
+
+Como ahora no tenemos que desechar ningún peso, sino sumar unos y restar otros, el código quedaría así:
+
+#+begin_src asm
+	MOVDQA XMMaux, XMMmascara      ;copiamos la máscara en una mascara auxiliar
+
+	PAND XMMaux, XMMentradas       ;obtenemos el valor del bit a procesar en cada byte
+    PCMPEQB XMMaux, XMMnulo        ;si el bit estaba activo->se pone a 0 todo el byte,
+                                   ;si no-> se pone a 1 todo el byte (255)
+	PCMPEQB XMMauxInv, XMMauxInv   ;ponemos 255 en todos los byes del registro XMMauxInv
+    PXOR XMMauxInv, XMMaux         ;ponemos el inverso de XMMaux en XMMauxInv
+
+	MOVDQU XMMaux128, XMM128       ;128 en todos los bytes de XMMaux128
+	PAND XMMaux128, XMMauxInv      ;128 sólo en los bytes que estaban activos
+	PSADBW XMMaux128, XMMnulo      ;sumamos 128 por cada byte que estaba activo
+	PSUBD XMMacumulador, XMMaux128 ;sustraemos 128 por cada bit que estaba activo
+
+	MOVDQU XMMaux128, XMM128       ;128 en todos los bytes de XMMaux128
+	PAND XMMaux128, XMMaux         ;128 sólo en los bytes que estaban inactivos
+	PSADBW XMMaux128, XMMnulo      ;sumamos 128 por cada byte que estaba activo
+	PADDD XMMacumulador, XMMaux128 ;sumamos 128 por cada bit que estaba inactivo
+
+	MOVDQU XMMpesos, [ptrPesos]    ;leemos el bloque actual de pesos
+	PAND XMMauxInv, XMMpesos       ;asi tenemos el peso de cada conexión 
+                                   ;solamente en los bytes con el bit activo
+	PAND XMMaux, XMMpesos          ;asi tenemos el peso de cada conexión 
+                                   ;solamente en los bytes con el bit inactivo
+
+	PSADBW XMMauxInv, XMMnulo      ;sumamos todos los bytes (los que estaban activos)
+	PSADBW XMMaux, XMMnulo         ;sumamos todos los bytes (los que estaban inactivos)
+
+	PADDD XMMacumulador, XMMauxInv ;sumamos los pesos "positivos" al acumulador
+	PSUBD XMMacumulador, XMMaux    ;sustraemos los pesos "negativos" al acumulador
+#+end_src
+
+Todavía se podrían mejorar las soluciones si contásemos con la arquitectura de 64 bits. En tal caso tendríamos 16 registros XMM en lugar de sólo 8, no habría que reusar tanto los registros y algunos trucos (como los de poner a 255 ó a 0 todo un registro) podrían realizarse solamente una vez al principio en vez de cada vez que necesitamos alguno de estos valores en un registro que usamos para multiples cosas. Hemos optado por la compilación para 32 bits por su mayor portabilidad. En los sistemas operativos de 64 bits se puede simular la arquitectura de 32 bits y ejecutar nuestra optimización. No sucede lo mismo al contrario: si hubiesemos optado por la implementación de 64 bits no podríamos ejecutar la optimización sobre un sistema operativo de 32 bits.
+
+Como hemos dicho, la colocación de los bits para la implementación XMM debe adaptarse para que se puedan obtener los mismos resultados que con el algoritmo implementado en C. Pero además en el algoritmo C no se puede usar el tipo char para los pesos (hay que usar unsigned char) y hay que restarles 128 antes de operar con ellos. Esto podría ralentizar "injustamente" al algoritmo C, por lo que también se hicieron pruebas de rendimiento sin restar 128 y usando el tipo char para comparar los tiempos. Logicamente, esa implementación C no obtiene resultados equivalentes a los de la SSE2, pero tan sólo se pretendía comparar el rendimiento. Sorprendentemente, con esta implementación C se obtenían resultados aún peores. También se probó usadno el tipo unsigned char pero sin restar 128 y el rendimiento era de nuevo ligeramente peor. Por alguna razón que no alcanzamos a explicar, el algoritmo en C funciona más rápido si ha de restar 128 a cada peso. Por ello, dejamos de lado nuestra preocupación sobre la posible penalización causada por nuestra representación de pesos en bytes.
+
+** TODO [0/4] Utilizaci\'on de la arquitectura CUDA
+#+LaTeX: \label{disenoParalCUDA}
+
+Debido a la insaciable demanda de mercado de gráficos 3D de alta definición y en tiempo real, las unidades de procesamiento gráfico (Graphic Processor Unit, GPU) han evolucionado en procesadores altamente paralelos y multihilo, con muchos núcleos, tremenda capacidad de computación y con gran ancho de banda de memoria. La técnica consistente en utilizar el este poder computacional para realizar trabajos de proposito general, que pueden no tener nada que ver con los gráficos se denomina GPGPU (General Purpose Graphic Processor Unit). Los pioneros de la técnica buscaban homorfismos entre los algoritmos que pretendían ejecutar y cálculos que las librerías gráficas realizan internamente. 
+
+Gracias a los lenguajes de alto nivel especializados para GPGPU como C CUDA u OpenCL, ya no es necesario modelar tu problema utilizando conceptos puramente gráficos como superficies y texturas. Sin embargo, para poder aprovechar las máximas posibilidades de rendimiento es necesario conocer la arquitectura de las unidades de procesamiento gráfico y así como los cuellos de botella que potencialmente puedan perjudicar a la optimización de nuestro algoritmo.
+
+Aunque otras arquitecturas gráficas puedan ser similares en muchos aspectos, describiremos los conceptos básicos de la arquitectura CUDA, que es la que hemos utilizado para paralelizar los cálculos de estado de las redes neuronales y que fue diseñada explícitamente para soportar GPGPU incluso desde lenguajes de alto nivel. En principio C, pero luego también otros leguajes como FORTRAN, C++ y OpenCL. Desde la serie NVIDIA GeForce 8000 todas las gráficas que ha producido NVIDIA obedecen a la arquitectura básica CUDA (excepto las específicas para dispositivos móviles, que siguen la aruitectura Tegra). Aunque tarjetas posteriores ofrecen nuevas capacidades y posibilidades de ajuste de los algoritmos, son retrocompatibles con respecto al código implementado para versiones anteriores.
+
+*** TODO Arquitectura CUDA
+#+LaTeX: \label{disenoParalCUDAarq}
+*** TODO Implementación mediante reducción paralelizada
+#+LaTeX: \label{disenoParalCUDAreduc}
+*** TODO Implementación paralelizando las salidas
+#+LaTeX: \label{disenoParalCUDAsal}
+*** TODO Implementación con matriz de pesos invertida
+#+LaTeX: \label{disenoParalCUDAinv}
+* TODO [0/3] Experimentaci\'on
+#+LaTeX: \label{experimentacion}
+** TODO Utilidades para la experimentación
+** TODO Tareas de clasificaci\'on
+** TODO Juegos de estrategia abstractos
+* TODO [0/3] Manual del programador
+#+LaTeX: \label{disenoInterfProgr}
+** TODO Guia de instalación
+** TODO Uso general (API)
+** TODO Extensibilidad a partir de interfaces
 \newpage
-* TODO Experimentaci\'on
-  #+LaTeX: \label{experimentacion}
-** Tareas de clasificaci\'on
-  #+LaTeX: \label{}
-** Juegos de estrategia abstractos
-  #+LaTeX: \label{}
-\newpage
-
-* TODO Resultados
-  #+LaTeX: \label{resultados}
-** Rendimiento
-  #+LaTeX: \label{rendimiento}
-
+* TODO Resultados: Rendimiento
+#+LaTeX: \label{rendimiento}
 En esta sección se analizan resultados de rendimiento en tiempo de ejecución.
-
-*** Rendimiento de las implementaciones paralelas de red neuronal
-  #+LaTeX: \label{rendImpl}
+** Rendimiento de las implementaciones paralelas de red neuronal
+#+LaTeX: \label{rendImpl}
 
 En esta sección se presentan los resultados en tiempo de ejecución de los métodos que se ejecutan de forma diferente con cada implementación.
 
-**** Acumulación de resultados
-  #+LaTeX: \label{rendImplAcumul}
+*** Acumulación de resultados
+#+LaTeX: \label{rendImplAcumul}
 
 En la figura \ref{grafImplCalculate}, puede apreciarse que la implementación con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a la implementación de referencia en lenguaje C, especialmente para los tipos de Buffer BIT y SIGN.
 
@@ -491,7 +728,7 @@ En la figura \ref{grafImplCalculate}, puede apreciarse que la implementación co
 [[./img/Connection_calculateAndAddTo.png]]
 \newpage
 
-**** Activación
+*** Activación
 
 De la figura \ref{grafImplActivation} se extraen varias conclusiones. No mucha diferencia de rendimiento entre las implementaciones y prácticamente ninguna cuando las neuronas son de tipo FLOAT. Esto era de esperar porque ambas implementaciones son idénticas: no se han hecho optimizaciones SSE2 para la función de activación y para el tipo FLOAT el algoritmo es idéntico al de C.
 
@@ -503,7 +740,7 @@ Para los tipos BIT y SIGN, la implementación en C es ligeramente más rápida q
 [[./img/Connection_activation.png]]
 \newpage
 
-**** Funciones de activación
+*** Funciones de activación
 
 Si en la figura \ref{grafImplActivation} se comparaba el rendimiento de los distintos tipos de neurona (BIT, SIGN y FLOAT con la función de activación IDENTITY), en la figura \ref{grafImplActivationFunc} se comparan los rendimientos de los distintos tipos de funciones para el tipo de neurona FLOAT. Con el tipo de neurona BIT, la función de activación siempre es BINARY_STEP y con el tipo SIGN la activación siempre es BIPOLAR_STEP, por ello podemos excluir estos tipos de esta gráfica. Además, la implementación SSE2 de la activación para FLOAT es idéntica a la de C, por lo que tampoco se muestran los resultados de la activación SSE2 en este caso.
 
@@ -514,7 +751,7 @@ Se puede ver como, en general, la función más lenta es la sigmoide, seguida de
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Activation_functions.png]]
 \newpage
-**** Cruza
+*** Cruza
 
 No hay una diferencia sustancial de rendimiento entre las diferentes implementaciones y tipos de neuronas para el operador genético de crossover, como se muestra en la figura \ref{grafImplCrossover}. Como en el método de activación, la cruza de SSE2 se ve ligeramente penalizada. En este caso se debe al almacenamiento especial de los pesos para SSE2, que usa bloques de pesos en vez de pesos individuales. La penalización es ligeramente superior para FLOAT.
 
@@ -524,7 +761,7 @@ No hay una diferencia sustancial de rendimiento entre las diferentes implementac
 [[./img/Connection_crossover.png]]
 \newpage
 
-**** Mutación
+*** Mutación
 
 De la figura \ref{grafImplMutation} se puede deducir que el operador de mutación tiene un coste mínimo y constante respecto al tamaño de la conexión para todas las implementaciones.
 
@@ -534,7 +771,7 @@ De la figura \ref{grafImplMutation} se puede deducir que el operador de mutació
 [[./img/Connection_mutate.png]]
 \newpage
 
-**** Olvido
+*** Olvido
 
 De manera similar a la operación de mutación, el olvido (figura \ref{grafImplReset}) tiene un coste constante y mínimo.
 
@@ -544,7 +781,7 @@ De manera similar a la operación de mutación, el olvido (figura \ref{grafImplR
 [[./img/Connection_reset.png]]
 \newpage
 
-**** Copiar desde y hacia Interfaz
+*** Copiar desde y hacia Interfaz
 
 Estos métodos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementación concreta escogida. Cada implementación debe mapear correctamente desde la representación genérica (Interfaz) hacia su propia representación interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
 
@@ -561,12 +798,12 @@ En ambos casos se observa que el coste es muy pequeño excepto para la implement
 [[./img/Buffer_copyToInterface.png]]
 \newpage
 
-*** Rendimiento de los diferentes operadores genéticos
-   #+LaTeX: \label{rendOperadores}
+** Rendimiento de los diferentes operadores genéticos
+#+LaTeX: \label{rendOperadores}
 
 En esta sección se cronometran los operadores genéticos. Algunos ya se habían analizado en la sección \ref{rendImpl}, pero a un nivel más bajo, del que dependen las implementaciones. Ahora lo que nos interesa es principalmente el coste de los operadores dependiendo de las diferentes formas de usarlo a más alto nivel. Nos abstraemos por ello de la implementación concreta y usamos la implementación SSE2 para todas estas pruebas.
 
-**** Selección
+*** Selección
 
 figura \ref{rendGenSelect}
 
@@ -578,7 +815,7 @@ Aunque no se aprecia bien en la figura \ref{rendGenSelect}, las selecciones de r
 [[./img/Population_Selection.png]]
 \newpage
 
-**** Cruza
+*** Cruza
 
 figura \ref{rendGenCruza}
 
@@ -592,7 +829,7 @@ En general, parece que el cruce uniforme es más costoso que el multi-punto y ta
 [[./img/Individual_crossover.png]]
 \newpage
 
-**** Mutación
+*** Mutación
 
 Según la figura \ref{rendGenMutation}, ambos tipos de mutación son más costosos cuánto mayor es la probabilidad, tal y cómo era de esperar, pues más mutaciones son más escrituras. Además, la mutación probabilística es en general más costosa que la mutación determinística (un número constante de mutaciones por individuo) salvo cuando la probabilidad es muy grande (muchas mutaciones por individuo). Aunque la interfaz determinística es más rápida, también se hace más lenta comprativamente cuanto mayor es la probabilidad. La explicación es que la opción probabilística tiene un coste fijo elevado (un número aleatorio por gen) mientras que en la determinística el coste sube con el número de mutaciones (varios números aleatorios por cada mutación a realizar).
 
@@ -602,7 +839,7 @@ Según la figura \ref{rendGenMutation}, ambos tipos de mutación son más costos
 [[./img/Individual_mutate.png]]
 \newpage
 
-**** Olvido
+*** Olvido
 
 El nuevo operador de olvido/reset presenta otra vez unos resultados similares a los de la mutación y se pueden extraer conclusiones semejantes como muestra la figura \ref{rendGenOlvido}.
 
@@ -612,16 +849,15 @@ El nuevo operador de olvido/reset presenta otra vez unos resultados similares a 
 [[./img/Individual_reset.png]]
 \newpage
 
-** Aprendizaje
-  #+LaTeX: \label{aprendizaje}
-
+* TODO Resultados: Aprendizaje
+#+LaTeX: \label{aprendizaje}
 En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación.
-*** Comparación entre las distintas funciones de activación
-   #+LaTeX: \label{aprendFunc}
+** Comparación entre las distintas funciones de activación
+#+LaTeX: \label{aprendFunc}
 
 A continuación observamos cómo influyen las diferentes funciones de activación para las tareas implementadas.
 
-**** OR
+*** OR
 
 Para la tarea Or, no se observan diferencias sustanciales con diferentes funciones de activación al mirar la figura \ref{aprenFuncOr}.
 
@@ -631,7 +867,7 @@ Para la tarea Or, no se observan diferencias sustanciales con diferentes funcion
 [[./img/FunctionTypes_OR.png]]
 
 \newpage
-**** AND
+*** AND
 
 Según la gráfica \ref{aprenFuncAnd} la función de activación Sigmoide bipolar es ligeramente superior al resto para la tarea lógica AND.
 
@@ -641,7 +877,7 @@ Según la gráfica \ref{aprenFuncAnd} la función de activación Sigmoide bipola
 [[./img/FunctionTypes_AND.png]]
 
 \newpage
-**** XOR
+*** XOR
 
 Para la tarea XOR - cuyas redes neuronales tienen 2 capas - la figura \ref{aprenFuncXor} muestra diferencias de en el aprendizaje dependiendo de la función de activación. La función identidad es superior a la mayoría y la de escalón binario inferior. La sigmoide empiza como la mayoría, pero se va haciendo peor según avanza el aprendizaje.
 
@@ -651,7 +887,7 @@ Para la tarea XOR - cuyas redes neuronales tienen 2 capas - la figura \ref{apren
 [[./img/FunctionTypes_XOR.png]]
 
 \newpage
-**** Reversi
+*** Reversi
 
 Para la tarea Reversi igual que pasaba con la tarea Or, no se observan diferencias sustanciales con diferentes funciones de activación a pesar de que en este caso también se tienen varias capas en la red neuronal (figura \ref{aprenFuncReversi}).
 
@@ -662,12 +898,12 @@ Para la tarea Reversi igual que pasaba con la tarea Or, no se observan diferenci
 
 \newpage
 
-*** Comparaci\'on entre redes discretas y lineales
-   #+LaTeX: \label{aprendDiscretLineales}
+** Comparaci\'on entre redes discretas y lineales
+#+LaTeX: \label{aprendDiscretLineales}
 
 A continuación compararemos los posibles efectos beneficiosos o perjudiciales al aprendizaje que se pueden obtener a partir de renunciar a las funciones derivables en favor de neuronas de tipo BIT (salida 0 ó 1) ó SIGN (salida -1 ó 1) y de pesos discretos y más reducidos (1 Byte en lugar de los 4 bytes de un float). También se incluyen las funciones de activación BINARY_STEP y BIPOLAR_STEP para FLOAT para ver el caso en que los pesos siguen siendo igual de grandes y las neuronas se comportan como BIT o SIGN (para poder analizar el efecto de los pesos discretos y menores por separado).
 
-**** OR
+*** OR
 
 Para la tarea Or, la función IDENTITY es la mejor opción con muy poca diferencia (figura \ref{aprenDiscretOr}).
 
@@ -677,7 +913,7 @@ Para la tarea Or, la función IDENTITY es la mejor opción con muy poca diferenc
 [[./img/BufferTypes_OR.png]]
 
 \newpage
-**** AND
+*** AND
 
 Para la tarea And, también con poca diferencia, las funciones bipolares son la opción superior independientemente de si los pesos son almacenados como Floats o cómo Bytes (figura \ref{aprenDiscretAnd}).
 
@@ -687,7 +923,7 @@ Para la tarea And, también con poca diferencia, las funciones bipolares son la 
 [[./img/BufferTypes_AND.png]]
 
 \newpage
-**** XOR
+*** XOR
 
 De nuevo observamos más diferencias en la tarea Xor (figura \ref{aprenDiscretXor}). Como en AND, la opciones bipolares son superiores durante todo el aprendizaje. Seguidas de la activación linear, que se va haciendo menos efectiva conforme avanza el aprendizaje, cuando es superada por las versiones binarias. Tanto como para las binarias como para las bipolares, se aprecia una diferencia mínima en favor de las versiones cuyos pesos se alamacenan como floats, pero que no compensan las grandes diferencias de rendimiento comentadas en la sección \ref{rendImplAcumul}.
 
@@ -697,7 +933,7 @@ De nuevo observamos más diferencias en la tarea Xor (figura \ref{aprenDiscretXo
 [[./img/BufferTypes_XOR.png]]
 
 \newpage
-**** Reversi
+*** Reversi
 
 Para la tarea Reversi todos los tipos de neuronas obtienen resultados bastante semejantes en la gráfica \ref{aprenDiscretReversi}.
 
@@ -707,16 +943,16 @@ Para la tarea Reversi todos los tipos de neuronas obtienen resultados bastante s
 [[./img/BufferTypes_REVERSI.png]]
 
 \newpage
-*** Comparaci\'on de operadores gen\'eticos
-   #+LaTeX: \label{aprendOperGen}
+** Comparaci\'on de operadores gen\'eticos
+#+LaTeX: \label{aprendOperGen}
 
 Para estudiar el aprendizaje con los distintos operadores genéticos, se han probado cada una de las 4 tareas implementadas y se han generado gráficas de cada una de ellas por separado. Se ha utilizado un tamaño de población de 8 individuos, de los cuales se seleccionan 4 en cada iteración, que se cruzan, se mutan se prueban los nuevos individuos generados para insertarlos ordenadamente en la población anterior, quedando de nuevo 8. De esta manera, se desechan los 4 peores de entre los 8 que había y los 4 nuevos generados. En caso de empate se favorece a los nuevos, siguiendo el criterio de búsqueda neutral (TODO falta referencia bibliográfica aquí). Cada población utiliza un esquema de selección, cruza y mutación concretos, pero para cada gráfica se hace la media de todos los esquemas posibles (salvo para el operador concreto que se esté estudiando en cada gráfica). El operador de olvido sólo se usa al generar sus propias gráficas, haciendo la media con el todas las posibilidades en el resto de operadores.
 
-**** Selección
+*** Selección
 
 Como esquemas de selección se utilizan los operadores de truncado (se selecciona directamente a los mejores), ruleta (con valor base=1), ranking (con valores por defecto base=9 step=6) y torneo (con tamaños de torneo 2 y 4).
 
-***** OR
+**** OR
 
 (figura \ref{aprenSelectOr}).
 
@@ -726,7 +962,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Selection_OR.png]]
 
 \newpage
-***** AND
+**** AND
 
 (figura \ref{aprenSelectAnd}).
 
@@ -736,7 +972,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Selection_AND.png]]
 
 \newpage
-***** XOR
+**** XOR
 
 (figura \ref{aprenSelectXor}). 
 
@@ -746,7 +982,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Selection_XOR.png]]
 
 \newpage
-***** Reversi
+**** Reversi
 
  gráfica \ref{aprenSelectReversi}.
 
@@ -757,10 +993,10 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 
 \newpage
-**** Cruza
+*** Cruza
 
 
-***** OR
+**** OR
 
 (figura \ref{aprenCrossOr}).
 
@@ -770,7 +1006,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Crossover_OR.png]]
 
 \newpage
-***** AND
+**** AND
 
 (figura \ref{aprenCrossAnd}).
 
@@ -780,7 +1016,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Crossover_AND.png]]
 
 \newpage
-***** XOR
+**** XOR
 
 (figura \ref{aprenCrossXor}). 
 
@@ -790,7 +1026,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Crossover_XOR.png]]
 
 \newpage
-***** Reversi
+**** Reversi
 
  gráfica \ref{aprenCrossReversi}.
 
@@ -800,10 +1036,10 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Crossover_REVERSI.png]]
 
 \newpage
-**** Mutación
+*** Mutación
 
 
-***** OR
+**** OR
 
 (figura \ref{aprenMutOr}).
 
@@ -813,7 +1049,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Mutations_OR.png]]
 
 \newpage
-***** AND
+**** AND
 
 (figura \ref{aprenMutAnd}).
 
@@ -823,7 +1059,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Mutations_AND.png]]
 
 \newpage
-***** XOR
+**** XOR
 
 (figura \ref{aprenMutXor}). 
 
@@ -833,7 +1069,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Mutations_XOR.png]]
 
 \newpage
-***** Reversi
+**** Reversi
 
  gráfica \ref{aprenMutReversi}.
 
@@ -843,10 +1079,10 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Mutations_REVERSI.png]]
 
 \newpage
-**** Operador de olvido
+*** Operador de olvido
 
 
-***** OR
+**** OR
 
 (figura \ref{aprenResetOr}).
 
@@ -856,7 +1092,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Reset_OR.png]]
 
 \newpage
-***** AND
+**** AND
 
 (figura \ref{aprenResetAnd}).
 
@@ -866,7 +1102,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Reset_AND.png]]
 
 \newpage
-***** XOR
+**** XOR
 
 (figura \ref{aprenResetXor}). 
 
@@ -876,7 +1112,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Reset_XOR.png]]
 
 \newpage
-***** Reversi
+**** Reversi
 
  gráfica \ref{aprenResetReversi}.
 
@@ -886,18 +1122,17 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 [[./img/Reset_REVERSI.png]]
 
 \newpage
-*** Comparación de distintos tamaños de población número de individuos conservados por generación
+** Comparación de distintos tamaños de población número de individuos conservados por generación
 
 \newpage
 * TODO Conclusiones
-
-  #+LaTeX: \label{conclusiones}
+#+LaTeX: \label{conclusiones}
 
 \newpage
 
 #Bibliografía 
 \cleardoublepage\phantomsection
-\addcontentsline{toc}{subsection}{\bibname}
+\addcontentsline{toc}{chapter}{\bibname}
 \begin{thebibliography}{9}
  
 %\cite[texto]{etiqueta}
