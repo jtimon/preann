@@ -838,11 +838,45 @@ Si una instrucción no atómica ejecutada en un warp escribe en la misma localiz
 #+LaTeX: \label{disenoParalCUDAsal}
 *** TODO Matriz de pesos invertida
 #+LaTeX: \label{disenoParalCUDAinv}
-* TODO [0/3] Experimentaci\'on
+* TODO [1/3] Experimentaci\'on
 #+LaTeX: \label{experimentacion}
-** TODO Utilidades para la experimentación
-** TODO Tareas de clasificaci\'on
+
+En esta sección se describen  los problemas para los que se entrenarán las redes neuronales y las utilidades implementadas para la experimentación.
+
+** DONE Tareas de clasificaci\'on
+#+LaTeX: \label{experimentacionClasif}
+
+Las tareas de clasificación son una aplicación común de las redes neuronales entrenadas con retropropagación del error. También podemos entrenar nuestras redes neuronales para aprender a desempeñar este tipo de tares utilizando algoritmos genéticos. En general, la clasificación consiste en agrupar conjuntos de entradas posibles en clases. Por ejemplo, las entradas {e1, e3, e5} pentenecen a la clase c1; las entradas {e2, e4} pertenecen a la clase c2; las {e6, e7} a la clase c3, etc. Cada entrada sólo puede pertenecer a una clase. La clasificación tiene muchas aplicaciones el como reconocimiento de patrones o la construcción de filtros.
+
+Las tareas de clasificación que se han elegido son simples. Se trata de operaciones lógicas entre dos vectores binarios. Las operaciones escogidas son AND (Y lógico), OR (O lógico) y XOR (O lógico exclusivo). Es sabido que para poder desempeñar la tarea XOR son necesarias redes neuronales de más de una capa, es decir, con capas ocultas. Si bien AND y OR eran tareas que un perceptrón simple (red neuronal de una sola capa) podía aprender, no puede aprender, sin embargo la tarea XOR. Esta última tarea fué la primera para la que se entrenó un perceptrón multicapa utilizando el algortimo de retropropagación del error y se ha convertido en un Benchmark común para algunos algortimos de aprendizaje artificial [TODO referencia bilbiográfica].
+
+Puede parecer poco intuitivo que el cálculo de estas operaciones lógicas constituyan una tarea de clasificación, por lo que pondremos unos ejemplos ilustrativos. A continuación se muestran las clasificaciones para las tareas AND, OR y XOR para vectores de un tamaño de 1 bit. Las entradas, por tanto, son dos vectores de 1 bit (v1 y v2). Como la salida será de un bit, en estos casos sólo existen dos clases (0 ó 1) para cada operación/clasificación.
+
+| v1 | v2 | Clase (OR) | Clase (AND) | Clase (XOR) |
+|----+----+------------+-------------+-------------|
+|  0 |  0 |          0 |           0 |           0 |
+|  1 |  0 |          1 |           0 |           1 |
+|  0 |  1 |          1 |           0 |           1 |
+|  1 |  1 |          1 |           1 |           0 |
+
+Expresado de otra forma, si llamamos c0 a la clase 0 y c1 a la clase 1, para la clasificación OR la entrada {00} pertenece a c0 y las entradas {10, 01, 11} pertenecen a c1; para AND, {00, 10, 01} pertenecen a c0 y {11} a c1; para XOR {00, 11} pertenecen a c0 y {10, 01} pertenecen a c1.
+
+Como se describió en el capítulo \ref{analisis}, para que nuestro sistema pueda aprender una tarea nueva, sólo es necesario implementar una clase que herede de la interzaz Task, en este caso, la clase implementada es BinaryTask. El método más importante es test, que toma un individuo como parámetro, lo prueba y le asigna el fitness resultante. También es importante el método setInputs, con el que se conectan las variables internas de la tarea con las entradas de la red neuronal de un individuo. Por último, getExample devuelve un individuo construido cuya estructura es suficiente para aprender la tarea concreta para la que se quiere entrenar a la población.
+
+La clase BinaryTask es bastante flexible respecto a cómo puede ser inicializada. Hay dos parámetros que son olbigatorios: un enumerado BinaryOperation que indica que tipo de operación será realizada (BO_OR, BO_AND ó BO_XOR) y el tamaño de los vectores de entrada, que es igual al tamaño del de salida.
+Existe un tercer parámetro optativo numTests que hace referencia al número de pruebas para evaluar a un individuo. Si no se rellena, se probarán todas las combinaciones posibles entre los dos vectores de entrada; si se rellena, determinará el número de pruebas aleatorias que se realizarán para probar a cada individuo. Para las dos posibilidades, el individuo empieza con una puntuación igual al número de diferencias con las salidas esperadas que podría obtener cómo máximo y se irán restando las diferencias que se vayan encontrando. Así, la puntuación del inndividuo será mejor cuanto menor sea el número de diferencias sigueindo la siguiente fórmula: Fitness = Número máximo de diferencias posibles - número de diferencias obtenidas.
+Las pruebas aleatorias consisten simplemente en dar valores aleatorios a los vectores, hacer que la red neuronal obtenga su salida, obtener la salida deseada realizando la operación lógica correspondiente y comparar las diferencias.
+
+No rellenar el número de pruebas y dejar que se evalúen todas las posibilidades nos dará valores de fitness más precisos, pero puede hacer las pruebas muy lentas para tamaños de vectores más grandes.
+
+Para que esta tarea pueda ser realizada por neuronas binarias, bipolares y reales, en lugar de comparar la salida de la neurona directamente con la salida deseada se usarán aproximaciones. Se entenderá que en la salida de las redes neuronales, cualquier valor mayor o igual a 0.5 es equivalente a un 1 y cualquier valor menor que 0.5 (por ejemplo -1 para una neurona bipolar; 0.1 ó -7 para una neurona real) es equivalente a un 0. Esto se podría implementar con una capa adicional, pero se ha preferido por simplicidad hacerlo directamente dentro de la clase BinaryTask.
+
 ** TODO Juegos de estrategia abstractos
+#+LaTeX: \label{experimentacionJuegos}
+
+** TODO Utilidades para la experimentación
+#+LaTeX: \label{experimentacionUtil}
+
 * TODO [0/3] Manual del programador
 #+LaTeX: \label{disenoInterfProgr}
 ** TODO Guia de instalación
