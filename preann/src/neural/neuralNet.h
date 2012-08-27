@@ -1,7 +1,7 @@
 #ifndef NEURALNET_H_
 #define NEURALNET_H_
 
-#include "optimization/factory.h"
+#include "factory/factory.h"
 #include "inputLayer.h"
 
 class NeuralNet

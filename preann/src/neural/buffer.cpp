@@ -6,7 +6,7 @@
  */
 
 #include "buffer.h"
-#include "optimization/factory.h"
+#include "factory/factory.h"
 
 void Buffer::copyFromInterface(Interface* interface)
 {

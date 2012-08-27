@@ -2,7 +2,7 @@
 #define ABSTRACTLAYER_H_
 
 #include "connection.h"
-#include "optimization/factory.h"
+#include "factory/factory.h"
 
 class Layer
 {

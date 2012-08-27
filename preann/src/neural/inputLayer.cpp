@@ -1,5 +1,5 @@
 #include "inputLayer.h"
-#include "optimization/factory.h"
+#include "factory/factory.h"
 
 InputLayer::InputLayer(Interface* interface, ImplementationType implementationType)
 {

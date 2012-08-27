@@ -3,7 +3,7 @@
 
 #include "loopTest/chronoPlotter.h"
 #include "common/dummy.h"
-#include "optimization/cuda_code.h"
+#include "cuda/cuda.h"
 
 #define START                                                                           \
     Buffer* buffer = Dummy::buffer(parametersMap);                                      \

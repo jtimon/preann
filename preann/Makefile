@@ -6,11 +6,10 @@
 
 SHELL = /bin/sh
 
-MODULES   = common optimization neural genetic game tasks loop loopTest 
-LIB_MODULES = $(MODULES) template  
+MODULES   = common factory neural genetic game tasks loop loopTest 
 
 SRC_DIR   = $(addprefix src/,$(MODULES))  
-BUILD_DIR = $(addprefix build/,$(MODULES)) build/test/ build/sse2
+BUILD_DIR = $(addprefix build/,$(MODULES)) build/test/ build/sse2 build/cuda
 OUTPUT_DIR = $(CURDIR)/output/
 LOG_DIR = $(CURDIR)/output/log/
 
@@ -20,21 +19,23 @@ OBJ       = $(patsubst src/%.cpp,build/%.o,$(SRC))
 SSE2_SRC = $(foreach sdir,src/sse2,$(wildcard $(sdir)/*.asm))
 SSE2_OBJ = $(patsubst src/sse2/%.asm,build/sse2/%.o,$(SSE2_SRC))
 
-CUDA_OBJ = build/optimization/cuda_code.o
+CUDA_SRC = $(foreach sdir,src/cuda,$(wildcard $(sdir)/*.cu))
+CUDA_OBJ = $(patsubst src/cuda/%.cu,build/cuda/%.o,$(CUDA_SRC))
+
 FULL_OBJ = $(SSE2_OBJ) $(CUDA_OBJ)
 
-#INCLUDES  = $(addprefix -I , $(addprefix src/,$(LIB_MODULES))) 
-INCLUDES  = -I src/ 
+#INCLUDES  = $(addprefix -I , $(addprefix src/,$(MODULES))) 
+INCLUDES  = -I src/
 
 PROGRAMS = $(wildcard src/test/*.cpp)
 EXE      = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,bin/%.exe,$(main)))
 LOGS     = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,output/log/%.log,$(main)))
 
-CXX = $(CXX_BASE) -ggdb $(INCLUDES) $(FACT_FLAGS)
+CXX = $(CXX_BASE) -ggdb $(INCLUDES)
 CXX_LINK = $(CXX_BASE)
-NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES) $(FACT_FLAGS)
+NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES)
 NVCC_LINK = $(NVCC) -L/usr/local/cuda/lib -lcudart 
-NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11  
+NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11
 NASM = nasm -f elf
 
 ifeq (cpp, $(MAKECMDGOALS))
@@ -55,7 +56,7 @@ ifeq (cuda, $(MAKECMDGOALS))
 endif
 ifeq (cuda_emu, $(MAKECMDGOALS))
 	CXX_BASE = g++-4.3
-	NVCC_COMPILE += --device-emulation  
+	NVCC_COMPILE += --device-emulation
 	FACT_OBJ = $(CUDA_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
 endif
@@ -66,7 +67,7 @@ ifeq (all, $(MAKECMDGOALS))
 endif
 ifeq (all_emu, $(MAKECMDGOALS))
 	CXX_BASE = g++-4.3
-	NVCC_COMPILE += --device-emulation  
+	NVCC_COMPILE += --device-emulation
 	FACT_OBJ = $(FULL_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
 endif
@@ -152,9 +153,9 @@ build/test/%.o: src/test/%.cpp
 build/%.o: src/%.cpp src/%.h
 	$(CXX) -c $< -o $@
 
-build/optimization/factory.o: src/optimization/factory.cpp src/optimization/factory.h src/optimization/configFactory.h src/template/*.h $(FACT_OBJ)
-	$(CXX) -c $< -o $@
-build/optimization/cuda_code.o : src/optimization/cuda_code.cu src/optimization/cuda_code.h src/common/util.h
+build/factory/factory.o: src/factory/factory.cpp src/factory/*.h src/factory/cpp/*.h src/factory/sse2/*.h src/factory/cuda/*.h $(FACT_OBJ)
+	$(CXX) $(FACT_FLAGS) -c $< -o $@
+build/cuda/%.o : src/cuda/%.cu src/cuda/cuda.h src/common/util.h
 	$(NVCC_COMPILE) $< -o $@
 build/sse2/%.o : src/sse2/%.asm src/sse2/sse2.h 
 	$(NASM) $< -o $@
