@@ -850,7 +850,7 @@ Si una instrucción no atómica ejecutada en un warp escribe en la misma localiz
 * TODO [1/3] Experimentaci\'on
 #+LaTeX: \label{experimentacion}
 
-En esta sección se describen  los problemas para los que se entrenarán las redes neuronales y las utilidades implementadas para la experimentación.
+En esta sección se describen los problemas para los que se entrenarán las redes neuronales y las utilidades implementadas para la experimentación.
 
 ** DONE Tareas de clasificaci\'on
 #+LaTeX: \label{experimentacionClasif}
