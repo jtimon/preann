@@ -9,14 +9,14 @@
 #define CONFIGFACTORY_H_
 
 #ifdef CPP_IMPL
-#include "template/cppConnection.h"
+#include "cpp/cppConnection.h"
 #endif
 #ifdef SSE2_IMPL
-#include "template/xmmConnection.h"
+#include "sse2/xmmConnection.h"
 #endif
 #ifdef CUDA_IMPL
-#include "template/cudaReductionConnection.h"
-#include "template/cudaInvertedConnection.h"
+#include "cuda/cudaReductionConnection.h"
+#include "cuda/cudaInvertedConnection.h"
 #endif
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
