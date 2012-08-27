@@ -1,5 +1,15 @@
+/** \file chronometer.cpp
+*   \brief Implemetación de los métodos de la clase Chronometer.
+*   \author
+*        \b Jorge Timón Morillo-Velarde\n
+*/
+
 #include "chronometer.h"
 
+/** Constructor por defecto de la clase Chronometer.
+*   \param " " este método no recibe parámetros
+*   \return No devuelve nada
+*/
 Chronometer::Chronometer()
 {
     start_time = -1;
@@ -7,10 +17,18 @@ Chronometer::Chronometer()
     timeInSeconds = 0;
 }
 
+/** Destructor de la clase Chronometer.
+*   \param " " este método no recibe parámetros
+*   \return No devuelve nada
+*/
 Chronometer::~Chronometer()
 {
 }
 
+/** Inicia la cuenta del cronómetro.
+*   \param " " este método no recibe parámetros
+*   \return No devuelve nada
+*/
 void Chronometer::start()
 {
     if (end_time != -1) {
@@ -21,6 +39,10 @@ void Chronometer::start()
     }
 }
 
+/** Detiene la cuenta del cronómetro.
+*   \param " " este método no recibe parámetros
+*   \return No devuelve nada
+*/
 void Chronometer::stop()
 {
     if (start_time == -1) {
@@ -34,6 +56,9 @@ void Chronometer::stop()
     }
 }
 
+/** Devuelve la cuenta almacenada en el cronómetro. Se debe haber llamado antes a Chronometer::stop().
+*   \return Devuelve el número de segundos (con decimales) en la cuenta.
+*/
 float Chronometer::getSeconds()
 {
     return timeInSeconds;
