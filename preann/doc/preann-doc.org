@@ -459,7 +459,8 @@ Gracias al diseño modular por el que se ha optado, es posible añadir otras imp
 
 La primera alternativa implementada es la utilización del conjunto ampliado de instrucciones SSE2 para acceder al co-procesador XMM. Este co-procesador está presente en todos los computadores recientes de la familia x86 liderada por Intel, que es probablemente la arquitectura más extendida en el mundo. La arquitectura vectorial del co-procesador multimedia permite operar sobre varios datos similares al mismo tiempo. En la sección \ref{disenoParalXMM} se explica con más detalle la arquitectura del mismo y como se ha utilizado para paralelizar nuestro algoritmo.
 
-La segunda paralelización obedece a una tendencia bastante más reciente y en alza conocida como GPGPU (General Purpose Graphic Processor Units), que consiste en utilizar las terjetas especializadas en procesar gráficos para procesar otros cálculos que posiblemente nada tengan que ver con los gráficos. Debido a la gran demanda proveniente de diseñadores gráficos y, sobre todo, aficionados a los videojuegos, estos dispositivos comenzaron a tener unas especificaciones que resultaban muy atractivas a gran variedad de investigadores como físicos o bioquímicos. Al principio los investigadores dependian de su ingenio para mapear sus problemas específicos a un algoritmo que usase primitivas gráficas, pero con el creciente interés de esta técnica, los fabricantes decidieron ampliar su mercado de consumidores creando lenguajes específicos para este fin mucho más amigables y con facilidades para la optimización. El lenguaje C CUDA de NVIDIA, con el que desarrollamos la paralelización descrita en la sección \ref{disenoParalCUDA} es un ejemplo de estos lenguajes. Más tarde las compañías decidieron crear un lenguaje común que sirviese para todas las GPUs sin importar la marca llamado OpenCL. Hoy en día muchas de los supercomputadores más potentes del mundo utilizan múltiples GPUs para obtener los altos rendimientos que requieren.
+La segunda paralelización obedece a una tendencia bastante más reciente y en alza conocida como GPGPU (General Purpose Graphic Processor Units), que consiste en utilizar las terjetas especializadas en procesar gráficos para procesar otros cálculos que posiblemente nada tengan que ver con los gráficos. Debido a la gran demanda proveniente de diseñadores gráficos y, sobre todo, aficionados a los videojuegos, estos dispositivos comenzaron a tener unas especificaciones que resultaban muy atractivas a gran variedad de investigadores como físicos o bioquímicos. Al principio los investigadores dependian de su ingenio para mapear sus problemas específicos a un algoritmo que usase primitivas gráficas, pero con el creciente interés de esta técnica, los fabricantes decidieron ampliar su mercado de consumidores creando lenguajes específicos para este fin mucho más amigables y con facilidades para la optimización. El lenguaje C CUDA de NVIDIA, con el que desarrollamos la paralelización descrita en la sección \ref{disenoParalCUDA} es un ejemplo de estos lenguajes. Más tarde las compañías decidieron crear un lenguaje común que sirviese para todas las GPUs sin importar la marca llamado OpenCL. Hoy en día muchas de los supercomputadores más potentes del mundo utilizan múltiples GPUs para obtener los altos rendimientos que requieren[fn:cudaSuperComp].
+
 ** DONE Ensamblador con SSE2
 #+LaTeX: \label{disenoParalXMM}
 *** Introducción al coprocesador XMM
@@ -800,10 +801,6 @@ Ademas, se puede hacer un sistema anfitrión con varias GPUs y hacer llamadas de
 
 *** DONE Arquitectura CUDA
 #+LaTeX: \label{disenoParalCUDAarq}
-
-A Set of SIMT Multiprocessors with On-Chip Shared Memory
-
-La arquitectura CUDA contempla un conjunto de multiprocesadores SIMT (una instrucción, múltiples hilos) con memoria compartida interna.
 
 La arquitectura CUDA se construye alrededor de un conjunto escalable de Multiprocesadoes de flujo (Streaming Multiprocessors, SMs). Cuando un programa CUDA en la CPU anfitrión invoca a un grid de kernel, los bloques del grid son enumerados y destribuidos a los multiprocesadores con capacidad de ejecución (TODO? como se muestra en la figura 4-1). Los hilos de un bloque se ejecutan concurrentemente en un mismo multiprocesador. Cuando los bloques terminan, nuevos bloques son lanzados en los Multiprocesadores que queden libres.
 
@@ -1350,4 +1347,6 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 * Footnotes
 
+[fn:cudaSuperComp] http://gpgpu.org/2010/11/17/gpus-in-3-of-5-fastest-supercomputers
+  http://blogs.nvidia.com/2011/11/gpu-supercomputers-show-exponential-growth-in-top500-list/
 [fn:juegosEstrategiaAbstrac] http://en.wikipedia.org/wiki/Abstract_strategy_game
