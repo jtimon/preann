@@ -9,7 +9,7 @@
 #define XMMBUFFER_H_
 
 #include "neural/buffer.h"
-#include "sse2/sse2_code.h"
+#include "sse2/sse2.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
     class XmmBuffer : virtual public Buffer

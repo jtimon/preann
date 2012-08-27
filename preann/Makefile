@@ -154,12 +154,9 @@ build/%.o: src/%.cpp src/%.h
 
 build/optimization/factory.o: src/optimization/factory.cpp src/optimization/factory.h src/optimization/configFactory.h src/template/*.h $(FACT_OBJ)
 	$(CXX) -c $< -o $@
-	echo $(FACT_OBJ)
-	echo $(SSE2_SRC)
-	echo $(SSE2_OBJ)	
 build/optimization/cuda_code.o : src/optimization/cuda_code.cu src/optimization/cuda_code.h src/common/util.h
 	$(NVCC_COMPILE) $< -o $@
-build/sse2/%.o : src/sse2/%.asm src/sse2/sse2_code.h 
+build/sse2/%.o : src/sse2/%.asm src/sse2/sse2.h 
 	$(NASM) $< -o $@
 
 # TODO dependencias dinamicas
