@@ -682,7 +682,7 @@ Todavía se podrían mejorar las soluciones si contásemos con la arquitectura d
 
 Como hemos dicho, la colocación de los bits para la implementación XMM debe adaptarse para que se puedan obtener los mismos resultados que con el algoritmo implementado en C. Pero además en el algoritmo C no se puede usar el tipo char para los pesos (hay que usar unsigned char) y hay que restarles 128 antes de operar con ellos. Esto podría ralentizar "injustamente" al algoritmo C, por lo que también se hicieron pruebas de rendimiento sin restar 128 y usando el tipo char para comparar los tiempos. Logicamente, esa implementación C no obtiene resultados equivalentes a los de la SSE2, pero tan sólo se pretendía comparar el rendimiento. Sorprendentemente, con esta implementación C se obtenían resultados aún peores. También se probó usadno el tipo unsigned char pero sin restar 128 y el rendimiento era de nuevo ligeramente peor. Por alguna razón que no alcanzamos a explicar, el algoritmo en C funciona más rápido si ha de restar 128 a cada peso. Por ello, dejamos de lado nuestra preocupación sobre la posible penalización causada por nuestra representación de pesos en bytes.
 
-** TODO [0/5] GPGPU con CUDA
+** TODO [2/5] GPGPU con CUDA
 #+LaTeX: \label{disenoParalCUDA}
 
 Debido a la insaciable demanda de mercado de gráficos 3D de alta definición y en tiempo real, las unidades de procesamiento gráfico (Graphic Processor Unit, GPU) han evolucionado en procesadores altamente paralelos y multihilo, con muchos núcleos, tremenda capacidad de computación y con gran ancho de banda de memoria. La técnica consistente en utilizar el este poder computacional para realizar trabajos de proposito general, que pueden no tener nada que ver con los gráficos se denomina GPGPU (General Purpose Graphic Processor Unit). Los pioneros de la técnica buscaban homorfismos entre los algoritmos que pretendían ejecutar y cálculos que las librerías gráficas realizan internamente. 
@@ -691,7 +691,7 @@ Gracias a los lenguajes de alto nivel especializados para GPGPU como C CUDA u Op
 
 Aunque otras arquitecturas gráficas puedan ser similares en muchos aspectos, describiremos los conceptos básicos de la arquitectura CUDA, que es la que hemos utilizado para paralelizar los cálculos de estado de las redes neuronales y que fue diseñada explícitamente para soportar GPGPU incluso desde lenguajes de alto nivel. En principio C, pero luego también otros leguajes como FORTRAN, C++ y OpenCL. Desde la serie NVIDIA GeForce 8000 todas las gráficas que ha producido NVIDIA obedecen a la arquitectura básica CUDA (excepto las específicas para dispositivos móviles, que siguen la aruitectura Tegra). Aunque tarjetas posteriores ofrecen nuevas capacidades y posibilidades de ajuste de los algoritmos, son retrocompatibles con respecto al código implementado para versiones anteriores.
 
-*** TODO Modelo de programación
+*** DONE Modelo de programación
 #+LaTeX: \label{disenoParalCUDAprog}
 
 C para CUDA es una extensión de C que permite al programador difinir funciones, llamadas núcleos (kernels) que cuando son llamadas se ejecutan N veces por N hilos CUDA diferentes, en vez de una sola vez como las funciones C habituales. Para definir un kernel se usa el especificador de declaración =__global__= y el número de hilos CUDA para cada llamada se especifica con la nueva sintaxis ~<<<...>>>~ del siguiente ejemplo:
@@ -798,7 +798,7 @@ Por tanto, un programa gestiona los espacios de memoria global, de constantes y 
 
 Ademas, se puede hacer un sistema anfitrión con varias GPUs y hacer llamadas de kernels con diferentes datos y configuraciones a cada uno de los dispoitivos. En el presente proyecto, sin embargo, se prescinde de esa posibilidad, así como de usar las memorias de constantes y de texturas.
 
-*** TODO Arquitectura CUDA
+*** DONE Arquitectura CUDA
 #+LaTeX: \label{disenoParalCUDAarq}
 
 A Set of SIMT Multiprocessors with On-Chip Shared Memory
@@ -838,6 +838,15 @@ Si una instrucción no atómica ejecutada en un warp escribe en la misma localiz
 #+LaTeX: \label{disenoParalCUDAsal}
 *** TODO Matriz de pesos invertida
 #+LaTeX: \label{disenoParalCUDAinv}
+* TODO [0/3] Manual del programador
+#+LaTeX: \label{manualProgr}
+** TODO Guia de instalación
+#+LaTeX: \label{manualProgrInstal}
+** TODO Uso general (API)
+#+LaTeX: \label{manualProgrApi}
+** TODO Extensibilidad a partir de interfaces
+#+LaTeX: \label{manualProgrInterf}
+\newpage
 * TODO [1/3] Experimentaci\'on
 #+LaTeX: \label{experimentacion}
 
@@ -861,7 +870,7 @@ Puede parecer poco intuitivo que el cálculo de estas operaciones lógicas const
 
 Expresado de otra forma, si llamamos c0 a la clase 0 y c1 a la clase 1, para la clasificación OR la entrada {00} pertenece a c0 y las entradas {10, 01, 11} pertenecen a c1; para AND, {00, 10, 01} pertenecen a c0 y {11} a c1; para XOR {00, 11} pertenecen a c0 y {10, 01} pertenecen a c1.
 
-Como se describió en el capítulo \ref{analisis}, para que nuestro sistema pueda aprender una tarea nueva, sólo es necesario implementar una clase que herede de la interzaz Task, en este caso, la clase implementada es BinaryTask. El método más importante es test, que toma un individuo como parámetro, lo prueba y le asigna el fitness resultante. También es importante el método setInputs, con el que se conectan las variables internas de la tarea con las entradas de la red neuronal de un individuo. Por último, getExample devuelve un individuo construido cuya estructura es suficiente para aprender la tarea concreta para la que se quiere entrenar a la población.
+Como se describió en el capítulo \ref{manualProgrInterf}, para que nuestro sistema pueda aprender una tarea nueva, sólo es necesario implementar una clase que herede de la interzaz Task, en este caso, la clase implementada es BinaryTask. El método más importante es test, que toma un individuo como parámetro, lo prueba y le asigna el fitness resultante. También es importante el método setInputs, con el que se conectan las variables internas de la tarea con las entradas de la red neuronal de un individuo. Por último, getExample devuelve un individuo construido cuya estructura es suficiente para aprender la tarea concreta para la que se quiere entrenar a la población.
 
 La clase BinaryTask es bastante flexible respecto a cómo puede ser inicializada. Hay dos parámetros que son olbigatorios: un enumerado BinaryOperation que indica que tipo de operación será realizada (BO_OR, BO_AND ó BO_XOR) y el tamaño de los vectores de entrada, que es igual al tamaño del de salida.
 Existe un tercer parámetro optativo numTests que hace referencia al número de pruebas para evaluar a un individuo. Si no se rellena, se probarán todas las combinaciones posibles entre los dos vectores de entrada; si se rellena, determinará el número de pruebas aleatorias que se realizarán para probar a cada individuo. Para las dos posibilidades, el individuo empieza con una puntuación igual al número de diferencias con las salidas esperadas que podría obtener cómo máximo y se irán restando las diferencias que se vayan encontrando. Así, la puntuación del inndividuo será mejor cuanto menor sea el número de diferencias sigueindo la siguiente fórmula: Fitness = Número máximo de diferencias posibles - número de diferencias obtenidas.
@@ -876,19 +885,6 @@ Para que esta tarea pueda ser realizada por neuronas binarias, bipolares y reale
 
 ** TODO Utilidades para la experimentación
 #+LaTeX: \label{experimentacionUtil}
-
-* TODO [0/3] Manual del programador
-#+LaTeX: \label{disenoInterfProgr}
-** TODO Guia de instalación
-** TODO Uso general (API)
-** TODO Extensibilidad a partir de interfaces
-\newpage
-* Documentación del código
-
-TODO mirar si hay que dejarlo aparte o se puede meter sin estropear el indice
-
-#   +LaTeX: \subimport{doxygen/latex/}{refman.tex}
-
 * TODO Resultados: Rendimiento
 #+LaTeX: \label{rendimiento}
 En esta sección se analizan resultados de rendimiento en tiempo de ejecución.
@@ -1328,3 +1324,10 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 
 \end{thebibliography}
+* TODO [0/2] Ediciones menores
+- [ ] Poner imagenes en parte CUDA
+- [ ] Documentación del código
+	  TODO mirar si hay que dejarlo aparte o se puede meter sin estropear el indice
+#   +LaTeX: \subimport{doxygen/latex/}{refman.tex}
+
+
