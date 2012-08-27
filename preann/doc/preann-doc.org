@@ -844,6 +844,10 @@ La primera aproximación para la implementación de nuestro algoritmo genérico 
 #+LaTeX: \label{manualProgr}
 ** TODO Guia de instalación
 #+LaTeX: \label{manualProgrInstal}
+
+sudo aptitude install make g++ nasm gnuplot
+sudo aptitude install texlive-latex-recommended texlive-latex-extra
+
 ** TODO Uso general (API)
 #+LaTeX: \label{manualProgrApi}
 ** TODO Extensibilidad a partir de interfaces
