@@ -6,21 +6,23 @@
 
 SHELL = /bin/sh
 
-MODULES   = common optimization neural genetic game tasks loop loopTest   
+MODULES   = common optimization neural genetic game tasks loop loopTest 
 LIB_MODULES = $(MODULES) template  
 
 SRC_DIR   = $(addprefix src/,$(MODULES))  
-BUILD_DIR = $(addprefix build/,$(MODULES)) build/test/
+BUILD_DIR = $(addprefix build/,$(MODULES)) build/test/ build/sse2
 OUTPUT_DIR = $(CURDIR)/output/
 LOG_DIR = $(CURDIR)/output/log/
 
 SRC       = $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
+OBJ       = $(patsubst src/%.cpp,build/%.o,$(SRC))
 
-SSE2_OBJ = build/optimization/sse2_code.o
+SSE2_SRC = $(foreach sdir,src/sse2,$(wildcard $(sdir)/*.asm))
+SSE2_OBJ = $(patsubst src/sse2/%.asm,build/sse2/%.o,$(SSE2_SRC))
+
 CUDA_OBJ = build/optimization/cuda_code.o
 FULL_OBJ = $(SSE2_OBJ) $(CUDA_OBJ)
 
-OBJ       = $(patsubst src/%.cpp,build/%.o,$(SRC))
 #INCLUDES  = $(addprefix -I , $(addprefix src/,$(LIB_MODULES))) 
 INCLUDES  = -I src/ 
 
@@ -68,22 +70,46 @@ ifeq (all_emu, $(MAKECMDGOALS))
 	FACT_OBJ = $(FULL_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
 endif
+ifeq (cpp_64, $(MAKECMDGOALS))
+	CXX_BASE = g++ -m32
+	NVCC_LINK = $(CXX_LINK)
+	FACT_FLAGS = -DCPP_IMPL
+endif
+ifeq (sse2_64, $(MAKECMDGOALS))
+	CXX_BASE = g++ -m32
+	NVCC_LINK = $(CXX_LINK)
+	FACT_OBJ = $(SSE2_OBJ)
+	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
+endif
+ifeq (cuda_64, $(MAKECMDGOALS))
+	CXX_BASE = g++ -m32
+	NVCC += -m32 
+	FACT_OBJ = $(CUDA_OBJ)
+	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
+endif
+ifeq (all_64, $(MAKECMDGOALS))
+	CXX_BASE = g++ -m32
+	NVCC += -m32 
+	FACT_OBJ = $(FULL_OBJ)
+	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
+endif
 
 OBJ += $(FACT_OBJ)
 
-.PHONY: all clean checkdirs cpp sse2 cuda cuda_emu all_emu
+.PHONY: all clean checkdirs cpp sse2 cuda cuda_emu all_emu cpp_64 sse2_64 cuda_64 all_64
 .SECONDARY:
 
-cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
+cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
 #	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe $(CURDIR)/
 #	./bin/testConnections.exe
 #	./bin/testLayers.exe $(CURDIR)/
 #	./bin/testPlot.exe $(OUTPUT_DIR)
-	./bin/chronoBuffers.exe $(OUTPUT_DIR)
-	./bin/chronoConnections.exe $(OUTPUT_DIR)
-	./bin/chronoBlockSizes.exe $(OUTPUT_DIR)
-	./bin/chronoFunctions.exe $(OUTPUT_DIR)
+#	./bin/chronoBuffers.exe $(OUTPUT_DIR)
+#	./bin/chronoConnections.exe $(OUTPUT_DIR)
+#	./bin/chronoBlockSizes.exe $(OUTPUT_DIR)
+#	./bin/chronoFunctions.exe $(OUTPUT_DIR)
+#	./bin/chronoCalculateAndAdd.exe $(OUTPUT_DIR)
 #	./bin/chronoIndividual.exe $(OUTPUT_DIR)
 #	./bin/chronoPopulation.exe $(OUTPUT_DIR)
 #	./bin/learnBufferType.exe $(OUTPUT_DIR)
@@ -121,17 +147,19 @@ output/log/%.log: bin/%.exe
 bin/%.exe: build/test/%.o $(OBJ)
 	$(NVCC_LINK) $^ -o $@
 #	./$@ > $(patsubst bin/%.exe,output/log/%.log,$@)
-build/test%.o: src/test%.cpp
+build/test/%.o: src/test/%.cpp
 	$(CXX) -c $< -o $@
 build/%.o: src/%.cpp src/%.h
 	$(CXX) -c $< -o $@
 
 build/optimization/factory.o: src/optimization/factory.cpp src/optimization/factory.h src/optimization/configFactory.h src/template/*.h $(FACT_OBJ)
 	$(CXX) -c $< -o $@
-
+	echo $(FACT_OBJ)
+	echo $(SSE2_SRC)
+	echo $(SSE2_OBJ)	
 build/optimization/cuda_code.o : src/optimization/cuda_code.cu src/optimization/cuda_code.h src/common/util.h
 	$(NVCC_COMPILE) $< -o $@
-build/optimization/sse2_code.o : src/optimization/sse2_code.asm src/optimization/sse2_code.h 
+build/sse2/%.o : src/sse2/%.asm src/sse2/sse2_code.h 
 	$(NASM) $< -o $@
 
 # TODO dependencias dinamicas
