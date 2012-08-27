@@ -847,7 +847,7 @@ Si una instrucción no atómica ejecutada en un warp escribe en la misma localiz
 ** TODO Extensibilidad a partir de interfaces
 #+LaTeX: \label{manualProgrInterf}
 \newpage
-* TODO [1/3] Experimentaci\'on
+* TODO [2/3] Experimentaci\'on
 #+LaTeX: \label{experimentacion}
 
 En esta sección se describen los problemas para los que se entrenarán las redes neuronales y las utilidades implementadas para la experimentación.
@@ -880,8 +880,24 @@ No rellenar el número de pruebas y dejar que se evalúen todas las posibilidade
 
 Para que esta tarea pueda ser realizada por neuronas binarias, bipolares y reales, en lugar de comparar la salida de la neurona directamente con la salida deseada se usarán aproximaciones. Se entenderá que en la salida de las redes neuronales, cualquier valor mayor o igual a 0.5 es equivalente a un 1 y cualquier valor menor que 0.5 (por ejemplo -1 para una neurona bipolar; 0.1 ó -7 para una neurona real) es equivalente a un 0. Esto se podría implementar con una capa adicional, pero se ha preferido por simplicidad hacerlo directamente dentro de la clase BinaryTask.
 
-** TODO Juegos de estrategia abstractos
+** DONE Juegos de estrategia abstractos
 #+LaTeX: \label{experimentacionJuegos}
+
+En la sección anterior \ref{experimentacionClasif} hemos visto ejemplos de tareas para las que se podían entrenar redes neuronales con el método tradicional de retropropagación del error. En esta sección nos dedicaremos a una tarea para la que no es tan fácil conocer las salidas deseadas. Los juegos de estrategia abstractos [fn:juegosEstrategiaAbstrac] son aquellos juegos de estrategia para los que se trata de minimizar el factor suerte y que carecen de trasfondo o ambientación. Casi todos entran dentro de las categorías de tablero, cartas o piezas (como el dominó). No tienen información oculta ni elementos no determinísticos y frecuentemente se juegan por dos jugadores en turnos alternativos.
+
+Nos hemos centrado en los juegos de tablero y en concreto en el juego conocido como Othello o Reversi. Otros juegos de estrategía abstractos de tablero podrían ser las damas, el tres en raya, el ajedrez, el go, el arimaa, etc. El tres en raya y las damas, por ejemplo, son problemas completamente resueltos matemáticamente y en esos casos sí sería relativamente fácil emparejar todas las posibles entradas con sus salidas deseadas para poder así entrenar a una red neuronal mediante retropropagación, pero no son particularmente interesantes desde el punto de vista del aprendizaje artificial. En otros juegos, los algoritmos de poda alfa-beta con alguna heurística diseñada por expertos y ejecutados en computadores son ampliamente superiores a los jugadores profesionales de los mismos. Es el caso del Reversi y el ajedrez.
+En otros juegos, el árbol de posibilidades crece tanto con cada nivel que la ventaja de una mayor lectura en profundidad que disfrutan las máquinas se desvanece y la intuición humana aún es superior al cálculo computacional, por increíble que pueda parecer. El juego del Go (cercado), a pesar de tener un tablero tan simple como el del Reversi y pocas reglas simples de enumerar entra en esta categoría. Es un juego asiático más antiguo que el ajedrez y muy célebre en oriente, en especial en China (weiqui), Korea (baduk) y Japón (igo). Por el momento, la mejor de las máquinas (que no usa poda alfa-beta sino métodos probabilísticos como TODO) no es capaz de ganar al peor de los jugadores profesionales.
+El Arimaa es un juego inventado recientmente (TODO poner fecha) con el objetivo específico de que los algoritmos habituales de búsqueda en profundidad no fuesen efectivos. Es parecido al ajedrez, pero hay casillas especiales, los movimientos cambian y algunas piezas pueden mover dos veces.
+
+Aunque nuestras redes también pueden ser entrenadas para dar una heurística para juegos como el Ajedrez y el Arimaa, hemos preferido optar por los juegos más simples de implementar con piezas de un sólo tipo (el Reversi y el Go), pues esto permitirá reutilizar más código y también puede ser interesante éstudiar el aprendizaje de redes bipolares en este tipo de juegos. Se ha  implementado un tablero que serviría para ambos juegos, pero sólo se ha implementado la tarea Reversi. Para la terea Go, extremadamente interesante, se recomienda utilizar algún jugador ya implementado mediante software libre como puede ser GnuGo o FueGo.
+
+Este tipo de tareas se implementará de forma general haciendo que las redes neuronales actúen como una heurística. Esta heurística puede ser usada como la base de un algoritmo de poda alfa-beta con profundidad configurable o simplemente considerando solamente el conjunto de todos los movimientos legales inmediatos, que es lo que se ha hecho para el caso Reversi. Para evaluar las redes neuronales, en lugar de enfrentarlas entre sí, se ha preferido utilizar un adversario también automático pero no basado en redes neuronales. Así, cada red que quiera ser evaluada se enfrenta a este jugador una o varias veces y se acumulan los resultados para obtener el fitness.
+
+El jugador que se ha implementado para Reversi es extremadamente simple, pero, aún así, es capáz de ganar al jugador humano casual. No utiliza poda  alfa-beta, sino simplemente evalua todos los movimientos legales inmediatos y elige el mejor, igual que lo harán los jugadores neuronales. La diferencia es que el oponente no utiliza una red neuronal como heurística. La heurística del oponente consiste simplemente en contar la puntuación que resultaría si se realizase un movimiento concreto, como si la partida acabase en ese momento. El oponente, por tanto, tiene acceso a la puntuación actual de cada movimiento hipotético y en eso basa su heurística. La red neuronal, sin embargo, no tiene acceso a esas puntuaciones: solamente toma como entrada el tablero resultante de cada movimiento hipotético y debe con eso dar una aproximación de lo bueno que es el movimiento. Para poder ganar a nuestro oponente tendrá que ser capáz, por lo menos, de ser capaz de calcular la puntuación de forma similar a su oponente. No obstante, la red neuronal actúa como una caja negra y no sabemos realmente en qué criterios internos se está basando. Lo que sí se podría hacer es construir un circuito lógico equivalente a la red neuronal para analizarlo y tratar de extraer conclusiones sobre la estrategia aprendida.
+
+La tarea Reversi se implementa en la clase ReversiTask que también hereda de la clase abstracta Task y que utiliza la clase ReversiBoard que implementa las reglas de juego de Reversi y que, a su vez, hereda de la clase que implementa el el tablero genérico para juegos con piezas iguales pero de dos jugadores Board. Éste último siempre es de un tamaño cuadrado (las mismas casillas a lo largo que a lo ancho) pero el tablero de Reversi tiene, además, la restricción de ser como mínimo de un tamaño 4x4. Esto es así por que las cuatro piezas centrales (2x2) empiezan ya rellenas para que los juegadores tengan movimientos legales al inicio.
+
+TODO ¿debo explicar las reglas del juego?
 
 ** TODO Utilidades para la experimentación
 #+LaTeX: \label{experimentacionUtil}
@@ -1324,10 +1340,14 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 
 \end{thebibliography}
-* TODO [0/2] Ediciones menores
+* TODO [0/3] Ediciones menores
 - [ ] Poner imagenes en parte CUDA
+- [ ] TODOs en experimentación
 - [ ] Documentación del código
 	  TODO mirar si hay que dejarlo aparte o se puede meter sin estropear el indice
-#   +LaTeX: \subimport{doxygen/latex/}{refman.tex}
+      #   +LaTeX: \subimport{doxygen/latex/}{refman.tex}
 
 
+* Footnotes
+
+[fn:juegosEstrategiaAbstrac] http://en.wikipedia.org/wiki/Abstract_strategy_game
