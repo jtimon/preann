@@ -831,6 +831,11 @@ Si una instrucción no atómica ejecutada en un warp escribe en la misma localiz
 
 *** TODO Reducción paralelizada
 #+LaTeX: \label{disenoParalCUDAreduc}
+
+La primera aproximación para la implementación de nuestro algoritmo genérico de cálculo de estado de una capa de red neuronal sobre la arquitectura CUDA estaba claramente influída por la optimización SSE2 anterior. Aquella función de ensamblador calculaba el resultado para una neurona de salida. En este primer kernel CUDA haremos lo mismo: cada llamada al kernel nos servirá para calcular la salida de un neurona (de nuevo, dejando la función de activación aparte).
+
+
+
 *** TODO Paralelizar las salidas
 #+LaTeX: \label{disenoParalCUDAsal}
 *** TODO Matriz de pesos invertida
@@ -880,7 +885,7 @@ Para que esta tarea pueda ser realizada por neuronas binarias, bipolares y reale
 ** DONE Juegos de estrategia abstractos
 #+LaTeX: \label{experimentacionJuegos}
 
-En la sección anterior \ref{experimentacionClasif} hemos visto ejemplos de tareas para las que se podían entrenar redes neuronales con el método tradicional de retropropagación del error. En esta sección nos dedicaremos a una tarea para la que no es tan fácil conocer las salidas deseadas. Los juegos de estrategia abstractos [fn:juegosEstrategiaAbstrac] son aquellos juegos de estrategia para los que se trata de minimizar el factor suerte y que carecen de trasfondo o ambientación. Casi todos entran dentro de las categorías de tablero, cartas o piezas (como el dominó). No tienen información oculta ni elementos no determinísticos y frecuentemente se juegan por dos jugadores en turnos alternativos.
+En la sección anterior \ref{experimentacionClasif} hemos visto ejemplos de tareas para las que se podían entrenar redes neuronales con el método tradicional de retropropagación del error. En esta sección nos dedicaremos a una tarea para la que no es tan fácil conocer las salidas deseadas. Los juegos de estrategia abstractos[fn:juegEstratAbst] son aquellos juegos de estrategia para los que se trata de minimizar el factor suerte y que carecen de trasfondo o ambientación. Casi todos entran dentro de las categorías de tablero, cartas o piezas (como el dominó). No tienen información oculta ni elementos no determinísticos y frecuentemente se juegan por dos jugadores en turnos alternativos.
 
 Nos hemos centrado en los juegos de tablero y en concreto en el juego conocido como Othello o Reversi. Otros juegos de estrategía abstractos de tablero podrían ser las damas, el tres en raya, el ajedrez, el go, el arimaa, etc. El tres en raya y las damas, por ejemplo, son problemas completamente resueltos matemáticamente y en esos casos sí sería relativamente fácil emparejar todas las posibles entradas con sus salidas deseadas para poder así entrenar a una red neuronal mediante retropropagación, pero no son particularmente interesantes desde el punto de vista del aprendizaje artificial. En otros juegos, los algoritmos de poda alfa-beta con alguna heurística diseñada por expertos y ejecutados en computadores son ampliamente superiores a los jugadores profesionales de los mismos. Es el caso del Reversi y el ajedrez.
 En otros juegos, el árbol de posibilidades crece tanto con cada nivel que la ventaja de una mayor lectura en profundidad que disfrutan las máquinas se desvanece y la intuición humana aún es superior al cálculo computacional, por increíble que pueda parecer. El juego del Go (cercado), a pesar de tener un tablero tan simple como el del Reversi y pocas reglas simples de enumerar entra en esta categoría. Es un juego asiático más antiguo que el ajedrez y muy célebre en oriente, en especial en China (weiqui), Korea (baduk) y Japón (igo). Por el momento, la mejor de las máquinas (que no usa poda alfa-beta sino métodos probabilísticos como TODO) no es capaz de ganar al peor de los jugadores profesionales.
@@ -1337,16 +1342,23 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 
 \end{thebibliography}
-* TODO [0/3] Ediciones menores
+* TODO [0/8] Cosas por hacer desperdigadas
 - [ ] Poner imagenes en parte CUDA
 - [ ] TODOs en experimentación
-- [ ] Documentación del código
-	  TODO mirar si hay que dejarlo aparte o se puede meter sin estropear el indice
-      #   +LaTeX: \subimport{doxygen/latex/}{refman.tex}
-
-
+- [ ] (Teoría: redes neuronales) Explicar la necesidad de funciones de activación continuas para retropropagación
+- [ ] (Teoría: redes neuronales) Explicar imposibilidad de recursividad con retropropagación
+- [ ] (Teoría: algoritmos genéticos) Introducir a GENITOR con bibliografía
+- [ ] (Teoría: algoritmos genéticos/neuro evolución) Introducir representación fregona con bibliografía
+- [ ] (Teoría: neuro evolución) NeuroEvolution of Augmenting Topologies (NEAT)
+- [ ] (Teoría: neuro evolución) Redes recurrentes, pybrain, Jürgen Schmidhuber
 * Footnotes
 
-[fn:cudaSuperComp] http://gpgpu.org/2010/11/17/gpus-in-3-of-5-fastest-supercomputers
-  http://blogs.nvidia.com/2011/11/gpu-supercomputers-show-exponential-growth-in-top500-list/
-[fn:juegosEstrategiaAbstrac] http://en.wikipedia.org/wiki/Abstract_strategy_game
+[fn:cudaSuperComp]
+\newline
+http://gpgpu.org/2010/11/17/gpus-in-3-of-5-fastest-supercomputers
+\newline
+http://blogs.nvidia.com/2011/11/gpu-supercomputers-show-exponential-growth-in-top500-list/
+
+[fn:juegEstratAbst]
+\newline
+http://en.wikipedia.org/wiki/Abstract_strategy_game
