@@ -832,9 +832,11 @@ Si una instrucción no atómica ejecutada en un warp escribe en la misma localiz
 *** TODO Reducción paralelizada
 #+LaTeX: \label{disenoParalCUDAreduc}
 
-La primera aproximación para la implementación de nuestro algoritmo genérico de cálculo de estado de una capa de red neuronal sobre la arquitectura CUDA estaba claramente influída por la optimización SSE2 anterior. Aquella función de ensamblador calculaba el resultado para una neurona de salida. En este primer kernel CUDA haremos lo mismo: cada llamada al kernel nos servirá para calcular la salida de un neurona (de nuevo, dejando la función de activación aparte).
+La primera aproximación para la implementación de nuestro algoritmo genérico de cálculo de estado de una capa de red neuronal sobre la arquitectura CUDA estaba claramente influída por la optimización SSE2 anterior. Aquella función de ensamblador calculaba el resultado para una neurona de salida. En este primer kernel CUDA haremos lo mismo: cada llamada al kernel nos servirá para calcular la salida de un neurona (de nuevo, dejando la función de activación aparte). De este modo, cada hilo hará una multiplicación entre una entrada y un peso y luego se sumarán todos los resultados usando una reducción paralela.
 
+En la sección \ref{disenoParalXMMbyte} utilizamos una instrucción especial para hacer la reducción y poder sumar los 16 elementos de un bloque, pero no existe una instrucción similar en CUDA. En \ref{disenoParalXMMfloat} se acumulaban los resultados en un registro con cuatro floats que se sumaban al final. El modo en que se sumaban no era lo que más aceleraba al algortimo, pero nos da una pista de lo que debemos hacer. Primero se sumaban dos y dos en una sóla instrucción (tras dduplicar el registro y desplazarlo) y después los otros dos resultantes. Generalizando a cualquier número de elementos iniciales y sumando los elementos de dos en dos de forma paralela, vemos que lo que tenemos que usar es una reducción en árbol\cite[Harris2007]{Harris2007}.
 
+SEGUIR
 
 *** TODO Paralelizar las salidas
 #+LaTeX: \label{disenoParalCUDAsal}
@@ -892,8 +894,10 @@ Para que esta tarea pueda ser realizada por neuronas binarias, bipolares y reale
 En la sección anterior \ref{experimentacionClasif} hemos visto ejemplos de tareas para las que se podían entrenar redes neuronales con el método tradicional de retropropagación del error. En esta sección nos dedicaremos a una tarea para la que no es tan fácil conocer las salidas deseadas. Los juegos de estrategia abstractos[fn:juegEstratAbst] son aquellos juegos de estrategia para los que se trata de minimizar el factor suerte y que carecen de trasfondo o ambientación. Casi todos entran dentro de las categorías de tablero, cartas o piezas (como el dominó). No tienen información oculta ni elementos no determinísticos y frecuentemente se juegan por dos jugadores en turnos alternativos.
 
 Nos hemos centrado en los juegos de tablero y en concreto en el juego conocido como Othello o Reversi. Otros juegos de estrategía abstractos de tablero podrían ser las damas, el tres en raya, el ajedrez, el go, el arimaa, etc. El tres en raya y las damas, por ejemplo, son problemas completamente resueltos matemáticamente y en esos casos sí sería relativamente fácil emparejar todas las posibles entradas con sus salidas deseadas para poder así entrenar a una red neuronal mediante retropropagación, pero no son particularmente interesantes desde el punto de vista del aprendizaje artificial. En otros juegos, los algoritmos de poda alfa-beta con alguna heurística diseñada por expertos y ejecutados en computadores son ampliamente superiores a los jugadores profesionales de los mismos. Es el caso del Reversi y el ajedrez.
-En otros juegos, el árbol de posibilidades crece tanto con cada nivel que la ventaja de una mayor lectura en profundidad que disfrutan las máquinas se desvanece y la intuición humana aún es superior al cálculo computacional, por increíble que pueda parecer. El juego del Go (cercado), a pesar de tener un tablero tan simple como el del Reversi y pocas reglas simples de enumerar entra en esta categoría. Es un juego asiático más antiguo que el ajedrez y muy célebre en oriente, en especial en China (weiqui), Korea (baduk) y Japón (igo). Por el momento, la mejor de las máquinas (que no usa poda alfa-beta sino métodos probabilísticos como TODO) no es capaz de ganar al peor de los jugadores profesionales.
-El Arimaa es un juego inventado recientmente (TODO poner fecha) con el objetivo específico de que los algoritmos habituales de búsqueda en profundidad no fuesen efectivos. Es parecido al ajedrez, pero hay casillas especiales, los movimientos cambian y algunas piezas pueden mover dos veces.
+
+En otros juegos, el árbol de posibilidades crece tanto con cada nivel que la ventaja de una mayor lectura en profundidad que disfrutan las máquinas se desvanece y la intuición humana aún es superior al cálculo computacional, por increíble que pueda parecer. El juego del Go (cercado), a pesar de tener un tablero tan simple como el del Reversi y pocas reglas simples de enumerar entra en esta categoría. Es un juego asiático más antiguo que el ajedrez y muy célebre en oriente, en especial en China (weiqui), Korea (baduk) y Japón (igo). Por el momento, la mejor de las máquinas (que no usa poda alfa-beta sino métodos probabilísticos y altamente paralelizables como el algortimo de Monte Carlo\cite[Chaslot2010]{Chaslot2010}) no es capaz de ganar al peor de los jugadores profesionales.
+
+El Arimaa es un juego diseñado recientemente con el objetivo específico de que los algoritmos habituales de búsqueda en profundidad no fuesen efectivos  \cite[Syed03]{Syed03}. Es parecido al ajedrez, con el mismo tablero y piezas, pero sin una configuración inicial preestablecida, con casillas especiales, turnos de dos pasos independientes, movimientos de cambiar de posición una pieza con la del contrario, etc.
 
 Aunque nuestras redes también pueden ser entrenadas para dar una heurística para juegos como el Ajedrez y el Arimaa, hemos preferido optar por los juegos más simples de implementar con piezas de un sólo tipo (el Reversi y el Go), pues esto permitirá reutilizar más código y también puede ser interesante éstudiar el aprendizaje de redes bipolares en este tipo de juegos. Se ha  implementado un tablero que serviría para ambos juegos, pero sólo se ha implementado la tarea Reversi. Para la terea Go, extremadamente interesante, se recomienda utilizar algún jugador ya implementado mediante software libre como puede ser GnuGo o FueGo.
 
@@ -1338,17 +1342,21 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 %Desde luego, he aprendido que la bibliografía es mejor prepararla sobre la marcha que al toda final.
 %
 
-  \bibitem{Yao99} \textsc{Xin Yao}: \emph{Evolving Artificial Neural Networks}. School of Computer Science, The University of Birmingham (1999).
+\bibitem{Yao99} \textsc{Xin Yao}: \emph{Evolving Artificial Neural Networks}. School of Computer Science, The University of Birmingham (1999).
 
-  \bibitem{GomezMiikkulainen2003} \textsc{Faustino J. G\'omez y Risto Miikkulainen}: \emph{Robust Non-Linear Control through Neuroevolution}. Deparment of Computer Science, The University of Texas (2003).
+\bibitem{GomezMiikkulainen2003} \textsc{Faustino J. G\'omez y Risto Miikkulainen}: \emph{Robust Non-Linear Control through Neuroevolution}. Deparment of Computer Science, The University of Texas (2003).
 
-  \bibitem{Bertona2005} \textsc{Luis Federico Bertona}: \emph{Entrenamiento de redes neuronales basado en algoritmos evolutivos}. Faculad de ingenier\'ia, Universidad de Buenos Aires (2005).
+\bibitem{Bertona2005} \textsc{Luis Federico Bertona}: \emph{Entrenamiento de redes neuronales basado en algoritmos evolutivos}. Faculad de ingenier\'ia, Universidad de Buenos Aires (2005).
 
+\bibitem{Harris2007} \textsc{Mark Harris}: \emph{Optimizing Parallel Reduction in CUDA}. NVIDIA Developer Technology, (2007).
+
+\bibitem{Chaslot2010} \textsc{Guillaume Maurice Jean-Bernard Chaslot}: \emph{Monte-Carlo Tree Search}. Tésis doctoral, Universiteit Maastricht, Maastricht, Holanda (2010).
+
+\bibitem{Syed03} \textsc{Syed, Omar; Syed, Aamir}: \emph{Arimaa – a New Game Designed to be Difficult for Computers}. International Computer Games Association Journal (2003).
 
 \end{thebibliography}
-* TODO [0/8] Cosas por hacer desperdigadas
+* TODO [1/8] Cosas por hacer desperdigadas
 - [ ] Poner imagenes en parte CUDA
-- [ ] TODOs en experimentación
 - [ ] (Teoría: redes neuronales) Explicar la necesidad de funciones de activación continuas para retropropagación
 - [ ] (Teoría: redes neuronales) Explicar imposibilidad de recursividad con retropropagación
 - [ ] (Teoría: algoritmos genéticos) Introducir a GENITOR con bibliografía
