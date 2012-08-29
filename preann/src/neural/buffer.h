@@ -61,7 +61,6 @@ public:
     void* getDataPointer();
     unsigned getSize();
 
-    FunctionType getFunctionType();
     Interface* toInterface();
 
     void save(FILE* stream);
