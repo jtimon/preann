@@ -22,6 +22,8 @@
 #+OPTIONS:     toc:nil H:5
 #+BIND: org-export-latex-title-command ""
 
+#+TODO: HACER MODIFICAR | REVISAR HECHO
+
 # definiciones propias
 #+begin_latex
 
@@ -98,7 +100,7 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
 \newpage
 #+end_latex
 
-* TODO Introducci\'on
+* HACER Introducci\'on
 #+LaTeX: \label{intro}
 
  El /aprendizaje autom\'atico/ es una rama de la inteligencia artificial que trata de construir sistemas inform\'aticos que optimicen un criterio de rendimiento utilizando datos o experiencia previa. Dentro del aprendizaje autom\'atico, las t\'ecnicas se clasifican en base a su entrenamiento como supervisado o no supervisado. En el primero, al sistema se le suministran ejemplos de entradas con sus correspondientes salidas deseadas. En el entrenamiento no supervisado, no se tienen a priori ejemplos de c\'omo deber\'ia comportarse el sistema. El aprendizaje por refuerzo es un caso especial de aprendizaje supervisado en que la salida deseada exacta es desconocida. Se basa s\'olo en informaci\'on sobre si la salida actual es correcta o no. Al agente que se quiere que aprenda se le provee informaci\'on sobre lo bien o lo mal que est\'a actuando. Esta se\~nal de recompensa puede serle indicada bien cada vez que el agente act\'ua, bien al final de una prueba completa durante la que realiza varias acciones.
@@ -121,7 +123,7 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
  En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado \flqq Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos\frqq, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. Los rendimientos obtenidos con las diferentes implementaciones paralelas y opciones en el algortimo genético se muestran en el capítulo \ref{rendimiento}.En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados de aprendizaje \ref{aprendizaje} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
 
 \newpage
-* TODO [0/4] Base te\'orica
+* HACER [0/4] Base te\'orica
 #+LaTeX: \label{baseTeorica}
 
 Tanto las redes neuronales como los algoritmos gen\'eticos est\'an inspirados en la naturaleza y han sido utilizados desde largo tiempo atr\'as. Las redes neuronales est\'an inspiradas en el funcionamiento del cerebro, como un sistema de procesamiento de informaci\'on distribuido. Por su parte, los algoritmos gen\'eticos se basan en la teor\'ia de la evoluci\'on de Darwin, por la que la evoluci\'on se produce a trav\'es de dos principios b\'asicos: los individuos que no se adaptan suficientemente al medio perecen, mientras que los que s\'i lo hacen transmiten sus genes con cierta variabilidad. Esta variabilidad puede proceder de dos fuentes: la cruza de genes entre individuos \'o la mutaci\'on directa de genes.
@@ -130,7 +132,7 @@ La combinaci\'on de estas dos t\'ecnicas es algo relativamente reciente. Algunos
 
 A continuaci\'on explicaremos m\'as detalladamente las bases te\'oricas de las tres t\'ecnicas: redes neuronales, algoritmos gen\'eticos y neuro-evoluci\'on. Nos centraremos principalmente en los algoritmos y estructuras que m\'as se asemejan a los implementamos en nuestra librer\'ia.
 
-** TODO Redes neuronales
+** HACER Redes neuronales
 #+LaTeX: \label{basTeoRedes}
 
 Las redes neuronales constan de un conjunto de elementos de procesamiento - conocidos como nodos o neuronas - interconectados entre s\'i. Pueden ser descritas mediante un grafo dirigido en el que cada neurona  \(i\) usa una funci\'on de activaci\'on de la forma:
@@ -157,7 +159,7 @@ donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada n\'umero \
 
  En nuestro caso, utilizamos aprendizaje por refuerzo y no necesitamos una colecci\'on de ejemplos (aunque se podr\'ia utilizar para calcular el refuerzo). Los pesos los ajustar\'a un algoritmo gen\'etico. La estructura de la red se definir\'a de forma previa para cada problema y s\'olo evolucionar\'an los pesos (y umbrales).
 
-** TODO Algoritmos gen\'eticos
+** HACER Algoritmos gen\'eticos
 #+LaTeX: \label{basTeoGenet}
 
 Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de problemas de b\'usqueda y optimizaci\'on que aplican a \'estos los principios de la evoluci\'on biol\'ogica: selecci\'on basada en la poblaci\'on, reproducci\'on sexual y mutaci\'on.
@@ -181,7 +183,7 @@ Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de 
 *** Operadores de cruza
 #+LaTeX: \label{basTeoGenetCruz}
 
-** TODO Fortalezas y deficiencias
+** HACER Fortalezas y deficiencias
 #+LaTeX: \label{baseTeoricaFort}
 
 Tanto las redes neuronales como los algoritmos gen\'eticos tienen fortalezas que nuestro m\'etodo aprovecha y debilidades que se pueden, en parte, minimizar por la combinaci\'on de ambos m\'etodos.
@@ -230,7 +232,7 @@ El fen\'omeno de par\'alisis del perceptr\'on multicapa ocurre fundamentalmente 
 Un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algoritmo robusto, por ser \'util para cualquier problema, pero a la vez d\'ebil, pues no est\'a especializado en ninguno. Hay que elegir la codificaci\'on de los cromosomas para cada caso concreto. Sin embargo, con nuestro m\'etodo siempre c\'odificaremos los cromosomas de manera similar (con una red neuronal) y s\'olo ser\'a necesario definir la funci\'on de fitness, elegir la topolog\'ia de la red, codificar las entradas y las salidas. Aunque la codificaci\'on de \'estas pueda admitir varias posibilidades (y algunas puedan ser m\'as ventajosas que otras) la red debe aprender a interpretar las correctas relaciones entre entradas y salidas por s\'i misma.
 
 
-** TODO Neuro-evoluci\'on
+** HACER Neuro-evoluci\'on
 #+LaTeX: \label{basTeoNeuro}
 
  La evoluci\'on se ha aplicado las redes neuronales artificiales en tres niveles muy diferentes: a los pesos de las conexiones, la arquitectura de la red y a las reglas de aprendizaje. La evoluci\'on de los pesos de las conexiones introduce una aproximaci\'on global y adaptable al entrenamiento, especialmente para el aprendizaje por refuerzo o para el entrenamiento de redes recursivas, donde los m\'etodos basados en el gradiente experimentan grandes dificultades. La evoluci\'on de las arquitecturas permite a las redes neuronales adaptar su topolog\'ia a diferentes problemas sin intervenci\'on humana y con esto se consigue un dise\~no autom\'atico de redes neuronales, dado que tanto la arquitectura como los pesos pueden ser evolucionados. La evoluci\'on de las reglas de aprendizaje puede ser considerada como un proceso de \textquotedblleft aprender a aprender\textquotedblright en redes neuronales donde la adaptaci\'on de las reglas de aprendizaje se consigue mediante la evoluci\'on. Tambi\'en puede ser contemplada como un proceso de descubrimiento autom\'atico de nuevas reglas de aprendizaje. Nos centraremos en la evoluci\'on de los pesos de las conexiones, por ser la evoluci\'on que utilizaremos.
@@ -260,19 +262,19 @@ Un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algori
  Uno de los problemas a los que se enfrenta la evoluci\'on de redes neuronales es el problema de la permutaci\'on. Es causado por el mapeado "muchos-a-uno" desde la representaci\'on en el cromosoma a la red que es construida. Con dos cromosomas distintos se pueden generar redes equivalentes como se muestra en las figuras \ref{figGrafo1} y \ref{figGrafo2}. Se puede solucionar dando m\'as importancia al operador de mutaci\'on que al de cruza (que es el que sufre con este problema) o con otros m\'etodos matem\'aticos \cite[Gomez, Miikkulainen 2003]{GomezMiikkulainen2003}. 
 
 \newpage
-* TODO [0/3] An\'alisis del problema
+* HACER [0/3] An\'alisis del problema
 #+LaTeX: \label{analisis}
-** TODO [0/2] Objetivos
+** HACER [0/2] Objetivos
 #+LaTeX: \label{anaObjetivos}
 
-*** TODO [/] Implementación de la librería
+*** HACER [/] Implementación de la librería
 #+LaTeX: \label{anaObjetivosLib}
 
 En el presente proyecto se pretende construir una librer\'ia de programaci\'on en C++ para la utilizaci\'on de redes neuronales con entrenamiento mediante algoritmos gen\'eticos. Se quiere que sea lo m\'as flexible posible en cuanto a la estructura de la red, para poder, en un futuro, determinar la topolog\'ia tambi\'en de forma gen\'etica. Por tanto, con la librer\'ia implementada debe ser posible crear una cualquier red con una arquitectura arbitraria. Deben ser posibles conexiones recurrentes y conectar capas con tipos de datos diferentes (por ejemplo, que una capa cuya salida son n\'umeros en coma flotante debe poder usar como entrada una capa que tiene bits como salida).
 
 Como los entrenamientos pueden ser costosos en tiempo de ejecuci\'on, la librer\'ia debe estar paralelizada internamente al menos para la ejecuci\'on de redes neuronales. Esta paralelizaci\'on debe poder aprovecharse por los sistemas m\'as extendidos para que pueda ser utilizada en proyectos que aprovechen la computaci\'on voluntaria.
 
-*** TODO Investigación
+*** HACER Investigación
 #+LaTeX: \label{anaObjetivosInvest}
 
 Se probar\'a la librer\'ia en casos concretos con el fin de contestar a las siguientes cuestiones:
@@ -286,7 +288,7 @@ Se probar\'a la librer\'ia en casos concretos con el fin de contestar a las sigu
 4) ?`Para qu\'e tipo de problemas resulta m\'as adecuado el m\'etodo propuesto? 
 
 \newpage
-** TODO Especificaciones de la librería a implementar
+** HACER Especificaciones de la librería a implementar
 #+LaTeX: \label{anaEspec}
 
 Como se definió en la sección \ref{anaObjetivosLib}, la librería debe poder construir redes neuronales de cualquier topología y, al mismo tiempo, debe poder ser paralelizada usando diferentes tecnologías. Además, en la sección \ref{anaObjetivosInvest} establecimos que las neuronas pueden ser de varios tipos (binarias, bipolares y reales). 
@@ -295,16 +297,16 @@ Para soportar las diferentes implementaciones y tipos de neuronas sin incrementa
 
 Primero se describirán las clases fachada y el resto de clases utilizadas para la implementación de las redes neuronales en la sección \ref{anaEspecRedes}. Las implementaciones concretas de las fachadas para la factoría se describirán con más detalle en la sección [TODO decidir dónde: diseño, paralelizaciones, extensibilidad]. En la sección \ref{anaEspecGenetic} especificaremos de forma general las clases destinadas a la implementación del algoritmo genético y cómo se relacionan con las clases de las redes neuronales. Finalmente, en la sección \ref{anaEspecLoop} se describen las utilidades destinadas a probar la librería y medir su eficiencia, tanto en términos de rendimiento computacional como en términos de aprendizaje. Este último componente debe poder generar gráficas comparativas y ser suficientemente extensible para adaptarse a las necesidades del proyecto. 
 
-*** TODO Estructura de las redes neuronales
+*** HACER Estructura de las redes neuronales
 #+LaTeX: \label{anaEspecRedes}
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
 
-**** TODO Interface: 
+**** HACER Interface: 
 
 Para unificar ciertas tareas comunes y tener una estructura de datos manipulable desde
 
-**** TODO Buffer: 
+**** HACER Buffer: 
 
 Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación ínterna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase Buffer. Esta clase abstracta implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como hemos dicho, a esas peculiaridades se accederá utilizando polimorfismo. 
 
@@ -330,28 +332,28 @@ Los métodos que Buffer ofrece son:
 - ImplementationType getImplementationType()
     virtual BufferType getBufferType() = 0;
     virtual void reset() = 0;
-**** TODO Connection:
-**** TODO Layer:
-**** TODO InputLayer:
-**** TODO NeuralNet:
+**** HACER Connection:
+**** HACER Layer:
+**** HACER InputLayer:
+**** HACER NeuralNet:
 
 #+LaTeX: \label{anaEspecNeural}
 
 Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene un grafo dirigido con capas (Layer )
 Al nivel más alto, la clase que utilizaremos es NeuralNet, que implementa una red neuronal concreta
 
-*** TODO Estructuras para algoritmos genéticos
+*** HACER Estructuras para algoritmos genéticos
 #+LaTeX: \label{anaEspecGenetic}
 
-*** TODO Utilidades para la experimentación
+*** HACER Utilidades para la experimentación
 #+LaTeX: \label{anaEspecLoop}
 
-* TODO Consideraciones generales de diseño
+* HACER Consideraciones generales de diseño
 #+LaTeX: \label{diseno}
 
-** TODO 
+** HACER 
 
-* Dise\~no del algoritmo gen\'etico 
+* REVISAR Dise\~no del algoritmo gen\'etico 
 #+LaTeX: \label{disenoGene}
 ** Funcionamiento general
 #+LaTeX: \label{disenoGeneFunc}
@@ -514,9 +516,9 @@ Para evitar repetir el calculo de la probabilidad tantas veces y mejorar el rend
 En este caso en lugar de determinar probabilisticamente y peso por peso si un peso debe mutar o no, se configura un número determinado de mutaciones (u olvidos) que se aplicarán a cada individuo. Las variables "número de mutaciones" y "número de olvidos" tienen ambas por defecto el valor 0. Sabiendo el número de mutaciones que se van a realizar, sólo queda determinar aleatoriamente qué pesos y/o umbrales concretos serán mutados (u olvidados).
 
 Para activar cualquiera de las dos modalidades en cualquiera de los dos operadores, basta con dar un valor positivo a las variables "probabilidad de mutación", "probabilidad de olvido", "número de mutaciones" y "número de olvidos". Como es habitual, se pueden emplear simultaneamente las varias opciones. En este caso también puede no activarse ningún tipo de mutación ni de olvido.
-* TODO [2/3] Paralelizaciones en las redes neuronales
+* REVISAR [2/3] Paralelizaciones en las redes neuronales
 #+LaTeX: \label{disenoParal}
-** DONE Introducción
+** REVISAR Introducción
 
 Tanto los algoritmos genéticos como las redes neuronales requieren cálculos que presentan paralelismos inherentes. Para este proyecto se ha escogido explotar exclusivamente los de las redes neuronales. Por ejemplo, con múltiples CPUs y GPUs. pero la implementación se podría extender para aprovechar también los de los algoritmos genéticos, aunque esto requeriría cambios no triviales en el modo en que las poblaciones son procesadas cada generación si se quiere extender la librería en ese sentido. Nuestras paralelizaciones solamente usan una CPU simultáneamente. Se han optado por dos alternativas que se comparan.
 
@@ -526,7 +528,7 @@ La primera alternativa implementada es la utilización del conjunto ampliado de 
 
 La segunda paralelización obedece a una tendencia bastante más reciente y en alza conocida como GPGPU (General Purpose Graphic Processor Units), que consiste en utilizar las terjetas especializadas en procesar gráficos para procesar otros cálculos que posiblemente nada tengan que ver con los gráficos. Debido a la gran demanda proveniente de diseñadores gráficos y, sobre todo, aficionados a los videojuegos, estos dispositivos comenzaron a tener unas especificaciones que resultaban muy atractivas a gran variedad de investigadores como físicos o bioquímicos. Al principio los investigadores dependian de su ingenio para mapear sus problemas específicos a un algoritmo que usase primitivas gráficas, pero con el creciente interés de esta técnica, los fabricantes decidieron ampliar su mercado de consumidores creando lenguajes específicos para este fin mucho más amigables y con facilidades para la optimización. El lenguaje C CUDA de NVIDIA, con el que desarrollamos la paralelización descrita en la sección \ref{disenoParalCUDA} es un ejemplo de estos lenguajes. Más tarde las compañías decidieron crear un lenguaje común que sirviese para todas las GPUs sin importar la marca llamado OpenCL. Hoy en día muchas de los supercomputadores más potentes del mundo utilizan múltiples GPUs para obtener los altos rendimientos que requieren[fn:cudaSuperComp].
 
-** DONE Ensamblador con SSE2
+** REVISAR Ensamblador con SSE2
 #+LaTeX: \label{disenoParalXMM}
 *** Introducción al coprocesador XMM
 #+LaTeX: \label{disenoParalXMMintro}
@@ -748,7 +750,7 @@ Todavía se podrían mejorar las soluciones si contásemos con la arquitectura d
 
 Como hemos dicho, la colocación de los bits para la implementación XMM debe adaptarse para que se puedan obtener los mismos resultados que con el algoritmo implementado en C. Pero además en el algoritmo C no se puede usar el tipo char para los pesos (hay que usar unsigned char) y hay que restarles 128 antes de operar con ellos. Esto podría ralentizar "injustamente" al algoritmo C, por lo que también se hicieron pruebas de rendimiento sin restar 128 y usando el tipo char para comparar los tiempos. Logicamente, esa implementación C no obtiene resultados equivalentes a los de la SSE2, pero tan sólo se pretendía comparar el rendimiento. Sorprendentemente, con esta implementación C se obtenían resultados aún peores. También se probó usadno el tipo unsigned char pero sin restar 128 y el rendimiento era de nuevo ligeramente peor. Por alguna razón que no alcanzamos a explicar, el algoritmo en C funciona más rápido si ha de restar 128 a cada peso. Por ello, dejamos de lado nuestra preocupación sobre la posible penalización causada por nuestra representación de pesos en bytes.
 
-** TODO [2/5] GPGPU con CUDA
+** HACER [2/5] GPGPU con CUDA
 #+LaTeX: \label{disenoParalCUDA}
 
 Debido a la insaciable demanda de mercado de gráficos 3D de alta definición y en tiempo real, las unidades de procesamiento gráfico (Graphic Processor Unit, GPU) han evolucionado en procesadores altamente paralelos y multihilo, con muchos núcleos, tremenda capacidad de computación y con gran ancho de banda de memoria. La técnica consistente en utilizar el este poder computacional para realizar trabajos de proposito general, que pueden no tener nada que ver con los gráficos se denomina GPGPU (General Purpose Graphic Processor Unit). Los pioneros de la técnica buscaban homorfismos entre los algoritmos que pretendían ejecutar y cálculos que las librerías gráficas realizan internamente. 
@@ -757,7 +759,7 @@ Gracias a los lenguajes de alto nivel especializados para GPGPU como C CUDA u Op
 
 Aunque otras arquitecturas gráficas puedan ser similares en muchos aspectos, describiremos los conceptos básicos de la arquitectura CUDA, que es la que hemos utilizado para paralelizar los cálculos de estado de las redes neuronales y que fue diseñada explícitamente para soportar GPGPU incluso desde lenguajes de alto nivel. En principio C, pero luego también otros leguajes como FORTRAN, C++ y OpenCL. Desde la serie NVIDIA GeForce 8000 todas las gráficas que ha producido NVIDIA obedecen a la arquitectura básica CUDA (excepto las específicas para dispositivos móviles, que siguen la aruitectura Tegra). Aunque tarjetas posteriores ofrecen nuevas capacidades y posibilidades de ajuste de los algoritmos, son retrocompatibles con respecto al código implementado para versiones anteriores.
 
-*** DONE Modelo de programación
+*** REVISAR Modelo de programación
 #+LaTeX: \label{disenoParalCUDAprog}
 
 C para CUDA es una extensión de C que permite al programador difinir funciones, llamadas núcleos (kernels) que cuando son llamadas se ejecutan N veces por N hilos CUDA diferentes, en vez de una sola vez como las funciones C habituales. Para definir un kernel se usa el especificador de declaración =__global__= y el número de hilos CUDA para cada llamada se especifica con la nueva sintaxis ~<<<...>>>~ del siguiente ejemplo:
@@ -864,7 +866,7 @@ Por tanto, un programa gestiona los espacios de memoria global, de constantes y 
 
 Ademas, se puede hacer un sistema anfitrión con varias GPUs y hacer llamadas de kernels con diferentes datos y configuraciones a cada uno de los dispoitivos. En el presente proyecto, sin embargo, se prescinde de esa posibilidad, así como de usar las memorias de constantes y de texturas.
 
-*** DONE Arquitectura CUDA
+*** REVISAR Arquitectura CUDA
 #+LaTeX: \label{disenoParalCUDAarq}
 
 La arquitectura CUDA se construye alrededor de un conjunto escalable de Multiprocesadoes de flujo (Streaming Multiprocessors, SMs). Cuando un programa CUDA en la CPU anfitrión invoca a un grid de kernel, los bloques del grid son enumerados y destribuidos a los multiprocesadores con capacidad de ejecución (TODO? como se muestra en la figura 4-1). Los hilos de un bloque se ejecutan concurrentemente en un mismo multiprocesador. Cuando los bloques terminan, nuevos bloques son lanzados en los Multiprocesadores que queden libres.
@@ -894,38 +896,38 @@ El número de bloques que un multiprocesador puede procesar a la vez - lo que se
 
 Si una instrucción no atómica ejecutada en un warp escribe en la misma localización global de momoria compartida para más de un hilo dentro de warp, el número de escrituras serializadas que suceden en esa localización y el orden en que ocurren no está definido, pero se garantiza que al menos una de las escrituras se realizará. Si una instrucción atómica ejecutada por un warp lee, modifica o escribe sobre la misma localización en momodia global para más de uno de los hilos del warp, todas las lecturas, modificaciones y escrituras sobre esa localización se realizan y son todas serializadas, epro el orden en que ocurren tampoco está definido.
 
-*** TODO Reducción paralelizada
+*** HACER Reducción paralelizada
 #+LaTeX: \label{disenoParalCUDAreduc}
 
 La primera aproximación para la implementación de nuestro algoritmo genérico de cálculo de estado de una capa de red neuronal sobre la arquitectura CUDA estaba claramente influída por la optimización SSE2 anterior. Aquella función de ensamblador calculaba el resultado para una neurona de salida. En este primer kernel CUDA haremos lo mismo: cada llamada al kernel nos servirá para calcular la salida de un neurona (de nuevo, dejando la función de activación aparte). De este modo, cada hilo hará una multiplicación entre una entrada y un peso y luego se sumarán todos los resultados usando una reducción paralela.
 
 En la sección \ref{disenoParalXMMbyte} utilizamos una instrucción especial para hacer la reducción y poder sumar los 16 elementos de un bloque, pero no existe una instrucción similar en CUDA. En \ref{disenoParalXMMfloat} se acumulaban los resultados en un registro con cuatro floats que se sumaban al final. El modo en que se sumaban no era lo que más aceleraba al algortimo, pero nos da una pista de lo que debemos hacer. Primero se sumaban dos y dos en una sóla instrucción (tras dduplicar el registro y desplazarlo) y después los otros dos resultantes. Generalizando a cualquier número de elementos iniciales y sumando los elementos de dos en dos de forma paralela, vemos que lo que tenemos que usar es una reducción en árbol\cite[Harris2007]{Harris2007}.
 
-SEGUIR
+El kernel más simple para hacer una reducción como esta es
 
-*** TODO Paralelizar las salidas
+*** HACER Paralelizar las salidas
 #+LaTeX: \label{disenoParalCUDAsal}
-*** TODO Matriz de pesos invertida
+*** HACER Matriz de pesos invertida
 #+LaTeX: \label{disenoParalCUDAinv}
-* TODO [0/3] Manual del programador
+* HACER [0/3] Manual del programador
 #+LaTeX: \label{manualProgr}
-** TODO Guia de instalación
+** HACER Guia de instalación
 #+LaTeX: \label{manualProgrInstal}
 
 sudo aptitude install make g++ nasm gnuplot
 sudo aptitude install texlive-latex-recommended texlive-latex-extra
 
-** TODO Uso general (API)
+** HACER Uso general (API)
 #+LaTeX: \label{manualProgrApi}
-** TODO Extensibilidad a partir de interfaces
+** HACER Extensibilidad a partir de interfaces
 #+LaTeX: \label{manualProgrInterf}
 \newpage
-* TODO [2/3] Experimentaci\'on
+* REVISAR [2/2] Experimentaci\'on
 #+LaTeX: \label{experimentacion}
 
 En esta sección se describen los problemas para los que se entrenarán las redes neuronales y las utilidades implementadas para la experimentación.
 
-** DONE Tareas de clasificaci\'on
+** REVISAR Tareas de clasificaci\'on
 #+LaTeX: \label{experimentacionClasif}
 
 Las tareas de clasificación son una aplicación común de las redes neuronales entrenadas con retropropagación del error. También podemos entrenar nuestras redes neuronales para aprender a desempeñar este tipo de tares utilizando algoritmos genéticos. En general, la clasificación consiste en agrupar conjuntos de entradas posibles en clases. Por ejemplo, las entradas {e1, e3, e5} pentenecen a la clase c1; las entradas {e2, e4} pertenecen a la clase c2; las {e6, e7} a la clase c3, etc. Cada entrada sólo puede pertenecer a una clase. La clasificación tiene muchas aplicaciones el como reconocimiento de patrones o la construcción de filtros.
@@ -953,7 +955,7 @@ No rellenar el número de pruebas y dejar que se evalúen todas las posibilidade
 
 Para que esta tarea pueda ser realizada por neuronas binarias, bipolares y reales, en lugar de comparar la salida de la neurona directamente con la salida deseada se usarán aproximaciones. Se entenderá que en la salida de las redes neuronales, cualquier valor mayor o igual a 0.5 es equivalente a un 1 y cualquier valor menor que 0.5 (por ejemplo -1 para una neurona bipolar; 0.1 ó -7 para una neurona real) es equivalente a un 0. Esto se podría implementar con una capa adicional, pero se ha preferido por simplicidad hacerlo directamente dentro de la clase BinaryTask.
 
-** DONE Juegos de estrategia abstractos
+** REVISAR Juegos de estrategia abstractos
 #+LaTeX: \label{experimentacionJuegos}
 
 En la sección anterior \ref{experimentacionClasif} hemos visto ejemplos de tareas para las que se podían entrenar redes neuronales con el método tradicional de retropropagación del error. En esta sección nos dedicaremos a una tarea para la que no es tan fácil conocer las salidas deseadas. Los juegos de estrategia abstractos[fn:juegEstratAbst] son aquellos juegos de estrategia para los que se trata de minimizar el factor suerte y que carecen de trasfondo o ambientación. Casi todos entran dentro de las categorías de tablero, cartas o piezas (como el dominó). No tienen información oculta ni elementos no determinísticos y frecuentemente se juegan por dos jugadores en turnos alternativos.
@@ -974,7 +976,7 @@ La tarea Reversi se implementa en la clase ReversiTask que también hereda de la
 
 TODO ¿debo explicar las reglas del juego?
 
-* TODO Resultados: Rendimiento
+* HACER Resultados: Rendimiento
 #+LaTeX: \label{rendimiento}
 En esta sección se analizan resultados de rendimiento en tiempo de ejecución.
 ** Rendimiento de las implementaciones paralelas de red neuronal
@@ -1112,7 +1114,7 @@ El nuevo operador de olvido/reset presenta otra vez unos resultados similares a 
 [[./img/Individual_reset.png]]
 \newpage
 
-* TODO Resultados: Aprendizaje
+* HACER Resultados: Aprendizaje
 #+LaTeX: \label{aprendizaje}
 En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación.
 ** Comparación entre las distintas funciones de activación
@@ -1385,7 +1387,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 ** Comparación de distintos tamaños de población número de individuos conservados por generación
 
 \newpage
-* TODO Conclusiones
+* HACER Conclusiones
 #+LaTeX: \label{conclusiones}
 
 \newpage
@@ -1416,15 +1418,16 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 \bibitem{Syed03} \textsc{Syed, Omar; Syed, Aamir}: \emph{Arimaa – a New Game Designed to be Difficult for Computers}. International Computer Games Association Journal (2003).
 
 \end{thebibliography}
-* TODO [0/8] Cosas por hacer desperdigadas
+* HACER [0/8] Cosas por hacer documentación
 - [ ] Poner imagenes en parte CUDA
 - [ ] (Teoría: redes neuronales) Explicar la necesidad de funciones de activación continuas para retropropagación
 - [ ] (Teoría: redes neuronales) Explicar imposibilidad de recursividad con retropropagación
 - [ ] (Teoría: algoritmos genéticos) Introducir a GENITOR con bibliografía
 - [ ] (Teoría: algoritmos genéticos/neuro evolución) Introducir representación fregona con bibliografía
+- [ ] (Teoría: algoritmos genéticos/neuro evolución) Búsqueda neutral con bibliografía
 - [ ] (Teoría: neuro evolución) NeuroEvolution of Augmenting Topologies (NEAT)
 - [ ] (Teoría: neuro evolución) Redes recurrentes, pybrain, Jürgen Schmidhuber
-* TODO [0/5] Cosas por hacer código
+* HACER [0/5] Cosas por hacer código
 - [ ] ¿Pasar Dummy a factory o a loopTest?
 - [ ] CUDA reduction malo
 - [ ] CUDA salidas malo
