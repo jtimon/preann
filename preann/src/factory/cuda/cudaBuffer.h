@@ -71,8 +71,6 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             tSize += min(bitBufferSize % maxWeighsPerBlock, block_size) * BITS_PER_UNSIGNED;
 
             Interface interfaceOrderedByBlockSize = Interface(tSize, BT_BIT);
-            unsigned byteSize = interfaceOrderedByBlockSize.getByteSize();
-            data = cuda_malloc(byteSize);
 
             unsigned bit = 0, thread = 0, block_offset = 0;
             for (unsigned i = 0; i < bitBufferSize; i++) {
@@ -90,6 +88,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     }
                 }
             }
+            unsigned byteSize = interfaceOrderedByBlockSize.getByteSize();
+            data = cuda_malloc(byteSize);
             cuda_copyToDevice(data, interfaceOrderedByBlockSize.getDataPointer(), byteSize);
         }
         virtual ~CudaBuffer()
