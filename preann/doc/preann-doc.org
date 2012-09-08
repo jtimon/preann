@@ -19,6 +19,7 @@
 #+LATEX_HEADER:     linkcolor=blue,%
 #+LATEX_HEADER:     urlcolor=blue
 #+LATEX_HEADER: }
+#+LaTeX_HEADER: \newcommand{\murl}[2]{\url{#1://#2}}
 #+OPTIONS:     toc:nil H:5
 #+BIND: org-export-latex-title-command ""
 
@@ -100,7 +101,7 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
 \newpage
 #+end_latex
 
-* HACER Introducci\'on
+* MODIFICAR Introducci\'on
 #+LaTeX: \label{intro}
 
  El /aprendizaje autom\'atico/ es una rama de la inteligencia artificial que trata de construir sistemas inform\'aticos que optimicen un criterio de rendimiento utilizando datos o experiencia previa. Dentro del aprendizaje autom\'atico, las t\'ecnicas se clasifican en base a su entrenamiento como supervisado o no supervisado. En el primero, al sistema se le suministran ejemplos de entradas con sus correspondientes salidas deseadas. En el entrenamiento no supervisado, no se tienen a priori ejemplos de c\'omo deber\'ia comportarse el sistema. El aprendizaje por refuerzo es un caso especial de aprendizaje supervisado en que la salida deseada exacta es desconocida. Se basa s\'olo en informaci\'on sobre si la salida actual es correcta o no. Al agente que se quiere que aprenda se le provee informaci\'on sobre lo bien o lo mal que est\'a actuando. Esta se\~nal de recompensa puede serle indicada bien cada vez que el agente act\'ua, bien al final de una prueba completa durante la que realiza varias acciones.
@@ -123,7 +124,7 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
  En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado \flqq Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos\frqq, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. Los rendimientos obtenidos con las diferentes implementaciones paralelas y opciones en el algortimo genético se muestran en el capítulo \ref{rendimiento}.En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados de aprendizaje \ref{aprendizaje} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
 
 \newpage
-* HACER [0/4] Base te\'orica
+* MODIFICAR [0/4] Base te\'orica
 #+LaTeX: \label{baseTeorica}
 
 Tanto las redes neuronales como los algoritmos gen\'eticos est\'an inspirados en la naturaleza y han sido utilizados desde largo tiempo atr\'as. Las redes neuronales est\'an inspiradas en el funcionamiento del cerebro, como un sistema de procesamiento de informaci\'on distribuido. Por su parte, los algoritmos gen\'eticos se basan en la teor\'ia de la evoluci\'on de Darwin, por la que la evoluci\'on se produce a trav\'es de dos principios b\'asicos: los individuos que no se adaptan suficientemente al medio perecen, mientras que los que s\'i lo hacen transmiten sus genes con cierta variabilidad. Esta variabilidad puede proceder de dos fuentes: la cruza de genes entre individuos \'o la mutaci\'on directa de genes.
@@ -132,7 +133,7 @@ La combinaci\'on de estas dos t\'ecnicas es algo relativamente reciente. Algunos
 
 A continuaci\'on explicaremos m\'as detalladamente las bases te\'oricas de las tres t\'ecnicas: redes neuronales, algoritmos gen\'eticos y neuro-evoluci\'on. Nos centraremos principalmente en los algoritmos y estructuras que m\'as se asemejan a los implementamos en nuestra librer\'ia.
 
-** HACER Redes neuronales
+** MODIFICAR Redes neuronales
 #+LaTeX: \label{basTeoRedes}
 
 Las redes neuronales constan de un conjunto de elementos de procesamiento - conocidos como nodos o neuronas - interconectados entre s\'i. Pueden ser descritas mediante un grafo dirigido en el que cada neurona  \(i\) usa una funci\'on de activaci\'on de la forma:
@@ -159,7 +160,7 @@ donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada n\'umero \
 
  En nuestro caso, utilizamos aprendizaje por refuerzo y no necesitamos una colecci\'on de ejemplos (aunque se podr\'ia utilizar para calcular el refuerzo). Los pesos los ajustar\'a un algoritmo gen\'etico. La estructura de la red se definir\'a de forma previa para cada problema y s\'olo evolucionar\'an los pesos (y umbrales).
 
-** HACER Algoritmos gen\'eticos
+** MODIFICAR Algoritmos gen\'eticos
 #+LaTeX: \label{basTeoGenet}
 
 Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de problemas de b\'usqueda y optimizaci\'on que aplican a \'estos los principios de la evoluci\'on biol\'ogica: selecci\'on basada en la poblaci\'on, reproducci\'on sexual y mutaci\'on.
@@ -183,7 +184,7 @@ Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de 
 *** Operadores de cruza
 #+LaTeX: \label{basTeoGenetCruz}
 
-** HACER Fortalezas y deficiencias
+** MODIFICAR Fortalezas y deficiencias
 #+LaTeX: \label{baseTeoricaFort}
 
 Tanto las redes neuronales como los algoritmos gen\'eticos tienen fortalezas que nuestro m\'etodo aprovecha y debilidades que se pueden, en parte, minimizar por la combinaci\'on de ambos m\'etodos.
@@ -231,8 +232,7 @@ El fen\'omeno de par\'alisis del perceptr\'on multicapa ocurre fundamentalmente 
 
 Un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algoritmo robusto, por ser \'util para cualquier problema, pero a la vez d\'ebil, pues no est\'a especializado en ninguno. Hay que elegir la codificaci\'on de los cromosomas para cada caso concreto. Sin embargo, con nuestro m\'etodo siempre c\'odificaremos los cromosomas de manera similar (con una red neuronal) y s\'olo ser\'a necesario definir la funci\'on de fitness, elegir la topolog\'ia de la red, codificar las entradas y las salidas. Aunque la codificaci\'on de \'estas pueda admitir varias posibilidades (y algunas puedan ser m\'as ventajosas que otras) la red debe aprender a interpretar las correctas relaciones entre entradas y salidas por s\'i misma.
 
-
-** HACER Neuro-evoluci\'on
+** MODIFICAR Neuro-evoluci\'on
 #+LaTeX: \label{basTeoNeuro}
 
  La evoluci\'on se ha aplicado las redes neuronales artificiales en tres niveles muy diferentes: a los pesos de las conexiones, la arquitectura de la red y a las reglas de aprendizaje. La evoluci\'on de los pesos de las conexiones introduce una aproximaci\'on global y adaptable al entrenamiento, especialmente para el aprendizaje por refuerzo o para el entrenamiento de redes recursivas, donde los m\'etodos basados en el gradiente experimentan grandes dificultades. La evoluci\'on de las arquitecturas permite a las redes neuronales adaptar su topolog\'ia a diferentes problemas sin intervenci\'on humana y con esto se consigue un dise\~no autom\'atico de redes neuronales, dado que tanto la arquitectura como los pesos pueden ser evolucionados. La evoluci\'on de las reglas de aprendizaje puede ser considerada como un proceso de \textquotedblleft aprender a aprender\textquotedblright en redes neuronales donde la adaptaci\'on de las reglas de aprendizaje se consigue mediante la evoluci\'on. Tambi\'en puede ser contemplada como un proceso de descubrimiento autom\'atico de nuevas reglas de aprendizaje. Nos centraremos en la evoluci\'on de los pesos de las conexiones, por ser la evoluci\'on que utilizaremos.
@@ -262,20 +262,10 @@ Un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algori
  Uno de los problemas a los que se enfrenta la evoluci\'on de redes neuronales es el problema de la permutaci\'on. Es causado por el mapeado "muchos-a-uno" desde la representaci\'on en el cromosoma a la red que es construida. Con dos cromosomas distintos se pueden generar redes equivalentes como se muestra en las figuras \ref{figGrafo1} y \ref{figGrafo2}. Se puede solucionar dando m\'as importancia al operador de mutaci\'on que al de cruza (que es el que sufre con este problema) o con otros m\'etodos matem\'aticos \cite[Gomez, Miikkulainen 2003]{GomezMiikkulainen2003}. 
 
 \newpage
-* HACER [0/3] An\'alisis del problema
+* MODIFICAR [0/2] An\'alisis del problema
 #+LaTeX: \label{analisis}
-** HACER [0/2] Objetivos
+** MODIFICAR Objetivos
 #+LaTeX: \label{anaObjetivos}
-
-*** HACER [/] Implementación de la librería
-#+LaTeX: \label{anaObjetivosLib}
-
-En el presente proyecto se pretende construir una librer\'ia de programaci\'on en C++ para la utilizaci\'on de redes neuronales con entrenamiento mediante algoritmos gen\'eticos. Se quiere que sea lo m\'as flexible posible en cuanto a la estructura de la red, para poder, en un futuro, determinar la topolog\'ia tambi\'en de forma gen\'etica. Por tanto, con la librer\'ia implementada debe ser posible crear una cualquier red con una arquitectura arbitraria. Deben ser posibles conexiones recurrentes y conectar capas con tipos de datos diferentes (por ejemplo, que una capa cuya salida son n\'umeros en coma flotante debe poder usar como entrada una capa que tiene bits como salida).
-
-Como los entrenamientos pueden ser costosos en tiempo de ejecuci\'on, la librer\'ia debe estar paralelizada internamente al menos para la ejecuci\'on de redes neuronales. Esta paralelizaci\'on debe poder aprovecharse por los sistemas m\'as extendidos para que pueda ser utilizada en proyectos que aprovechen la computaci\'on voluntaria.
-
-*** HACER Investigación
-#+LaTeX: \label{anaObjetivosInvest}
 
 Se probar\'a la librer\'ia en casos concretos con el fin de contestar a las siguientes cuestiones:
 
@@ -288,25 +278,34 @@ Se probar\'a la librer\'ia en casos concretos con el fin de contestar a las sigu
 4) ?`Para qu\'e tipo de problemas resulta m\'as adecuado el m\'etodo propuesto? 
 
 \newpage
-** HACER Especificaciones de la librería a implementar
-#+LaTeX: \label{anaEspec}
 
-Como se definió en la sección \ref{anaObjetivosLib}, la librería debe poder construir redes neuronales de cualquier topología y, al mismo tiempo, debe poder ser paralelizada usando diferentes tecnologías. Además, en la sección \ref{anaObjetivosInvest} establecimos que las neuronas pueden ser de varios tipos (binarias, bipolares y reales). 
+** MODIFICAR Especificaciones de la librería a implementar
+#+LaTeX: \label{anaEspecLib}
+
+En el presente proyecto se pretende construir una librer\'ia de programaci\'on en C++ para la utilizaci\'on de redes neuronales con entrenamiento mediante algoritmos gen\'eticos. Se quiere que sea lo m\'as flexible posible en cuanto a la estructura de la red, para poder, en un futuro, determinar la topolog\'ia tambi\'en de forma gen\'etica. Por tanto, con la librer\'ia implementada debe ser posible crear una cualquier red con una arquitectura arbitraria. Deben ser posibles conexiones recurrentes y conectar capas con tipos de datos diferentes (por ejemplo, que una capa cuya salida son n\'umeros en coma flotante debe poder usar como entrada una capa que tiene bits como salida).
+
+Como los entrenamientos pueden ser costosos en tiempo de ejecuci\'on, la librer\'ia debe estar paralelizada internamente al menos para la ejecuci\'on de redes neuronales. Esta paralelizaci\'on debe poder aprovecharse por los sistemas m\'as extendidos para que pueda ser utilizada en proyectos que aprovechen la computaci\'on voluntaria.
+* HACER Diseño general
+#+LaTeX: \label{diseno}
+
+Como se definió en la sección \ref{anaEspecLib}, la librería debe poder construir redes neuronales de cualquier topología y, al mismo tiempo, debe poder ser paralelizada usando diferentes tecnologías. Además, en la sección \ref{anaObjetivos} establecimos que las neuronas pueden ser de varios tipos (binarias, bipolares y reales). 
 
 Para soportar las diferentes implementaciones y tipos de neuronas sin incrementar la complejidad de la API de la librería, se definirán clases abstractas como interfaces de las que luego heredarán las diferentes implementaciones. Para independizar completamente el manejo de estas clases de fachada [TODO bibliografía patrón diseño facade], las implementaciones concretas sólo serán visibles a una clase factoría que será el único método para instanciar las implementaciones siguiendo el patrón de diseño factoría [TODO bibliografía patrón diseño factory]. Para las diferentes implementaciones paralelas descritas en el capítulo \ref{disenoParal}, se crearán diferentes clases que extiendan de las fachadas. Para soportar los diferentes tipos de neuronas, estas clases paralelizadas se implementarán usando plantillas. Sólo serán utilizadas directamente las clases fachada y los métodos específicos de cada implementación concreta serán llamados utilizando la técnica que en el contexto de análisis, diseño y desarrollo orientado a objetos se denomina polimorfismo.
 
-Primero se describirán las clases fachada y el resto de clases utilizadas para la implementación de las redes neuronales en la sección \ref{anaEspecRedes}. Las implementaciones concretas de las fachadas para la factoría se describirán con más detalle en la sección [TODO decidir dónde: diseño, paralelizaciones, extensibilidad]. En la sección \ref{anaEspecGenetic} especificaremos de forma general las clases destinadas a la implementación del algoritmo genético y cómo se relacionan con las clases de las redes neuronales. Finalmente, en la sección \ref{anaEspecLoop} se describen las utilidades destinadas a probar la librería y medir su eficiencia, tanto en términos de rendimiento computacional como en términos de aprendizaje. Este último componente debe poder generar gráficas comparativas y ser suficientemente extensible para adaptarse a las necesidades del proyecto. 
+Primero se describirán las clases fachada y el resto de clases utilizadas para la implementación de las redes neuronales en la sección \ref{disenoRedes}. Las implementaciones concretas de las fachadas para la factoría se describirán con más detalle en la sección [TODO decidir dónde: diseño, paralelizaciones, extensibilidad]. En la sección \ref{disenoGenetic} especificaremos de forma general las clases destinadas a la implementación del algoritmo genético y cómo se relacionan con las clases de las redes neuronales. Finalmente, en la sección \ref{disenoLoop} se describen las utilidades destinadas a probar la librería y medir su eficiencia, tanto en términos de rendimiento computacional como en términos de aprendizaje. Este último componente debe poder generar gráficas comparativas y ser suficientemente extensible para adaptarse a las necesidades del proyecto. 
 
-*** HACER Estructura de las redes neuronales
-#+LaTeX: \label{anaEspecRedes}
+** HACER Estructura de las redes neuronales
+#+LaTeX: \label{disenoRedes}
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
 
-**** HACER Interface: 
+*** HACER Interface: 
+#+LaTeX: \label{disenoRedesInter}
 
 Para unificar ciertas tareas comunes y tener una estructura de datos manipulable desde
 
-**** HACER Buffer: 
+*** HACER Buffer: 
+#+LaTeX: \label{disenoRedesBuff}
 
 Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación ínterna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase Buffer. Esta clase abstracta implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como hemos dicho, a esas peculiaridades se accederá utilizando polimorfismo. 
 
@@ -332,27 +331,20 @@ Los métodos que Buffer ofrece son:
 - ImplementationType getImplementationType()
     virtual BufferType getBufferType() = 0;
     virtual void reset() = 0;
-**** HACER Connection:
-**** HACER Layer:
-**** HACER InputLayer:
-**** HACER NeuralNet:
+*** HACER Connection:
+*** HACER Layer:
+*** HACER InputLayer:
+*** HACER NeuralNet:
 
-#+LaTeX: \label{anaEspecNeural}
+#+LaTeX: \label{disenoNeural}
 
 Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene un grafo dirigido con capas (Layer )
 Al nivel más alto, la clase que utilizaremos es NeuralNet, que implementa una red neuronal concreta
 
-*** HACER Estructuras para algoritmos genéticos
-#+LaTeX: \label{anaEspecGenetic}
-
-*** HACER Utilidades para la experimentación
-#+LaTeX: \label{anaEspecLoop}
-
-* HACER Consideraciones generales de diseño
-#+LaTeX: \label{diseno}
-
-** HACER 
-
+** HACER Estructuras para algoritmos genéticos
+#+LaTeX: \label{disenoGenetic}
+** HACER Utilidades para la experimentación
+#+LaTeX: \label{disenoLoop}
 * REVISAR Dise\~no del algoritmo gen\'etico 
 #+LaTeX: \label{disenoGene}
 ** Funcionamiento general
@@ -422,7 +414,11 @@ La selección elitista es la más sencilla de todas. Simplemente se cogen los N 
 
 Aunque aceptamos varias definiciones de gen, como se explica en la sección \ref{disenoGeneNiv}, en esta sección trataremos las formas en que se pueden cruzar dos individuos, produciendo dos descencientes con los genes de los progenitores combinados de forma complementaria (todos los genes de los progenitores irán a un descendiente o a otro, aunque puede que uno de los descendientes se deseche si sobra). 
 
-Todos los esquemas de cruce se aplican primero sobre un vetor de bits (cada bit representa un gen) y luego se aplica el crossover usando ese vector. Esto permite compartir una sóla interfaz para la cruza a bajo nivel. Dada la diversidad de implementaciones de las redes neuronales, la cantidad de código se multiplicaría con los distintos esquemas de cruza de forma que el código sería mucho más complicado de desarrollar y mantener. Esto, además, permite extender nuestro algoritmo genético con nuevos esquemas de cruza sin necesidad de modificar las distintas implementaciones (C, SEE2, CUDA). También es posible crear una nueva implementación (por ejemplo, usando openCL) sin necesidad de implementar por separado cada uno de los esquemas de cruza.
+Todos los esquemas de cruce se aplican primero sobre un vector de bits (cada bit representa un gen) y luego se aplica el crossover usando ese vector. Esto permite compartir una sóla interfaz para la cruza a bajo nivel. Dada la diversidad de implementaciones de las redes neuronales, la cantidad de código se multiplicaría con los distintos esquemas de cruza de forma que el código sería mucho más complicado de desarrollar y mantener. Esto permite extender nuestro algoritmo genético con nuevos esquemas de cruza sin necesidad de modificar las distintas implementaciones (C, SEE2, CUDA). 
+
+También es posible crear una nueva implementación (por ejemplo, usando openCL) sin necesidad de implementar por separado cada uno de los esquemas de cruza. De otra manera, la complejidad del código crecería NxM con respecto al número de esquemas de cruza y de implementaciones paralelas. De esta manera, sólo hay que implementar N + M.
+
+Además, los pesos pueden estar dispuestos de forma diferente en memoria dependiendo de la implementación, como sucede en el caso descrito en las secciones \ref{disenoParalCUDAinv} y \ref{disenoParalCUDAcruza}, en el que la matriz de pesos se almacena invertida en memoria. En ese caso, basta con invertir la matriz de bits interfaz, en lugar de reimplementar el algoritmo de cruza que comparte con otros algoritmos CUDA.
 
 *** Uniforme
 #+LaTeX: \label{disenoGeneCruzUni}
@@ -516,11 +512,11 @@ Para evitar repetir el calculo de la probabilidad tantas veces y mejorar el rend
 En este caso en lugar de determinar probabilisticamente y peso por peso si un peso debe mutar o no, se configura un número determinado de mutaciones (u olvidos) que se aplicarán a cada individuo. Las variables "número de mutaciones" y "número de olvidos" tienen ambas por defecto el valor 0. Sabiendo el número de mutaciones que se van a realizar, sólo queda determinar aleatoriamente qué pesos y/o umbrales concretos serán mutados (u olvidados).
 
 Para activar cualquiera de las dos modalidades en cualquiera de los dos operadores, basta con dar un valor positivo a las variables "probabilidad de mutación", "probabilidad de olvido", "número de mutaciones" y "número de olvidos". Como es habitual, se pueden emplear simultaneamente las varias opciones. En este caso también puede no activarse ningún tipo de mutación ni de olvido.
-* REVISAR [2/3] Paralelizaciones en las redes neuronales
+* REVISAR Optimizaciones mediante paralelización
 #+LaTeX: \label{disenoParal}
-** REVISAR Introducción
+** Introducción
 
-Tanto los algoritmos genéticos como las redes neuronales requieren cálculos que presentan paralelismos inherentes. Para este proyecto se ha escogido explotar exclusivamente los de las redes neuronales. Por ejemplo, con múltiples CPUs y GPUs. pero la implementación se podría extender para aprovechar también los de los algoritmos genéticos, aunque esto requeriría cambios no triviales en el modo en que las poblaciones son procesadas cada generación si se quiere extender la librería en ese sentido. Nuestras paralelizaciones solamente usan una CPU simultáneamente. Se han optado por dos alternativas que se comparan.
+Tanto los algoritmos genéticos como las redes neuronales requieren cálculos que presentan paralelismos inherentes. Para este proyecto se ha escogido explotar exclusivamente los de las redes neuronales (aunque también se paraleliza el operador genético de cruza para GPGPU, como se describe en la sección \ref{disenoParalCUDAcruza}). Pero la implementación se podría extender para aprovechar también los de los algoritmos genéticos, por ejemplo, utilizando múltiples CPUs y GPUs, usando una CPU para cada individuo y administrando las GPUs según su disponibilidad. Esto requeriría cambios no triviales en el modo en que las poblaciones son procesadas cada generación si se quiere extender la librería en ese sentido. Nuestras paralelizaciones solamente usan una CPU. Se han optado por dos alternativas que se comparan.
 
 Gracias al diseño modular por el que se ha optado, es posible añadir otras implementaciones paralelas de las redes neuronales (por ejemplo, usando el lenguaje OpenCL) tan sólo implementando unos pocos métodos en un par de clases que extiendan las clases Fachada (TODO nota al pie sobre el patrón de diseño) que contienen toda la parte susceptible de ser cambiada para obtener mejor rendimiento.
 
@@ -528,7 +524,7 @@ La primera alternativa implementada es la utilización del conjunto ampliado de 
 
 La segunda paralelización obedece a una tendencia bastante más reciente y en alza conocida como GPGPU (General Purpose Graphic Processor Units), que consiste en utilizar las terjetas especializadas en procesar gráficos para procesar otros cálculos que posiblemente nada tengan que ver con los gráficos. Debido a la gran demanda proveniente de diseñadores gráficos y, sobre todo, aficionados a los videojuegos, estos dispositivos comenzaron a tener unas especificaciones que resultaban muy atractivas a gran variedad de investigadores como físicos o bioquímicos. Al principio los investigadores dependian de su ingenio para mapear sus problemas específicos a un algoritmo que usase primitivas gráficas, pero con el creciente interés de esta técnica, los fabricantes decidieron ampliar su mercado de consumidores creando lenguajes específicos para este fin mucho más amigables y con facilidades para la optimización. El lenguaje C CUDA de NVIDIA, con el que desarrollamos la paralelización descrita en la sección \ref{disenoParalCUDA} es un ejemplo de estos lenguajes. Más tarde las compañías decidieron crear un lenguaje común que sirviese para todas las GPUs sin importar la marca llamado OpenCL. Hoy en día muchas de los supercomputadores más potentes del mundo utilizan múltiples GPUs para obtener los altos rendimientos que requieren[fn:cudaSuperComp].
 
-** REVISAR Ensamblador con SSE2
+** Ensamblador con SSE2
 #+LaTeX: \label{disenoParalXMM}
 *** Introducción al coprocesador XMM
 #+LaTeX: \label{disenoParalXMMintro}
@@ -610,7 +606,7 @@ Para no estropear la mascará, previamente se ha copiado su contenido a XMMaux, 
 	PAND XMMaux, XMMentradas
 #+end_src
 
-Ahora dependiendo de si el byte tiene algún bit activo o no, se sumará o no el peso correspondiente. Esta colocación de los bits con respecto al orden en que se cogen los pesos no es igual a la del algoritmo equivalente implementado en C, por tanto la función de activación de los tipos binario y bipolar para la implementación SSE2 (aunque esté escrita en C), debe tener en cuenta la disposición especial de los bits de entrada que espera esta función. Lo mismo sucede para los métodos que copian vectores de bits desde los Buffer dependientes de la implementación a los vectores más generales de la clase Interface que usamos para acceder a las entradas y salidas de la red neuronal desde el exterior, independizando así el manejo de estos datos de la representación interna que pueda tener cada implementación, como ya se ha descrito en la sección \ref{anaEspec}.
+Ahora dependiendo de si el byte tiene algún bit activo o no, se sumará o no el peso correspondiente. Esta colocación de los bits con respecto al orden en que se cogen los pesos no es igual a la del algoritmo equivalente implementado en C, por tanto la función de activación de los tipos binario y bipolar para la implementación SSE2 (aunque esté escrita en C), debe tener en cuenta la disposición especial de los bits de entrada que espera esta función. Lo mismo sucede para los métodos que copian vectores de bits desde los Buffer dependientes de la implementación a los vectores más generales de la clase Interface que usamos para acceder a las entradas y salidas de la red neuronal desde el exterior, independizando así el manejo de estos datos de la representación interna que pueda tener cada implementación, como ya se ha descrito en la sección \ref{diseno}.
 
 ¿Cómo llegamos a partir de lo que tenemos en XMMaux (cada byte tiene en bit activo o no, dependiendo del estado de la neurona de entrada procesada) y en XMMpesos a un registro en el que sólo se tengan los pesos que correspondan a neuronas activas y que tenga anulados los pesos que corresponden a neuronas inactivas? Son necesarios algunos trucos de bastante bajo nivel que son realmente la parte más interesante de las funciones. Primero ejecutaremos la siguiente instrucción:
 
@@ -750,7 +746,7 @@ Todavía se podrían mejorar las soluciones si contásemos con la arquitectura d
 
 Como hemos dicho, la colocación de los bits para la implementación XMM debe adaptarse para que se puedan obtener los mismos resultados que con el algoritmo implementado en C. Pero además en el algoritmo C no se puede usar el tipo char para los pesos (hay que usar unsigned char) y hay que restarles 128 antes de operar con ellos. Esto podría ralentizar "injustamente" al algoritmo C, por lo que también se hicieron pruebas de rendimiento sin restar 128 y usando el tipo char para comparar los tiempos. Logicamente, esa implementación C no obtiene resultados equivalentes a los de la SSE2, pero tan sólo se pretendía comparar el rendimiento. Sorprendentemente, con esta implementación C se obtenían resultados aún peores. También se probó usadno el tipo unsigned char pero sin restar 128 y el rendimiento era de nuevo ligeramente peor. Por alguna razón que no alcanzamos a explicar, el algoritmo en C funciona más rápido si ha de restar 128 a cada peso. Por ello, dejamos de lado nuestra preocupación sobre la posible penalización causada por nuestra representación de pesos en bytes.
 
-** HACER [2/5] GPGPU con CUDA
+** GPGPU con CUDA
 #+LaTeX: \label{disenoParalCUDA}
 
 Debido a la insaciable demanda de mercado de gráficos 3D de alta definición y en tiempo real, las unidades de procesamiento gráfico (Graphic Processor Unit, GPU) han evolucionado en procesadores altamente paralelos y multihilo, con muchos núcleos, tremenda capacidad de computación y con gran ancho de banda de memoria. La técnica consistente en utilizar el este poder computacional para realizar trabajos de proposito general, que pueden no tener nada que ver con los gráficos se denomina GPGPU (General Purpose Graphic Processor Unit). Los pioneros de la técnica buscaban homorfismos entre los algoritmos que pretendían ejecutar y cálculos que las librerías gráficas realizan internamente. 
@@ -759,10 +755,12 @@ Gracias a los lenguajes de alto nivel especializados para GPGPU como C CUDA u Op
 
 Aunque otras arquitecturas gráficas puedan ser similares en muchos aspectos, describiremos los conceptos básicos de la arquitectura CUDA, que es la que hemos utilizado para paralelizar los cálculos de estado de las redes neuronales y que fue diseñada explícitamente para soportar GPGPU incluso desde lenguajes de alto nivel. En principio C, pero luego también otros leguajes como FORTRAN, C++ y OpenCL. Desde la serie NVIDIA GeForce 8000 todas las gráficas que ha producido NVIDIA obedecen a la arquitectura básica CUDA (excepto las específicas para dispositivos móviles, que siguen la aruitectura Tegra). Aunque tarjetas posteriores ofrecen nuevas capacidades y posibilidades de ajuste de los algoritmos, son retrocompatibles con respecto al código implementado para versiones anteriores.
 
-*** REVISAR Modelo de programación
+Por simplicidad, los trozos de código mostrados tratarán exclusivamente la versión real (float) de las neuronas, sin mostrar ni explicar las complejidades adicionales de las versiones binaria y bipolar.
+
+*** Modelo de programación
 #+LaTeX: \label{disenoParalCUDAprog}
 
-C para CUDA es una extensión de C que permite al programador difinir funciones, llamadas núcleos (kernels) que cuando son llamadas se ejecutan N veces por N hilos CUDA diferentes, en vez de una sola vez como las funciones C habituales. Para definir un kernel se usa el especificador de declaración =__global__= y el número de hilos CUDA para cada llamada se especifica con la nueva sintaxis ~<<<...>>>~ del siguiente ejemplo:
+C para CUDA es una extensión de C que permite al programador difinir funciones, llamadas núcleos (kernels) que cuando son llamadas se ejecutan N veces por N hilos CUDA diferentes, en vez de una sola vez como las funciones C habituales\cite{progGuide2009}. Para definir un kernel se usa el especificador de declaración =__global__= y el número de hilos CUDA para cada llamada se especifica con la nueva sintaxis ~<<<...>>>~ del siguiente ejemplo:
 
 #+begin_src c
 // Definicion del Nucleo
@@ -822,10 +820,12 @@ Los hilos dentro de un mismo bloque pueden cooperar entre ellos compartiendo dat
 
 Para una cooperación eficiente, se espera que la memoria compartida sea de baja latencia y cercana al núcleo del procesador, como una caché de primer nivel, también que =__syncthreads()= sea ligera y todos los hilos de un bloque deben estar en el mismo núcleo de procesamiento. Por ello el número de hilos por bloque está restringido por los recursos limitados de memoria de un núcleo de procesamiento. En GPUs actuales un bloque de hilos puede contener hasta 512 hilos.
 
-Sin embargo, un kernel puede ser ejecutado por múltiples bloques de hilos similares, de forma que el número total de hilos sea igual al número de hilos por bloque multiplicado por el número de bloques. Estos múltiples bloques se organizan en grids unidimensionales o bidimensionales de bloques de hilos como se muestra en la figura \ref{cudaGridThreadBlocks}. 
+Sin embargo, un kernel puede ser ejecutado por múltiples bloques de hilos similares, de forma que el número total de hilos sea igual al número de hilos por bloque multiplicado por el número de bloques. Estos múltiples bloques se organizan en grids unidimensionales o bidimensionales de bloques de hilos como se muestra en la figura \ref{figGridThreadBlocks}. 
 
-#+LaTeX: \label{figGridThreadBlocks}
-TODO figGridThreadBlocks
+#+CAPTION:    Grid de bloques de hilos.
+#+LABEL:      figGridThreadBlocks
+#+ATTR_LaTeX: scale=0.6
+[[./img/gridBlockThreads.jpg]]
 
 La dimensiones del grid se especifica con el primer parámetro específico del kernel entre la sintaxis ~<<<...>>>~. Cada bloque dentro del grid se puede identicar con un índice unidimensional o bidimensional a través de la variable interna blockIdx. Las dimensiones de el bloque de hilos es accesible desde el kernel usando la variable interna blockDim. El código de ejemplo anterior quedaría así:
 
@@ -855,8 +855,10 @@ Los bloques de hilos deben poder ejecutarse independientemente, en cualquier ord
 
 Además de la jerarquía para la organización de los hilos descrita existe una jerarquía de memorias a cuyos diferentes espacios pueden acceder los hilos CUDA como muestra la figura \ref{cudaMemory}. Cada hilo tiene una memoria privada local. Cada bloque de hilos tiene uuna memoria compartida visible para todos los hilos del bloque y cuyos datos se mantienen por lo que dure el procesamiento del bloque. Finalmente, todos los hilos de todos los bloques tienen acceso a la misma memoria global. 
 
-#+LaTeX: \label{cudaMemory}
-TODO cudaMemory
+#+CAPTION:    Modelo de jerarquías de memoria CUDA.
+#+LABEL:      cudaMemory
+#+ATTR_LaTeX: scale=0.7
+[[./img/memDrDobb.jpg]]
 
 También hay dos espacios de memoria adicionales de sólo lectura que accesibles por todos los hilos: los espacios de memoria constantes y texturas. La memoria global, la de constantes y la de texturas pueden ser optimizadas para diferentes usos de memoria y son consistentes entre llamadas a kernels de la misma aplicación.
 
@@ -866,20 +868,25 @@ Por tanto, un programa gestiona los espacios de memoria global, de constantes y 
 
 Ademas, se puede hacer un sistema anfitrión con varias GPUs y hacer llamadas de kernels con diferentes datos y configuraciones a cada uno de los dispoitivos. En el presente proyecto, sin embargo, se prescinde de esa posibilidad, así como de usar las memorias de constantes y de texturas.
 
-*** REVISAR Arquitectura CUDA
+*** Arquitectura CUDA
 #+LaTeX: \label{disenoParalCUDAarq}
 
-La arquitectura CUDA se construye alrededor de un conjunto escalable de Multiprocesadoes de flujo (Streaming Multiprocessors, SMs). Cuando un programa CUDA en la CPU anfitrión invoca a un grid de kernel, los bloques del grid son enumerados y destribuidos a los multiprocesadores con capacidad de ejecución (TODO? como se muestra en la figura 4-1). Los hilos de un bloque se ejecutan concurrentemente en un mismo multiprocesador. Cuando los bloques terminan, nuevos bloques son lanzados en los Multiprocesadores que queden libres.
+La arquitectura CUDA se construye alrededor de un conjunto escalable de Multiprocesadoes de flujo (Streaming Multiprocessors, SMs). Cuando un programa CUDA en la CPU anfitrión invoca a un grid de kernel, los bloques del grid son enumerados y distribuidos a los multiprocesadores con capacidad de ejecución como se muestra en la figura \ref{automaticScalability}. Los hilos de un bloque se ejecutan concurrentemente en un mismo multiprocesador. Cuando los bloques terminan, nuevos bloques son lanzados en los Multiprocesadores que queden libres.
+
+#+CAPTION:    Escalabilidad automática: un dispositivo con más mutliprocesadores ejecutará un grid automáticamente más rápido que un dispositivo con menos multiprocesadores.
+#+LABEL:      automaticScalability
+#+ATTR_LaTeX: scale=0.6
+[[./img/automaticScalability.jpg]]
 
 Un multiprocesador consta de 8 núcleos que son procesadores escalares (Scalar Processors, SP), dos uunidades de función especial para trascendentales, una unidad de intrucciones multi-hilo, y una memoria compartida interna. El multiprocesador crea, gestiona y ejecuta los hilos concurrentes en un hardware con sobrecarga de planificación de ejecución nula. Implementa la barrera de sincronización intrínseca =__syncthreads()= con una sola instrucción. La rápida barrera de sincronización junto con la ligera creación de hilos y la sobrecarga nula de planificación soporta eficientemente un paralelismo muy granulado, permitiendo, por ejemplo, una descomposición con baja granulidad de problemas asignando un hilo a cada elemento de datos (como un pixel en una imagen, una celda en un calculo basado en una rejilla [grid] o una neurona de salida en una capa de una red neuronal).
 
-Para gestionar cientos de hilos corriendo varios programas diferentes, el multiprocesador emplea una nueva arquitectura llamada SIMT (Single-instruction, multiple-trhead; una instrucción, múltiples hilos). El multiprocesador mapea cada hilo en un núcleo de procesamiento escalar, y cada hilo escalar se ejecuta independientemente con su propia dirección de instrucción y registro de estado. El multiprocesador SIMT crea, gestiona, planifica y ejecuta hilos en grupos de 32 hilos paralelos llamados warps (Termino originado en Weaving, la primera tecnología de hilos paralelos). Los hilos individuales que componene un warp SIMT empiezan juntos en la misma dirección de programa, pero son libres de divergir y seguir una ejecución independiente.
+Para gestionar cientos de hilos corriendo varios programas diferentes, el multiprocesador emplea una nueva arquitectura llamada SIMT (Single-instruction, multiple-trhead; una instrucción, múltiples hilos). El multiprocesador mapea cada hilo en un núcleo de procesamiento escalar, y cada hilo escalar se ejecuta independientemente con su propia dirección de instrucción y registro de estado. El multiprocesador SIMT crea, gestiona, planifica y ejecuta hilos en grupos de 32 hilos paralelos llamados warps (Termino originado en Weaving, la primera tecnología de hilos paralelos). Los hilos individuales que componen un warp SIMT empiezan juntos en la misma dirección de programa, pero son libres de divergir y seguir una ejecución independiente.
 
 Cuando un multiprocesador recibe uno o más bloques de hilos para ejecutar, los divide en warps que son programados por la unidad SIMT. El modo en que un bloque es dividido en warps es siempre el mismo; cada warp contiene hilos con IDs consecutivos y crecientes con el primer warp conteniendo el hilo 0. 
 
-Por cada tiempo de ejecución de intrucción, la unidad SIMT selecciona un warp que esté preparado para ser ehecutado y les da la siguiente instrucción a los hilos activos del warp. El warp ejecuta una instrucción común cada vez, por lo que la máxima eficiencia se alcanza cuando los 32 hilos del warp siguen el mismo flujo de ejecución. Si los hilos que divergen debido a una bifurcación condicional dependiente de los datos, el warp ejecuta de forma seliarizada cada camino de ejecución, desactivando los hilos que no están en ese camuno. Cuando todos los caminos se completan, los hilos convergen de nuevo en el mismo flujo de ejecución. Estas bifucaciones ocurren sólo dentro de un mismo warp; los diferentes warps se ejecutan independientemente sin importar si estos están ejecutando caminos de código comunes o disjuntos.
+Por cada tiempo de ejecución de intrucción, la unidad SIMT selecciona un warp que esté preparado para ser ejecutado y les da la siguiente instrucción a los hilos activos del warp. El warp ejecuta una instrucción común cada vez, por lo que la máxima eficiencia se alcanza cuando los 32 hilos del warp siguen el mismo flujo de ejecución. Si los hilos que divergen debido a una bifurcación condicional dependiente de los datos, el warp ejecuta de forma seliarizada cada camino de ejecución, desactivando los hilos que no están en ese camuno. Cuando todos los caminos se completan, los hilos convergen de nuevo en el mismo flujo de ejecución. Estas bifucaciones ocurren sólo dentro de un mismo warp; los diferentes warps se ejecutan independientemente sin importar si estos están ejecutando caminos de código comunes o disjuntos.
 
-La qrquitectura SIMT se parece a las organizaciones vectoriales SIMD (Single Instruction, Multiple Data) en que una sola instrucción controla multiples elementos de procesamiento. Una diferencia clave entre es que las arquitecturas vectoriales SIMD exponen el tamaño del vector SIMD al software, mientras que las instrucciones SIMT especifican la ejecución y el comportamiento de las bifurcaciones para un solo hilo. A diferencia de las maquinas vectoriales SIMD, SIMT permite a los programadores escribir código a nivel de hilo para hilos independientes y escalares, así como código con paralelismo de datos para hilos coordinados. En lo que se refiere a la corrección del código, el programador puede basicamente ignorar el comportamiento SIMT; sin embargo, se pueden conseguir mejoras de rendimiento sustanciales teniendo en cuenta que el código puede hacer que los hilos de un warp se bifurquen y evitándolo en la medida de lo posible. En la práctica, esto es similar al rol de las lineas de cache en el código tradicional: el tamaño de las lineas de cache se puede ignorar de forma segura cuando se diseña para que el código sea correcto pero debe ser considerado en la estructura del código cuando se diseña para un rendimiento máximo. Las arquitecturas vectoriales, sin embargo, requieren que el software haga las cargas coalescentes y gestione las divergencias manualmente.
+La arquitectura SIMT se parece a las organizaciones vectoriales SIMD (Single Instruction, Multiple Data) en que una sola instrucción controla multiples elementos de procesamiento. Una diferencia clave entre es que las arquitecturas vectoriales SIMD exponen el tamaño del vector SIMD al software, mientras que las instrucciones SIMT especifican la ejecución y el comportamiento de las bifurcaciones para un solo hilo. A diferencia de las maquinas vectoriales SIMD, SIMT permite a los programadores escribir código a nivel de hilo para hilos independientes y escalares, así como código con paralelismo de datos para hilos coordinados. En lo que se refiere a la corrección del código, el programador puede basicamente ignorar el comportamiento SIMT; sin embargo, se pueden conseguir mejoras de rendimiento sustanciales teniendo en cuenta que el código puede hacer que los hilos de un warp se bifurquen y evitándolo en la medida de lo posible. En la práctica, esto es similar al rol de las lineas de cache en el código tradicional: el tamaño de las lineas de cache se puede ignorar de forma segura cuando se diseña para que el código sea correcto pero debe ser considerado en la estructura del código cuando se diseña para un rendimiento máximo. Las arquitecturas vectoriales, sin embargo, requieren que el software haga las cargas coalescentes y gestione las divergencias manualmente.
 
 Como se muestra en la figura \ref{arqCUDAdetalle}, cada mutliprocesador tiene memoria interna de 4 tipos:
 
@@ -888,46 +895,653 @@ Como se muestra en la figura \ref{arqCUDAdetalle}, cada mutliprocesador tiene me
 - Una cache de constantes de sólo lectura que es compartida por todos los procesadores escalares y acelera las lecturas desde el espacio de memoria de constantes, que es una región de sólo lectura de la memoria del dispositivo.
 - Una cache de texturas de sólo lectura que es compartida por todos los procesadores escalares y acelera las lecturas desde el espacio de memoria de texturas, que es una región de sólo lectura de la memoria del dispositivo; cada multiprocesador accede a la cache de texturas a través de la unidedad de texturas que implementa los diferentes modos de direccionamiento y filtrado de datos especiales para texturas.
 
-#+LaTeX: \label{arqCUDAdetalle}
-TODO arqCUDAdetalle
+#+CAPTION:    Un conjunto de multiprocesadores SIMT con memoria compartida en el chip.
+#+LABEL:      arqCUDAdetalle
+#+ATTR_LaTeX: scale=0.6
+[[./img/arqCUDAdetalle.jpg]]
 
 Los espacios de memoria locales y globales son regiones de lectura/escritura de la momoria del dispositivo y no son cacheados. 
 El número de bloques que un multiprocesador puede procesar a la vez - lo que se denomina como número de bloques activos por multiprocesador - depende de cuantos registros por hilo y cuánta memoria compartida por bloque son necesarios para un kernel dado, debido a que los registros de un multiprocesador y la momoria compartida son divididos entre todos los hilos de los bloques activos. Si no hay suficientes registros o memoria compartida disponibles por multiprocesador para procesar al menos un bloque, el kernel no podrá ser lanzado. El número máximo de bloques activos por multiprocesador, así como él número máximo de warps activos y el número de hilos activos dependen del dispositivo CUDA concreto.
 
 Si una instrucción no atómica ejecutada en un warp escribe en la misma localización global de momoria compartida para más de un hilo dentro de warp, el número de escrituras serializadas que suceden en esa localización y el orden en que ocurren no está definido, pero se garantiza que al menos una de las escrituras se realizará. Si una instrucción atómica ejecutada por un warp lee, modifica o escribe sobre la misma localización en momodia global para más de uno de los hilos del warp, todas las lecturas, modificaciones y escrituras sobre esa localización se realizan y son todas serializadas, epro el orden en que ocurren tampoco está definido.
-
-*** HACER Reducción paralelizada
+*** Reducción paralelizada
 #+LaTeX: \label{disenoParalCUDAreduc}
 
 La primera aproximación para la implementación de nuestro algoritmo genérico de cálculo de estado de una capa de red neuronal sobre la arquitectura CUDA estaba claramente influída por la optimización SSE2 anterior. Aquella función de ensamblador calculaba el resultado para una neurona de salida. En este primer kernel CUDA haremos lo mismo: cada llamada al kernel nos servirá para calcular la salida de un neurona (de nuevo, dejando la función de activación aparte). De este modo, cada hilo hará una multiplicación entre una entrada y un peso y luego se sumarán todos los resultados usando una reducción paralela.
 
 En la sección \ref{disenoParalXMMbyte} utilizamos una instrucción especial para hacer la reducción y poder sumar los 16 elementos de un bloque, pero no existe una instrucción similar en CUDA. En \ref{disenoParalXMMfloat} se acumulaban los resultados en un registro con cuatro floats que se sumaban al final. El modo en que se sumaban no era lo que más aceleraba al algortimo, pero nos da una pista de lo que debemos hacer. Primero se sumaban dos y dos en una sóla instrucción (tras dduplicar el registro y desplazarlo) y después los otros dos resultantes. Generalizando a cualquier número de elementos iniciales y sumando los elementos de dos en dos de forma paralela, vemos que lo que tenemos que usar es una reducción en árbol\cite[Harris2007]{Harris2007}.
 
-El kernel más simple para hacer una reducción como esta es
+Pero queremos que el algortimo sirva para un tamaño de entrada cualquiera y como hemos visto, dividiremos los datos en un grid también de tamaño arbitrario compuesto de bloques de hilos cuyo tamaño sí depende de la máquina concreta. Este tamaño lo podremos ajustar a cada dispositivo con pruebas, pero surge un problema. No existe un método de sincronización global entre los hilos de los diferentes bloques en CUDA, sólo uno para sincronizar los hilos de un mismo bloque. Para superarlo analizaremos dos posibilidades. 
 
-*** HACER Paralelizar las salidas
+La primera es tener dos kernels y ejecutar el segundo cuantas veces sea necesario. El primer kernel multiplicará cada entrada por su peso correspondiente y hará la primera reducción. Cada bloque de hilos almacenará el resultado parcial de la reducción que ha realizado en la memoria global del dispositivo. El segundo kernel hará sólo reducción, sin multiplicar entradas ni pesos. Éste tomará como entrada las salidas de la ejecución anterior y se llamará tantas veces como sea necesario hasta que se llame al kernel con un grid de un sólo bloque de hilos que pueda sumar todo en una sola variable. Aunque la sobrecarga de tiempo que el hardware tarda en lanzar un kernel es despreciable y la sobrecarga que generaremos mediante software para configurar correctamente las sucesivas llamadas a los diferentes kernels parece en principio asumible, vemos que esta aproximación tiene otra gran desventaja. En cada ejecución de bloque, tras el cálculo inicial de la entrada por el peso, la primera reducción la realizan tan sólo la mitad de los hilos, la otra mitad están parados casi desde el principio, lo que sin duda parece un desperdicio. Además, cuando queden pocos resultados parciales el número de bloques por grid será también pequeño y si el dispositivo tiene muchos multiprocesadores los estaremos también infrautilizando.
+
+La segunda posibilidad a analizar es renunciar a hacer una llamada al kernel por cada neurona de salida y, en vez de ello, permitir que cada bloque se encargue de una neurona de salida, contando el grid con tantos bloques como neuronas de salida tenga la capa de la red que esté siendo procesada. Siempre que el número de multiprocesadores de un dispositivo sea inferior al número de neuronas de salida (algo bastante razonable) no debemos temer el último problema de infrautilización comentado para la primera posibilidad. Además, también se desvanece nuestra preocupación de que los hilos de cada bloque queden demasiado pronto inactivos. Todas las lecturas de entradas y pesos, y los cálculos y acumulaciones correspondientes se dividirán entre todos los hilos del bloque destinado a calcular el valor de esa salida. De esta manera mantendremos todos los hilos de un bloque ocupados hasta la reducción final de los resultados parciales de cada hilo.
+
+Elegimos, por tanto, esta segunda posibilidad, que consiste en realidad en combinar la reducción paralela con la secuencial (en varios hilos). No por ello dejaremos de explorar las posibilidades de optimización para la reducción paralela que sí se hará para reunir todos los resultados parciales de los diferentes hilos de un mismo bloque. Antes de analizar esas posibles optimizaciones, veamos como sería nuestro kernel sin tener en cuenta esas optimizaciones en la reducción (y, como hemos dicho anteriormente, sin contemplar neuronas binarias ni bipolares). Nuestro kernel tomará por entradas el número de neuronas de entrada (=input_size=) de la capa, al vector con las neuronas de entrada (=inputPtr=) y la matriz con los pesos (=weighs=). Como parámetro de salida tendrá el vector con las neuronas de salida listas para que se les aplique la función de activación (=results=).
+Este sería el código que implementa el kernel:
+
+#+begin_src c
+__global__ void ReductionKernel(float* inputPtr, unsigned input_size, 
+                    float* weighs, float* results)
+{
+    extern __shared__ float sdata[];
+
+    unsigned weighsOffset = (blockIdx.x * input_size);
+
+    float result = 0;
+    unsigned i = threadIdx.x;
+
+    while (i < input_size) {
+        result += inputPtr[i] * weighs[weighsOffset + i];
+        i += blockDim.x;
+    }
+    __syncthreads();
+
+    unsigned tid = threadIdx.x;
+    sdata[tid] = result;
+    __syncthreads();
+
+    // Reducción paralela de los resultados parciales en memoria compartida
+    // ...
+
+    if (tid == 0) {
+        results[blockIdx.x] += sdata[0];
+    }
+}
+#+end_src
+
+Los pesos están ordenados de forma que todos los que correspondan a una misma neurona de salida estén juntos. Por ello, cada bloque calcula un desplazamiento en la matriz de pesos (=weighsOffset=) multiplicando su id de bloque por el tamaño de las entradas para acceder a los pesos que corresponden a la neurona de salida que le toca calcular. Hasta que se acaben las entradas, cada hilo tomará una entrada y la multiplicará por su peso correspondiente, acumulando su resultado parcial en una variable local (=result=) que empezará a cero. El iterador =i= que es diferente para cada hilo del bloque se irá incrementando con el tamaño del bloque, para que no se repitan los accesos a una misma entrada ni un mismo bloque. Tras esto, cada hilo almacena su resultado parcial en la memoria compartida que es donde se realizará la reducción paralela y sólo uno de ellos escribirá el resultado todal desde la memoria compartida a la memoria global del dispositivo, donde se almacenan las salidas de la capa.
+
+Detengamonos ahora a analizar la parte de la reducción paralelizada y sus posibles optimizaciones. Una primera aproximación sería un acceso entrelazado como el del siguiente código:
+
+#+begin_src c
+    // ...
+    // Reducción paralela de los resultados parciales en memoria compartida
+    for(unsigned int s=1; s < blockDim.x; s *= 2) 
+    {
+        if (tid % (2*s) == 0) {
+            sdata[tid] += sdata[tid + s];
+        }
+        __syncthreads();
+    }
+    // ...
+#+end_src
+
+Esta aproximación, sin embargo tiene defectos. En primer lugar, el operador módulo (=%=) es muy lento. Pero eso no es lo peor. Como vimos en la sección \ref{disenoParalCUDAarq}, además de los bloques hay una unidad menor llamada warp compuesta de 32 hilos y si todos los hilos del warp no siguen el mismo flujo de ejecución sufrimos una penalización importante en redimiento. Como los hilos de un mismo warp tienen ids consecutivos, vemos que la condición =if= del interior del bucle producirá warps altamente divergentes, lo que a su vez es altamente ineficiente.
+Podemos mantener el mismo acceso entrelazado pero desde hilos consecutivos reemplazando el código anterior con el siguiente, con indexación por saltos:
+
+#+begin_src c
+    // ...
+    // Reducción paralela de los resultados parciales en memoria compartida
+    for(unsigned int s=1; s < blockDim.x; s *= 2) 
+    {
+        int index = 2 * s * tid;
+
+        if (index < blockDim.x) 
+        {
+            sdata[index] += sdata[index + s];
+        }
+        __syncthreads();
+    }
+    // ...
+}
+#+end_src
+
+Esta condición =if= no produce ejecuciones divergentes en un mismo warp tan a menudo, sólo en las fases finales de la reducción (los 32 últimos elementos). Sin embargo, nos encontramos con un nuevo problema y es que los bancos de la memoria copartida no están diseñados para acceder a ellos de esta manera. Si dos hilos acceden de forma conflictiva a posiciones de la memoria compartida que se encuentran en el mismo banco, se produce un conflicto de bancos y se accederá a las dos posiciones secuencialmente, perdiendo las ventajas del acceso paralelo. Una excepción a esto sería que todos los hilos accediesen simultáneamente al mismo elemento, entonces en vez de obtener un conflicto simplemente utilizará una instrucción de broadcast (el número de hilos que tienen que acceder simultaneamente para usar el broadcast dependen de la generación del dispositivo, cuanto más nuevos, más permisivos).
+
+Hay 16 bancos en la memoria compartida (32 en generaciones más nuevas, Fermi), que están entrelazados con una granularidad de 32 bits. Así, las direcciones de memoria estarían situadas en bancos de la siguiente manera:
+
+| Banco       | 0           | 1           | ... | 15              |
+|-------------+-------------+-------------+-----+-----------------|
+| Direcciones | 0  1  2  3  | 4  5  6  7  | ... | 60  61  62  63  |
+| Direcciones | 64 65 66 67 | 68 69 70 71 | ... | 124 125 126 127 |
+| ...         | ...         | ...         | ... | ...             |
+
+Floats con posiciones consecutivas en la memoria compartida pertenecen a distintos bancos y si dos hilos del mismo medio-warp (halfwarp) acceden al mismo banco a la vez se producirá el conflicto. En nuestro caso, es el propio acceso entrelazado el que nos está causando los problemas, por lo que nos desharemos de él en la siguiente aproximación con acceso secuencial:
+
+#+begin_src c
+    // ...
+    // Reducción paralela de los resultados parciales en memoria compartida
+    for(unsigned int s=blockDim.x/2; s>0; s>>=1) 
+    {
+        if (tid < s) 
+        {
+            sdata[tid] += sdata[tid + s];
+        }
+        __syncthreads();
+    }
+    // ...
+}
+#+end_src
+
+Hemos invertido el bucle y basado la indexación en el id del hilo. Así, además de una condición que no produce divergencias dentro de los warps, tenemos que hilos consucutivos acceden a posiciones de memoria compartida consecutivas. De nuevo, podemos mejorar esta parte del algortimo.
+
+Conforme avanza la reducción, tenemos cada vez menos hilos activos en el bloque y cuando la s es menor o igual a 32, sólo nos queda un warp. Las instrucciones dentro de un warp se calculan de forma síncrona y vectorial (SIMD). Esto significa que cuando ~s <= 32~ no necesitamos llamar a =__syncthreads()=. Tampoco necesitamos hacer la comprobación ~if(tid < s)~, pues no ahorrará ningún cálculo. Por ello podemos desenrollar (loop unrolling) las 6 últimas iteraciones del bucle:
+
+#+begin_src c
+    // ...
+    // Reducción paralela de los resultados parciales en memoria compartida
+    for(unsigned int s=blockDim.x/2; s>32; s>>=1) 
+    {
+        if (tid < s)
+        {
+            sdata[tid] += sdata[tid + s];
+        }
+        __syncthreads();
+    }
+
+    if (tid < 32)
+    {
+        sdata[tid] += sdata[tid + 32];
+        sdata[tid] += sdata[tid + 16];
+        sdata[tid] += sdata[tid +  8];
+        sdata[tid] += sdata[tid +  4];
+        sdata[tid] += sdata[tid +  2];
+        sdata[tid] += sdata[tid +  1];
+    }   
+    // ...
+}
+#+end_src
+
+Esto no sólo ahorra trabajo inútil en el último warp sino en todos ellos. Sin desenrollar, todos los warps siguen ejecutando las vueltas del bucle y las condiciones =if=.
+NVIDIA dejó de mantener el modo emulado para el compilador nvcc a partir de la versión CUDA v2.3 (esta fué la última que lo incluía). Al tratarse de software privativo nadie pudo continuar con su mantenimiento y este modo ya no es útil en nuevas versiones. Sin embargo, dado que nuestro software está preparado para ser compilado en modo emulación usando la versión mencionada, estimamos oportuno precisar que el emulador no trata los warps de forma idéntica a los dispositivos y para obtener resultados correctos, hay que añadir unas indicaciones para el precompilador:
+
+#+begin_src c
+    // ...
+    // Reducción paralela de los resultados parciales en memoria compartida
+#ifndef __DEVICE_EMULATION__
+    if (tid < 32)
+#endif
+    {
+        sdata[tid] += sdata[tid + 32]; EMUSYNC;
+        sdata[tid] += sdata[tid + 16]; EMUSYNC;
+        sdata[tid] += sdata[tid +  8]; EMUSYNC;
+        sdata[tid] += sdata[tid +  4]; EMUSYNC;
+        sdata[tid] += sdata[tid +  2]; EMUSYNC;
+        sdata[tid] += sdata[tid +  1]; EMUSYNC;
+    }
+    // ...
+}
+#+end_src
+
+El paso que hemos usado anteriormente consistente en desenrrollar bucles (loop unrolling), no es solamente útil para aprovechar las peculiaridades de la arquitectura CUDA. De forma general, esta técnica se usa para ahorrar la sobrecarga que suponen los cálculos que se ocupan de gestionar el bucle. Podemos obtener un mayor rendimiento desenrollando completamente el bucle. Como contrapartida obtendremos un código compilado más largo, pero centrándonos en el rendimiento no nos importa tener unos binarios más grandes.
+
+Para poder hacer esto necesitaríamos saber el tamaño del bloque en tiempo de compilación y repetir el resto del código para los posibles tamños de bloque. Esta penosa tarea perjudicará además gravemente la legibilidad y mantenibilidad del código si no se cuenta con plantillas, una técnica que implementa el lenguaje C++ pero no el C original. Las primeras versiones de CUDA no soportaban C++, tan sólo C, sin embargo, las plantillas están disponibles desde el principio, también para C CUDA.
+
+Así quedaría la parte de código dedicada a la reducción paralelizada con los bucles completamente desenrrollados usando plantillas:
+
+#+begin_src c
+    // ...
+    // Reducción paralela de los resultados parciales en memoria compartida
+    if (blockSize >= 512) { 
+        if (tid < 256) { sdata[tid] += sdata[tid + 256]; } __syncthreads();
+    }
+    if (blockSize >= 256) { 
+        if (tid < 128) { sdata[tid] += sdata[tid + 128]; } __syncthreads(); 
+    }
+    if (blockSize >= 128) { 
+        if (tid <  64) { sdata[tid] += sdata[tid +  64]; } __syncthreads(); 
+    }
+    
+#ifndef __DEVICE_EMULATION__
+    if (tid < 32)
+#endif
+    {
+        if (blockSize >=  64) { sdata[tid] += sdata[tid + 32]; EMUSYNC; }
+        if (blockSize >=  32) { sdata[tid] += sdata[tid + 16]; EMUSYNC; }
+        if (blockSize >=  16) { sdata[tid] += sdata[tid +  8]; EMUSYNC; }
+        if (blockSize >=   8) { sdata[tid] += sdata[tid +  4]; EMUSYNC; }
+        if (blockSize >=   4) { sdata[tid] += sdata[tid +  2]; EMUSYNC; }
+        if (blockSize >=   2) { sdata[tid] += sdata[tid +  1]; EMUSYNC; }
+    }
+    // ...
+}
+#+end_src
+
+Además, podemos sustituir la variable local =blockDim.x= por la constante =blockSize= cuando aparezca. El kernel completo final (sólo para neuronas reales) es este:
+
+#+begin_src c
+template <unsigned int blockSize>
+__global__ void ReductionKernel(float* inputPtr, unsigned input_size, 
+                    float* weighs, float* results)
+{
+    extern __shared__ float sdata[];
+
+    unsigned weighsOffset = (blockIdx.x * input_size);
+
+    float result = 0;
+    unsigned i = threadIdx.x;
+
+    while (i < input_size) {
+        result += inputPtr[i] * weighs[weighsOffset + i];
+        i += blockSize;
+    }
+    __syncthreads();
+
+    unsigned tid = threadIdx.x;
+    sdata[tid] = result;
+    __syncthreads();
+
+    // Reducción paralela de los resultados parciales en memoria compartida
+    if (blockSize >= 512) { 
+        if (tid < 256) { sdata[tid] += sdata[tid + 256]; } __syncthreads();
+    }
+    if (blockSize >= 256) { 
+        if (tid < 128) { sdata[tid] += sdata[tid + 128]; } __syncthreads(); 
+    }
+    if (blockSize >= 128) { 
+        if (tid <  64) { sdata[tid] += sdata[tid +  64]; } __syncthreads(); 
+    }
+    
+#ifndef __DEVICE_EMULATION__
+    if (tid < 32)
+#endif
+    {
+        if (blockSize >=  64) { sdata[tid] += sdata[tid + 32]; EMUSYNC; }
+        if (blockSize >=  32) { sdata[tid] += sdata[tid + 16]; EMUSYNC; }
+        if (blockSize >=  16) { sdata[tid] += sdata[tid +  8]; EMUSYNC; }
+        if (blockSize >=   8) { sdata[tid] += sdata[tid +  4]; EMUSYNC; }
+        if (blockSize >=   4) { sdata[tid] += sdata[tid +  2]; EMUSYNC; }
+        if (blockSize >=   2) { sdata[tid] += sdata[tid +  1]; EMUSYNC; }
+    }
+
+    if (tid == 0) {
+        results[blockIdx.x] += sdata[0];
+    }
+}
+#+end_src
+
+Para no tener que decidir el tamaño del bloque en tiempo de ejecución y poder mantener =block_size= como parámetro, al llamar al kernel utilizamos una estructura =switch= con los 10 posibles valores:
+
+#+begin_src c
+unsigned grid_size = output_size;
+unsigned shared_mem_size = block_size * sizeof(float);
+
+switch (block_size) {
+    case 512:
+        ReductionKernel<512, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>
+            (inputPtr, input_size, output_size, weighs, results); break;
+    case 256:
+        ReductionKernel<256, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>
+            (inputPtr, input_size, output_size, weighs, results); break;
+    case 128:
+        ReductionKernel<128, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>
+            (inputPtr, input_size, output_size, weighs, results); break;
+    case 64:
+        ReductionKernel< 64, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>
+            (inputPtr, input_size, output_size, weighs, results); break;
+    case 32:
+        ReductionKernel< 32, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>
+            (inputPtr, input_size, output_size, weighs, results); break;
+    case 16:
+        ReductionKernel< 16, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>
+            (inputPtr, input_size, output_size, weighs, results); break;
+    case 8:
+        ReductionKernel<  8, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>
+            (inputPtr, input_size, output_size, weighs, results); break;
+    case 4:
+        ReductionKernel<  4, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>
+            (inputPtr, input_size, output_size, weighs, results); break;
+    case 2:
+        ReductionKernel<  2, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>
+            (inputPtr, input_size, output_size, weighs, results); break;
+    case 1:
+        ReductionKernel<  1, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>
+            (inputPtr, input_size, output_size, weighs, results); break;
+}
+#+end_src
+
+*** Paralelizar las salidas
 #+LaTeX: \label{disenoParalCUDAsal}
-*** HACER Matriz de pesos invertida
+
+En la sección \ref{disenoParalCUDAreduc} hemos realizado varias optimizaciones, pero no hemos usado al máximo la memoria compartida cuya lantencia es aproximadamente de 100 a 150 veces menor que la de la memoria global\cite[Farber2008]{Farber2008}. Tan sólo usamos un float por cada hilo del bloque, esto es, como máximo usamos 512 floats ó 512x4 = 2048 Bytes, cuando la memoria cmpartida tiene un tamaño de 16 KB (48KB para dispositivos de capacidad de computación 2.0 o superiores). A esto hay que descontar lo que ocupen los parámetros del kernel, que también se ubicarán en esta memoria, pues todos los hilos de un bloque deben poder acceder a ellos. Por tanto, tiene sentido buscar otra aproximación distinta de la de la reducción con la que se aproveche al máximo este espacio de memoria que sabemos es más rápido.
+
+En esta aproximación, cada hilo calculará de forma completa una neurona de salida, en vez de hacerlo cada bloque como en la versión de reducción. De nuevo, todos los bloques tendrán que leer todas las entradas, pero ahora los hilos de un mismo bloque podrán usar la memoria compartida para almacenar estas entradas que en este caso deberán leer todos los hilos en vez de dividirselas. 
+En una primera fase, cargaremos las entradas en la memoria compartida:
+
+#+begin_src c
+__global__
+void OutputsKernel(float* inputs, unsigned input_size, unsigned output_size, float* weighs,
+                                float* results)
+{
+    extern __shared__ float sdata[];
+
+    unsigned pos = threadIdx.x;
+    while (pos < input_size) {
+
+        sdata[pos] = inputs[pos];
+        pos += blockDim.x;
+    }
+    __syncthreads();
+    // ...
+#+end_src
+
+Una vez tengamos todas las entradas en memoria, cada hilo accederá a los pesos que le correspondan para ir multiplicandolos por las entradas en memoria compartida e ir acumulando los resultados:
+
+#+begin_src c
+    // ...
+    unsigned outputNeuron = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned weighsOffset = outputNeuron * input_size;
+    float result = 0;
+
+    if (outputNeuron < output_size) {
+
+        for (unsigned i = 0; i < input_size; i++) {
+            result += sdata[i] * weighs[weighsOffset + i];
+            __syncthreads();
+        }
+
+        results[outputNeuron] += result;
+    }
+}
+#+end_src
+
+Finalmente, cada hilo almacena el resultado en la la nuerona de salida que le corresponde.
+Notesé que en este caso todos los hilos del bloque acceden a la misma posición de memoria compartida a la vez. No esperamos que se presenten de nuevo conflictos de bancos de memoria sino, por el contrario, aprovechar la posibilidad de las lecturas de tipo broadcast. Desafortunadamente, el acceso a la memoria global para leer los pesos no es coalescente lo que se estropean nuestras expectativas. El acceso coalescente permite al dispositivo leer secciones contiguas de memoria con una sóla operación. Para un acceso coalescente, hilos contiguos deben acceder a posiciones de memoria global contiguas. Sin embargo, el salto entre la posición que lee un hilo y el siguiente es igual al tamaño de la capa de entrada, como se aprecia en la asignación =weighsOffset = outputNeuron * input_size=.
+
+Como los pesos no están siendo accedidos de forma coalescente, las lecturas a memoria global serán secuenciales y, por tanto, las de la memoria compartida pueden no suceder al mismo tiempo. Además de estropear el broadcast, las lecturas desde la memoria global serán mucho más lentas. Esta es probablemente la optimización más importante de un kernel y la primera a tener en cuenta, pues aprovechar al máximo el ancho de banda de la memoria es fundamental para obtener un buen rendimiento usando GPGPU\cite{bestPract2009}.
+
+Otro problema de esta aproximación es que el tamaño máximo de la capa de entrada está limitado por el tamaño de la memoria compartida. Como hemos dicho, la memoria compartida tiene una capacidad de 16 KB (aunque pueda ser superior en dispositivos más modernos). Para aceptar entradas de cualquier tamaño tendríamos que modificar el kernel de forma que tomase por parámetro con un índice que indicase el númeo de entrada que toca leer y adaptar los índices de las entradas en consecuencia. Como el algoritmo no podrá ser óptimo debido al acceso no coalescente, no se implementa dicha modificación. La presente aproximación se mantiene y se implementa también para los tipos de neurona binaria y bipolar; simplemente para comparar su rendimiento. Pero en la siguiente sección \ref{disenoParalCUDAinv} se trata de adaptar este algoritmo para conseguir un acceso coalescente a los pesos que sí podrá tomar entradas de cualquier tamaño.
+
+*** Matriz de pesos invertida
 #+LaTeX: \label{disenoParalCUDAinv}
-* HACER [0/3] Manual del programador
-#+LaTeX: \label{manualProgr}
-** HACER Guia de instalación
-#+LaTeX: \label{manualProgrInstal}
 
-sudo aptitude install make g++ nasm gnuplot
-sudo aptitude install texlive-latex-recommended texlive-latex-extra
+En la sección anterior \label{disenoParalCUDAsal} la causa del acceso no coalescente era que los todos pesos de cada neurona de salida estaban juntos. Para acceder al primer peso de dos neuronas de salida consecutivas, que es a lo que quieren acceder dos hilos consecutivos, aplicabamos un salto de =input_size=. Pero si los pesos estuviesen en memoria colocados de la forma en la que serán accedidos, tendríamos un acceso coalescente. Para ello, tan sólo tenemos que invertir la matriz de pesos. Así, los pesos que corresponden a una misma neurona de entrada serán los que están juntos en lugar de los de una misma neurona de salida.
 
-** HACER Uso general (API)
-#+LaTeX: \label{manualProgrApi}
-** HACER Extensibilidad a partir de interfaces
-#+LaTeX: \label{manualProgrInterf}
-\newpage
-* REVISAR [2/2] Experimentaci\'on
+Si estuviesemos considerando un algortimo genérico de multiplicación de un vector por una matriz, tendríamos que contabilizar el coste de invertir la matriz como parte del coste total de ejecución, pues la inversión se realizaría siempre antes de hacer la operación. Pero nuestro caso es diferente. Podemos tener los pesos siempre invertidos en memoria. Tan sólo cuando la red sea almacenada o leída desde disco (por compatibilidad con las otras implementaciones paralelas), deben ser invertidas las matrices su formato normal. Cuando una capa es generada aleatoriamente, ni siquiera es necesaria la inversión. Sin embargo el cáculo del estado de una capa de una red neuronal se ejecutará probablemente varias veces durante la evaluación de un individuo y la evaluación de los individuos se repetirá por muchas generaciones. Por ello, no tenemos en cuenta los costes de la inversión de la matriz de pesos al comparar este algoritmo con otros, pues es bastante irrelevante.
+
+La inversión de la matriz, sin embargo, sí tiene costes en cuanto a desarrollo de software. Las operaciones de mutación, cruza y olvido tienen que tener en cuenta esta colocación especial. El caso más complicado sería la cruza, aunque con el diseño descrito en la sección \ref{disenoGeneCruz}, la inversión se podrá hacer sobre el vector de bits que actua como interfaz para los diferentes esquemas de cruza y las diferentes implementaciones paralelas, cuyas disposiciones de pesos en memoria, como sucede en este caso, pueden variar. 
+
+Resuelto el problema de la inversión desde el diseño y fuera de nuestro código CUDA, veamos los cambios que se han de aplicar sobre el kernel anterior para conseguir el acceso coalescente y poder mejorar su rendimiento:
+
+#+begin_src c
+__global__
+void InvertedKernel(float* inputs, unsigned input_size, float* weighs, float* results,
+                                        unsigned output_size)
+{
+    extern __shared__ float sdata[];
+
+    unsigned input_pos = threadIdx.x;
+    while (input_pos < input_size) {
+
+        sdata[input_pos] = inputs[input_pos];
+        input_pos += blockDim.x;
+    }
+    __syncthreads();
+
+    unsigned output_pos = blockIdx.x * blockDim.x + threadIdx.x;
+    float result = 0;
+
+    if (output_pos < output_size) {
+
+        for (unsigned i = 0; i < input_size; i++) {
+            result += sdata[i] * weighs[output_pos + (i * output_size)];
+            __syncthreads();
+        }
+        results[output_pos] += result;
+    }
+}
+#+end_src
+
+El kernel resulta incluso más simple. Ahora no hay una variable, =weighsOffset= para el salto entre hilos contiguos, porque el salto es simplemente  =output_pos= que depende directamente del número de bloque y de hilo. Ahora en vez de avanzar una posición en cada vuelta de bucle se avanza output_size, que es lo que se lee en total en cada vuelta.
+
+Quedaba también pendiente por resolver el problema de la limitación del tamaño de las entradas que la memoria compartida nos impone. Para la proximación en la que paralelizabamos las salidas sin invertir la matriz de peso, resolver esto era más complejo, dijimos que teníamos que utilizar un parámetro adicional de indice de entradas y adaptar los índices a los pesos con este nuevo parámetro. Luego llmaríamos al kernel cuantas veces fuese necesario cambiando el valor de ese parámetro. 
+
+Ahora, sin embargo, tenemos los pesos ordenados por entradas. Podemos directamente cambiar los punteros de entradas y pesos en cada llamada y darle como parámetro =input_size= el número de entradas que vaya a procesar en esa llamada en lugar del tamaño total de las entradas. Así, llamaremos a este kernel de la siguiente manera:
+
+#+begin_src c
+unsigned grid_size = ((output_size - 1) / block_size) + 1;
+unsigned shared_mem_size;
+
+while (input_size > CUDA_MAX_SHARED_FLOATS) {
+
+    shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(float);
+    InvertedKernel<<< grid_size, block_size, shared_mem_size >>>(flInputPtr, flWeighs, results, CUDA_MAX_SHARED_FLOATS, output_size);
+    flInputPtr += CUDA_MAX_SHARED_FLOATS;
+    flWeighs += (CUDA_MAX_SHARED_FLOATS * output_size);
+    input_size -= CUDA_MAX_SHARED_FLOATS;
+}
+shared_mem_size = input_size * sizeof(float);
+InvertedKernel<<< grid_size, block_size, shared_mem_size >>>(flInputPtr, flWeighs, results, input_size, output_size);
+#+end_src
+
+La constante =CUDA_MAX_SHARED_FLOATS= nos dice las entradas que podremos almacenar en memoria compartida en cada llamada al kernel. Para que funcione en todos los dispositivos, consideraremos un tamaño de memoria compartida de 16 KB ó 16384 Bytes a la que hay que descontar los parámetros del kernel. Hay ya 16 Bytes de memoria compartida que están reservados para almacenar las variables internas blockIdx, blockDim y gridDim (threadIdx se almacena en un registro especial). Además, se pueden usar hasta 256 bytes  como parámetros propios a los kernels. Nuestros parámetros propios son 3 punteros y 2 enteros sin signo. Todos ellos ocupan 4 Bytes, por lo que en nuestro caso debemos reservar 20 bytes más para los parámetros del kernel. En total, tenemos 16384 - 16 - 20 = 16348, por lo que para la versión de neurona real (dividir entre los 4 bytes que ocupa un float) tenemos que el tamaño máximo de la capa  de entrada es 4087.
+Para dispositivos de capacidad de computación 2.0 o superiores, se puede adaptar el valor de esta constante y así aprovechar los 48 KB en lugar de usar sólo 16 KB.
+
+Independientemente del valor de la constante, en cada llamada al kernel se incrementa el puntero a las entradas en ese número de posiciones. El puntero de pesos se incrementa más rápido, puesto que por cada entrada que se procesa, se leen los pesos de todas las neuronas de salida correspondientes a esa entrada. Mientras el número de entradas por procesar sea mayor a la constante, se seguirá llamando al kernel, indicándole la constante como el número de entradas que debe procesar. Para la última llamada se indican las entradas que queden y también se adapta el parámetro de memoria compartida para reservar sólo la que se va a usar.
+
+*** Función de activación
+#+LaTeX: \label{disenoParalCUDAactiv}
+
+Una vez que hemos obtenido los resultados de las neuronas de salida usando alguno de los algoritmos anteriores para cada una de las múltiples capas que una capa puede tomar como entrada, podemos aplicar la función de activación para completar el trabajo de esa capa de neuronas. El kernel para la activación se implementa con el siguiente código:
+
+#+begin_src c
+__global__
+void activationKernel(float* results, float* thresholds, float* output, unsigned output_sz,
+                             FunctionType functionType)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < output_sz) {
+        output[idx] = Func(results[idx] - thresholds[idx], functionType);
+    }
+}
+#+end_src
+
+Como vemos, es una tarea bastante más simple. Cada uno de los hilos representa a una neurona de salida y accede a un resultado y a un umbral, los que le corresponden. Notamos, sin embargo, que se está llamando a una funcion =Func= dentro del kernel. Aunque sea una simple función C, no podemos reutilizar la definición que usan el resto de implementaciones (C++ y SSE2), sino que tenemos que redefinirla dentro de nuestro código CUDA como una función especial que será ejecutada dentro del dispositivo. Para este tipo de funciones se utiliza el especificador de declaración =__device__=. Esta es nuestra función:
+
+#+begin_src c
+__device__
+float Func(float number, FunctionType functionType)
+{
+    switch (functionType) {
+
+        case FT_BINARY_STEP:
+            if (number > 0) {
+                return 1;
+            } else {
+                return 0;
+            }
+        case FT_BIPOLAR_STEP:
+            if (number > 0) {
+                return 1;
+            } else {
+                return -1;
+            }
+        case SIGMOID:
+            return 1.0f / (1.0f - exp(-number));
+        case FT_BIPOLAR_SIGMOID:
+            return -1.0f + (2.0f / (1.0f + exp(-number)));
+        case FT_HYPERBOLIC_TANGENT:
+            return tanh(number);
+        case FT_IDENTITY:
+        default:
+            return number;
+    }
+}
+#+end_src
+
+Como vimos en el apartado del diseño \ref{disenoRedes}, las diferentes funciones de activación soportadas tienen un valor enumerado asociado y se pueden añadir más modificando tan sólo el enumerado y esta función. No obstante es importante recordar que esta función está definida en dos sitios que tendrán que actualizarse: aquí para el código CUDA y en el exterior para las otras implementaciones.
+
+*** Operador de cruza
+#+LaTeX: \label{disenoParalCUDAcruza}
+
+Como se explicó en \ref{disenoGeneCruz} y en \ref{disenoParalCUDAinv}, la implementación del operador genético de cruza es independiente del esquema de cruza y de la disposición de los pesos en memoria de cada implementación paralela. Tan sólo se tiene que recorrer dos matrices de pesos como si fuesen dos vectores y intercambiar el valor de cada peso o no en función de si está activo el bit correspondiente en el vector de bits del mismo tamaño que también se recibirá como parámetro. Por tanto, todas las demás consideraciones han debido aplicarse ya de antemano sobre el vector de bits.
+
+El vector de bits llegará al kernel como un array de enteros sin signo y se deberá acceder a los bits individuales usando máscaras y operaciones lógicas.
+Esta sería una primera aproximación:
+
+#+begin_src c
+__global__
+void crossoverKernel(float* buffer1, float* buffer2, unsigned* bitBuffer, unsigned size)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < size) {
+
+        unsigned bit = bitBuffer[ idx / BITS_PER_UNSIGNED ];
+        __syncthreads();
+        unsigned mask = 0x80000000;
+        mask >>= (idx % BITS_PER_UNSIGNED);
+        
+        if (bit & mask) {
+            float aux = buffer1[idx];
+            buffer1[idx] = buffer2[idx];
+            buffer2[idx] = aux;
+        }
+    }
+}
+#+end_src
+
+Es bastante simple, cada hilo coge la parte del bitBuffer que le corresponde y aplica sobre la máscara (que contiene inicialmente =100...00=) los deplazamientos hacia la derecha que correspondan para acceder a su bit. Si haciendo un =AND= lógico entre esa parte del vector de bits y la máscara para seleccionar el suyo se obtiene algún 1, se intercambian en los vactores por la posición del hilo. La constante BITS_PER_UNSIGNED es igual a 32.
+
+Sin embargo, esta forma de acceso al vector de bits es altamente ineficiente. Los 32 hilos contiguos accederán a la misma posición del vector de bits. Esto no sólo implica que no se accederá coalescentemente y no se leerán 16 valores (medio warp, que es cómo se accede a la memoria global en condiciones óptimas) con una sola instrucción de lectura. Además, el acceso a ese mismo elemento por los 32 hilos se hará de forma secuencial. Esta penalización es intolerable.
+
+Si leyesemos primero el vector de bits a memoria compartida quizá podríamos evitar todo esto. Podríamos también evitar los posibles conflictos de bancos de memoria compartida con un broadcast para un warp (justamente 32 hilos, como los bits en una palabra de 4 bytes) del bloque de bits compartido por ese warp. El mínimo número de hilos contiguos que deben acceder a la misma posición de memoria compartida para que se haga un broadcast en lugar de producir un conflicto de bancos de memoria es 16 (un halfwarp), por lo que 32 hilos nos servirán:
+
+#+begin_src c
+__global__
+void crossoverKernel(float* buffer1, float* buffer2, unsigned* bitBuffer, unsigned size)
+{
+    extern __shared__ float sdata[];
+
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned bitBuffer_pos = idx / BITS_PER_UNSIGNED;
+    unsigned bitblocks_per_block = blockDim.x / BITS_PER_UNSIGNED;
+
+    if (threadIdx.x < bitblocks_per_block) {
+        sdata[threadIdx.x] = bitBuffer[ bitBuffer_pos ];
+    }
+    __syncthreads();
+
+    if (idx < size) {
+
+        unsigned bit = sdata[ threadIdx.x / BITS_PER_UNSIGNED ];
+        __syncthreads();
+
+        unsigned mask = 0x80000000;
+        mask >>= ( threadIdx.x % BITS_PER_UNSIGNED );
+        
+        if (bit & mask) {
+            float aux = buffer1[idx];
+            buffer1[idx] = buffer2[idx];
+            buffer2[idx] = aux;
+        }
+    }
+}
+#+end_src
+
+El último bloque de hilos también leerá bitblocks_per_block, por lo que habrá que hacer el array de bits artificialemente más grande para que esas lecturas puedan hacerse, aunque no se vayan a utilizar esos valores.
+
+Hemos, mejorado mucho el acceso al vector de bits. No obstante, el número de lecturas de desde memoria global a memoria compartida es muy pequeño. Sólo la hacen los primeros hilos del bloque. Como mucho, cuando el bloque tenga 512 hilos, se harán 4 lecturas por bloque desde =bitBuffer=. Para hacer una lectura coalescente se necesite que cada 16 hilos del bloque accedan a 16 posiciones consecutivas (y que los medios warps no se también estén seguidos). Pero en este caso algunos medios warps no realizarán lectura alguna y los que los hagan, no leerán 16 valores. La lectura coalescente puede no utilizar los 16 valores leídos, 4 es el mínimo. Con un tamaño de bloque de 512 hilos, se harían 4 lecturas. Entonces siempre se tendrá que llamar al kernel con 512 hilos para hacer lecturas conjuntas. No poder ajustar el número de hilos por bloque es un trastorno importante. Los recursos de un multiprocesador se reparten entre los hilos del bloque. Por ejemplo, cuantos más hilos por bloque, menos registros tendrá disponibles cada hilo. Corremos el riesgo de que algunas variables locales tengan que almacenarse en memoria global en vez de en registros.
+
+Afortunadamente, existe una solución mejor. Si cada hilo se ocupase de los 32 bits de una posición del array =bitBuffer=, el acceso también podría ser coalescente ya además el valor se podría alamacenar directamente en un registro. Pero entonces dejaría de ser coalescente el acceso a los propios vectores de pesos, pues cada hilo querría acceder a 32 pesos contiguos. A no ser, que el vector de bits viniese ya colocado de la forma que queremos, para que una posición de =bitBuffer= no representase 32 pesos contiguos, sino 32 los 32 pesos a los que su hilo puede acceder de forma coalescente. Debemos aplicar una transformación adicional sobre le vector de bits (si es que ya ha tenido alguno, por ejemplo, por la inversión de las matriz de pesos) para adaptarlo a nuestro nuevo algoritmo antes de llamar al kernel. Podemos aprovechar el momento en que creemos un Buffer CUDA a partir de una Interfaz (ver secciones \ref{disenoRedesInter} y \ref{disenoRedesBuff}) para realizar esta transformación. 
+
+Pero antes de ver cómo realizaríamos la transformación, vemos como sería nuestro nuevo kernel. Cada hilo accederá a BITS_PER_UNSIGNED elementos de los arrays de pesos, cada bloque accederá a blockDim.x * BITS_PER_UNSIGNED. El salto entre las posiciones de un bloque y las del siguiente multiplicará el tamaño del bloque por BITS_PER_UNSIGNED, pero los hilos de un mismo bloque sequirán accediendo a posiciones contiguas:
+
+#+begin_src c
+__global__
+void crossoverKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
+{
+    unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
+    unsigned maxPosForThisBlock = device_min ( (blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED, size);
+
+    unsigned bitsForTheThread, mask;
+    if (weighPos < maxPosForThisBlock) {
+        bitsForTheThread = bitBuffer[(blockIdx.x * blockDim.x) + threadIdx.x];
+        mask = 0x80000000;
+    }
+    __syncthreads();
+
+    while (weighPos < maxPosForThisBlock) {
+        if (mask & bitsForTheThread) {
+            type aux = buffer1[weighPos];
+            buffer1[weighPos] = buffer2[weighPos];
+            buffer2[weighPos] = aux;
+        }
+        __syncthreads();
+        weighPos += blockDim.x;
+        mask >>= 1;
+    }
+}
+#+end_src
+
+Vemos entonces que la posición que los bits deben tomar en el vector para corresponderse con los pesos en este kernel depende del tamaño del bloque con el que se vaya a lanzar el kernel. Además, las partes finales de algunos bloques de bits no serán tenidas en cuenta dependiendo del tamaño del vector y del bloque CUDA, cuando antes sólo se quedaban sin usar las del último bloque de 32 bits. Así es que el array de bits adaptado puede ser más grande que el original.
+
+Este es el constructor especial de la clase CudaBuffer para construir el array de bits adecuado:
+
+#+begin_src c
+CudaBuffer(Interface* bitBuffer, unsigned block_size)
+{
+    if (bitBuffer->getBufferType() != BT_BIT) {
+        std::string error = "The Buffer type must be BIT to use a BitBuffer CudaBuffer constructor.";
+        throw error;
+    }
+    unsigned bitBufferSize = bitBuffer->getSize();
+    unsigned maxWeighsPerBlock = BITS_PER_UNSIGNED * block_size;
+
+    tSize = (bitBufferSize / maxWeighsPerBlock) * maxWeighsPerBlock;
+    tSize += min(bitBufferSize % maxWeighsPerBlock, block_size) * BITS_PER_UNSIGNED;
+
+    Interface interfaceOrderedByBlockSize = Interface(tSize, BT_BIT);
+
+    unsigned bit = 0, thread = 0, block_offset = 0;
+    for (unsigned i = 0; i < bitBufferSize; i++) {
+
+        unsigned weighPos = (thread * BITS_PER_UNSIGNED) + bit + block_offset;
+        thread++;
+        interfaceOrderedByBlockSize.setElement(weighPos, bitBuffer->getElement(i));
+
+        if (thread == block_size) {
+            thread = 0;
+            bit++;
+            if (bit == BITS_PER_UNSIGNED) {
+                bit = 0;
+                block_offset += (block_size * BITS_PER_UNSIGNED);
+            }
+        }
+    }
+    unsigned byteSize = interfaceOrderedByBlockSize.getByteSize();
+    data = cuda_malloc(byteSize);
+    cuda_copyToDevice(data, interfaceOrderedByBlockSize.getDataPointer(), byteSize);
+}
+#+end_src
+
+No es particularmente elegante, pues básicamente reproduce lo que tendŕía que hacer el kernel de forma serializada para cambiar las posiciones para el acceso coalescente. Pero sólo será llamado antes de realizar una cruza con dos redes CUDA. Aunque esta transforamción puede parecer una penalización muy importante, no lo es. Tengase en cuenta que esta copia de Interface al Buffer CUDA se tenía que hacer de todas maneras. De no hacer esto, lo único que no ahorraríamos es la conversión de la interfaz inicial que contiene el vector de bits a otra interfaz intermedia con las nuevas posiciones. Pero las 3 últimas líneas las ejecutaríamos igual si hubiesemos optado por la segunda solución y mover los datos de memoria huesped a memoria de dispositivo es muy costoso. El acceso al vector de bits mucho más eficiente durante la ejecución del kernel y la mayor libertad para elegir el número de hilos sin duda justifican esta conversión.
+
+*** Otros operadoers genéticos
+
+Otros operadores genéticos como la mutación y el olvido también se lanzando kernels CUDA. Este es el kernel para la mutación:
+
+#+begin_src c
+__global__
+void mutateKernel(float* buffer, unsigned pos, float mutation)
+{
+    if (threadIdx.x == 0) {
+        buffer[pos] += mutation;
+    }
+}
+#+end_src
+
+Y este el de olvido:
+
+#+begin_src c
+__global__
+void resetKernel(float* buffer, unsigned pos)
+{
+    if (threadIdx.x == 0) {
+        buffer[pos] = 0;
+    }
+}
+#+end_src
+
+Sólo actuará un hilo por bloque, no parece que se optimice mucho. Sin embargo, no se trata tanto de optimizar estos kernels sino de mantener los pesos en memoria de dispositivo en todo momento. El ancho de banda máximo en la transferencia de entre la memoria de dispositivo y la GPU es mucho mayor (por ejemplo, 141 GBps en la NVIDIA GeForce GTX 280) que el ancho de banda en la transmisión de datos entre la memoria huesped y la del dispositivo (8 GBps para PCI Express
+×16 de segunda generación). Por ello, para el mejor rendimiento general de la aplicación, es de una prioridad alta minimizar las transferencias de datos etre el husped y el dispositivo, incluso si eso significa lanzar kernels en la GPU que no suponen ninguna mejora de rendimiento comparados con ejecutar lo mismo en la CPU\cite{bestPract2009}.
+
+* REVISAR Experimentaci\'on
 #+LaTeX: \label{experimentacion}
 
 En esta sección se describen los problemas para los que se entrenarán las redes neuronales y las utilidades implementadas para la experimentación.
 
-** REVISAR Tareas de clasificaci\'on
+** Tareas de clasificaci\'on
 #+LaTeX: \label{experimentacionClasif}
 
 Las tareas de clasificación son una aplicación común de las redes neuronales entrenadas con retropropagación del error. También podemos entrenar nuestras redes neuronales para aprender a desempeñar este tipo de tares utilizando algoritmos genéticos. En general, la clasificación consiste en agrupar conjuntos de entradas posibles en clases. Por ejemplo, las entradas {e1, e3, e5} pentenecen a la clase c1; las entradas {e2, e4} pertenecen a la clase c2; las {e6, e7} a la clase c3, etc. Cada entrada sólo puede pertenecer a una clase. La clasificación tiene muchas aplicaciones el como reconocimiento de patrones o la construcción de filtros.
@@ -955,7 +1569,7 @@ No rellenar el número de pruebas y dejar que se evalúen todas las posibilidade
 
 Para que esta tarea pueda ser realizada por neuronas binarias, bipolares y reales, en lugar de comparar la salida de la neurona directamente con la salida deseada se usarán aproximaciones. Se entenderá que en la salida de las redes neuronales, cualquier valor mayor o igual a 0.5 es equivalente a un 1 y cualquier valor menor que 0.5 (por ejemplo -1 para una neurona bipolar; 0.1 ó -7 para una neurona real) es equivalente a un 0. Esto se podría implementar con una capa adicional, pero se ha preferido por simplicidad hacerlo directamente dentro de la clase BinaryTask.
 
-** REVISAR Juegos de estrategia abstractos
+** Juegos de estrategia abstractos
 #+LaTeX: \label{experimentacionJuegos}
 
 En la sección anterior \ref{experimentacionClasif} hemos visto ejemplos de tareas para las que se podían entrenar redes neuronales con el método tradicional de retropropagación del error. En esta sección nos dedicaremos a una tarea para la que no es tan fácil conocer las salidas deseadas. Los juegos de estrategia abstractos[fn:juegEstratAbst] son aquellos juegos de estrategia para los que se trata de minimizar el factor suerte y que carecen de trasfondo o ambientación. Casi todos entran dentro de las categorías de tablero, cartas o piezas (como el dominó). No tienen información oculta ni elementos no determinísticos y frecuentemente se juegan por dos jugadores en turnos alternativos.
@@ -975,8 +1589,20 @@ El jugador que se ha implementado para Reversi es extremadamente simple, pero, a
 La tarea Reversi se implementa en la clase ReversiTask que también hereda de la clase abstracta Task y que utiliza la clase ReversiBoard que implementa las reglas de juego de Reversi y que, a su vez, hereda de la clase que implementa el el tablero genérico para juegos con piezas iguales pero de dos jugadores Board. Éste último siempre es de un tamaño cuadrado (las mismas casillas a lo largo que a lo ancho) pero el tablero de Reversi tiene, además, la restricción de ser como mínimo de un tamaño 4x4. Esto es así por que las cuatro piezas centrales (2x2) empiezan ya rellenas para que los juegadores tengan movimientos legales al inicio.
 
 TODO ¿debo explicar las reglas del juego?
+* HACER [0/3] Manual del programador
+#+LaTeX: \label{manualProgr}
+** HACER Guia de instalación
+#+LaTeX: \label{manualProgrInstal}
 
-* HACER Resultados: Rendimiento
+sudo aptitude install make g++ nasm gnuplot
+sudo aptitude install texlive-latex-recommended texlive-latex-extra
+
+** HACER Uso general (API)
+#+LaTeX: \label{manualProgrApi}
+** HACER Extensibilidad a partir de interfaces
+#+LaTeX: \label{manualProgrInterf}
+\newpage
+* MODIFICAR Resultados: Rendimiento
 #+LaTeX: \label{rendimiento}
 En esta sección se analizan resultados de rendimiento en tiempo de ejecución.
 ** Rendimiento de las implementaciones paralelas de red neuronal
@@ -1113,8 +1739,7 @@ El nuevo operador de olvido/reset presenta otra vez unos resultados similares a 
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Individual_reset.png]]
 \newpage
-
-* HACER Resultados: Aprendizaje
+* MODIFICAR Resultados: Aprendizaje
 #+LaTeX: \label{aprendizaje}
 En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación.
 ** Comparación entre las distintas funciones de activación
@@ -1405,34 +2030,36 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 %Desde luego, he aprendido que la bibliografía es mejor prepararla sobre la marcha que al toda final.
 %
 
+%%%%%%%% Neuro Evolución
+
 \bibitem{Yao99} \textsc{Xin Yao}: \emph{Evolving Artificial Neural Networks}. School of Computer Science, The University of Birmingham (1999).
 
 \bibitem{GomezMiikkulainen2003} \textsc{Faustino J. G\'omez y Risto Miikkulainen}: \emph{Robust Non-Linear Control through Neuroevolution}. Deparment of Computer Science, The University of Texas (2003).
 
 \bibitem{Bertona2005} \textsc{Luis Federico Bertona}: \emph{Entrenamiento de redes neuronales basado en algoritmos evolutivos}. Faculad de ingenier\'ia, Universidad de Buenos Aires (2005).
 
+%%%%%%%% CUDA
+
+%%%%%%%% TODO poner el manual de programación, el de mejores prácticas y la guia de referencia
+%%%%%%%% TODO probar \textsl para el contenido del bibitem 
+
+\bibitem{progGuide2009} \textsc{NVIDIA corporation}: \emph{CUDA Programming guide v2.3.1}. NVIDIA Developer Technology, (2009).
+
 \bibitem{Harris2007} \textsc{Mark Harris}: \emph{Optimizing Parallel Reduction in CUDA}. NVIDIA Developer Technology, (2007).
+
+\bibitem{bestPract2009} \textsc{NVIDIA corporation}: \emph{CUDA Best practices guide}. NVIDIA Developer Technology, (2009).
+
+\bibitem{Farber2008} \textsc{Rob Farber}: \emph{CUDA: Supercomputing for the Masses}. Dr Dobbs (2008)
+
+\murl{http}{www.drdobbs.com/parallel/cuda-supercomputing-for-the-masses-part/207200659}.
+
+%%%% Juegos
 
 \bibitem{Chaslot2010} \textsc{Guillaume Maurice Jean-Bernard Chaslot}: \emph{Monte-Carlo Tree Search}. Tésis doctoral, Universiteit Maastricht, Maastricht, Holanda (2010).
 
 \bibitem{Syed03} \textsc{Syed, Omar; Syed, Aamir}: \emph{Arimaa – a New Game Designed to be Difficult for Computers}. International Computer Games Association Journal (2003).
 
 \end{thebibliography}
-* HACER [0/8] Cosas por hacer documentación
-- [ ] Poner imagenes en parte CUDA
-- [ ] (Teoría: redes neuronales) Explicar la necesidad de funciones de activación continuas para retropropagación
-- [ ] (Teoría: redes neuronales) Explicar imposibilidad de recursividad con retropropagación
-- [ ] (Teoría: algoritmos genéticos) Introducir a GENITOR con bibliografía
-- [ ] (Teoría: algoritmos genéticos/neuro evolución) Introducir representación fregona con bibliografía
-- [ ] (Teoría: algoritmos genéticos/neuro evolución) Búsqueda neutral con bibliografía
-- [ ] (Teoría: neuro evolución) NeuroEvolution of Augmenting Topologies (NEAT)
-- [ ] (Teoría: neuro evolución) Redes recurrentes, pybrain, Jürgen Schmidhuber
-* HACER [0/5] Cosas por hacer código
-- [ ] ¿Pasar Dummy a factory o a loopTest?
-- [ ] CUDA reduction malo
-- [ ] CUDA salidas malo
-- [ ] Revisar todas las impl CUDA
-- [ ] Guardar/Cargar a través de Interface y main de prueba (hasta nivel Population)
 * Footnotes
 
 [fn:cudaSuperComp]
