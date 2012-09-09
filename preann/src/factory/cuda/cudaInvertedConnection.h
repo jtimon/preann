@@ -2,11 +2,11 @@
 #define CUDAINVERTEDCONNECTION_H_
 
 #include "neural/connection.h"
-#include "cudaConnection.h"
+#include "cudaBaseConnection.h"
 
 template<BufferType bufferTypeTempl, class c_typeTempl>
-    class CudaInvertedConnection : public virtual Connection, public CudaConnection<bufferTypeTempl,
-                                           c_typeTempl>
+    class CudaInvertedConnection : public virtual Connection, public CudaBaseConnection<bufferTypeTempl,
+            c_typeTempl>
     {
     protected:
         //redefined from CudaBuffer
@@ -24,12 +24,10 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual void _calculateAndAddTo(Buffer* results)
         {
-            void* inputWeighs = this->getDataPointer();
             float* resultsPtr = (float*) results->getDataPointer();
 
-            cuda_inputCalculationInvertedMatrix(tInput->getDataPointer(), tInput->getSize(),
-                                                tInput->getBufferType(), results->getSize(), inputWeighs,
-                                                resultsPtr, Cuda_Threads_Per_Block);
+            cuda_netCalcInvMatrix(tInput->getBufferType(), Cuda_Threads_Per_Block, tInput->getDataPointer(),
+                                  this->getDataPointer(), resultsPtr, tInput->getSize(), results->getSize());
         }
 
         unsigned invertPos(unsigned pos)
@@ -46,8 +44,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             Interface invertedBitBuffer = Interface(bitBuffer);
             invertedBitBuffer.transposeMatrix(tInput->getSize());
 
-            CudaBuffer<bufferTypeTempl, c_typeTempl> cudaBitBuffer(&invertedBitBuffer,
-                                                                   Cuda_Threads_Per_Block);
+            CudaBuffer<bufferTypeTempl, c_typeTempl>
+                    cudaBitBuffer(&invertedBitBuffer, Cuda_Threads_Per_Block);
 
             cuda_crossover(this->getDataPointer(), other->getDataPointer(),
                            (unsigned*) cudaBitBuffer.getDataPointer(), tSize, bufferTypeTempl,
@@ -65,8 +63,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         }
 
     public:
-        CudaInvertedConnection(Buffer* input, unsigned outputSize)
-                : CudaConnection<bufferTypeTempl, c_typeTempl>(input, outputSize)
+        CudaInvertedConnection(Buffer* input, unsigned outputSize) :
+            CudaBaseConnection<bufferTypeTempl, c_typeTempl> (input, outputSize)
         {
         }
 

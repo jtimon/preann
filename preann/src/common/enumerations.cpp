@@ -181,8 +181,10 @@ std::string Enumerations::implementationToString(unsigned implementationType)
             return "C";
         case IT_SSE2:
             return "SSE2";
-        case IT_CUDA:
+        case IT_CUDA_OUT:
             return "CUDA";
+        case IT_CUDA_REDUC0:
+            return "CUDA_REDUC0";
         case IT_CUDA_REDUC:
             return "CUDA_REDUC";
         case IT_CUDA_INV:

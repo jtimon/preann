@@ -6,14 +6,12 @@
 __device__
 unsigned device_min(unsigned a, unsigned b)
 {
-    if (a < b)
-        return a;
-    return b;
+    return (a < b) ? a : b;
 }
 
 template <unsigned int blockSize, BufferType inputType>
 __global__
-void ReductionKernel(void* inputPtr, unsigned input_size, unsigned output_size, void* weighs, float* results)
+void ReductionKernel(void* inputPtr, void* weighs, float* results, unsigned input_size)
 {
     extern __shared__ float sdata[];
 
@@ -25,7 +23,7 @@ void ReductionKernel(void* inputPtr, unsigned input_size, unsigned output_size, 
     if (inputType == BT_FLOAT) {
         while (i < input_size) {
             result += ((float*)inputPtr)[i] * ((float*)weighs)[weighsOffset + i];
-            i += blockDim.x;
+            i += blockSize;
         }
     } else {
         weighsOffset += threadIdx.x * BITS_PER_UNSIGNED;
@@ -33,7 +31,6 @@ void ReductionKernel(void* inputPtr, unsigned input_size, unsigned output_size, 
         unsigned input_blocks_to_read = ((input_size - 1) / BITS_PER_UNSIGNED) + 1;
         while (i < input_blocks_to_read) {
 
-            //TODO TCC check performance penalty (this is just for BT_SIGN)
             unsigned maxBits = device_min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
             unsigned mask = 0x80000000;
@@ -51,9 +48,10 @@ void ReductionKernel(void* inputPtr, unsigned input_size, unsigned output_size, 
                 mask >>= 1;
             }
             i += blockSize;
-            weighsOffset += blockDim.x * BITS_PER_UNSIGNED;
+            weighsOffset += blockSize * BITS_PER_UNSIGNED;
         }
     }
+    __syncthreads();
 
     unsigned tid = threadIdx.x;
     sdata[tid] = result;
@@ -63,6 +61,7 @@ void ReductionKernel(void* inputPtr, unsigned input_size, unsigned output_size, 
     if (blockSize >= 256) {if (tid < 128) {sdata[tid] += sdata[tid + 128];}__syncthreads();}
     if (blockSize >= 128) {if (tid < 64) {sdata[tid] += sdata[tid + 64];}__syncthreads();}
 
+// TODO en la documentación está con EMUSYNC, que no compila en emu, cambiar allí también
 #if __DEVICE_EMULATION__
     if (blockSize >= 64) {if (tid < 32) {sdata[tid] += sdata[tid + 32];}__syncthreads();}
     if (blockSize >= 32) {if (tid < 16) {sdata[tid] += sdata[tid + 16];}__syncthreads();}
@@ -80,14 +79,14 @@ void ReductionKernel(void* inputPtr, unsigned input_size, unsigned output_size, 
         if (blockSize >= 2) sdata[tid] += sdata[tid + 1];
     }
 #endif
+
     if (tid == 0) {
         results[blockIdx.x] += sdata[0];
     }
 }
 
-extern "C" void cuda_inputCalculationReduction0(void* inputPtr, unsigned input_size, BufferType inputType,
-                                               unsigned output_size, void* weighs, float* results,
-                                               unsigned block_size)
+extern "C" void cuda_netCalcReduction(BufferType inputType, unsigned block_size, void* inputPtr, void* weighs,
+                                      float* results, unsigned input_size, unsigned output_size)
 {
     unsigned grid_size = output_size;
     unsigned shared_mem_size = block_size * sizeof(float);
@@ -98,71 +97,71 @@ extern "C" void cuda_inputCalculationReduction0(void* inputPtr, unsigned input_s
     } else if (inputType == BT_FLOAT) {
         switch (block_size) {
             case 512:
-                ReductionKernel<512, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<512, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 256:
-                ReductionKernel<256, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<256, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 128:
-                ReductionKernel<128, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<128, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 64:
-                ReductionKernel< 64, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel< 64, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 32:
-                ReductionKernel< 32, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel< 32, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 16:
-                ReductionKernel< 16, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel< 16, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 8:
-                ReductionKernel< 8, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  8, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 4:
-                ReductionKernel< 4, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  4, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 2:
-                ReductionKernel< 2, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  2, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 1:
-                ReductionKernel< 1, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  1, BT_FLOAT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
         }
     } else if (inputType == BT_BIT) {
         switch (block_size) {
             case 512:
-                ReductionKernel<512, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<512, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 256:
-                ReductionKernel<256, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<256, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 128:
-                ReductionKernel<128, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<128, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 64:
-                ReductionKernel< 64, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel< 64, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 32:
-                ReductionKernel< 32, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel< 32, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 16:
-                ReductionKernel< 16, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel< 16, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 8:
-                ReductionKernel< 8, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  8, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 4:
-                ReductionKernel< 4, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  4, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 2:
-                ReductionKernel< 2, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  2, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 1:
-                ReductionKernel< 1, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  1, BT_BIT><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
         }
     } else {
         switch (block_size) {
             case 512:
-                ReductionKernel<512, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<512, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 256:
-                ReductionKernel<256, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<256, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 128:
-                ReductionKernel<128, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<128, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 64:
-                ReductionKernel< 64, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel< 64, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 32:
-                ReductionKernel< 32, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel< 32, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 16:
-                ReductionKernel< 16, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel< 16, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 8:
-                ReductionKernel< 8, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  8, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 4:
-                ReductionKernel< 4, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  4, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 2:
-                ReductionKernel< 2, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  2, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
             case 1:
-                ReductionKernel< 1, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, input_size, output_size, weighs, results); break;
+                ReductionKernel<  1, BT_SIGN><<< grid_size, block_size, shared_mem_size >>>(inputPtr, weighs, results, input_size); break;
         }
     }
     checkCUDAError("cuda_inputCalculation2");

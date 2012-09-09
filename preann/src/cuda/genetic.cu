@@ -6,32 +6,33 @@
 __device__
 unsigned device_min(unsigned a, unsigned b)
 {
-    if (a < b)
-        return a;
-    return b;
+    return (a < b) ? a : b;
 }
 
 // GENETIC OPERATORS
 
 template <class type>
 __global__
-void crossoverKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
+void CrossoverKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
 {
     unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
-    unsigned maxPosForThisBlock = device_min ( (blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED,
-                                        size);
+    unsigned maxPosForThisBlock = device_min ( (blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED, size);
+
     unsigned bitsForTheThread, mask;
     if (weighPos < maxPosForThisBlock) {
         bitsForTheThread = bitBuffer[(blockIdx.x * blockDim.x) + threadIdx.x];
         mask = 0x80000000;
     }
     __syncthreads();
+
     while (weighPos < maxPosForThisBlock) {
         if (mask & bitsForTheThread) {
             type aux = buffer1[weighPos];
             buffer1[weighPos] = buffer2[weighPos];
             buffer2[weighPos] = aux;
         }
+        // TODO por que no se puede poner aqui ? incorrect use of __syncthreads()
+//        __syncthreads();
         weighPos += blockDim.x;
         mask >>= 1;
     }
@@ -44,13 +45,13 @@ extern "C" void cuda_crossover(void* buffer1, void* buffer2, unsigned* bitBuffer
 
     switch (bufferType) {
         case BT_BYTE:
-            crossoverKernel<unsigned char><<< grid_size, block_size >>>
-            ((unsigned char*)buffer1, (unsigned char*)buffer2, (unsigned*)bitBuffer, size);
+            CrossoverKernel<unsigned char><<< grid_size, block_size >>>
+            ((unsigned char*)buffer1, (unsigned char*)buffer2, bitBuffer, size);
 
             break;
         case BT_FLOAT:
-            crossoverKernel<float><<< grid_size, block_size >>>
-            ((float*)buffer1, (float*)buffer2, (unsigned*)bitBuffer, size);
+            CrossoverKernel<float><<< grid_size, block_size >>>
+            ((float*)buffer1, (float*)buffer2, bitBuffer, size);
             break;
         case BT_BIT:
         case BT_SIGN:

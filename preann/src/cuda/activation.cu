@@ -35,13 +35,11 @@ float Func(float number, FunctionType functionType)
 __device__
 unsigned device_min(unsigned a, unsigned b)
 {
-    if (a < b)
-        return a;
-    return b;
+    return (a < b) ? a : b;
 }
 
 __global__
-void activation_float_kernel(float* results, float* thresholds, float* output, unsigned output_sz,
+void ActivationFloatKernel(float* results, float* thresholds, float* output, unsigned output_sz,
                              FunctionType functionType)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -51,7 +49,7 @@ void activation_float_kernel(float* results, float* thresholds, float* output, u
 }
 
 __global__
-void activation_bit_kernel(float* results, float* thresholds, unsigned* output, unsigned output_sz)
+void ActivationBitKernel(float* results, float* thresholds, unsigned* output, unsigned output_sz)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     unsigned offset = idx * BITS_PER_UNSIGNED;
@@ -89,14 +87,14 @@ extern "C" void cuda_activation(void* output, unsigned size, BufferType bufferTy
         case BT_FLOAT:
             {
                 grid_size = ((size - 1) / block_size) + 1;
-                activation_float_kernel<<< grid_size, block_size >>>(results, thresholds, (float*)output, size, functionType);
+                ActivationFloatKernel<<< grid_size, block_size >>>(results, thresholds, (float*)output, size, functionType);
         }
         break;
         case BT_BIT:
         case BT_SIGN:
         {
             grid_size = ((size - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
-            activation_bit_kernel<<< grid_size, block_size >>>(results, thresholds, (unsigned*)output, size);
+            ActivationBitKernel<<< grid_size, block_size >>>(results, thresholds, (unsigned*)output, size);
         }
         break;
     }

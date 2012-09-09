@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
         plotter.plotChronoAveraged(chronoCalculateAndAddTo, "Connection_calculateAndAddTo", &linesLoop,
                                    &averageLoop, 50000);
 
-        linesLoop.with(ET_IMPLEMENTATION, 3, IT_C, IT_SSE2, IT_CUDA);
+        linesLoop.with(ET_IMPLEMENTATION, 3, IT_C, IT_SSE2, IT_CUDA_OUT);
         plotter.plotChronoAveraged(chronoCrossover, "Connection_crossover", &linesLoop, &averageLoop, 50000);
         plotter.plotChrono(chronoActivation, "Connection_activation", &linesLoop, 90000);
 

@@ -39,7 +39,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual ImplementationType getImplementationType()
         {
-            return IT_CUDA;
+            return IT_CUDA_OUT;
         }
 
         virtual BufferType getBufferType()

@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
         EnumLoop linesLoop(ET_FUNCTION);
 
-        linesLoop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_CUDA));
+        linesLoop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_CUDA_OUT));
 //        linesLoop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
 
         linesLoop.print();

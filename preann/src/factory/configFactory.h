@@ -15,7 +15,9 @@
 #include "sse2/xmmConnection.h"
 #endif
 #ifdef CUDA_IMPL
+#include "cuda/cudaReduction0Connection.h"
 #include "cuda/cudaReductionConnection.h"
+#include "cuda/cudaOutputsConnection.h"
 #include "cuda/cudaInvertedConnection.h"
 #endif
 
@@ -41,7 +43,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     throw error;
                 }
 #endif
-            case IT_CUDA:
+            case IT_CUDA_OUT:
+            case IT_CUDA_REDUC0:
             case IT_CUDA_REDUC:
             case IT_CUDA_INV:
 #ifdef CUDA_IMPL
@@ -83,14 +86,17 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                 }
 #endif
 #ifdef CUDA_IMPL
-            case IT_CUDA:
-                return new CudaConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
+            case IT_CUDA_OUT:
+                return new CudaOutputsConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
+            case IT_CUDA_REDUC0:
+                return new CudaReduction0Connection<bufferTypeTempl, c_typeTempl>(input, outputSize);
             case IT_CUDA_REDUC:
                 return new CudaReductionConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
             case IT_CUDA_INV:
                 return new CudaInvertedConnection<bufferTypeTempl, c_typeTempl>(input, outputSize);
 #else
-                case IT_CUDA:
+                case IT_CUDA_OUT:
+                case IT_CUDA_REDUC0:
                 case IT_CUDA_REDUC:
                 case IT_CUDA_INV:
                 {

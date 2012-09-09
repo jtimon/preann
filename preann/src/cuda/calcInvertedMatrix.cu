@@ -6,14 +6,13 @@
 __device__
 unsigned device_min(unsigned a, unsigned b)
 {
-    if (a < b)
-        return a;
-    return b;
+    return (a < b) ? a : b;
 }
 
+#define CUDA_BYTES_PARAMS_K_INVERTED (3 * size_of(void*) + 2 * size_of(unsigned))
+
 __global__
-void SumFloatsInvertedConnectionsKernel(float* inputs, unsigned input_size, float* weighs, float* results,
-                                        unsigned output_size)
+void InvertedFloatKernel(float* inputs, float* weighs, float* results, unsigned input_size, unsigned output_size)
 {
     extern __shared__ float sdata[];
 
@@ -32,6 +31,8 @@ void SumFloatsInvertedConnectionsKernel(float* inputs, unsigned input_size, floa
 
         for (unsigned i = 0; i < input_size; i++) {
             result += sdata[i] * weighs[output_pos + (i * output_size)];
+            // TODO se puede poner esto aqui?
+//            __syncthreads();
         }
         results[output_pos] += result;
     }
@@ -39,7 +40,7 @@ void SumFloatsInvertedConnectionsKernel(float* inputs, unsigned input_size, floa
 
 template <BufferType inputType>
 __global__
-void SumBitsInvertedConnectionsKernel(unsigned* inputs, unsigned input_size, unsigned output_size, unsigned char* weighs, float* results)
+void InvertedBitKernel(unsigned* inputs, unsigned char* weighs, float* results, unsigned input_size, unsigned output_size)
 {
     extern __shared__ unsigned shared_inputs[];
 
@@ -87,9 +88,8 @@ void SumBitsInvertedConnectionsKernel(unsigned* inputs, unsigned input_size, uns
     }
 }
 
-extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned input_size, BufferType inputType,
-                                                    unsigned output_size, void* weighs, float* results,
-                                                    unsigned block_size)
+extern "C" void cuda_netCalcInvMatrix(BufferType inputType, unsigned block_size, void* inputPtr, void* weighs,
+                                      float* results, unsigned input_size, unsigned output_size)
 {
     unsigned grid_size = ((output_size - 1) / block_size) + 1;
     unsigned shared_mem_size;
@@ -98,27 +98,32 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
         std::string error = "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
         throw error;
     } else if (inputType == BT_FLOAT) {
+
+        float* flInputPtr = (float*)inputPtr;
+        float* flWeighs = (float*)weighs;
+
         while (input_size > CUDA_MAX_SHARED_FLOATS) {
 
             shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(float);
-            SumFloatsInvertedConnectionsKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, CUDA_MAX_SHARED_FLOATS, (float*)weighs, results, output_size);
-            inputPtr = (void*) ((float*) inputPtr + CUDA_MAX_SHARED_FLOATS);
-            weighs = (void*) ((float*) weighs + (CUDA_MAX_SHARED_FLOATS * output_size));
+            InvertedFloatKernel<<< grid_size, block_size, shared_mem_size >>>(flInputPtr, flWeighs, results, CUDA_MAX_SHARED_FLOATS, output_size);
+            flInputPtr += CUDA_MAX_SHARED_FLOATS;
+            flWeighs += (CUDA_MAX_SHARED_FLOATS * output_size);
             input_size -= CUDA_MAX_SHARED_FLOATS;
         }
+        //TODO esto se puede meter dentro del bucle usando CUDA_MAX_SHARED_SIZE
         shared_mem_size = input_size * sizeof(float);
-        SumFloatsInvertedConnectionsKernel    <<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, input_size, (float*)weighs, results, output_size);
+        InvertedFloatKernel<<< grid_size, block_size, shared_mem_size >>>(flInputPtr, flWeighs, results, input_size, output_size);
     } else {
         //TODO TCC esta parte no funciona bien
         while (input_size > CUDA_MAX_SHARED_BITS) {
 
+// TODO uniformar con lo de arriba, que esto está super sucio
             shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(unsigned);
             // TODO TCC probar sin emulación
-            //			printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
             if (inputType == BT_BIT) {
-                SumBitsInvertedConnectionsKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
+                InvertedBitKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, CUDA_MAX_SHARED_BITS, output_size);
             } else {
-                SumBitsInvertedConnectionsKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, CUDA_MAX_SHARED_BITS, output_size, (unsigned char*)weighs, results);
+                InvertedBitKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, CUDA_MAX_SHARED_BITS, output_size);
             }
             inputPtr = (void*)((float*)inputPtr + CUDA_MAX_SHARED_FLOATS);
             weighs = (void*)((float*)weighs + (CUDA_MAX_SHARED_BITS * output_size));
@@ -126,11 +131,10 @@ extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned inp
         }
         shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
         // TODO TCC probar sin emulación
-        //printf("grid_size %d, block_size %d, shared_mem_size %d \n", grid_size, block_size, shared_mem_size);
         if (inputType == BT_BIT) {
-            SumBitsInvertedConnectionsKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+            InvertedBitKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, input_size, output_size);
         } else {
-            SumBitsInvertedConnectionsKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, input_size, output_size, (unsigned char*)weighs, results);
+            InvertedBitKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, input_size, output_size);
         }
     }
 }

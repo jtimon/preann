@@ -3,8 +3,20 @@
 
 #include "common/enumerations.h"
 
-#define CUDA_MAX_SHARED_FLOATS (4032)
-#define CUDA_MAX_SHARED_BITS (CUDA_MAX_SHARED_FLOATS * CUDA_MAX_SHARED_FLOATS)
+struct NetCalcKernelParams
+{
+    void* inputs;
+    void* weighs;
+    void* results;
+    unsigned input_size;
+    unsigned output_size;
+};
+
+// 16 KB shared memory, 16 bytes for blockIdx, blockDim y gridDim
+#define CUDA_MAX_SHARED_SIZE ( 16384 - ( 16 + sizeof(NetCalcKernelParams) ) )
+// TODO intentar quitar estas dos constantes:
+#define CUDA_MAX_SHARED_FLOATS ( CUDA_MAX_SHARED_SIZE / 4 )
+#define CUDA_MAX_SHARED_BITS ( CUDA_MAX_SHARED_FLOATS * BITS_PER_UNSIGNED )
 
 static unsigned Cuda_Threads_Per_Block = 256;
 
@@ -27,18 +39,20 @@ extern "C" void cuda_resetWeigh(void* buffer, unsigned pos, BufferType bufferTyp
 extern "C" void cuda_crossover(void* buffer1, void* buffer2, unsigned* bitBuffer, unsigned size,
                                BufferType bufferType, unsigned block_size);
 
+// cuda_reduction0.cu
+extern "C" void cuda_netCalcReduction0(BufferType inputType, unsigned block_size, void* inputPtr,
+                                       void* weighs, float* results, unsigned input_size,
+                                       unsigned output_size);
 // cuda_reduction.cu
-extern "C" void cuda_inputCalculationReduction(void* inputPtr, unsigned input_size, BufferType inputType,
-                                               unsigned output_size, void* weighs, float* results,
-                                               unsigned block_size);
+extern "C" void
+        cuda_netCalcReduction(BufferType inputType, unsigned block_size, void* inputPtr, void* weighs,
+                              float* results, unsigned input_size, unsigned output_size);
 //
-extern "C" void cuda_inputCalculation(void* inputPtr, unsigned input_size, BufferType inputType,
-                                      unsigned output_size, void* weighs, float* results,
-                                      unsigned block_size);
+extern "C" void cuda_netCalcOutputs(BufferType inputType, unsigned block_size, void* inputPtr, void* weighs,
+                                    float* results, unsigned input_size, unsigned output_size);
 //
-extern "C" void cuda_inputCalculationInvertedMatrix(void* inputPtr, unsigned input_size, BufferType inputType,
-                                                    unsigned output_size, void* weighs, float* results,
-                                                    unsigned block_size);
-
+extern "C" void
+        cuda_netCalcInvMatrix(BufferType inputType, unsigned block_size, void* inputPtr, void* weighs,
+                              float* results, unsigned input_size, unsigned output_size);
 
 #endif /*CUDA_DEFINITIONS_H_*/
