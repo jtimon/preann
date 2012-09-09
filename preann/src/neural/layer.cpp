@@ -95,17 +95,13 @@ void Layer::calculateOutput()
         std::string error = "Cannot calculate the output of a Layer without output.";
         throw error;
     }
-    //TODO B do not use clone on the thresholds, compare with them in activation (one write less)
-    //	Buffer* results = newBuffer(thresholds->getSize(), thresholds->getBufferType());
-    results->reset();
-//    results->copyFrom(thresholds);
 
+    results->reset();
     for (unsigned i = 0; i < connections.size(); i++) {
         connections[i]->calculateAndAddTo(results);
     }
-
-//    output->activation(results, functionType);
     thresholds->activation(output, functionType);
+
     if (outputInterface != NULL) {
         output->copyToInterface(outputInterface);
     }
