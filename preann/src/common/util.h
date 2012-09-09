@@ -26,13 +26,9 @@ using namespace std;
 #include <sstream>
 #include <map>
 #include <algorithm>
-//#include <stdexcept>
 
-        //TODO std::runtime_error // #include <stdexcept> //
-//        catch (exception& e)
-//          {
-//            cerr << "exception caught: " << e.what() << endl;
-//          }
+#define BITS_PER_BYTE (8)
+#define BITS_PER_UNSIGNED (sizeof(unsigned) * BITS_PER_BYTE)
 
 #define CLEAR_PTR_LIST(_typeClear, _listToClear) {list<_typeClear* >::iterator _iterClear; for (_iterClear = _listToClear.begin(); _iterClear != _listToClear.end(); ++_iterClear) { delete(*_iterClear); } _listToClear.clear();}
 #define CLEAR_PTR_VECTOR(_typeClear, _listToClear) {vector<_typeClear* >::iterator _iterClear; for (_iterClear = _listToClear.begin(); _iterClear != _listToClear.end(); ++_iterClear) { delete(*_iterClear); } _listToClear.clear();}
@@ -42,8 +38,12 @@ using namespace std;
 #define ENUM_VECTOR(_vector, _values...) unsigned _array[] = {_values}; std::vector<unsigned> _vector; _vector.insert(_vector.end(), _array, _array + (sizeof(_array) / sizeof(_array[0])))
 //#define FOR_EACH(_type,_iter,_coll) for (_type::iterator _iter = _coll.begin(); _iter != _coll.end(); ++_iter)
 
-#define BITS_PER_BYTE (8)
-#define BITS_PER_UNSIGNED (sizeof(unsigned) * BITS_PER_BYTE)
+//#include <stdexcept>
+        //TODO std::runtime_error // #include <stdexcept> //
+//        catch (exception& e)
+//          {
+//            cerr << "exception caught: " << e.what() << endl;
+//          }
 
 // TODO explorar esta posibilidad en vez de user punteros a las variables
 template<class T>
