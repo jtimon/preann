@@ -1308,6 +1308,8 @@ InvertedKernel<<< grid_size, block_size, shared_mem_size >>>(flInputPtr, flWeigh
 La constante =CUDA_MAX_SHARED_FLOATS= nos dice las entradas que podremos almacenar en memoria compartida en cada llamada al kernel. Para que funcione en todos los dispositivos, consideraremos un tamaño de memoria compartida de 16 KB ó 16384 Bytes a la que hay que descontar los parámetros del kernel. Hay ya 16 Bytes de memoria compartida que están reservados para almacenar las variables internas blockIdx, blockDim y gridDim (threadIdx se almacena en un registro especial). Además, se pueden usar hasta 256 bytes  como parámetros propios a los kernels. Nuestros parámetros propios son 3 punteros y 2 enteros sin signo. Todos ellos ocupan 4 Bytes, por lo que en nuestro caso debemos reservar 20 bytes más para los parámetros del kernel. En total, tenemos 16384 - 16 - 20 = 16348, por lo que para la versión de neurona real (dividir entre los 4 bytes que ocupa un float) tenemos que el tamaño máximo de la capa  de entrada es 4087.
 Para dispositivos de capacidad de computación 2.0 o superiores, se puede adaptar el valor de esta constante y así aprovechar los 48 KB en lugar de usar sólo 16 KB.
 
+TODO pero los accesos coalescentes tiene que ser desde posiciones de memoria alineadas con 64 bytes, así es que 16348-64
+
 Independientemente del valor de la constante, en cada llamada al kernel se incrementa el puntero a las entradas en ese número de posiciones. El puntero de pesos se incrementa más rápido, puesto que por cada entrada que se procesa, se leen los pesos de todas las neuronas de salida correspondientes a esa entrada. Mientras el número de entradas por procesar sea mayor a la constante, se seguirá llamando al kernel, indicándole la constante como el número de entradas que debe procesar. Para la última llamada se indican las entradas que queden y también se adapta el parámetro de memoria compartida para reservar sólo la que se va a usar.
 
 *** Función de activación
@@ -1362,7 +1364,7 @@ float Func(float number, FunctionType functionType)
 
 Como vimos en el apartado del diseño \ref{disenoRedes}, las diferentes funciones de activación soportadas tienen un valor enumerado asociado y se pueden añadir más modificando tan sólo el enumerado y esta función. No obstante es importante recordar que esta función está definida en dos sitios que tendrán que actualizarse: aquí para el código CUDA y en el exterior para las otras implementaciones.
 
-*** Operador de cruza
+*** MODIFICAR Operador de cruza
 #+LaTeX: \label{disenoParalCUDAcruza}
 
 Como se explicó en \ref{disenoGeneCruz} y en \ref{disenoParalCUDAinv}, la implementación del operador genético de cruza es independiente del esquema de cruza y de la disposición de los pesos en memoria de cada implementación paralela. Tan sólo se tiene que recorrer dos matrices de pesos como si fuesen dos vectores y intercambiar el valor de cada peso o no en función de si está activo el bit correspondiente en el vector de bits del mismo tamaño que también se recibirá como parámetro. Por tanto, todas las demás consideraciones han debido aplicarse ya de antemano sobre el vector de bits.
@@ -1432,6 +1434,12 @@ void crossoverKernel(float* buffer1, float* buffer2, unsigned* bitBuffer, unsign
 El último bloque de hilos también leerá bitblocks_per_block, por lo que habrá que hacer el array de bits artificialemente más grande para que esas lecturas puedan hacerse, aunque no se vayan a utilizar esos valores.
 
 Hemos, mejorado mucho el acceso al vector de bits. No obstante, el número de lecturas de desde memoria global a memoria compartida es muy pequeño. Sólo la hacen los primeros hilos del bloque. Como mucho, cuando el bloque tenga 512 hilos, se harán 4 lecturas por bloque desde =bitBuffer=. Para hacer una lectura coalescente se necesite que cada 16 hilos del bloque accedan a 16 posiciones consecutivas (y que los medios warps no se también estén seguidos). Pero en este caso algunos medios warps no realizarán lectura alguna y los que los hagan, no leerán 16 valores. La lectura coalescente puede no utilizar los 16 valores leídos, 4 es el mínimo. Con un tamaño de bloque de 512 hilos, se harían 4 lecturas. Entonces siempre se tendrá que llamar al kernel con 512 hilos para hacer lecturas conjuntas. No poder ajustar el número de hilos por bloque es un trastorno importante. Los recursos de un multiprocesador se reparten entre los hilos del bloque. Por ejemplo, cuantos más hilos por bloque, menos registros tendrá disponibles cada hilo. Corremos el riesgo de que algunas variables locales tengan que almacenarse en memoria global en vez de en registros.
+
+TODO ademaś de posiciones contiguas las posiciones de memoria deben estar alineadas
+TODO Solución con memoria compartida para bitVector pero varias posiciones de pesos por hilo ??
+Cada hilo un bloque de bits
+Despues, entre todos los del bloque, pasar por todos los bloques de bits
+TODO ¿poner nueva solución como la mejor?
 
 Afortunadamente, existe una solución mejor. Si cada hilo se ocupase de los 32 bits de una posición del array =bitBuffer=, el acceso también podría ser coalescente ya además el valor se podría alamacenar directamente en un registro. Pero entonces dejaría de ser coalescente el acceso a los propios vectores de pesos, pues cada hilo querría acceder a 32 pesos contiguos. A no ser, que el vector de bits viniese ya colocado de la forma que queremos, para que una posición de =bitBuffer= no representase 32 pesos contiguos, sino 32 los 32 pesos a los que su hilo puede acceder de forma coalescente. Debemos aplicar una transformación adicional sobre le vector de bits (si es que ya ha tenido alguno, por ejemplo, por la inversión de las matriz de pesos) para adaptarlo a nuestro nuevo algoritmo antes de llamar al kernel. Podemos aprovechar el momento en que creemos un Buffer CUDA a partir de una Interfaz (ver secciones \ref{disenoRedesInter} y \ref{disenoRedesBuff}) para realizar esta transformación. 
 
