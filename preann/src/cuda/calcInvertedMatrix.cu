@@ -91,50 +91,35 @@ void InvertedBitKernel(unsigned* inputs, unsigned char* weighs, float* results, 
 extern "C" void cuda_netCalcInvMatrix(BufferType inputType, unsigned block_size, void* inputPtr, void* weighs,
                                       float* results, unsigned input_size, unsigned output_size)
 {
-    unsigned grid_size = ((output_size - 1) / block_size) + 1;
-    unsigned shared_mem_size;
-
     if (inputType == BT_BYTE) {
         std::string error = "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
         throw error;
-    } else if (inputType == BT_FLOAT) {
+    }
 
-        float* flInputPtr = (float*)inputPtr;
-        float* flWeighs = (float*)weighs;
+    unsigned grid_size = ((output_size - 1) / block_size) + 1;
+    unsigned char* inputPtrAux = (unsigned char*)inputPtr;
+    unsigned inputs_to_process;
+    unsigned shared_mem_size = getSharedMemorySize(inputType, input_size);
 
-        while (input_size > CUDA_MAX_SHARED_FLOATS) {
+    while (shared_mem_size > 0) {
 
-            shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(float);
-            InvertedFloatKernel<<< grid_size, block_size, shared_mem_size >>>(flInputPtr, flWeighs, results, CUDA_MAX_SHARED_FLOATS, output_size);
-            flInputPtr += CUDA_MAX_SHARED_FLOATS;
-            flWeighs += (CUDA_MAX_SHARED_FLOATS * output_size);
-            input_size -= CUDA_MAX_SHARED_FLOATS;
-        }
-        //TODO esto se puede meter dentro del bucle usando CUDA_MAX_SHARED_SIZE
-        shared_mem_size = input_size * sizeof(float);
-        InvertedFloatKernel<<< grid_size, block_size, shared_mem_size >>>(flInputPtr, flWeighs, results, input_size, output_size);
-    } else {
-        //TODO TCC esta parte no funciona bien
-        while (input_size > CUDA_MAX_SHARED_BITS) {
-
-// TODO uniformar con lo de arriba, que esto está super sucio
-            shared_mem_size = CUDA_MAX_SHARED_FLOATS * sizeof(unsigned);
+        if (inputType == BT_FLOAT) {
+            inputs_to_process = shared_mem_size / 4;
+            InvertedFloatKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtrAux, (float*)weighs, results, inputs_to_process, output_size);
+            weighs = (float*)weighs + (inputs_to_process * output_size);
+        } else {
+            inputs_to_process = (shared_mem_size / 4) * BITS_PER_UNSIGNED;
             // TODO TCC probar sin emulación
             if (inputType == BT_BIT) {
-                InvertedBitKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, CUDA_MAX_SHARED_BITS, output_size);
+                InvertedBitKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtrAux, (unsigned char*)weighs, results, inputs_to_process, output_size);
             } else {
-                InvertedBitKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, CUDA_MAX_SHARED_BITS, output_size);
+                InvertedBitKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtrAux, (unsigned char*)weighs, results, inputs_to_process, output_size);
             }
-            inputPtr = (void*)((float*)inputPtr + CUDA_MAX_SHARED_FLOATS);
-            weighs = (void*)((float*)weighs + (CUDA_MAX_SHARED_BITS * output_size));
-            input_size -= CUDA_MAX_SHARED_BITS;
+            weighs = (unsigned char*)weighs + (inputs_to_process * output_size);
         }
-        shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
-        // TODO TCC probar sin emulación
-        if (inputType == BT_BIT) {
-            InvertedBitKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, input_size, output_size);
-        } else {
-            InvertedBitKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, input_size, output_size);
-        }
+
+        inputPtrAux += shared_mem_size;
+        input_size -= inputs_to_process;
+        shared_mem_size = getSharedMemorySize(inputType, input_size);
     }
 }

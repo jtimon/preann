@@ -27,11 +27,10 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual void _crossover(Buffer* other, Interface* bitBuffer)
         {
-            CudaBuffer<bufferTypeTempl, c_typeTempl> cudaBitBuffer(bitBuffer, Cuda_Threads_Per_Block);
+            Buffer* cudaBitBuffer = Factory::newBuffer(bitBuffer, getImplementationType());
 
             cuda_crossover(this->getDataPointer(), other->getDataPointer(),
-                           (unsigned*) cudaBitBuffer.getDataPointer(), tSize, bufferTypeTempl,
-                           Cuda_Threads_Per_Block);
+                           (unsigned*) cudaBitBuffer->getDataPointer(), tSize, bufferTypeTempl);
         }
 
         virtual void _mutateWeigh(unsigned pos, float mutation)

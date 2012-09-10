@@ -11,9 +11,66 @@ unsigned device_min(unsigned a, unsigned b)
 
 // GENETIC OPERATORS
 
+// blockDim.x = BITS_PER_UNSIGNED : 32 threads that are going to process 32 * 32 = 1024 weighs
 template <class type>
 __global__
-void CrossoverKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
+void crossoverSharedKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
+{
+    extern __shared__ float sdata[];
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned bitBlocks =  ( (size - 1) / BITS_PER_UNSIGNED ) + 1;
+
+    if (idx < bitBlocks) {
+        sdata[threadIdx.x] = bitBuffer[ idx ];
+    }
+    __syncthreads();
+
+    unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
+    for (int bit_block = 0; bit_block < blockDim.x; ++bit_block) {
+
+        unsigned bit = sdata[ bit_block ];
+        __syncthreads();
+
+        unsigned mask = 0x80000000;
+        mask >>= ( threadIdx.x );
+
+        if (bit & mask) {
+            type aux = buffer1[weighPos];
+            buffer1[weighPos] = buffer2[weighPos];
+            buffer2[weighPos] = aux;
+        }
+        weighPos += blockDim.x;
+        __syncthreads();
+    }
+}
+
+extern "C" void cuda_crossover(void* buffer1, void* buffer2, unsigned* bitBuffer, unsigned size,
+                               BufferType bufferType)
+{
+    unsigned grid_size = ((size - 1) / (BITS_PER_UNSIGNED * BITS_PER_UNSIGNED)) + 1;
+
+    switch (bufferType) {
+        case BT_BYTE:
+            crossoverSharedKernel<unsigned char><<< grid_size, BITS_PER_UNSIGNED >>>
+                ((unsigned char*)buffer1, (unsigned char*)buffer2, bitBuffer, size);
+
+            break;
+        case BT_FLOAT:
+            crossoverSharedKernel<float><<< grid_size, BITS_PER_UNSIGNED >>>
+                ((float*)buffer1, (float*)buffer2, bitBuffer, size);
+            break;
+        case BT_BIT:
+        case BT_SIGN:
+            {
+                std::string error = "cuda_crossover is not implemented for BufferType BIT nor SIGN.";
+                throw error;
+            }
+    }
+}
+
+template <class type>
+__global__
+void CrossoverOldKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
 {
     unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
     unsigned maxPosForThisBlock = device_min ( (blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED, size);
@@ -38,19 +95,19 @@ void CrossoverKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned
     }
 }
 
-extern "C" void cuda_crossover(void* buffer1, void* buffer2, unsigned* bitBuffer, unsigned size,
+extern "C" void cuda_crossoverOld(void* buffer1, void* buffer2, unsigned* bitBuffer, unsigned size,
                                BufferType bufferType, unsigned block_size)
 {
     unsigned grid_size = ((size - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
 
     switch (bufferType) {
         case BT_BYTE:
-            CrossoverKernel<unsigned char><<< grid_size, block_size >>>
+            CrossoverOldKernel<unsigned char><<< grid_size, block_size >>>
             ((unsigned char*)buffer1, (unsigned char*)buffer2, bitBuffer, size);
 
             break;
         case BT_FLOAT:
-            CrossoverKernel<float><<< grid_size, block_size >>>
+            CrossoverOldKernel<float><<< grid_size, block_size >>>
             ((float*)buffer1, (float*)buffer2, bitBuffer, size);
             break;
         case BT_BIT:
@@ -62,7 +119,6 @@ extern "C" void cuda_crossover(void* buffer1, void* buffer2, unsigned* bitBuffer
     }
 }
 
-//TODO CU es necesario usar un kernel para esto ??
 __global__
 void resetFloatKernel(float* buffer, unsigned pos)
 {

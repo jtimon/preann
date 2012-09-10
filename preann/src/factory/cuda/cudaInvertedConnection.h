@@ -44,12 +44,10 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
             Interface invertedBitBuffer = Interface(bitBuffer);
             invertedBitBuffer.transposeMatrix(tInput->getSize());
 
-            CudaBuffer<bufferTypeTempl, c_typeTempl>
-                    cudaBitBuffer(&invertedBitBuffer, Cuda_Threads_Per_Block);
+            Buffer* cudaBitBuffer = Factory::newBuffer(&invertedBitBuffer, getImplementationType());
 
             cuda_crossover(this->getDataPointer(), other->getDataPointer(),
-                           (unsigned*) cudaBitBuffer.getDataPointer(), tSize, bufferTypeTempl,
-                           Cuda_Threads_Per_Block);
+                           (unsigned*) cudaBitBuffer->getDataPointer(), tSize, bufferTypeTempl);
         }
 
         virtual void _mutateWeigh(unsigned pos, float mutation)

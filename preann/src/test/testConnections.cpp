@@ -150,15 +150,18 @@ int main(int argc, char *argv[])
         RangeLoop loop(Dummy::SIZE, 2, 13, 10);
         loop.addInnerLoop(new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2));
         loop.addInnerLoop(new EnumLoop(ET_BUFFER, 3, BT_BIT, BT_SIGN, BT_FLOAT));
-//        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
-        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION));
+        EnumLoop* loopImpl = new EnumLoop(ET_IMPLEMENTATION);
+        loop.addInnerLoop(loopImpl);
 
         loop.print();
 
         test.test(testCalculateAndAddTo, "Connection::calculateAndAddTo", &loop);
         test.test(testMutate, "Connection::mutate", &loop);
-        test.test(testCrossover, "Connection::crossover", &loop);
         test.test(testActivation, "Connection::activation", &loop);
+
+        loopImpl->with(ET_IMPLEMENTATION, 3, IT_CUDA_REDUC0, IT_CUDA_OUT, IT_CUDA_INV);
+        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
+        test.test(testCrossover, "Connection::crossover", &loop);
 
         printf("Exit success.\n");
     } catch (std::string error) {

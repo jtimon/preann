@@ -7,11 +7,10 @@
 template<BufferType bufferTypeTempl, class c_typeTempl>
     class CudaBuffer : virtual public Buffer
     {
-    private:
+    protected:
         CudaBuffer()
         {
         }
-    protected:
         unsigned getByteSize()
         {
             switch (bufferTypeTempl) {

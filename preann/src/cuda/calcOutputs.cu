@@ -89,35 +89,46 @@ void OutputsBitKernel(unsigned* inputs, unsigned char* weighs, float* results, u
     }
 }
 
+unsigned getSharedMemorySize(BufferType inputType, unsigned input_size)
+{
+    unsigned size = 0;
+    if (inputType == BT_BIT || inputType == BT_SIGN)
+    {
+        size = ( ( (input_size - 1) / BITS_PER_UNSIGNED ) + 1) * sizeof(unsigned);
+    }
+    else if (inputType == BT_FLOAT)
+    {
+        size = input_size * sizeof(float);
+    }
+    return (size < CUDA_MAX_SHARED_SIZE) ? size : CUDA_MAX_SHARED_SIZE;
+};
+
 extern "C" void cuda_netCalcOutputs(BufferType inputType, unsigned block_size, void* inputPtr, void* weighs,
                                     float* results, unsigned input_size, unsigned output_size)
 {
-    unsigned grid_size = ((output_size - 1) / block_size) + 1;
-    unsigned shared_mem_size;
-
     if (inputType == BT_BYTE) {
         std::string error = "cuda_inputCalculation is not implemented for BufferType BYTE as input.";
         throw error;
-    } else if (inputType == BT_FLOAT) {
+    }
 
-        shared_mem_size = input_size * sizeof(float);
-        if (shared_mem_size > CUDA_MAX_SHARED_SIZE) {
-            string error = "The maximum float input size is 4032.";
-            throw error;
-        }
-        OutputsFloatKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, (float*)weighs, results, input_size, output_size);
-    } else {
+    unsigned grid_size = ((output_size - 1) / block_size) + 1;
+    unsigned shared_mem_size = getSharedMemorySize(inputType, input_size);
 
-        shared_mem_size =(((input_size - 1)/BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
-        if (shared_mem_size > CUDA_MAX_SHARED_SIZE) {
-            //16128 * 8
-            string error = "The maximum bit/sign input size is 129024.";
-            throw error;
-        }
-        if (inputType == BT_BIT) {
-            OutputsBitKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, input_size, output_size);
+    if (shared_mem_size > CUDA_MAX_SHARED_SIZE) {
+        string error;
+        if (inputType == BT_FLOAT) {
+            error = "The maximum float input size for cuda_netCalcOutputs is 4032.";
         } else {
-            OutputsBitKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, input_size, output_size);
+            error = "The maximum bit/sign input size for cuda_netCalcOutputs is 129024.";
         }
+        throw error;
+    }
+
+    if (inputType == BT_FLOAT) {
+        OutputsFloatKernel<<< grid_size, block_size, shared_mem_size >>>((float*)inputPtr, (float*)weighs, results, input_size, output_size);
+    } else if (inputType == BT_BIT) {
+        OutputsBitKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, input_size, output_size);
+    } else {
+        OutputsBitKernel<BT_SIGN><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtr, (unsigned char*)weighs, results, input_size, output_size);
     }
 }
