@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "loopTest/dummy.h"
 #include "loopTest/chronoPlotter.h"
-#include "common/dummy.h"
 #include "cuda/cuda.h"
 
 #define START                                                                           \
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_CUDA_OUT);
 //        EnumLoop linesLoop(ET_IMPLEMENTATION, 4, IT_C, IT_CUDA, IT_CUDA_REDUC, IT_CUDA_INV);
 
-        RangeLoop linesLoop("cuda block size", 32, 513, 32);
+        ExpLoop linesLoop("cuda block size", 16, 513, 2);
 
         linesLoop.addInnerLoop(new EnumLoop(ET_BUFFER, 3, BT_FLOAT, BT_BIT, BT_SIGN));
 

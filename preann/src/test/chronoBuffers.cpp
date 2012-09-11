@@ -3,8 +3,8 @@
 
 using namespace std;
 
+#include "loopTest/dummy.h"
 #include "loopTest/chronoPlotter.h"
-#include "common/dummy.h"
 #include "common/chronometer.h"
 
 #define START                                                                           \

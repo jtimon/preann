@@ -10,7 +10,6 @@
 
 #include "common/enumerations.h"
 #include "common/chronometer.h"
-#include "common/dummy.h"
 #include "genetic/population.h"
 
 #include "parametersMap.h"

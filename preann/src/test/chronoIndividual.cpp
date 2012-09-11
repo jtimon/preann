@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "loopTest/dummy.h"
 #include "loopTest/chronoPlotter.h"
-#include "common/dummy.h"
 
 const string PROBABILITY = "prob";
 const string NUM_TIMES = "times";

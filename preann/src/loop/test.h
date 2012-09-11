@@ -7,6 +7,7 @@
 #include "parametersMap.h"
 #include "loop.h"
 #include "rangeLoop.h"
+#include "expLoop.h"
 #include "enumLoop.h"
 #include "joinEnumLoop.h"
 

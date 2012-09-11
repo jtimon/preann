@@ -5,7 +5,7 @@ using namespace std;
 
 #include "common/chronometer.h"
 #include "loop/test.h"
-#include "common/dummy.h"
+#include "loopTest/dummy.h"
 
 #define START                                                                           \
     unsigned differencesCounter = 0;                                                    \

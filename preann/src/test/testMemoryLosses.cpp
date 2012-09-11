@@ -3,8 +3,8 @@
 
 using namespace std;
 
-#include "common/dummy.h"
 #include "loop/test.h"
+#include "loopTest/dummy.h"
 #include "genetic/population.h"
 #include "tasks/binaryTask.h"
 #include "common/chronometer.h"

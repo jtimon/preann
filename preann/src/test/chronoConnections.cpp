@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "loopTest/dummy.h"
 #include "loopTest/chronoPlotter.h"
-#include "common/dummy.h"
 
 #define START                                                                           \
     Buffer* buffer = Dummy::buffer(parametersMap);                                      \

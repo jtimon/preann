@@ -9,6 +9,7 @@
 #define TASKPLOTTER_H_
 
 #include "loop/plot.h"
+#include "dummy.h"
 
 class TaskPlotter : public Plot
 {
