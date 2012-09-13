@@ -32,10 +32,7 @@ void OutputsFloatKernel(float* inputs, float* weighs, float* results, unsigned i
 
         for (unsigned i = 0; i < input_size; i++) {
             result += sdata[i] * weighs[weighsOffset + i];
-//TODO averiguar por qué esto producia el error
-//            __syncthreads();
         }
-
         results[outputNeuron] += result;
     }
 }

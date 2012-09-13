@@ -31,8 +31,6 @@ void InvertedFloatKernel(float* inputs, float* weighs, float* results, unsigned 
 
         for (unsigned i = 0; i < input_size; i++) {
             result += sdata[i] * weighs[output_pos + (i * output_size)];
-            // TODO se puede poner esto aqui?
-//            __syncthreads();
         }
         results[output_pos] += result;
     }
@@ -65,7 +63,6 @@ void InvertedBitKernel(unsigned* inputs, unsigned char* weighs, float* results, 
 
         for (unsigned i=0; i < input_blocks_to_read; i++) {
 
-            //TODO TCC check performance penalty (this is just for BT_SIGN)
             unsigned maxBits = device_min(BITS_PER_UNSIGNED, input_size - (i * BITS_PER_UNSIGNED));
 
             unsigned weighsOffset = (i * BITS_PER_UNSIGNED * output_size) + outputNeuron;
@@ -109,7 +106,6 @@ extern "C" void cuda_netCalcInvMatrix(BufferType inputType, unsigned block_size,
             weighs = (float*)weighs + (inputs_to_process * output_size);
         } else {
             inputs_to_process = (shared_mem_size / 4) * BITS_PER_UNSIGNED;
-            // TODO TCC probar sin emulación
             if (inputType == BT_BIT) {
                 InvertedBitKernel<BT_BIT><<< grid_size, block_size, shared_mem_size >>>((unsigned*)inputPtrAux, (unsigned char*)weighs, results, inputs_to_process, output_size);
             } else {

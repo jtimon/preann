@@ -88,8 +88,6 @@ void CrossoverOldKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsig
             buffer1[weighPos] = buffer2[weighPos];
             buffer2[weighPos] = aux;
         }
-        // TODO por que no se puede poner aqui ? incorrect use of __syncthreads()
-//        __syncthreads();
         weighPos += blockDim.x;
         mask >>= 1;
     }
