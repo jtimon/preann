@@ -37,7 +37,8 @@ NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES)
 NVCC_LINK = $(NVCC) -L/usr/local/cuda/lib -lcudart 
 NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11
 NASM = nasm -f elf
-
+#NVCC = /usr/local/cuda/bin/nvcc -m32 $(INCLUDES) $(FACT_FLAGS)
+#NVCC_LINK = $(NVCC) -L/opt/cuda-toolkit/lib -lcudart
 ifeq (cpp, $(MAKECMDGOALS))
 	CXX_BASE = g++
 	NVCC_LINK = $(CXX_LINK)
@@ -107,7 +108,7 @@ cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EX
 #	./bin/testLayers.exe $(CURDIR)/
 #	./bin/testPlot.exe $(OUTPUT_DIR)
 #	./bin/chronoBuffers.exe $(OUTPUT_DIR)
-#	./bin/chronoConnections.exe $(OUTPUT_DIR)
+	./bin/chronoConnections.exe $(OUTPUT_DIR)
 #	./bin/chronoBlockSizes.exe $(OUTPUT_DIR)
 #	./bin/chronoFunctions.exe $(OUTPUT_DIR)
 #	./bin/chronoCalculateAndAdd.exe $(OUTPUT_DIR)
@@ -153,6 +154,8 @@ build/test/%.o: src/test/%.cpp
 build/%.o: src/%.cpp src/%.h
 	$(CXX) -c $< -o $@
 
+build/common/chronometer.o: src/common/chronometer.cpp src/common/chronometer.h
+	$(CXX) $(FACT_FLAGS) -c $< -o $@
 build/factory/factory.o: src/factory/factory.cpp src/factory/*.h src/factory/cpp/*.h src/factory/sse2/*.h src/factory/cuda/*.h $(FACT_OBJ)
 	$(CXX) $(FACT_FLAGS) -c $< -o $@
 build/cuda/%.o : src/cuda/%.cu src/cuda/cuda.h src/common/util.h

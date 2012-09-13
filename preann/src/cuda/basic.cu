@@ -14,6 +14,15 @@ void checkCUDAError(const char *msg)
     }
 }
 
+// CLOCK
+
+extern "C" void cuda_synchronize()
+{
+    cudaThreadSynchronize();
+    checkCUDAError("synchronize");
+}
+
+
 // MEMORY MANAGEMENT
 
 extern "C" void* cuda_malloc(unsigned byteSize)

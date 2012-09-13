@@ -45,6 +45,10 @@ void Chronometer::start()
 */
 void Chronometer::stop()
 {
+#ifdef CUDA_IMPL
+        cuda_synchronize();
+#endif
+
     if (start_time == -1) {
         std::string error = "The chronometer must be started before stop it.";
         throw error;

@@ -13,6 +13,7 @@ static unsigned Cuda_Threads_Per_Block = 256;
 // basic.cu
 void checkCUDAError(const char *msg);
 
+extern "C" void cuda_synchronize();
 extern "C" void* cuda_malloc(unsigned byteSize);
 extern "C" void cuda_free(void* d_ptr);
 extern "C" void cuda_copyToDevice(void* d_dest, void* h_src, unsigned count);

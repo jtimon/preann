@@ -1,4 +1,4 @@
-/** 
+/**
 * \file chronometer.h
 *   \brief Cabecera de la clase Chronometer.
 *   \author
@@ -11,6 +11,10 @@
 using namespace std;
 
 #include <iostream>
+
+#ifdef CUDA_IMPL
+#include "cuda/cuda.h"
+#endif
 
 /** \class Chronometer
 *   \brief clase para cronometrar el rendimiento de los métodos a optimizar
