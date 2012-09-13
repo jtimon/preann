@@ -111,9 +111,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     }
                 default:
                     {
-                        //TODO Z decidir cual mola mas
-                        c_typeTempl* otherWeighs = other->getDataPointer2<c_typeTempl>();
                         c_typeTempl* thisWeighs = (c_typeTempl*) this->getDataPointer();
+                        c_typeTempl* otherWeighs = (c_typeTempl*) other->getDataPointer();
                         c_typeTempl auxWeigh;
 
                         for (unsigned i = 0; i < tSize; i++) {

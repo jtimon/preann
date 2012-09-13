@@ -69,11 +69,6 @@ public:
     float compareTo(Buffer* other);
     void random(float range);
 
-    template<class c_typeTempl>
-        c_typeTempl* getDataPointer2()
-        {
-            return (c_typeTempl*) data;
-        }
 protected:
     template<class c_typeTempl>
         void SetValueToAnArray(void* array, unsigned size, c_typeTempl value)
