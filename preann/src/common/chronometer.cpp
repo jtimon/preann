@@ -31,6 +31,9 @@ Chronometer::~Chronometer()
 */
 void Chronometer::start()
 {
+#ifdef CUDA_IMPL
+        cuda_synchronize();
+#endif
     if (end_time != -1) {
         cout << "Warning: the chronometer was already started." << endl;
     } else {
