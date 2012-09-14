@@ -119,7 +119,6 @@ unsigned testCrossover(ParametersMap* parametersMap)
     cOther->copyFrom(other);
 
     Interface bitBuffer = Interface(connection->getSize(), BT_BIT);
-    //TODO bitBuffer.random(2); ??
     bitBuffer.random(1);
 
     connection->crossover(other, &bitBuffer);
@@ -158,9 +157,6 @@ int main(int argc, char *argv[])
         test.test(testCalculateAndAddTo, "Connection::calculateAndAddTo", &loop);
         test.test(testMutate, "Connection::mutate", &loop);
         test.test(testActivation, "Connection::activation", &loop);
-
-        loopImpl->with(ET_IMPLEMENTATION, 3, IT_CUDA_REDUC0, IT_CUDA_OUT, IT_CUDA_INV);
-        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
         test.test(testCrossover, "Connection::crossover", &loop);
 
         printf("Exit success.\n");
