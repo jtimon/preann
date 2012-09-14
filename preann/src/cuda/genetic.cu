@@ -16,7 +16,7 @@ template <class type>
 __global__
 void crossoverSharedKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
 {
-    extern __shared__ float sdata[];
+    extern __shared__ unsigned sdata[];
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     unsigned bitBlocks =  ( (size - 1) / BITS_PER_UNSIGNED ) + 1;
 
@@ -29,12 +29,12 @@ void crossoverSharedKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, un
     for (int bit_block = 0; bit_block < blockDim.x; ++bit_block) {
 
         unsigned bit = sdata[ bit_block ];
-        __syncthreads();
 
         unsigned mask = 0x80000000;
         mask >>= ( threadIdx.x );
+        __syncthreads();
 
-        if (bit & mask) {
+        if (bit & mask && weighPos < size) {
             type aux = buffer1[weighPos];
             buffer1[weighPos] = buffer2[weighPos];
             buffer2[weighPos] = aux;
@@ -47,16 +47,18 @@ void crossoverSharedKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, un
 extern "C" void cuda_crossover(void* buffer1, void* buffer2, unsigned* bitBuffer, unsigned size,
                                BufferType bufferType)
 {
-    unsigned grid_size = ((size - 1) / (BITS_PER_UNSIGNED * BITS_PER_UNSIGNED)) + 1;
+    unsigned block_size = BITS_PER_UNSIGNED;
+    unsigned grid_size = ((size - 1) / (block_size * BITS_PER_UNSIGNED)) + 1;
+    unsigned shared_mem_size = BITS_PER_UNSIGNED * sizeof(unsigned);
 
     switch (bufferType) {
         case BT_BYTE:
-            crossoverSharedKernel<unsigned char><<< grid_size, BITS_PER_UNSIGNED >>>
+            crossoverSharedKernel<unsigned char><<< grid_size, block_size, shared_mem_size >>>
                 ((unsigned char*)buffer1, (unsigned char*)buffer2, bitBuffer, size);
 
             break;
         case BT_FLOAT:
-            crossoverSharedKernel<float><<< grid_size, BITS_PER_UNSIGNED >>>
+            crossoverSharedKernel<float><<< grid_size, block_size, shared_mem_size >>>
                 ((float*)buffer1, (float*)buffer2, bitBuffer, size);
             break;
         case BT_BIT:
