@@ -3,6 +3,7 @@
 
 #include "loopTest/dummy.h"
 #include "loopTest/chronoPlotter.h"
+#include "cuda/cuda.h"
 
 #define START                                                                           \
     Buffer* buffer = Dummy::buffer(parametersMap);                                      \
@@ -35,24 +36,39 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
-        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::OUTPUT_SIZE, 100, 1001, 100), "Time (seconds)");
+        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 1000, 10001, 1000), "Time (seconds)");
+        unsigned repetitions = 5000;
 
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
-//        plotter.parameters.putNumber(Dummy::OUTPUT_SIZE, 100);
 
-//        EnumLoop linesLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2);
         EnumLoop linesLoop(ET_IMPLEMENTATION);
-
         linesLoop.addInnerLoop(new EnumLoop(ET_BUFFER, 3, BT_FLOAT, BT_BIT, BT_SIGN));
 
-        linesLoop.print();
+        RangeLoop averageLoop(Dummy::OUTPUT_SIZE, 512, 1025, 512);
 
-        RangeLoop averageLoop(Dummy::SIZE, 100, 151, 50);
+        plotter.plotChronoAveraged(chronoCalculateAndAddTo, "impl_calculate_inputSize", &linesLoop,
+                                   &averageLoop, repetitions);
 
-        plotter.plotChronoAveraged(chronoCalculateAndAddTo, "CalculateAndAddTo_outputSize", &linesLoop,
-                                   &averageLoop, 50000);
+        plotter.setLabelX(Dummy::OUTPUT_SIZE);
+        averageLoop.setKey(Dummy::SIZE);
+
+        plotter.plotChronoAveraged(chronoCalculateAndAddTo, "impl_calculate_outputSize", &linesLoop,
+                                   &averageLoop, repetitions);
+
+        EnumLoop filesLoop(ET_BUFFER, 3, BT_FLOAT, BT_BIT, BT_SIGN);
+        EnumLoop cudaLinesLoop(ET_IMPLEMENTATION, 4, IT_CUDA_REDUC0, IT_CUDA_REDUC, IT_CUDA_OUT, IT_CUDA_INV);
+        cudaLinesLoop.addInnerLoop(new ExpLoop(CUDA_BLOCK_SIZE, 16, 513, 2));
+
+        plotter.plotChronoFilesAveraged(chronoCalculateAndAddTo, "impl_calculate_outputSize_blockSize", &cudaLinesLoop,
+                                   &filesLoop, &averageLoop, repetitions);
+
+        plotter.setLabelX(Dummy::SIZE);
+        averageLoop.setKey(Dummy::OUTPUT_SIZE);
+
+        plotter.plotChronoFilesAveraged(chronoCalculateAndAddTo, "impl_calculate_inputSize_blockSize", &cudaLinesLoop,
+                                   &filesLoop, &averageLoop, repetitions);
 
         printf("Exit success.\n");
     } catch (std::string error) {
