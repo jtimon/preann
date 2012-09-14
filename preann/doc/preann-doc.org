@@ -1515,7 +1515,7 @@ CudaBuffer(Interface* bitBuffer, unsigned block_size)
 
 No es particularmente elegante, pues básicamente reproduce lo que tendŕía que hacer el kernel de forma serializada para cambiar las posiciones para el acceso coalescente. Pero sólo será llamado antes de realizar una cruza con dos redes CUDA. Aunque esta transforamción puede parecer una penalización muy importante, no lo es. Tengase en cuenta que esta copia de Interface al Buffer CUDA se tenía que hacer de todas maneras. De no hacer esto, lo único que no ahorraríamos es la conversión de la interfaz inicial que contiene el vector de bits a otra interfaz intermedia con las nuevas posiciones. Pero las 3 últimas líneas las ejecutaríamos igual si hubiesemos optado por la segunda solución y mover los datos de memoria huesped a memoria de dispositivo es muy costoso. El acceso al vector de bits mucho más eficiente durante la ejecución del kernel y la mayor libertad para elegir el número de hilos sin duda justifican esta conversión.
 
-*** Otros operadoers genéticos
+*** Otros operadores genéticos
 
 Otros operadores genéticos como la mutación y el olvido también se lanzando kernels CUDA. Este es el kernel para la mutación:
 
@@ -1541,8 +1541,7 @@ void resetKernel(float* buffer, unsigned pos)
 }
 #+end_src
 
-Sólo actuará un hilo por bloque, no parece que se optimice mucho. Sin embargo, no se trata tanto de optimizar estos kernels sino de mantener los pesos en memoria de dispositivo en todo momento. El ancho de banda máximo en la transferencia de entre la memoria de dispositivo y la GPU es mucho mayor (por ejemplo, 141 GBps en la NVIDIA GeForce GTX 280) que el ancho de banda en la transmisión de datos entre la memoria huesped y la del dispositivo (8 GBps para PCI Express
-×16 de segunda generación). Por ello, para el mejor rendimiento general de la aplicación, es de una prioridad alta minimizar las transferencias de datos etre el husped y el dispositivo, incluso si eso significa lanzar kernels en la GPU que no suponen ninguna mejora de rendimiento comparados con ejecutar lo mismo en la CPU\cite{bestPract2009}.
+Sólo actuará un hilo por bloque, no parece que se optimice mucho. Sin embargo, no se trata tanto de optimizar estos kernels sino de mantener los pesos en memoria de dispositivo en todo momento. El ancho de banda máximo en la transferencia de entre la memoria de dispositivo y la GPU es mucho mayor (por ejemplo, 141 GBps en la NVIDIA GeForce GTX 280) que el ancho de banda en la transmisión de datos entre la memoria huesped y la del dispositivo (8 GBps para PCI Express ×16 de segunda generación). Por ello, para el mejor rendimiento general de la aplicación, es de una prioridad alta minimizar las transferencias de datos etre el husped (CPU) y el dispositivo (GPU), incluso si eso significa lanzar kernels en la GPU que no suponen ninguna mejora de rendimiento comparados con ejecutar lo mismo en la CPU\cite{bestPract2009}. 
 
 * REVISAR Experimentaci\'on
 #+LaTeX: \label{experimentacion}
@@ -1610,30 +1609,428 @@ sudo aptitude install texlive-latex-recommended texlive-latex-extra
 ** HACER Extensibilidad a partir de interfaces
 #+LaTeX: \label{manualProgrInterf}
 \newpage
-* MODIFICAR Resultados: Rendimiento
+* REVISAR [2/3] Resultados: Rendimiento
 #+LaTeX: \label{rendimiento}
+
 En esta sección se analizan resultados de rendimiento en tiempo de ejecución.
-** Rendimiento de las implementaciones paralelas de red neuronal
+
+** REVISAR [1/2] Características técnicas de la máquinas utilizadas
+#+LaTeX: \label{rendMaq}
+
+*** MODIFICAR Máquina con capacidad CUDA
+#+LaTeX: \label{rendMaqCUDA}
+
+Para las pruebas en las que no se necesitaba capacidad CUDA se ha utilizado otra máquina con peores características técnicas. Esta es la máquina que se ha utilizado para las pruebas del apartado \ref{rendOperadores} y el capítulo \ref{aprendizaje}. Se trata de un ordenador de mesa (desktop) con bastante potencia, con una CPU Phenom II X6 1100T y un dispositvo GPU NVIDIA GTX 570.
+
+Para más detalles técnicos sobre la máquina, a continuación se adjunta la salida de los comandos ejecutados para obtener información sobre la misma.
+
+- CPU
+
+#+begin_src sh
+$ cat /proc/cpuinfo
+#+end_src
+
+- Dispositivos (GPU)
+
+#+begin_src sh
+$ lspci -vv
+#+end_src
+
+- Memoria
+
+#+begin_src sh
+$ cat /proc/meminfo
+#+end_src
+
+TODO
+After compilation, go to NVIDIA_GPU_Computing_SDK/C/bin/linux/release in
+the user’s home directory and run deviceQuery
+
+*** REVISAR Máquina sin capacidad CUDA
+#+LaTeX: \label{rendMaqLaptop}
+
+Para las pruebas en las que no se necesitaba capacidad CUDA se ha utilizado otra máquina con peores características técnicas. Esta es la máquina que se ha utilizado para las pruebas del apartado \ref{rendOperadores} y el capítulo \ref{aprendizaje} (aunque en ese no se miden rendimientos en tiempo sino aprendizaje a lo largo de generaciones). Se trata de un pequeño ordenador portatil (laptop) de la marca Asus con 2 núcleos (core 2 duo) y 4 GB de memoria (de los que parte son utilizados por la GPU Intel, que no cuenta con su propia memoria).
+
+Para más detalles técnicos sobre la máquina, a continuación se adjunta la salida de los comandos ejecutados para obtener información sobre la misma.
+
+- CPU
+
+#+begin_src sh
+$ cat /proc/cpuinfo
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 23
+model name	: Genuine Intel(R) CPU           U7300  @ 1.30GHz
+stepping	: 10
+cpu MHz		: 800.000
+cache size	: 3072 KB
+physical id	: 0
+siblings	: 2
+core id		: 0
+cpu cores	: 2
+apicid		: 0
+initial apicid	: 0
+fdiv_bug	: no
+hlt_bug		: no
+f00f_bug	: no
+coma_bug	: no
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe nx lm constant_tsc arch_perfmon pebs bts aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm sse4_1 xsave lahf_lm tpr_shadow vnmi flexpriority
+bogomips	: 2677.65
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 23
+model name	: Genuine Intel(R) CPU           U7300  @ 1.30GHz
+stepping	: 10
+cpu MHz		: 800.000
+cache size	: 3072 KB
+physical id	: 0
+siblings	: 2
+core id		: 1
+cpu cores	: 2
+apicid		: 1
+initial apicid	: 1
+fdiv_bug	: no
+hlt_bug		: no
+f00f_bug	: no
+coma_bug	: no
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe nx lm constant_tsc arch_perfmon pebs bts aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm sse4_1 xsave lahf_lm tpr_shadow vnmi flexpriority
+bogomips	: 2676.61
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+#+end_src
+
+- Dispositivos (GPU)
+
+#+begin_src sh
+$ lspci -vv
+00:00.0 Host bridge: Intel Corporation Mobile 4 Series Chipset Memory Controller Hub (rev 07)
+	Subsystem: ASUSTeK Computer Inc. Device 1c47
+	Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort+ >SERR- <PERR- INTx-
+	Latency: 0
+	Capabilities: <access denied>
+	Kernel driver in use: agpgart-intel
+	Kernel modules: intel-agp
+
+00:02.0 VGA compatible controller: Intel Corporation Mobile 4 Series Chipset Integrated Graphics Controller (rev 07)
+	Subsystem: ASUSTeK Computer Inc. Device 1862
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx+
+	Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin A routed to IRQ 28
+	Region 0: Memory at fe400000 (64-bit, non-prefetchable) [size=4M]
+	Region 2: Memory at d0000000 (64-bit, prefetchable) [size=256M]
+	Region 4: I/O ports at dc00 [size=8]
+	Capabilities: <access denied>
+	Kernel driver in use: i915
+	Kernel modules: i915
+
+00:02.1 Display controller: Intel Corporation Mobile 4 Series Chipset Integrated Graphics Controller (rev 07)
+	Subsystem: ASUSTeK Computer Inc. Device 1862
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Region 0: Memory at fe800000 (64-bit, non-prefetchable) [size=1M]
+	Capabilities: <access denied>
+
+00:1a.0 USB Controller: Intel Corporation 82801I (ICH9 Family) USB UHCI Controller #4 (rev 03)
+	Subsystem: ASUSTeK Computer Inc. Device 1c47
+	Control: I/O+ Mem- BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin A routed to IRQ 16
+	Region 4: I/O ports at d880 [size=32]
+	Capabilities: <access denied>
+	Kernel driver in use: uhci_hcd
+
+00:1a.1 USB Controller: Intel Corporation 82801I (ICH9 Family) USB UHCI Controller #5 (rev 03)
+	Subsystem: ASUSTeK Computer Inc. Device 1c47
+	Control: I/O+ Mem- BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin B routed to IRQ 21
+	Region 4: I/O ports at d800 [size=32]
+	Capabilities: <access denied>
+	Kernel driver in use: uhci_hcd
+
+00:1a.2 USB Controller: Intel Corporation 82801I (ICH9 Family) USB UHCI Controller #6 (rev 03)
+	Subsystem: ASUSTeK Computer Inc. Device 1c47
+	Control: I/O+ Mem- BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin D routed to IRQ 19
+	Region 4: I/O ports at d480 [size=32]
+	Capabilities: <access denied>
+	Kernel driver in use: uhci_hcd
+
+00:1a.7 USB Controller: Intel Corporation 82801I (ICH9 Family) USB2 EHCI Controller #2 (rev 03) (prog-if 20)
+	Subsystem: ASUSTeK Computer Inc. Device 1c47
+	Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin C routed to IRQ 18
+	Region 0: Memory at fe9fbc00 (32-bit, non-prefetchable) [size=1K]
+	Capabilities: <access denied>
+	Kernel driver in use: ehci_hcd
+
+00:1b.0 Audio device: Intel Corporation 82801I (ICH9 Family) HD Audio Controller (rev 03)
+	Subsystem: ASUSTeK Computer Inc. Device 1443
+	Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0, Cache Line Size: 32 bytes
+	Interrupt: pin A routed to IRQ 22
+	Region 0: Memory at fe9f4000 (64-bit, non-prefetchable) [size=16K]
+	Capabilities: <access denied>
+	Kernel driver in use: HDA Intel
+	Kernel modules: snd-hda-intel
+
+00:1c.0 PCI bridge: Intel Corporation 82801I (ICH9 Family) PCI Express Port 1 (rev 03)
+	Control: I/O- Mem- BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR+ FastB2B- DisINTx+
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0, Cache Line Size: 32 bytes
+	Bus: primary=00, secondary=01, subordinate=01, sec-latency=0
+	Secondary status: 66MHz- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- <SERR- <PERR-
+	BridgeCtl: Parity- SERR+ NoISA- VGA- MAbort- >Reset- FastB2B-
+		PriDiscTmr- SecDiscTmr- DiscTmrStat- DiscTmrSERREn-
+	Capabilities: <access denied>
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+
+00:1c.1 PCI bridge: Intel Corporation 82801I (ICH9 Family) PCI Express Port 2 (rev 03)
+	Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR+ FastB2B- DisINTx+
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0, Cache Line Size: 32 bytes
+	Bus: primary=00, secondary=02, subordinate=02, sec-latency=0
+	Memory behind bridge: fea00000-feafffff
+	Secondary status: 66MHz- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- <SERR- <PERR-
+	BridgeCtl: Parity- SERR+ NoISA- VGA- MAbort- >Reset- FastB2B-
+		PriDiscTmr- SecDiscTmr- DiscTmrStat- DiscTmrSERREn-
+	Capabilities: <access denied>
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+
+00:1c.5 PCI bridge: Intel Corporation 82801I (ICH9 Family) PCI Express Port 6 (rev 03)
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR+ FastB2B- DisINTx+
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0, Cache Line Size: 32 bytes
+	Bus: primary=00, secondary=03, subordinate=03, sec-latency=0
+	I/O behind bridge: 0000e000-0000efff
+	Memory behind bridge: feb00000-febfffff
+	Prefetchable memory behind bridge: 00000000c0000000-00000000c01fffff
+	Secondary status: 66MHz- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- <SERR- <PERR-
+	BridgeCtl: Parity- SERR+ NoISA- VGA- MAbort- >Reset- FastB2B-
+		PriDiscTmr- SecDiscTmr- DiscTmrStat- DiscTmrSERREn-
+	Capabilities: <access denied>
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+
+00:1d.0 USB Controller: Intel Corporation 82801I (ICH9 Family) USB UHCI Controller #1 (rev 03)
+	Subsystem: ASUSTeK Computer Inc. Device 1c47
+	Control: I/O+ Mem- BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin A routed to IRQ 23
+	Region 4: I/O ports at d400 [size=32]
+	Capabilities: <access denied>
+	Kernel driver in use: uhci_hcd
+
+00:1d.1 USB Controller: Intel Corporation 82801I (ICH9 Family) USB UHCI Controller #2 (rev 03)
+	Subsystem: ASUSTeK Computer Inc. Device 1c47
+	Control: I/O+ Mem- BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin B routed to IRQ 19
+	Region 4: I/O ports at d080 [size=32]
+	Capabilities: <access denied>
+	Kernel driver in use: uhci_hcd
+
+00:1d.2 USB Controller: Intel Corporation 82801I (ICH9 Family) USB UHCI Controller #3 (rev 03)
+	Subsystem: ASUSTeK Computer Inc. Device 1c47
+	Control: I/O+ Mem- BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin C routed to IRQ 18
+	Region 4: I/O ports at d000 [size=32]
+	Capabilities: <access denied>
+	Kernel driver in use: uhci_hcd
+
+00:1d.7 USB Controller: Intel Corporation 82801I (ICH9 Family) USB2 EHCI Controller #1 (rev 03) (prog-if 20)
+	Subsystem: ASUSTeK Computer Inc. Device 1c47
+	Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR+ FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin A routed to IRQ 23
+	Region 0: Memory at fe9fb800 (32-bit, non-prefetchable) [size=1K]
+	Capabilities: <access denied>
+	Kernel driver in use: ehci_hcd
+
+00:1e.0 PCI bridge: Intel Corporation 82801 Mobile PCI Bridge (rev 93) (prog-if 01)
+	Control: I/O- Mem- BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR+ FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Bus: primary=00, secondary=04, subordinate=04, sec-latency=32
+	Secondary status: 66MHz- FastB2B+ ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort+ <SERR- <PERR-
+	BridgeCtl: Parity- SERR+ NoISA- VGA- MAbort- >Reset- FastB2B-
+		PriDiscTmr- SecDiscTmr- DiscTmrStat- DiscTmrSERREn-
+	Capabilities: <access denied>
+
+00:1f.0 ISA bridge: Intel Corporation ICH9M-E LPC Interface Controller (rev 03)
+	Subsystem: ASUSTeK Computer Inc. Device 1c47
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Capabilities: <access denied>
+	Kernel modules: iTCO_wdt
+
+00:1f.2 SATA controller: Intel Corporation ICH9M/M-E SATA AHCI Controller (rev 03) (prog-if 01)
+	Subsystem: ASUSTeK Computer Inc. Device 1c47
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx+
+	Status: Cap+ 66MHz+ UDF- FastB2B+ ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin B routed to IRQ 27
+	Region 0: I/O ports at cc00 [size=8]
+	Region 1: I/O ports at c880 [size=4]
+	Region 2: I/O ports at c800 [size=8]
+	Region 3: I/O ports at c480 [size=4]
+	Region 4: I/O ports at c400 [size=32]
+	Region 5: Memory at fe9fb000 (32-bit, non-prefetchable) [size=2K]
+	Capabilities: <access denied>
+	Kernel driver in use: ahci
+	Kernel modules: ahci
+
+02:00.0 Network controller: Atheros Communications Inc. AR9285 Wireless Network Adapter (PCI-Express) (rev 01)
+	Subsystem: Device 1a3b:1089
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0, Cache Line Size: 32 bytes
+	Interrupt: pin A routed to IRQ 17
+	Region 0: Memory at feaf0000 (64-bit, non-prefetchable) [size=64K]
+	Capabilities: <access denied>
+	Kernel driver in use: ath9k
+	Kernel modules: ath9k
+
+03:00.0 Ethernet controller: Atheros Communications Atheros AR8132 / L1c Gigabit Ethernet Adapter (rev c0)
+	Subsystem: ASUSTeK Computer Inc. Device 14e5
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx+
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0, Cache Line Size: 32 bytes
+	Interrupt: pin A routed to IRQ 29
+	Region 0: Memory at febc0000 (64-bit, non-prefetchable) [size=256K]
+	Region 2: I/O ports at ec00 [size=128]
+	Capabilities: <access denied>
+	Kernel driver in use: atl1c
+	Kernel modules: atl1c
+
+#+end_src
+
+- Memoria
+
+#+begin_src sh
+$ cat /proc/meminfo
+MemTotal:        3062124 kB
+MemFree:          209488 kB
+Buffers:          293972 kB
+Cached:           950716 kB
+SwapCached:         8024 kB
+Active:          1741556 kB
+Inactive:         935852 kB
+Active(anon):    1082592 kB
+Inactive(anon):   496576 kB
+Active(file):     658964 kB
+Inactive(file):   439276 kB
+Unevictable:          68 kB
+Mlocked:              68 kB
+HighTotal:       2201224 kB
+HighFree:          95160 kB
+LowTotal:         860900 kB
+LowFree:          114328 kB
+SwapTotal:       1490936 kB
+SwapFree:        1436288 kB
+Dirty:               136 kB
+Writeback:             0 kB
+AnonPages:       1426568 kB
+Mapped:           116060 kB
+Shmem:            146448 kB
+Slab:             137540 kB
+SReclaimable:     112872 kB
+SUnreclaim:        24668 kB
+KernelStack:        3136 kB
+PageTables:         8592 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:     3021996 kB
+Committed_AS:    2333124 kB
+VmallocTotal:     122880 kB
+VmallocUsed:       35100 kB
+VmallocChunk:      40420 kB
+HardwareCorrupted:     0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       4096 kB
+DirectMap4k:       16376 kB
+DirectMap4M:      892928 kB
+#+end_src
+
+\newpage
+
+** MODIFICAR [0/15] Rendimiento de las implementaciones paralelas
 #+LaTeX: \label{rendImpl}
 
-En esta sección se presentan los resultados en tiempo de ejecución de los métodos que se ejecutan de forma diferente con cada implementación.
+En esta sección se presentan los resultados en tiempo de ejecución de los métodos que se ejecutan de forma diferente con cada implementación. Todas las pruebas de la sección se han realizado con la máquina descrita en la sección \ref{rendMaqCUDA}.
 
-*** Acumulación de resultados
-#+LaTeX: \label{rendImplAcumul}
+*** MODIFICAR Acumulación de resultados
+#+LaTeX: \label{rendImplAcumulEnt}
 
-En la figura \ref{grafImplCalculate}, puede apreciarse que la implementación con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a la implementación de referencia en lenguaje C, especialmente para los tipos de Buffer BIT y SIGN.
+****  en función de las entradas
+En la figura \ref{grafImplCalculateEnt}, puede apreciarse que la implementación con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a las demás. En ésta los tipos de Buffer BIT y SIGN (neuronas binarias y bipolares) obtienen tiempos similares al tipo FLOAT. 
 
-#+CAPTION:    Método de acumulación de resultados (Connection::calculateAndAdd).
-#+LABEL:      grafImplCalculate
+Las implementaciones CUDA obtienen resultados parecidos, aunque todas ellas obtienen peores tiempos para BIT y SIGN, esto se debe a que los pesos en estos casos son de un sólo byte y los algoritmos desarrollados están optimizados para accesos coalescentes a datos float de 4 bytes (la aruitectura CUDA está en general más preparada para este tipo de datos, aunque se podrían modificar los algoritmos BIT y SIGN para adaptarse mejor a la misma).
+
+Los tiempos de la implementación de referencia C para el tipo FLOAT se encuentran cercanos a los de las implementaciones CUDA para BIT y SIGN, es decir, no mucho peor que las implementaciones CUDA para float. Sin embargo, los peores tiempos de la gráfica son con mucha diferencia los de esta implementación para BIT y SIGN.
+
+Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en segundos. Los pesos y otros valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. El tamaño de la capa de salida es 100 la mitad de las veces y 150 la otra mitad, haciendose la media. Se permutan los tipos de neuronas y los tipos de implementación para obtener cada curva. Cada combinación se repite 5000 veces para hacer la media y reducir el ruido.
+
+#+CAPTION:    Método de acumulación de resultados (Connection::calculateAndAdd) variando el tamaño de la capa de entrada.
+#+LABEL:      grafImplCalculateEnt
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Connection_calculateAndAddTo.png]]
 \newpage
 
-*** Activación
+**** HACER Acumulación de resultados en función de las salidas
+#+LaTeX: \label{rendImplAcumulSal}
 
-De la figura \ref{grafImplActivation} se extraen varias conclusiones. No mucha diferencia de rendimiento entre las implementaciones y prácticamente ninguna cuando las neuronas son de tipo FLOAT. Esto era de esperar porque ambas implementaciones son idénticas: no se han hecho optimizaciones SSE2 para la función de activación y para el tipo FLOAT el algoritmo es idéntico al de C.
+**** HACER Zoom CUDA con bloques ent
+**** HACER Zoom CUDA con bloques sal
+*** MODIFICAR Activación
+#+LaTeX: \label{rendImplActiv}
 
-Para los tipos BIT y SIGN, la implementación en C es ligeramente más rápida que para el tipo FLOAT y la  escrita en SSE2 es ligeremante más lenta que la FLOAT. En la implementación SSE2 de BIT y SIGN no se almacenan los bits en el orden normal, si no en la representación especial de SSE2, para que el método de acumulación de resultados pueda ser óptimo.
+De la figura \ref{grafImplActivation} se extraen varias conclusiones. El rendimiento de la activación FLOAT es idéntico para las implementaciones C y SSE2.
+Era de esperar pues no se han hecho optimizaciones para la versión SSE2. Para los tipos BIT y SIGN con estas mismas implementaciones se mejora ligeramente el rendimiento. SSE2 tarda un poco más que que la C en BIT y SIGN porque en la implementación SSE2 de BIT y SIGN no se almacenan los bits en el orden normal, si no en la representación especial de SSE2 (ver seción \ref{disenoParalXMMbyte}), para que el método de acumulación de resultados pueda ser óptimo. 
+
+La implemetación CUDA es la más rápida para FLOAT, con un tiempo que se mantiene constante para los tamaños de salida probados. La implementación CUDA de BIT y SIGN produce los peores resultados con bastante diferencia. De nuevo, el algoritmo se adaptó directamente de la versión float sin modificarlo sustancialmente, lo que se requeriría para un rendimiento óptimo.
+
+Esta prueba se ha hecho utilizando la función de activación IDENTITY (ninguna). El tamaño de las salidas se representa en la como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en segundos. Los valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Se permutan los tipos de neuronas y los tipos de implementación para obtener cada curva. Cada combinación se repite 90000 veces para hacer la media reducir el ruido.
 
 #+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation).
 #+LABEL:      grafImplActivation
@@ -1641,30 +2038,54 @@ Para los tipos BIT y SIGN, la implementación en C es ligeramente más rápida q
 [[./img/Connection_activation.png]]
 \newpage
 
-*** Funciones de activación
+**** HACER Activación CUDA
 
-Si en la figura \ref{grafImplActivation} se comparaba el rendimiento de los distintos tipos de neurona (BIT, SIGN y FLOAT con la función de activación IDENTITY), en la figura \ref{grafImplActivationFunc} se comparan los rendimientos de los distintos tipos de funciones para el tipo de neurona FLOAT. Con el tipo de neurona BIT, la función de activación siempre es BINARY_STEP y con el tipo SIGN la activación siempre es BIPOLAR_STEP, por ello podemos excluir estos tipos de esta gráfica. Además, la implementación SSE2 de la activación para FLOAT es idéntica a la de C, por lo que tampoco se muestran los resultados de la activación SSE2 en este caso.
+TODO cambiando tamaño de bloques 
+FLOAT, BIT y SIGN por separado que si no no se ve nada
 
-Se puede ver como, en general, la función más lenta es la sigmoide, seguida de la sigmoide bipolar. La tangente hiperbólica sólo es ligeramente más lenta que el resto, cuyo rendimiento es similar al de la función identidad (que no hace nada).
+\newpage
+*** MODIFICAR Funciones de activación
+
+Si en la figura \ref{grafImplActivation} se comparaba el rendimiento de los distintos tipos de neurona (BIT, SIGN y FLOAT con la función de activación IDENTITY), en la figura \ref{grafImplActivationFunc} se comparan los rendimientos de los distintos tipos de funciones para el tipo de neurona FLOAT. Con el tipo de neurona BIT, la función de activación siempre es BINARY_STEP y con el tipo SIGN la activación siempre es BIPOLAR_STEP, por ello podemos excluir estos tipos de neurona de esta gráfica (esas activaciones se mantienen, pero para usando la implementación FLOAT internamente). Además, la implementación SSE2 de la activación para FLOAT es práctiacamente idéntica a la de C y como vimos en la gráfica \ref{grafImplActivation} produce los mismo resultados de rendimiento, por lo que tampoco se muestran los resultados de la activación SSE2 en este caso. Se muestran, entonces, los diferentes funciones de activación para las neuronas FLOAt y para las implementaciones C y CUDA.
+
+Los rendimientos de la implementación CUDA son todos muy buenos y casi constantes, por lo que es difícil compararlos.
+
+Para la implementación C, se puede ver como, en general, la función más lenta es la sigmoide bipolar, seguida muy de cerca por la sigmoide. La tangente hiperbólica sólo es ligeramente más lenta que el resto. Los tiempos de las funciones de activación de salto binario y bipolar son muy parecidos (ligeramente mayor para el caso salto binario) son muy similares al de la función identidad (que no hace nada).
+
+Esta prueba se ha hecho utilizando los parámetros que se describen a continuación. El tamaño de las salidas se representa en la como coordenada X, variándolo de 2000 en 2000 desde 2000 hasta 20000. La coordenada Y es el tiempo en segundos. Los valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Se permutan los tipos de funciones de activación para FLOAT y los tipos de implementación para para obtener cada curva. Cada combinación se repite 50000 veces para hacer la media reducir el ruido.
 
 #+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation) con tipo de Buffer FLOAT y las diferentes funciones de activación implementadas.
 #+LABEL:      grafImplActivationFunc
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Activation_functions.png]]
 \newpage
-*** Cruza
+**** HACER Funciones de activación CUDA
 
-No hay una diferencia sustancial de rendimiento entre las diferentes implementaciones y tipos de neuronas para el operador genético de crossover, como se muestra en la figura \ref{grafImplCrossover}. Como en el método de activación, la cruza de SSE2 se ve ligeramente penalizada. En este caso se debe al almacenamiento especial de los pesos para SSE2, que usa bloques de pesos en vez de pesos individuales. La penalización es ligeramente superior para FLOAT.
+Simplemente un detalle de la anterior sin meter la implementación C
+
+*** MODIFICAR Cruce
+
+El cruce para BIT y para SIGN es idéntico, los dos se hacen sobre pesos de un byte en lugar de pesos de 4 bytes (float), por lo que se omite el tipo de neurona bipolar (SIGN) en esta prueba. No hay una diferencia sustancial de rendimiento entre los diferentes tipos de neuronas (FLOAT y BIT) para las implementaciones C y SSE2. La cruza de SSE2 se ve ligeramente penalizada, Como en el método de la activación, aunque no se aprecia muy bien en la gráfica \ref{grafImplCrossover}. En este caso se debe al almacenamiento especial de los pesos para SSE2, que usa bloques de pesos en vez de pesos individuales.
+La implementación CUDA es algo más lenta. Aunque tampoco hay mucha diferencia entre los tipos de neuronas para esta implementación, las de tipo BIT hacen el cruce más rápido.
+
+Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en segundos. Los pesos y otros valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Los vectores de bits que determinan qué pesos tendrán que cruzarse también se determinan aleatoriamente con 1 ó 0. El tamaño de la capa de salida es 100 la mitad de las veces y 150 la otra mitad, haciendose la media. Se permutan los tipos de neuronas FLOAT y SIGN con los tipos de implementación C, SSE2 y CUDA para obtener cada curva. Cada combinación se repite 5000 veces para hacer la media y reducir el ruido.
 
 #+CAPTION:    Método que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).
 #+LABEL:      grafImplCrossover
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Connection_crossover.png]]
+
+TODO fichero Crossover_Impl
+Los dos métodos CUDA (en el antiguo, variando el número de bloques).
+TODO fichero Crossover_CUDA
+
 \newpage
 
-*** Mutación
+*** MODIFICAR Mutación
 
-De la figura \ref{grafImplMutation} se puede deducir que el operador de mutación tiene un coste mínimo y constante respecto al tamaño de la conexión para todas las implementaciones.
+De la figura \ref{grafImplMutation} se puede deducir que el operador de mutación tiene un coste mínimo y constante respecto al tamaño de la conexión (da igual que sea en función de las entradas o las salidas) para todas las implementaciones. La implementación CUDA es más lenta para los dos tipos de neuronas, y los tiempo para estas dos son idénticos. Para CUDA sólo se contempla una implementación, pues todas comparten la misma función de mutación.
+
+Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en segundos. Los pesos y mutaciones se determinan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El tamaño de la capa de salida es 100 la mitad de las veces y 150 la otra mitad, haciendose la media. Se permutan los tipos de neuronas FLOAT y BIT con los tipos de implementación C, SSE2 y CUDA para obtener cada curva. Cada combinación se repite 90000 veces para hacer la media y reducir el ruido.
 
 #+CAPTION:    Método que implementa el operador genético de mutación (Connection::mutate).
 #+LABEL:      grafImplMutation
@@ -1672,9 +2093,9 @@ De la figura \ref{grafImplMutation} se puede deducir que el operador de mutació
 [[./img/Connection_mutate.png]]
 \newpage
 
-*** Olvido
+*** MODIFICAR Olvido
 
-De manera similar a la operación de mutación, el olvido (figura \ref{grafImplReset}) tiene un coste constante y mínimo.
+La gráfica \ref{grafImplReset} se obtiene con unos parámetros iguales a los descritos en la sección \ref{grafImplMutation} y los resultados y conclusiones también coinciden. El operador de olvido tiene un coste constante y mínimo.
 
 #+CAPTION:    Método que implementa el operador genético de olvido (Connection::reset).
 #+LABEL:      grafImplReset
@@ -1682,55 +2103,97 @@ De manera similar a la operación de mutación, el olvido (figura \ref{grafImplR
 [[./img/Connection_reset.png]]
 \newpage
 
-*** Copiar desde y hacia Interfaz
+*** MODIFICAR Mapeos entre Interface y Buffer
 
 Estos métodos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementación concreta escogida. Cada implementación debe mapear correctamente desde la representación genérica (Interfaz) hacia su propia representación interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
+
+Como se especifica en el apartado \ref{disenoRedes}, los Buffers pueden almacenar los estados de capas de neuronas, pero también los pesos de las conexiones. Por ello, además de los tipos FLOAT, BIT y SIGN se incluye el tipo BYTE, que es el que utilizan los pesos para conexiones con capas de entrada BIT ó SIGN. Sin embargo, los tipos BIT y SIGN comparten métodos por lo que se ignora el SIGN. De nuevo, todas las implementaciones CUDA comparten las mismas funciones y no se contemplan por separado.
+
+Esta prueba se ha hecho usando el tamaño del buffer como coordenada X, variándolo con incrementos de 2000 desde 2000 hasta 20000. La coordenada Y es el tiempo en segundos. Los elementos a ser copiados se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20] (1 ó 0 para los BITS). Se permutan los tipos de neuronas FLOAT y BIT con los tipos de implementación C, SSE2 y CUDA para obtener cada curva. Cada combinación se repite 50000 veces para hacer la media y reducir el ruido.
 
 #+CAPTION:    Método que implementa la copia a un Buffer con una implementación determinada desde un Buffer genérico de la clase Interfaz (Buffer::copyFromInterface).
 #+LABEL:      grafImplCopyFrom
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Buffer_copyFromInterface.png]]
 
-En ambos casos se observa que el coste es muy pequeño excepto para la implementación SSE2 de los tipos BIT y SIGN, por razones similares a las de Activación.
+Para el caso en que se copian datos desde la interfaz hacia el Buffer (gráfica \ref{grafImplCopyFrom}), los peores tiempos son con mucha diferencia para el tipo BIT con la implementación SSE2. Igual que en la sección \ref{rendImplActiv}, esto se debe a la colación especial de los bits para este algoritmo.
+
+La implemetación CUDA no es tan lenta como se podría haber esperado. Dentro de esta implementación, el tipo FLOAT es el más lento, después el tipo BYTE y después el BIT. Esto se explica fácilmente, pues los tipo más grandes ocupan también más espacio en memoria y son más datos los que tienen que ser movidos.
+Salvo la excepción ya citada de SSE2 para BIT, esto se cumple en general para todas las implementaciones.
+
+Aunque no se aprecia en la gráfica, la versión CUDA para BIT es igual de rápida que las versiones C y SSE2 para FLOAT. Tampoco se observa bien, pero las versiones C y SSE2 para BYTE también obtienen tiempos similares.
 
 #+CAPTION:    Método que implementa la copia de un Buffer con una implementación determinada a un Buffer genérico de la clase Interfaz (Buffer::copyToInterface).
 #+LABEL:      grafImplCopyTo
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Buffer_copyToInterface.png]]
+
+La gráfica \ref{grafImplCopyTo} se ha generado utilizando los mismos parémetros iguales a la ya comentada y también muestra unos resultados similares. La única diferencia notable es que las versiones CUDA son algo más lentas y la versión CUDA para BIT ya no consigue igualar a la versiones C y SSE2 para FLOAT. Mover datos desde la memoria del dispositivo (GPU) hacia la memoria del huesped (CPU) es más costoso que hacerlo en el sentido contrario.
+
 \newpage
 
-** Rendimiento de los diferentes operadores genéticos
+** REVISAR Rendimiento de los diferentes operadores genéticos
 #+LaTeX: \label{rendOperadores}
 
-En esta sección se cronometran los operadores genéticos. Algunos ya se habían analizado en la sección \ref{rendImpl}, pero a un nivel más bajo, del que dependen las implementaciones. Ahora lo que nos interesa es principalmente el coste de los operadores dependiendo de las diferentes formas de usarlo a más alto nivel. Nos abstraemos por ello de la implementación concreta y usamos la implementación SSE2 para todas estas pruebas.
+Esta sección compara empíricamente el rendimiento computacional de los algoritmos de selección descritos en el apartado \ref{disenoGeneSel} del diseño de los algortimos genéticos.
+
+En esta sección se cronometran los operadores genéticos descritos en el capitulo \ref{disenoGene}. Algunos ya se habían analizado en la sección \ref{rendImpl}, pero a un nivel más bajo, del que dependen las implementaciones. Ahora lo que nos interesa es principalmente el coste de los operadores dependiendo de las diferentes formas de usarlo a más alto nivel. Nos abstraemos por ello de la implementación paralela concreta y usamos la implementación C de referencia para todas estas pruebas. Todas las pruebas de esta sección se realizan usando la máquina descrita en \ref{rendMaqLaptop}.
 
 *** Selección
 
-Aunque no se aprecia bien en la figura \ref{rendGenSelect}, las selecciones de ruleta y truncado tienen un coste mínimo y bastante independiente tanto del tamaño total de la población como del número de individuos a seleccionar en comparación con los otros dos esquemas de selección. La selección por ranking es la más costosa y además la que más depende del tamaño total de la población. La selección por torneo es algo menos costosa y depende más del tamaño del torneo que del tamaño total de la población.
+Esta sección compara empriricamente el rendimiento computacional de los algoritmos de selección descritos en el apartado \ref{disenoGeneSel} del diseño de los algortimos genéticos.
+
+Esta prueba se ha realizado usando el número de individuos a seleccionar como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. La coordenada Y es el tiempo en segundos. Se permutan dos tamaños totales de población (400 y 500) con los tipos de selección ROULETTE_WHEEL, RANKING, TOURNAMENT y TRUNCATION para obtener las diferentes curvas. Para el tipo de selección TOURNAMENT, se cosideran los tamaños de torneo 5, 15 y 25. Cada combinación se repite 50 veces para hacer la media y reducir el ruido. Para esta prueba se ha creado una tarea (hereda de la clase Task) especial que asigna el fitness a los individuos aleatoriamente y que genera individuos vacíos. Así se minimizan todos los tiempos que no tienen que ver con la selección. Por tanto, a esta prueba no le afecta en absoluto la implementación utilizada.
 
 #+CAPTION:    Rendimiento de los distintos operadores de selección en función del número de individuos a seleccionar. Cada operador se prueba con tamaños totales de población 400 y 500. Además, para la selección por torneo se muestran los resultados con varios tamaños de torneo.
 #+LABEL:      rendGenSelect
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Population_Selection.png]]
+
+La selección por ranking es la más costosa y además la que más depende del tamaño total de la población. 
+
+La selección por torneo es algo menos costosa y depende más del tamaño del torneo que del tamaño total de la población. Aunque cuando se tienen que seleccionar muchos individuos un tamaño de población más grande también penaliza ligeramente a la selcción por torneo.
+
+La selección de ruleta también tiene un coste muy bajo y poco dependiente del número de individuos a seleccionar en comparación con los esquemas ranking y torneo. Aunque tampoco se aprecia en la gráfica, la selección por ruleta sí resulta penalizada con un tamaño de población mayor.
+
+A pesar que que tampoco se aprecia bien en la figura \ref{rendGenSelect}, la selección de truncado tiene un coste mínimo y prácticamente constante tanto del tamaño total de la población como del número de individuos a seleccionar. 
+
 \newpage
 
-*** Cruza
+*** Cruce
 
-figura \ref{rendGenCruza}
+Esta sección compara empíricamente el rendimiento computacional de los algoritmos de cruce descritos en los apartados \ref{disenoGeneCruz} y \ref{disenoGeneNiv} del diseño de los algortimos genéticos.
 
-Como muestra la figura \ref{rendGenCruza} el nivel de cruza más costoso es el propio peso, el más barato es el nivel de capa completa y los niveles de neurona tienen rendimientos intermedios y parecidos independientemente de cómo se interprete qué pesos pertenecen a una neurona (si los pesos de entrada a la neurona o los pesos de salida de la misma).
+Esta prueba se ha realizado usando un tamaño como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. Este tamaño es el tamaño de las capas entradas y el de las internas. La coordenada Y es el tiempo en segundos. Se usan dos capas de entrada a la red (iguales). Los pesos se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El número de capas internas es 1 la mitad de las veces y 2 la otra mitad, haciendose la media. Se usa el tipo de neurona FLOAT la mitad de las veces y BIT la otra mitad, haciéndose la media. Para obtener cada curva, se usan los tipos de cruce UNIFORM, MULTIPOINT y PROPORTIONAL. Es primero se prueba con las probabilidad de cruce de 0.2 y 0.4. El segundo tipo se prueba con 1 y 6 puntos de cruce. Para el algortimo PROPORTIONAL se usa siempre un fitness de 1 para un individuo y 1.5 para el otro. Cada combinación se repite 50 veces para hacer la media y reducir el ruido.
 
-En general, parece que el cruce uniforme es más costoso que el multi-punto y también es más costoso cuanto más se acerque al 50\% la probabilidad de coger el peso de un padre o de otro. El algoritmo multi-punto, sin embargo, no presenta diferencias de rendimiento significativas para 1 punto o 6 puntos de corte.
+Como muestra la figura \ref{rendGenCruza} el nivel de cruza más costoso es el propio peso, el más barato es el nivel de capa completa y los niveles de neurona tienen rendimientos intermedios y parecidos independientemente de cómo se interprete qué pesos pertenecen a una neurona (si los pesos de entrada a la neurona o los pesos de salida de la misma). 
 
 #+CAPTION:    Rendimiento de los distintos operadores genéticos de cruza en función del tamaño de las capas de neuronas internas.
 #+LABEL:      rendGenCruza
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Individual_crossover.png]]
+
+Como norma general, observamos que el cruce unifrome es siempre más costoso cuanto más se acerque la probabilidad de cruce al 50% y que el cruce multi-punto siempre es más lento cuantos más puntos de corte tenga, lo cuál, por otra parte, no es en modo alguno sorprendente. Sin embargo, el cruce multi-punto no parece muy sensible al número de puntos de corte, aunque afecta más cuanto mayor sea el tamaño de la red-individuo, más afecta el número de cortes al rendimiento. El cruce proporcional siempre es ligeramente más lento que el unifrome con probabilidad 0.4 (aunque con tiempos muy cercanos). La razón es que la probabilidad de cruce para este algoritmo se calcula con la expresión =fitness / (fitness + other_fitness)= y con los parámetros escogidos siempre resulta en ~1 / (1 + 1.5) = 0.4~.
+
+Para el cruce a nivel de peso, el más lento por tener los genes más pequeños y numerosos, los algoritmos más lentos son el uniforme con una probabilidad del 40% y el proporcional, después el uniforme con probabilidad 0.2 y los más rápidos son los muulti-punto.
+
+Con el cruce a nivel de capa, ocurre lo contrario: el uniforme con probabilidad 0.2 se mantiene en el medio, pero ahora los algoritmos más rápidos son el uniforme con una probabilidad del 40% y el proporcional, mientras que los multi-punto son más lentos.
+
+El uniforme con una probabilidad del 20% es igual de rápido para el nivel de neurona independientemente de si se la trata de forma invertida o no. Es el más rápido para este nivel de cruce. Para el resto de esquemas de cruza, el nivel de neurona es más lento que el de neurona invertida.
+
+Para en nivel de neurona sin invertir, el multi-punto con un sólo corte es el más lento y todos los demás, el multi-punto con 6 cortes, el uniforme 40% y el proporcional obtienen tiempos iguales.
+
+Para el nivel de neurona invertida, los algoritmos más lentos son el uniforme con una probabilidad del 40% y el proporcional, después el multi-punto con un sólo corte, después el multi-punto de 6 cortes y el más rápido, como ya se ha dicho, es el uniforme con una probabilidad de 0.2.
+
 \newpage
-
 *** Mutación
+#+LaTeX: \label{rendOperadoresMut}
 
-Según la figura \ref{rendGenMutation}, ambos tipos de mutación son más costosos cuánto mayor es la probabilidad, tal y cómo era de esperar, pues más mutaciones son más escrituras. Además, la mutación probabilística es en general más costosa que la mutación determinística (un número constante de mutaciones por individuo) salvo cuando la probabilidad es muy grande (muchas mutaciones por individuo). Aunque la interfaz determinística es más rápida, también se hace más lenta comprativamente cuanto mayor es la probabilidad. La explicación es que la opción probabilística tiene un coste fijo elevado (un número aleatorio por gen) mientras que en la determinística el coste sube con el número de mutaciones (varios números aleatorios por cada mutación a realizar).
+Esta sección compara empíricamente el rendimiento computacional de los modos de mutación descritos en el apartado \ref{disenoGeneMut} del diseño de los algortimos genéticos.
+
+Esta prueba se ha realizado usando un tamaño como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. Este tamaño es el tamaño de las capas entradas y el de las internas. La coordenada Y es el tiempo en segundos. Se usan dos capas de entrada a la red (iguales). Los pesos se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El número de capas internas es 1 la mitad de las veces y 2 la otra mitad, haciendose la media. Se usa el tipo de neurona FLOAT la mitad de las veces y BIT la otra mitad, haciéndose la media. Para obtener cada curva, se permutan los algortimos PER_INDIVIDUAL y PROBABILISTIC con 4 probabilidades: 0.1, 0.2, 0.3 y 0.4. Para el PROBABILISTIC la probabilidad se toma directamente como parámetro. Para el algoritmo PER_INDIVIDUAL, el número de mutuaciones se calcula multiplicando el número total de genes del individuo por la probabilidad. Así, se espera que los dos algoritmos obtengan un número similar de mutaciones por individuo para la misma probabilidad parámetro.
+
+Según la figura \ref{rendGenMutation}, ambos tipos de mutación son más costosos cuánto mayor es la probabilidad, tal y cómo era de esperar, pues más mutaciones son más escrituras. Además, la mutación probabilística es en general más costosa que la mutación determinística (un número constante de mutaciones por individuo, PER_INDIVIDUAL) salvo cuando la probabilidad parámetro es muy grande (muchas mutaciones por individuo). Aunque la interfaz determinística es más rápida, también se hace más lenta comparativamente cuanto mayor es la probabilidad. La explicación es que la opción probabilística tiene un coste fijo elevado (un número aleatorio por gen) mientras que en la determinística el coste sube con el número de mutaciones (varios números aleatorios por cada mutación a realizar).
 
 #+CAPTION:    Rendimiento de los distintos operadores genéticos de mutación para diferentes probabilidades. Para el operador no probabilístico, se ha calculado el número de mutaciones por individuo multiplicando la probabilidad por el número de genes (pesos y umbrales), para poder compararlo en igualdad con el operador probabilístico en cuanto al número de escrituras en los pesos.
 #+LABEL:      rendGenMutation
@@ -1739,17 +2202,22 @@ Según la figura \ref{rendGenMutation}, ambos tipos de mutación son más costos
 \newpage
 
 *** Olvido
+#+LaTeX: \label{rendOperadoresOlv}
 
-El nuevo operador de olvido/reset presenta otra vez unos resultados similares a los de la mutación y se pueden extraer conclusiones semejantes como muestra la figura \ref{rendGenOlvido}.
+Esta sección compara empíricamente el rendimiento computacional de los modos de olvido descritos en el apartado \ref{disenoGeneMut} del diseño de los algortimos genéticos. Esta prueba utiliza unos parámetros semejantes a la anterior (sección \ref{rendOperadoresMut}).
+El nuevo operador de olvido/reset presenta otra vez unos resultados similares a los de la mutación y se pueden extraer las mismas conclusiones como muestra la figura \ref{rendGenOlvido}.
 
 #+CAPTION:    Rendimiento de los distintas interfaces del nuevo operador genético de olvido para diferentes probabilidades. Para el operador no probabilístico, se ha calculado el número de mutaciones por individuo multiplicando la probabilidad por el número de genes (pesos y umbrales), para poder compararlo en igualdad con el operador probabilístico en cuanto al número de escrituras en los pesos.
 #+LABEL:      rendGenOlvido
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Individual_reset.png]]
 \newpage
+
 * MODIFICAR Resultados: Aprendizaje
 #+LaTeX: \label{aprendizaje}
-En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación.
+
+En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación. Nos abstraemos por ello de la implementación concreta y usamos la SSE2 para todas las pruebas del capítulo. Se elige esa implementación por ser la más rápida usando la máquina descrita en \ref{rendMaqLaptop} y porque no se miden tiempos sino generaciones, por lo que la implementación paralela no va a afectar al resultado.
+
 ** Comparación entre las distintas funciones de activación
 #+LaTeX: \label{aprendFunc}
 
@@ -1823,7 +2291,7 @@ Para la tarea And, también con poca diferencia, las funciones bipolares son la 
 \newpage
 *** XOR
 
-De nuevo observamos más diferencias en la tarea Xor (figura \ref{aprenDiscretXor}). Como en AND, la opciones bipolares son superiores durante todo el aprendizaje. Seguidas de la activación linear, que se va haciendo menos efectiva conforme avanza el aprendizaje, cuando es superada por las versiones binarias. Tanto como para las binarias como para las bipolares, se aprecia una diferencia mínima en favor de las versiones cuyos pesos se alamacenan como floats, pero que no compensan las grandes diferencias de rendimiento comentadas en la sección \ref{rendImplAcumul}.
+De nuevo observamos más diferencias en la tarea Xor (figura \ref{aprenDiscretXor}). Como en AND, la opciones bipolares son superiores durante todo el aprendizaje. Seguidas de la activación linear, que se va haciendo menos efectiva conforme avanza el aprendizaje, cuando es superada por las versiones binarias. Tanto como para las binarias como para las bipolares, se aprecia una diferencia mínima en favor de las versiones cuyos pesos se alamacenan como floats, pero que no compensan las grandes diferencias de rendimiento comentadas en la sección TODO cambiar referencia\ref{rendImplAcumulEnt}.
 
 #+CAPTION:    Aprendizaje de la tarea lógica Xor con los distintos tipos de neuronas (Binarias, bipolares y lineales).
 #+LABEL:      aprenDiscretXor
