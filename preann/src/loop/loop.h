@@ -38,6 +38,7 @@ public:
     friend class JoinEnumLoop;
     virtual ~Loop();
 
+    void setKey(string key);
     string getKey();
 
     virtual void addInnerLoop(Loop* innerLoop);

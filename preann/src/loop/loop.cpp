@@ -28,6 +28,10 @@ Loop::~Loop()
     }
 }
 
+void Loop::setKey(string key)
+{
+    tKey = key;
+}
 string Loop::getKey()
 {
     return tKey;
