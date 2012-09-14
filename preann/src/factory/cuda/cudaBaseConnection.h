@@ -31,6 +31,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
             cuda_crossover(this->getDataPointer(), other->getDataPointer(),
                            (unsigned*) cudaBitBuffer->getDataPointer(), tSize, bufferTypeTempl);
+
+            delete(cudaBitBuffer);
         }
 
         virtual void _mutateWeigh(unsigned pos, float mutation)
