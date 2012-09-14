@@ -101,19 +101,24 @@ OBJ += $(FACT_OBJ)
 .PHONY: all clean checkdirs cpp sse2 cuda cuda_emu all_emu cpp_64 sse2_64 cuda_64 all_64
 .SECONDARY:
 
-cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ) 
+cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
+	./bin/chronoCrossover.exe $(OUTPUT_DIR)
+	./bin/chronoCalculateAndAdd.exe $(OUTPUT_DIR)
+	./bin/chronoActivation.exe $(OUTPUT_DIR)
+	./bin/chronoInterface.exe $(OUTPUT_DIR)
+	./bin/chronoMutations.exe $(OUTPUT_DIR)
+	cat /proc/cpuinfo > $(OUTPUT_DIR)cpu.txt
+	lspci -vv > $(OUTPUT_DIR)device.txt
+	cat /proc/meminfo > $(OUTPUT_DIR)mem.txt
+#After compilation, go to NVIDIA_GPU_Computing_SDK/C/bin/linux/release in
+#the user’s home directory and run ./deviceQuery	 
 #	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe $(CURDIR)/
 #	./bin/testConnections.exe
 #	./bin/testLayers.exe $(CURDIR)/
 #	./bin/testPlot.exe $(OUTPUT_DIR)
-#	./bin/chronoBuffers.exe $(OUTPUT_DIR)
-	./bin/chronoConnections.exe $(OUTPUT_DIR)
-#	./bin/chronoBlockSizes.exe $(OUTPUT_DIR)
-#	./bin/chronoFunctions.exe $(OUTPUT_DIR)
-#	./bin/chronoCalculateAndAdd.exe $(OUTPUT_DIR)
-#	./bin/chronoIndividual.exe $(OUTPUT_DIR)
-#	./bin/chronoPopulation.exe $(OUTPUT_DIR)
+#	./bin/chronoGenIndividual.exe $(OUTPUT_DIR)
+#	./bin/chronoGenPopulation.exe $(OUTPUT_DIR)
 #	./bin/learnBufferType.exe $(OUTPUT_DIR)
 #	./bin/learnFunctionTypes.exe $(OUTPUT_DIR)
 #	./bin/learnMutation.exe $(OUTPUT_DIR)
@@ -121,13 +126,6 @@ cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EX
 #	./bin/learnSelection.exe $(OUTPUT_DIR)
 #	./bin/learnCrossover.exe $(OUTPUT_DIR)
 #	./bin/learnTasks.exe $(OUTPUT_DIR)
-#	./bin/chronoConnectionsFiles.exe
-#	./bin/chronoBinaryTasks.exe 
-#	./bin/chronoReversi.exe
-#	./bin/plotReversiSelection.exe
-#	./bin/plotBinaryTasks.exe
-#	./bin/plotCombBinaryTasks.exe
-#	./bin/plotTimeBinaryTasks.exe
 #	./bin/testMemoryLosses.exe > $(LOG_DIR)testMemoryLosses.log
 #	./bin/testBuffers.exe > $(LOG_DIR)testBuffers.log
 #	./bin/testConnections.exe > $(LOG_DIR)testConnections.log
