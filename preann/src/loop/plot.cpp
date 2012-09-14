@@ -32,6 +32,16 @@ Plot::~Plot()
     MemoryManagement::free(plotData.yArray);
 }
 
+void Plot::setLabelY(string yLabel)
+{
+    plotData.yLabel = yLabel;
+}
+void Plot::setLabelX(string xLabel)
+{
+    plotData.xToPlot->setKey(xLabel);
+    plotData.xLabel = xLabel;
+}
+
 void Plot::validateLinesLoop(Loop* linesLoop)
 {
     // validations
@@ -51,6 +61,11 @@ void Plot::resetRangeX(float min, float max, float inc)
     plotData.xArray = plotData.xToPlot->toArray();
     plotData.yArray = plotData.xToPlot->toArray();
     plotData.arraySize = plotData.xToPlot->getNumBranches();
+}
+void Plot::resetRangeX(string xLabel, float min, float max, float inc)
+{
+    setLabelX(xLabel);
+    resetRangeX(min, max, inc);
 }
 
 // * BASIC PLOTTING FUNCTIONS

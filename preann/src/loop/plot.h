@@ -49,7 +49,10 @@ public:
     Plot(string plotPath, RangeLoop* xToPlot, string yLabel);
     virtual ~Plot();
 
+    void setLabelY(string yLabel);
+    void setLabelX(string xLabel);
     void resetRangeX(float min, float max, float inc);
+    void resetRangeX(string xLabel, float min, float max, float inc);
 
     // custom plots
     void genericPlot(std::string title, GenericPlotFillAction* fillArrayAction, Loop* linesLoop);
