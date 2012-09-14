@@ -116,7 +116,9 @@ void JoinEnumLoop::print()
 
     for (int i = 0; i < tValueVector.size(); ++i) {
         cout << "Branch " << Enumerations::toString(tEnumType, tValueVector[i]) << endl;
-        tInnerLoops[i]->print();
+        if (tInnerLoops[i] != NULL){
+            tInnerLoops[i]->print();
+        }
         cout << "----------------" << endl;
     }
     cout << endl;
