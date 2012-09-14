@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
-        EnumLoop linesLoop(Enumerations::enumTypeToString(ET_IMPLEMENTATION), ET_IMPLEMENTATION, 2, IT_C,
-                           IT_SSE2);
+//        EnumLoop linesLoop(ET_IMPLEMENTATION);
+        EnumLoop linesLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2);
         linesLoop.print();
 
         EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER, 3,
