@@ -21,13 +21,13 @@ float chronoCalculateAndAddTo(ParametersMap* parametersMap, unsigned repetitions
     START
 
 #ifdef CUDA_IMPL
-    Cuda_Threads_Per_Block = parametersMap->getNumber("cuda block size");
+    Cuda_Threads_Per_Block = parametersMap->getNumber(CUDA_BLOCK_SIZE);
 #endif
 
     Buffer* results = Factory::newBuffer(outputSize, BT_FLOAT, connection->getImplementationType());
     START_CHRONO
-        connection->calculateAndAddTo(results);
-    STOP_CHRONO
+            connection->calculateAndAddTo(results);
+        STOP_CHRONO
 
     delete (results);
 
@@ -38,18 +38,18 @@ float chronoActivation(ParametersMap* parametersMap, unsigned repetitions)
 {
 
 #ifdef CUDA_IMPL
-    Cuda_Threads_Per_Block = parametersMap->getNumber("cuda block size");
+    Cuda_Threads_Per_Block = parametersMap->getNumber(CUDA_BLOCK_SIZE);
 #endif
 
     Buffer* output = Dummy::buffer(parametersMap);
     Buffer* results = Factory::newBuffer(output->getSize(), BT_FLOAT, output->getImplementationType());
     Connection* thresholds = Factory::newConnection(results, 1);
 
-    FunctionType functionType = (FunctionType) parametersMap->getNumber(
-            Enumerations::enumTypeToString(ET_FUNCTION));
+    FunctionType functionType =
+            (FunctionType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_FUNCTION));
     START_CHRONO
-        thresholds->activation(output, functionType);
-    STOP_CHRONO
+            thresholds->activation(output, functionType);
+        STOP_CHRONO
 
     delete (thresholds);
     delete (results);
@@ -62,16 +62,14 @@ float chronoCrossover(ParametersMap* parametersMap, unsigned repetitions)
 {
     START
 
-#ifdef CUDA_IMPL
-    Cuda_Threads_Per_Block = parametersMap->getNumber("cuda block size");
-#endif
+    Cuda_Threads_Per_Block = parametersMap->getNumber(CUDA_BLOCK_SIZE);
 
     Connection* other = Factory::newConnection(connection->getInput(), outputSize);
     Interface bitVector(connection->getSize(), BT_BIT);
     bitVector.random(2);
     START_CHRONO
-        connection->crossover(other, &bitVector);
-    STOP_CHRONO
+            connection->crossover(other, &bitVector);
+        STOP_CHRONO
 
     delete (other);
 
@@ -91,9 +89,7 @@ int main(int argc, char *argv[])
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
 
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_CUDA_OUT);
-//        EnumLoop linesLoop(ET_IMPLEMENTATION, 4, IT_C, IT_CUDA, IT_CUDA_REDUC, IT_CUDA_INV);
-
-        ExpLoop linesLoop("cuda block size", 16, 513, 2);
+        ExpLoop linesLoop(CUDA_BLOCK_SIZE, 16, 513, 2);
 
         linesLoop.addInnerLoop(new EnumLoop(ET_BUFFER, 3, BT_FLOAT, BT_BIT, BT_SIGN));
 
