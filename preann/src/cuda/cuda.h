@@ -9,6 +9,7 @@
 #define CUDA_MAX_SHARED_SIZE ( 16384 - 64 )
 
 static unsigned Cuda_Threads_Per_Block = 256;
+const string CUDA_BLOCK_SIZE = "cuda block size";
 
 // basic.cu
 void checkCUDAError(const char *msg);
