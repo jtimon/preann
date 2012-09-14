@@ -74,18 +74,6 @@ unsigned testSaveLoad(ParametersMap* parametersMap)
     END
 }
 
-unsigned testClone(ParametersMap* parametersMap)
-{
-    START
-
-    Buffer* copy = buffer->clone();
-    differencesCounter += Test::assertEquals(buffer, copy);
-
-    delete (copy);
-
-    END
-}
-
 int main(int argc, char *argv[])
 {
     Chronometer total;
@@ -106,7 +94,6 @@ int main(int argc, char *argv[])
 
         loop.print();
 
-        test.test(testClone, "Buffer::clone", &loop);
         test.test(testCopyFromInterface, "Buffer::copyFromInterface", &loop);
         test.test(testCopyToInterface, "Buffer::copyToInterface", &loop);
         test.test(testSaveLoad, "Buffer::saveLoad", &loop);

@@ -56,7 +56,6 @@ public:
     void copyToInterface(Interface* interface);
     virtual void copyFrom(Buffer* buffer);
     virtual void copyTo(Buffer* buffer);
-    virtual Buffer* clone();
 
     void* getDataPointer();
     unsigned getSize();

@@ -67,13 +67,6 @@ void Buffer::copyTo(Buffer* buffer)
     delete (interface);
 }
 
-Buffer* Buffer::clone()
-{
-    Buffer* clone = Factory::newBuffer(this, getImplementationType());
-    copyTo(clone);
-    return clone;
-}
-
 void Buffer::save(FILE* stream)
 {
     Interface* interface = toInterface();
