@@ -38,20 +38,6 @@ using namespace std;
 #define ENUM_VECTOR(_vector, _values...) unsigned _array[] = {_values}; std::vector<unsigned> _vector; _vector.insert(_vector.end(), _array, _array + (sizeof(_array) / sizeof(_array[0])))
 //#define FOR_EACH(_type,_iter,_coll) for (_type::iterator _iter = _coll.begin(); _iter != _coll.end(); ++_iter)
 
-//#include <stdexcept>
-        //TODO std::runtime_error // #include <stdexcept> //
-//        catch (exception& e)
-//          {
-//            cerr << "exception caught: " << e.what() << endl;
-//          }
-
-// TODO explorar esta posibilidad en vez de user punteros a las variables
-template<class T>
-    T& ptrToType(void* ptr)
-    {
-        return *((T*)ptr);
-    }
-
 template<class T>
     std::string to_string(const T& t)
     {
