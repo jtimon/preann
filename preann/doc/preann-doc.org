@@ -12,14 +12,7 @@
 #+LATEX_HEADER: \usepackage{chngcntr}
 #+LATEX_HEADER: \usepackage{hyperref}
 #+LATEX_HEADER: \usepackage{import}
-#+LATEX_HEADER: \hypersetup{
-#+LATEX_HEADER:     colorlinks,%
-#+LATEX_HEADER:     citecolor=green,%
-#+LATEX_HEADER:     filecolor=black,%
-#+LATEX_HEADER:     linkcolor=blue,%
-#+LATEX_HEADER:     urlcolor=blue
-#+LATEX_HEADER: }
-#+LaTeX_HEADER: \newcommand{\murl}[2]{\url{#1://#2}}
+#+LATEX_HEADER: \hypersetup{colorlinks,citecolor=green,filecolor=black,linkcolor=blue,urlcolor=blue}
 #+OPTIONS:     toc:nil H:5
 #+BIND: org-export-latex-title-command ""
 
@@ -31,6 +24,8 @@
 \setcounter{secnumdepth}{5}
 \counterwithin{figure}{section}
 \setcounter{tocdepth}{5}
+
+\newcommand{\murl}[2]{\url{#1://#2}}
 
 \newcommand{\mail}[1][jtimonmv@gmail.com]{%
      \href{mailto:#1} {#1}
@@ -345,7 +340,7 @@ Al nivel más alto, la clase que utilizaremos es NeuralNet, que implementa una r
 #+LaTeX: \label{disenoGenetic}
 ** HACER Utilidades para la experimentación
 #+LaTeX: \label{disenoLoop}
-* REVISAR Dise\~no del algoritmo gen\'etico 
+* HECHO Dise\~no del algoritmo gen\'etico 
 #+LaTeX: \label{disenoGene}
 ** Funcionamiento general
 #+LaTeX: \label{disenoGeneFunc}
@@ -760,7 +755,7 @@ Por simplicidad, los trozos de código mostrados tratarán exclusivamente la ver
 *** Modelo de programación
 #+LaTeX: \label{disenoParalCUDAprog}
 
-C para CUDA es una extensión de C que permite al programador difinir funciones, llamadas núcleos (kernels) que cuando son llamadas se ejecutan N veces por N hilos CUDA diferentes, en vez de una sola vez como las funciones C habituales\cite{progGuide2009}. Para definir un kernel se usa el especificador de declaración =__global__= y el número de hilos CUDA para cada llamada se especifica con la nueva sintaxis ~<<<...>>>~ del siguiente ejemplo:
+C para CUDA es una extensión de C que permite al programador definir funciones, llamadas kernels (núcleos) que cuando son llamadas se ejecutan N  veces por N hilos CUDA diferentes, en vez de una sola vez como las funciones C habituales\cite{progGuide2009}. Para definir un kernel se usa el especificador de declaración =__global__= y el número de hilos CUDA para cada llamada se especifica con la nueva sintaxis (TODO arreglar esto) =< < <...> > >= del siguiente ejemplo:
 
 #+begin_src c
 // Definicion del Nucleo
@@ -776,7 +771,7 @@ int main()
 }
 #+end_src
 
-A cada uno de los hilos que ejecuta el kernel se le da un identificador de hilo único que es accesible desde el kernel con la variable interna threadIdx. El siguiente código de ejemplo suma dos vectores A y B de tamaño N y guarda el resultado en el vector C:
+A cada uno de los hilos que ejecuta el kernel se le da un identificador de hilo único que es accesible desde el kernel con la variable interna =threadIdx=. El siguiente código de ejemplo suma dos vectores A y B de tamaño N y guarda el resultado en el vector C:
 
 #+begin_src c
 // Definicion del Nucleo
@@ -816,7 +811,7 @@ int main()
 
 El índice del hilo y su ID se relacionan de manera directa: para un bloque unidimensional, son iguales; para un bloque bidimensional de tamaño (Dx, Dy), el ID del hilo en con índice (x, y) es (x + y Dx); para uno tridimensional de tamaño (Dx, Dy, Dz), el ID del hilo con índice (x, y, z) es (x + y Dx + z Dx Dy).
 
-Los hilos dentro de un mismo bloque pueden cooperar entre ellos compartiendo datos a través de la memoria compartida y sincronizando su ejecución para coordinar el acceso a memoria. Para ser más precisos, uno puede especificar puntos de sincronización en el núcleo llamando a la función interna =__syncthreads()= que actua como una barrera que hace esperar a todos los hilos del bloque antes de que ninguno pueda seguir. 
+Los hilos dentro de un mismo bloque pueden cooperar entre ellos compartiendo datos a través de la memoria compartida y sincronizando su ejecución para coordinar el acceso a memoria. Para ser más precisos, uno puede especificar puntos de sincronización en el kernel llamando a la función interna =__syncthreads()= que actua como una barrera que hace esperar a todos los hilos del bloque antes de que ninguno pueda seguir. 
 
 Para una cooperación eficiente, se espera que la memoria compartida sea de baja latencia y cercana al núcleo del procesador, como una caché de primer nivel, también que =__syncthreads()= sea ligera y todos los hilos de un bloque deben estar en el mismo núcleo de procesamiento. Por ello el número de hilos por bloque está restringido por los recursos limitados de memoria de un núcleo de procesamiento. En GPUs actuales un bloque de hilos puede contener hasta 512 hilos.
 
@@ -827,7 +822,7 @@ Sin embargo, un kernel puede ser ejecutado por múltiples bloques de hilos simil
 #+ATTR_LaTeX: scale=0.6
 [[./img/gridBlockThreads.jpg]]
 
-La dimensiones del grid se especifica con el primer parámetro específico del kernel entre la sintaxis ~<<<...>>>~. Cada bloque dentro del grid se puede identicar con un índice unidimensional o bidimensional a través de la variable interna blockIdx. Las dimensiones de el bloque de hilos es accesible desde el kernel usando la variable interna blockDim. El código de ejemplo anterior quedaría así:
+La dimensiones del grid se especifica con el primer parámetro específico del kernel entre la sintaxis (TODO arreglar esto) ~< < <...> > >~. Cada bloque dentro del grid se puede identicar con un índice unidimensional o bidimensional a través de la variable interna blockIdx. Las dimensiones de el bloque de hilos es accesible desde el kernel usando la variable interna blockDim. El código de ejemplo anterior quedaría así:
 
 #+begin_src c
 // Definicion del Nucleo
@@ -1049,17 +1044,23 @@ NVIDIA dejó de mantener el modo emulado para el compilador nvcc a partir de la 
 #+begin_src c
     // ...
     // Reducción paralela de los resultados parciales en memoria compartida
-#ifndef __DEVICE_EMULATION__
-    if (tid < 32)
-#endif
-    {
-        sdata[tid] += sdata[tid + 32]; EMUSYNC;
-        sdata[tid] += sdata[tid + 16]; EMUSYNC;
-        sdata[tid] += sdata[tid +  8]; EMUSYNC;
-        sdata[tid] += sdata[tid +  4]; EMUSYNC;
-        sdata[tid] += sdata[tid +  2]; EMUSYNC;
-        sdata[tid] += sdata[tid +  1]; EMUSYNC;
+#if __DEVICE_EMULATION__
+    if (tid < 32) {sdata[tid] += sdata[tid + 32];} __syncthreads();
+    if (tid < 16) {sdata[tid] += sdata[tid + 16];} __syncthreads();
+    if (tid < 8) {sdata[tid] += sdata[tid + 8];} __syncthreads();
+    if (tid < 4) {sdata[tid] += sdata[tid + 4];} __syncthreads();
+    if (tid < 2) {sdata[tid] += sdata[tid + 2];} __syncthreads();
+    if (tid < 1) {sdata[tid] += sdata[tid + 1];} __syncthreads();
+#else
+    if (tid < 32) {
+        if (blockSize >= 64) sdata[tid] += sdata[tid + 32];
+        if (blockSize >= 32) sdata[tid] += sdata[tid + 16];
+        if (blockSize >= 16) sdata[tid] += sdata[tid + 8];
+        if (blockSize >= 8) sdata[tid] += sdata[tid + 4];
+        if (blockSize >= 4) sdata[tid] += sdata[tid + 2];
+        if (blockSize >= 2) sdata[tid] += sdata[tid + 1];
     }
+#endif
     // ...
 }
 #+end_src
@@ -1082,18 +1083,36 @@ Así quedaría la parte de código dedicada a la reducción paralelizada con los
     if (blockSize >= 128) { 
         if (tid <  64) { sdata[tid] += sdata[tid +  64]; } __syncthreads(); 
     }
-    
-#ifndef __DEVICE_EMULATION__
-    if (tid < 32)
-#endif
-    {
-        if (blockSize >=  64) { sdata[tid] += sdata[tid + 32]; EMUSYNC; }
-        if (blockSize >=  32) { sdata[tid] += sdata[tid + 16]; EMUSYNC; }
-        if (blockSize >=  16) { sdata[tid] += sdata[tid +  8]; EMUSYNC; }
-        if (blockSize >=   8) { sdata[tid] += sdata[tid +  4]; EMUSYNC; }
-        if (blockSize >=   4) { sdata[tid] += sdata[tid +  2]; EMUSYNC; }
-        if (blockSize >=   2) { sdata[tid] += sdata[tid +  1]; EMUSYNC; }
+
+#if __DEVICE_EMULATION__
+    if (blockSize >= 64) {
+        if (tid < 32) {sdata[tid] += sdata[tid + 32];} __syncthreads();
     }
+    if (blockSize >= 32) {
+        if (tid < 16) {sdata[tid] += sdata[tid + 16];} __syncthreads();
+    }
+    if (blockSize >= 16) {
+        if (tid < 8) {sdata[tid] += sdata[tid + 8];} __syncthreads();
+    }
+    if (blockSize >= 8) {
+        if (tid < 4) {sdata[tid] += sdata[tid + 4];} __syncthreads();
+    }
+    if (blockSize >= 4) {
+        if (tid < 2) {sdata[tid] += sdata[tid + 2];} __syncthreads();
+    }
+    if (blockSize >= 2) {
+        if (tid < 1) {sdata[tid] += sdata[tid + 1];} __syncthreads();
+    }
+#else
+    if (tid < 32) {
+        if (blockSize >= 64) sdata[tid] += sdata[tid + 32];
+        if (blockSize >= 32) sdata[tid] += sdata[tid + 16];
+        if (blockSize >= 16) sdata[tid] += sdata[tid + 8];
+        if (blockSize >= 8) sdata[tid] += sdata[tid + 4];
+        if (blockSize >= 4) sdata[tid] += sdata[tid + 2];
+        if (blockSize >= 2) sdata[tid] += sdata[tid + 1];
+    }
+#endif
     // ...
 }
 #+end_src
@@ -1133,18 +1152,35 @@ __global__ void ReductionKernel(float* inputPtr, unsigned input_size,
         if (tid <  64) { sdata[tid] += sdata[tid +  64]; } __syncthreads(); 
     }
     
-#ifndef __DEVICE_EMULATION__
-    if (tid < 32)
-#endif
-    {
-        if (blockSize >=  64) { sdata[tid] += sdata[tid + 32]; EMUSYNC; }
-        if (blockSize >=  32) { sdata[tid] += sdata[tid + 16]; EMUSYNC; }
-        if (blockSize >=  16) { sdata[tid] += sdata[tid +  8]; EMUSYNC; }
-        if (blockSize >=   8) { sdata[tid] += sdata[tid +  4]; EMUSYNC; }
-        if (blockSize >=   4) { sdata[tid] += sdata[tid +  2]; EMUSYNC; }
-        if (blockSize >=   2) { sdata[tid] += sdata[tid +  1]; EMUSYNC; }
+#if __DEVICE_EMULATION__
+    if (blockSize >= 64) {
+        if (tid < 32) {sdata[tid] += sdata[tid + 32];} __syncthreads();
     }
-
+    if (blockSize >= 32) {
+        if (tid < 16) {sdata[tid] += sdata[tid + 16];} __syncthreads();
+    }
+    if (blockSize >= 16) {
+        if (tid < 8) {sdata[tid] += sdata[tid + 8];} __syncthreads();
+    }
+    if (blockSize >= 8) {
+        if (tid < 4) {sdata[tid] += sdata[tid + 4];} __syncthreads();
+    }
+    if (blockSize >= 4) {
+        if (tid < 2) {sdata[tid] += sdata[tid + 2];} __syncthreads();
+    }
+    if (blockSize >= 2) {
+        if (tid < 1) {sdata[tid] += sdata[tid + 1];} __syncthreads();
+    }
+#else
+    if (tid < 32) {
+        if (blockSize >= 64) sdata[tid] += sdata[tid + 32];
+        if (blockSize >= 32) sdata[tid] += sdata[tid + 16];
+        if (blockSize >= 16) sdata[tid] += sdata[tid + 8];
+        if (blockSize >= 8) sdata[tid] += sdata[tid + 4];
+        if (blockSize >= 4) sdata[tid] += sdata[tid + 2];
+        if (blockSize >= 2) sdata[tid] += sdata[tid + 1];
+    }
+#endif
     if (tid == 0) {
         results[blockIdx.x] += sdata[0];
     }
@@ -1364,7 +1400,7 @@ float Func(float number, FunctionType functionType)
 
 Como vimos en el apartado del diseño \ref{disenoRedes}, las diferentes funciones de activación soportadas tienen un valor enumerado asociado y se pueden añadir más modificando tan sólo el enumerado y esta función. No obstante es importante recordar que esta función está definida en dos sitios que tendrán que actualizarse: aquí para el código CUDA y en el exterior para las otras implementaciones.
 
-*** MODIFICAR Operador de cruza
+*** REVISAR Operador de cruce
 #+LaTeX: \label{disenoParalCUDAcruza}
 
 Como se explicó en \ref{disenoGeneCruz} y en \ref{disenoParalCUDAinv}, la implementación del operador genético de cruza es independiente del esquema de cruza y de la disposición de los pesos en memoria de cada implementación paralela. Tan sólo se tiene que recorrer dos matrices de pesos como si fuesen dos vectores y intercambiar el valor de cada peso o no en función de si está activo el bit correspondiente en el vector de bits del mismo tamaño que también se recibirá como parámetro. Por tanto, todas las demás consideraciones han debido aplicarse ya de antemano sobre el vector de bits.
@@ -1393,11 +1429,91 @@ void crossoverKernel(float* buffer1, float* buffer2, unsigned* bitBuffer, unsign
 }
 #+end_src
 
-Es bastante simple, cada hilo coge la parte del bitBuffer que le corresponde y aplica sobre la máscara (que contiene inicialmente =100...00=) los deplazamientos hacia la derecha que correspondan para acceder a su bit. Si haciendo un =AND= lógico entre esa parte del vector de bits y la máscara para seleccionar el suyo se obtiene algún 1, se intercambian en los vactores por la posición del hilo. La constante BITS_PER_UNSIGNED es igual a 32.
+Es bastante simple, cada hilo coge la parte del bitBuffer que le corresponde y aplica sobre la máscara (que contiene inicialmente =100...00=) los deplazamientos hacia la derecha que correspondan para acceder a su bit. Si haciendo un =AND= lógico entre esa parte del vector de bits y la máscara para seleccionar el suyo se obtiene algún 1, se intercambian en los vactores por la posición del hilo. La constante =BITS_PER_UNSIGNED= es igual a 32.
 
 Sin embargo, esta forma de acceso al vector de bits es altamente ineficiente. Los 32 hilos contiguos accederán a la misma posición del vector de bits. Esto no sólo implica que no se accederá coalescentemente y no se leerán 16 valores (medio warp, que es cómo se accede a la memoria global en condiciones óptimas) con una sola instrucción de lectura. Además, el acceso a ese mismo elemento por los 32 hilos se hará de forma secuencial. Esta penalización es intolerable.
 
-Si leyesemos primero el vector de bits a memoria compartida quizá podríamos evitar todo esto. Podríamos también evitar los posibles conflictos de bancos de memoria compartida con un broadcast para un warp (justamente 32 hilos, como los bits en una palabra de 4 bytes) del bloque de bits compartido por ese warp. El mínimo número de hilos contiguos que deben acceder a la misma posición de memoria compartida para que se haga un broadcast en lugar de producir un conflicto de bancos de memoria es 16 (un halfwarp), por lo que 32 hilos nos servirán:
+Todo esto se podría evitar si los datos estuviesen dispuestos de otra manera en memoria. No podemos modificar la posición de los pesos porque las optimizaciones para el cálculo de estado de las neuronas descritas en las secciones anteriores dependen de estas posiciones. Sin embargo podemos modificar la posición en el vector de bits para conseguir nuestro objetivo.
+
+Si cada hilo se ocupase de los 32 bits de una posición del array =bitBuffer=, el acceso también podría ser coalescente y a además el valor se podría alamacenar directamente en un registro. Pero entonces dejaría de ser coalescente el acceso a los propios vectores de pesos, pues cada hilo querría acceder a 32 pesos contiguos. A no ser, que el vector de bits viniese ya colocado de la forma que queremos, para que una posición de =bitBuffer= no representase 32 pesos contiguos, sino 32 los 32 pesos a los que su hilo puede acceder de forma coalescente. Debemos aplicar una transformación adicional sobre el vector de bits (si es que ya ha tenido alguna, por ejemplo, por la inversión de las matriz de pesos) para adaptarlo a nuestro nuevo algoritmo antes de llamar al kernel. Podemos aprovechar el momento en que creemos un Buffer CUDA a partir de una Interfaz (ver secciones \ref{disenoRedesInter} y \ref{disenoRedesBuff}) para realizar esta transformación. 
+
+Pero antes de ver cómo realizaríamos la transformación, vemos como sería nuestro nuevo kernel. Cada hilo accederá a =BITS_PER_UNSIGNED= elementos de los arrays de pesos, cada bloque accederá a =blockDim.x * BITS_PER_UNSIGNED=. El salto entre las posiciones de un bloque y las del siguiente multiplicará el tamaño del bloque por =BITS_PER_UNSIGNED=, pero los hilos de un mismo bloque sequirán accediendo a posiciones contiguas:
+
+#+begin_src c
+__global__
+void crossoverKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
+{
+    unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
+    unsigned maxPosForThisBlock = device_min (size,
+        (blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED);
+
+    unsigned bitsForTheThread, mask;
+    if (weighPos < maxPosForThisBlock) {
+        bitsForTheThread = bitBuffer[(blockIdx.x * blockDim.x) + threadIdx.x];
+        mask = 0x80000000;
+    }
+    __syncthreads();
+
+    while (weighPos < maxPosForThisBlock) {
+        if (mask & bitsForTheThread) {
+            type aux = buffer1[weighPos];
+            buffer1[weighPos] = buffer2[weighPos];
+            buffer2[weighPos] = aux;
+        }
+        __syncthreads();
+        weighPos += blockDim.x;
+        mask >>= 1;
+    }
+}
+#+end_src
+
+Vemos entonces que la posición que los bits deben tomar en el vector para corresponderse con los pesos en este kernel depende del tamaño del bloque con el que se vaya a lanzar el kernel. Además, las partes finales de algunos bloques de bits no serán tenidas en cuenta dependiendo del tamaño del vector y del bloque CUDA, cuando antes sólo se quedaban sin usar las del último bloque de 32 bits. Así es que el array de bits adaptado puede ser más grande que el original.
+
+Este es el constructor especial de la clase CudaBuffer para construir el array de bits adecuado:
+
+#+begin_src c
+CudaBuffer(Interface* bitBuffer, unsigned block_size)
+{
+    if (bitBuffer->getBufferType() != BT_BIT) {
+        std::string error = 
+            "The Buffer type must be BIT to use this constructor.";
+        throw error;
+    }
+    unsigned bitBufferSize = bitBuffer->getSize();
+    unsigned maxWeighsPerBlock = BITS_PER_UNSIGNED * block_size;
+
+    tSize = (bitBufferSize / maxWeighsPerBlock) * maxWeighsPerBlock;
+    tSize += min(bitBufferSize % maxWeighsPerBlock, block_size) * BITS_PER_UNSIGNED;
+
+    Interface interfaceOrderedByBlockSize = Interface(tSize, BT_BIT);
+
+    unsigned bit = 0, thread = 0, block_offset = 0;
+    for (unsigned i = 0; i < bitBufferSize; i++) {
+
+        unsigned weighPos = (thread * BITS_PER_UNSIGNED) + bit + block_offset;
+        thread++;
+        interfaceOrderedByBlockSize.setElement(weighPos, bitBuffer->getElement(i));
+
+        if (thread == block_size) {
+            thread = 0;
+            bit++;
+            if (bit == BITS_PER_UNSIGNED) {
+                bit = 0;
+                block_offset += (block_size * BITS_PER_UNSIGNED);
+            }
+        }
+    }
+    unsigned byteSize = interfaceOrderedByBlockSize.getByteSize();
+    data = cuda_malloc(byteSize);
+    cuda_copyToDevice(data, interfaceOrderedByBlockSize.getDataPointer(), byteSize);
+}
+#+end_src
+
+Esta función no es pprecisamente elegante, pues básicamente reproduce lo que tendŕía que hacer el kernel de forma serializada para cambiar las posiciones para el acceso coalescente. Y será llamado antes de realizar una cruza con dos redes CUDA. Aunque esta transforamción puede parecer una penalización importante, mantenemos esta implementación del cruce se lo asignamos a la versión de reducción inicial (implementada en la clase cudaReduction0Connection, descrita en la sección \ref{implCudaReduc0Con}), que también se mantiene para hacer comparativas.
+
+Afortunadamente, exite otra solución mucho más elegante y que nos parece también más eficiente (aunque reservamos los resultados de la comparación para la sección de resultados \ref{rendImplCruce}).
+
+Si leyesemos primero el vector de bits a memoria compartida quizá podríamos evitar la transformación del vector de bits además de los accesos no coalescentes. Podríamos también evitar los posibles conflictos de bancos de memoria compartida con un broadcast para un warp (justamente 32 hilos, como los bits en una palabra de 4 bytes) del bloque de bits compartido por ese warp. El mínimo número de hilos contiguos que deben acceder a la misma posición de memoria compartida para que se haga un broadcast en lugar de producir un conflicto de bancos de memoria es 16 (un halfwarp), por lo que 32 hilos nos servirán:
 
 #+begin_src c
 __global__
@@ -1431,89 +1547,46 @@ void crossoverKernel(float* buffer1, float* buffer2, unsigned* bitBuffer, unsign
 }
 #+end_src
 
-El último bloque de hilos también leerá bitblocks_per_block, por lo que habrá que hacer el array de bits artificialemente más grande para que esas lecturas puedan hacerse, aunque no se vayan a utilizar esos valores.
+El último bloque de hilos también leerá =bitblocks_per_block=, por lo que habrá que hacer el array de bits artificialemente más grande para que esas lecturas puedan hacerse, aunque no se vayan a utilizar esos valores.
 
-Hemos, mejorado mucho el acceso al vector de bits. No obstante, el número de lecturas de desde memoria global a memoria compartida es muy pequeño. Sólo la hacen los primeros hilos del bloque. Como mucho, cuando el bloque tenga 512 hilos, se harán 4 lecturas por bloque desde =bitBuffer=. Para hacer una lectura coalescente se necesite que cada 16 hilos del bloque accedan a 16 posiciones consecutivas (y que los medios warps no se también estén seguidos). Pero en este caso algunos medios warps no realizarán lectura alguna y los que los hagan, no leerán 16 valores. La lectura coalescente puede no utilizar los 16 valores leídos, 4 es el mínimo. Con un tamaño de bloque de 512 hilos, se harían 4 lecturas. Entonces siempre se tendrá que llamar al kernel con 512 hilos para hacer lecturas conjuntas. No poder ajustar el número de hilos por bloque es un trastorno importante. Los recursos de un multiprocesador se reparten entre los hilos del bloque. Por ejemplo, cuantos más hilos por bloque, menos registros tendrá disponibles cada hilo. Corremos el riesgo de que algunas variables locales tengan que almacenarse en memoria global en vez de en registros.
+Hemos, mejorado mucho el acceso al vector de bits. No obstante, el número de lecturas de desde memoria global a memoria compartida es muy pequeño. Sólo la hacen los primeros hilos del bloque. Como mucho, cuando el bloque tenga 512 hilos, se harán 4 lecturas por bloque desde =bitBuffer=. Para hacer una lectura coalescente se necesite que cada 16 hilos del bloque accedan a 16 posiciones consecutivas (y que los medios warps no se también estén seguidos). Pero en este caso algunos medios warps no realizarán lectura alguna y los que los hagan, no leerán 16 valores. La lectura coalescente puede no utilizar los 16 valores leídos, 4 es el mínimo. Con un tamaño de bloque de 512 hilos, se harían 4 lecturas. Y el resto de los 16 se ignorarían. Pero no basta con que sean valores contiguos para que la lectura sea coalescente, además, tiene que ser sobre posiciones alineadas sobre 16 elementos. Con este método sólo una de cada cuatro lecturas del vector de bits estará alineada y podrá ser coalescente.
 
-TODO ademaś de posiciones contiguas las posiciones de memoria deben estar alineadas
-TODO Solución con memoria compartida para bitVector pero varias posiciones de pesos por hilo ??
-Cada hilo un bloque de bits
-Despues, entre todos los del bloque, pasar por todos los bloques de bits
-TODO ¿poner nueva solución como la mejor?
-
-Afortunadamente, existe una solución mejor. Si cada hilo se ocupase de los 32 bits de una posición del array =bitBuffer=, el acceso también podría ser coalescente ya además el valor se podría alamacenar directamente en un registro. Pero entonces dejaría de ser coalescente el acceso a los propios vectores de pesos, pues cada hilo querría acceder a 32 pesos contiguos. A no ser, que el vector de bits viniese ya colocado de la forma que queremos, para que una posición de =bitBuffer= no representase 32 pesos contiguos, sino 32 los 32 pesos a los que su hilo puede acceder de forma coalescente. Debemos aplicar una transformación adicional sobre le vector de bits (si es que ya ha tenido alguno, por ejemplo, por la inversión de las matriz de pesos) para adaptarlo a nuestro nuevo algoritmo antes de llamar al kernel. Podemos aprovechar el momento en que creemos un Buffer CUDA a partir de una Interfaz (ver secciones \ref{disenoRedesInter} y \ref{disenoRedesBuff}) para realizar esta transformación. 
-
-Pero antes de ver cómo realizaríamos la transformación, vemos como sería nuestro nuevo kernel. Cada hilo accederá a BITS_PER_UNSIGNED elementos de los arrays de pesos, cada bloque accederá a blockDim.x * BITS_PER_UNSIGNED. El salto entre las posiciones de un bloque y las del siguiente multiplicará el tamaño del bloque por BITS_PER_UNSIGNED, pero los hilos de un mismo bloque sequirán accediendo a posiciones contiguas:
+Por ello deberíamos leer a memoría compartida más de 4 bloques de bits por cada bloque de hilos, como poco, 16. Lo ideal sería que cada hilo leyese un bloque de bits. Pero entonces, cada hilo tendría que procesar después 32 pesos, aunque no necesariamente los que corresponden al bloque de bits que ha leído. Si se elige un tamaño de bloque fijo de 32 hilos siempre que se llame a este kernel, se puede acceder a los bloques de bits en memoria compartida de uno en uno y hacer que cada hilo se ocupe de uno de los bits. Esto debería resultar en un broadcast. Este sería el kernel que realiza el cruce como acabamos de describir:
 
 #+begin_src c
 __global__
-void crossoverKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
+void crossoverSharedKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
 {
-    unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
-    unsigned maxPosForThisBlock = device_min ( (blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED, size);
+    extern __shared__ unsigned sdata[];
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned bitBlocks =  ( (size - 1) / BITS_PER_UNSIGNED ) + 1;
 
-    unsigned bitsForTheThread, mask;
-    if (weighPos < maxPosForThisBlock) {
-        bitsForTheThread = bitBuffer[(blockIdx.x * blockDim.x) + threadIdx.x];
-        mask = 0x80000000;
+    if (idx < bitBlocks) {
+        sdata[threadIdx.x] = bitBuffer[ idx ];
     }
     __syncthreads();
 
-    while (weighPos < maxPosForThisBlock) {
-        if (mask & bitsForTheThread) {
+    unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
+    for (int bit_block = 0; bit_block < blockDim.x; ++bit_block) {
+
+        unsigned bit = sdata[ bit_block ];
+
+        unsigned mask = 0x80000000;
+        mask >>= ( threadIdx.x );
+        __syncthreads();
+
+        if (bit & mask && weighPos < size) {
             type aux = buffer1[weighPos];
             buffer1[weighPos] = buffer2[weighPos];
             buffer2[weighPos] = aux;
         }
-        __syncthreads();
         weighPos += blockDim.x;
-        mask >>= 1;
+        __syncthreads();
     }
 }
 #+end_src
 
-Vemos entonces que la posición que los bits deben tomar en el vector para corresponderse con los pesos en este kernel depende del tamaño del bloque con el que se vaya a lanzar el kernel. Además, las partes finales de algunos bloques de bits no serán tenidas en cuenta dependiendo del tamaño del vector y del bloque CUDA, cuando antes sólo se quedaban sin usar las del último bloque de 32 bits. Así es que el array de bits adaptado puede ser más grande que el original.
-
-Este es el constructor especial de la clase CudaBuffer para construir el array de bits adecuado:
-
-#+begin_src c
-CudaBuffer(Interface* bitBuffer, unsigned block_size)
-{
-    if (bitBuffer->getBufferType() != BT_BIT) {
-        std::string error = "The Buffer type must be BIT to use a BitBuffer CudaBuffer constructor.";
-        throw error;
-    }
-    unsigned bitBufferSize = bitBuffer->getSize();
-    unsigned maxWeighsPerBlock = BITS_PER_UNSIGNED * block_size;
-
-    tSize = (bitBufferSize / maxWeighsPerBlock) * maxWeighsPerBlock;
-    tSize += min(bitBufferSize % maxWeighsPerBlock, block_size) * BITS_PER_UNSIGNED;
-
-    Interface interfaceOrderedByBlockSize = Interface(tSize, BT_BIT);
-
-    unsigned bit = 0, thread = 0, block_offset = 0;
-    for (unsigned i = 0; i < bitBufferSize; i++) {
-
-        unsigned weighPos = (thread * BITS_PER_UNSIGNED) + bit + block_offset;
-        thread++;
-        interfaceOrderedByBlockSize.setElement(weighPos, bitBuffer->getElement(i));
-
-        if (thread == block_size) {
-            thread = 0;
-            bit++;
-            if (bit == BITS_PER_UNSIGNED) {
-                bit = 0;
-                block_offset += (block_size * BITS_PER_UNSIGNED);
-            }
-        }
-    }
-    unsigned byteSize = interfaceOrderedByBlockSize.getByteSize();
-    data = cuda_malloc(byteSize);
-    cuda_copyToDevice(data, interfaceOrderedByBlockSize.getDataPointer(), byteSize);
-}
-#+end_src
-
-No es particularmente elegante, pues básicamente reproduce lo que tendŕía que hacer el kernel de forma serializada para cambiar las posiciones para el acceso coalescente. Pero sólo será llamado antes de realizar una cruza con dos redes CUDA. Aunque esta transforamción puede parecer una penalización muy importante, no lo es. Tengase en cuenta que esta copia de Interface al Buffer CUDA se tenía que hacer de todas maneras. De no hacer esto, lo único que no ahorraríamos es la conversión de la interfaz inicial que contiene el vector de bits a otra interfaz intermedia con las nuevas posiciones. Pero las 3 últimas líneas las ejecutaríamos igual si hubiesemos optado por la segunda solución y mover los datos de memoria huesped a memoria de dispositivo es muy costoso. El acceso al vector de bits mucho más eficiente durante la ejecución del kernel y la mayor libertad para elegir el número de hilos sin duda justifican esta conversión.
+En la versión real, se sustituye =blockDim.x= por la constante =BITS_PER_UNSIGNED= (número de bits por entero sin signo ó bloque de bits) para mejorar el tiempo de ejecución. Aquí se ha mantenido =blockDim.x=, aunque se sepa que siempre va a ser 32, para mejorar la legibilidad.
 
 *** Otros operadores genéticos
 
@@ -1529,7 +1602,7 @@ void mutateKernel(float* buffer, unsigned pos, float mutation)
 }
 #+end_src
 
-Y este el de olvido:
+Y este es el de olvido:
 
 #+begin_src c
 __global__
@@ -1604,6 +1677,9 @@ TODO ¿debo explicar las reglas del juego?
 sudo aptitude install make g++ nasm gnuplot
 sudo aptitude install texlive-latex-recommended texlive-latex-extra
 
+** HACER Factoria e implementaciones optimizadas
+*** HACER CudaReduction0Connection
+#+LaTeX: \label{implCudaReduc0Con}
 ** HACER Uso general (API)
 #+LaTeX: \label{manualProgrApi}
 ** HACER Extensibilidad a partir de interfaces
@@ -2064,6 +2140,7 @@ Esta prueba se ha hecho utilizando los parámetros que se describen a continuaci
 Simplemente un detalle de la anterior sin meter la implementación C
 
 *** MODIFICAR Cruce
+#+LaTeX: \label{rendImplCruce}
 
 El cruce para BIT y para SIGN es idéntico, los dos se hacen sobre pesos de un byte en lugar de pesos de 4 bytes (float), por lo que se omite el tipo de neurona bipolar (SIGN) en esta prueba. No hay una diferencia sustancial de rendimiento entre los diferentes tipos de neuronas (FLOAT y BIT) para las implementaciones C y SSE2. La cruza de SSE2 se ve ligeramente penalizada, Como en el método de la activación, aunque no se aprecia muy bien en la gráfica \ref{grafImplCrossover}. En este caso se debe al almacenamiento especial de los pesos para SSE2, que usa bloques de pesos en vez de pesos individuales.
 La implementación CUDA es algo más lenta. Aunque tampoco hay mucha diferencia entre los tipos de neuronas para esta implementación, las de tipo BIT hacen el cruce más rápido.
