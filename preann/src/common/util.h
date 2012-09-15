@@ -80,7 +80,6 @@ public:
 
 class MemoryManagement
 {
-    //TODO usar void * calloc ( size_t num, size_t size );
     static vector<void*> ptrs;
     static vector<unsigned> sizes;
 
