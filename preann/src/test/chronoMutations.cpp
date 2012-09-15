@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     total.start();
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
-        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 5000, 50001, 5000), "Time (seconds)");
+        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 256, 4097, 256), "Time (seconds)");
         unsigned repetitions = 90000;
 
         plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
