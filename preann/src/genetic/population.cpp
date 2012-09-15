@@ -570,7 +570,6 @@ void Population::crossover()
 
 unsigned Population::choseParent(Interface &usedParentsBitmap, unsigned &usedParents)
 {
-    //TODO usar bitset
     unsigned chosenPoint;
     do {
         chosenPoint = Random::positiveInteger(parents.size());

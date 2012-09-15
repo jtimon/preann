@@ -18,7 +18,6 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         virtual void _calculateAndAddTo(Buffer* results)
         {
             float* resultsPtr = (float*) results->getDataPointer();
-            // TODO TCC este método no funciona correctamente para BT_SIGN
             cuda_netCalcReduction(tInput->getBufferType(), Cuda_Threads_Per_Block, tInput->getDataPointer(),
                                   this->getDataPointer(), resultsPtr, tInput->getSize(), results->getSize());
         }

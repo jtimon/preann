@@ -32,7 +32,6 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         unsigned invertPos(unsigned pos)
         {
-            //TODO z simplificar cuentas
             unsigned outputPos = pos / tInput->getSize();
             unsigned inputPos = (pos % tInput->getSize());
             unsigned outputSize = tSize / tInput->getSize();

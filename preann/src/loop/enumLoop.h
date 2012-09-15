@@ -11,8 +11,6 @@
 #include "loop.h"
 #include "common/enumerations.h"
 
-//TODO typeid(Param).name()
-
 class EnumLoop : public Loop
 {
 protected:

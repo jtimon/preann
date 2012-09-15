@@ -9,19 +9,6 @@ using namespace std;
 #include "genetic/population.h"
 #include "tasks/binaryTask.h"
 
-//TODO AA_REF methods must be all verbs
-//common
-//game
-//genetic
-//neural
-//optimization
-//tasks
-//template
-
-// vector size / fitness goal
-// 2 / 32
-// 3 / 192
-
 int main(int argc, char *argv[])
 {
     Chronometer total;

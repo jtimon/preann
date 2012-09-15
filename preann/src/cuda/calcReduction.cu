@@ -61,7 +61,6 @@ void ReductionKernel(void* inputPtr, void* weighs, float* results, unsigned inpu
     if (blockSize >= 256) {if (tid < 128) {sdata[tid] += sdata[tid + 128];}__syncthreads();}
     if (blockSize >= 128) {if (tid < 64) {sdata[tid] += sdata[tid + 64];}__syncthreads();}
 
-// TODO en la documentación está con EMUSYNC, que no compila en emu, cambiar allí también
 #if __DEVICE_EMULATION__
     if (blockSize >= 64) {if (tid < 32) {sdata[tid] += sdata[tid + 32];}__syncthreads();}
     if (blockSize >= 32) {if (tid < 16) {sdata[tid] += sdata[tid + 16];}__syncthreads();}
