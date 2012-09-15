@@ -17,7 +17,7 @@ __global__
 void crossoverSharedKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
 {
     extern __shared__ unsigned sdata[];
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int idx = blockIdx.x * BITS_PER_UNSIGNED + threadIdx.x;
     unsigned bitBlocks =  ( (size - 1) / BITS_PER_UNSIGNED ) + 1;
 
     if (idx < bitBlocks) {
@@ -25,8 +25,8 @@ void crossoverSharedKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, un
     }
     __syncthreads();
 
-    unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
-    for (int bit_block = 0; bit_block < blockDim.x; ++bit_block) {
+    unsigned weighPos = (blockIdx.x * BITS_PER_UNSIGNED * BITS_PER_UNSIGNED) + threadIdx.x;
+    for (int bit_block = 0; bit_block < BITS_PER_UNSIGNED; ++bit_block) {
 
         unsigned bit = sdata[ bit_block ];
 
@@ -39,7 +39,7 @@ void crossoverSharedKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, un
             buffer1[weighPos] = buffer2[weighPos];
             buffer2[weighPos] = aux;
         }
-        weighPos += blockDim.x;
+        weighPos += BITS_PER_UNSIGNED;
         __syncthreads();
     }
 }
