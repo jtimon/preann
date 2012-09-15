@@ -33,12 +33,11 @@ LOGS     = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,output/log/%.l
 
 CXX = $(CXX_BASE) -ggdb $(INCLUDES)
 CXX_LINK = $(CXX_BASE)
-NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES)
-NVCC_LINK = $(NVCC) -L/usr/local/cuda/lib -lcudart 
+NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES) -I /opt/cuda-toolkit/include/
+NVCC_LINK = $(NVCC) -lcudart 
 NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11
 NASM = nasm -f elf
-#NVCC = /usr/local/cuda/bin/nvcc -m32 $(INCLUDES) $(FACT_FLAGS)
-#NVCC_LINK = $(NVCC) -L/opt/cuda-toolkit/lib -lcudart
+
 ifeq (cpp, $(MAKECMDGOALS))
 	CXX_BASE = g++
 	NVCC_LINK = $(CXX_LINK)
@@ -52,46 +51,52 @@ ifeq (sse2, $(MAKECMDGOALS))
 endif
 ifeq (cuda, $(MAKECMDGOALS))
 	CXX_BASE = g++
+	NVCC_LINK += -L/usr/local/cuda/lib
 	FACT_OBJ = $(CUDA_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
 endif
 ifeq (cuda_emu, $(MAKECMDGOALS))
 	CXX_BASE = g++-4.3
 	NVCC_COMPILE += --device-emulation
+	NVCC_LINK += -L/usr/local/cuda/lib
 	FACT_OBJ = $(CUDA_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
 endif
 ifeq (all, $(MAKECMDGOALS))
 	CXX_BASE = g++
+	NVCC_LINK += -L/usr/local/cuda/lib
 	FACT_OBJ = $(FULL_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
 endif
 ifeq (all_emu, $(MAKECMDGOALS))
 	CXX_BASE = g++-4.3
 	NVCC_COMPILE += --device-emulation
+	NVCC_LINK += -L/usr/local/cuda/lib
 	FACT_OBJ = $(FULL_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
 endif
 ifeq (cpp_64, $(MAKECMDGOALS))
-	CXX_BASE = g++ -m32
+	CXX_BASE = g++ -m32 -fpermissive
 	NVCC_LINK = $(CXX_LINK)
 	FACT_FLAGS = -DCPP_IMPL
 endif
 ifeq (sse2_64, $(MAKECMDGOALS))
-	CXX_BASE = g++ -m32
+	CXX_BASE = g++ -m32 -fpermissive
 	NVCC_LINK = $(CXX_LINK)
 	FACT_OBJ = $(SSE2_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
 endif
 ifeq (cuda_64, $(MAKECMDGOALS))
-	CXX_BASE = g++ -m32
-	NVCC += -m32 
+	CXX_BASE = g++ -m32 -fpermissive
+	NVCC += -m32
+	NVCC_LINK += -L/opt/cuda-toolkit/lib
 	FACT_OBJ = $(CUDA_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
 endif
 ifeq (all_64, $(MAKECMDGOALS))
-	CXX_BASE = g++ -m32
-	NVCC += -m32 
+	CXX_BASE = g++ -m32 -fpermissive
+	NVCC += -m32
+	NVCC_LINK += -L/opt/cuda-toolkit/lib
 	FACT_OBJ = $(FULL_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
 endif
@@ -107,11 +112,14 @@ cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EX
 	./bin/chronoActivation.exe $(OUTPUT_DIR)
 	./bin/chronoInterface.exe $(OUTPUT_DIR)
 	./bin/chronoMutations.exe $(OUTPUT_DIR)
-	cat /proc/cpuinfo > $(OUTPUT_DIR)cpu.txt
-	lspci -vv > $(OUTPUT_DIR)device.txt
-	cat /proc/meminfo > $(OUTPUT_DIR)mem.txt
-#After compilation, go to NVIDIA_GPU_Computing_SDK/C/bin/linux/release in
-#the user’s home directory and run ./deviceQuery	 
+	cat /proc/cpuinfo > $(OUTPUT_DIR)info/cpu.txt
+	lspci -vv > $(OUTPUT_DIR)info/device.txt
+	cat /proc/meminfo > $(OUTPUT_DIR)info/mem.txt
+	g++ -v > $(OUTPUT_DIR)info/g++.txt
+	cat /etc/*version > $(OUTPUT_DIR)info/OS.txt
+	cat /etc/*release > $(OUTPUT_DIR)info/OS2.txt
+	cat /proc/version > $(OUTPUT_DIR)info/OS3.txt
+	uname -a > $(OUTPUT_DIR)info/OS4.txt
 #	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe $(CURDIR)/
 #	./bin/testConnections.exe
