@@ -1637,9 +1637,13 @@ sudo aptitude install texlive-latex-recommended texlive-latex-extra
 ** HACER Factoria e implementaciones optimizadas
 *** HACER CudaReduction0Connection
 #+LaTeX: \label{implCudaReduc0Con}
-** HACER Uso general (API)
+** HACER [0/13] Uso general (API)
 #+LaTeX: \label{manualProgrApi}
-*** HACER Neural
+*** HACER [0/3] Common
+**** HACER Chronometer
+**** HACER Enumerations
+**** HACER Util
+*** HACER [0/6] Neural
 #+LaTeX: \label{apiNeural}
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
@@ -1684,11 +1688,49 @@ Los métodos que Buffer ofrece son:
 
 Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene un grafo dirigido con capas (Layer )
 Al nivel más alto, la clase que utilizaremos es NeuralNet, que implementa una red neuronal concreta
-
-*** HACER Genetic
+*** HACER SSE2
+*** HACER Cuda
+*** HACER [0/12] Factory
+**** HACER factory
+**** HACER configFactory
+**** HACER cppBuffer
+**** HACER cppConnection
+**** HACER xmmBuffer
+**** HACER xmmConnection
+**** HACER cudaBuffer
+**** HACER cudaBaseConnection
+**** HACER cudaReduction0Connection
+**** HACER cudaReductionConnection
+**** HACER cudaOutputsConnection
+**** HACER cudaInvertedConnection
+*** HACER [/] Genetic
 #+LaTeX: \label{disenoGenetic}
-*** HACER Loop
+**** HACER Individual
+**** HACER Task
+**** HACER Population
+*** HACER [0/2] Game
+**** HACER Board
+**** HACER ReversiBoard
+*** HACER [0/3] Tasks
+**** HACER BinaryTask
+**** HACER ClassificationTask
+**** HACER ReversiTask
+*** HACER [0/9] Loop
 #+LaTeX: \label{disenoLoop}
+**** HACER Loop
+**** HACER RangeLoop
+**** HACER ExpLoop
+**** HACER EnumLoop
+**** HACER JoinEnumLoop
+**** HACER ParametersMap
+**** HACER GenericPlotter
+**** HACER Test
+**** HACER Plot
+*** HACER [0/3] LoopTest
+**** HACER ChronoPlotter
+**** HACER Dummy
+**** HACER TaskPlotter
+*** HACER Test
 *** HACER Extensibilidad a partir de interfaces
 #+LaTeX: \label{manualProgrInterf}
 \newpage
