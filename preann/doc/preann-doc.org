@@ -1,6 +1,6 @@
-#+TITLE:       Aprendizaje por refuerzo mediante algoritmos genéticos de redes neuronales paralelizadas con GPGPU
-#+AUTHOR:      Jorge Tim\'on Morillo-Velarde
-#+EMAIL:       jtimonmv@gmail.com
+#+TITLE:       
+#+AUTHOR:      
+#+EMAIL:       
 #+KEYWORDS:    Redes neuronales, algoritmos gen\'eticos, redes neuronales evolutivas, neuro-evolución, aprendizaje por refuerzo, SSE2, GPGPU, CUDA.
 #+LANGUAGE:    es
 #+LATEX_HEADER: \usepackage[T1]{fontenc}
@@ -59,30 +59,33 @@
 
 \begin{titlepage}
 
-\title{Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos}
-\newline
-\newline
-\newline
+\title{Aprendizaje por refuerzo mediante algoritmos genéticos de redes neuronales paralelizadas con GPGPU}
 
 \author{
-\\ Autor:\\
-\\ Jorge Tim\'on Morillo-Velarde \\ \mail
-\\ \\ \\ \\
-\\ Tutores del proyecto:\\ 
-\\ Rosa M. P\'erez Utrero \\ \mail[rosapere@unex.es]
-\\ 
-\\ Juan A. G\'omez Pulido \\ \mail[jangomez@unex.es]
-\\ \\ \\ \\
+\\\\\\\\\\\\
+Autor:\\\\
+Jorge Tim\'on Morillo-Velarde\\\\
+\mail\\\\
+\\\\\\\\\\\\
+Tutores del proyecto:\\\\ 
+\\
+Rosa M. P\'erez Utrero\\\\
+\mail[rosapere@unex.es]\\\\
+\\\\
+Juan A. G\'omez Pulido\\\\
+\mail[jangomez@unex.es]\\\\
+\\\\\\\\\\\\
 }
 
-\date{\today}
+\end{titlepage}
+
 \maketitle
 
 \newpage
 \begin{abstract}
 
 En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de redes neuronales. Se utiliza un algoritmo gen\'etico para ajustar los pesos de la red neuronal. Se eval\'ua el uso de diferentes tipos de neuronas (con salida real o binaria) para comparar sus rendimientos utilizando diferentes implementaciones paralelas (para el coprocesador XMM y para la arquitectura CUDA). Se prueban variaciones de los operadores gen\'eticos y se mide su efectividad en el entrenamiento. Se enfrenta el algoritmo a diferentes tipos de problemas de aprendizaje por refuerzo y se reflexiona sobre la idoneidad del mismo para cada problema.
-\\
+\\\\
 
 \textbf{Palabras clave:} Redes neuronales, algoritmos gen\'eticos, redes neuronales evolutivas, neuro-evoluci\'on, aprendizaje por refuerzo, SSE2, GPGPU, CUDA.
 
@@ -90,6 +93,7 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
 
 \newpage
 
+\setcounter{tocdepth}{2}
 \tableofcontents
 
 \newpage
@@ -712,7 +716,7 @@ Por simplicidad, los trozos de código mostrados tratarán exclusivamente la ver
 *** Modelo de programación
 #+LaTeX: \label{disenoParalCUDAprog}
 
-C para CUDA es una extensión de C que permite al programador definir funciones, llamadas kernels (núcleos) que cuando son llamadas se ejecutan N  veces por N hilos CUDA diferentes, en vez de una sola vez como las funciones C habituales\cite{progGuide2009}. Para definir un kernel se usa el especificador de declaración =__global__= y el número de hilos CUDA para cada llamada se especifica con la nueva sintaxis (TODO arreglar esto) =< < <...> > >= del siguiente ejemplo:
+C para CUDA es una extensión de C que permite al programador definir funciones, llamadas kernels (núcleos) que cuando son llamadas se ejecutan N  veces por N hilos CUDA diferentes, en vez de una sola vez como las funciones C habituales\cite{progGuide2009}. Para definir un kernel se usa el especificador de declaración =__global__= y el número de hilos CUDA para cada llamada se especifica con la nueva sintaxis \verb=<<<=...\verb=>>>= del siguiente ejemplo:
 
 #+begin_src c
 // Definicion del Nucleo
@@ -779,7 +783,7 @@ Sin embargo, un kernel puede ser ejecutado por múltiples bloques de hilos simil
 #+ATTR_LaTeX: scale=0.6
 [[./img/gridBlockThreads.jpg]]
 
-La dimensiones del grid se especifica con el primer parámetro específico del kernel entre la sintaxis (TODO arreglar esto) ~< < <...> > >~. Cada bloque dentro del grid se puede identicar con un índice unidimensional o bidimensional a través de la variable interna blockIdx. Las dimensiones de el bloque de hilos es accesible desde el kernel usando la variable interna blockDim. El código de ejemplo anterior quedaría así:
+La dimensiones del grid se especifica con el primer parámetro específico del kernel entre la sintaxis \verb=<<<=...\verb=>>>=. Cada bloque dentro del grid se puede identicar con un índice unidimensional o bidimensional a través de la variable interna blockIdx. Las dimensiones de el bloque de hilos es accesible desde el kernel usando la variable interna blockDim. El código de ejemplo anterior quedaría así:
 
 #+begin_src c
 // Definicion del Nucleo
@@ -2614,6 +2618,41 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 ** Comparación de distintos tamaños de población número de individuos conservados por generación
 
 \newpage
+* HACER [0/21] cosas pendientes
+- [ ] Bibliografías de introducción
+- [ ] TODO teoría CUDA occupance vs resources
+	  Entonces siempre se tendrá que llamar al kernel con 512 hilos para hacer lecturas conjuntas. No poder ajustar el número de hilos por bloque es un trastorno importante. Los recursos de un multiprocesador se reparten entre los hilos del bloque. Por ejemplo, cuantos más hilos por bloque, menos registros tendrá disponibles cada hilo. Corremos el riesgo de que algunas variables locales tengan que almacenarse en memoria global en vez de en registros.
+- [ ] Más bibliografía GA
+- [ ] Meter todo lo del último correo del profesor
+- [ ] Más bibliografía NN 
+  - [ ] ¿Preguntar rosa?
+  - [ ] Mirar las bibliografías ahí a pelo con corchetes
+- [ ] Modificar Teoría
+- [ ] Modificar Introducción
+- [ ] Modificar Análisis
+- [ ] Hacer Diseño
+- [ ] (Teoría: redes neuronales) Explicar la necesidad de funciones de activación continuas para retropropagación
+- [ ] (Teoría: redes neuronales) Explicar imposibilidad de recursividad con retropropagación
+- [ ] (Teoría: algoritmos genéticos) Introducir a GENITOR con bibliografía
+- [ ] (Teoría: algoritmos genéticos/neuro evolución) Introducir representación fregona con bibliografía
+- [ ] (Teoría: algoritmos genéticos/neuro evolución) Búsqueda neutral con bibliografía
+- [ ] (Teoría: neuro evolución) NeuroEvolution of Augmenting Topologies (NEAT)
+- [ ] (Teoría: neuro evolución) Redes recurrentes, pybrain, Jürgen Schmidhuber
+- [ ] En utilidades para pruebas u otro sitio (consultar a rosa sobre el redondeo utilizado)
+  explicar el error que hemos permitido para probar la corrección de cada implementación paralela comparandolas con la implementación secuencial C++
+  Cogido del best practices de CUDA...
+  7.3.2 Floating-Point Math Is Not Associative
+  Each floating-point arithmetic operation involves a certain amount of rounding.
+  Consequently, the order in which arithmetic operations are performed is important.
+  If A, B, and C are floating-point values, (A+B)+C is not guaranteed to equal
+  A+(B+C) as it is in symbolic math. When you parallelize computations, you
+  potentially change the order of operations and therefore the parallel results might
+  not match sequential results. This limitation is not specific to CUDA, but an
+  inherent part of parallel computation.
+- [ ] Modificar Resultados : Rendimiento
+- [ ] Modificar CUDA después de tener resultados
+- [ ] Modificar Resultados : Aprendizaje
+- [ ] Hacer conclusiones
 * HACER Conclusiones
 #+LaTeX: \label{conclusiones}
 
