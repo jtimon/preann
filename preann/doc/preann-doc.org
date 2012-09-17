@@ -1,7 +1,7 @@
-#+TITLE:       Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos
+#+TITLE:       Aprendizaje por refuerzo mediante algoritmos genéticos de redes neuronales paralelizadas con GPGPU
 #+AUTHOR:      Jorge Tim\'on Morillo-Velarde
 #+EMAIL:       jtimonmv@gmail.com
-#+KEYWORDS:    Redes neuronales, algoritmos gen\'eticos, redes neuronales evolutivas, aprendizaje por refuerzo, CUDA, entornos artificiales, juegos multi-agente.
+#+KEYWORDS:    Redes neuronales, algoritmos gen\'eticos, redes neuronales evolutivas, neuro-evolución, aprendizaje por refuerzo, SSE2, GPGPU, CUDA.
 #+LANGUAGE:    es
 #+LATEX_HEADER: \usepackage[T1]{fontenc}
 #+LATEX_HEADER: \usepackage[spanish]{babel}
@@ -57,7 +57,6 @@
 # Título, abstract e índice
 #+begin_latex
 
-
 \begin{titlepage}
 
 \title{Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos}
@@ -82,10 +81,10 @@
 \newpage
 \begin{abstract}
 
-En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de redes neuronales con conexi\'on hacia delante. Se utiliza un algoritmo gen\'etico para ajustar los pesos de la red neuronal. Se eval\'ua el uso de diferentes tipos de neuronas (con salida real o binaria) para comparar sus rendimientos utilizando diferentes implementaciones paralelas (para el coprocesador XMM y para la arquitectura CUDA). Se prueban variaciones de los operadores gen\'eticos y se mide su efectividad en el entrenamiento. Se enfrenta el algoritmo a diferentes tipos de problemas de aprendizaje por refuerzo y se medita sobre la idoneidad del mismo para cada problema.
+En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de redes neuronales. Se utiliza un algoritmo gen\'etico para ajustar los pesos de la red neuronal. Se eval\'ua el uso de diferentes tipos de neuronas (con salida real o binaria) para comparar sus rendimientos utilizando diferentes implementaciones paralelas (para el coprocesador XMM y para la arquitectura CUDA). Se prueban variaciones de los operadores gen\'eticos y se mide su efectividad en el entrenamiento. Se enfrenta el algoritmo a diferentes tipos de problemas de aprendizaje por refuerzo y se reflexiona sobre la idoneidad del mismo para cada problema.
 \\
 
-\textbf{Palabras clave:} Redes neuronales, algoritmos gen\'eticos, redes neuronales evolutivas, aprendizaje por refuerzo, CUDA, entornos artificiales, juegos multi-agente.
+\textbf{Palabras clave:} Redes neuronales, algoritmos gen\'eticos, redes neuronales evolutivas, neuro-evoluci\'on, aprendizaje por refuerzo, SSE2, GPGPU, CUDA.
 
 \end{abstract}
 
@@ -99,30 +98,30 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
 * MODIFICAR Introducci\'on
 #+LaTeX: \label{intro}
 
- El /aprendizaje autom\'atico/ es una rama de la inteligencia artificial que trata de construir sistemas inform\'aticos que optimicen un criterio de rendimiento utilizando datos o experiencia previa. Dentro del aprendizaje autom\'atico, las t\'ecnicas se clasifican en base a su entrenamiento como supervisado o no supervisado. En el primero, al sistema se le suministran ejemplos de entradas con sus correspondientes salidas deseadas. En el entrenamiento no supervisado, no se tienen a priori ejemplos de c\'omo deber\'ia comportarse el sistema. El aprendizaje por refuerzo es un caso especial de aprendizaje supervisado en que la salida deseada exacta es desconocida. Se basa s\'olo en informaci\'on sobre si la salida actual es correcta o no. Al agente que se quiere que aprenda se le provee informaci\'on sobre lo bien o lo mal que est\'a actuando. Esta se\~nal de recompensa puede serle indicada bien cada vez que el agente act\'ua, bien al final de una prueba completa durante la que realiza varias acciones.
+El /aprendizaje autom\'atico/ es una rama de la inteligencia artificial que trata de construir sistemas inform\'aticos que optimicen un criterio de rendimiento utilizando datos o experiencia previa. Dentro del aprendizaje autom\'atico, las t\'ecnicas se clasifican en base a su entrenamiento como supervisado o no supervisado. En el primero, al sistema se le suministran ejemplos de entradas con sus correspondientes salidas deseadas. En el entrenamiento no supervisado, no se tienen a priori ejemplos de c\'omo deber\'ia comportarse el sistema. El aprendizaje por refuerzo es un caso especial de aprendizaje supervisado en que la salida deseada exacta es desconocida. Se basa s\'olo en informaci\'on sobre si la salida actual es correcta o no. Al agente que se quiere que aprenda se le provee informaci\'on sobre lo bien o lo mal que est\'a actuando. Esta se\~nal de recompensa puede serle indicada bien cada vez que el agente act\'ua, bien al final de una prueba completa durante la que realiza varias acciones.
 
- Los algoritmos que tienen su origen en la observaci\'on de la naturaleza se denominan bio-inspirados. Entre ellos se encuentran las redes neuronales y los algoritmos gen\'eticos. 
+Los algoritmos que tienen su origen en la observaci\'on de la naturaleza se denominan bio-inspirados. Entre ellos se encuentran las redes neuronales y los algoritmos gen\'eticos. 
 
- Las redes neuronales son modelos que intentan reproducir el comportamiento del cerebro humano [Hilera y Mart\'inez, 1995]. Una red neuronal consiste en un conjunto de elementos de procesamiento, llamados neuronas, los cuales se conectan entre s\'i [Koehn, 1994]. Las conexiones entre las neuronas tienen pesos asociados cuyos valores determinar\'an el comportamiento de la red. Existen algoritmos para determinar el valor de los pesos de una red mediante un entrenamiento supervisado, cabe destacar el de retro-propagaci\'on del error.
+Las redes neuronales son modelos que intentan reproducir el comportamiento del cerebro humano TODO [Hilera y Mart\'inez, 1995]. Una red neuronal consiste en un conjunto de elementos de procesamiento, llamados neuronas, los cuales se conectan entre s\'i TODO [Koehn, 1994]. Las conexiones entre las neuronas tienen pesos asociados cuyos valores determinar\'an el comportamiento de la red. Existen algoritmos para determinar el valor de los pesos de una red mediante un entrenamiento supervisado, cabe destacar el de retro-propagaci\'on del error.
 
- Los algoritmos evolutivos, dentro de los cuales los algoritmos gen\'eticos son los m\'as conocidos, son una familia de modelos computacionales inspirados en la evoluci\'on y la supervivencia del m\'as apto [B\"ach, et. al., 1991; \"Omer, 1995; Whitley, 2001]. Se utilizan fundamentalmente en la resoluci\'on de problemas de b\'usqueda y de optimizaci\'on [Holland, 1975]. Buscan una soluci\'on del problema reproduciendo gen\'eticamente una poblaci\'on de individuos a lo largo de una serie de generaciones [Koza, 1997]. El aprendizaje es formulado como un problema de optimizaci\'on, en el que cada individuo de la poblaci\'on es una posible soluci\'on.
+Los algoritmos evolutivos, dentro de los cuales los algoritmos gen\'eticos son los m\'as conocidos, son una familia de modelos computacionales inspirados en la evoluci\'on y la supervivencia del m\'as apto TODO [B\"ach, et. al., 1991; \"Omer, 1995; Whitley, 2001]. Se utilizan fundamentalmente en la resoluci\'on de problemas de b\'usqueda y de optimizaci\'on TODO [Holland, 1975]. Buscan una soluci\'on del problema reproduciendo gen\'eticamente una poblaci\'on de individuos a lo largo de una serie de generaciones TODO [Koza, 1997]. El aprendizaje es formulado como un problema de optimizaci\'on, en el que cada individuo de la poblaci\'on es una posible soluci\'on.
 
- Dada una topolog\'ia de red fija, el entrenamiento de una red neuronal puede ser visto como un proceso de optimizaci\'on cuyo objetivo es encontrar un conjunto de pesos que minimice el error que produce la red sobre el conjunto de ejemplos en el entrenamiento supervisado, o que maximice la recompensa en el aprendizaje por refuerzo.
+Dada una topolog\'ia de red fija, el entrenamiento de una red neuronal puede ser visto como un proceso de optimizaci\'on cuyo objetivo es encontrar un conjunto de pesos que minimice el error que produce la red sobre el conjunto de ejemplos en el entrenamiento supervisado, o que maximice la recompensa en el aprendizaje por refuerzo.
 
- En nuestro caso, el agente utilizar\'a una red neuronal para decidir sus acciones (salida de la red) a partir de los datos que pueda recoger de su entorno (entrada a la red). Se utiliza un algoritmo gen\'etico para decidir los pesos adecuados para la red, utilizando una poblaci\'on de agentes con redes diferentes. Se utiliza la recompensa acumulada por el individuo en una o varias pruebas para medir su adaptaci\'on al medio. Se utilizan estas medidas y la poblaci\'on actual para construir la siguiente generaci\'on. Cuando alg\'un individuo demuestra estar lo suficientemente adaptado al medio para cumplir con las expectativas del entrenamiento (o cuando se supera un l\'imite prefijado de iteraciones), \'este finaliza.
+En nuestro caso, el agente utilizar\'a una red neuronal para decidir sus acciones (salida de la red) a partir de los datos que pueda recoger de su entorno (entrada a la red). Se utiliza un algoritmo gen\'etico para decidir los pesos adecuados para la red, utilizando una poblaci\'on de agentes con redes diferentes. Se utiliza la recompensa acumulada por el individuo en una o varias pruebas para medir su adaptaci\'on al medio. Se utilizan estas medidas y la poblaci\'on actual para construir la siguiente generaci\'on. Cuando alg\'un individuo demuestra estar lo suficientemente adaptado al medio para cumplir con las expectativas del entrenamiento (o cuando se supera un l\'imite prefijado de iteraciones), \'este finaliza.
 
- En todo este proceso, El algoritmo que m\'as se ejecuta es el que calcula la salida de la red a partir de la entrada. Este algoritmo se puede llamar varias veces por cada prueba. Adem\'as, las pruebas pueden repetirse varias veces por individuo y generaci\'on para disminuir el ruido producido por los factores aleatorios que pueda haber en las pruebas. Por ello, esta funci\'on se ha optimizado mediante su paralelizaci\'on en dos arquitecturas ampliamente extendidas y econ\'omicas: el coprocesador XMM, presente en todos los PCs de reciente fabricaci\'on y la arquitectura CUDA[Nota al pie: CUDA forma parte de lo que se conoce como GPGPU, que consiste en utilizar unidades de procesamiento gr\'afico (GPUs) para c\'alculos generales que no tienen por qu\'e ser gr\'aficos], compatible con la mayor\'ia de tarjetas gr\'aficas NVIDIA a partir de la serie 8000. Adem\'as, para incrementar a\'un m\'as el rendimiento, se estudia la viabilidad de entrenar redes con una versi\'on m\'inima de neurona con activaci\'on de tipo escal\'on y con pesos con tama\~no de un byte (en la secci\'on \ref{disenoParal} se describe con m\'as detalle). Llamaremos a las redes que utilizan estas estructuras redes discretas.
+En todo este proceso, El algoritmo que m\'as se ejecuta es el que calcula la salida de la red a partir de la entrada. Este algoritmo se puede llamar varias veces por cada prueba. Adem\'as, las pruebas pueden repetirse varias veces por individuo para disminuir el ruido producido por los factores aleatorios que pueda haber en las pruebas y, por último, esto debe multiplicarse por el número de individuos que se evaluen por generaci\'on. Por ello, esta funci\'on se ha optimizado mediante su paralelizaci\'on en dos arquitecturas ampliamente extendidas y econ\'omicas: el coprocesador XMM, presente en todos los PCs de reciente fabricaci\'on y la arquitectura CUDA [fn:cudaGPGPU], compatible con la mayor\'ia de tarjetas gr\'aficas NVIDIA a partir de la serie 8000. Adem\'as, para incrementar a\'un m\'as el rendimiento, se estudia la viabilidad de entrenar redes con una versi\'on m\'inima de neurona con activaci\'on de tipo escal\'on y con pesos con tama\~no de un byte (en la secci\'on \ref{disenoParal} se describe con m\'as detalle). Llamaremos a las redes que utilizan estas estructuras redes discretas.
 
  Los problemas en los que aplicamos nuestro desarrollo, aunque no son realistas, se consideran interesantes para la rob\'otica y/o para la inteligencia artificial. Los tipos de problemas tienen que ver con la clasificaci\'on, los juegos considerados como deportes mentales, el control autom\'atico, la toma de decisiones en tiempo real y la colaboraci\'on de m\'ultiples agentes en tiempo real; pudiendo estar relacionados estos \'ultimos con la
 [[http://es.wikipedia.org/wiki/Vida_artificial][vida artificial]]. En la mayor\'ia de los problemas, el agente se enfrenta a pruebas gen\'ericas que pueden tener factores aleatorios y/o agentes directamente programados. En algunos problemas, sin embargo, los agentes de la poblaci\'on pueden enfrentarse entre ellos para obtener una valoraci\'on.
 
- En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado \flqq Entrenamiento por refuerzo de redes neuronales mediante algoritmos gen\'eticos\frqq, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. Los rendimientos obtenidos con las diferentes implementaciones paralelas y opciones en el algortimo genético se muestran en el capítulo \ref{rendimiento}.En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados de aprendizaje \ref{aprendizaje} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
+En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado /<<Aprendizaje por refuerzo mediante algoritmos genéticos de redes neuronales paralelizadas con GPGPU>>/, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. Los rendimientos obtenidos con las diferentes implementaciones paralelas y opciones en el algortimo genético se muestran en el capítulo \ref{rendimiento}. En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados de aprendizaje \ref{aprendizaje} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
 
 \newpage
 * MODIFICAR [0/4] Base te\'orica
 #+LaTeX: \label{baseTeorica}
 
-Tanto las redes neuronales como los algoritmos gen\'eticos est\'an inspirados en la naturaleza y han sido utilizados desde largo tiempo atr\'as. Las redes neuronales est\'an inspiradas en el funcionamiento del cerebro, como un sistema de procesamiento de informaci\'on distribuido. Por su parte, los algoritmos gen\'eticos se basan en la teor\'ia de la evoluci\'on de Darwin, por la que la evoluci\'on se produce a trav\'es de dos principios b\'asicos: los individuos que no se adaptan suficientemente al medio perecen, mientras que los que s\'i lo hacen transmiten sus genes con cierta variabilidad. Esta variabilidad puede proceder de dos fuentes: la cruza de genes entre individuos \'o la mutaci\'on directa de genes.
+Tanto las redes neuronales como los algoritmos gen\'eticos est\'an inspirados en la naturaleza y han sido utilizados desde largo tiempo atr\'as. Las redes neuronales est\'an inspiradas en el funcionamiento del cerebro, como un sistema de procesamiento de informaci\'on distribuido. Por su parte, los algoritmos gen\'eticos se basan en la teor\'ia de la evoluci\'on de Darwin, por la que la evoluci\'on se produce a trav\'es de dos principios b\'asicos: los individuos que no se adaptan suficientemente al medio perecen, mientras que los que s\'i lo hacen transmiten sus genes con cierta variabilidad. Esta variabilidad puede proceder de dos fuentes: el cruce de genes entre individuos \'o la mutaci\'on directa de esos genes.
 
 La combinaci\'on de estas dos t\'ecnicas es algo relativamente reciente. Algunos - principalmente anglosajones - han coincidido en llamar a esta s\'intesis [[http://en.wikipedia.org/wiki/Neuroevolution][neuro-evoluci\'on]], otros se refieren a ella como [[http://laral.istc.cnr.it/nolfi/papers/HBTNN-A.pdf][evoluci\'on de redes neuronales artificiales]], pero - en general - la mayor\'ia de los que la usan recurren a nombres que definen con m\'as precisi\'on la t\'ecnica concreta que utilizan; dadas las m\'ultiples posibilidades para combinar ambos m\'etodos. Aceptaremos el t\'ermino neuro-evoluci\'on para el resto del texto, aunque sin renunciar a los otros t\'erminos que hayan podido ser utilizados como redes neuronales evolutivas.
 
@@ -166,7 +165,7 @@ Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de 
 
  Por lo tanto, un algoritmo gen\'etico consiste en lo siguiente: hallar de qu\'e par\'ametros depende el problema, codificarlos en un cromosoma, y se aplican los m\'etodos de la evoluci\'on: selecci\'on y reproducci\'on sexual con intercambio de informaci\'on y alteraciones que generan diversidad. En las siguientes secciones se ver\'an cada uno de los aspectos de un algoritmo gen\'etico.
 
- Mediante los operadores de selecci\'on, se eligen los individuos que ser\'an progenitores de la siguiente generaci\'on (o directamente formar\'an parte de ella). Con los operadores de cruza, se generan nuevos individuos mezclando los cromosomas de varios individuos (normalmente, dos). Por \'ultimo, los operadores de mutaci\'on a\~naden cambios aleatorios a los individuos. La funci\'on de fitness nos da una aproximaci\'on de la adaptaci\'on del individuo al medio y \'esta es utilizada por los operadores de selecci\'on.
+ Mediante los operadores de selecci\'on, se eligen los individuos que ser\'an progenitores de la siguiente generaci\'on (o directamente formar\'an parte de ella). Con los operadores de cruce, se generan nuevos individuos mezclando los cromosomas de varios individuos (normalmente, dos). Por \'ultimo, los operadores de mutaci\'on a\~naden cambios aleatorios a los individuos. La funci\'on de fitness nos da una aproximaci\'on de la adaptaci\'on del individuo al medio y \'esta es utilizada por los operadores de selecci\'on.
 
  En nuestro caso, el cromosoma de cada individuo lo forman los pesos de la red que utiliza ese individuo. Para calcular el fitness del individuo, se construir\'a la red con los pesos del cromosoma y se realizar\'an varias pruebas (para reducir el ruido generado por los posibles factores aleatorios de \'estas) sobre el individuo, sumando las recompensas de todas y obteniendo el citado fitness.
 
@@ -176,7 +175,7 @@ Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de 
 *** Operadores de selección
 #+LaTeX: \label{basTeoGenetSel}
 
-*** Operadores de cruza
+*** Operadores de cruce
 #+LaTeX: \label{basTeoGenetCruz}
 
 ** MODIFICAR Fortalezas y deficiencias
@@ -254,7 +253,7 @@ Un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algori
 \end{minipage}
 \end{figure}
 
- Uno de los problemas a los que se enfrenta la evoluci\'on de redes neuronales es el problema de la permutaci\'on. Es causado por el mapeado "muchos-a-uno" desde la representaci\'on en el cromosoma a la red que es construida. Con dos cromosomas distintos se pueden generar redes equivalentes como se muestra en las figuras \ref{figGrafo1} y \ref{figGrafo2}. Se puede solucionar dando m\'as importancia al operador de mutaci\'on que al de cruza (que es el que sufre con este problema) o con otros m\'etodos matem\'aticos \cite[Gomez, Miikkulainen 2003]{GomezMiikkulainen2003}. 
+ Uno de los problemas a los que se enfrenta la evoluci\'on de redes neuronales es el problema de la permutaci\'on. Es causado por el mapeado "muchos-a-uno" desde la representaci\'on en el cromosoma a la red que es construida. Con dos cromosomas distintos se pueden generar redes equivalentes como se muestra en las figuras \ref{figGrafo1} y \ref{figGrafo2}. Se puede solucionar dando m\'as importancia al operador de mutaci\'on que al de cruce (que es el que sufre con este problema) o con otros m\'etodos matem\'aticos \cite[Gomez, Miikkulainen 2003]{GomezMiikkulainen2003}. 
 
 \newpage
 * MODIFICAR [0/2] An\'alisis del problema
@@ -294,48 +293,6 @@ Primero se describirán las clases fachada y el resto de clases utilizadas para 
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
 
-*** HACER Interface: 
-#+LaTeX: \label{disenoRedesInter}
-
-Para unificar ciertas tareas comunes y tener una estructura de datos manipulable desde
-
-*** HACER Buffer: 
-#+LaTeX: \label{disenoRedesBuff}
-
-Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación ínterna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase Buffer. Esta clase abstracta implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como hemos dicho, a esas peculiaridades se accederá utilizando polimorfismo. 
-
-Los métodos que Buffer ofrece son:
-
-- El destructor: aunque nunca es recomendable llamarlo explícitamente, como para cualquier otra clase. Notesé que el constructor no es público y, por tanto, no se podrá instanciar esta clase directamente. Se deberá utilizar siempre la clase Factory
-- copyFromInterface(Interface* interface): 
-- void copyToInterface(Interface* interface)
-- virtual void copyFrom(Buffer* buffer)
-- virtual void copyTo(Buffer* buffer)
-- virtual Buffer* clone()
-- void* getDataPointer()
-- unsigned getSize()
-- Interface* toInterface()
-- void save(FILE* stream)
-- void load(FILE* stream)
-- void print()
-- float compareTo(Buffer* other)
-- void random(float range)
-
-
-
-- ImplementationType getImplementationType()
-    virtual BufferType getBufferType() = 0;
-    virtual void reset() = 0;
-*** HACER Connection:
-*** HACER Layer:
-*** HACER InputLayer:
-*** HACER NeuralNet:
-
-#+LaTeX: \label{disenoNeural}
-
-Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene un grafo dirigido con capas (Layer )
-Al nivel más alto, la clase que utilizaremos es NeuralNet, que implementa una red neuronal concreta
-
 ** HACER Estructuras para algoritmos genéticos
 #+LaTeX: \label{disenoGenetic}
 ** HACER Utilidades para la experimentación
@@ -353,7 +310,7 @@ En general, para cada nueva generación se realiza la siguiente secuencia de acc
 
 1) Selección: se puede definir una cantidad independiente de individuos a seleccionar con cada operador de selección. De esta manera, se pueden utilizar varios operadores de selección simultaneamente y combinarlos de infinidad de formas. Se deben seleccionar un mínimo de dos progenitores en cada generación para que el siguiente fallo no resulte en error.
 
-2) Cruza: una vez seleccionados los progenitores, se genera a partir de ellos la descendencia, los nuevos individuos. Los progenitores se van eligiendo aleatoriamente y si van marcando para no ser usados dos veces. Si se han seleccionado menos individuos de los que se quieren generar mediante cruza, cuando todos hayan sido usados una vez se desmarcarán para poder ser reutilizados y continuar con la generación de la descendencia mediante la cruza. Por tanto, el número de nuevos individuos por generación puede ser tanto mayor como menor al número de progenitores seleccionados. Además, como ocurría en la selección, varios operadores de cruza diferentes pueden combinarse también. En este caso, cada operador de cruza puede ser aplicado a un nivel de cruza diferente (ver sección \ref{disenoGeneNiv}) y cada una de estas combinaciones se le puede asignar un número independiente de individuos a generar por cruza. Por tanto, en este caso las posibilidades son aún más abundantes que para la selección.
+2) Cruce: una vez seleccionados los progenitores, se genera a partir de ellos la descendencia, los nuevos individuos. Los progenitores se van eligiendo aleatoriamente y si van marcando para no ser usados dos veces. Si se han seleccionado menos individuos de los que se quieren generar mediante cruce, cuando todos hayan sido usados una vez se desmarcarán para poder ser reutilizados y continuar con la generación de la descendencia mediante el cruce. Por tanto, el número de nuevos individuos por generación puede ser tanto mayor como menor al número de progenitores seleccionados. Además, como ocurría en la selección, varios operadores de cruce diferentes pueden combinarse también. En este caso, cada operador de cruce puede ser aplicado a un nivel de cruce diferente (ver sección \ref{disenoGeneNiv}) y cada una de estas combinaciones se le puede asignar un número independiente de individuos a generar por cruce. Por tanto, en este caso las posibilidades son aún más abundantes que para la selección.
 
 3) Olvido: a cada uno de los individuos de la descendencia se le aplica el operador de olvido determinístico o probabilístico (o los dos, aunque no tenga mucho sentido) como se detalla en la sección \ref{disenoGeneMut}.
 
@@ -404,21 +361,21 @@ El tamaño típico y, por ello, el valor por defecto que hemos seleccionado para
 
 La selección elitista es la más sencilla de todas. Simplemente se cogen los N (donde N es el número de individuos a seleccionar por este método) más aptos desde el principio de la lista ordenada de la población.
 
-** Operadores de cruza
+** Operadores de cruce
 #+LaTeX: \label{disenoGeneCruz}
 
 Aunque aceptamos varias definiciones de gen, como se explica en la sección \ref{disenoGeneNiv}, en esta sección trataremos las formas en que se pueden cruzar dos individuos, produciendo dos descencientes con los genes de los progenitores combinados de forma complementaria (todos los genes de los progenitores irán a un descendiente o a otro, aunque puede que uno de los descendientes se deseche si sobra). 
 
-Todos los esquemas de cruce se aplican primero sobre un vector de bits (cada bit representa un gen) y luego se aplica el crossover usando ese vector. Esto permite compartir una sóla interfaz para la cruza a bajo nivel. Dada la diversidad de implementaciones de las redes neuronales, la cantidad de código se multiplicaría con los distintos esquemas de cruza de forma que el código sería mucho más complicado de desarrollar y mantener. Esto permite extender nuestro algoritmo genético con nuevos esquemas de cruza sin necesidad de modificar las distintas implementaciones (C, SEE2, CUDA). 
+Todos los esquemas de cruce se aplican primero sobre un vector de bits (cada bit representa un gen) y luego se aplica el crossover usando ese vector. Esto permite compartir una sóla interfaz para el cruce a bajo nivel. Dada la diversidad de implementaciones de las redes neuronales, la cantidad de código se multiplicaría con los distintos esquemas de cruce de forma que el código sería mucho más complicado de desarrollar y mantener. Esto permite extender nuestro algoritmo genético con nuevos esquemas de cruce sin necesidad de modificar las distintas implementaciones (C, SEE2, CUDA). 
 
-También es posible crear una nueva implementación (por ejemplo, usando openCL) sin necesidad de implementar por separado cada uno de los esquemas de cruza. De otra manera, la complejidad del código crecería NxM con respecto al número de esquemas de cruza y de implementaciones paralelas. De esta manera, sólo hay que implementar N + M.
+También es posible crear una nueva implementación (por ejemplo, usando openCL) sin necesidad de implementar por separado cada uno de los esquemas de cruce. De otra manera, la complejidad del código crecería NxM con respecto al número de esquemas de cruce y de implementaciones paralelas. De esta manera, sólo hay que implementar N + M.
 
-Además, los pesos pueden estar dispuestos de forma diferente en memoria dependiendo de la implementación, como sucede en el caso descrito en las secciones \ref{disenoParalCUDAinv} y \ref{disenoParalCUDAcruza}, en el que la matriz de pesos se almacena invertida en memoria. En ese caso, basta con invertir la matriz de bits interfaz, en lugar de reimplementar el algoritmo de cruza que comparte con otros algoritmos CUDA.
+Además, los pesos pueden estar dispuestos de forma diferente en memoria dependiendo de la implementación, como sucede en el caso descrito en las secciones \ref{disenoParalCUDAinv} y \ref{disenoParalCUDAcruza}, en el que la matriz de pesos se almacena invertida en memoria. En ese caso, basta con invertir la matriz de bits interfaz, en lugar de reimplementar el algoritmo de cruce que comparte con otros algoritmos CUDA.
 
 *** Uniforme
 #+LaTeX: \label{disenoGeneCruzUni}
 
-Para la cruza uniforme, se debe indicar un parámetro "probabilidad", que puede ser configurado independientemente para cada nivel de cruza.
+Para el cruce uniforme, se debe indicar un parámetro "probabilidad", que puede ser configurado independientemente para cada nivel de cruce.
 Para generar el hijo A, por cada gen de los progenitores, se elige un número aleatorio en el intervalo (0, 1). Si el número es menor que la probabilidad, se cogerá el gen del progenitor B, en caso contrario, el del progenitor A. Para generar el hijo B, se utilizan los genes que no se hayan utilizado para el descendiente A.
 
 La probabilidad por defecto para todos los niveles es 0.7.
@@ -426,7 +383,7 @@ La probabilidad por defecto para todos los niveles es 0.7.
 *** Proporcional
 #+LaTeX: \label{disenoGeneCruzProp}
 
-Este modo de cruza funciona de forma similar al anterior, con la diferencia de que la probabilidad no es especificada por el usuario, sino que se calcula a partir de los fitness de los progenitores. Tradicionalmente, se usa la siguiente fórmula:
+Este modo de cruce funciona de forma similar al anterior, con la diferencia de que la probabilidad no es especificada por el usuario, sino que se calcula a partir de los fitness de los progenitores. Tradicionalmente, se usa la siguiente fórmula:
 
 \begin{equation}\label{eqCruzProp}
   probabilidad = finessA / (fitnessA + fitnessB)
@@ -448,12 +405,12 @@ Esta fórmula sólo admite finess positivos, pero en nuestro caso hemos admitido
   probabilidad = -finessB / -(fitnessA + fitnessB)
 \end{equation}
 
-Aunque contemplar estos casos especiales puede parecer una complicación innecesaria, nos permite que este tipo de cruza sea compatible con tareas que admiten fitness negativos en lugar de tener que lanzar un error.
+Aunque contemplar estos casos especiales puede parecer una complicación innecesaria, nos permite que este tipo de cruce sea compatible con tareas que admiten fitness negativos en lugar de tener que lanzar un error.
 
 *** Multi-punto
 #+LaTeX: \label{disenoGeneCruzMulti}
 
-En la literatura convencional, frecuentemente se mencionan la "cruza de un punto" o la "cruza de dos puntos", pero en realidad son casos concretos de la más general "cruza multipunto". Por ello, se ha decido implementar sólo esta última, creando un parámetro "número de puntos" que puede ser configurado independientemente para cada nivel de cruza. El número de puntos por defecto para todos los niveles es 1.
+En la literatura convencional, frecuentemente se mencionan el "cruce de un punto" o el "cruce de dos puntos", pero en realidad son casos concretos del caso más general "cruce multipunto". Por ello, se ha decido implementar sólo esta última, creando un parámetro "número de puntos" que puede ser configurado independientemente para cada nivel de cruce. El número de puntos por defecto para todos los niveles es 1.
 
 El funcionamiento general es el siguiente:
 
@@ -463,13 +420,13 @@ El funcionamiento general es el siguiente:
 
 De esta manera, se va alternando el progenitor en cada punto. Como siempre, el decendiente B usará los genes que no haya usado el descendiente A.
 
-** Niveles de cruza
+** Niveles de cruce
 #+LaTeX: \label{disenoGeneNiv}
 
 *** Pesos y umbrales
 #+LaTeX: \label{disenoGeneNivPes}
 
-Este es el nivel de cruza más pesado y sensible de todos. Todas las capas se colocan una detrás de otra con sus pesos seguidos de sus umbrales. Cada peso o umbral es un gen.
+Este es el nivel de cruce más pesado y sensible de todos. Todas las capas se colocan una detrás de otra con sus pesos seguidos de sus umbrales. Cada peso o umbral es un gen.
 
 *** Neurona
 #+LaTeX: \label{disenoGeneNivNeu}
@@ -487,7 +444,7 @@ Este caso es muy similar al anterior, pero se cambia la definición de lo que se
 
 Para el nivel de capa, cada capa, valga la redundancia, es considerada un gen. Una capa incluye todas sus neuronas con sus pesos y umbrales, entendiendo una neurona como se hace en el apartado \ref{disenoGeneNivNeu} y no como la neurona invertida.
 
-Aunque intuitivamente se puede pensar que este tipo de cruza no será muy útil si las capas son muy pocas o muy grandes, se ha decido implementar también este nivel de cruza para comparar el aprendizaje.
+Aunque intuitivamente se puede pensar que este tipo de cruce no será muy útil si las capas son muy pocas o muy grandes, se ha decido implementar también este nivel de cruce para comparar el aprendizaje.
 
 ** Mutación y olvido
 #+LaTeX: \label{disenoGeneMut}
@@ -511,7 +468,7 @@ Para activar cualquiera de las dos modalidades en cualquiera de los dos operador
 #+LaTeX: \label{disenoParal}
 ** Introducción
 
-Tanto los algoritmos genéticos como las redes neuronales requieren cálculos que presentan paralelismos inherentes. Para este proyecto se ha escogido explotar exclusivamente los de las redes neuronales (aunque también se paraleliza el operador genético de cruza para GPGPU, como se describe en la sección \ref{disenoParalCUDAcruza}). Pero la implementación se podría extender para aprovechar también los de los algoritmos genéticos, por ejemplo, utilizando múltiples CPUs y GPUs, usando una CPU para cada individuo y administrando las GPUs según su disponibilidad. Esto requeriría cambios no triviales en el modo en que las poblaciones son procesadas cada generación si se quiere extender la librería en ese sentido. Nuestras paralelizaciones solamente usan una CPU. Se han optado por dos alternativas que se comparan.
+Tanto los algoritmos genéticos como las redes neuronales requieren cálculos que presentan paralelismos inherentes. Para este proyecto se ha escogido explotar exclusivamente los de las redes neuronales (aunque también se paraleliza el operador genético de cruce para GPGPU, como se describe en la sección \ref{disenoParalCUDAcruza}). Pero la implementación se podría extender para aprovechar también los de los algoritmos genéticos, por ejemplo, utilizando múltiples CPUs y GPUs, usando una CPU para cada individuo y administrando las GPUs según su disponibilidad. Esto requeriría cambios no triviales en el modo en que las poblaciones son procesadas cada generación si se quiere extender la librería en ese sentido. Nuestras paralelizaciones solamente usan una CPU. Se han optado por dos alternativas que se comparan.
 
 Gracias al diseño modular por el que se ha optado, es posible añadir otras implementaciones paralelas de las redes neuronales (por ejemplo, usando el lenguaje OpenCL) tan sólo implementando unos pocos métodos en un par de clases que extiendan las clases Fachada (TODO nota al pie sobre el patrón de diseño) que contienen toda la parte susceptible de ser cambiada para obtener mejor rendimiento.
 
@@ -1286,7 +1243,7 @@ En la sección anterior \label{disenoParalCUDAsal} la causa del acceso no coales
 
 Si estuviesemos considerando un algortimo genérico de multiplicación de un vector por una matriz, tendríamos que contabilizar el coste de invertir la matriz como parte del coste total de ejecución, pues la inversión se realizaría siempre antes de hacer la operación. Pero nuestro caso es diferente. Podemos tener los pesos siempre invertidos en memoria. Tan sólo cuando la red sea almacenada o leída desde disco (por compatibilidad con las otras implementaciones paralelas), deben ser invertidas las matrices su formato normal. Cuando una capa es generada aleatoriamente, ni siquiera es necesaria la inversión. Sin embargo el cáculo del estado de una capa de una red neuronal se ejecutará probablemente varias veces durante la evaluación de un individuo y la evaluación de los individuos se repetirá por muchas generaciones. Por ello, no tenemos en cuenta los costes de la inversión de la matriz de pesos al comparar este algoritmo con otros, pues es bastante irrelevante.
 
-La inversión de la matriz, sin embargo, sí tiene costes en cuanto a desarrollo de software. Las operaciones de mutación, cruza y olvido tienen que tener en cuenta esta colocación especial. El caso más complicado sería la cruza, aunque con el diseño descrito en la sección \ref{disenoGeneCruz}, la inversión se podrá hacer sobre el vector de bits que actua como interfaz para los diferentes esquemas de cruza y las diferentes implementaciones paralelas, cuyas disposiciones de pesos en memoria, como sucede en este caso, pueden variar. 
+La inversión de la matriz, sin embargo, sí tiene costes en cuanto a desarrollo de software. Las operaciones de mutación, cruce y olvido tienen que tener en cuenta esta colocación especial. El caso más complicado sería el cruce, aunque con el diseño descrito en la sección \ref{disenoGeneCruz}, la inversión se podrá hacer sobre el vector de bits que actua como interfaz para los diferentes esquemas de cruce y las diferentes implementaciones paralelas, cuyas disposiciones de pesos en memoria, como sucede en este caso, pueden variar. 
 
 Resuelto el problema de la inversión desde el diseño y fuera de nuestro código CUDA, veamos los cambios que se han de aplicar sobre el kernel anterior para conseguir el acceso coalescente y poder mejorar su rendimiento:
 
@@ -1403,7 +1360,7 @@ Como vimos en el apartado del diseño \ref{disenoRedes}, las diferentes funcione
 *** REVISAR Operador de cruce
 #+LaTeX: \label{disenoParalCUDAcruza}
 
-Como se explicó en \ref{disenoGeneCruz} y en \ref{disenoParalCUDAinv}, la implementación del operador genético de cruza es independiente del esquema de cruza y de la disposición de los pesos en memoria de cada implementación paralela. Tan sólo se tiene que recorrer dos matrices de pesos como si fuesen dos vectores y intercambiar el valor de cada peso o no en función de si está activo el bit correspondiente en el vector de bits del mismo tamaño que también se recibirá como parámetro. Por tanto, todas las demás consideraciones han debido aplicarse ya de antemano sobre el vector de bits.
+Como se explicó en \ref{disenoGeneCruz} y en \ref{disenoParalCUDAinv}, la implementación del operador genético de cruce es independiente del esquema de cruce y de la disposición de los pesos en memoria de cada implementación paralela. Tan sólo se tiene que recorrer dos matrices de pesos como si fuesen dos vectores y intercambiar el valor de cada peso o no en función de si está activo el bit correspondiente en el vector de bits del mismo tamaño que también se recibirá como parámetro. Por tanto, todas las demás consideraciones han debido aplicarse ya de antemano sobre el vector de bits.
 
 El vector de bits llegará al kernel como un array de enteros sin signo y se deberá acceder a los bits individuales usando máscaras y operaciones lógicas.
 Esta sería una primera aproximación:
@@ -1435,7 +1392,7 @@ Sin embargo, esta forma de acceso al vector de bits es altamente ineficiente. Lo
 
 Todo esto se podría evitar si los datos estuviesen dispuestos de otra manera en memoria. No podemos modificar la posición de los pesos porque las optimizaciones para el cálculo de estado de las neuronas descritas en las secciones anteriores dependen de estas posiciones. Sin embargo podemos modificar la posición en el vector de bits para conseguir nuestro objetivo.
 
-Si cada hilo se ocupase de los 32 bits de una posición del array =bitBuffer=, el acceso también podría ser coalescente y a además el valor se podría alamacenar directamente en un registro. Pero entonces dejaría de ser coalescente el acceso a los propios vectores de pesos, pues cada hilo querría acceder a 32 pesos contiguos. A no ser, que el vector de bits viniese ya colocado de la forma que queremos, para que una posición de =bitBuffer= no representase 32 pesos contiguos, sino 32 los 32 pesos a los que su hilo puede acceder de forma coalescente. Debemos aplicar una transformación adicional sobre el vector de bits (si es que ya ha tenido alguna, por ejemplo, por la inversión de las matriz de pesos) para adaptarlo a nuestro nuevo algoritmo antes de llamar al kernel. Podemos aprovechar el momento en que creemos un Buffer CUDA a partir de una Interfaz (ver secciones \ref{disenoRedesInter} y \ref{disenoRedesBuff}) para realizar esta transformación. 
+Si cada hilo se ocupase de los 32 bits de una posición del array =bitBuffer=, el acceso también podría ser coalescente y a además el valor se podría alamacenar directamente en un registro. Pero entonces dejaría de ser coalescente el acceso a los propios vectores de pesos, pues cada hilo querría acceder a 32 pesos contiguos. A no ser, que el vector de bits viniese ya colocado de la forma que queremos, para que una posición de =bitBuffer= no representase 32 pesos contiguos, sino 32 los 32 pesos a los que su hilo puede acceder de forma coalescente. Debemos aplicar una transformación adicional sobre el vector de bits (si es que ya ha tenido alguna, por ejemplo, por la inversión de las matriz de pesos) para adaptarlo a nuestro nuevo algoritmo antes de llamar al kernel. Podemos aprovechar el momento en que creemos un Buffer CUDA a partir de una Interfaz (ver secciones \ref{disenoRedes},  \ref{apiRedesInter} y \ref{apiRedesBuff}) para realizar esta transformación. 
 
 Pero antes de ver cómo realizaríamos la transformación, vemos como sería nuestro nuevo kernel. Cada hilo accederá a =BITS_PER_UNSIGNED= elementos de los arrays de pesos, cada bloque accederá a =blockDim.x * BITS_PER_UNSIGNED=. El salto entre las posiciones de un bloque y las del siguiente multiplicará el tamaño del bloque por =BITS_PER_UNSIGNED=, pero los hilos de un mismo bloque sequirán accediendo a posiciones contiguas:
 
@@ -1509,7 +1466,7 @@ CudaBuffer(Interface* bitBuffer, unsigned block_size)
 }
 #+end_src
 
-Esta función no es pprecisamente elegante, pues básicamente reproduce lo que tendŕía que hacer el kernel de forma serializada para cambiar las posiciones para el acceso coalescente. Y será llamado antes de realizar una cruza con dos redes CUDA. Aunque esta transforamción puede parecer una penalización importante, mantenemos esta implementación del cruce se lo asignamos a la versión de reducción inicial (implementada en la clase cudaReduction0Connection, descrita en la sección \ref{implCudaReduc0Con}), que también se mantiene para hacer comparativas.
+Esta función no es pprecisamente elegante, pues básicamente reproduce lo que tendŕía que hacer el kernel de forma serializada para cambiar las posiciones para el acceso coalescente. Y será llamado antes de realizar un cruce con dos redes CUDA. Aunque esta transforamción puede parecer una penalización importante, mantenemos esta implementación del cruce se lo asignamos a la versión de reducción inicial (implementada en la clase cudaReduction0Connection, descrita en la sección \ref{implCudaReduc0Con}), que también se mantiene para hacer comparativas.
 
 Afortunadamente, exite otra solución mucho más elegante y que nos parece también más eficiente (aunque reservamos los resultados de la comparación para la sección de resultados \ref{rendImplCruce}).
 
@@ -1682,7 +1639,57 @@ sudo aptitude install texlive-latex-recommended texlive-latex-extra
 #+LaTeX: \label{implCudaReduc0Con}
 ** HACER Uso general (API)
 #+LaTeX: \label{manualProgrApi}
-** HACER Extensibilidad a partir de interfaces
+*** HACER Neural
+#+LaTeX: \label{apiNeural}
+
+Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
+
+**** HACER Interface: 
+#+LaTeX: \label{apiRedesInter}
+
+Para unificar ciertas tareas comunes y tener una estructura de datos manipulable desde
+
+**** HACER Buffer: 
+#+LaTeX: \label{apiRedesBuff}
+
+Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación ínterna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase Buffer. Esta clase abstracta implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como hemos dicho, a esas peculiaridades se accederá utilizando polimorfismo. 
+
+Los métodos que Buffer ofrece son:
+
+- El destructor: aunque nunca es recomendable llamarlo explícitamente, como para cualquier otra clase. Notesé que el constructor no es público y, por tanto, no se podrá instanciar esta clase directamente. Se deberá utilizar siempre la clase Factory
+- copyFromInterface(Interface* interface): 
+- void copyToInterface(Interface* interface)
+- virtual void copyFrom(Buffer* buffer)
+- virtual void copyTo(Buffer* buffer)
+- virtual Buffer* clone()
+- void* getDataPointer()
+- unsigned getSize()
+- Interface* toInterface()
+- void save(FILE* stream)
+- void load(FILE* stream)
+- void print()
+- float compareTo(Buffer* other)
+- void random(float range)
+
+
+
+- ImplementationType getImplementationType()
+    virtual BufferType getBufferType() = 0;
+    virtual void reset() = 0;
+**** HACER Connection:
+**** HACER Layer:
+**** HACER InputLayer:
+**** HACER NeuralNet:
+#+LaTeX: \label{apiNeuralNet}
+
+Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene un grafo dirigido con capas (Layer )
+Al nivel más alto, la clase que utilizaremos es NeuralNet, que implementa una red neuronal concreta
+
+*** HACER Genetic
+#+LaTeX: \label{disenoGenetic}
+*** HACER Loop
+#+LaTeX: \label{disenoLoop}
+*** HACER Extensibilidad a partir de interfaces
 #+LaTeX: \label{manualProgrInterf}
 \newpage
 * REVISAR [2/3] Resultados: Rendimiento
@@ -2142,7 +2149,7 @@ Simplemente un detalle de la anterior sin meter la implementación C
 *** MODIFICAR Cruce
 #+LaTeX: \label{rendImplCruce}
 
-El cruce para BIT y para SIGN es idéntico, los dos se hacen sobre pesos de un byte en lugar de pesos de 4 bytes (float), por lo que se omite el tipo de neurona bipolar (SIGN) en esta prueba. No hay una diferencia sustancial de rendimiento entre los diferentes tipos de neuronas (FLOAT y BIT) para las implementaciones C y SSE2. La cruza de SSE2 se ve ligeramente penalizada, Como en el método de la activación, aunque no se aprecia muy bien en la gráfica \ref{grafImplCrossover}. En este caso se debe al almacenamiento especial de los pesos para SSE2, que usa bloques de pesos en vez de pesos individuales.
+El cruce para BIT y para SIGN es idéntico, los dos se hacen sobre pesos de un byte en lugar de pesos de 4 bytes (float), por lo que se omite el tipo de neurona bipolar (SIGN) en esta prueba. No hay una diferencia sustancial de rendimiento entre los diferentes tipos de neuronas (FLOAT y BIT) para las implementaciones C y SSE2. El cruce de SSE2 se ve ligeramente penalizado, como en el método de la activación, aunque no se aprecia muy bien en la gráfica \ref{grafImplCrossover}. En este caso se debe al almacenamiento especial de los pesos para SSE2, que usa bloques de pesos en vez de pesos individuales.
 La implementación CUDA es algo más lenta. Aunque tampoco hay mucha diferencia entre los tipos de neuronas para esta implementación, las de tipo BIT hacen el cruce más rápido.
 
 Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en segundos. Los pesos y otros valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Los vectores de bits que determinan qué pesos tendrán que cruzarse también se determinan aleatoriamente con 1 ó 0. El tamaño de la capa de salida es 100 la mitad de las veces y 150 la otra mitad, haciendose la media. Se permutan los tipos de neuronas FLOAT y SIGN con los tipos de implementación C, SSE2 y CUDA para obtener cada curva. Cada combinación se repite 5000 veces para hacer la media y reducir el ruido.
@@ -2243,9 +2250,9 @@ Esta sección compara empíricamente el rendimiento computacional de los algorit
 
 Esta prueba se ha realizado usando un tamaño como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. Este tamaño es el tamaño de las capas entradas y el de las internas. La coordenada Y es el tiempo en segundos. Se usan dos capas de entrada a la red (iguales). Los pesos se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El número de capas internas es 1 la mitad de las veces y 2 la otra mitad, haciendose la media. Se usa el tipo de neurona FLOAT la mitad de las veces y BIT la otra mitad, haciéndose la media. Para obtener cada curva, se usan los tipos de cruce UNIFORM, MULTIPOINT y PROPORTIONAL. Es primero se prueba con las probabilidad de cruce de 0.2 y 0.4. El segundo tipo se prueba con 1 y 6 puntos de cruce. Para el algortimo PROPORTIONAL se usa siempre un fitness de 1 para un individuo y 1.5 para el otro. Cada combinación se repite 50 veces para hacer la media y reducir el ruido.
 
-Como muestra la figura \ref{rendGenCruza} el nivel de cruza más costoso es el propio peso, el más barato es el nivel de capa completa y los niveles de neurona tienen rendimientos intermedios y parecidos independientemente de cómo se interprete qué pesos pertenecen a una neurona (si los pesos de entrada a la neurona o los pesos de salida de la misma). 
+Como muestra la figura \ref{rendGenCruza} el nivel de cruce más costoso es el propio peso, el más barato es el nivel de capa completa y los niveles de neurona tienen rendimientos intermedios y parecidos independientemente de cómo se interprete qué pesos pertenecen a una neurona (si los pesos de entrada a la neurona o los pesos de salida de la misma). 
 
-#+CAPTION:    Rendimiento de los distintos operadores genéticos de cruza en función del tamaño de las capas de neuronas internas.
+#+CAPTION:    Rendimiento de los distintos operadores genéticos de cruce en función del tamaño de las capas de neuronas internas.
 #+LABEL:      rendGenCruza
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Individual_crossover.png]]
@@ -2256,7 +2263,7 @@ Para el cruce a nivel de peso, el más lento por tener los genes más pequeños 
 
 Con el cruce a nivel de capa, ocurre lo contrario: el uniforme con probabilidad 0.2 se mantiene en el medio, pero ahora los algoritmos más rápidos son el uniforme con una probabilidad del 40% y el proporcional, mientras que los multi-punto son más lentos.
 
-El uniforme con una probabilidad del 20% es igual de rápido para el nivel de neurona independientemente de si se la trata de forma invertida o no. Es el más rápido para este nivel de cruce. Para el resto de esquemas de cruza, el nivel de neurona es más lento que el de neurona invertida.
+El uniforme con una probabilidad del 20% es igual de rápido para el nivel de neurona independientemente de si se la trata de forma invertida o no. Es el más rápido para este nivel de cruce. Para el resto de esquemas de cruce, el nivel de neurona es más lento que el de neurona invertida.
 
 Para en nivel de neurona sin invertir, el multi-punto con un sólo corte es el más lento y todos los demás, el multi-punto con 6 cortes, el uniforme 40% y el proporcional obtienen tiempos iguales.
 
@@ -2389,7 +2396,7 @@ Para la tarea Reversi todos los tipos de neuronas obtienen resultados bastante s
 ** Comparaci\'on de operadores gen\'eticos
 #+LaTeX: \label{aprendOperGen}
 
-Para estudiar el aprendizaje con los distintos operadores genéticos, se han probado cada una de las 4 tareas implementadas y se han generado gráficas de cada una de ellas por separado. Se ha utilizado un tamaño de población de 8 individuos, de los cuales se seleccionan 4 en cada iteración, que se cruzan, se mutan se prueban los nuevos individuos generados para insertarlos ordenadamente en la población anterior, quedando de nuevo 8. De esta manera, se desechan los 4 peores de entre los 8 que había y los 4 nuevos generados. En caso de empate se favorece a los nuevos, siguiendo el criterio de búsqueda neutral (TODO falta referencia bibliográfica aquí). Cada población utiliza un esquema de selección, cruza y mutación concretos, pero para cada gráfica se hace la media de todos los esquemas posibles (salvo para el operador concreto que se esté estudiando en cada gráfica). El operador de olvido sólo se usa al generar sus propias gráficas, haciendo la media con el todas las posibilidades en el resto de operadores.
+Para estudiar el aprendizaje con los distintos operadores genéticos, se han probado cada una de las 4 tareas implementadas y se han generado gráficas de cada una de ellas por separado. Se ha utilizado un tamaño de población de 8 individuos, de los cuales se seleccionan 4 en cada iteración, que se cruzan, se mutan se prueban los nuevos individuos generados para insertarlos ordenadamente en la población anterior, quedando de nuevo 8. De esta manera, se desechan los 4 peores de entre los 8 que había y los 4 nuevos generados. En caso de empate se favorece a los nuevos, siguiendo el criterio de búsqueda neutral (TODO falta referencia bibliográfica aquí). Cada población utiliza un esquema de selección, cruce y mutación concretos, pero para cada gráfica se hace la media de todos los esquemas posibles (salvo para el operador concreto que se esté estudiando en cada gráfica). El operador de olvido sólo se usa al generar sus propias gráficas, haciendo la media con el todas las posibilidades en el resto de operadores.
 
 *** Selección
 
@@ -2436,13 +2443,13 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 
 \newpage
-*** Cruza
+*** Cruce
 
 **** OR
 
 (figura \ref{aprenCrossOr}).
 
-#+CAPTION:    Aprendizaje de la tarea lógica Or con los distintos esquemas y niveles de cruza.
+#+CAPTION:    Aprendizaje de la tarea lógica Or con los distintos esquemas y niveles de cruce.
 #+LABEL:      aprenCrossOr
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Crossover_OR.png]]
@@ -2452,7 +2459,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 (figura \ref{aprenCrossAnd}).
 
-#+CAPTION:    Aprendizaje de la tarea lógica And con los distintos esquemas y niveles de cruza.
+#+CAPTION:    Aprendizaje de la tarea lógica And con los distintos esquemas y niveles de cruce.
 #+LABEL:      aprenCrossAnd
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Crossover_AND.png]]
@@ -2462,7 +2469,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 (figura \ref{aprenCrossXor}). 
 
-#+CAPTION:    Aprendizaje de la tarea lógica Xor con los distintos esquemas y niveles de cruza.
+#+CAPTION:    Aprendizaje de la tarea lógica Xor con los distintos esquemas y niveles de cruce.
 #+LABEL:      aprenCrossXor
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Crossover_XOR.png]]
@@ -2472,7 +2479,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
  gráfica \ref{aprenCrossReversi}.
 
-#+CAPTION:    Aprendizaje de la tarea Reversi con los distintos esquemas y niveles de cruza.
+#+CAPTION:    Aprendizaje de la tarea Reversi con los distintos esquemas y niveles de cruce.
 #+LABEL:      aprenCrossReversi
 #+ATTR_LaTeX: width=\textwidth
 [[./img/Crossover_REVERSI.png]]
@@ -2615,6 +2622,8 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 \end{thebibliography}
 * Footnotes
 
+[fn:cudaGPGPU] CUDA forma parte de lo que se conoce como GPGPU, que consiste en utilizar unidades de procesamiento gráfico (GPUs) para cálculos generales que no tienen por qué ser gráficos.
+
 [fn:cudaSuperComp]
 \newline
 http://gpgpu.org/2010/11/17/gpus-in-3-of-5-fastest-supercomputers
@@ -2624,3 +2633,4 @@ http://blogs.nvidia.com/2011/11/gpu-supercomputers-show-exponential-growth-in-to
 [fn:juegEstratAbst]
 \newline
 http://en.wikipedia.org/wiki/Abstract_strategy_game
+
