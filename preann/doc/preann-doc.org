@@ -1639,6 +1639,9 @@ sudo aptitude install make g++ nasm gnuplot
 sudo aptitude install texlive-latex-recommended texlive-latex-extra
 ** REVISAR [1/8] Uso general (API)
 #+LaTeX: \label{manualProgrApi}
+
+En esta sección se describen las clases implementadas y sus métodos. Explicando lo que hacen y cómo deben ser llamadas pero no necesariamente el funcionamiento interno. Se omiten los constructores por defecto (sin parámetros) y los destructores.
+
 *** REVISAR Common
 **** Enumerations
 <<<Enumerations>>>
@@ -1711,41 +1714,66 @@ Esta clase se utiliza para realizar las mediciones de tiempo de ejecución y pod
 + =void stop():= Detiene la cuenta del cronómetro. Si no se había llamado previamente a =start()= lanza una cadena como excepción.
 + =float getSeconds():= Devuelve el contenido del cronómetro en segundos. Si no se había detenido el chronómetro llamando a =stop()=, devolverá 0.
 
-*** HACER [0/6] Neural
+*** HACER [1/6] Neural
 #+LaTeX: \label{apiNeural}
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
 
+**** REVISAR <<<Buffer>>>
+
+Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación interna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase abstracta Buffer. Esta clase implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como se indicó en el diseño, a esas peculiaridades se accederá utilizando polimorfismo.  
+
+Al ser una clase abstracta, no se puede instanciar. Las clases que heredan de Buffer se describen en la sección \ref{implFactoria} y estas son sólo accesibles desde la clase Factory, por lo que la única forma de instanciarlas es usando la propia clase Factory.
+
+Esta clase tiene métodos de tres tipos: convencionales, virtuales y virtuales puros. El tener métodos virtuales puros es lo que hace que la clase sea abstracta. Estos no están definidos pero deben ser definidos en las clases que hereden de ésta para que no sean abstractas y puedan ser instanciadas. Los métodos virtuales están implementados, pero si es preciso puede cambiarse su implementación en las clases hijas. Los métodos convencionales no se pueden reimplementar para tener polimorfismo. Los métodos privados y protegidos de la clase se describen en la sección \ref{manualProgrInterfRed}, estos incluyen métodos no públicos que son virtuales puros. A continuación se describen los métodos públicos que ofrece Buffer. 
+
+Los métodos públicos y virtuales puros (deben ser implementados en las clases hijas):
+
++ =ImplementationType getImplementationType() := Devuelve el tipo de implementación del Buffer. =ImplementationType= es un enumerado descrito en Enumerations.
++ =BufferType getBufferType() := Devuelve el tipo de Buffer. =BufferType= es un enumerado descrito en Enumerations.
++ =void reset() := Inicializa a cero el valor de todos los elementos del vector.
+
+Los demás métodos públicos y virtuales son:
+
++ =void copyFrom(Buffer* buffer) := Copia los valores contenidos en el buffer parámetro y los asigna al propio objeto. No es necesario que sean de la misma implementación, pero si no son del mismo =BufferType=, se lanzará una excepción. Si el objeto que llama al método tiene un tamaño *menor* que el buffer parámetro también se lanzará una excepción. Este método llama internamente a =copyFromInterface= y =toInterface=, por lo que no es especialmente eficiente. Sin embargo, se puede reimplementar para optimizar la copia entre buffers con la misma implementación.
++ =void copyTo(Buffer* buffer) := Copia los valores contenidos en el propio objeto y los asigna al buffer parámetro. No es necesario que sean de la misma implementación, pero si no son del mismo =BufferType=, se lanzará una excepción. Si el objeto que llama al método tiene un tamaño *mayor* que el buffer parámetro también se lanzará una excepción. Este método llama internamente a =copyFromInterface= y =toInterface=, por lo que no es especialmente eficiente. Sin embargo, se puede reimplementar para optimizar la copia entre buffers con la misma implementación.
+
+El resto de métodos públicos son:
+
++ =void copyFromInterface(Interface* interface) := Copia los valores contenidos en la interfaz parámetro y los asigna al propio objeto. Si no son del mismo =BufferType=, se lanzará una excepción. Si el objeto que llama al método tiene un tamaño *menor* que el interfaz parámetro también se lanzará una excepción.
++ =void copyToInterface(Interface* interface) := Copia los valores contenidos en el propio buffer y los asigna a la interfaz parámetro. Si no son del mismo =BufferType=, se lanzará una excepción. Si el objeto que llama al método tiene un tamaño *mayor* que el interfaz parámetro también se lanzará una excepción.
++ =void* getDataPointer() := Devuelve un puntero a la posición de memoria en donde se almacenan los datos. No tiene por qué ser una posición de memoria en la RAM de la CPU, también puede apuntar a la memoria global de un dispositivo GPU, como es el caso para CudaBuffer.
++ =unsigned getSize() := Devuelve el número de elementos del buffer.
++ =Interface* toInterface() := Crea una interfaz con el mismo tamaño, =BufferType= y los mismos datos contenidos en este buffer.
++ =void save(FILE* stream) := *Guarda* el tamáño, tipo y contenido contenido del buffer *en* el fichero descrito por el parámetro stream.
++ =void load(FILE* stream) := *Carga* el tamáño, tipo y contenido contenido del buffer *desde* el fichero descrito por el parámetro stream.
++ =void print() := Muestra en la consola los contenidos del buffer en un formato legible por humanos. Llama internamente al método homónimo de Interface.
++ =float compareTo(Buffer* other) := Recorre el vector y compara cada elemento con los elementos del vector parámetro, acumulando las diferencias para luego devolverlas. Si los dos buffers no tienen el mismo tamaño a los tipos de buffer no coinciden, se lanzará un error. Internamente, se llama al método homónimo de la clase Interface.
++ =void random(float range) := Inicializa el buffer con valores aleatorios. Si el tipo de buffer es =BYTE= y valor introducido introducido es mayor que 128, se generan valores entre -127 y +128. Si el tipo de buffer es binario o bipolar (internamente se representan igual), siempre se generan valores pertenecientes a {0, 1} (en el caso bipolar {-1, +1}).
+
 **** HACER <<<Interface>>>
 
-Para unificar ciertas tareas comunes y tener una estructura de datos manipulable desde
+Para unificar ciertas tareas comunes y tener una estructura de datos manipulable desde el exterior de las clases de esta sección se implementa esta clase. es necesaria, por ejemplo para las entradas y salidas de NeuralNet. Como es muy parecida a Buffer, ésta última reutiliza, como ya se ha mencionado algunos métodos de Interface internamente. Los métodos con los que cuenta la clase son:
 
-**** HACER <<<Buffer>>>
++ =Interface(unsigned size, BufferType bufferType) := Constructor parametrizado. Se indica el tamaño y el tipo. El constructor por defecto es privado para obligar al usuario de la librería a utilizar algún otro constructor.
++ =Interface(Interface* toCopy) := Constructor copia. Con este constructor, el interfaz se incializa directamente con el tamaño, tipo y valores del interfaz parámetro. Puede ser llamado implicitamente, como cuando un Interface es un parámetro convencional (en vez de un puntero o un parámetro por referencia) de una función o método.
++ =Interface(FILE* stream) := Con éste constructor el interfaz carga directamente su tamaño, tipo y valores desde el archivo descrito por el parámetro stream.
++ =void* getDataPointer() := Devuelve un puntero al array de datos en memoria.
++ =virtual unsigned getByteSize() := DEvuelve el tamaño en bytes del array de datos en memoria.
++ =unsigned getSize() := Devuelve el número de elementos del interfaz.
++ =BufferType getBufferType() := Devuelve el tipo de vector (BufferType).
++ =float getElement(unsigned pos) := Devuelve el valor del elemento en la posición pasada por parámetro. Si la posición indicada es igual o superior al tamaño del interfaz, se lanza un error. 
++ =void setElement(unsigned pos, float value) := Asigna al elemento del vector en la posición indicada por el parámetro =pos= el valor del parámetro =value=. Si la posición indicada es igual o superior al tamaño del interfaz, se lanza un error. 
++ =void copyFromFast(Interface* other) := 
++ =void copyFrom(Interface* other) := 
++ =void print() := Muestra en la consola los contenidos del vector en un formato legible por humanos.
++ =float compareTo(Interface* other) := 
++ =void random(float range) := 
++ =void reset() := 
++ =void save(FILE* stream) := 
++ =void load(FILE* stream) := 
++ =void transposeMatrix(unsigned width) := 
 
-Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación interna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase Buffer. Esta clase abstracta implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como hemos dicho, a esas peculiaridades se accederá utilizando polimorfismo. 
-
-Los métodos que Buffer ofrece son:
-
-- El destructor: aunque nunca es recomendable llamarlo explícitamente, como para cualquier otra clase. Notesé que el constructor no es público y, por tanto, no se podrá instanciar esta clase directamente. Se deberá utilizar siempre la clase Factory
-- copyFromInterface(Interface* interface): 
-- void copyToInterface(Interface* interface)
-- virtual void copyFrom(Buffer* buffer)
-- virtual void copyTo(Buffer* buffer)
-- virtual Buffer* clone()
-- void* getDataPointer()
-- unsigned getSize()
-- Interface* toInterface()
-- void save(FILE* stream)
-- void load(FILE* stream)
-- void print()
-- float compareTo(Buffer* other)
-- void random(float range)
-
-
-
-- ImplementationType getImplementationType()
-    virtual BufferType getBufferType() = 0;
-    virtual void reset() = 0;
 **** HACER <<<Connection>>>
 **** HACER <<<Layer>>>
 **** HACER <<<InputLayer>>>
@@ -1782,6 +1810,8 @@ Al nivel más alto, la clase que utilizaremos es NeuralNet, que implementa una r
 **** HACER <<<TaskPlotter>>>
 *** HACER Ejecutables
 ** HACER Factoria e implementaciones optimizadas
+#+LaTeX: \label{implFactoria}
+
 *** HACER [0/12] Factory
 **** HACER <<<Factory>>>
 **** HACER configFactory
@@ -1798,8 +1828,14 @@ Al nivel más alto, la clase que utilizaremos es NeuralNet, que implementa una r
 **** HACER <<<CudaReductionConnection>>>
 **** HACER <<<CudaOutputsConnection>>>
 **** HACER <<<CudaInvertedConnection>>>
-** HACER Extensibilidad a partir de interfaces
+** HACER [0/3] Extensibilidad a partir de interfaces
 #+LaTeX: \label{manualProgrInterf}
+
+*** HACER Nuevas paralelizaciones de redes neuronales
+#+LaTeX: \label{manualProgrInterfRed}
+
+*** HACER Nuevas tareas para ser aprendidas
+*** HACER Nuevas clases para pruebas y generación de gráficas.
 \newpage
 * REVISAR [2/3] Resultados: Rendimiento
 #+LaTeX: \label{rendimiento}
