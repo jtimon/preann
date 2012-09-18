@@ -1719,6 +1719,29 @@ Esta clase se utiliza para realizar las mediciones de tiempo de ejecución y pod
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
 
+**** REVISAR <<<Interface>>>
+
+Para unificar ciertas tareas comunes y tener una estructura de datos manipulable desde el exterior de las clases de esta sección se implementa esta clase. es necesaria, por ejemplo para las entradas y salidas de NeuralNet. Como es muy parecida a Buffer, ésta última reutiliza, como ya se ha mencionado algunos métodos de Interface internamente. Los métodos con los que cuenta la clase son:
+
++ =Interface(unsigned size, BufferType bufferType) := Constructor parametrizado. Se indica el tamaño y el tipo. El constructor por defecto es privado para obligar al usuario de la librería a utilizar algún otro constructor.
++ =Interface(Interface* toCopy) := Constructor copia. Con este constructor, el interfaz se incializa directamente con el tamaño, tipo y valores del interfaz parámetro. Puede ser llamado implicitamente, como cuando un Interface es un parámetro convencional (en vez de un puntero o un parámetro por referencia) de una función o método.
++ =Interface(FILE* stream) := Con éste constructor el interfaz carga directamente su tamaño, tipo y valores desde el archivo descrito por el parámetro stream.
++ =void* getDataPointer() := Devuelve un puntero al array de datos en memoria.
++ =virtual unsigned getByteSize() := DEvuelve el tamaño en bytes del array de datos en memoria.
++ =unsigned getSize() := Devuelve el número de elementos del interfaz.
++ =BufferType getBufferType() := Devuelve el tipo de vector (BufferType).
++ =float getElement(unsigned pos) := Devuelve el valor del elemento en la posición pasada por parámetro. Si la posición indicada es igual o superior al tamaño del interfaz, se lanza un error. 
++ =void setElement(unsigned pos, float value) := Asigna al elemento del vector en la posición indicada por el parámetro =pos= el valor del parámetro =value=. Si la posición indicada es igual o superior al tamaño del interfaz, se lanza un error. 
++ =void copyFrom(Interface* other) := Copia los elementos del interfaz parámetro acceciendo a ellos de uno a uno con los métodos anteriores. No verifica que sean del mismo tipo, pero si no son del mismo tamaño se lanza una excepción.
++ =void copyFromFast(Interface* other) := Copia los datos del interfaz parámetro llamando a memcpy. Si los interfaces no son del mismo tipo o tamaño se lanza una excepción.
++ =void print() := Muestra en la consola los contenidos del vector en un formato legible por humanos.
++ =float compareTo(Interface* other) := Recorre el vector y compara cada elemento con los elementos del vector parámetro, acumulando las diferencias para luego devolverlas sumadas. Si los dos interfaces no tienen el mismo tamaño a los tipos de buffer no coinciden, se lanzará un error.
++ =void random(float range) := Inicializa la interfaz con valores aleatorios. Si el tipo de buffer es =BYTE= y valor introducido introducido es mayor que 128, se generan valores entre -127 y +128. Si el tipo de buffer es binario o bipolar (internamente se representan igual), siempre se generan valores pertenecientes a {0, 1} (en el caso bipolar {-1, +1}).
++ =void reset() := Inicializa la interfaz con todos sus valores a cero.
++ =void save(FILE* stream) := *Guarda* el tamáño, tipo y contenido contenido del buffer *en* el fichero descrito por el parámetro stream.
++ =void load(FILE* stream) := *Carga* el tamáño, tipo y contenido contenido del buffer *desde* el fichero descrito por el parámetro stream.
++ =void transposeMatrix(unsigned width) := Este método trata al vector como si fuese una matriz e lo transforma en la matriz invertida. Toma por parámetro el ancho de la matriz (=width=) para poder hacerlo. Si el tamaño del vector no es múltiplo de =width= se lanza una excepción. Este método lo llama internamente CudaInvertedConnection tanto para salvar y cargar como para transformar el vector de bits antes de realizar la operación de cruce entre dos conexiones.
+
 **** REVISAR <<<Buffer>>>
 
 Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación interna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase abstracta Buffer. Esta clase implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como se indicó en el diseño, a esas peculiaridades se accederá utilizando polimorfismo.  
@@ -1750,29 +1773,6 @@ El resto de métodos públicos son:
 + =void print() := Muestra en la consola los contenidos del buffer en un formato legible por humanos. Llama internamente al método homónimo de Interface.
 + =float compareTo(Buffer* other) := Recorre el vector y compara cada elemento con los elementos del vector parámetro, acumulando las diferencias para luego devolverlas sumadas. Si los dos buffers no tienen el mismo tamaño a los tipos de buffer no coinciden, se lanzará un error. Internamente llama al método homónimo de la clase Interface.
 + =void random(float range) := Inicializa el buffer con valores aleatorios. Si el tipo de buffer es =BYTE= y valor introducido introducido es mayor que 128, se generan valores entre -127 y +128. Si el tipo de buffer es binario o bipolar (internamente se representan igual), siempre se generan valores pertenecientes a {0, 1} (en el caso bipolar {-1, +1}). Internamente llama al método homónimo de Interface.
-
-**** REVISAR <<<Interface>>>
-
-Para unificar ciertas tareas comunes y tener una estructura de datos manipulable desde el exterior de las clases de esta sección se implementa esta clase. es necesaria, por ejemplo para las entradas y salidas de NeuralNet. Como es muy parecida a Buffer, ésta última reutiliza, como ya se ha mencionado algunos métodos de Interface internamente. Los métodos con los que cuenta la clase son:
-
-+ =Interface(unsigned size, BufferType bufferType) := Constructor parametrizado. Se indica el tamaño y el tipo. El constructor por defecto es privado para obligar al usuario de la librería a utilizar algún otro constructor.
-+ =Interface(Interface* toCopy) := Constructor copia. Con este constructor, el interfaz se incializa directamente con el tamaño, tipo y valores del interfaz parámetro. Puede ser llamado implicitamente, como cuando un Interface es un parámetro convencional (en vez de un puntero o un parámetro por referencia) de una función o método.
-+ =Interface(FILE* stream) := Con éste constructor el interfaz carga directamente su tamaño, tipo y valores desde el archivo descrito por el parámetro stream.
-+ =void* getDataPointer() := Devuelve un puntero al array de datos en memoria.
-+ =virtual unsigned getByteSize() := DEvuelve el tamaño en bytes del array de datos en memoria.
-+ =unsigned getSize() := Devuelve el número de elementos del interfaz.
-+ =BufferType getBufferType() := Devuelve el tipo de vector (BufferType).
-+ =float getElement(unsigned pos) := Devuelve el valor del elemento en la posición pasada por parámetro. Si la posición indicada es igual o superior al tamaño del interfaz, se lanza un error. 
-+ =void setElement(unsigned pos, float value) := Asigna al elemento del vector en la posición indicada por el parámetro =pos= el valor del parámetro =value=. Si la posición indicada es igual o superior al tamaño del interfaz, se lanza un error. 
-+ =void copyFrom(Interface* other) := Copia los elementos del interfaz parámetro acceciendo a ellos de uno a uno con los métodos anteriores. No verifica que sean del mismo tipo, pero si no son del mismo tamaño se lanza una excepción.
-+ =void copyFromFast(Interface* other) := Copia los datos del interfaz parámetro llamando a memcpy. Si los interfaces no son del mismo tipo o tamaño se lanza una excepción.
-+ =void print() := Muestra en la consola los contenidos del vector en un formato legible por humanos.
-+ =float compareTo(Interface* other) := Recorre el vector y compara cada elemento con los elementos del vector parámetro, acumulando las diferencias para luego devolverlas sumadas. Si los dos interfaces no tienen el mismo tamaño a los tipos de buffer no coinciden, se lanzará un error.
-+ =void random(float range) := Inicializa la interfaz con valores aleatorios. Si el tipo de buffer es =BYTE= y valor introducido introducido es mayor que 128, se generan valores entre -127 y +128. Si el tipo de buffer es binario o bipolar (internamente se representan igual), siempre se generan valores pertenecientes a {0, 1} (en el caso bipolar {-1, +1}).
-+ =void reset() := Inicializa la interfaz con todos sus valores a cero.
-+ =void save(FILE* stream) := *Guarda* el tamáño, tipo y contenido contenido del buffer *en* el fichero descrito por el parámetro stream.
-+ =void load(FILE* stream) := *Carga* el tamáño, tipo y contenido contenido del buffer *desde* el fichero descrito por el parámetro stream.
-+ =void transposeMatrix(unsigned width) := Este método trata al vector como si fuese una matriz e lo transforma en la matriz invertida. Toma por parámetro el ancho de la matriz (=width=) para poder hacerlo. Si el tamaño del vector no es múltiplo de =width= se lanza una excepción. Este método lo llama internamente CudaInvertedConnection tanto para salvar y cargar como para transformar el vector de bits antes de realizar la operación de cruce entre dos conexiones.
 
 **** HACER <<<Connection>>>
 **** HACER <<<Layer>>>
