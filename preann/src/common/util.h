@@ -80,9 +80,6 @@ public:
     static unsigned getTotalAllocated();
 };
 
-typedef std::vector<std::pair<unsigned, unsigned> > pair_vect;
-typedef std::vector<std::pair<unsigned, unsigned> >::iterator pair_vect_iterator;
-
 class SimpleGraph
 {
     std::vector<std::pair<unsigned, unsigned> > graph;
