@@ -32,7 +32,7 @@ public:
         tSize = (bitBufferSize / maxWeighsPerBlock) * maxWeighsPerBlock;
         tSize += min(bitBufferSize % maxWeighsPerBlock, block_size) * BITS_PER_UNSIGNED;
 
-        Interface interfaceOrderedByBlockSize = Interface(tSize, BT_BIT);
+        Interface interfaceOrderedByBlockSize(tSize, BT_BIT);
 
         unsigned bit = 0, thread = 0, block_offset = 0;
         for (unsigned i = 0; i < bitBufferSize; i++) {

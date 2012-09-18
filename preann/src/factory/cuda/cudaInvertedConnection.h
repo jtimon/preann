@@ -40,7 +40,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         virtual void _crossover(Buffer* other, Interface* bitBuffer)
         {
-            Interface invertedBitBuffer = Interface(bitBuffer);
+            Interface invertedBitBuffer(bitBuffer);
             invertedBitBuffer.transposeMatrix(tInput->getSize());
 
             Buffer* cudaBitBuffer = Factory::newBuffer(&invertedBitBuffer, getImplementationType());

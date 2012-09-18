@@ -38,10 +38,10 @@ unsigned testCopyToInterface(ParametersMap* parametersMap)
 {
     START
 
-    Interface interface = Interface(buffer->getSize(), buffer->getBufferType());
+    Interface interface(buffer->getSize(), buffer->getBufferType());
 
     Buffer* cBuffer = Factory::newBuffer(buffer, IT_C);
-    Interface cInterface = Interface(buffer->getSize(), buffer->getBufferType());
+    Interface cInterface(buffer->getSize(), buffer->getBufferType());
 
     buffer->copyToInterface(&interface);
     cBuffer->copyToInterface(&cInterface);

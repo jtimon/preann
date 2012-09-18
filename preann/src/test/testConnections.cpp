@@ -118,7 +118,7 @@ unsigned testCrossover(ParametersMap* parametersMap)
     Connection* cOther = Factory::newConnection(cInput, outputSize);
     cOther->copyFrom(other);
 
-    Interface bitBuffer = Interface(connection->getSize(), BT_BIT);
+    Interface bitBuffer(connection->getSize(), BT_BIT);
     bitBuffer.random(1);
 
     connection->crossover(other, &bitBuffer);
