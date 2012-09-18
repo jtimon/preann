@@ -1639,8 +1639,8 @@ sudo aptitude install make g++ nasm gnuplot
 sudo aptitude install texlive-latex-recommended texlive-latex-extra
 ** REVISAR [1/8] Uso general (API)
 #+LaTeX: \label{manualProgrApi}
-*** REVISAR [1/3] Common
-**** REVISAR Enumerations
+*** REVISAR Common
+**** Enumerations
 <<<Enumerations>>>
 
 Dado que la librería cuenta con tantas posibles configuraciones, su gestión básica en esta clase. Se han definido 10 tipos enumerados para: 
@@ -1658,48 +1658,71 @@ Dado que la librería cuenta con tantas posibles configuraciones, su gestión b�
 
 Cada enumerado tiene un método que devuelve una cadena descriptora a partir de un valor de enumerado. También hay otro más genérico al que además del valor se le pasa la enumeración (hay otra enumeración de los enumerados) cuya declaración es: =static std::string toString(EnumType enumType, unsigned enumValue)=. Por último, otro método devuelve el número de elementos de un enumerado concreto =static unsigned enumTypeDim(EnumType enumType)=. Todos los métodos son estáticos. Como nunca es necesario instanciar la clase, el constructor se hace privado para que no se pueda hacer.
 
-**** HACER [0/1] Util
-<<<Util>>>
+**** <<<Util>>>
 
-Estos ficheros contienen varias utilidades variadas. Se definen macros para recorrer vectores y listas de la librería C++ estándar para evitar más dependencias de librerías externas como Boost[fn:boost]. Para poder concatenar otros tipos con objetos de la clase std::string de forma más legible y cómoda, se define la función plantilla =std::string to_string(const T& t)=. El resto de funciones de utilidad se agrupan en clases, aunque por ser simples se definen e implmentan en los mismos ficheros. Las clases son:
+Estos ficheros contienen varias utilidades variadas. Se definen macros para recorrer vectores y listas de la librería C++ estándar para evitar más dependencias de librerías externas como Boost[fn:boost]. Para poder concatenar otros tipos con objetos de la clase std::string de forma más legible y cómoda, se define la función plantilla \verb=std::string to_string(const T& t)=. El resto de funciones de utilidad se agrupan en clases, aunque por ser simples se definen e implmentan en los mismos ficheros. Como pasaba con Enumerations, estas clases tienen todos sus  métodos (y atributos si los tienen) estáticos y no es necesario instanciarlas. La única excepción es SimpleGraph. Las clases son:
 
-***** HACER Util: 
+***** Util : 
 
 utilidades generales. Contiene los métodos:
 
-+
++ \verb=FILE* openFile(string path):= Abre un fichero en modo escritura y si no existe lo crea. Si surge algún problema lanza un string como excepción. Devuelve el descriptor del fichero para poder hacer escrituras con =fprintf()= ó =fwrite()=.
++ \verb=void check(bool condition, std::string message):= Si se cumple la condición se imprime la cadena en la salida estándar y se lanza la cadena como excepción.
 
-***** HACER Random: 
-<<<Random>>>
+***** <<<Random>>> :
 
 para generar números aleatorios. Contiene los métodos:
 
-***** HACER MemoryManagement: 
-<<<MemoryManagement>>>
++ =int integer(unsigned range):= Devuelve un entero aleatorio entre -range y range.
++ =float floatNum(float range):= Devuelve un número en coma flotante aleatorio entre -range y range.
++ =unsigned positiveInteger(unsigned range):= Devuelve un entero aleatorio entre 0 y range.
++ =float positiveFloat(float range):= Devuelve un número en coma flotante aleatorio entre 0 y range.
 
-en vez de llamar directamente a malloc y free para reservar memoria para los arrays de los Buffers y las interfaces, se llama a métodos de esta clase para controlar que el programa no pierda memoria. Contiene los métodos:
+***** <<<MemoryManagement>>> :
 
-***** HACER SimpleGraph: 
-<<<SimpleGraph>>>
+en vez de llamar directamente a malloc y free para reservar memoria para los arrays de los Buffers y las interfaces, se llama a métodos de esta clase para controlar que el programa no pierda memoria. Es útil principalmente para el desarrollo. Contiene los métodos:
 
-una implementación simple de un grafo que almacena simplemente pares de índices a elemntos del grafo (los arcos o flechas). Pueden ser guardados a y cargados desde un fichero en disco. Esta clase la usa NeuralNet para almacenar el grafo de conexiones entre las diferentes capas. Contiene los métodos:
++ =void* malloc(unsigned size):= funciona como el malloc tradicional, se le dice un tamaño en bytes y devuelve un puntero a memoria con ese espacio reservado. La diferencia es que en este caso  se guarda el puntero y el tamaño en una lista estática que mantiene la clase MemoryManagement.
++ =void free(void* ptr):= funciona como el free tradicional, esto es, libera la memoria reservada en el puntero parámetro. En este caso también elimina el registro correspondiente de la lista antes mencionada.
++ =void clear():= Libera todos los punteros que hubiesen quedado en la lista y libera también la propia lista.
++ =void printTotalAllocated():= Imprime por la salida estándar el número total de bytes reservados con la clase (expresando las cantidades en KB ó MB si es posible).
++ =void printTotalPointers():= Imprime por la salida estándar el número total de punteros en la lista.
++ =void printListOfPointers():= Imprime por la salida estándar una lista con todos los punteros reservados y sus respectivos tamaños.
++ =unsigned getPtrCounter():= Devuelve el número total de punteros en la lista.
++ =unsigned getTotalAllocated():= Devuelve el número total de bytes reservados.
 
-**** HACER Chronometer
-<<<Chronometer>>>
+***** <<<SimpleGraph>>> :
+
+una implementación simple de un grafo que almacena simplemente pares de índices a elemntos del grafo (los arcos, aristas o flechas). Pueden ser guardados a y cargados desde un fichero en disco. Esta clase la usa NeuralNet para almacenar el grafo de conexiones entre las diferentes capas. Contiene los métodos (se omite el destructor):
+
++ =void addConnection(unsigned source, unsigned destination):= Añade un arco al grafo que va desde el origen (source) al destino (destination) indicados. Si ya existía un arco así no lo añade.
++ =bool removeConnection(unsigned source, unsigned destination):= Elimina del grafo un arco que vaya desde el origen (source) al destino (destination) indicados. Si existía un arco así, lo borra y devuelve =true=. Si no existía, devuelve =false=.
++ =bool checkConnection(unsigned source, unsigned destination):= Busca en el grafo un arco que vaya desde el origen (source) al destino (destination) indicados. Si existe devuelve =true=, si no devuelve =false=.
++ \verb=std::vector<std::pair<unsigned, unsigned> >::iterator getIterator():= Devuelve un iterador al vector de pares de enteros sin signo que representan los arcos del grafo.
++ \verb=std::vector<std::pair<unsigned, unsigned> >::iterator getEnd():= Devuelve el puntero al final del vector de pares de enteros sin signo que representan los arcos del grafo.
++ =void save(FILE* stream):= Guarda la lista de arcos en el fichero descrito por el parámetro =stream=. Lo primero que guarda es el número de arcos.
++ =void load(FILE* stream):= Carga una lista de arcos desde el fichero descrito por el parámetro =stream=. Lo primero que carga es el número de arcos.
+
+**** <<<Chronometer>>>
+
+Esta clase se utiliza para realizar las mediciones de tiempo de ejecución y poder comparar el rendimiento de las diferentes implmentaciones paralelas descritas en el capítulo \ref{disenoParal}. Si se compila la librería para que soporte la implementación CUDA, se obliga al dispositivo GPU a que sincronice su ejecución con la de la CPU al empezar y al terminar de cronometrar para poder medir los tiempos adecuadamente. Contiene los siguientes métodos:
+
++ =void start():= Comienza la cuenta del cronómetro. Si ya estaba empezada anteriormente, imprime en la salida estándar un mensaje de advertencia.
++ =void stop():= Detiene la cuenta del cronómetro. Si no se había llamado previamente a =start()= lanza una cadena como excepción.
++ =float getSeconds():= Devuelve el contenido del cronómetro en segundos. Si no se había detenido el chronómetro llamando a =stop()=, devolverá 0.
+
 *** HACER [0/6] Neural
 #+LaTeX: \label{apiNeural}
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
 
-**** HACER Interface
-<<<Interface>>>
+**** HACER <<<Interface>>>
 
 Para unificar ciertas tareas comunes y tener una estructura de datos manipulable desde
 
-**** HACER Buffer
-<<<Buffer>>>
+**** HACER <<<Buffer>>>
 
-Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación ínterna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase Buffer. Esta clase abstracta implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como hemos dicho, a esas peculiaridades se accederá utilizando polimorfismo. 
+Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación interna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase Buffer. Esta clase abstracta implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como hemos dicho, a esas peculiaridades se accederá utilizando polimorfismo. 
 
 Los métodos que Buffer ofrece son:
 
@@ -1723,94 +1746,58 @@ Los métodos que Buffer ofrece son:
 - ImplementationType getImplementationType()
     virtual BufferType getBufferType() = 0;
     virtual void reset() = 0;
-**** HACER Connection
-<<<Connection>>>
-**** HACER Layer
-<<<Layer>>>
-**** HACER InputLayer
-<<<InputLayer>>>
-**** HACER NeuralNet
-#+LaTeX: \label{apiNeuralNet}
-<<<NeuralNet>>>
+**** HACER <<<Connection>>>
+**** HACER <<<Layer>>>
+**** HACER <<<InputLayer>>>
+**** HACER <<<NeuralNet>>>
 
-Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene un grafo dirigido con capas (Layer )
+Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene un grafo dirigido con capas (Layer)
 Al nivel más alto, la clase que utilizaremos es NeuralNet, que implementa una red neuronal concreta
-*** HACER [/] Genetic
+*** HACER [0/3] Genetic
 #+LaTeX: \label{disenoGenetic}
-**** HACER Individual
-<<<Individual>>>
-**** HACER Task
-<<<Task>>>
-**** HACER Population
-<<<Population>>>
+**** HACER <<<Individual>>>
+**** HACER <<<Task>>>
+**** HACER <<<Population>>>
 *** HACER [0/2] Game
-**** HACER Board
-<<<Board>>>
-**** HACER ReversiBoard
-<<<ReversiBoard>>>
+**** HACER <<<Board>>>
+**** HACER <<<ReversiBoard>>>
 *** HACER [0/3] Tasks
-**** HACER BinaryTask
-<<<BinaryTask>>>
-**** HACER ClassificationTask
-<<<ClassificationTask>>>
-**** HACER ReversiTask
-<<<ReversiTask>>>
+**** HACER <<<BinaryTask>>>
+**** HACER <<<ClassificationTask>>>
+**** HACER <<<ReversiTask>>>
 *** HACER [0/9] Loop
 #+LaTeX: \label{disenoLoop}
-**** HACER ParametersMap
-<<<ParametersMap>>>
-**** HACER Loop
-<<<Loop>>>
-**** HACER RangeLoop
-<<<RangeLoop>>>
-**** HACER ExpLoop
-<<<ExpLoop>>>
-**** HACER EnumLoop
-<<<EnumLoop>>>
-**** HACER JoinEnumLoop
-<<<JoinEnumLoop>>>
-**** HACER GenericPlotter
-<<<GenericPlotter>>>
-**** HACER Test
-<<<Test>>>
-**** HACER Plot
-<<<Plot>>>
+**** HACER <<<ParametersMap>>>
+**** HACER <<<Loop>>>
+**** HACER <<<RangeLoop>>>
+**** HACER <<<ExpLoop>>>
+**** HACER <<<EnumLoop>>>
+**** HACER <<<JoinEnumLoop>>>
+**** HACER <<<GenericPlotter>>>
+**** HACER <<<Test>>>
+**** HACER <<<Plot>>>
 *** HACER [0/3] LoopTest
-**** HACER ChronoPlotter
-<<<ChronoPlotter>>>
-**** HACER Dummy
-<<<Dummy>>>
-**** HACER TaskPlotter
-<<<TaskPlotter>>>
+**** HACER <<<ChronoPlotter>>>
+**** HACER <<<Dummy>>>
+**** HACER <<<TaskPlotter>>>
 *** HACER Ejecutables
 ** HACER Factoria e implementaciones optimizadas
 *** HACER [0/12] Factory
-**** HACER Factory
-<<<Factory>>>
+**** HACER <<<Factory>>>
 **** HACER configFactory
 *** HACER [0/2] Implementación de referencia
-**** HACER CppBuffer
-<<<CppBuffer>>>
-**** HACER CppConnection
-<<<CppConnection>>>
+**** HACER <<<CppBuffer>>>
+**** HACER <<<CppConnection>>>
 *** HACER [0/2] SSE2
-**** HACER XmmBuffer
-<<<XmmBuffer>>>
-**** HACER XmmConnection
-<<<XmmConnection>>>
+**** HACER <<<XmmBuffer>>>
+**** HACER <<<XmmConnection>>>
 *** HACER [0/6] Cuda
-**** HACER CudaBuffer
-<<<CudaBuffer>>>
-**** HACER CudaBaseConnection
-<<<CudaBaseConnection>>>
-**** HACER CudaReduction0Connection
-<<<CudaReduction0Connection>>>
-**** HACER CudaReductionConnection
-<<<CudaReductionConnection>>>
-**** HACER CudaOutputsConnection
-<<<CudaOutputsConnection>>>
-**** HACER CudaInvertedConnection
-<<<CudaInvertedConnection>>>
+**** HACER <<<CudaBuffer>>>
+**** HACER <<<CudaBaseConnection>>>
+**** HACER <<<CudaReduction0Connection>>>
+**** HACER <<<CudaReductionConnection>>>
+**** HACER <<<CudaOutputsConnection>>>
+**** HACER <<<CudaInvertedConnection>>>
 ** HACER Extensibilidad a partir de interfaces
 #+LaTeX: \label{manualProgrInterf}
 \newpage
