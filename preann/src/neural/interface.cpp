@@ -1,11 +1,5 @@
 #include "interface.h"
 
-Interface::Interface()
-{
-    this->size = 0;
-    data = NULL;
-}
-
 Interface::Interface(FILE* stream)
 {
     fread(&size, sizeof(unsigned), 1, stream);
@@ -142,6 +136,14 @@ void Interface::setElement(unsigned pos, float value)
 
 float Interface::compareTo(Interface *other)
 {
+    if (size != other->getSize()) {
+        std::string error = "The sizes of the interfaces are different.";
+        throw error;
+    }
+    if (bufferType != other->getBufferType()) {
+        std::string error = "The Types of the Interfaces are different.";
+        throw error;
+    }
     float accumulator = 0;
     for (unsigned i = 0; i < this->size; i++) {
         float difference = this->getElement(i) - other->getElement(i);

@@ -16,8 +16,8 @@ class Interface
     void* data;
     BufferType bufferType;
 
-public:
     Interface();
+public:
     Interface(FILE* stream);
     Interface(unsigned size, BufferType bufferType);
     Interface(Interface* toCopy);
