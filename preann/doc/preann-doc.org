@@ -1396,7 +1396,7 @@ Sin embargo, esta forma de acceso al vector de bits es altamente ineficiente. Lo
 
 Todo esto se podría evitar si los datos estuviesen dispuestos de otra manera en memoria. No podemos modificar la posición de los pesos porque las optimizaciones para el cálculo de estado de las neuronas descritas en las secciones anteriores dependen de estas posiciones. Sin embargo podemos modificar la posición en el vector de bits para conseguir nuestro objetivo.
 
-Si cada hilo se ocupase de los 32 bits de una posición del array =bitBuffer=, el acceso también podría ser coalescente y a además el valor se podría alamacenar directamente en un registro. Pero entonces dejaría de ser coalescente el acceso a los propios vectores de pesos, pues cada hilo querría acceder a 32 pesos contiguos. A no ser, que el vector de bits viniese ya colocado de la forma que queremos, para que una posición de =bitBuffer= no representase 32 pesos contiguos, sino 32 los 32 pesos a los que su hilo puede acceder de forma coalescente. Debemos aplicar una transformación adicional sobre el vector de bits (si es que ya ha tenido alguna, por ejemplo, por la inversión de las matriz de pesos) para adaptarlo a nuestro nuevo algoritmo antes de llamar al kernel. Podemos aprovechar el momento en que creemos un Buffer CUDA a partir de una Interfaz (ver secciones \ref{disenoRedes},  \ref{apiRedesInter} y \ref{apiRedesBuff}) para realizar esta transformación. 
+Si cada hilo se ocupase de los 32 bits de una posición del array =bitBuffer=, el acceso también podría ser coalescente y a además el valor se podría alamacenar directamente en un registro. Pero entonces dejaría de ser coalescente el acceso a los propios vectores de pesos, pues cada hilo querría acceder a 32 pesos contiguos. A no ser, que el vector de bits viniese ya colocado de la forma que queremos, para que una posición de =bitBuffer= no representase 32 pesos contiguos, sino 32 los 32 pesos a los que su hilo puede acceder de forma coalescente. Debemos aplicar una transformación adicional sobre el vector de bits (si es que ya ha tenido alguna, por ejemplo, por la inversión de las matriz de pesos) para adaptarlo a nuestro nuevo algoritmo antes de llamar al kernel. Podemos aprovechar el momento en que creemos un buffer CUDA a partir de una Interfaz (ver Buffer e Interface) para realizar esta transformación. 
 
 Pero antes de ver cómo realizaríamos la transformación, vemos como sería nuestro nuevo kernel. Cada hilo accederá a =BITS_PER_UNSIGNED= elementos de los arrays de pesos, cada bloque accederá a =blockDim.x * BITS_PER_UNSIGNED=. El salto entre las posiciones de un bloque y las del siguiente multiplicará el tamaño del bloque por =BITS_PER_UNSIGNED=, pero los hilos de un mismo bloque sequirán accediendo a posiciones contiguas:
 
@@ -1470,7 +1470,7 @@ CudaBuffer(Interface* bitBuffer, unsigned block_size)
 }
 #+end_src
 
-Esta función no es pprecisamente elegante, pues básicamente reproduce lo que tendŕía que hacer el kernel de forma serializada para cambiar las posiciones para el acceso coalescente. Y será llamado antes de realizar un cruce con dos redes CUDA. Aunque esta transforamción puede parecer una penalización importante, mantenemos esta implementación del cruce se lo asignamos a la versión de reducción inicial (implementada en la clase cudaReduction0Connection, descrita en la sección \ref{implCudaReduc0Con}), que también se mantiene para hacer comparativas.
+Esta función no es pprecisamente elegante, pues básicamente reproduce lo que tendŕía que hacer el kernel de forma serializada para cambiar las posiciones para el acceso coalescente. Y será llamado antes de realizar un cruce con dos redes CUDA. Aunque esta transforamción puede parecer una penalización importante, mantenemos esta implementación del cruce se lo asignamos a la versión de reducción inicial (implementada en la clase CudaReduction0Connection), que también se mantiene para hacer comparativas.
 
 Afortunadamente, exite otra solución mucho más elegante y que nos parece también más eficiente (aunque reservamos los resultados de la comparación para la sección de resultados \ref{rendImplCruce}).
 
@@ -1602,7 +1602,7 @@ Expresado de otra forma, si llamamos c0 a la clase 0 y c1 a la clase 1, para la 
 
 Como se describió en el capítulo \ref{manualProgrInterf}, para que nuestro sistema pueda aprender una tarea nueva, sólo es necesario implementar una clase que herede de la interzaz Task, en este caso, la clase implementada es BinaryTask. El método más importante es test, que toma un individuo como parámetro, lo prueba y le asigna el fitness resultante. También es importante el método setInputs, con el que se conectan las variables internas de la tarea con las entradas de la red neuronal de un individuo. Por último, getExample devuelve un individuo construido cuya estructura es suficiente para aprender la tarea concreta para la que se quiere entrenar a la población.
 
-La clase BinaryTask es bastante flexible respecto a cómo puede ser inicializada. Hay dos parámetros que son olbigatorios: un enumerado BinaryOperation que indica que tipo de operación será realizada (BO_OR, BO_AND ó BO_XOR) y el tamaño de los vectores de entrada, que es igual al tamaño del de salida.
+La clase BinaryTask es bastante flexible respecto a cómo puede ser inicializada. Hay dos parámetros que son olbigatorios: un enumerado BinaryOperation que indica que tipo de operación será realizada (OR, AND ó XOR) y el tamaño de los vectores de entrada, que es igual al tamaño del de salida.
 Existe un tercer parámetro optativo numTests que hace referencia al número de pruebas para evaluar a un individuo. Si no se rellena, se probarán todas las combinaciones posibles entre los dos vectores de entrada; si se rellena, determinará el número de pruebas aleatorias que se realizarán para probar a cada individuo. Para las dos posibilidades, el individuo empieza con una puntuación igual al número de diferencias con las salidas esperadas que podría obtener cómo máximo y se irán restando las diferencias que se vayan encontrando. Así, la puntuación del inndividuo será mejor cuanto menor sea el número de diferencias sigueindo la siguiente fórmula: Fitness = Número máximo de diferencias posibles - número de diferencias obtenidas.
 Las pruebas aleatorias consisten simplemente en dar valores aleatorios a los vectores, hacer que la red neuronal obtenga su salida, obtener la salida deseada realizando la operación lógica correspondiente y comparar las diferencias.
 
@@ -1630,35 +1630,74 @@ El jugador que se ha implementado para Reversi es extremadamente simple, pero, a
 La tarea Reversi se implementa en la clase ReversiTask que también hereda de la clase abstracta Task y que utiliza la clase ReversiBoard que implementa las reglas de juego de Reversi y que, a su vez, hereda de la clase que implementa el el tablero genérico para juegos con piezas iguales pero de dos jugadores Board. Éste último siempre es de un tamaño cuadrado (las mismas casillas a lo largo que a lo ancho) pero el tablero de Reversi tiene, además, la restricción de ser como mínimo de un tamaño 4x4. Esto es así por que las cuatro piezas centrales (2x2) empiezan ya rellenas para que los juegadores tengan movimientos legales al inicio.
 
 TODO ¿debo explicar las reglas del juego?
-* HACER [0/3] Manual del programador
+* REVISAR [1/4] Manual del programador
 #+LaTeX: \label{manualProgr}
 ** HACER Guia de instalación
 #+LaTeX: \label{manualProgrInstal}
 
 sudo aptitude install make g++ nasm gnuplot
 sudo aptitude install texlive-latex-recommended texlive-latex-extra
-
-** HACER Factoria e implementaciones optimizadas
-*** HACER CudaReduction0Connection
-#+LaTeX: \label{implCudaReduc0Con}
-** HACER [0/13] Uso general (API)
+** REVISAR [1/8] Uso general (API)
 #+LaTeX: \label{manualProgrApi}
-*** HACER [0/3] Common
+*** REVISAR [1/3] Common
+**** REVISAR Enumerations
+<<<Enumerations>>>
+
+Dado que la librería cuenta con tantas posibles configuraciones, su gestión básica en esta clase. Se han definido 10 tipos enumerados para: 
+
++ 4 tipos de Buffer: FLOAT, BIT, SIGN y BYTE.
++ 6 funciones de activación: identidad, escalón binario, escalón bipolar, sigmoide, sigmoide bipolar y tangente hiperbólica.
++ 6 implementaciones paralelas: C++, SSE2, CUDA por reducción 0, CUDA por reducción mejorada, CUDA paralelizando salidas y CUDA con la matriz de pesos invertida.
++ 4 algortimos de selección: ruleta, ranking, por torneo y truncado.
++ 3 algortimos de cruce: uniforme, proporcional y multipunto.
++ 4 niveles para el cruce: peso, neurona, neurona invertida (representación fregona) y capa completa.
++ 3 modos de mutación: desactivado, por individuo y probabilística
++ 3 modos de olvido: desactivado, por individuo y probabilística
++ 3 operaciones binarias: OR, AND y XOR.
++ 4 tareas: las tres operaciones binarias y la tarea Reversi/Othello.
+
+Cada enumerado tiene un método que devuelve una cadena descriptora a partir de un valor de enumerado. También hay otro más genérico al que además del valor se le pasa la enumeración (hay otra enumeración de los enumerados) cuya declaración es: =static std::string toString(EnumType enumType, unsigned enumValue)=. Por último, otro método devuelve el número de elementos de un enumerado concreto =static unsigned enumTypeDim(EnumType enumType)=. Todos los métodos son estáticos. Como nunca es necesario instanciar la clase, el constructor se hace privado para que no se pueda hacer.
+
+**** HACER [0/1] Util
+<<<Util>>>
+
+Estos ficheros contienen varias utilidades variadas. Se definen macros para recorrer vectores y listas de la librería C++ estándar para evitar más dependencias de librerías externas como Boost[fn:boost]. Para poder concatenar otros tipos con objetos de la clase std::string de forma más legible y cómoda, se define la función plantilla =std::string to_string(const T& t)=. El resto de funciones de utilidad se agrupan en clases, aunque por ser simples se definen e implmentan en los mismos ficheros. Las clases son:
+
+***** HACER Util: 
+
+utilidades generales. Contiene los métodos:
+
++
+
+***** HACER Random: 
+<<<Random>>>
+
+para generar números aleatorios. Contiene los métodos:
+
+***** HACER MemoryManagement: 
+<<<MemoryManagement>>>
+
+en vez de llamar directamente a malloc y free para reservar memoria para los arrays de los Buffers y las interfaces, se llama a métodos de esta clase para controlar que el programa no pierda memoria. Contiene los métodos:
+
+***** HACER SimpleGraph: 
+<<<SimpleGraph>>>
+
+una implementación simple de un grafo que almacena simplemente pares de índices a elemntos del grafo (los arcos o flechas). Pueden ser guardados a y cargados desde un fichero en disco. Esta clase la usa NeuralNet para almacenar el grafo de conexiones entre las diferentes capas. Contiene los métodos:
+
 **** HACER Chronometer
-**** HACER Enumerations
-**** HACER Util
+<<<Chronometer>>>
 *** HACER [0/6] Neural
 #+LaTeX: \label{apiNeural}
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
 
-**** HACER Interface: 
-#+LaTeX: \label{apiRedesInter}
+**** HACER Interface
+<<<Interface>>>
 
 Para unificar ciertas tareas comunes y tener una estructura de datos manipulable desde
 
-**** HACER Buffer: 
-#+LaTeX: \label{apiRedesBuff}
+**** HACER Buffer
+<<<Buffer>>>
 
 Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación ínterna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase Buffer. Esta clase abstracta implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como hemos dicho, a esas peculiaridades se accederá utilizando polimorfismo. 
 
@@ -1684,58 +1723,95 @@ Los métodos que Buffer ofrece son:
 - ImplementationType getImplementationType()
     virtual BufferType getBufferType() = 0;
     virtual void reset() = 0;
-**** HACER Connection:
-**** HACER Layer:
-**** HACER InputLayer:
-**** HACER NeuralNet:
+**** HACER Connection
+<<<Connection>>>
+**** HACER Layer
+<<<Layer>>>
+**** HACER InputLayer
+<<<InputLayer>>>
+**** HACER NeuralNet
 #+LaTeX: \label{apiNeuralNet}
+<<<NeuralNet>>>
 
 Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene un grafo dirigido con capas (Layer )
 Al nivel más alto, la clase que utilizaremos es NeuralNet, que implementa una red neuronal concreta
-*** HACER SSE2
-*** HACER Cuda
-*** HACER [0/12] Factory
-**** HACER factory
-**** HACER configFactory
-**** HACER cppBuffer
-**** HACER cppConnection
-**** HACER xmmBuffer
-**** HACER xmmConnection
-**** HACER cudaBuffer
-**** HACER cudaBaseConnection
-**** HACER cudaReduction0Connection
-**** HACER cudaReductionConnection
-**** HACER cudaOutputsConnection
-**** HACER cudaInvertedConnection
 *** HACER [/] Genetic
 #+LaTeX: \label{disenoGenetic}
 **** HACER Individual
+<<<Individual>>>
 **** HACER Task
+<<<Task>>>
 **** HACER Population
+<<<Population>>>
 *** HACER [0/2] Game
 **** HACER Board
+<<<Board>>>
 **** HACER ReversiBoard
+<<<ReversiBoard>>>
 *** HACER [0/3] Tasks
 **** HACER BinaryTask
+<<<BinaryTask>>>
 **** HACER ClassificationTask
+<<<ClassificationTask>>>
 **** HACER ReversiTask
+<<<ReversiTask>>>
 *** HACER [0/9] Loop
 #+LaTeX: \label{disenoLoop}
-**** HACER Loop
-**** HACER RangeLoop
-**** HACER ExpLoop
-**** HACER EnumLoop
-**** HACER JoinEnumLoop
 **** HACER ParametersMap
+<<<ParametersMap>>>
+**** HACER Loop
+<<<Loop>>>
+**** HACER RangeLoop
+<<<RangeLoop>>>
+**** HACER ExpLoop
+<<<ExpLoop>>>
+**** HACER EnumLoop
+<<<EnumLoop>>>
+**** HACER JoinEnumLoop
+<<<JoinEnumLoop>>>
 **** HACER GenericPlotter
+<<<GenericPlotter>>>
 **** HACER Test
+<<<Test>>>
 **** HACER Plot
+<<<Plot>>>
 *** HACER [0/3] LoopTest
 **** HACER ChronoPlotter
+<<<ChronoPlotter>>>
 **** HACER Dummy
+<<<Dummy>>>
 **** HACER TaskPlotter
-*** HACER Test
-*** HACER Extensibilidad a partir de interfaces
+<<<TaskPlotter>>>
+*** HACER Ejecutables
+** HACER Factoria e implementaciones optimizadas
+*** HACER [0/12] Factory
+**** HACER Factory
+<<<Factory>>>
+**** HACER configFactory
+*** HACER [0/2] Implementación de referencia
+**** HACER CppBuffer
+<<<CppBuffer>>>
+**** HACER CppConnection
+<<<CppConnection>>>
+*** HACER [0/2] SSE2
+**** HACER XmmBuffer
+<<<XmmBuffer>>>
+**** HACER XmmConnection
+<<<XmmConnection>>>
+*** HACER [0/6] Cuda
+**** HACER CudaBuffer
+<<<CudaBuffer>>>
+**** HACER CudaBaseConnection
+<<<CudaBaseConnection>>>
+**** HACER CudaReduction0Connection
+<<<CudaReduction0Connection>>>
+**** HACER CudaReductionConnection
+<<<CudaReductionConnection>>>
+**** HACER CudaOutputsConnection
+<<<CudaOutputsConnection>>>
+**** HACER CudaInvertedConnection
+<<<CudaInvertedConnection>>>
+** HACER Extensibilidad a partir de interfaces
 #+LaTeX: \label{manualProgrInterf}
 \newpage
 * REVISAR [2/3] Resultados: Rendimiento
@@ -2618,7 +2694,11 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 ** Comparación de distintos tamaños de población número de individuos conservados por generación
 
 \newpage
-* HACER [0/21] cosas pendientes
+* HACER [0/26] cosas pendientes
+- [ ] Hacer API
+- [ ] Arreglar murl
+- [ ] Factoria e implementaciones optimizadas
+- [ ] Extensibilidad a partir de interfaces
 - [ ] Bibliografías de introducción
 - [ ] TODO teoría CUDA occupance vs resources
 	  Entonces siempre se tendrá que llamar al kernel con 512 hilos para hacer lecturas conjuntas. No poder ajustar el número de hilos por bloque es un trastorno importante. Los recursos de un multiprocesador se reparten entre los hilos del bloque. Por ejemplo, cuantos más hilos por bloque, menos registros tendrá disponibles cada hilo. Corremos el riesgo de que algunas variables locales tengan que almacenarse en memoria global en vez de en registros.
@@ -2628,6 +2708,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
   - [ ] ¿Preguntar rosa?
   - [ ] Mirar las bibliografías ahí a pelo con corchetes
 - [ ] Modificar Teoría
+- [ ] Guia de instalación
 - [ ] Modificar Introducción
 - [ ] Modificar Análisis
 - [ ] Hacer Diseño
@@ -2714,4 +2795,6 @@ http://blogs.nvidia.com/2011/11/gpu-supercomputers-show-exponential-growth-in-to
 [fn:juegEstratAbst]
 \newline
 http://en.wikipedia.org/wiki/Abstract_strategy_game
+
+[fn:boost] \murl{http}{en.wikipedia.org/wiki/Boost_(C%2B%2B_libraries)}
 
