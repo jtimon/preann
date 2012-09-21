@@ -453,7 +453,7 @@ Aunque intuitivamente se puede pensar que este tipo de cruce no será muy útil 
 ** Mutación y olvido
 #+LaTeX: \label{disenoGeneMut}
 
-La forma en que se implementan el operador de mutación y el de olvido son muy similares. La principal diferencia es que mientras el operador de olvido o reset simplemente pone a cero el peso o umbral que toque, el de mutación le suma un número aleatorio del intervalo (-X, X), donde X es un parámetro configurable que llamaremos "rango de mutación", que por defecto toma el valor 1. En cierto sentido, se podría considerar al operador de olvido como un tipo especial demutación.
+La forma en que se implementan el operador de mutación y el de olvido son muy similares. La principal diferencia es que mientras el operador de olvido o reset simplemente pone a cero el peso o umbral que toque, el de mutación le suma un número aleatorio del intervalo (-X, X), donde X es un parámetro configurable que llamaremos "rango de mutación", que por defecto toma el valor 1. En cierto sentido, se podría considerar al operador de olvido como un tipo especial de mutación.
 
 Por lo demás, los dos operadores tienen dos formas de ser empleados: probabilística y determinista.
 
@@ -1714,7 +1714,7 @@ Esta clase se utiliza para realizar las mediciones de tiempo de ejecución y pod
 + =void stop():= Detiene la cuenta del cronómetro. Si no se había llamado previamente a =start()= lanza una cadena como excepción.
 + =float getSeconds():= Devuelve el contenido del cronómetro en segundos. Si no se había detenido el chronómetro llamando a =stop()=, devolverá 0.
 
-*** HACER [2/6] Neural
+*** HACER [3/6] Neural
 #+LaTeX: \label{apiNeural}
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
@@ -1774,8 +1774,52 @@ El resto de métodos públicos son:
 + =float compareTo(Buffer* other) := Recorre el vector y compara cada elemento con los elementos del vector parámetro, acumulando las diferencias para luego devolverlas sumadas. Si los dos buffers no tienen el mismo tamaño a los tipos de buffer no coinciden, se lanzará un error. Internamente llama al método homónimo de la clase Interface.
 + =void random(float range) := Inicializa el buffer con valores aleatorios. Si el tipo de buffer es =BYTE= y valor introducido introducido es mayor que 128, se generan valores entre -127 y +128. Si el tipo de buffer es binario o bipolar (internamente se representan igual), siempre se generan valores pertenecientes a {0, 1} (en el caso bipolar {-1, +1}). Internamente llama al método homónimo de Interface.
 
-**** HACER <<<Connection>>>
+**** REVISAR <<<Connection>>>
+
+Al igual que Buffer, esta clase es abstracta y sólo se puede instanciar usando Factory. De está clase heredarán también las clases que la terminan de implementar, cada una cons su =ImplementationType=. Esta clase, a su vez, hereda de Buffer para reutilizar los métodos que tratan la gestión de la memoria entre otros. Las implementaciones concretas de Connection deberán heredar de forma virtual (no repetir campos) de Connection y además de su implementación concreta de Buffer. Por ejemplo, CppConnection hereda de Connection y de CppBuffer.
+
+Esta clase conecta un Buffer de entrada con un Buffer de salida y almacena una matriz de pesos. Como caso especial, una conexión puede conectar un vector de resultados con la verdadera salida. En este caso, lo que almacena es un vector de umbrales y usará el método =activation= en lugar de =calculateAndAddTo=. 
+
+Todos los Buffer asociados a una Connection deben ser del mismo tipo de implementación, como se describe en más detalle en la sección \ref{implFactoria}.
+
+Los métodos públicos (ninguno virtual) que ofrece son:
++ =Buffer* getInput() := Devuelve el puntero al Buffer de entrada a la conexión.
++ =void calculateAndAddTo(Buffer* results) := Partiendo de su matriz de pesos interna y del estado actual de su buffer de entrada, calcula el rresultado parcial de cada neurona de salida para este Buffer de entrada y lo suma a la posición correspondiente en el vector =results= que toma como parámetro. El tamaño de la conexión (número de elementos ó pesos) debe ser igual al tamaño de su entrada por el tamaño del vector de resultados (que debería ser igual al tamaño del vector de salidas), de no cumplirse esta condición se lanzará una excepción.
++ =void activation(Buffer* output, FunctionType functionType) := cuando la conexión representa a un vector de umbrales, esta apunta a un vector de resultados, el parámetro del método anterior. Este método lee el vector de resultados (el input de la Connection que lo llama) y usando su vector de umbrales aplica la función de activación indicada por el parámetro =functionType=, poniendo los resultados en el Buffer =output= indicado como parámetro. Si el tamaño de la Connection (el vector de umbrales) no es del mismo tamaño que la entrada a la conexión (el vector de resultados) o que el =output=, se lanza una excepción. Si la entrada a la conexión o la propia Connection (el vector de umbrales) no son de tipo FLOAT también se lanzan excepciones. Por tanto, para que una conexión pueda llamar correctamente a este método debe ser inicializa con tamaño de salida igual a 1.
++ =void crossover(Connection* other, Interface* bitBuffer) := Aplica el operador de cruce entre la conexión y otra Connection similar recibida en el parámetro =other= dependiendo del contenido de la interfaz de tipo =BIT= recibida en el parámetro =bitBuffer=. Los pesos para cuyas posiciones haya un 1 en el vector de bits se intercambian, para los que haya un 0, se dejan como están. Las conexiones deben ser del mismo tipo y tamaño. El vector de bits debe tener también el mismo tamaño. Si cualquiera desde estas condiciones no se cumplen, se lanza la excepción correspondiente.
++ =void mutate(unsigned pos, float mutation) := Se suma =mutation= al peso en la posición =pos=. Se controlan los máximos si los pesos son de tipo =BYTE=. Si la posición es mayor que el tamaño de la conexión se lanza una excepción.
++ =void reset(unsigned pos) := Se asigna 0 al peso en la posición =pos=. Si la posición es mayor que el tamaño de la conexión se lanza una excepción. Este es el método que implementa la nueva operación de olvido descrita en la sección \ref{disenoGeneMut}.
 **** HACER <<<Layer>>>
+
+Esta clase utiliza Buffer y Connection para construir una capa neuronal completa. A pesar de que las capas pueden ser de diferentes implementaciones, la implementación de esta clase es completamente genérica, pues las peculiaridades ya están encapsuladas en Buffer y Connection, que esta clase construye llamando a Factory. 
+
+El constructor por defecto está protegido para obligar al usuario de la librería a utilizar uno de los constructores paramétrizados.
+
+- 
+- =Layer(unsigned size, BufferType outputType, FunctionType functionType, ImplementationType implementationType) := 
+- =Layer(FILE* stream, ImplementationType implementationType) := 
+
+
+
+    virtual void addInput(Buffer* input);
+    virtual void calculateOutput();
+
+    virtual void randomWeighs(float range);
+    virtual void copyWeighs(Layer* sourceLayer);
+
+    void loadWeighs(FILE* stream);
+    void saveWeighs(FILE* stream);
+    virtual void save(FILE* stream);
+
+    unsigned getNumberInputs();
+    Buffer* getInput(unsigned pos);
+    Connection* getConnection(unsigned inputPos);
+    Buffer* getOutput();
+    Interface* getOutputInterface();
+    Connection* getThresholds();
+    FunctionType getFunctionType();
+    ImplementationType getImplementationType();
+
 **** HACER <<<InputLayer>>>
 **** HACER <<<NeuralNet>>>
 
