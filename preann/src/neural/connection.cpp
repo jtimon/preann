@@ -58,6 +58,10 @@ void Connection::crossover(Connection* other, Interface* bitBuffer)
         std::string error = "Connection::crossover The Buffers must have the same type to crossover them.";
         throw error;
     }
+    if (getSize() != bitBuffer->getSize()) {
+        std::string error = "Connection::crossover The bitBuffer must have the same size that the Buffers to crossover has.";
+        throw error;
+    }
     _crossover(other, bitBuffer);
 }
 
