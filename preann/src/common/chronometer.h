@@ -16,6 +16,8 @@ using namespace std;
 #include "cuda/cuda.h"
 #endif
 
+#define CLOCKS_PER_M_SEC ((double)(CLOCKS_PER_SEC/1000))
+
 /** \class Chronometer
 *   \brief clase para cronometrar el rendimiento de los métodos a optimizar
 *

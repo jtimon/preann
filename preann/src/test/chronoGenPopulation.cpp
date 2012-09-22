@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
         ChronoPlotter plotter(argv[1], new RangeLoop(Population::NUM_SELECTION, 50, 301, 50),
-                              "Time (seconds)");
+                              "Tiempo (ms)");
 
         plotter.parameters.putNumber(Population::NUM_CROSSOVER, 0);
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
