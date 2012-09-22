@@ -16,7 +16,7 @@
 #+OPTIONS:     toc:nil H:5
 #+BIND: org-export-latex-title-command ""
 
-#+TODO: HACER MODIFICAR | REVISAR HECHO
+#+TODO: HACER MODIFICAR BORRAR | REVISAR HECHO
 
 # definiciones propias
 #+begin_latex
@@ -99,16 +99,16 @@ En este trabajo se estudia un m\'etodo alternativo para el entrenamiento de rede
 \newpage
 #+end_latex
 
-* MODIFICAR Introducci\'on
+* REVISAR Introducci\'on
 #+LaTeX: \label{intro}
 
 El /aprendizaje autom\'atico/ es una rama de la inteligencia artificial que trata de construir sistemas inform\'aticos que optimicen un criterio de rendimiento utilizando datos o experiencia previa. Dentro del aprendizaje autom\'atico, las t\'ecnicas se clasifican en base a su entrenamiento como supervisado o no supervisado. En el primero, al sistema se le suministran ejemplos de entradas con sus correspondientes salidas deseadas. En el entrenamiento no supervisado, no se tienen a priori ejemplos de c\'omo deber\'ia comportarse el sistema. El aprendizaje por refuerzo es un caso especial de aprendizaje supervisado en que la salida deseada exacta es desconocida. Se basa s\'olo en informaci\'on sobre si la salida actual es correcta o no. Al agente que se quiere que aprenda se le provee informaci\'on sobre lo bien o lo mal que est\'a actuando. Esta se\~nal de recompensa puede serle indicada bien cada vez que el agente act\'ua, bien al final de una prueba completa durante la que realiza varias acciones.
 
 Los algoritmos que tienen su origen en la observaci\'on de la naturaleza se denominan bio-inspirados. Entre ellos se encuentran las redes neuronales y los algoritmos gen\'eticos. 
 
-Las redes neuronales son modelos que intentan reproducir el comportamiento del cerebro humano TODO [Hilera y Mart\'inez, 1995]. Una red neuronal consiste en un conjunto de elementos de procesamiento, llamados neuronas, los cuales se conectan entre s\'i TODO [Koehn, 1994]. Las conexiones entre las neuronas tienen pesos asociados cuyos valores determinar\'an el comportamiento de la red. Existen algoritmos para determinar el valor de los pesos de una red mediante un entrenamiento supervisado, cabe destacar el de retro-propagaci\'on del error.
+Las redes neuronales son modelos que intentan reproducir el comportamiento del cerebro humano \cite[Hilera y Mart\'inez, 1995]{Hilera95}. Una red neuronal consiste en un conjunto de elementos de procesamiento, llamados neuronas, los cuales se conectan entre s\'i \cite[Koehn, 1994]{Koehn94}. Las conexiones entre las neuronas tienen pesos asociados cuyos valores determinar\'an el comportamiento de la red. Existen algoritmos para determinar el valor de los pesos de una red mediante un entrenamiento supervisado, cabe destacar el de retro-propagaci\'on del error.
 
-Los algoritmos evolutivos, dentro de los cuales los algoritmos gen\'eticos son los m\'as conocidos, son una familia de modelos computacionales inspirados en la evoluci\'on y la supervivencia del m\'as apto TODO [B\"ach, et. al., 1991; \"Omer, 1995; Whitley, 2001]. Se utilizan fundamentalmente en la resoluci\'on de problemas de b\'usqueda y de optimizaci\'on TODO [Holland, 1975]. Buscan una soluci\'on del problema reproduciendo gen\'eticamente una poblaci\'on de individuos a lo largo de una serie de generaciones TODO [Koza, 1997]. El aprendizaje es formulado como un problema de optimizaci\'on, en el que cada individuo de la poblaci\'on es una posible soluci\'on.
+Los algoritmos evolutivos, dentro de los cuales los algoritmos gen\'eticos son los m\'as conocidos, son una familia de modelos computacionales inspirados en la evoluci\'on y la supervivencia del m\'as apto \cite[B\"ach, et. al.]{BackSchwefel93}. Se utilizan fundamentalmente en la resoluci\'on de problemas de b\'usqueda y de optimizaci\'on \cite[Holland, 1975]{Holland75}. Buscan una soluci\'on del problema reproduciendo gen\'eticamente una poblaci\'on de individuos a lo largo de una serie de generaciones \cite[Koza, 1992]{Koza92}. El aprendizaje es formulado como un problema de optimizaci\'on, en el que cada individuo de la poblaci\'on es una posible soluci\'on.
 
 Dada una topolog\'ia de red fija, el entrenamiento de una red neuronal puede ser visto como un proceso de optimizaci\'on cuyo objetivo es encontrar un conjunto de pesos que minimice el error que produce la red sobre el conjunto de ejemplos en el entrenamiento supervisado, o que maximice la recompensa en el aprendizaje por refuerzo.
 
@@ -122,18 +122,22 @@ En todo este proceso, El algoritmo que m\'as se ejecuta es el que calcula la sal
 En el presente documento (que contiene la documentaci\'on asociada al proyecto fin de carrera titulado /<<Aprendizaje por refuerzo mediante algoritmos genéticos de redes neuronales paralelizadas con GPGPU>>/, desarrollado por Jorge Tim\'on Morillo-Velarde para la consecuci\'on del t\'itulo de ingenier\'ia inform\'atica), primero comentaremos los fundamentos te\'oricos precisos para su comprensi\'on y su correcta ubicaci\'on dentro del dominio de la neuro-evoluci\'on, diferenci\'andolo de otros desarrollos en \'este \'area. Despu\'es, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementaci\'on. Los rendimientos obtenidos con las diferentes implementaciones paralelas y opciones en el algortimo genético se muestran en el capítulo \ref{rendimiento}. En el cap\'itulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elecci\'on de los mismos. El cap\'itulo de resultados de aprendizaje \ref{aprendizaje} expone los datos emp\'iricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el cap\'itulo \ref{conclusiones}.
 
 \newpage
-* MODIFICAR [0/4] Base te\'orica
+* REVISAR [1/3] Base te\'orica
 #+LaTeX: \label{baseTeorica}
 
 Tanto las redes neuronales como los algoritmos gen\'eticos est\'an inspirados en la naturaleza y han sido utilizados desde largo tiempo atr\'as. Las redes neuronales est\'an inspiradas en el funcionamiento del cerebro, como un sistema de procesamiento de informaci\'on distribuido. Por su parte, los algoritmos gen\'eticos se basan en la teor\'ia de la evoluci\'on de Darwin, por la que la evoluci\'on se produce a trav\'es de dos principios b\'asicos: los individuos que no se adaptan suficientemente al medio perecen, mientras que los que s\'i lo hacen transmiten sus genes con cierta variabilidad. Esta variabilidad puede proceder de dos fuentes: el cruce de genes entre individuos \'o la mutaci\'on directa de esos genes.
 
-La combinaci\'on de estas dos t\'ecnicas es algo relativamente reciente. Algunos - principalmente anglosajones - han coincidido en llamar a esta s\'intesis [[http://en.wikipedia.org/wiki/Neuroevolution][neuro-evoluci\'on]], otros se refieren a ella como [[http://laral.istc.cnr.it/nolfi/papers/HBTNN-A.pdf][evoluci\'on de redes neuronales artificiales]], pero - en general - la mayor\'ia de los que la usan recurren a nombres que definen con m\'as precisi\'on la t\'ecnica concreta que utilizan; dadas las m\'ultiples posibilidades para combinar ambos m\'etodos. Aceptaremos el t\'ermino neuro-evoluci\'on para el resto del texto, aunque sin renunciar a los otros t\'erminos que hayan podido ser utilizados como redes neuronales evolutivas.
+La combinaci\'on de estas dos t\'ecnicas es algo relativamente reciente. Algunos - principalmente anglosajones - han coincidido en llamar a esta s\'intesis [[http://en.wikipedia.org/wiki/Neuroevolution][neuro-evoluci\'on]], otros se refieren a ella como [[http://laral.istc.cnr.it/nolfi/papers/HBTNN-A.pdf][evoluci\'on de redes neuronales artificiales]], GANN, etc. En general, la mayor\'ia de los que la usan recurren a nombres que definen con m\'as precisi\'on la t\'ecnica concreta que utilizan; dadas las m\'ultiples posibilidades para combinar ambos m\'etodos. Aceptaremos el t\'ermino neuro-evoluci\'on para el resto del texto, aunque sin renunciar a los otros t\'erminos que hayan podido ser utilizados como redes neuronales evolutivas.
 
 A continuaci\'on explicaremos m\'as detalladamente las bases te\'oricas de las tres t\'ecnicas: redes neuronales, algoritmos gen\'eticos y neuro-evoluci\'on. Nos centraremos principalmente en los algoritmos y estructuras que m\'as se asemejan a los implementamos en nuestra librer\'ia.
 
-** MODIFICAR Redes neuronales
+\newpage
+** REVISAR Redes neuronales
 #+LaTeX: \label{basTeoRedes}
 
+Describiremos de forma suscinta el funcionamiento general de las redes neuronales y sus estructuras más comunes, para luego discutir las ventajas y las posibles limitaciones, centrándonos en los algoritmos de aprendizaje de gradiente descendente y, en concreto, en el de retropropagación del error.
+
+*** Conceptos generales
 Las redes neuronales constan de un conjunto de elementos de procesamiento - conocidos como nodos o neuronas - interconectados entre s\'i. Pueden ser descritas mediante un grafo dirigido en el que cada neurona  \(i\) usa una funci\'on de activaci\'on de la forma:
 
 \begin{equation}\label{eqSalidaNeu}
@@ -147,101 +151,104 @@ donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada n\'umero \
 #+ATTR_LaTeX: trim= 0.5cm 22cm 10cm 0cm, clip, width=15cm
 [[./img/feed-forward.jpg]]
 
- Las redes neuronales artificiales pueden clasificarse como \emph{feed-forward} (con propagaci\'on hacia delante) o recurrentes dependiendo de su conectividad. Una red es \emph{feed-forward} (figura \ref{figFeedForward}) si existe un m\'etodo de numeraci\'on de las neuronas que cumpla que no existan conexiones desde un nodo hacia otro nodo con un n\'umero m\'as peque\~no que el de nodo de origen. Una red es recurrente (figura \ref{figRecurrente}) si no existe un m\'etodo de numeraci\'on que cumpla tal condici\'on. Para simplificar nuestro trabajo, nos centraremos en las redes \emph{feed-forward}.
+ Las redes neuronales artificiales pueden clasificarse como /feed-forward/ (con propagaci\'on hacia delante) o recurrentes dependiendo de su conectividad. Una red es /feed-forward/ (figura \ref{figFeedForward}) si existe un m\'etodo de numeraci\'on de las neuronas que cumpla que no existan conexiones desde un nodo hacia otro nodo con un n\'umero m\'as peque\~no que el de nodo de origen. Una red es recurrente (figura \ref{figRecurrente}) si no existe un m\'etodo de numeraci\'on que cumpla tal condici\'on. Para simplificar nuestro trabajo, nos centraremos en las redes /feed-forward/.
+
+ El aprendizaje de las redes neuronales se consigue habitualmente usando ejemplos: suelen tener un entrenamiento supervisado. Se basa en la comparaci\'on directa entre la salida de la red y la salida correcta o deseada. Normalmente se formula el entrenamiento como la minimizaci\'on de una funci\'on de error como el sumatorio del cuadrado del error de la salida respecto de la salida deseada para todos los datos disponibles (que constan de pares de entradas con sus correspondientes salidas deseadas). Un algoritmo de optimizaci\'on basado en el descenso del gradiente como la regla delta generalizada (tambi\'en conocido como algoritmo /backpropagation/) puede ser usado despu\'es iterativamente para ajustar los pesos y as\'i minimizar el error.
 
 #+CAPTION:    Red neuronal recurrente.
 #+LABEL:      figRecurrente
 #+ATTR_LaTeX: scale=0.35
 [[./img/recurrente.jpg]]
 
- El aprendizaje de las redes neuronales se consigue habitualmente usando ejemplos: suelen tener un entrenamiento supervisado. Se basa en la comparaci\'on directa entre la salida de la red y la salida correcta o deseada. Normalmente se formula el entrenamiento como la minimizaci\'on de una funci\'on de error como el sumatorio del cuadrado del error de la salida respecto de la salida deseada para todos los datos disponibles (que constan de pares de entradas con sus correspondientes salidas deseadas). Un algoritmo de optimizaci\'on basado en el descenso del gradiente como la regla delta generalizada (tambi\'en conocido como algoritmo backpropagation) puede ser usado despu\'es iterativamente para ajustar los pesos y as\'i minimizar el error.
+El algoritmo /backpropagation/ no funciona con topologías recurrentes. En nuestro caso, no necesitamos una conectividad hacia delante, la librería implementada como parte del proyecto sí puede utilizar conexiones recurrentes como se especifica en el capítulo de [[analisis][análisis]]. Además, utilizamos aprendizaje por refuerzo y no necesitamos una colecci\'on de ejemplos (aunque se puede utilizar el error total en un conjunto de ejemplos para calcular el refuerzo). Los pesos los ajustar\'a un algoritmo gen\'etico. La estructura de la red se definir\'a de forma previa y manualmente para cada problema y s\'olo evolucionar\'an los pesos (y umbrales).
 
- En nuestro caso, utilizamos aprendizaje por refuerzo y no necesitamos una colecci\'on de ejemplos (aunque se podr\'ia utilizar para calcular el refuerzo). Los pesos los ajustar\'a un algoritmo gen\'etico. La estructura de la red se definir\'a de forma previa para cada problema y s\'olo evolucionar\'an los pesos (y umbrales).
+*** Fortalezas y deficiencias
+#+LaTeX: \label{baseTeoricaFortRedes}
 
-** MODIFICAR Algoritmos gen\'eticos
+Las redes neuronales con conexi\'on hacia delante en general son un importante m\'etodo de aproximaci\'on de funciones \cite[Kim, 1992]{Kim92}. El perceptr\'on multicapa es un tipo de red neuronal con conexiones hacia delante. La topolog\'ia de un perceptr\'on multicapa esta definida por un conjunto de capas ocultas, una capa de entrada y una de salida. No existen restricciones sobre la funci\'on de activaci\'on aunque en general se suelen utilizar funciones sigmoideas. Existen demostraciones te\'oricas \cite[Funahashi, 1989]{Funahashi89} de que un perceptr\'on multicapa cuya funci\'on de activaci\'on sea no constante, acotada y mon\'otona creciente es un aproximador universal de funciones. En \cite[Hornik et alt, 1989]{Hornik89} se llega a un resultado similar utilizando funciones de activaci\'on sigmoideas, no necesariamente continuas. Esto es un punto muy fuerte de las redes neuronales. 
+
+Adem\'as, constituyen buena una herramienta para la construcci\'on de agentes pues s\'olo hay que codificar las entradas y las salidas de la red como las del agente y el tiempo de ejecuci\'on de la red s\'olo depende de la topolog\'ia de \'esta (para una topolog\'ia dada, es lineal con respecto al número de entradas consecutivas).
+
+Algunas deficiencias del algoritmo back-propagation son su baja adaptabilidad, la alta dependencia de los par\'ametros del algoritmo, el estancamiento en m\'inimos locales, la posibilidad de par\'alisis y la alta dependencia de las condiciones iniciales.
+
++ *Adaptabilidad:* 
+  El algoritmo tiene como premisa la utilizaci\'on de una funci\'on de activaci\'on derivable \cite[Walker, 1995]{Walker95}. Al hacer uso de la derivada de la funci\'on de activaci\'on, es condici\'on necesaria para la aplicaci\'on del algoritmo que la misma sea continua y derivable en todo el dominio de aplicaci\'on \cite[Wilson, 1994]{Wilson94}. Esto impide la utilizaci\'on del m\'etodo en otras topolog\'ias donde la funci\'on de activaci\'on presenta discontinuidades.
+
+  Este problema suele encontrarse en varios m\'etodos de entrenamiento, los cuales son desarrollados para una determinada topolog\'ia y sus resultados, en general, no son extensibles directamente a otras topolog\'ias. Es necesario adaptar los m\'etodos para aplicarlos a otras topolog\'ias.
+
++ *M\'inimos locales:* 
+  La superficie que define la funci\'on de error E en base a los par\'ametros de la red neuronal es compleja y esta llena de valles y colinas. Debido a la utilizaci\'on del gradiente para encontrar el m\'inimo de dicha funci\'on de error se corre el riesgo de que el proceso de entrenamiento quede atrapado en un m\'inimo local \cite[Sutton, 1986]{Sutton86}. Esta situaci\'on no es deseable, fundamentalmente si dicho m\'inimo esta localizado lejos del m\'inimo global.
+
+  Existen algunos mecanismos para evitar que esto suceda. Una posible soluci\'on para evitar que el entrenamiento quede atrapado en un m\'inimo local es aumentar el n\'umero de neuronas ocultas de la red. Este mecanismo puede ayudar en aquellos casos en los que la red tiene escaso poder de representaci\'on interna, y no es capaz de distinguir entre dos patrones diferentes, proporcionando una misma salida para ambos patrones. Al aumentar el n\'umero de neuronas ocultas la red posee mayor cantidad de par\'ametros libres y puede conseguir una mejor representaci\'on interna.
+
+  Otros mecanismos que ayudan a disminuir los efectos de este problema son la adici\'on de una tasa de momento al proceso de entrenamiento, utilizar una tasa de aprendizaje decreciente a lo largo del proceso, partir de otras configuraciones iniciales de la red, a\~nadir ruido al m\'etodo de gradiente, etc.
+
++ *Saturaci\'on:* 
+  El fen\'omeno de saturaci\'on, tambi\'en conocido como par\'alisis, se produce cuando la entrada total a una neurona de la red toma valores muy altos, ya sean positivos o negativos. Al utilizar funciones de activaci\'on sigmoidales, la funci\'on de activaci\'on posee dos as\'intotas horizontales. Si la entrada de la neurona alcanza un valor alto, la funci\'on de activaci\'on se satura y alcanza un valor de activaci\'on m\'aximo o m\'inimo.
+
+  Cuando la funci\'on de activaci\'on se satura su derivada tiende a hacerse nula, haciendo que los par\'ametros de la red permanezcan invariables y, como consecuencia, la suma de los errores locales permanece constante por un largo periodo de tiempo \cite[Kröse y van der Smagt, 1993]{Krose93}. Aunque esta situaci\'on se suele confundir con un m\'inimo local, pues el error permanece invariable, en este caso es posible que despu\'es de un cierto tiempo el error comience nuevamente a decrecer.
+
+  El fen\'omeno de par\'alisis del perceptr\'on multicapa ocurre fundamentalmente cuando los par\'ametros de la red toman valores muy altos. Un mecanismo para evitar esto consiste en partir de valores iniciales bajos.
+
++ *Condiciones iniciales:* 
+  El conjunto de pesos iniciales de la red neuronal generalmente se selecciona de manera aleatoria. Sin embargo, el algoritmo /backpropagation/ es muy dependiente de las condiciones iniciales seleccionadas \cite[Kolen, 1991]{Kolen91}. Peque\~nas variaciones realizadas sobre las condiciones iniciales pueden llevar a grandes diferencias en el tiempo de convergencia del algoritmo.
+
++ *Dependencia de par\'ametros del algoritmo:* 
+  Los algoritmos de gradiente descendente hacen uso de una tasa de aprendizaje que idealmente deber\'ia ser infinitesimal. De esta manera, mediante peque\~nos ajustes de los pesos sin\'apticos el algoritmo converge hacia un m\'inimo. El uso de tasas de aprendizaje muy peque\~nas hace que el algoritmo tenga una convergencia estable hacia un m\'inimo, aunque el tiempo necesario para alcanzarlo puede llegar a ser muy alto. Como consecuencia de lo dicho anteriormente, y con el objetivo de disminuir el tiempo de convergencia del algoritmo, en la pr\'actica se suelen utilizar tasas de aprendizajes mayores a las te\'oricas. El aumento de la tasa de aprendizaje disminuye el tiempo de convergencia, pero tiene un efecto contraproducente: el algoritmo comienza a oscilar en torno a un m\'inimo, disminuyendo la probabilidad de alcanzarlo. El efecto de oscilaci\'on puede reducirse mediante la adici\'on de una tasa de momento, pero no puede eliminarse.
+
+  El algoritmo /backpropagation/ es muy dependiente de los par\'ametros mencionados previamente. Dependiendo de la selecci\'on de par\'ametros realizadas el resultado de la aplicaci\'on del algoritmo ser\'a exitosa o no \cite[Liu et alt, 2004]{Liu2004}. Peque\~nas variaciones sobre los par\'ametros del algoritmo pueden conducir a resultados diferentes. El principal problema es que no existe un m\'etodo general que permita establecer el valor de estos par\'ametros \cite[Branke, 1995]{Branke95}. Los par\'ametros que aseguran la convergencia para un determinado problema pueden no ser aplicables a otro problema. De esta manera, la selecci\'on de los par\'ametros del algoritmo se realiza en base a la experiencia del dise\~nador, y se realiza un refinamiento de los mismos mediante mecanismos de prueba y error. Esto produce un aumento en el tiempo total de dise\~no y entrenamiento de la red.
+
+A esto hay que a\~nadir que los algoritmos de gradiente requieren entrenamiento supervisado (normalmente, no funcionan para el aprendizaje por refuerzo, que es más general) y que las conexiones sean hacia delante (la retro-propagaci\'on del error no se puede aplicar en redes recurrentes). 
+
+Usando un [[basTeoGenet][algoritmo genético]] como m\'etodo de entrenamiento de la red, se solucionan algunos de estos problemas y otros se mitigan en cierto grado:
+
+- Con el algoritmo gen\'etico, se puede usar el aprendizaje por refuerzo y se pueden entrenar redes recurrentes sin problema alguno.
+- No se tienen requerimientos para la funci\'on de activaci\'on que como hemos visto tenía que ser continua y derivable para /backpropagation/, por lo que aumenta su adaptabilidad. 
+- El algoritmo gen\'etico es mucho menos tendente a estancarse en m\'inimos locales porque no utiliza la informaci\'on del gradiente y porque explora varios puntos (tantos como individuos tenga la poblaci\'on) del espacio de b\'usqueda simult\'aneamente.
+- El fen\'omeno de saturaci\'on se produce cuando una neurona alcanza un m\'aximo o un m\'inimo. En este caso, la derivada de la funci\'on de activaci\'on se hace nula, y los pesos de la red permanecen invariables. Como el m\'etodo propuesto no hace uso de la derivada de la funci\'on de activaci\'on, el efecto de este fen\'omeno es completamente eliminado. 
+- Los valores iniciales de los pesos tambi\'en pueden afectar al algoritmo gen\'etico, en especial si son muy altos (ya sean positivos o negativos), pero existen experimentos que permiten afirmar que el m\'etodo propuesto es menos dependiente de los valores iniciales que el algoritmo /backpropagation/ \cite[Bertona2005]{Bertona2005}.
+- Se cambia la dependencia de los par\'ametros de ese algoritmo y ahora depende de los par\'ametros del algoritmo gen\'etico, estos par\'ametros son m\'as flexibles que se pueden alterar en durante el entrenamiento y no provocan la oscilación comentada anteriormente.
+
+\newpage
+** MODIFICAR [0/4] Algoritmos gen\'eticos
 #+LaTeX: \label{basTeoGenet}
 
 Los algoritmos gen\'eticos son m\'etodos sistem\'aticos para la resoluci\'on de problemas de b\'usqueda y optimizaci\'on que aplican a \'estos los principios de la evoluci\'on biol\'ogica: selecci\'on basada en la poblaci\'on, reproducci\'on sexual y mutaci\'on.
 
- Los algoritmos gen\'eticos son m\'etodos de optimizaci\'on, que tratan de resolver el conjunto de problemas formulados como: hallar (xi,...,xn) tales que F(xi,...,xn) sea m\'aximo. En un algoritmo gen\'etico, tras parametrizar el problema en una serie de variables (xi,...,xn), se codifican en un cromosoma. Todos los operadores utilizados por un algoritmo gen\'etico se aplicar\'an sobre estos cromosomas, o sobre poblaciones de ellos. En el algoritmo gen\'etico va impl\'icito el m\'etodo para resolver el problema; son s\'olo par\'ametros de tal m\'etodo los que est\'an codificados - a diferencia de otros algoritmos evolutivos como la programaci\'on gen\'etica. Hay que tener en cuenta que un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algoritmo robusto, por ser \'util para cualquier problema, pero a la vez d\'ebil, pues no est\'a especializado en ninguno.
+Los algoritmos gen\'eticos son m\'etodos de optimizaci\'on, que tratan de resolver el conjunto de problemas formulados como: hallar (xi,...,xn) tales que F(xi,...,xn) sea m\'aximo. En un algoritmo gen\'etico, tras parametrizar el problema en una serie de variables (xi,...,xn), se codifican en un cromosoma. Todos los operadores utilizados por un algoritmo gen\'etico se aplicar\'an sobre estos cromosomas, o sobre poblaciones de ellos. En el algoritmo gen\'etico va impl\'icito el m\'etodo para resolver el problema; son s\'olo par\'ametros de tal m\'etodo los que est\'an codificados - a diferencia de otros algoritmos evolutivos como la programaci\'on gen\'etica. Hay que tener en cuenta que un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algoritmo robusto, por ser \'util para cualquier problema, pero a la vez d\'ebil, pues no est\'a especializado en ninguno.
 
- Las soluciones codificadas en un cromosoma compiten para ver cu\'al constituye la mejor soluci\'on (aunque no necesariamente la mejor de todas las soluciones posibles). El ambiente, constituido por las otras camaradas soluciones, ejercer\'a una presi\'on selectiva sobre la poblaci\'on, de forma que s\'olo los mejor adaptados (aquellos que resuelvan mejor el problema) sobrevivan o leguen su material gen\'etico a las siguientes generaciones, igual que en la evoluci\'on de las especies. La diversidad gen\'etica se introduce mediante mutaciones y reproducci\'on sexual. En la Naturaleza lo \'unico que hay que optimizar es la supervivencia, y eso significa a su vez maximizar diversos factores y minimizar otros. Un algoritmo gen\'etico, sin embargo, se usar\'a para optimizar habitualmente para optimizar s\'olo una funci\'on, no diversas funciones relacionadas entre s\'i simult\'aneamente. Este tipo de optimizaci\'on, denominada optimizaci\'on multimodal, tambi\'en se suele abordar con un algoritmo gen\'etico especializado.
+Las soluciones codificadas en un cromosoma compiten para ver cu\'al constituye la mejor soluci\'on (aunque no necesariamente la mejor de todas las soluciones posibles). El ambiente, constituido por las otras camaradas soluciones, ejercer\'a una presi\'on selectiva sobre la poblaci\'on, de forma que s\'olo los mejor adaptados (aquellos que resuelvan mejor el problema) sobrevivan o leguen su material gen\'etico a las siguientes generaciones, igual que en la evoluci\'on de las especies. La diversidad gen\'etica se introduce mediante mutaciones y reproducci\'on sexual. En la Naturaleza lo \'unico que hay que optimizar es la supervivencia, y eso significa a su vez maximizar diversos factores y minimizar otros. Un algoritmo gen\'etico, sin embargo, se usar\'a para optimizar habitualmente para optimizar s\'olo una funci\'on, no diversas funciones relacionadas entre s\'i simult\'aneamente. Este tipo de optimizaci\'on, denominada optimizaci\'on multimodal, tambi\'en se suele abordar con un algoritmo gen\'etico especializado.
 
- Por lo tanto, un algoritmo gen\'etico consiste en lo siguiente: hallar de qu\'e par\'ametros depende el problema, codificarlos en un cromosoma, y se aplican los m\'etodos de la evoluci\'on: selecci\'on y reproducci\'on sexual con intercambio de informaci\'on y alteraciones que generan diversidad. En las siguientes secciones se ver\'an cada uno de los aspectos de un algoritmo gen\'etico.
+Por lo tanto, un algoritmo gen\'etico consiste en lo siguiente: hallar de qu\'e par\'ametros depende el problema, codificarlos en un cromosoma, y se aplican los m\'etodos de la evoluci\'on: selecci\'on y reproducci\'on sexual con intercambio de informaci\'on y alteraciones que generan diversidad. En las siguientes secciones se ver\'an cada uno de los aspectos de un algoritmo gen\'etico.
 
- Mediante los operadores de selecci\'on, se eligen los individuos que ser\'an progenitores de la siguiente generaci\'on (o directamente formar\'an parte de ella). Con los operadores de cruce, se generan nuevos individuos mezclando los cromosomas de varios individuos (normalmente, dos). Por \'ultimo, los operadores de mutaci\'on a\~naden cambios aleatorios a los individuos. La funci\'on de fitness nos da una aproximaci\'on de la adaptaci\'on del individuo al medio y \'esta es utilizada por los operadores de selecci\'on.
+Mediante los operadores de selecci\'on, se eligen los individuos que ser\'an progenitores de la siguiente generaci\'on (o directamente formar\'an parte de ella). Con los operadores de cruce, se generan nuevos individuos mezclando los cromosomas de varios individuos (normalmente, dos). Por \'ultimo, los operadores de mutaci\'on a\~naden cambios aleatorios a los individuos. La funci\'on de fitness nos da una aproximaci\'on de la adaptaci\'on del individuo al medio y \'esta es utilizada por los operadores de selecci\'on.
 
- En nuestro caso, el cromosoma de cada individuo lo forman los pesos de la red que utiliza ese individuo. Para calcular el fitness del individuo, se construir\'a la red con los pesos del cromosoma y se realizar\'an varias pruebas (para reducir el ruido generado por los posibles factores aleatorios de \'estas) sobre el individuo, sumando las recompensas de todas y obteniendo el citado fitness.
+En nuestro caso, el cromosoma de cada individuo lo forman los pesos de la red que utiliza ese individuo. Para calcular el fitness del individuo, se construir\'a la red con los pesos del cromosoma y se realizar\'an varias pruebas (para reducir el ruido generado por los posibles factores aleatorios de \'estas) sobre el individuo, sumando las recompensas de todas y obteniendo el citado fitness.
 
-*** Algoritmo genético estándar y variaciones
+*** HACER Algoritmo genético estándar y variaciones
 #+LaTeX: \label{basTeoGenetEstan}
-
-*** Operadores de selección
+*** Operadores genéticos
+**** HACER Operadores de selección
 #+LaTeX: \label{basTeoGenetSel}
-
-*** Operadores de cruce
+**** HACER Operadores de cruce
 #+LaTeX: \label{basTeoGenetCruz}
-
-** MODIFICAR Fortalezas y deficiencias
-#+LaTeX: \label{baseTeoricaFort}
-
-Tanto las redes neuronales como los algoritmos gen\'eticos tienen fortalezas que nuestro m\'etodo aprovecha y debilidades que se pueden, en parte, minimizar por la combinaci\'on de ambos m\'etodos.
-
-*** Redes neuronales
-#+LaTeX: \label{baseTeoricaFortRedes}
-
-Las redes neuronales con conexi\'on hacia delante en general son un importante m\'etodo de aproximaci\'on de funciones [Kim, 1992]. El perceptr\'on multicapa es un tipo de red neuronal con conexiones hacia delante. La topolog\'ia de un perceptr\'on multicapa esta definida por un conjunto de capas ocultas, una capa de entrada y una de salida. No existen restricciones sobre la funci\'on de activaci\'on aunque en general se suelen utilizar funciones sigmoideas. Existen demostraciones te\'oricas [Funahashi, 1989] de que un perceptr\'on multicapa cuya funci\'on de activaci\'on sea no constante, acotada y mon\'otona creciente es un aproximador universal de funciones. En [Hornik et alt, 1989] se llega a un resultado similar utilizando funciones de activaci\'on sigmoideas, no necesariamente continuas. Esto es un punto muy fuerte de las redes neuronales. 
-
-Adem\'as, constituyen buena una herramienta para la construcci\'on de agentes pues s\'olo hay que codificar las entradas y las salidas de la red como las del agente y el tiempo de ejecuci\'on de la red s\'olo depende de la topolog\'ia de \'esta (para una topolog\'ia dada, es constante).
-
-Algunas deficiencias del algoritmo back-propagation son su baja adaptabilidad, la alta dependencia de los par\'ametros del algoritmo, el estancamiento en m\'inimos locales, la posibilidad de par\'alisis y la alta dependencia de las condiciones iniciales.
-
-\begin{listaDefiniciones}
-
-\item [Adaptabilidad] El algoritmo tiene como premisa la utilizaci\'on de una funci\'on de activaci\'on derivable [Walker, 1995]. Al hacer uso de la derivada de la funci\'on de activaci\'on, es condici\'on necesaria para la aplicaci\'on del algoritmo que la misma sea continua y derivable en todo el dominio de aplicaci\'on [Wilson, 1994]. Esto impide la utilizaci\'on del m\'etodo en otras topolog\'ias donde la funci\'on de activaci\'on presenta discontinuidades.
-
-Este problema suele encontrarse en varios m\'etodos de entrenamiento, los cuales son desarrollados para una determinada topolog\'ia y sus resultados, en general, no son extensibles directamente a otras topolog\'ias. Es necesario adaptar los m\'etodos para aplicarlos a otras topolog\'ias.
-
-\item [Dependencia de par\'ametros del algoritmo] Los algoritmos de gradiente descendente hacen uso de una tasa de aprendizaje que idealmente deber\'ia ser infinitesimal. De esta manera, mediante peque\~nos ajustes de los pesos sin\'apticos el algoritmo converge hacia un m\'inimo. El uso de tasas de aprendizaje muy peque\~nas hace que el algoritmo tenga una convergencia estable hacia un m\'inimo, aunque el tiempo necesario para alcanzarlo puede llegar a ser muy alto. Como consecuencia de lo dicho anteriormente, y con el objetivo de disminuir el tiempo de convergencia del algoritmo, en la pr\'actica se suelen utilizar tasas de aprendizajes mayores a las te\'oricas. El aumento de la tasa de aprendizaje disminuye el tiempo de convergencia, pero tiene un efecto contraproducente: el algoritmo comienza a oscilar en torno a un m\'inimo, disminuyendo la probabilidad de alcanzarlo. El efecto de oscilaci\'on puede reducirse mediante la adici\'on de una tasa de momento, como se describi\'o en el cap\'itulo 3, pero no puede eliminarse.
-
-El algoritmo backpropagation es muy dependiente de los par\'ametros mencionados previamente. Dependiendo de la selecci\'on de par\'ametros realizadas el resultado de la aplicaci\'on del algoritmo ser\'a exitosa o no [Liu et alt, 2004]. Peque\~nas variaciones sobre los par\'ametros del algoritmo pueden conducir a resultados diferentes. El principal problema es que no existe un m\'etodo general que permita establecer el valor de estos par\'ametros [Branke, 1995]. Los par\'ametros que aseguran la convergencia para un determinado problema pueden no ser aplicables a otro problema. De esta manera, la selecci\'on de los par\'ametros del algoritmo se realiza en base a la experiencia del dise\~nador, y se realiza un refinamiento de los mismos mediante mecanismos de prueba y error. Esto produce un aumento en el tiempo total de dise\~no y entrenamiento de la red.
-
-\item [M\'inimos locales] La superficie que define la funci\'on de error E (ecuaci\'on 8) en base a los par\'ametros de la red neuronal es compleja y esta llena de valles y colinas. Debido a la utilizaci\'on del gradiente para encontrar el m\'inimo de dicha funci\'on de error se corre el riesgo de que el proceso de entrenamiento quede atrapado en un m\'inimo local [Sutton, 1986]. Esta situaci\'on no es deseable, fundamentalmente si dicho m\'inimo esta localizado lejos del m\'inimo global.
-
-Existen algunos mecanismos para evitar que esto suceda. Una posible soluci\'on para evitar que el entrenamiento quede atrapado en un m\'inimo local es aumentar el n\'umero de neuronas ocultas de la red. Este mecanismo puede ayudar en aquellos casos en los que la red tiene escaso poder de representaci\'on interna, y no es capaz de distinguir entre dos patrones diferentes, proporcionando una misma salida para ambos patrones. Al aumentar el n\'umero de neuronas ocultas la red posee mayor cantidad de par\'ametros libres y puede conseguir una mejor representaci\'on interna.
-
-Otros mecanismos que ayudan a disminuir los efectos de este problema son la adici\'on de una tasa de momento al proceso de entrenamiento, utilizar una tasa de aprendizaje decreciente a lo largo del proceso, partir de otras configuraciones iniciales de la red, a\~nadir ruido al m\'etodo de gradiente, etc.
-
-\item [Par\'alisis] El fen\'omeno de par\'alisis, tambi\'en conocido como saturaci\'on, se produce cuando la entrada total a una neurona de la red toma valores muy altos, ya sean positivos o negativos. Al utilizar funciones de activaci\'on sigmoidales, la funci\'on de activaci\'on posee dos as\'intotas horizontales. Si la entrada de la neurona alcanza un valor alto, la funci\'on de activaci\'on se satura y alcanza un valor de activaci\'on m\'aximo o m\'inimo.
-
-Cuando la funci\'on de activaci\'on se satura su derivada tiende a hacerse nula, haciendo que los par\'ametros de la red permanezcan invariables y, como consecuencia, la suma de los errores locales permanece constante por un largo periodo de tiempo [Kr\"ose y van der Smagt, 1993]. Aunque esta situaci\'on se suele confundir con un m\'inimo local, pues el error permanece invariable, en este caso es posible que despu\'es de un cierto tiempo el error comience nuevamente a decrecer.
-
-El fen\'omeno de par\'alisis del perceptr\'on multicapa ocurre fundamentalmente cuando los par\'ametros de la red toman valores muy altos. Un mecanismo para evitar esto consiste en partir de valores iniciales bajos.
-
-\item [Condiciones iniciales] El conjunto de pesos iniciales de la red neuronal generalmente se selecciona de manera aleatoria. Sin embargo, el algoritmo backpropagation es muy dependiente de las condiciones iniciales seleccionadas [Kolen, 1991]. Peque\~nas variaciones realizadas sobre las condiciones iniciales pueden llevar a grandes diferencias en el tiempo de convergencia del algoritmo.
-\end{listaDefiniciones}
-
- A esto hay que a\~nadir que los algoritmos de gradiente requieren entrenamiento supervisado (normalmente, no funcionan para el aprendizaje por refuerzo) y que las conexiones sean hacia delante (la retro-propagaci\'on del error no se puede aplicar en redes recurrentes). 
-
- Usando un algoritmo gen\'etico como m\'etodo de entrenamiento de la red, se solucionan algunos de estos problemas y otros se mitigan en cierto grado. Con el algoritmo gen\'etico, se puede usar el aprendizaje por refuerzo y se pueden entrenar redes recurrentes sin problema. No se tienen requerimientos para la funci\'on de activaci\'on, por lo que aumenta su adaptabilidad. Se cambia la dependencia de los par\'ametros de ese algoritmo y ahora depende de los par\'ametros del algoritmo gen\'etico, estos par\'ametros son m\'as flexibles y se pueden alterar en medio del entrenamiento. El algoritmo gen\'etico es mucho menos tendente a estancarse en m\'inimos locales porque no utiliza la informaci\'on del gradiente y porque explora varios puntos (tantos como individuos tenga la poblaci\'on) del espacio de b\'usqueda simult\'aneamente. El fen\'omeno de saturaci\'on se produce cuando una neurona alcanza un m\'aximo o un m\'inimo. En este caso, la derivada de la funci\'on de activaci\'on se hace nula, y los pesos de la red permanecen invariables. Como el m\'etodo propuesto no hace uso de la derivada de la funci\'on de activaci\'on, el efecto de este fen\'omeno es completamente eliminado. Los valores iniciales de los pesos tambi\'en pueden afectar al algoritmo gen\'etico, en especial si son muy altos (ya sean positivos o negativos), pero existen experimentos que permiten afirmar que el m\'etodo propuesto es menos dependiente de los valores iniciales que el algoritmo backpropagation \cite[Bertona2005]{Bertona2005}.
-
-*** Algoritmos gen\'eticos
-#+LaTeX: \label{baseTeoricaFortRedes}
+*** MODIFICAR Fortalezas y deficiencias
+#+LaTeX: \label{baseTeoricaFortGene}
 
 Un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algoritmo robusto, por ser \'util para cualquier problema, pero a la vez d\'ebil, pues no est\'a especializado en ninguno. Hay que elegir la codificaci\'on de los cromosomas para cada caso concreto. Sin embargo, con nuestro m\'etodo siempre c\'odificaremos los cromosomas de manera similar (con una red neuronal) y s\'olo ser\'a necesario definir la funci\'on de fitness, elegir la topolog\'ia de la red, codificar las entradas y las salidas. Aunque la codificaci\'on de \'estas pueda admitir varias posibilidades (y algunas puedan ser m\'as ventajosas que otras) la red debe aprender a interpretar las correctas relaciones entre entradas y salidas por s\'i misma.
 
 ** MODIFICAR Neuro-evoluci\'on
 #+LaTeX: \label{basTeoNeuro}
 
- La evoluci\'on se ha aplicado las redes neuronales artificiales en tres niveles muy diferentes: a los pesos de las conexiones, la arquitectura de la red y a las reglas de aprendizaje. La evoluci\'on de los pesos de las conexiones introduce una aproximaci\'on global y adaptable al entrenamiento, especialmente para el aprendizaje por refuerzo o para el entrenamiento de redes recursivas, donde los m\'etodos basados en el gradiente experimentan grandes dificultades. La evoluci\'on de las arquitecturas permite a las redes neuronales adaptar su topolog\'ia a diferentes problemas sin intervenci\'on humana y con esto se consigue un dise\~no autom\'atico de redes neuronales, dado que tanto la arquitectura como los pesos pueden ser evolucionados. La evoluci\'on de las reglas de aprendizaje puede ser considerada como un proceso de \textquotedblleft aprender a aprender\textquotedblright en redes neuronales donde la adaptaci\'on de las reglas de aprendizaje se consigue mediante la evoluci\'on. Tambi\'en puede ser contemplada como un proceso de descubrimiento autom\'atico de nuevas reglas de aprendizaje. Nos centraremos en la evoluci\'on de los pesos de las conexiones, por ser la evoluci\'on que utilizaremos.
+La evoluci\'on se ha aplicado las redes neuronales artificiales en tres niveles muy diferentes: a los pesos de las conexiones, la arquitectura de la red y a las reglas de aprendizaje. La evoluci\'on de los pesos de las conexiones introduce una aproximaci\'on global y adaptable al entrenamiento, especialmente para el aprendizaje por refuerzo o para el entrenamiento de redes recursivas, donde los m\'etodos basados en el gradiente experimentan grandes dificultades. La evoluci\'on de las arquitecturas permite a las redes neuronales adaptar su topolog\'ia a diferentes problemas sin intervenci\'on humana y con esto se consigue un dise\~no autom\'atico de redes neuronales, dado que tanto la arquitectura como los pesos pueden ser evolucionados. La evoluci\'on de las reglas de aprendizaje puede ser considerada como un proceso de \textquotedblleft aprender a aprender\textquotedblright en redes neuronales donde la adaptaci\'on de las reglas de aprendizaje se consigue mediante la evoluci\'on. Tambi\'en puede ser contemplada como un proceso de descubrimiento autom\'atico de nuevas reglas de aprendizaje. Nos centraremos en la evoluci\'on de los pesos de las conexiones, por ser la evoluci\'on que utilizaremos.
 
- La evoluci\'on de los pesos de las conexiones se puede realizar en el aprendizaje supervisado (con ejemplos) definiendo la funci\'on de fitness como el error global obtenido por la red (invirtiendo el signo), comparando las salidas de la red y la salida deseada para cada ejemplo. Tambi\'en puede utilizar para el aprendizaje por refuerzo definiendo una funci\'on de fitness distinta.
+La evoluci\'on de los pesos de las conexiones se puede realizar en el aprendizaje supervisado (con ejemplos) definiendo la funci\'on de fitness como el error global obtenido por la red (invirtiendo el signo), comparando las salidas de la red y la salida deseada para cada ejemplo. Tambi\'en puede utilizar para el aprendizaje por refuerzo definiendo una funci\'on de fitness distinta.
 
- En general, los pasos a seguir son dos: decidir la codificaci\'on de los pesos de las conexiones (si se har\'a mediante cadenas binarias o no) y la ejecuci\'on del algoritmo gen\'etico propiamente dicho. Para el primer paso, las opciones m\'as extendidas son la representaci\'on binaria y la representaci\'on con n\'umeros reales.
+En general, los pasos a seguir son dos: decidir la codificaci\'on de los pesos de las conexiones (si se har\'a mediante cadenas binarias o no) y la ejecuci\'on del algoritmo gen\'etico propiamente dicho. Para el primer paso, las opciones m\'as extendidas son la representaci\'on binaria y la representaci\'on con n\'umeros reales.
 
-   El algoritmo gen\'etico can\'onico siempre usa cadenas de bits para codificar las diferentes soluciones. Por ello, algunos trabajos tempranos de evoluci\'on de los pesos de las conexiones siguen esta aproximaci\'on \cite[Yao99]{Yao99}. Las ventajas son la f\'acil aplicaci\'on de los operadores gen\'eticos y su posible implementaci\'on digital. Habr\'ia que elegir la representaci\'on de los n\'umeros reales. Aqu\'i hay un compromiso para la precisi\'on con que se quieran representar los n\'umeros reales. Si se usan muy pocos bits para representar cada conexi\'on, el entrenamiento puede fallar porque algunas combinaciones de pesos no se pueden aproximar con suficiente precisi\'on por valores discretos. Por otra parte, si se usan demasiados bits, los cromosomas que representen a redes neuronales grandes se volver\'an demasiado largos y la evoluci\'on en proceso resultar\'a muy ineficiente.
+El algoritmo gen\'etico can\'onico siempre usa cadenas de bits para codificar las diferentes soluciones. Por ello, algunos trabajos tempranos de evoluci\'on de los pesos de las conexiones siguen esta aproximaci\'on \cite[Yao99]{Yao99}. Las ventajas son la f\'acil aplicaci\'on de los operadores gen\'eticos y su posible implementaci\'on digital. Habr\'ia que elegir la representaci\'on de los n\'umeros reales. Aqu\'i hay un compromiso para la precisi\'on con que se quieran representar los n\'umeros reales. Si se usan muy pocos bits para representar cada conexi\'on, el entrenamiento puede fallar porque algunas combinaciones de pesos no se pueden aproximar con suficiente precisi\'on por valores discretos. Por otra parte, si se usan demasiados bits, los cromosomas que representen a redes neuronales grandes se volver\'an demasiado largos y la evoluci\'on en proceso resultar\'a muy ineficiente.
 
- Por su parte, en la representaci\'on con n\'umeros reales, los cromosomas se codifican como vectores de n\'umeros reales con tantos elementos como conexiones. Los operadores gen\'eticos no se pueden aplicar directamente sobre los bits y han de ser dise\~nados de nuevo. Esto puede ser una ventaja, pues, por ejemplo, el operador de mutaci\'on podr\'ia tener una distribuci\'on gaussiana (u otra funci\'on) en lugar de mutar un bit cualquiera sin tener en cuenta su peso en la construcci\'on del n\'umero.
+Por su parte, en la representaci\'on con n\'umeros reales, los cromosomas se codifican como vectores de n\'umeros reales con tantos elementos como conexiones. Los operadores gen\'eticos no se pueden aplicar directamente sobre los bits y han de ser dise\~nados de nuevo. Esto puede ser una ventaja, pues, por ejemplo, el operador de mutaci\'on podr\'ia tener una distribuci\'on gaussiana (u otra funci\'on) en lugar de mutar un bit cualquiera sin tener en cuenta su peso en la construcci\'on del n\'umero.
 
 \begin{figure}[t]
 \begin{minipage}{0.45\textwidth}
@@ -257,11 +264,17 @@ Un algoritmo gen\'etico es independiente del problema, lo cual lo hace un algori
 \end{minipage}
 \end{figure}
 
- Uno de los problemas a los que se enfrenta la evoluci\'on de redes neuronales es el problema de la permutaci\'on. Es causado por el mapeado "muchos-a-uno" desde la representaci\'on en el cromosoma a la red que es construida. Con dos cromosomas distintos se pueden generar redes equivalentes como se muestra en las figuras \ref{figGrafo1} y \ref{figGrafo2}. Se puede solucionar dando m\'as importancia al operador de mutaci\'on que al de cruce (que es el que sufre con este problema) o con otros m\'etodos matem\'aticos \cite[Gomez, Miikkulainen 2003]{GomezMiikkulainen2003}. 
+Uno de los problemas a los que se enfrenta la evoluci\'on de redes neuronales es el problema de la permutaci\'on. Es causado por el mapeado "muchos-a-uno" desde la representaci\'on en el cromosoma a la red que es construida. Con dos cromosomas distintos se pueden generar redes equivalentes como se muestra en las figuras \ref{figGrafo1} y \ref{figGrafo2}. Se puede solucionar dando m\'as importancia al operador de mutaci\'on que al de cruce (que es el que sufre con este problema) o con otros m\'etodos matem\'aticos \cite[Gomez, Miikkulainen 2003]{GomezMiikkulainen2003}. 
 
 \newpage
 * MODIFICAR [0/2] An\'alisis del problema
 #+LaTeX: \label{analisis}
+** MODIFICAR Especificaciones de la librería a implementar
+#+LaTeX: \label{anaEspecLib}
+
+En el presente proyecto se pretende construir una librer\'ia de programaci\'on en C++ para la utilizaci\'on de redes neuronales con entrenamiento mediante algoritmos gen\'eticos. Se quiere que sea lo m\'as flexible posible en cuanto a la estructura de la red, para poder, en un futuro, determinar la topolog\'ia tambi\'en de forma gen\'etica. Por tanto, con la librer\'ia implementada debe ser posible crear una cualquier red con una arquitectura arbitraria. Deben ser posibles conexiones recurrentes y conectar capas con tipos de datos diferentes (por ejemplo, que una capa cuya salida son n\'umeros en coma flotante debe poder usar como entrada una capa que tiene bits como salida).
+
+Como los entrenamientos pueden ser costosos en tiempo de ejecuci\'on, la librer\'ia debe estar paralelizada internamente al menos para la ejecuci\'on de redes neuronales. Esta paralelizaci\'on debe poder aprovecharse por los sistemas m\'as extendidos para que pueda ser utilizada en proyectos que aprovechen la computaci\'on voluntaria.
 ** MODIFICAR Objetivos
 #+LaTeX: \label{anaObjetivos}
 
@@ -273,16 +286,9 @@ Se probar\'a la librer\'ia en casos concretos con el fin de contestar a las sigu
 
 3) ?`Qu\'e operadores gen\'eticos resultan m\'as adecuados para el entrenamiento en diferentes problemas? ?`Qu\'e valores de los par\'ametros del algoritmo gen\'etico resultan m\'as adecuados para el entrenamiento en diferentes problemas?
 
-4) ?`Para qu\'e tipo de problemas resulta m\'as adecuado el m\'etodo propuesto? 
+4) ?`Para qu\'e tipo de problemas resulta adecuado el m\'etodo propuesto? 
 
 \newpage
-
-** MODIFICAR Especificaciones de la librería a implementar
-#+LaTeX: \label{anaEspecLib}
-
-En el presente proyecto se pretende construir una librer\'ia de programaci\'on en C++ para la utilizaci\'on de redes neuronales con entrenamiento mediante algoritmos gen\'eticos. Se quiere que sea lo m\'as flexible posible en cuanto a la estructura de la red, para poder, en un futuro, determinar la topolog\'ia tambi\'en de forma gen\'etica. Por tanto, con la librer\'ia implementada debe ser posible crear una cualquier red con una arquitectura arbitraria. Deben ser posibles conexiones recurrentes y conectar capas con tipos de datos diferentes (por ejemplo, que una capa cuya salida son n\'umeros en coma flotante debe poder usar como entrada una capa que tiene bits como salida).
-
-Como los entrenamientos pueden ser costosos en tiempo de ejecuci\'on, la librer\'ia debe estar paralelizada internamente al menos para la ejecuci\'on de redes neuronales. Esta paralelizaci\'on debe poder aprovecharse por los sistemas m\'as extendidos para que pueda ser utilizada en proyectos que aprovechen la computaci\'on voluntaria.
 * HACER Diseño general
 #+LaTeX: \label{diseno}
 
@@ -301,14 +307,14 @@ Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar 
 #+LaTeX: \label{disenoGenetic}
 ** HACER Utilidades para la experimentación
 #+LaTeX: \label{disenoLoop}
-* HECHO Dise\~no del algoritmo gen\'etico 
+* Dise\~no del algoritmo gen\'etico p
 #+LaTeX: \label{disenoGene}
 ** Funcionamiento general
 #+LaTeX: \label{disenoGeneFunc}
 
-Como se vió en la sección \ref{basTeoGenetEstan} existen diferentes enfoques en cuanto a la gestión de la población de individuos. El algoritmo genético original adoptaba la política de reemplazo generacional [biblio], con el que la población completa es reemplazada en cada generación. En cambio, la política de estado estacionario [biblio], adoptada por varios algoritmos genéticos posteriores, reemplaza la población selectivamente. Es posible, por ejemplo, que mantener uno o varios miembros de la población por varias generaciones, siempre que estos mantengan su puntuación por encima de otros individuos de la población. Nuestra gestión de la población debe permitir ambas posibilidades de forma configurable.
+Como se vió en la sección \ref{basTeoGenetEstan} existen diferentes enfoques en cuanto a la gestión de la población de individuos. El algoritmo genético original adoptaba la política de reemplazo generacional, con el que la población completa es reemplazada en cada generación. En cambio, la política de estado estacionario, adoptada por varios algoritmos genéticos posteriores, reemplaza la población selectivamente TODO [biblio]. Es posible, por ejemplo, que mantener uno o varios miembros de la población por varias generaciones, siempre que estos mantengan su puntuación por encima de otros individuos de la población. Nuestra gestión de la población debe permitir ambas posibilidades de forma configurable.
 
-Para ello, mantendremos a la población como una lista ordenada en la que se irán insertando (también ordenadamente) los nuevos individuos producidos. Si tras una inserción se tienen más individuos que el tamaño máximo, el peor individuo (sea el nuevo o no) será desechado. Si dos individuos comparten la misma puntuación al ser comparados durante una inserción, se le dará ventaja al nuevo individuo siguiendo el criterio de busqueda neutral [biblio]. Este comportamiento es el propio del estado estacionario. Para obtener el comportamiento generacional, así como diferentes híbridos entre las dos posibilidades, definiremos una variable configurable para la población. Tras generar a los individuos de la siguiente generación, el sistema mirará esta variable para saber cuantos de los antiguos individuos debe conservar para competir con los nuevos y simplemente elimina al resto. Si el numéro de individuos a preservar es 0, el comportamiento será el generacional puro. Si el número de individuos a preservar es igual al tamaño máximo de la población (o es un número negativo), no se eliminará a ningún individuo de la generación anterior y todos ellos tendrán la oportunidad de sobrevivir compitiendo con los de la nueva generación. Si el número es algo intermedio entre 0 y el tamaño máximo de la población, estaremos usando un híbrido entre las políticas de reemplazo generacional y la de estado estacionario.
+Para ello, mantendremos a la población como una lista ordenada en la que se irán insertando (también ordenadamente) los nuevos individuos producidos. Si tras una inserción se tienen más individuos que el tamaño máximo, el peor individuo (sea el nuevo o no) será desechado. Si dos individuos comparten la misma puntuación al ser comparados durante una inserción, se le dará ventaja al nuevo individuo siguiendo el criterio de busqueda neutral TODO [biblio]. Este comportamiento es el propio del estado estacionario. Para obtener el comportamiento generacional, así como diferentes híbridos entre las dos posibilidades, definiremos una variable configurable para la población. Tras generar a los individuos de la siguiente generación, el sistema mirará esta variable para saber cuantos de los antiguos individuos debe conservar para competir con los nuevos y simplemente elimina al resto. Si el numéro de individuos a preservar es 0, el comportamiento será el generacional puro. Si el número de individuos a preservar es igual al tamaño máximo de la población (o es un número negativo), no se eliminará a ningún individuo de la generación anterior y todos ellos tendrán la oportunidad de sobrevivir compitiendo con los de la nueva generación. Si el número es algo intermedio entre 0 y el tamaño máximo de la población, estaremos usando un híbrido entre las políticas de reemplazo generacional y la de estado estacionario.
 
 En general, para cada nueva generación se realiza la siguiente secuencia de acciones:
 
@@ -441,7 +447,7 @@ Se colocan en orden todas las capas y todas las neuronas de cada capa.
 *** Neurona invertida
 #+LaTeX: \label{disenoGeneNivNeuInv}
 
-Este caso es muy similar al anterior, pero se cambia la definición de lo que se considera una neurona. En este caso, junto con el umbral, forman parte del mismo gen los pesos que se multiplican por la salida de esta neurona, en lugar de los que utiliza esta neurona para calcular su estado. Esta representación ha sido también denominada "neurona en fregona" [biblio].
+Este caso es muy similar al anterior, pero se cambia la definición de lo que se considera una neurona. En este caso, junto con el umbral, forman parte del mismo gen los pesos que se multiplican por la salida de esta neurona, en lugar de los que utiliza esta neurona para calcular su estado. Esta representación ha sido también denominada "neurona en fregona" \cite[J. Merelo, 2012]{Merelo2012}.
 
 *** Capa
 #+LaTeX: \label{disenoGeneNivCap}
@@ -775,6 +781,8 @@ El índice del hilo y su ID se relacionan de manera directa: para un bloque unid
 Los hilos dentro de un mismo bloque pueden cooperar entre ellos compartiendo datos a través de la memoria compartida y sincronizando su ejecución para coordinar el acceso a memoria. Para ser más precisos, uno puede especificar puntos de sincronización en el kernel llamando a la función interna =__syncthreads()= que actua como una barrera que hace esperar a todos los hilos del bloque antes de que ninguno pueda seguir. 
 
 Para una cooperación eficiente, se espera que la memoria compartida sea de baja latencia y cercana al núcleo del procesador, como una caché de primer nivel, también que =__syncthreads()= sea ligera y todos los hilos de un bloque deben estar en el mismo núcleo de procesamiento. Por ello el número de hilos por bloque está restringido por los recursos limitados de memoria de un núcleo de procesamiento. En GPUs actuales un bloque de hilos puede contener hasta 512 hilos.
+
+Se pueden conseguir mejores resultados para un determinado algoritmo en determinada máquina ajustando el número de hilos por bloque. Los recursos de un multiprocesador se reparten entre los hilos del bloque. Por ejemplo, cuantos más hilos por bloque, menos registros tendrá disponibles cada hilo. Dependiendo del algoritmo, corremos el riesgo de que algunas variables locales tengan que almacenarse en memoria global en vez de en registros si lanzamos muchos hilos por bloque. Si elegimos pocos hilos por bloque, nos arriesgamos a no utilizar todos los procesadores de un multiprocesador (aunque a menudo este segundo problema lo resuelve automáticamente la arquitectura).
 
 Sin embargo, un kernel puede ser ejecutado por múltiples bloques de hilos similares, de forma que el número total de hilos sea igual al número de hilos por bloque multiplicado por el número de bloques. Estos múltiples bloques se organizan en grids unidimensionales o bidimensionales de bloques de hilos como se muestra en la figura \ref{figGridThreadBlocks}. 
 
@@ -1630,7 +1638,7 @@ El jugador que se ha implementado para Reversi es extremadamente simple, pero, a
 La tarea Reversi se implementa en la clase ReversiTask que también hereda de la clase abstracta Task y que utiliza la clase ReversiBoard que implementa las reglas de juego de Reversi y que, a su vez, hereda de la clase que implementa el el tablero genérico para juegos con piezas iguales pero de dos jugadores Board. Éste último siempre es de un tamaño cuadrado (las mismas casillas a lo largo que a lo ancho) pero el tablero de Reversi tiene, además, la restricción de ser como mínimo de un tamaño 4x4. Esto es así por que las cuatro piezas centrales (2x2) empiezan ya rellenas para que los juegadores tengan movimientos legales al inicio.
 
 TODO ¿debo explicar las reglas del juego?
-* REVISAR [1/4] Manual del programador
+* HACER [1/4] Manual del programador
 #+LaTeX: \label{manualProgr}
 ** HACER Guia de instalación
 #+LaTeX: \label{manualProgrInstal}
@@ -1663,7 +1671,7 @@ Cada enumerado tiene un método que devuelve una cadena descriptora a partir de 
 
 **** <<<Util>>>
 
-Estos ficheros contienen varias utilidades variadas. Se definen macros para recorrer vectores y listas de la librería C++ estándar para evitar más dependencias de librerías externas como Boost[fn:boost]. Para poder concatenar otros tipos con objetos de la clase std::string de forma más legible y cómoda, se define la función plantilla \verb=std::string to_string(const T& t)=. El resto de funciones de utilidad se agrupan en clases, aunque por ser simples se definen e implmentan en los mismos ficheros. Como pasaba con Enumerations, estas clases tienen todos sus  métodos (y atributos si los tienen) estáticos y no es necesario instanciarlas. La única excepción es SimpleGraph. Las clases son:
+Estos ficheros contienen varias utilidades variadas. Se definen macros para recorrer vectores y listas de la librería C++ estándar para evitar más dependencias de librerías externas como [[http://en.wikipedia.org/wiki/Boost_(C%2B%2B_libraries)][Boost]]. Para poder concatenar otros tipos con objetos de la clase std::string de forma más legible y cómoda, se define la función plantilla \verb=std::string to_string(const T& t)=. El resto de funciones de utilidad se agrupan en clases, aunque por ser simples se definen e implmentan en los mismos ficheros. Como pasaba con Enumerations, estas clases tienen todos sus  métodos (y atributos si los tienen) estáticos y no es necesario instanciarlas. La única excepción es SimpleGraph. Las clases son:
 
 ***** Util : 
 
@@ -2432,7 +2440,6 @@ La selección de ruleta también tiene un coste muy bajo y poco dependiente del 
 A pesar que que tampoco se aprecia bien en la figura \ref{rendGenSelect}, la selección de truncado tiene un coste mínimo y prácticamente constante tanto del tamaño total de la población como del número de individuos a seleccionar. 
 
 \newpage
-
 *** Cruce
 
 Esta sección compara empíricamente el rendimiento computacional de los algoritmos de cruce descritos en los apartados \ref{disenoGeneCruz} y \ref{disenoGeneNiv} del diseño de los algortimos genéticos.
@@ -2761,32 +2768,14 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 ** Comparación de distintos tamaños de población número de individuos conservados por generación
 
 \newpage
-* HACER [0/26] cosas pendientes
-- [ ] Hacer API
-- [ ] Arreglar murl
-- [ ] Factoria e implementaciones optimizadas
-- [ ] Extensibilidad a partir de interfaces
-- [ ] Bibliografías de introducción
-- [ ] TODO teoría CUDA occupance vs resources
-	  Entonces siempre se tendrá que llamar al kernel con 512 hilos para hacer lecturas conjuntas. No poder ajustar el número de hilos por bloque es un trastorno importante. Los recursos de un multiprocesador se reparten entre los hilos del bloque. Por ejemplo, cuantos más hilos por bloque, menos registros tendrá disponibles cada hilo. Corremos el riesgo de que algunas variables locales tengan que almacenarse en memoria global en vez de en registros.
-- [ ] Más bibliografía GA
-- [ ] Meter todo lo del último correo del profesor
-- [ ] Más bibliografía NN 
-  - [ ] ¿Preguntar rosa?
-  - [ ] Mirar las bibliografías ahí a pelo con corchetes
-- [ ] Modificar Teoría
-- [ ] Guia de instalación
-- [ ] Modificar Introducción
-- [ ] Modificar Análisis
-- [ ] Hacer Diseño
-- [ ] (Teoría: redes neuronales) Explicar la necesidad de funciones de activación continuas para retropropagación
-- [ ] (Teoría: redes neuronales) Explicar imposibilidad de recursividad con retropropagación
-- [ ] (Teoría: algoritmos genéticos) Introducir a GENITOR con bibliografía
+* BORRAR [0/4] cosas pendientes
+** HACER [0/9] Cosas que comentar
 - [ ] (Teoría: algoritmos genéticos/neuro evolución) Introducir representación fregona con bibliografía
+- [ ] (Teoría: algoritmos genéticos) Introducir a GENITOR con bibliografía
 - [ ] (Teoría: algoritmos genéticos/neuro evolución) Búsqueda neutral con bibliografía
 - [ ] (Teoría: neuro evolución) NeuroEvolution of Augmenting Topologies (NEAT)
 - [ ] (Teoría: neuro evolución) Redes recurrentes, pybrain, Jürgen Schmidhuber
-- [ ] En utilidades para pruebas u otro sitio (consultar a rosa sobre el redondeo utilizado)
+- [ ] En utilidades para pruebas o en otro sitio...
   explicar el error que hemos permitido para probar la corrección de cada implementación paralela comparandolas con la implementación secuencial C++
   Cogido del best practices de CUDA...
   7.3.2 Floating-Point Math Is Not Associative
@@ -2797,16 +2786,32 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
   potentially change the order of operations and therefore the parallel results might
   not match sequential results. This limitation is not specific to CUDA, but an
   inherent part of parallel computation.
+** HACER [0/15] General
+- [ ] Modificar Teoría GA
+- [ ] Más bibliografía GANN (incluir GANN)
+- [ ] Hacer API
+- [ ] Factoria e implementaciones optimizadas
+- [ ] Extensibilidad a partir de interfaces
+- [ ] Meter todo lo del último correo del profesor
+- [ ] Guia de instalación
+- [ ] Modificar Análisis
+- [ ] Hacer Diseño
 - [ ] Modificar Resultados : Rendimiento
 - [ ] Modificar CUDA después de tener resultados
 - [ ] Modificar Resultados : Aprendizaje
 - [ ] Hacer conclusiones
+** HACER [0/1] Org-mode/LaTeX
+- [ ] Arreglar murl
 * HACER Conclusiones
 #+LaTeX: \label{conclusiones}
 
 \newpage
 
+* Footnotes
+
 #Bibliografía 
+#+begin_latex
+
 \cleardoublepage\phantomsection
 \addcontentsline{toc}{chapter}{\bibname}
 \begin{thebibliography}{9}
@@ -2819,17 +2824,72 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 %Desde luego, he aprendido que la bibliografía es mejor prepararla sobre la marcha que al toda final.
 %
 
+%%%%%%%%% \bibitem{} \textsc{}: \emph{}.  ().
+
+%%%%%%%% Redes neuronales
+
+\bibitem{Hilera95} \textsc{Hilera, J.R., Martñinez, V.J.}: \emph{Redes Neuronales Artificiales. Fundamentos, Modelos y Aplicaciones}. Addison Wesley Iberoamericana, Madrid / Mexico (1995).
+
+\bibitem{Koehn94} \textsc{Philipp Koehn}: \emph{Combining genetic algorithms and neural networks: The encoding problem}. The University of Tennessee, Knoxville (1994).
+
+\bibitem{BackSchwefel93} \textsc{Th. Bäck and H.-P Schwefel}: \emph{An overview of evolutionary algorithms for parameter optimization}. Evolutionary Computation, Vol.1, No.1, pp.1–23. (1993).
+
+\bibitem{Holland75} \textsc{J. H. Holland}: \emph{Adaptation in natural and artificial systems}. Univ Mich Press, Ann Arbor (1975).
+
+\bibitem{Koza92} \textsc{J. R. Koza}: \emph{Genetic Programming: On the programming of computers by means of natural evolution}. MIT Press, Massachusetts (1992).
+
+\bibitem{Kim92} \textsc{Kim, H.} (1992): \emph{Mathematical Findings on Artificial Neural Nets and Their Physical Meaning}. Technical Report. Computer Science
+
+\bibitem{Funahashi89} \textsc{Funahashi, K.I.} (1989) : \emph{On the approximate realization of continuous mappings by neural networks}. En Neural Networks, 2. pp. 183-192.
+
+\bibitem{Hornik89} \textsc{Hornik, K., Stichcombe, M. White, H.} (1989) : \emph{Multilayer feedforward networks are universal approximators}. En Neural Network, 2(5): 359 - 366
+
+\bibitem{Walker95} \textsc{Walker, T.} (1995): \emph{Generating neural networks with genetic algorithms using a marker based encoding}. MSc Thesis. University of Edinburgh.
+
+\bibitem{Wilson94} \textsc{Wilson, E.} (1994): \emph{Backpropagation Learning for System with Discrete-Valued Functions}. En Proceedings of the World Congress on Neural Networks. Vol 3, pp. 332-339.
+
+
+\bibitem{Sutton86} \textsc{Sutton, R.S.} (1986): \emph{Two problems with Backpropagation and other steepest descent learning procedures for networks}. En Proc. of 8th Annual Conf. Of the Cognitive Science Society, pp 823-831. Lawrence Erlbaum Associates, Hillsdale, NJ.
+
+\bibitem{Krose93} \textsc{Kröse, B., Van der Smagt, P.} (1993): \emph{An Introduction to Neural Networks}. University of Amsterdam.
+
+\bibitem{Kolen91} \textsc{Kolen, J., Pollack, J.} (1991): \emph{Back Propagation is Sensitive to Initial Conditions}. En Advances in Neural Information Processing Systems. R. P. Lippmann, J. E. Moody, D. S. Touretzky (eds). Vol. 3, pp. 860-867. Morgan Kaufmann Publishers, Inc.
+
+\bibitem{Liu2004} \textsc{Liu, A., Liu, Z., Niu, Z., Wang, C.} (2004): \emph{Evolving Neural Network using Real coded Genetic Algorithm (GA) for Multispectral Image}.
+
+\bibitem{Branke95} \textsc{Branke, J.} (1995): \emph{Evolutionary Algorithms for Neural Network Design and Training}. En Proceedings of the First Nordic Workshop on Genetic
+
+\bibitem{Bertona2005} \textsc{Luis Federico Bertona}: \emph{Entrenamiento de redes neuronales basado en algoritmos evolutivos}. Faculad de ingenier\'ia, Universidad de Buenos Aires (2005).
+
+%%%%%%%%% 17
+
+
+%%%%%%%% Algoritmos genéticos
+
+
+\bibitem{DeJong88} \textsc{K. De Jong}: \emph{Learning with genetic algorithms: An overview}. Mach Learning, vol. 3, pp. 121-138 (1988).
+
+\bibitem{Goldberg89} \textsc{Goldberg, D.E.}: \emph{Genetic Algorithms in Search, Optimization and Machine Learning}. Addison-Wesley, Reading (1989).
+
+\bibitem{Fogel95} \textsc{D. B. Fogel}: \emph{Evolutionary computation. Toward a new philosophy of machine intelligence}. IEEE Press, Piscataway, NJ (1995).
+
+\bibitem{Michalewicz96} \textsc{Z. Michalewicz}: \emph{Genetic algorithms + data structures = evolution programs}. Third, Revised and Extended Edition, 3 ed: Springer (1996).
+
+
+\bibitem{Merelo2012} \textsc{Juan J. Merelo Guervós}: \emph{Informática evolutiva: Algoritmos genéticos}. Documento
+ técnico, Universidad de Granada, 2012. http://geneura.ugr.es/~jmerelo/ie/ags.htm
+
+
+
 %%%%%%%% Neuro Evolución
+
 
 \bibitem{Yao99} \textsc{Xin Yao}: \emph{Evolving Artificial Neural Networks}. School of Computer Science, The University of Birmingham (1999).
 
 \bibitem{GomezMiikkulainen2003} \textsc{Faustino J. G\'omez y Risto Miikkulainen}: \emph{Robust Non-Linear Control through Neuroevolution}. Deparment of Computer Science, The University of Texas (2003).
 
-\bibitem{Bertona2005} \textsc{Luis Federico Bertona}: \emph{Entrenamiento de redes neuronales basado en algoritmos evolutivos}. Faculad de ingenier\'ia, Universidad de Buenos Aires (2005).
-
 %%%%%%%% CUDA
 
-%%%%%%%% TODO poner el manual de programación, el de mejores prácticas y la guia de referencia
 %%%%%%%% TODO probar \textsl para el contenido del bibitem 
 
 \bibitem{progGuide2009} \textsc{NVIDIA corporation}: \emph{CUDA Programming guide v2.3.1}. NVIDIA Developer Technology, (2009).
@@ -2849,7 +2909,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 \bibitem{Syed03} \textsc{Syed, Omar; Syed, Aamir}: \emph{Arimaa – a New Game Designed to be Difficult for Computers}. International Computer Games Association Journal (2003).
 
 \end{thebibliography}
-* Footnotes
+#+end_latex
 
 [fn:cudaGPGPU] CUDA forma parte de lo que se conoce como GPGPU, que consiste en utilizar unidades de procesamiento gráfico (GPUs) para cálculos generales que no tienen por qué ser gráficos.
 
@@ -2862,6 +2922,4 @@ http://blogs.nvidia.com/2011/11/gpu-supercomputers-show-exponential-growth-in-to
 [fn:juegEstratAbst]
 \newline
 http://en.wikipedia.org/wiki/Abstract_strategy_game
-
-[fn:boost] \murl{http}{en.wikipedia.org/wiki/Boost_(C%2B%2B_libraries)}
 
