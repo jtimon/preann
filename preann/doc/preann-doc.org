@@ -280,7 +280,7 @@ Una aproximación existosa para la evolución de la topología de la red además
 Si las variaciones en el uso de los algoritmos genéticos ya eran abundantes, la diversidad de combinaciones de esta técnica con las redes neuronales es aún mayor. No es el objetivo del presente documento el cubrirlas todas ni clasificarlas y con esta idea general estamos ya preparados para definir los objetivos de nuestro proyecto.
 
 \newpage
-* MODIFICAR [2/3] Análisis del problema
+* REVISAR Análisis del problema
 #+LaTeX: \label{analisis}
 
 En este capítulo se deciden los objetivos específicos del proyecto. 
@@ -289,7 +289,7 @@ Se tratan las especificaciones formales de la librería a implementar. Se especi
 
 También se analizan las cuestiones técnicas y teóricas que se pretenden resolver en la sección de [[anaObjetivos][objetivos]]. Estas cuestiones determinarán la naturaleza de las empíricas realizadas, cuyos resultados se muestran por separado en un capitulo para el [[rendimiento]] y otro para el [[aprendizaje]]; y se discuten en las [[conclusiones][conclusiones]].
 
-** REVISAR Especificaciones de la librería a implementar
+** Especificaciones de la librería a implementar
 #+LaTeX: \label{anaEspecLib}
 
 En el presente proyecto se pretende construir una librería de programación para el lenguaje C++ en un entorno GNU/Linux que permita el entrenamiento de redes neuronales utilizando algoritmos genéticos. La librería tendrá una licencia de software libre.
@@ -344,22 +344,32 @@ Se quiere que sea lo más flexible posible en cuanto a la estructura de la red, 
 
 A partir de estas especificaciones funcionales, se toman ciertas decisiones de [[diseno][diseño]] que escapan el alcance de esta sección. El diseño se encuentra en el capítulo \ref{diseno} aunque, por motivos prácticos relacionados con la presentación del documento, se ha separado el diseño de los operadores genéticos en el capítulo \ref{disenoGene}. Las optimizaciones mediante paralelización de las *capas* también ocupan [[disenoParal][su propio capítulo]].
 
-** MODIFICAR Objetivos
+\newpage
+** Objetivos
 #+LaTeX: \label{anaObjetivos}
 
 Se probará la librería en casos concretos con el fin de contestar a las siguientes cuestiones:
 
-1) ¿Qué ventajas en el rendimiento se pueden obtener gracias a la paralelización?
+1) ¿Se puede abstraer más el concepto de /capa neuronal/ para obtener estructuras más simples y simplificar la paralelización?
 
-2) ¿Se puede simplificar la estructura de las redes neuronales para mejorar la paralelización? ¿Qué efecto tienen las funciones de tipo escalón (que permiten codificar la salida de cada neurona como un bit en vez de como un número real) tanto en el rendimiento como en el aprendizaje? ¿Qué efecto tiene la codificación de los pesos en estructuras discretas (en lugar de números reales) tanto en el rendimiento como en el aprendizaje?
+2) ¿Qué ventajas en el rendimiento se pueden obtener gracias a la paralelización?
 
-3) ¿Qué operadores genéticos resultan más adecuados para el entrenamiento en diferentes problemas? ¿Qué valores de los parámetros del algoritmo genético resultan más adecuados para el entrenamiento en diferentes problemas?
+3) ¿Qué efecto tienen las funciones de tipo escalón (que permiten codificar la salida de cada neurona como un bit en vez de como un número real) tanto en el rendimiento como en el aprendizaje? 
 
-4) ¿Para qué tipo de problemas resulta adecuado el método propuesto? 
+4) Disminuir la cardinalidad de los pesos reduce el espacio de búsqueda. ¿Qué efecto tiene la codificación de los pesos y umbrales con estructuras discretas de menor tamaño, números enteros acotados en lugar de números reales, tanto en el rendimiento como en el aprendizaje?
+
+5) ¿Resulta efectivo el algoritmo para los problemas propuestos?
+
+6) ¿Qué operadores genéticos resultan más adecuados en el entrenamiento de los problemas propuestos?
+
+7) ¿Qué valores de los parámetros del algoritmo genético resultan más adecuados en el entrenamiento de los problemas propuestos?
+
+8) Las mutaciones de los pesos causrán en ocasiones que una conexión, ya sea excitatoria o inhibitoria, se haga más débil en lugar de hacerse más fuerte ¿Puede la eliminación completa de conexiones neuronales aleatorias mejorar el aprendizaje?
+
+A la primera pregunta se responderá en el [[disenoRedes][diseño de las redes neuronales]]. Y aunque el resto de cuestiones se resolveránen los capítlos de resultados, en el capítulo final de [[conclusiones]] se discute la respuesta a todas ellas.
 
 \newpage
-\newpage
-* HACER Diseño general
+* HACER [0/4] Diseño general
 #+LaTeX: \label{diseno}
 
 Como se definió en la sección \ref{anaEspecLib}, la librería debe poder construir redes neuronales de cualquier topología y, al mismo tiempo, debe poder ser paralelizada usando diferentes tecnologías. Además, en la sección \ref{anaObjetivos} establecimos que las neuronas pueden ser de varios tipos (binarias, bipolares y reales). 
@@ -372,6 +382,13 @@ Primero se describirán las clases fachada y el resto de clases utilizadas para 
 #+LaTeX: \label{disenoRedes}
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
+
+Diagrama de clases del componenete e [[apiNeural][Neural]].
+
+#+CAPTION:    Diagrama de clases del component e Neural.
+#+LABEL:      classNeural
+#+ATTR_LaTeX: scale=0.6
+[[./img/uml/classNeural.png]]
 
 ** HACER Estructuras para algoritmos genéticos
 #+LaTeX: \label{disenoGenetic}
@@ -603,7 +620,7 @@ En este caso en lugar de determinar probabilisticamente y peso por peso si un pe
 
 Para activar cualquiera de las dos modalidades en cualquiera de los dos operadores, basta con dar un valor positivo a las variables "probabilidad de mutación", "probabilidad de olvido", "número de mutaciones" y "número de olvidos". Como es habitual, se pueden emplear simultaneamente las varias opciones. En este caso también puede no activarse ningún tipo de mutación ni de olvido.
 \newpage
-* REVISAR Optimizaciones mediante paralelización
+* REVISAR [1/1] Optimizaciones mediante paralelización
 #+LaTeX: \label{disenoParal}
 ** Introducción
 
@@ -840,7 +857,7 @@ Todavía se podrían mejorar las soluciones si contásemos con la arquitectura d
 Como hemos dicho, la colocación de los bits para la implementación XMM debe adaptarse para que se puedan obtener los mismos resultados que con el algoritmo implementado en C. Pero además en el algoritmo C no se puede usar el tipo char para los pesos (hay que usar unsigned char) y hay que restarles 128 antes de operar con ellos. Esto podría ralentizar "injustamente" al algoritmo C, por lo que también se hicieron pruebas de rendimiento sin restar 128 y usando el tipo char para comparar los tiempos. Logicamente, esa implementación C no obtiene resultados equivalentes a los de la SSE2, pero tan sólo se pretendía comparar el rendimiento. Sorprendentemente, con esta implementación C se obtenían resultados aún peores. También se probó usadno el tipo unsigned char pero sin restar 128 y el rendimiento era de nuevo ligeramente peor. Por alguna razón que no alcanzamos a explicar, el algoritmo en C funciona más rápido si ha de restar 128 a cada peso. Por ello, dejamos de lado nuestra preocupación sobre la posible penalización causada por nuestra representación de pesos en bytes.
 
 \newpage
-** GPGPU con CUDA
+** REVISAR [1/1] GPGPU con CUDA
 #+LaTeX: \label{disenoParalCUDA}
 
 Debido a la insaciable demanda de mercado de gráficos 3D de alta definición y en tiempo real, las unidades de procesamiento gráfico (Graphic Processor Unit, GPU) han evolucionado en procesadores altamente paralelos y multihilo, con muchos núcleos, tremenda capacidad de computación y con gran ancho de banda de memoria. La técnica consistente en utilizar el este poder computacional para realizar trabajos de proposito general, que pueden no tener nada que ver con los gráficos se denomina GPGPU (General Purpose Graphic Processor Unit). Los pioneros de la técnica buscaban homorfismos entre los algoritmos que pretendían ejecutar y cálculos que las librerías gráficas realizan internamente. 
@@ -1720,14 +1737,14 @@ void resetKernel(float* buffer, unsigned pos)
 Sólo actuará un hilo por bloque, no parece que se optimice mucho. Sin embargo, no se trata tanto de optimizar estos kernels sino de mantener los pesos en memoria de dispositivo en todo momento. El ancho de banda máximo en la transferencia de entre la memoria de dispositivo y la GPU es mucho mayor (por ejemplo, 141 GBps en la NVIDIA GeForce GTX 280) que el ancho de banda en la transmisión de datos entre la memoria huesped y la del dispositivo (8 GBps para PCI Express ×16 de segunda generación). Por ello, para el mejor rendimiento general de la aplicación, es de una prioridad alta minimizar las transferencias de datos etre el husped (CPU) y el dispositivo (GPU), incluso si eso significa lanzar kernels en la GPU que no suponen ninguna mejora de rendimiento comparados con ejecutar lo mismo en la CPU\cite{bestPract2009}. 
 
 \newpage
-* HACER [1/4] Manual del programador
+* HACER [0/4] Manual del programador
 #+LaTeX: \label{manualProgr}
 ** HACER Guia de instalación
 #+LaTeX: \label{manualProgrInstal}
 
 sudo aptitude install make g++ nasm gnuplot
 sudo aptitude install texlive-latex-recommended texlive-latex-extra
-** REVISAR [1/8] Uso general (API)
+** HACER [1/8] Uso general (API)
 #+LaTeX: \label{manualProgrApi}
 
 En esta sección se describen las clases implementadas y sus métodos. Explicando lo que hacen y cómo deben ser llamadas pero no necesariamente el funcionamiento interno. Se omiten los constructores por defecto (sin parámetros) y los destructores.
@@ -2853,20 +2870,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 \newpage
 \newpage
 * BORRAR [0/4] cosas pendientes
-** HACER [0/9] Cosas que comentar
-- [ ] En utilidades para pruebas o en otro sitio...
-  explicar el error que hemos permitido para probar la corrección de cada implementación paralela comparandolas con la implementación secuencial C++
-  Cogido del best practices de CUDA...
-  7.3.2 Floating-Point Math Is Not Associative
-  Each floating-point arithmetic operation involves a certain amount of rounding.
-  Consequently, the order in which arithmetic operations are performed is important.
-  If A, B, and C are floating-point values, (A+B)+C is not guaranteed to equal
-  A+(B+C) as it is in symbolic math. When you parallelize computations, you
-  potentially change the order of operations and therefore the parallel results might
-  not match sequential results. This limitation is not specific to CUDA, but an
-  inherent part of parallel computation.
-** HACER [0/14] General documentación
-- [ ] Modificar Análisis
+** HACER [0/12] General documentación
 - [ ] Hacer Diseño
 - [ ] Modificar Resultados : Rendimiento genético (pasar gráficas a milisegundos)
 - [ ] Hacer API
@@ -2879,13 +2883,26 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 - [ ] Hacer conclusiones
 - [ ] Doxygen ?
 - [ ] Estándar Universidad
-** HACER [0/1] Org-mode/LaTeX
+** HACER [0/1] Cosas que comentar
+- [ ] En utilidades para pruebas o en otro sitio...
+  explicar el error que hemos permitido para probar la corrección de cada implementación paralela comparandolas con la implementación secuencial C++
+  Cogido del best practices de CUDA...
+  7.3.2 Floating-Point Math Is Not Associative
+  Each floating-point arithmetic operation involves a certain amount of rounding.
+  Consequently, the order in which arithmetic operations are performed is important.
+  If A, B, and C are floating-point values, (A+B)+C is not guaranteed to equal
+  A+(B+C) as it is in symbolic math. When you parallelize computations, you
+  potentially change the order of operations and therefore the parallel results might
+  not match sequential results. This limitation is not specific to CUDA, but an
+  inherent part of parallel computation.
+** HACER [0/3] Org-mode/LaTeX
 - [ ] Arreglar murl
 - [ ] Código con colorines (minted)
   sudo su
   PATH=/usr/local/texlive/2012/bin/i386-linux:$PATH
   tlmgr update minted
   pdflatex -shell-escape preann-doc.tex
+- [ ] Poner el plantuml dentro del documento principal ?
 * HACER Conclusiones
 #+LaTeX: \label{conclusiones}
 
