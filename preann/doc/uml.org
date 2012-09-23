@@ -1,0 +1,28 @@
+* Diagramas de clase
+** Neural
+@startuml img/uml/classNeural.png
+NeuralNet <..> Interface
+NeuralNet o-- InputLayer
+NeuralNet o-- Layer
+Interface <..> Buffer
+InputLayer -> Interface
+Layer <|-- InputLayer
+Layer *-- Buffer
+Layer o-- Connection
+Buffer <|-- Connection
+Connection --> Buffer
+@enduml
+
+** Relations between classes
+@startuml img/uml/classes01.png
+Class01 <|-- Class02
+Class03 *-- Class04
+Class05 o-- Class06
+Class07 .. Class08
+Class09 -- Class10
+Class11 <|.. Class12
+Class13 --> Class14
+Class15 ..> Class16
+Class17 ..|> Class18
+Class19 <--* Class20
+@enduml
