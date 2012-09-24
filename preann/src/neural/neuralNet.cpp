@@ -58,7 +58,7 @@ void NeuralNet::updateInput(unsigned inputPos, Interface* input)
                 + " Inputs.";
         throw error;
     }
-    inputs[inputPos]->getOutput()->copyFromInterface(input);
+    inputs[inputPos]->getInputInterface()->copyFrom(input);
 }
 
 unsigned NeuralNet::getNumInputs()
