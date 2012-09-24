@@ -15,8 +15,8 @@ unsigned testCalculateOutput(ParametersMap* parametersMap)
     string path = parametersMap->getString(LAYER_PATH);
     ImplementationType implementationType = (ImplementationType) (parametersMap->getNumber(
                 Enumerations::enumTypeToString(ET_IMPLEMENTATION)));
-    Buffer* interfInput = Dummy::interface(parametersMap);
-    
+    Interface* interfInput = Dummy::interface(parametersMap);
+
     Layer* input = new InputLayer(interfInput, implementationType);
     Layer* inputC = new InputLayer(interfInput, IT_C);
     Layer* layer = Dummy::layer(parametersMap, input);
@@ -43,9 +43,10 @@ unsigned testCalculateOutput(ParametersMap* parametersMap)
     differencesCounter += Test::assertEquals(layer->getOutput(), layerC->getOutput());
 
     delete (layerC);
-    delete (bufferC);
     delete (layer);
-    delete (buffer);
+    delete (inputC);
+    delete (input);
+    delete (interfInput);
 
     return differencesCounter;
 }
