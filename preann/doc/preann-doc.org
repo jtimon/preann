@@ -572,7 +572,7 @@ El funcionamiento general es el siguiente:
 
 1) Se marcan aleatoriamente "número de puntos" genes, que serán como puntos de corte.
 
-2) Desde el inicio, hasta el primer punto, se cogen los genes del progenitor A. A partir desde este punto de corte hasta el siguiente, se gogen los genes del progenitor B, luego de nuevo los del A y así sucesivamente hasta el final.
+2) Desde el inicio, hasta el primer punto, se cogen los genes del progenitor A. A partir desde este punto de corte hasta el siguiente, se cogen los genes del progenitor B, luego de nuevo los del A y así sucesivamente hasta el final.
 
 De esta manera, se va alternando el progenitor en cada punto. Como siempre, el decendiente B usará los genes que no haya usado el descendiente A.
 
@@ -606,15 +606,17 @@ Aunque intuitivamente se puede pensar que este tipo de cruce no será muy útil 
 ** Mutación y olvido
 #+LaTeX: \label{disenoGeneMut}
 
-La forma en que se implementan el operador de mutación y el de olvido son muy similares. La principal diferencia es que mientras el operador de olvido o reset simplemente pone a cero el peso o umbral que toque, el de mutación le suma un número aleatorio del intervalo (-X, X), donde X es un parámetro configurable que llamaremos "rango de mutación", que por defecto toma el valor 1. En cierto sentido, se podría considerar al operador de olvido como un tipo especial de mutación.
+La forma en que se implementan el operador de mutación y el de olvido son muy similares. La principal diferencia es que mientras el operador de olvido o reset simplemente pone a cero el peso o umbral que toque, el de mutación le suma un número aleatorio del intervalo (-X, X), donde X es un parámetro configurable que llamaremos "rango de mutación", que por defecto toma el valor 1. En cierto sentido, se podría considerar al operador de olvido como un tipo especial de mutación. En la práctica equivale a destruir una conexión de la red neuronal.
 
 Por lo demás, los dos operadores tienen dos formas de ser empleados: probabilística y determinista.
 
 *** Probabilística
+#+LaTeX: \label{disenoGeneMutProb}
 
 Esta forma de mutación es la más habitual en los algoritmos genéticos. Se usa una probabilidad parámetro ("probabilidad de mutación" o "probabilidad de olvido", ambas 0 por defecto) para calcular con cada peso y umbral si será mutado o no. Se elige un número aleatorio entre 0 y 1 y si el número es menor que la probabilidad, se realiza la acción correspondiente. Si es mutación sumar al peso la mutación que se obtiene a partir del rango como se ha comentado anteriormente y si es olvido el peso se iguala directamente a cero.
 
 *** Determinista
+#+LaTeX: \label{disenoGeneMutDet}
 
 Para evitar repetir el calculo de la probabilidad tantas veces y mejorar el rendimiento, se ofrece esta otra modalidad de mutación, con la esperanza de que el aprendizaje no se vea afectado negativamente.
 
@@ -1971,22 +1973,213 @@ Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene 
 - =void createFeedForwardNet(unsigned inputSize, BufferType inputType, unsigned numLayers, unsigned sizeLayers, BufferType hiddenLayersType, FunctionTyp functiontype = FT_IDENTITY) := Crea una red neuronal con conexiones hacia delante completa con las conexiones que es de esperar (y pone las capas en el orden habitual en el que tienen que ser activadas). Sólo hay una capa de entrada, para la que hay que indicar tamaño y /tipo de neurona/. Todas las capas internas tendrán el mismo tamaño, tipo (que pueden ser diferentes a los de la de entrada) y /tipo de activación/. Si no se indica la función de activación, se usará =IDENTITY= por defecto. También hay que indicar el número de capas internas. Tras crear una red neuronal utilizando este método, se pueden seguir añadiendo más capas y conexiones por lo que, aunque no se quiera esta topología, puede ser útil para crear la base de otra topología de forma más cómoda.
 - =void createFullyConnectedNet(unsigned inputSize, BufferType inputType, unsigned numLayers, unsigned sizeLayers, BufferType hiddenLayersType  FunctionType functiontype = FT_IDENTITY) := Este método es similar al anterior, pero en lugar de estar conectadas cada capa con la anterior, cada una de las capas internas toma como entrada todas las otras capas (incluso a sí misma). Además, todas las capas están directamente conectadas con la capa de entrada. Como sucedía con el método anterior, se puede usar como base para otra topología. Al ser esta la más compleja, este método es el más recomendable paraprobar la implementación de la red neuronal y los cambios que se hagan
 
-*** HACER [0/3] Genetic
+*** HACER [2/3] Genetic
 #+LaTeX: \label{disenoGenetic}
-**** HACER <<<Individual>>>
-**** HACER <<<Task>>>
+**** REVISAR <<<Individual>>>
+
+Esta clase hereda de la clase NeuralNet y, por tanto, comparte todos sus atributos y métodos. Las funcionalidades relacionadas con el algoritmo genético (cruce, mutación) están separadas aquí. Así, aunque las clase Connection sí tiene métodos relacionados con operadores genéticos (que todas las implementaciones de la clase abstracta deben proveer), se pueden tener los operadores genéticos fuera de Layer y NeuralNet, manteniendo el código más encapsulado y legible. El constructor de Individual es similar al de la clase padre NeuralNet: sólo toma el /tipo de implementación/ y como un parámetro opcional que usa por defecto la implementación de referencia.
+
+Los métodos públicos que implementa la clase son:
+
+- =Individual* newCopy(bool copyWeighs) := genera un nuevo individuo con el mismo tipo de implementación y la misma topología (las mismas capas de los mismos tipos y tamaños y las mismas conexiones). Si el parámetro =copyWeighs= es verdadero, también se copian los pesos.
+- =Individual* newCopy(ImplementationType implementationType, bool copyWeighs) := Funciona exactamente igual que el método anterior pero en este caso se puede especificar un /tipo de impplementación/ diferente al del individuo original.
+- =void mutate(unsigned numMutations, float mutationRange) := realiza sobre el individuo mutaciones con el esquema *determinístico* (=PER_INDIVIDUAL=, descrito en \ref{disenoGeneMutDet}). Realizará un número de mutaciones fijo indicado por el parámetro =numMutations=. Por cada una, se escoje un peso o umbral del individuo aleatoriamente y se le suma un número aleatorio entre =-range= y =range=.
+- =void mutate(float probability, float mutationRange) := realiza sobre el individuo mutaciones con el esquema *probabilístico* (=PROBABILISTIC=, descrito en \ref{disenoGeneMutProb}). Por cada peso y umbral del individuo se calcula un número aleatorio entre 0 y 1. Si el número es mayor o igual que el parámetro =probability= no se hace nada. En caso contrario se le suma al peso o umbral un número aleatorio entre =-range= y =range=.
+- =void reset(unsigned numResets) := realiza el operador de olvido descrito en la sección \ref{disenoGeneMutDet} con el esquema *determinístico*.
+- =void reset(float probability) := realiza el operador de olvido descrito en la sección \ref{disenoGeneMutDet} con el esquema *probabilístico*.
+- =void uniformCrossover(CrossoverLevel crossoverLevel, Individual* other, float probability) := Realiza el cruce *uniforme* descrito en la sección \ref{disenoGeneCruzUni} con el individuo recibido por el parámetro =other=. El otro parámetro indica la probabilidad de que cada peso se coja de este invididuo en vez del de parámetro.
+- =void proportionalCrossover(CrossoverLevel crossoverLevel, Individual* other) := Realiza el cruce *proporcional* descrito en la sección \ref{disenoGeneCruzProp} con el individuo recibido por el parámetro =other=. Internamente usa el /fitness/ de ambos individuos, que está contenido en los mismos.
+- =void multipointCrossover(CrossoverLevel crossoverLevel, Individual* other, unsigned numPoints) := Realiza el cruce *multi-punto* descrito en la sección \ref{disenoGeneCruzMulti} con el individuo recibido por el parámetro =other=. El parámetro numPoints indica el número de puntos de corte que tendrá la cruza. La posición de los puntos de corte se determina aleatoriamente.
+- =float getFitness() := Devuelve la puntuación /fitness/ del individuo.
+- =void setFitness(float fitness) := Sirve para asignarle al individuo su /fitness/.
+- =unsigned getNumGenes() := Devuelve el número total de pesos y umbrales del individuo.
+
+**** REVISAR <<<Task>>>
+
+Esta clase es abstracta y no puede ser instanciada. Todos sus métodos deben ser implementados por las clases que hereden de ésta para poder ser usadas como tarea por una población para la evaluación de los individuos. Se describe aquí lo que deben hacer los métodos de forma general, aunque la implementación puede variar mucho de un individuo a otro. 
+
+- =virtual void test(Individual* individual) = 0 := Evalúa el individuo tomado por parámetro haciendo las pruebas que necesite la tarea. Esto puede requerir activar la red neuronal del individuo muchas veces. Al final, establece el /fitness/ del individuo.
+- =virtual void setInputs(Individual* individual) = 0 := Toma un individuo y le añade los datos de estado del problema (en forma de uno o varios Interface) como entradas a la red del individuo. De esta forma, muchos individuos de la misma Population pueden apuntar a las mismas interfaces.
+- =virtual Individual* getExample(ParametersMap* parameters) = 0 := Devuelve un individuo de ejemplo con una topología que podría resolver el problema. Es muy conveniente en casos en los que se sabe de antemano qué topología requerirá la red para poder aprender el problema. Por ejemplo, AND y OR, sólo necesitan una capa del mismo tamaño de las entradas. Para resolver XOR se necesita una capa oculta adicional o la red nunca será capáz de resolver el problema (un perceptrón monocapa no puede resolver XOR). Si no se tiene ninguna idea de cómo puede ser la topología de los individuos, el entrenador tendrá que establecerla manualmente o usar algún otro método. En esos casos, la tarea puede devolver simplemente un individuo sin capas ni conexiones, pero este método debe implementarse siempre. Es muy útil para usarlo junto a la utilidad de generación y presentación de resultados de aprendizaje TaskPlotter. 
+- =virtual string toString() = 0 := Devuelve una cadena que identifica la tarea que se está realizando. Puede contener algún número como el tamaño del problema. Como el método anterior, su mayor utilidad es ser llamada desde la clase TaskPlotter.
+
 **** HACER <<<Population>>>
+
+Esta clase gestiona el algortimo genético y la población de individuos, de los cuales almacena una lista ordenada. Tiene mcuhos parámetros internos para configurar su funcionamiento y muchos de ellos son obtativos. Por ello, contiene un mapa de parámetros de la clase ParametersMap para almacenar la mayoría de ellos, evitando así un excesivo número de atributos para la clase.
+
+- =Population(Population* other) :=
+- =Population(Task* task) :=
+- =Population(Task* task, Individual* example, unsigned size, float range) :=
+
+- =void save(FILE* stream) :=
+- =void load(FILE* stream) :=
+
+- =void putParam(string key, float number) :=
+- =void setParams(ParametersMap* parametersMap) :=
+- =void setPreservation(unsigned number) :=
+- =void setSelectionRouletteWheel(unsigned number) :=
+- =void setSelectionTruncation(unsigned number) :=
+- =void setSelectionTournament(unsigned number, unsigned tourSize) :=
+- =void setSelectionRanking(unsigned number, float base, float step) :=
+
+- =void setCrossoverUniformScheme(CrossoverLevel crossoverLevel, unsigned number, float probability) :=
+- =void setCrossoverProportionalScheme(CrossoverLevel crossoverLevel, unsigned number) :=
+- =void setCrossoverMultipointScheme(CrossoverLevel crossoverLevel, unsigned number, unsigned numPoints) :=
+
+- =void setMutationsPerIndividual(unsigned numMutations, float range) :=
+- =void setMutationProbability(float probability, float range) :=
+
+- =void setResetsPerIndividual(unsigned numResets) :=
+- =void setResetProbability(float resetProb) :=
+
+- =void insertIndividual(Individual* individual) :=
+- =unsigned nextGeneration() :=
+- =void learn(unsigned generations) :=
+
+- =unsigned getGeneration() :=
+- =Individual* getBestIndividual() :=
+- =float getBestIndividualScore() :=
+- =float getTotalScore() :=
+- =float getAverageFitness() :=
+- =float getWorstIndividualScore() :=
+- =Task* getTask() :=
+- =unsigned getSize() :=
+- =Individual* getIndividual(unsigned pos) :=
+
+- =std::string toString() :=
+
 *** HACER [0/2] Game
 **** HACER <<<Board>>>
+
+- =Board(unsigned size) :=
+- =Board(Board* other) :=
+- =virtual ~Board() :=
+
+- =virtual void initBoard() :=
+- =virtual bool endGame() = 0 :=
+- =virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player) = 0 :=
+- =virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player) = 0 :=
+- =virtual bool canMove(SquareState player) = 0 :=
+- =virtual void turn(SquareState player, Individual* individual = NULL) = 0 :=
+- =virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player) = 0 :=
+- =virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual) = 0 :=
+- =virtual int countPoints(SquareState player) :=
+
+- =unsigned getSize() :=
+- =void setSquare(unsigned xPos, unsigned yPos, SquareState squareState) :=
+- =SquareState getSquare(unsigned xPos, unsigned yPos) :=
+- =bool squareIs(int xPos, int yPos, SquareState squareState) :=
+- =Interface* getInterface() :=
+- =Interface* updateInterface() :=
+- =static SquareState opponent(SquareState player) :=
+- =void print() :=
+
 **** HACER <<<ReversiBoard>>>
+
+- =ReversiBoard(ReversiBoard* other) :=
+- =ReversiBoard(unsigned size) :=
+- =virtual ~ReversiBoard() :=
+
+- =virtual void initBoard() :=
+
+- =virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player) :=
+- =virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player) :=
+- =virtual bool canMove(SquareState player) :=
+- =virtual bool endGame() :=
+- =virtual void turn(SquareState player, Individual* individual = NULL) :=
+- =virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player) :=
+- =virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual) :=
+
 *** HACER [0/3] Tasks
 **** HACER <<<BinaryTask>>>
+
+- =BinaryTask(BinaryOperation binaryOperation, unsigned size) :=
+- =BinaryTask(BinaryOperation binaryOperation, unsigned size, unsigned numTests) :=
+
+- =virtual void test(Individual* individual) :=
+- =virtual void setInputs(Individual* individual) :=
+- =virtual void doOperation() :=
+- =virtual string toString() :=
+- =virtual Individual* getExample(ParametersMap* parameters) :=
+
 **** HACER <<<ClassificationTask>>>
+
+- =ClassificationTask() :=
+- =ClassificationTask(Interface** inputs, Interface** desiredOutputs, unsigned inputsDim) :=
+- =virtual void test(Individual* individual) :=
+- =virtual string toString() :=
+- =virtual Individual* getExample(ParametersMap* parameters) :=
+
 **** HACER <<<ReversiTask>>>
+
+- =ReversiTask(unsigned size, unsigned numTests = 1) :=
+
+- =virtual void test(Individual* individual) :=
+- =virtual void setInputs(Individual* individual) :=
+- =virtual std::string toString() :=
+- =virtual Individual* getExample(ParametersMap* parameters) :=
+
 *** HACER [0/9] Loop
-#+LaTeX: \label{disenoLoop}
 **** HACER <<<ParametersMap>>>
+
+- =void putNumber(std::string key, float number) :=
+- =float getNumber(std::string key) :=
+- =void putPtr(std::string key, void* ptr) :=
+- =void* getPtr(std::string key) :=
+- =void putString(std::string key, std::string str) :=
+- =std::string getString(std::string key) :=
+
+- =std::string printNumber(std::string key) :=
+- =std::string printString(std::string key) :=
+- =void print() :=
+    // All you have
+- =void copyTo(ParametersMap* parametersMap) :=
+    // All you have
+- =void copyFrom(ParametersMap* parametersMap) :=
+
 **** HACER <<<Loop>>>
+
+private:
+    void setCallerLoop(Loop* callerLoop);
+protected:
+
+    std::string tKey;
+    Loop* tCallerLoop;
+
+    Loop();
+    Loop(std::string key);
+    unsigned tCurrentBranch;
+    Loop* tInnerLoop;
+
+    void __repeatBase(LoopFunction* func);
+    virtual void __repeatImpl(LoopFunction* func) = 0;
+public:
+    friend class JoinEnumLoop;
+    virtual ~Loop();
+
+    void setKey(string key);
+    string getKey();
+
+    virtual void addInnerLoop(Loop* innerLoop);
+    Loop* getInnerLoop();
+    virtual Loop* dropFirstLoop();
+    Loop* dropLastLoop();
+    Loop* dropLoop(Loop* loop);
+
+    virtual unsigned getCurrentBranch();
+    virtual unsigned getNumBranches() = 0;
+    unsigned getNumLeafs();
+    virtual unsigned getDepth();
+
+    virtual Loop* findLoop(std::string key);
+    virtual void print() = 0;
+
+    void repeatFunction(GenericLoopFuncPtr func, ParametersMap* parametersMap, std::string functionLabel);
+    void repeatFunction(LoopFunction* func, ParametersMap* parametersMap);
+
+    virtual std::string valueToString() = 0;
+    virtual std::string getState(bool longVersion);
+
 **** HACER <<<RangeLoop>>>
 **** HACER <<<ExpLoop>>>
 **** HACER <<<EnumLoop>>>
@@ -2908,9 +3101,10 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 \newpage
 \newpage
-* BORRAR [0/4] cosas pendientes
-** HACER [0/12] General documentación
+* BORRAR [0/3] cosas pendientes
+** HACER [0/13] General documentación
 - [ ] Hacer Diseño
+- [ ] Arreglar resul chorno genet ?
 - [ ] Modificar Resultados : Rendimiento genético (pasar gráficas a milisegundos)
 - [ ] Hacer API
 - [ ] Factoria e implementaciones optimizadas
