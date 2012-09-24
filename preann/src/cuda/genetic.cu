@@ -1,15 +1,4 @@
-#undef _GLIBCXX_ATOMIC_BUILTINS
-#undef _GLIBCXX_USE_INT128
-
-#include "cuda.h"
-
-__device__
-unsigned device_min(unsigned a, unsigned b)
-{
-    return (a < b) ? a : b;
-}
-
-// GENETIC OPERATORS
+#include "cudaCommon.h"
 
 // blockDim.x = BITS_PER_UNSIGNED : 32 threads that are going to process 32 * 32 = 1024 weighs
 template <class type>

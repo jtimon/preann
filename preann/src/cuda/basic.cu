@@ -1,7 +1,4 @@
-#undef _GLIBCXX_ATOMIC_BUILTINS
-#undef _GLIBCXX_USE_INT128
-
-#include "cuda.h"
+#include "cudaCommon.h"
 
 // ERRORS
 

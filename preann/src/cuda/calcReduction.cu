@@ -1,13 +1,4 @@
-#undef _GLIBCXX_ATOMIC_BUILTINS
-#undef _GLIBCXX_USE_INT128
-
-#include "cuda.h"
-
-__device__
-unsigned device_min(unsigned a, unsigned b)
-{
-    return (a < b) ? a : b;
-}
+#include "cudaCommon.h"
 
 template <unsigned int blockSize, BufferType inputType>
 __global__

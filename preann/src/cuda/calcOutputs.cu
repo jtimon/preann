@@ -1,15 +1,4 @@
-#undef _GLIBCXX_ATOMIC_BUILTINS
-#undef _GLIBCXX_USE_INT128
-
-#include "cuda.h"
-
-__device__
-unsigned device_min(unsigned a, unsigned b)
-{
-    return (a < b) ? a : b;
-}
-
-// CL_LAYER CALCULATION
+#include "cudaCommon.h"
 
 __global__
 void OutputsFloatKernel(float* inputs, float* weighs, float* results, unsigned input_size, unsigned output_size)

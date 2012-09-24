@@ -1,7 +1,4 @@
-#undef _GLIBCXX_ATOMIC_BUILTINS
-#undef _GLIBCXX_USE_INT128
-
-#include "cuda.h"
+#include "cudaCommon.h"
 
 __device__
 float Func(float number, FunctionType functionType)
@@ -30,12 +27,6 @@ float Func(float number, FunctionType functionType)
         default:
             return number;
     }
-}
-
-__device__
-unsigned device_min(unsigned a, unsigned b)
-{
-    return (a < b) ? a : b;
 }
 
 __global__

@@ -1,13 +1,4 @@
-#undef _GLIBCXX_ATOMIC_BUILTINS
-#undef _GLIBCXX_USE_INT128
-
-#include "cuda.h"
-
-__device__
-unsigned device_min(unsigned a, unsigned b)
-{
-    return (a < b) ? a : b;
-}
+#include "cudaCommon.h"
 
 #define CUDA_BYTES_PARAMS_K_INVERTED (3 * size_of(void*) + 2 * size_of(unsigned))
 
