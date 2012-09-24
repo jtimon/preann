@@ -5,6 +5,16 @@ ImplementationType Layer::getImplementationType()
     return output->getImplementationType();
 }
 
+unsigned Layer::getSize()
+{
+	return output->getSize();
+}
+
+BufferType Layer::getBufferType()
+{
+	return output->getBufferType();
+}
+
 Layer::Layer()
 {
     this->functionType = FT_IDENTITY;
@@ -109,8 +119,8 @@ void Layer::calculateOutput()
 
 void Layer::addInput(Layer* input)
 {
-	check(getImplementationType() != input->getImplementationType(), 
-			"Layer::addInput : layers of different implementatio types are not compatible.");
+	Util::check(getImplementationType() != input->getImplementationType(), 
+			"Layer::addInput : layers of different implementation types are not compatible.");
 	
     Connection* newConnection = Factory::newConnection(input->getOutput(), output->getSize());
     connections.push_back(newConnection);
@@ -131,13 +141,6 @@ void Layer::randomWeighs(float range)
 unsigned Layer::getNumberInputs()
 {
     return connections.size();
-}
-
-Buffer* Layer::getInput(unsigned pos)
-{
-	Util::check(pos >= connections.size(), "Layer::getInput : trying to access input in pos" 
-			+ to_string(pos) + " but the layer only has " to_string(connections.size()) " connections.");
-    return connections[pos]->getInput();
 }
 
 Buffer* Layer::getOutput()
@@ -164,17 +167,18 @@ FunctionType Layer::getFunctionType()
 
 void Layer::copyWeighs(Layer* sourceLayer)
 {
-    if (connections.size() != sourceLayer->getNumberInputs()) {
-        std::string error = "Layer::copyWeighs : Cannot copyWeighs from a layer with "
-                + to_string(sourceLayer->getNumberInputs()) + " connections to a layer with "
-                + to_string(connections.size());
-        throw error;
-    }
-    if (this->getImplementationType() != sourceLayer->getImplementationType()) {
-        std::string error =
-                "Layer::copyWeighs : The layers are incompatible: the implementation is different.";
-        throw error;
-    }
+	Util::check(getImplementationType() != sourceLayer->getImplementationType(), 
+			"Layer::copyWeighs : layers of different implementation types are not compatible.");
+	
+	Util::check(getSize() != sourceLayer->getSize(), "Layer::copyWeighs : Cannot copyWeighs from layers that have different size.");
+	
+	Util::check(getBufferType() != sourceLayer->getBufferType(), "Layer::copyWeighs : Cannot copyWeighs from layers that have different BufferType.");
+	
+	Util::check(connections.size() != sourceLayer->getNumberInputs(), 
+			"Layer::copyWeighs : Cannot copyWeighs from a layer with "
+			                + to_string(sourceLayer->getNumberInputs()) + " connections to a layer with "
+			                + to_string(connections.size()));
+	
     //TODO L implementar metodo Buffer::copyFast restringido a bufferes con el mismo tipo de implementacion
     for (int i = 0; i < connections.size(); i++) {
         connections[i]->copyFrom(sourceLayer->getConnection(i));

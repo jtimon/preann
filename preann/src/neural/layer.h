@@ -33,13 +33,15 @@ public:
     virtual void saveWeighs(FILE* stream);
 
     unsigned getNumberInputs();
-    Buffer* getInput(unsigned pos);
     Connection* getConnection(unsigned inputPos);
     Buffer* getOutput();
     Interface* getOutputInterface();
     Connection* getThresholds();
     FunctionType getFunctionType();
     ImplementationType getImplementationType();
+    
+    unsigned getSize();
+    BufferType getBufferType();
 };
 
 #endif /*ABSTRACTLAYER_H_*/
