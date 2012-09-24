@@ -181,6 +181,7 @@ Individual* BinaryTask::getExample(ParametersMap* parameters)
             example->addInputConnection(1, 0);
             break;
         case BO_XOR:
+        	//TODO probar con vectorsSize en vez de (vectorsSize * 2)
             example->addLayer(vectorsSize * 2, bufferType, functionType);
             example->addLayer(vectorsSize, bufferType, functionType);
             example->addInputConnection(0, 0);
