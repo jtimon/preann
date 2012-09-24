@@ -107,7 +107,7 @@ void NeuralNet::addInputConnection(unsigned sourceInputPos,
         throw error;
     }
 
-    layers[destinationLayerPos]->addInput(inputs[sourceInputPos]->getOutput());
+    layers[destinationLayerPos]->addInput(inputs[sourceInputPos]);
     inputConnectionsGraph.addConnection(sourceInputPos, destinationLayerPos);
 }
 
@@ -124,7 +124,7 @@ void NeuralNet::addLayersConnection(unsigned sourceLayerPos,
         throw error;
     }
 
-    layers[destinationLayerPos]->addInput(layers[sourceLayerPos]->getOutput());
+    layers[destinationLayerPos]->addInput(layers[sourceLayerPos]);
     connectionsGraph.addConnection(sourceLayerPos, destinationLayerPos);
 }
 

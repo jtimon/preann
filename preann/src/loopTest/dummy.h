@@ -31,7 +31,7 @@ public:
     static Interface* interface(ParametersMap* parametersMap);
     static Buffer* buffer(ParametersMap* parametersMap);
     static Connection* connection(ParametersMap* parametersMap, Buffer* buffer);
-    static Layer* layer(ParametersMap* parametersMap, Buffer* input);
+    static Layer* layer(ParametersMap* parametersMap, Layer* input);
     static NeuralNet* neuralNet(ParametersMap* parametersMap, Interface* input);
     static Individual* individual(ParametersMap* parametersMap, Interface* input);
     static Task* task(ParametersMap* parametersMap);

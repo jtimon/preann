@@ -27,11 +27,16 @@ void testConnection(ParametersMap* parametersMap)
 
 void testLayer(ParametersMap* parametersMap)
 {
-    Buffer* buffer = Dummy::buffer(parametersMap);
-    Layer* layer = Dummy::layer(parametersMap, buffer);
+	ImplementationType implementationType = (ImplementationType) (parametersMap->getNumber(
+	                Enumerations::enumTypeToString(ET_IMPLEMENTATION)));
+	
+	Interface* interfInput = Dummy::interface(parametersMap);
+	Layer* input = new InputLayer(interfInput, implementationType);
+    Layer* layer = Dummy::layer(parametersMap, input);
 
     delete (layer);
-    delete (buffer);
+    delete (input);
+    delete (interfInput);
 }
 
 void testNeuralNet(ParametersMap* parametersMap)

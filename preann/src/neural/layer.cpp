@@ -107,9 +107,12 @@ void Layer::calculateOutput()
     }
 }
 
-void Layer::addInput(Buffer* input)
+void Layer::addInput(Layer* input)
 {
-    Connection* newConnection = Factory::newConnection(input, output->getSize());
+	check(getImplementationType() != input->getImplementationType(), 
+			"Layer::addInput : layers of different implementatio types are not compatible.");
+	
+    Connection* newConnection = Factory::newConnection(input->getOutput(), output->getSize());
     connections.push_back(newConnection);
 }
 
@@ -132,6 +135,8 @@ unsigned Layer::getNumberInputs()
 
 Buffer* Layer::getInput(unsigned pos)
 {
+	Util::check(pos >= connections.size(), "Layer::getInput : trying to access input in pos" 
+			+ to_string(pos) + " but the layer only has " to_string(connections.size()) " connections.");
     return connections[pos]->getInput();
 }
 
@@ -147,11 +152,8 @@ Connection* Layer::getThresholds()
 
 Connection* Layer::getConnection(unsigned inputPos)
 {
-    if (inputPos > connections.size()) {
-        string error = "Cannot access the Connection in position " + to_string(inputPos)
-                + ": the Layer has only " + to_string(connections.size()) + " inputs.";
-        throw error;
-    }
+	Util::check( inputPos > connections.size(), "Layer::getConnection : Cannot access the Connection in position " + to_string(inputPos)
+            + ": the Layer has only " + to_string(connections.size()) + " inputs.");
     return connections[inputPos];
 }
 

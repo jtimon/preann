@@ -55,7 +55,7 @@ Connection* Dummy::connection(ParametersMap* parametersMap, Buffer* buffer)
     return connection;
 }
 
-Layer* Dummy::layer(ParametersMap* parametersMap, Buffer* input)
+Layer* Dummy::layer(ParametersMap* parametersMap, Layer* input)
 {
     BufferType bufferType = (BufferType) parametersMap->getNumber(Enumerations::enumTypeToString(ET_BUFFER));
     ImplementationType implementationType = (ImplementationType) parametersMap->getNumber(

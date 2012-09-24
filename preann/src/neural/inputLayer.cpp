@@ -35,10 +35,17 @@ ImplementationType InputLayer::getImplementationType()
     return output->getImplementationType();
 }
 
-void InputLayer::addInput(Buffer *input)
+void InputLayer::addInput(Layer* input)
 {
     std::string error = "addInput method does not work for InputLayer.";
     throw error;
+}
+
+Connection* InputLayer::getThresholds()
+{
+    std::string error = "getThresholds method does not work for InputLayer.";
+    throw error;
+    return NULL;
 }
 
 void InputLayer::calculateOutput()

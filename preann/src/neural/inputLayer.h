@@ -21,7 +21,8 @@ public:
     virtual void save(FILE* stream);
     virtual ~InputLayer();
 
-    virtual void addInput(Buffer* input);
+    virtual void addInput(Layer* input);
+    Connection* getThresholds();
     virtual void calculateOutput();
 
     virtual void randomWeighs(float range);

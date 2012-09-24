@@ -13,9 +13,13 @@ unsigned testCalculateOutput(ParametersMap* parametersMap)
 {
     unsigned differencesCounter = 0;
     string path = parametersMap->getString(LAYER_PATH);
-    Buffer* buffer = Dummy::buffer(parametersMap);
-    Buffer* bufferC = Factory::newBuffer(buffer, IT_C);
-    Layer* layer = Dummy::layer(parametersMap, buffer);
+    ImplementationType implementationType = (ImplementationType) (parametersMap->getNumber(
+                Enumerations::enumTypeToString(ET_IMPLEMENTATION)));
+    Buffer* interfInput = Dummy::interface(parametersMap);
+    
+    Layer* input = new InputLayer(interfInput, implementationType);
+    Layer* inputC = new InputLayer(interfInput, IT_C);
+    Layer* layer = Dummy::layer(parametersMap, input);
 
     FILE* stream = fopen(path.data(), "w+b");
     layer->save(stream);
@@ -27,7 +31,7 @@ unsigned testCalculateOutput(ParametersMap* parametersMap)
 
     unsigned numInputs = (unsigned) parametersMap->getNumber(Dummy::NUM_INPUTS);
     for (unsigned i = 0; i < numInputs; ++i) {
-        layerC->addInput(bufferC);
+        layerC->addInput(inputC);
     }
     layerC->loadWeighs(stream);
     fclose(stream);

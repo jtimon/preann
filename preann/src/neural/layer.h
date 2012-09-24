@@ -21,15 +21,16 @@ public:
     Layer(FILE* stream, ImplementationType implementationType);
     virtual ~Layer();
 
-    virtual void addInput(Buffer* input);
+    virtual void addInput(Layer* input);
     virtual void calculateOutput();
 
     virtual void randomWeighs(float range);
     virtual void copyWeighs(Layer* sourceLayer);
 
-    void loadWeighs(FILE* stream);
-    void saveWeighs(FILE* stream);
     virtual void save(FILE* stream);
+    
+    virtual void loadWeighs(FILE* stream);
+    virtual void saveWeighs(FILE* stream);
 
     unsigned getNumberInputs();
     Buffer* getInput(unsigned pos);
