@@ -314,13 +314,15 @@ Se quiere que sea lo más flexible posible en cuanto a la estructura de la red, 
 
 9) Las *capas* no tienen que ser compatibles con otras capas de diferente *tipo de implementación*, sin embargo, las entradas y salidas de una *red neuronal* completa deben ser accedidas y manipuladas de forma completamente transparente con respecto al *tipo de implementación*.
 
-10) Las diferentes implementaciones de las *capas* deben implementar también la gestión genética de los pesos y umbrales, pero se debe definir una interfaz lo suficientemente genérica para que puedan implementarse distintos esquemas de *cruza y mutación* sin que estos tengan que ser implementados una vez por cada *tipo de implementación*. Por tanto los diferentes tipos de operadores genéticos definidos en el punto 13 no deben ser necesarios desde la implementación de la *capa*.
+10) Las diferentes implementaciones de las *capas* deben implementar también la gestión genética de los pesos y umbrales, pero se debe definir una interfaz lo suficientemente genérica para que puedan implementarse distintos esquemas de *cruza y mutación* sin que estos tengan que ser implementados una vez por cada *tipo de implementación*. Por tanto los diferentes tipos de operadores genéticos definidos en el punto 14 no deben ser necesarios desde la implementación de la *capa*.
 
-11) La entidad que se ocupa de la evolución es la *población*, que contiene una lista ordenada de *individuos*, que a su vez contienen una *red neuronal* completa.
+11) Una /red neuronal/ debe poder incorporar nuevas capas y conexiones una vez creada, incluso en medio de un entrenamiento.
 
-12) La *población* debe poder ser gestionada de forma generacional o con el estado estacionario mencionado en la sección \ref{basTeoGenetEstan}. 
+12) La entidad que se ocupa de la evolución es la *población*, que contiene una lista ordenada de *individuos*, que a su vez contienen una *red neuronal* completa.
 
-13) Para garantizar cierta flexibilidad en el algoritmo genético se definen varios enumerados con el fin de poder variar y extender los diferentes aspectos del algoritmos genético. Se debe implementar más de una opción para cada uno de los tipos listados a continuación:
+13) La *población* debe poder ser gestionada de forma generacional o con el estado estacionario mencionado en la sección \ref{basTeoGenetEstan}. 
+
+14) Para garantizar cierta flexibilidad en el algoritmo genético se definen varios enumerados con el fin de poder variar y extender los diferentes aspectos del algoritmos genético. Se debe implementar más de una opción para cada uno de los tipos listados a continuación:
 
 	1) *Tipo de selección*: determina los *individuos* que serán utilizados para generar nuevos genotipos.
 
@@ -330,17 +332,17 @@ Se quiere que sea lo más flexible posible en cuanto a la estructura de la red, 
 
 	4) *Tipo de mutación*: determina qué individuos cambiarán sus genes aleatoriamente y cómo.
  
-14) Todas las combinaciones de los enumerados descritos en el punto anterior deben ser permitidas. Se debe permitir también que la población combine varios esquemas del mismo tipo simultáneamente.
+15) Todas las combinaciones de los enumerados descritos en el punto anterior deben ser permitidas. Se debe permitir también que la población combine varios esquemas del mismo tipo simultáneamente.
 
-15) Las *poblaciones* evolucionan a sus *individuos* para realizar una determinada *tarea*. La *tarea* toma a un individuo y puede presentarle cualquier número de entradas y activar la red para tomar las salidas cualquier número de veces y en cualquier orden (esto puede influir en las salidas si hay conexiones recurrentes) dependiendo de las características concretas del problema a optimizar y al final debe evaluar al individuo estableciendo el valor del campo *fitness* de la entidad *individuo*, que será un número real cuanto más positivo mejor.
+16) Las *poblaciones* evolucionan a sus *individuos* para realizar una determinada *tarea*. La *tarea* toma a un individuo y puede presentarle cualquier número de entradas y activar la red para tomar las salidas cualquier número de veces y en cualquier orden (esto puede influir en las salidas si hay conexiones recurrentes) dependiendo de las características concretas del problema a optimizar y al final debe evaluar al individuo estableciendo el valor del campo *fitness* de la entidad *individuo*, que será un número real cuanto más positivo mejor.
 
-16) La *población* debe tratar a todas las tareas de forma similar para que crear nuevas tareas sea una tarea relativamente sencilla. Por supuesto, sencilla sin tener en cuenta las complejidades que cada función de fitness pueda requerir. La clase *tarea* debe ser una interfaz para la clase *población*, pero con un comportamiento interno configurable y extensible. Para la implementación de la *población* nunca debe ser necesario el *tipo de tarea* para la que se está evolucionando. 
+17) La *población* debe tratar a todas las tareas de forma similar para que crear nuevas tareas sea una tarea relativamente sencilla. Por supuesto, sencilla sin tener en cuenta las complejidades que cada función de fitness pueda requerir. La clase *tarea* debe ser una interfaz para la clase *población*, pero con un comportamiento interno configurable y extensible. Para la implementación de la *población* nunca debe ser necesario el *tipo de tarea* para la que se está evolucionando. 
 
-17) Se implementarán varias tareas de [[experimentacionClasif][clasificación]] para ser aprendidas por las redes utilizando entranamiento supervisado.
+18) Se implementarán varias tareas de [[experimentacionClasif][clasificación]] para ser aprendidas por las redes utilizando entranamiento supervisado.
 
-18) Se implementará un [[experimentacionJuegos][juego de estratégia]] como ejemplo de tarea con aprendizaje por refuerzo para ser aprendida por las redes.
+19) Se implementará un [[experimentacionJuegos][juego de estratégia]] como ejemplo de tarea con aprendizaje por refuerzo para ser aprendida por las redes.
 
-19) La librería debe incorporar herramientas para la exploración gráfica de los resultados. Se deben poder generar gráficas de rendimiento computacional y de la evolución del *fitness* de una poblacción.
+20) La librería debe incorporar herramientas para la exploración gráfica de los resultados. Se deben poder generar gráficas de rendimiento computacional y de la evolución del *fitness* de una poblacción.
 
 A partir de estas especificaciones funcionales, se toman ciertas decisiones de [[diseno][diseño]] que escapan el alcance de esta sección. El diseño se encuentra en el capítulo \ref{diseno} aunque, por motivos prácticos relacionados con la presentación del documento, se ha separado el diseño de los operadores genéticos en el capítulo \ref{disenoGene}. Las optimizaciones mediante paralelización de las *capas* también ocupan [[disenoParal][su propio capítulo]].
 
@@ -1744,10 +1746,10 @@ Sólo actuará un hilo por bloque, no parece que se optimice mucho. Sin embargo,
 
 sudo aptitude install make g++ nasm gnuplot
 sudo aptitude install texlive-latex-recommended texlive-latex-extra
-** HACER [1/8] Uso general (API)
+** HACER [2/8] Uso general (API)
 #+LaTeX: \label{manualProgrApi}
 
-En esta sección se describen las clases implementadas y sus métodos. Explicando lo que hacen y cómo deben ser llamadas pero no necesariamente el funcionamiento interno. Se omiten los constructores por defecto (sin parámetros) y los destructores.
+En esta sección se describen las clases implementadas y sus métodos. Explicando lo que hacen y cómo deben ser llamadas pero no necesariamente el funcionamiento interno. Se omiten los constructores por defecto (los constructores que no toman ningún parámetro) y los destructores.
 
 *** REVISAR Common
 **** Enumerations
@@ -1821,12 +1823,12 @@ Esta clase se utiliza para realizar las mediciones de tiempo de ejecución y pod
 + =void stop():= Detiene la cuenta del cronómetro. Si no se había llamado previamente a =start()= lanza una cadena como excepción.
 + =float getSeconds():= Devuelve el contenido del cronómetro en segundos. Si no se había detenido el chronómetro llamando a =stop()=, devolverá 0.
 
-*** HACER [3/6] Neural
+*** REVISAR Neural
 #+LaTeX: \label{apiNeural}
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
 
-**** REVISAR <<<Interface>>>
+**** <<<Interface>>>
 
 Para unificar ciertas tareas comunes y tener una estructura de datos manipulable desde el exterior de las clases de esta sección se implementa esta clase. es necesaria, por ejemplo para las entradas y salidas de NeuralNet. Como es muy parecida a Buffer, ésta última reutiliza, como ya se ha mencionado algunos métodos de Interface internamente. Los métodos con los que cuenta la clase son:
 
@@ -1849,7 +1851,7 @@ Para unificar ciertas tareas comunes y tener una estructura de datos manipulable
 + =void load(FILE* stream) := *Carga* el tamáño, tipo y contenido contenido del buffer *desde* el fichero descrito por el parámetro stream.
 + =void transposeMatrix(unsigned width) := Este método trata al vector como si fuese una matriz e lo transforma en la matriz invertida. Toma por parámetro el ancho de la matriz (=width=) para poder hacerlo. Si el tamaño del vector no es múltiplo de =width= se lanza una excepción. Este método lo llama internamente CudaInvertedConnection tanto para salvar y cargar como para transformar el vector de bits antes de realizar la operación de cruce entre dos conexiones.
 
-**** REVISAR <<<Buffer>>>
+**** <<<Buffer>>>
 
 Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación interna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase abstracta Buffer. Esta clase implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como se indicó en el diseño, a esas peculiaridades se accederá utilizando polimorfismo.  
 
@@ -1881,7 +1883,7 @@ El resto de métodos públicos son:
 + =float compareTo(Buffer* other) := Recorre el vector y compara cada elemento con los elementos del vector parámetro, acumulando las diferencias para luego devolverlas sumadas. Si los dos buffers no tienen el mismo tamaño a los tipos de buffer no coinciden, se lanzará un error. Internamente llama al método homónimo de la clase Interface.
 + =void random(float range) := Inicializa el buffer con valores aleatorios. Si el tipo de buffer es =BYTE= y valor introducido introducido es mayor que 128, se generan valores entre -127 y +128. Si el tipo de buffer es binario o bipolar (internamente se representan igual), siempre se generan valores pertenecientes a {0, 1} (en el caso bipolar {-1, +1}). Internamente llama al método homónimo de Interface.
 
-**** REVISAR <<<Connection>>>
+**** <<<Connection>>>
 
 Al igual que Buffer, esta clase es abstracta y sólo se puede instanciar usando Factory. De está clase heredarán también las clases que la terminan de implementar, cada una cons su =ImplementationType=. Esta clase, a su vez, hereda de Buffer para reutilizar los métodos que tratan la gestión de la memoria entre otros. Las implementaciones concretas de Connection deberán heredar de forma virtual (no repetir campos) de Connection y además de su implementación concreta de Buffer. Por ejemplo, CppConnection hereda de Connection y de CppBuffer.
 
@@ -1896,42 +1898,79 @@ Los métodos públicos (ninguno virtual) que ofrece son:
 + =void crossover(Connection* other, Interface* bitBuffer) := Aplica el operador de cruce entre la conexión y otra Connection similar recibida en el parámetro =other= dependiendo del contenido de la interfaz de tipo =BIT= recibida en el parámetro =bitBuffer=. Los pesos para cuyas posiciones haya un 1 en el vector de bits se intercambian, para los que haya un 0, se dejan como están. Las conexiones deben ser del mismo tipo y tamaño. El vector de bits debe tener también el mismo tamaño. Si cualquiera desde estas condiciones no se cumplen, se lanza la excepción correspondiente.
 + =void mutate(unsigned pos, float mutation) := Se suma =mutation= al peso en la posición =pos=. Se controlan los máximos si los pesos son de tipo =BYTE=. Si la posición es mayor que el tamaño de la conexión se lanza una excepción.
 + =void reset(unsigned pos) := Se asigna 0 al peso en la posición =pos=. Si la posición es mayor que el tamaño de la conexión se lanza una excepción. Este es el método que implementa la nueva operación de olvido descrita en la sección \ref{disenoGeneMut}.
-**** HACER <<<Layer>>>
+**** <<<Layer>>>
 
 Esta clase utiliza Buffer y Connection para construir una capa neuronal completa. A pesar de que las capas pueden ser de diferentes implementaciones, la implementación de esta clase es completamente genérica, pues las peculiaridades ya están encapsuladas en Buffer y Connection, que esta clase construye llamando a Factory. 
 
 El constructor por defecto está protegido para obligar al usuario de la librería a utilizar uno de los constructores paramétrizados.
 
-- 
-- =Layer(unsigned size, BufferType outputType, FunctionType functionType, ImplementationType implementationType) := 
-- =Layer(FILE* stream, ImplementationType implementationType) := 
+- =Layer(unsigned size, BufferType outputType, FunctionType functionType, ImplementationType implementationType) := Este es el constructor que será utilizado con más frecuencia. Se le indica el tamaño, el /tipo de neurona/ (=BufferType=), la función de activación (=FunctionType=) y la implementación optimizada a usar (/ImplementationType/). Las entradas se añaden posteriormente de forma dinámica.
+- =Layer(FILE* stream, ImplementationType implementationType) := este otro constructor resulta útil para construir nuevas capas a partir de un fichero, por ejemplo, cuando se carga una población desde el dicos duro. Se le indica un descriptor de fichero (parámetro =stream=) y el /tipo de implementación/, pues el almacenamiento en disco es independiente de la implementación.
 
+Luego tenemos ciertos métodos que, aunque son públicos, pueden ser modificados por otra clase que herede de Layer, como es el caso de InputLayer:
 
+- =void addInput(Layer* input) := Se añade una conexión a otra capa como entrada. Como se especificó en el [[anaEspecLib][análisis]], la capa puede ser un puntero a la propia capa. Si las capas no tienen la misma implementación se lanza una excepción.
+- =void calculateOutput() := Calcula el estado de sus neuronas en función de las entradas a la capa (y, por supuesto, los pesos y umbrales).
+- =void randomWeighs(float range) := Establece valores aleatorios entre =-range= y =+range= para los pesos y umbrales.
+- =void copyWeighs(Layer* sourceLayer) := Copia los pesos desde la capa en el parámetro =sourceLayer=. Si las capas no tienen la misma implementación, =BufferType= o tamaño se lanza la excepción correspondiente.
+- =void save(FILE* stream) := Se guarda en el fichero el tipo de activación y el Buffer que alamcena las neuronas de salida. Es el inverso del constructor que utiliza un fichero.
+- =void saveWeighs(FILE* stream) := Se guarda en el fichero el número de entradas y después cada una de las Connection alamcenadas que contienen los pesos de cada conexión entre esta capa y las entradas. Luego se guarda la Connection que contiene el vector de umbrales.
+- =void loadWeighs(FILE* stream) := Se carga el número de entradas, despues las Connection asociadas a esas entradas y, por último, la Connection que contiene el vector de umbrales. Es la operación inversa a la del método anterior.
+- =Connection* getThresholds() := Devuelve la conexión que contiene el vector de pesos.
 
-    virtual void addInput(Buffer* input);
-    virtual void calculateOutput();
+Por último, el resto de métodos públicos:
 
-    virtual void randomWeighs(float range);
-    virtual void copyWeighs(Layer* sourceLayer);
+- =unsigned getNumberInputs() := Devuelve el número de entradas de la capa.
+- =Connection* getConnection(unsigned inputPos) := Devuelve la Connection que contiene los pesos de la capa de entrada en la conexión =inputPos=.
+- =Buffer* getOutput() := Devuelve el Buffer que contiene el estado de las neuronas de salida de la capa.
+- =Interface* getOutputInterface() := Devuelve un puntero a una interfaz que siempre contiene los mismos datos que el Buffer que contiene las salidas. Si no existía la interfaz, se crea. La propia capa se ocupará de borrar la interfaz cuando se llame a su propio destructor. Esta intertaz servirá para acceder a los estados de las neuronas de una capa. No es recomendable llamar a este método con capas que no sean de salida porque en adelante las salidas se copiarán a esta interfaz siempre que sean calculadas con =calculateOutput=.
+- =Connection* getThresholds() := Devuelve la Connection que contiene el vector de umbrales.
+- =unsigned getSize() := Devuelve el tamaño de la capa (número de neuronas de salida).
+- =ImplementationType getImplementationType() := Devuelve el /tipo de implementación/ de la capa.
+- =FunctionType getFunctionType() := Devuelve el /tipo de activación/ de la capa.
+- =BufferType getBufferType() := Devuelve el /tipo de neurona/ de la capa.
 
-    void loadWeighs(FILE* stream);
-    void saveWeighs(FILE* stream);
-    virtual void save(FILE* stream);
+**** <<<InputLayer>>>
 
-    unsigned getNumberInputs();
-    Buffer* getInput(unsigned pos);
-    Connection* getConnection(unsigned inputPos);
-    Buffer* getOutput();
-    Interface* getOutputInterface();
-    Connection* getThresholds();
-    FunctionType getFunctionType();
-    ImplementationType getImplementationType();
+Esta clase hereda de Layer y, por tanto, comparte sus métodos. Sin embargo, los constructores son diferentes:
 
-**** HACER <<<InputLayer>>>
-**** HACER <<<NeuralNet>>>
+- =InputLayer(Interface* interface, ImplementationType implementationType) := Construye una capa a partir de una Interface de entrada y el /tipo de implementación/.
+- =InputLayer(FILE* stream, ImplementationType implementationType) := Construye una capa de entrada desde un fichero. Este sí tiene parámetros similares al constructor desde fichero de Layer, pero internamente funciona diferente. Como no recibe una interfaz, la crea con las características necesarias. La interfaz de entrada, se recibida por parámetro o construída de esta forma, debe eliminarse desde fuera de la capa: la InputLayer no destruye la Interface de entrada en ningún caso.
 
-Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene un grafo dirigido con capas (Layer)
-Al nivel más alto, la clase que utilizaremos es NeuralNet, que implementa una red neuronal concreta
+Además, se añade un nuevo método exclusivo de InputLayer:
+
+- =Interface* getInputInterface() := Devuelve el Interface de entrada desde el que esta capa de entrada copia los valores. Si la capa ha sido construída desde fichero en vez de recibir la Interface por parámetro, está interfaz ha sido creada por la Capa y este método se vuelve imprescindible para acceder a la Interfaz y poder cambiar sus valores.
+
+Por último, se redefinen los métodos que no deben funcionar igual que en Layer.
+
+- =virtual void calculateOutput() := En lugar de calcular el estado de las neuronas de salida a partir de los pesos y las entradas (que no tiene), la capa de entrada copia sus valores directamente de la interfaz de entrada. Si tiene una interfaz de salida (aunque no tenga mucha lógica), el estado también se copia a la interfaz de salida como para las capas normales.
+- =virtual void save(FILE* stream) := A diferencia del método de Layer, éste no guarda el /tipo de activación/ (=FunctionType=) porque nunca se usa.
+- =virtual void randomWeighs(float range) := Como no almacena pesos, no hace nada. Pero tampoco lanza excepción si se le llama.
+- =virtual void copyWeighs(Layer* sourceLayer) := Hace las mismas comprobaciones que el método original y si alguna no se cumple, lanza una excepción. Si todas se cumplen no hace nada.
+- =virtual void addInput(Layer* input) := Lanza una excepción, este método nunca debería ser llamado para una capa de entrada.
+- =Connection* getThresholds() := Lanza una excepción, este método nunca debería ser llamado para una capa de entrada.
+
+**** <<<NeuralNet>>>
+
+Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene un grafo dirigido con capas (Layer). Se accede a las entradas y salidas utilizando la clase Interface. Las capas de entrada se guardan separadas del resto y tienen sus propios índices para establecer conexiones. Estos son los métodos públicos que implementa:
+
+- =NeuralNet(ImplementationType implementationType = IT_C) := El constructor sólo toma el /tipo de implementación/ y de forma optativa. Si no se introduce ninguno, se usará la /implementación de referencia/ en =C++=.
+- =void addInputLayer(Interface* interface) := Crea una capa de entrada que estará conectada y se sincronizará (cuando se llame al método =calculateOutput= para esa Layer) con la Interface recibida por parámetro.
+- =void addInputLayer(unsigned size, BufferType bufferType) := Crea una capa interna con el tamaño y /tipo de neurona/ indicados por parámetro. No es necesario indicar si se tratará de una capa de salida u oculta. Todas son ocultas en principio hasta que se accede al estado de la capa una vez usando el método =getOutput= descrito a continuación.
+- =void updateInput(unsigned inputPos, Interface* input) := Hay ocasiones en las que los datos de entrada no se suministran siempre a través de la misma interfaz porque se crea una interfaz para cada dato (clasificación genérica, ver ClassificationTask), porque se quiere ver un tablero futuro hipotético (ReversiTask) o por cualquier otra razón. Este método copia los valores del interfaz recibida por parámetro =input= a la interfaz de la que normalmente coge su entrada la capa de entrada en la posición =inputPos=. Después, cuando se llame al método =calculateOutput=, se copiarán esas entradas al Buffer de la InputLayer.
+- =Interface* getOutput(unsigned layerPos) := Devuelve una interfaz sincronizada con la capa en la posición =layerPos=. Si no existía tal interfaz, la capa correspondiente la crea.
+- =unsigned getNumInputs() := Devuelve el número de capas de entrada.
+- =unsigned getNumLayers() := Devuelve el número de capas que no son de entrada.
+- =void addLayer(unsigned size, BufferType destinationType = BT_FLOAT, FunctionType functiontype = FT_IDENTITY) :=
+- =void addInputConnection(unsigned sourceInputPos, unsigned destinationLayerPos) := Añade la capa de entrada en posición =sourceInputPos= como conexión a la capa en posición destinationLayerPos. Recuérdese que los índices para capas de entrada y para el resto de capas van separados.
+- =void addLayersConnection(unsigned sourceLayerPos, unsigned destinationLayerPos) := Añade una conexión entre capas que no son de entrada. La capa en la posición =destinationLayerPos= toma como entrada a la que está en posición =sourceLayerPos=.
+- =virtual void calculateOutput() := Calcula el estado de la red neuronal. Primero, todas las capas de entrada copian sus valores de sus interfaces correspondientes. Luego el resto de capas calculan su estado en el orden en que fueron añadidas a la red (su posición).
+- =void randomWeighs(float range) := Todas los pesos (y umbrales) de todas las capas de la red toman valores aleatorios entre =-range= y =range=.
+- =void save(FILE* stream) := Se salva la red neuronal completa en un fichero descrito por =stream=. Primero se guarda el número de capas de entrada y de salida. Luego las capas de entrada, después las de salida, el grafo de conexiones con las capas de entrada, el grafo de conexiones entre capas "normales" y, por último, se cargan los pesos y umbrales de cada capa en el orden en el que fueron añadidas a la red neuronal.
+- =void load(FILE* stream) := Se carga la red neuronal completa en un fichero descrito por =stream=. Es la operación inversa a =save=.
+- =void createFeedForwardNet(unsigned inputSize, BufferType inputType, unsigned numLayers, unsigned sizeLayers, BufferType hiddenLayersType, FunctionTyp functiontype = FT_IDENTITY) := Crea una red neuronal con conexiones hacia delante completa con las conexiones que es de esperar (y pone las capas en el orden habitual en el que tienen que ser activadas). Sólo hay una capa de entrada, para la que hay que indicar tamaño y /tipo de neurona/. Todas las capas internas tendrán el mismo tamaño, tipo (que pueden ser diferentes a los de la de entrada) y /tipo de activación/. Si no se indica la función de activación, se usará =IDENTITY= por defecto. También hay que indicar el número de capas internas. Tras crear una red neuronal utilizando este método, se pueden seguir añadiendo más capas y conexiones por lo que, aunque no se quiera esta topología, puede ser útil para crear la base de otra topología de forma más cómoda.
+- =void createFullyConnectedNet(unsigned inputSize, BufferType inputType, unsigned numLayers, unsigned sizeLayers, BufferType hiddenLayersType  FunctionType functiontype = FT_IDENTITY) := Este método es similar al anterior, pero en lugar de estar conectadas cada capa con la anterior, cada una de las capas internas toma como entrada todas las otras capas (incluso a sí misma). Además, todas las capas están directamente conectadas con la capa de entrada. Como sucedía con el método anterior, se puede usar como base para otra topología. Al ser esta la más compleja, este método es el más recomendable paraprobar la implementación de la red neuronal y los cambios que se hagan
+
 *** HACER [0/3] Genetic
 #+LaTeX: \label{disenoGenetic}
 **** HACER <<<Individual>>>
