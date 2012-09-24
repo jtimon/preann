@@ -30,11 +30,6 @@ InputLayer::~InputLayer()
 {
 }
 
-ImplementationType InputLayer::getImplementationType()
-{
-    return output->getImplementationType();
-}
-
 void InputLayer::addInput(Layer* input)
 {
     std::string error = "addInput method does not work for InputLayer.";
@@ -51,6 +46,10 @@ Connection* InputLayer::getThresholds()
 void InputLayer::calculateOutput()
 {
     output->copyFromInterface(tInput);
+    
+    if (outputInterface != NULL) {
+    	outputInterface->copyFrom(tInput);
+    }
 }
 
 void InputLayer::randomWeighs(float range)

@@ -13,8 +13,6 @@
 class InputLayer : public Layer
 {
     Interface* tInput;
-protected:
-    ImplementationType getImplementationType();
 public:
     InputLayer(Interface* interface, ImplementationType implementationType);
     InputLayer(FILE* stream, ImplementationType implementationType);
