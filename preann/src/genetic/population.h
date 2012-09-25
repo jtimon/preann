@@ -16,17 +16,10 @@
 class Population
 {
 public:
-    static const string SIZE;
     static const string NUM_PRESERVE;
     static const string NUM_SELECTION;
     static const string NUM_CROSSOVER;
 
-    //TODO borrar
-    static const string NUM_ROULETTE_WHEEL;
-    static const string NUM_TRUNCATION;
-    static const string NUM_TOURNAMENT;
-    static const string NUM_RANKING;
-    
     static const string TOURNAMENT_SIZE;
     static const string RANKING_BASE;
     static const string RANKING_STEP;
@@ -35,8 +28,8 @@ public:
     static const string MULTIPOINT_NUM;
 
     static const string MUTATION_NUM;
-    static const string MUTATION_RANGE;
     static const string MUTATION_PROB;
+    static const string MUTATION_RANGE;
     static const string RESET_NUM;
     static const string RESET_PROB;
     
@@ -95,6 +88,7 @@ public:
     void insertIndividual(Individual* individual);
     unsigned nextGeneration();
     void learn(unsigned generations);
+    void learn(unsigned generations, float goal);
 
     unsigned getGeneration();
     Individual* getBestIndividual();
@@ -104,6 +98,8 @@ public:
     float getWorstIndividualScore();
     Task* getTask();
     unsigned getSize();
+    unsigned getMaxSize();
+    void changeMaxSize(unsigned newSize);
     Individual* getIndividual(unsigned pos);
 
     std::string toString();

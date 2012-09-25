@@ -7,7 +7,6 @@
 
 #include "population.h"
 
-const string Population::SIZE = "population_Size";
 const string Population::NUM_PRESERVE = "population_NumPreserve";
 const string Population::NUM_SELECTION = "population_NumSelection";
 const string Population::NUM_CROSSOVER = "population_NumCrossover";
@@ -321,6 +320,15 @@ void Population::insertIndividual(Individual *individual)
     }
 }
 
+void Population::changeMaxSize(unsigned newSize)
+{
+	while (individuals.size() > newSize){
+		delete (individuals.back());
+        individuals.pop_back();
+	}
+	maxSize = newSize;
+}
+
 void Population::selection()
 {
 	selectRouletteWheel();
@@ -409,6 +417,11 @@ unsigned Population::getSize()
     return individuals.size();
 }
 
+unsigned Population::getMaxSize()
+{
+    return maxSize;
+}
+
 std::string Population::toString()
 {
     return task->toString() + "_" + to_string(maxSize);
@@ -417,6 +430,13 @@ std::string Population::toString()
 void Population::learn(unsigned generations)
 {
     while (this->generation < generations) {
+        nextGeneration();
+    }
+}
+
+void Population::learn(unsigned generations, float goal)
+{
+    while (this->generation < generations && getBestIndividualScore() < fitness) {
         nextGeneration();
     }
 }
