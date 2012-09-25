@@ -2005,11 +2005,13 @@ Esta clase es abstracta y no puede ser instanciada. Todos sus métodos deben ser
 
 **** HACER <<<Population>>>
 
-Esta clase gestiona el algortimo genético y la población de individuos, de los cuales almacena una lista ordenada. Tiene mcuhos parámetros internos para configurar su funcionamiento y muchos de ellos son obtativos. Por ello, contiene un mapa de parámetros de la clase ParametersMap para almacenar la mayoría de ellos, evitando así un excesivo número de atributos para la clase.
+Esta clase gestiona el algortimo genético y la población de individuos, de los cuales almacena una lista ordenada. Tiene mcuhos parámetros internos para configurar su funcionamiento y muchos de ellos son obtativos. Por ello, contiene un mapa de parámetros de la clase ParametersMap para almacenar la mayoría de ellos, evitando así un excesivo número de atributos para la clase. 
 
-- =Population(Population* other) :=
-- =Population(Task* task) :=
-- =Population(Task* task, Individual* example, unsigned size, float range) :=
+El constructor por defecto es privado. Los constructores parametrizados necesitan, como mínimo una tarea que aprender.
+
+- =Population(Task* task) := Se le pasa por parámetro la tarea que la población debe usar para entrenar a sus individuos. El tamaño máximo se pone a cero, por lo que tendrá que cambiarse
+- =Population(Task* task, Individual* example, unsigned size, float range) := Además de la tarea, se le pasa un individuo de ejemplo del que los nuevos copiarán la topología, el tamaño máximo de la población (que llenará)
+- =Population(Population* other) := Se crea la población a partir de otra. Se copia la tarea, el tamaño máximo de la población y los individuos que ésta contenga, pero los parametros del algoritmo genético se establecen con los valores por defecto.
 
 - =void save(FILE* stream) :=
 - =void load(FILE* stream) :=
