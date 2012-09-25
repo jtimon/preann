@@ -70,6 +70,8 @@ protected:
     void reset();
     void checkNotEmpty();
     void eliminateWorse();
+private:
+    Population(){};
 public:
     Population(Population* other);
     Population(Task* task);
