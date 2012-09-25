@@ -2009,46 +2009,56 @@ Esta clase gestiona el algortimo genético y la población de individuos, de los
 
 El constructor por defecto es privado. Los constructores parametrizados necesitan, como mínimo una tarea que aprender.
 
-- =Population(Task* task) := Se le pasa por parámetro la tarea que la población debe usar para entrenar a sus individuos. El tamaño máximo se pone a cero, por lo que tendrá que cambiarse
+- =Population(Task* task, unsigned size) := Se le pasa por parámetro la tarea que la población debe usar para entrenar a sus individuos. También se le indica el tamaño máximo de la población.
 - =Population(Task* task, Individual* example, unsigned size, float range) := Además de la tarea, se le pasa un individuo de ejemplo del que los nuevos copiarán la topología, el tamaño máximo de la población (que llenará)
 - =Population(Population* other) := Se crea la población a partir de otra. Se copia la tarea, el tamaño máximo de la población y los individuos que ésta contenga, pero los parametros del algoritmo genético se establecen con los valores por defecto.
 
-- =void save(FILE* stream) :=
-- =void load(FILE* stream) :=
-
-- =void putParam(string key, float number) :=
 - =void setParams(ParametersMap* parametersMap) :=
-- =void setPreservation(unsigned number) :=
-- =void setSelectionRouletteWheel(unsigned number) :=
-- =void setSelectionTruncation(unsigned number) :=
-- =void setSelectionTournament(unsigned number, unsigned tourSize) :=
-- =void setSelectionRanking(unsigned number, float base, float step) :=
+- =void putParam(string key, float number) := 
 
-- =void setCrossoverUniformScheme(CrossoverLevel crossoverLevel, unsigned number, float probability) :=
-- =void setCrossoverProportionalScheme(CrossoverLevel crossoverLevel, unsigned number) :=
-- =void setCrossoverMultipointScheme(CrossoverLevel crossoverLevel, unsigned number, unsigned numPoints) :=
+TODO, comentar constantes y métodos para obtener keys.
+    static const string NUM_PRESERVE;
+    static const string NUM_SELECTION;
+    static const string NUM_CROSSOVER;
 
-- =void setMutationsPerIndividual(unsigned numMutations, float range) :=
-- =void setMutationProbability(float probability, float range) :=
+    static const string TOURNAMENT_SIZE;
+    static const string RANKING_BASE;
+    static const string RANKING_STEP;
 
-- =void setResetsPerIndividual(unsigned numResets) :=
-- =void setResetProbability(float resetProb) :=
+    static const string UNIFORM_CROSS_PROB;
+    static const string MULTIPOINT_NUM;
 
-- =void insertIndividual(Individual* individual) :=
-- =unsigned nextGeneration() :=
-- =void learn(unsigned generations) :=
+    static const string MUTATION_NUM;
+    static const string MUTATION_PROB;
+    static const string MUTATION_RANGE;
+    static const string RESET_NUM;
+    static const string RESET_PROB;
+    
+    static string getKeyNumSelection(SelectionAlgorithm selectionAlgorithm);
+    static string getKeyNumCrossover(CrossoverAlgorithm crossoverAlgorithm, CrossoverLevel crossoverLevel);
+    static string getKeyProbabilityUniform(CrossoverLevel crossoverLevel);
+    static string getKeyNumPointsMultipoint(CrossoverLevel crossoverLevel);
 
-- =unsigned getGeneration() :=
-- =Individual* getBestIndividual() :=
-- =float getBestIndividualScore() :=
-- =float getTotalScore() :=
-- =float getAverageFitness() :=
-- =float getWorstIndividualScore() :=
-- =Task* getTask() :=
-- =unsigned getSize() :=
-- =Individual* getIndividual(unsigned pos) :=
-
-- =std::string toString() :=
+El resto de métodos públicos son:
+    
+- =void insertIndividual(Individual* individual) := Evalúa al individuo recibido por parámetro con la tarea de la población que le asignará su fitness correspondiente. Usando ese fitness, se inserta en la lista ordenada que contiene la población. Si la población ya tiene el máximo número de individuos, pueden pasar dos cosas. Si el nuevo individuo insertado es peor que todos los individuos que ya hay, no se insertará y será eliminado. Si es igual o mejor que alguno de los que ya hay, ocupa su posición y se elimina el peor individuo (para no superar el número máximo con la nueva inserción).
+- =unsigned nextGeneration() := Realiza la selección de los individuos de la lista ordenada (usando todos los algoritmos de selección que se hayan configurado), se crean nuevos individuos mediante los operadores de cruce configurados, se mutan y se les aplica el operador de olvido de acuerdo con la configuración, se insertan todos los nuevos individuos usando el método anterior y, por último, se incrementa el contador de generaciones interno.
+- =void learn(unsigned generations) := Se entrena a la población hasta que el contador interno de generaciones sea igual al parametros =generations=.
+- =void learn(unsigned generations, float goal) := Se entrena a la población mientras el contador interno de generaciones sea igual al parametros =generations= y el mejor individuo de la población tenga un /fitness/ menor que el parámetro =goal=.
+- =unsigned getGeneration() := Devuelve el valor del contador interno de generaciones.
+- =Individual* getBestIndividual() := Devuelve un puntero al mejor individuo.
+- =float getBestIndividualScore() := Devuelve el /fitness/ del mejor individuo.
+- =float getTotalScore() := Devuelve la suma de todos los /fitness/ de los individuos que forman parte actualemente de la población.
+- =float getAverageFitness() := Devuelve la media de todos los /fitness/ de los individuos que forman parte actualemente de la población.
+- =float getWorstIndividualScore() := Devuelve el /fitness/ del peor individuo.
+- =Task* getTask() := Devuelve un puntero a la tarea de la población.
+- =unsigned getSize() := Devuelve el tamaño actual de la población.
+- =unsigned getMaxSize() := Devuelve el tamaño máximo de la población.
+- =void changeMaxSize(unsigned newSize) := Cambia el tamaño máximo de la población, si el nuevo tamaño máximo es menor que el tamaño actual, se eliminarán los peores individuos.
+- =Individual* getIndividual(unsigned pos) := Devuelve el individuo en la posición =pos= de la lista ordenada por /fitness/.
+- =std::string toString() := Devuelve una cadena que identifica a la población. Llama a =Task::toString()= y le concatena el tamaño máximo de la población. 
+- =void save(FILE* stream) := Guarda los parámetros de configuración del algoritmo genético y todos los individuos de la población al fichero especificado por el parámetro =stream=. Notesé que la tarea no se guarda.
+- =void load(FILE* stream) := Carga los parámetros de configuración del algoritmo genético y los individuos, para insertarlos en la población, desde el fichero especificado por el parámetro =stream=. Notesé que la tarea no se carga y tiene que haber sido establecida en el constructor.
 
 *** HACER [0/2] Game
 **** HACER <<<Board>>>
