@@ -21,11 +21,13 @@ public:
     static const string NUM_SELECTION;
     static const string NUM_CROSSOVER;
 
+    //TODO borrar
     static const string NUM_ROULETTE_WHEEL;
     static const string NUM_TRUNCATION;
     static const string NUM_TOURNAMENT;
-    static const string TOURNAMENT_SIZE;
     static const string NUM_RANKING;
+    
+    static const string TOURNAMENT_SIZE;
     static const string RANKING_BASE;
     static const string RANKING_STEP;
 
@@ -37,6 +39,11 @@ public:
     static const string MUTATION_PROB;
     static const string RESET_NUM;
     static const string RESET_PROB;
+    
+    string getKeyNumSelection(SelectionAlgorithm selectionAlgorithm);
+    string getKeyNumCrossover(CrossoverAlgorithm crossoverAlgorithm, CrossoverLevel crossoverLevel);
+    string getKeyProbabilityUniform(CrossoverLevel crossoverLevel);
+    string getKeyNumPointsMultipoint(CrossoverLevel crossoverLevel);
 
     ParametersMap params;
 protected:
@@ -47,9 +54,10 @@ protected:
     vector<Individual*> parents;
     vector<Individual*> offSpring;
 
-    unsigned numCrossover[CROSSOVER_ALGORITHM_DIM][CROSSOVER_LEVEL_DIM];
-    float probabilityUniform[CROSSOVER_LEVEL_DIM];
-    unsigned numPointsMultipoint[CROSSOVER_LEVEL_DIM];
+    static const string NUM_SELECT;
+    static const string NUM_CROSS;
+    static const string PROB_CROSS;
+    static const string POINTS_CROSS;
 
     void setDefaults();
     void selection();
@@ -74,7 +82,7 @@ private:
     Population(){};
 public:
     Population(Population* other);
-    Population(Task* task);
+    Population(Task* task, unsigned size);
     Population(Task* task, Individual* example, unsigned size, float range);
     virtual ~Population();
 
@@ -84,11 +92,7 @@ public:
     void putParam(string key, float number);
     void setParams(ParametersMap* parametersMap);
     void setPreservation(unsigned number);
-    void setSelectionRouletteWheel(unsigned number);
-    void setSelectionTruncation(unsigned number);
-    void setSelectionTournament(unsigned number, unsigned tourSize);
-    void setSelectionRanking(unsigned number, float base, float step);
-
+    
     void setCrossoverUniformScheme(CrossoverLevel crossoverLevel,
             unsigned number, float probability);
     void setCrossoverProportionalScheme(CrossoverLevel crossoverLevel,

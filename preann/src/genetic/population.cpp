@@ -7,26 +7,66 @@
 
 #include "population.h"
 
-const string Population::SIZE = "populationSize";
-const string Population::NUM_PRESERVE = "populationNumPreserve";
-const string Population::NUM_SELECTION = "populationNumSelection";
-const string Population::NUM_CROSSOVER = "populationNumCrossover";
+const string Population::SIZE = "population_Size";
+const string Population::NUM_PRESERVE = "population_NumPreserve";
+const string Population::NUM_SELECTION = "population_NumSelection";
+const string Population::NUM_CROSSOVER = "population_NumCrossover";
 
-const string Population::NUM_ROULETTE_WHEEL = "populationNumRouletteWheel";
-const string Population::NUM_TRUNCATION = "populationNumTruncation";
-const string Population::NUM_TOURNAMENT = "populationNumTournament";
-const string Population::TOURNAMENT_SIZE = "populationTournamentSize";
-const string Population::NUM_RANKING = "populationNumRanking";
-//const string Population::AAAAAAAA = "population_AAAA";
-const string Population::RANKING_BASE = "populationRankingBase";
-const string Population::RANKING_STEP = "populationRankingStep";
-const string Population::UNIFORM_CROSS_PROB = "populationUniformCrossProb";
-const string Population::MULTIPOINT_NUM = "populationNumPoints";
-const string Population::MUTATION_NUM = "populationMutationsPerIndividual";
-const string Population::MUTATION_RANGE = "populationMutationRange";
-const string Population::MUTATION_PROB = "populationMutationProb";
-const string Population::RESET_NUM = "populationResetNumResets";
-const string Population::RESET_PROB = "populationResetProb";
+const string Population::TOURNAMENT_SIZE = "population_TournamentSize";
+const string Population::RANKING_BASE = "population_RankingBase";
+const string Population::RANKING_STEP = "population_RankingStep";
+const string Population::UNIFORM_CROSS_PROB = "population_UniformCrossProb";
+const string Population::MULTIPOINT_NUM = "population_NumPoints";
+const string Population::MUTATION_NUM = "population_MutationsPerIndividual";
+const string Population::MUTATION_RANGE = "population_MutationRange";
+const string Population::MUTATION_PROB = "population_MutationProb";
+const string Population::RESET_NUM = "population_ResetNumResets";
+const string Population::RESET_PROB = "population_ResetProb";
+
+const string Population::NUM_SELECT = "population_NumSelection_";
+const string Population::NUM_CROSS = "population_NumCrossover_";
+const string Population::PROB_CROSS = "population_ProbCrossover_";
+const string Population::POINTS_CROSS = "population_NumPointsCrossover_";
+
+string Population::getKeyNumSelection(SelectionAlgorithm selectionAlgorithm)
+{
+	Util::check(selectionAlgorithm >= SELECTION_ALGORITHM_DIM, 
+			"Population::getKeyProbabilityUniform : " + to_string(selectionAlgorithm) + 
+			" is greater than the number of selection algorithms, which is " + to_string(SELECTION_ALGORITHM_DIM));
+	
+	return NUM_SELECT + Enumerations::selectionAlgorithmToString(selectionAlgorithm);
+}
+
+string Population::getKeyNumCrossover(CrossoverAlgorithm crossoverAlgorithm, CrossoverLevel crossoverLevel)
+{
+	Util::check(crossoverAlgorithm >= CROSSOVER_ALGORITHM_DIM, 
+			"Population::getKeyNumCrossover : " + to_string(crossoverAlgorithm) + 
+			" is greater than the number of crossover algorithms, which is " + to_string(CROSSOVER_ALGORITHM_DIM));
+	Util::check(crossoverLevel >= CROSSOVER_LEVEL_DIM, 
+			"Population::getKeyNumCrossover : " + to_string(crossoverLevel) + 
+			" is greater than the number of crossover levels, which is " + to_string(CROSSOVER_LEVEL_DIM));
+	
+	return NUM_CROSSOVER + Enumerations::crossoverAlgorithmToString(crossoverAlgorithm) + "_" +
+			Enumerations::crossoverLevelToString(crossoverLevel);
+}
+
+string Population::getKeyProbabilityUniform(CrossoverLevel crossoverLevel)
+{
+	Util::check(crossoverLevel >= CROSSOVER_LEVEL_DIM, 
+			"Population::getKeyProbabilityUniform : " + to_string(crossoverLevel) + 
+			" is greater than the number of crossover levels, which is " + to_string(CROSSOVER_LEVEL_DIM));
+	
+	return PROB_CROSS + Enumerations::crossoverLevelToString(crossoverLevel);
+}
+
+string Population::getKeyNumPointsMultipoint(CrossoverLevel crossoverLevel)
+{
+	Util::check(crossoverLevel >= CROSSOVER_LEVEL_DIM, 
+			"Population::getKeyNumPointsMultipoint : " + to_string(crossoverLevel) + 
+			" is greater than the number of crossover levels, which is " + to_string(CROSSOVER_LEVEL_DIM));
+	
+	return POINTS_CROSS + Enumerations::crossoverLevelToString(crossoverLevel);
+}
 
 Population::Population(Population* other)
 {
@@ -41,11 +81,11 @@ Population::Population(Population* other)
     }
 }
 
-Population::Population(Task* task)
+Population::Population(Task* task, unsigned size)
 {
     this->task = task;
 
-    maxSize = 0;
+    maxSize = size;
 
     setDefaults();
 }
@@ -74,19 +114,22 @@ void Population::setDefaults()
 
     params.putNumber(NUM_PRESERVE, -1);
 
-    params.putNumber(NUM_ROULETTE_WHEEL, 0);
-    params.putNumber(NUM_RANKING, 0);
+    for (unsigned selectAlg = 0; selectAlg < SELECTION_ALGORITHM_DIM; selectAlg++) {
+    	
+		params.putNumber(getKeyNumSelection(selectAlg), 0);
+    }
+    
     params.putNumber(RANKING_BASE, 0);
     params.putNumber(RANKING_STEP, 1);
-    params.putNumber(NUM_TOURNAMENT, 0);
     params.putNumber(TOURNAMENT_SIZE, 2);
-    params.putNumber(NUM_TRUNCATION, 0);
 
     for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; crossLevel++) {
-        probabilityUniform[crossLevel] = 0.7;
-        numPointsMultipoint[crossLevel] = 1;
+    	
+		params.putNumber(getKeyProbabilityUniform(crossLevel), 0.7);
+		params.putNumber(getKeyNumPointsMultipoint(crossLevel), 1);
         for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg) {
-            numCrossover[crossAlg][crossLevel] = 0;
+        	
+			params.putNumber(getKeyNumCrossover(crossAlg, crossLevel), 0);
         }
     }
 
@@ -112,20 +155,8 @@ void Population::setParams(ParametersMap* parametersMap)
         if (numSelection > 0) {
             SelectionAlgorithm selectionAlgorithm = (SelectionAlgorithm) parametersMap->getNumber(
                     Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM));
-            switch (selectionAlgorithm) {
-                case SA_ROULETTE_WHEEL:
-                    params.putNumber(NUM_ROULETTE_WHEEL, numSelection);
-                    break;
-                case SA_RANKING:
-                    params.putNumber(NUM_RANKING, numSelection);
-                    break;
-                case SA_TOURNAMENT:
-                    params.putNumber(NUM_TOURNAMENT, numSelection);
-                    break;
-                case SA_TRUNCATION:
-                    params.putNumber(NUM_TRUNCATION, numSelection);
-                    break;
-            }
+            
+			params.putNumber(getKeyNumSelection(selectionAlgorithm), numSelection);
         }
     } catch (...) {
     }
@@ -320,29 +351,6 @@ void Population::setPreservation(unsigned number)
     params.putNumber(NUM_PRESERVE, number);
 }
 
-void Population::setSelectionRouletteWheel(unsigned number)
-{
-    params.putNumber(NUM_ROULETTE_WHEEL, number);
-}
-
-void Population::setSelectionTruncation(unsigned number)
-{
-    params.putNumber(NUM_TRUNCATION, number);
-}
-
-void Population::setSelectionTournament(unsigned number, unsigned tourSize)
-{
-    params.putNumber(NUM_TOURNAMENT, number);
-    params.putNumber(TOURNAMENT_SIZE, tourSize);
-}
-
-void Population::setSelectionRanking(unsigned number, float base, float step)
-{
-    params.putNumber(NUM_RANKING, number);
-    params.putNumber(RANKING_BASE, base);
-    params.putNumber(RANKING_STEP, step);
-}
-
 void Population::setCrossoverMultipointScheme(CrossoverLevel crossoverLevel, unsigned number,
                                               unsigned numPoints)
 {
@@ -350,9 +358,8 @@ void Population::setCrossoverMultipointScheme(CrossoverLevel crossoverLevel, uns
         std::string error = "the number of crossover must be even.";
         throw error;
     }
-    int incSize = number - numCrossover[CA_MULTIPOINT][crossoverLevel];
-    numCrossover[CA_MULTIPOINT][crossoverLevel] = number;
-    numPointsMultipoint[crossoverLevel] = numPoints;
+	params.putNumber(getKeyNumCrossover(CA_MULTIPOINT, crossoverLevel), number);
+	params.putNumber(getKeyNumPointsMultipoint(crossoverLevel), numPoints);
 }
 
 void Population::setCrossoverProportionalScheme(CrossoverLevel crossoverLevel, unsigned number)
@@ -361,8 +368,7 @@ void Population::setCrossoverProportionalScheme(CrossoverLevel crossoverLevel, u
         std::string error = "the number of crossover must be even.";
         throw error;
     }
-    int incSize = number - numCrossover[CA_PROPORTIONAL][crossoverLevel];
-    numCrossover[CA_PROPORTIONAL][crossoverLevel] = number;
+	params.putNumber(getKeyNumCrossover(CA_PROPORTIONAL, crossoverLevel), number);
 }
 
 void Population::setCrossoverUniformScheme(CrossoverLevel crossoverLevel, unsigned number, float probability)
@@ -371,20 +377,16 @@ void Population::setCrossoverUniformScheme(CrossoverLevel crossoverLevel, unsign
         std::string error = "the number of crossover must be even.";
         throw error;
     }
-    numCrossover[CA_UNIFORM][crossoverLevel] = number;
-    probabilityUniform[crossoverLevel] = probability;
+	params.putNumber(getKeyNumCrossover(CA_UNIFORM, crossoverLevel), number);
+	params.putNumber(getKeyProbabilityUniform(crossoverLevel), probability);
 }
 
 void Population::selection()
 {
-    if (params.getNumber(NUM_ROULETTE_WHEEL) > 0)
-        selectRouletteWheel();
-    if (params.getNumber(NUM_RANKING) > 0)
-        selectRanking();
-    if (params.getNumber(NUM_TOURNAMENT) > 0)
-        selectTournament();
-    if (params.getNumber(NUM_TRUNCATION) > 0)
-        selectTruncation();
+	selectRouletteWheel();
+	selectRanking();
+	selectTournament();
+	selectTruncation();
 }
 
 void Population::mutation()
@@ -529,12 +531,12 @@ float Population::getWorstIndividualScore()
 
 void Population::crossover()
 {
-    //TODO F reescribir de forma m√°s legible y practica
+    //TODO F reescribir de forma m·s legible y practica
     if (parents.size() < 2) {
         for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg) {
             for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; ++crossLevel) {
 
-                if (numCrossover[crossAlg][crossLevel]) {
+                if (params.getNumber(getKeyNumCrossover(crossAlg, crossLevel))) {
                     std::string error =
                             "Population::crossover(): The number of parents must be grater than 2 to do crossover.";
                     throw error;
@@ -550,7 +552,7 @@ void Population::crossover()
             for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; crossLevel++) {
                 CrossoverLevel crossoverLevel = (CrossoverLevel) crossLevel;
 
-                unsigned numCurrentScheme = numCrossover[crossoverAlgorithm][crossoverLevel];
+                unsigned numCurrentScheme = params.getNumber(getKeyNumCrossover(crossoverAlgorithm, crossoverLevel));
                 unsigned numGenerated = 0;
                 while (numGenerated < numCurrentScheme) {
                     Individual* indA = parents[choseParent(bufferUsedParents, usedParents)]->newCopy(true);
@@ -588,127 +590,142 @@ void Population::oneCrossover(Individual* offSpringA, Individual* offSpringB,
 {
     switch (crossoverAlgorithm) {
         case CA_UNIFORM:
-            offSpringA->uniformCrossover(crossoverLevel, offSpringB, probabilityUniform[crossoverLevel]);
+            offSpringA->uniformCrossover(crossoverLevel, offSpringB, 
+            		params.getNumber(getKeyProbabilityUniform(crossoverLevel)));
             break;
         case CA_PROPORTIONAL:
             offSpringA->proportionalCrossover(crossoverLevel, offSpringB);
             break;
         case CA_MULTIPOINT:
-            offSpringA->multipointCrossover(crossoverLevel, offSpringB, numPointsMultipoint[crossoverLevel]);
+            offSpringA->multipointCrossover(crossoverLevel, offSpringB, 
+            		params.getNumber(getKeyNumPointsMultipoint(crossoverLevel)));
             break;
     }
 }
 
 void Population::selectRouletteWheel()
 {
-    unsigned numRouletteWheel = params.getNumber(NUM_ROULETTE_WHEEL);
+    unsigned numRouletteWheel = params.getNumber(getKeyNumSelection(SA_ROULETTE_WHEEL));
 
-    float total_score = getTotalScore();
-
-    Util::check(
-            individuals.back()->getFitness() <= 0,
-            "Population::selectRouletteWheel all the individuals must have a positive fitness to apply reoulette wheel selection.");
-
-    for (unsigned i = 0; i < numRouletteWheel; i++) {
-        list<Individual*>::iterator itIndividuals = individuals.begin();
-        float chosen_point = Random::positiveFloat(total_score);
-        while (chosen_point) {
-            float fitness = (*itIndividuals)->getFitness();
-            if (fitness > chosen_point) {
-                parents.push_back(*itIndividuals);
-                chosen_point = 0;
-            } else {
-                chosen_point -= fitness;
-                ++itIndividuals;
-            }
-        }
+    if (numRouletteWheel > 0){
+    	
+		float total_score = getTotalScore();
+	
+		Util::check(
+				individuals.back()->getFitness() <= 0,
+				"Population::selectRouletteWheel all the individuals must have a positive fitness to apply reoulette wheel selection.");
+	
+		for (unsigned i = 0; i < numRouletteWheel; i++) {
+			list<Individual*>::iterator itIndividuals = individuals.begin();
+			float chosen_point = Random::positiveFloat(total_score);
+			while (chosen_point) {
+				float fitness = (*itIndividuals)->getFitness();
+				if (fitness > chosen_point) {
+					parents.push_back(*itIndividuals);
+					chosen_point = 0;
+				} else {
+					chosen_point -= fitness;
+					++itIndividuals;
+				}
+			}
+		}
     }
 }
 
 void Population::selectRanking()
 {
-    unsigned numRanking = params.getNumber(NUM_RANKING);
+    unsigned numRanking = params.getNumber(getKeyNumSelection(SA_RANKING));
     unsigned rankingBase = params.getNumber(RANKING_BASE);
     unsigned rankingStep = params.getNumber(RANKING_STEP);
 
-    float total_base = rankingBase * individuals.size();
-    for (unsigned i = 0; i < individuals.size(); i++) {
-        total_base += i * rankingStep;
-    }
-
-    for (unsigned i = 0; i < numRanking; i++) {
-        unsigned j = 0;
-        list<Individual*>::iterator it = individuals.begin();
-        float chosen_point = Random::positiveFloat(total_base);
-        while (chosen_point) {
-
-            float individual_ranking_score = rankingBase + (rankingStep * (individuals.size() - j - 1));
-            if (individual_ranking_score > chosen_point) {
-                parents.push_back(*it);
-                chosen_point = 0;
-            } else {
-                chosen_point -= individual_ranking_score;
-                ++j;
-                ++it;
-            }
-        }
+    if (numRanking > 0){
+    	
+		float total_base = rankingBase * individuals.size();
+		for (unsigned i = 0; i < individuals.size(); i++) {
+			total_base += i * rankingStep;
+		}
+	
+		for (unsigned i = 0; i < numRanking; i++) {
+			unsigned j = 0;
+			list<Individual*>::iterator it = individuals.begin();
+			float chosen_point = Random::positiveFloat(total_base);
+			while (chosen_point) {
+	
+				float individual_ranking_score = rankingBase + (rankingStep * (individuals.size() - j - 1));
+				if (individual_ranking_score > chosen_point) {
+					parents.push_back(*it);
+					chosen_point = 0;
+				} else {
+					chosen_point -= individual_ranking_score;
+					++j;
+					++it;
+				}
+			}
+		}
     }
 }
 
 void Population::selectTournament()
 {
-    unsigned numTournament = params.getNumber(NUM_TOURNAMENT);
+    unsigned numTournament = params.getNumber(getKeyNumSelection(SA_TOURNAMENT));
     unsigned tournamentSize = params.getNumber(TOURNAMENT_SIZE);
 
-    if (tournamentSize > individuals.size()) {
-        std::string error =
-                "Population::selectTournament: The tournament size cannot be grater than the population size.";
-        throw error;
+    if (numTournament > 0){
+    	
+		if (tournamentSize > individuals.size()) {
+			std::string error =
+					"Population::selectTournament: The tournament size cannot be grater than the population size.";
+			throw error;
+		}
+	
+		unsigned* alreadyChosen = (unsigned*) MemoryManagement::malloc(sizeof(unsigned) * tournamentSize);
+		for (unsigned i = 0; i < numTournament; i++) {
+			unsigned selected = maxSize;
+			for (unsigned j = 0; j < tournamentSize; j++) {
+				unsigned chosen;
+				char newChosen = 0;
+				while (!newChosen) {
+					newChosen = 1;
+					chosen = Random::positiveInteger(individuals.size());
+					for (unsigned k = 0; k < j; k++) {
+						if (chosen == alreadyChosen[k]) {
+							newChosen = 0;
+							break;
+						}
+					}
+				}
+				alreadyChosen[j] = chosen;
+	
+				if (chosen < selected) {
+					selected = chosen;
+				}
+			}
+			list<Individual*>::iterator it = individuals.begin();
+			for (unsigned s = 0; s < selected; ++s) {
+				++it;
+			}
+			parents.push_back(*it);
+		}
+		MemoryManagement::free(alreadyChosen);
     }
-
-    unsigned* alreadyChosen = (unsigned*) MemoryManagement::malloc(sizeof(unsigned) * tournamentSize);
-    for (unsigned i = 0; i < numTournament; i++) {
-        unsigned selected = maxSize;
-        for (unsigned j = 0; j < tournamentSize; j++) {
-            unsigned chosen;
-            char newChosen = 0;
-            while (!newChosen) {
-                newChosen = 1;
-                chosen = Random::positiveInteger(individuals.size());
-                for (unsigned k = 0; k < j; k++) {
-                    if (chosen == alreadyChosen[k]) {
-                        newChosen = 0;
-                        break;
-                    }
-                }
-            }
-            alreadyChosen[j] = chosen;
-
-            if (chosen < selected) {
-                selected = chosen;
-            }
-        }
-        list<Individual*>::iterator it = individuals.begin();
-        for (unsigned s = 0; s < selected; ++s) {
-            ++it;
-        }
-        parents.push_back(*it);
-    }
-    MemoryManagement::free(alreadyChosen);
 }
 
 void Population::selectTruncation()
 {
-    unsigned numTruncation = params.getNumber(NUM_TRUNCATION);
-    if (numTruncation > individuals.size()) {
-        std::string error =
-                "The number of selected individuals by truncation cannot be grater than the population size.";
-        throw error;
-    }
-
-    list<Individual*>::iterator it = individuals.begin();
-    for (unsigned i = 0; i < numTruncation; i++) {
-        parents.push_back(*it);
-        ++it;
+    unsigned numTruncation = params.getNumber(getKeyNumSelection(SA_TRUNCATION));
+    
+    if (numTruncation > 0){
+    	
+		if (numTruncation > individuals.size()) {
+			std::string error =
+					"The number of selected individuals by truncation cannot be grater than the population size.";
+			throw error;
+		}
+	
+		list<Individual*>::iterator it = individuals.begin();
+		for (unsigned i = 0; i < numTruncation; i++) {
+			parents.push_back(*it);
+			++it;
+		}
     }
 }
