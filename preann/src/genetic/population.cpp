@@ -177,17 +177,14 @@ void Population::setParams(ParametersMap* parametersMap)
                     Enumerations::enumTypeToString(ET_CROSS_ALG));
             CrossoverLevel crossoverLevel = (CrossoverLevel) parametersMap->getNumber(
                     Enumerations::enumTypeToString(ET_CROSS_LEVEL));
+			params.putNumber(getKeyNumCrossover(crossoverAlgorithm, crossoverLevel), numCrossover);
+			
             switch (crossoverAlgorithm) {
                 case CA_UNIFORM:
-                    this->setCrossoverUniformScheme(crossoverLevel, numCrossover,
-                                                    parametersMap->getNumber(UNIFORM_CROSS_PROB));
-                    break;
-                case CA_PROPORTIONAL:
-                    this->setCrossoverProportionalScheme(crossoverLevel, numCrossover);
+                	params.putNumber(getKeyProbabilityUniform(crossoverLevel), parametersMap->getNumber(UNIFORM_CROSS_PROB));
                     break;
                 case CA_MULTIPOINT:
-                    this->setCrossoverMultipointScheme(crossoverLevel, numCrossover,
-                                                       parametersMap->getNumber(MULTIPOINT_NUM));
+                	params.putNumber(getKeyNumPointsMultipoint(crossoverLevel), parametersMap->getNumber(MULTIPOINT_NUM));
                     break;
             }
         }
@@ -322,63 +319,6 @@ void Population::insertIndividual(Individual *individual)
         delete (individuals.back());
         individuals.pop_back();
     }
-}
-
-void Population::setMutationsPerIndividual(unsigned numMutations, float range)
-{
-    params.putNumber(MUTATION_NUM, numMutations);
-    params.putNumber(MUTATION_RANGE, range);
-}
-
-void Population::setMutationProbability(float probability, float range)
-{
-    params.putNumber(MUTATION_PROB, probability);
-    params.putNumber(MUTATION_RANGE, range);
-}
-
-void Population::setResetsPerIndividual(unsigned numResets)
-{
-    params.putNumber(RESET_NUM, numResets);
-}
-
-void Population::setResetProbability(float resetProb)
-{
-    params.putNumber(RESET_PROB, resetProb);
-}
-
-void Population::setPreservation(unsigned number)
-{
-    params.putNumber(NUM_PRESERVE, number);
-}
-
-void Population::setCrossoverMultipointScheme(CrossoverLevel crossoverLevel, unsigned number,
-                                              unsigned numPoints)
-{
-    if (number % 2 != 0) {
-        std::string error = "the number of crossover must be even.";
-        throw error;
-    }
-	params.putNumber(getKeyNumCrossover(CA_MULTIPOINT, crossoverLevel), number);
-	params.putNumber(getKeyNumPointsMultipoint(crossoverLevel), numPoints);
-}
-
-void Population::setCrossoverProportionalScheme(CrossoverLevel crossoverLevel, unsigned number)
-{
-    if (number % 2 != 0) {
-        std::string error = "the number of crossover must be even.";
-        throw error;
-    }
-	params.putNumber(getKeyNumCrossover(CA_PROPORTIONAL, crossoverLevel), number);
-}
-
-void Population::setCrossoverUniformScheme(CrossoverLevel crossoverLevel, unsigned number, float probability)
-{
-    if (number % 2 != 0) {
-        std::string error = "the number of crossover must be even.";
-        throw error;
-    }
-	params.putNumber(getKeyNumCrossover(CA_UNIFORM, crossoverLevel), number);
-	params.putNumber(getKeyProbabilityUniform(crossoverLevel), probability);
 }
 
 void Population::selection()
@@ -553,6 +493,9 @@ void Population::crossover()
                 CrossoverLevel crossoverLevel = (CrossoverLevel) crossLevel;
 
                 unsigned numCurrentScheme = params.getNumber(getKeyNumCrossover(crossoverAlgorithm, crossoverLevel));
+                Util::check(numCurrentScheme % 2 != 0, 
+                		"Population::crossover() : The number of individuals to create through crossover must be even.");
+                
                 unsigned numGenerated = 0;
                 while (numGenerated < numCurrentScheme) {
                     Individual* indA = parents[choseParent(bufferUsedParents, usedParents)]->newCopy(true);

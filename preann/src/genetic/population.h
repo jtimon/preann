@@ -40,10 +40,10 @@ public:
     static const string RESET_NUM;
     static const string RESET_PROB;
     
-    string getKeyNumSelection(SelectionAlgorithm selectionAlgorithm);
-    string getKeyNumCrossover(CrossoverAlgorithm crossoverAlgorithm, CrossoverLevel crossoverLevel);
-    string getKeyProbabilityUniform(CrossoverLevel crossoverLevel);
-    string getKeyNumPointsMultipoint(CrossoverLevel crossoverLevel);
+    static string getKeyNumSelection(SelectionAlgorithm selectionAlgorithm);
+    static string getKeyNumCrossover(CrossoverAlgorithm crossoverAlgorithm, CrossoverLevel crossoverLevel);
+    static string getKeyProbabilityUniform(CrossoverLevel crossoverLevel);
+    static string getKeyNumPointsMultipoint(CrossoverLevel crossoverLevel);
 
     ParametersMap params;
 protected:
@@ -91,21 +91,7 @@ public:
 
     void putParam(string key, float number);
     void setParams(ParametersMap* parametersMap);
-    void setPreservation(unsigned number);
     
-    void setCrossoverUniformScheme(CrossoverLevel crossoverLevel,
-            unsigned number, float probability);
-    void setCrossoverProportionalScheme(CrossoverLevel crossoverLevel,
-            unsigned number);
-    void setCrossoverMultipointScheme(CrossoverLevel crossoverLevel,
-            unsigned number, unsigned numPoints);
-
-    void setMutationsPerIndividual(unsigned numMutations, float range);
-    void setMutationProbability(float probability, float range);
-
-    void setResetsPerIndividual(unsigned numResets);
-    void setResetProbability(float resetProb);
-
     void insertIndividual(Individual* individual);
     unsigned nextGeneration();
     void learn(unsigned generations);
