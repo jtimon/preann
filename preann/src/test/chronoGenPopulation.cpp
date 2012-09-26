@@ -49,8 +49,7 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
-        ChronoPlotter plotter(argv[1], new RangeLoop(Population::NUM_SELECTION, 50, 301, 50),
-                              "Tiempo (ms)");
+        ChronoPlotter plotter(argv[1], new RangeLoop(Population::NUM_SELECTION, 50, 301, 50), "Tiempo (ms)");
 
         plotter.parameters.putNumber(Population::NUM_CROSSOVER, 0);
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
@@ -62,7 +61,7 @@ int main(int argc, char *argv[])
         linesLoop.addEnumLoop(SA_TOURNAMENT, new RangeLoop(Population::TOURNAMENT_SIZE, 5, 30, 10));
         linesLoop.addEnumLoop(SA_TRUNCATION, NULL);
 
-        plotter.plotChrono(chronoSelection, "Population_Selection", &linesLoop, 50);
+        plotter.plotChrono(chronoSelection, "chronoGen_Selection", &linesLoop, 50);
 
         printf("Exit success.\n");
     } catch (std::string& error) {

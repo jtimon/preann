@@ -108,8 +108,7 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
-        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 50, 301, 50),
-                              "Tiempo (ms)");
+        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 50, 301, 50), "Tiempo (ms)");
 
         plotter.parameters.putNumber(PROBABILITY, 0);
         plotter.parameters.putNumber(NUM_TIMES, 0);
@@ -129,17 +128,17 @@ int main(int argc, char *argv[])
         crossAlgLoop->addEnumLoop(CA_MULTIPOINT, new RangeLoop(NUM_TIMES, 1, 10, 5));
         crossAlgLoop->addEnumLoop(CA_PROPORTIONAL, NULL);
 
-        plotter.plotChronoAveraged(chronoCrossover, "Individual_crossover", &crossLoop, &averageLoop, 50);
+        plotter.plotChronoAveraged(chronoCrossover, "chronoGen_crossover", &crossLoop, &averageLoop, 50);
 
         EnumLoop mutatAlgLoop(ET_MUTATION_ALG, 2, MA_PER_INDIVIDUAL, MA_PROBABILISTIC);
         mutatAlgLoop.addInnerLoop(new RangeLoop(PROBABILITY, 0.1, 0.5, 0.1));
 
-        plotter.plotChronoAveraged(chronoMutations, "Individual_mutate", &mutatAlgLoop, &averageLoop, 100);
+        plotter.plotChronoAveraged(chronoMutations, "chronoGen_mutate", &mutatAlgLoop, &averageLoop, 100);
 
         EnumLoop resetAlgLoop(ET_RESET_ALG, 2, RA_PER_INDIVIDUAL, RA_PROBABILISTIC);
         resetAlgLoop.addInnerLoop(new RangeLoop(PROBABILITY, 0.1, 0.5, 0.1));
 
-        plotter.plotChronoAveraged(chronoReset, "Individual_reset", &resetAlgLoop, &averageLoop, 100);
+        plotter.plotChronoAveraged(chronoReset, "chronoGen_reset", &resetAlgLoop, &averageLoop, 100);
 
 //        // separated files
 //
