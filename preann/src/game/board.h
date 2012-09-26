@@ -31,6 +31,7 @@ protected:
 
     bool insideBoard(int xPos, int yPos);
 private:
+    Board(){};
     void baseConstructor(unsigned size);
 public:
     Board(unsigned size);
