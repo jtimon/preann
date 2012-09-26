@@ -1748,7 +1748,7 @@ Sólo actuará un hilo por bloque, no parece que se optimice mucho. Sin embargo,
 
 sudo aptitude install make g++ nasm gnuplot
 sudo aptitude install texlive-latex-recommended texlive-latex-extra
-** HACER [2/8] Uso general (API)
+** HACER [3/8] Uso general (API)
 #+LaTeX: \label{manualProgrApi}
 
 En esta sección se describen las clases implementadas y sus métodos. Explicando lo que hacen y cómo deben ser llamadas pero no necesariamente el funcionamiento interno. Se omiten los constructores por defecto (los constructores que no toman ningún parámetro) y los destructores.
@@ -1973,9 +1973,9 @@ Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene 
 - =void createFeedForwardNet(unsigned inputSize, BufferType inputType, unsigned numLayers, unsigned sizeLayers, BufferType hiddenLayersType, FunctionTyp functiontype = FT_IDENTITY) := Crea una red neuronal con conexiones hacia delante completa con las conexiones que es de esperar (y pone las capas en el orden habitual en el que tienen que ser activadas). Sólo hay una capa de entrada, para la que hay que indicar tamaño y /tipo de neurona/. Todas las capas internas tendrán el mismo tamaño, tipo (que pueden ser diferentes a los de la de entrada) y /tipo de activación/. Si no se indica la función de activación, se usará =IDENTITY= por defecto. También hay que indicar el número de capas internas. Tras crear una red neuronal utilizando este método, se pueden seguir añadiendo más capas y conexiones por lo que, aunque no se quiera esta topología, puede ser útil para crear la base de otra topología de forma más cómoda.
 - =void createFullyConnectedNet(unsigned inputSize, BufferType inputType, unsigned numLayers, unsigned sizeLayers, BufferType hiddenLayersType  FunctionType functiontype = FT_IDENTITY) := Este método es similar al anterior, pero en lugar de estar conectadas cada capa con la anterior, cada una de las capas internas toma como entrada todas las otras capas (incluso a sí misma). Además, todas las capas están directamente conectadas con la capa de entrada. Como sucedía con el método anterior, se puede usar como base para otra topología. Al ser esta la más compleja, este método es el más recomendable paraprobar la implementación de la red neuronal y los cambios que se hagan
 
-*** HACER [2/3] Genetic
+*** REVISAR Genetic
 #+LaTeX: \label{disenoGenetic}
-**** REVISAR <<<Individual>>>
+**** <<<Individual>>>
 
 Esta clase hereda de la clase NeuralNet y, por tanto, comparte todos sus atributos y métodos. Las funcionalidades relacionadas con el algoritmo genético (cruce, mutación) están separadas aquí. Así, aunque las clase Connection sí tiene métodos relacionados con operadores genéticos (que todas las implementaciones de la clase abstracta deben proveer), se pueden tener los operadores genéticos fuera de Layer y NeuralNet, manteniendo el código más encapsulado y legible. El constructor de Individual es similar al de la clase padre NeuralNet: sólo toma el /tipo de implementación/ y como un parámetro opcional que usa por defecto la implementación de referencia.
 
@@ -1994,7 +1994,7 @@ Los métodos públicos que implementa la clase son:
 - =void setFitness(float fitness) := Sirve para asignarle al individuo su /fitness/.
 - =unsigned getNumGenes() := Devuelve el número total de pesos y umbrales del individuo.
 
-**** REVISAR <<<Task>>>
+**** <<<Task>>>
 
 Esta clase es abstracta y no puede ser instanciada. Todos sus métodos deben ser implementados por las clases que hereden de ésta para poder ser usadas como tarea por una población para la evaluación de los individuos. Se describe aquí lo que deben hacer los métodos de forma general, aunque la implementación puede variar mucho de un individuo a otro. 
 
@@ -2003,7 +2003,7 @@ Esta clase es abstracta y no puede ser instanciada. Todos sus métodos deben ser
 - =virtual Individual* getExample(ParametersMap* parameters) = 0 := Devuelve un individuo de ejemplo con una topología que podría resolver el problema. Es muy conveniente en casos en los que se sabe de antemano qué topología requerirá la red para poder aprender el problema. Por ejemplo, AND y OR, sólo necesitan una capa del mismo tamaño de las entradas. Para resolver XOR se necesita una capa oculta adicional o la red nunca será capáz de resolver el problema (un perceptrón monocapa no puede resolver XOR). Si no se tiene ninguna idea de cómo puede ser la topología de los individuos, el entrenador tendrá que establecerla manualmente o usar algún otro método. En esos casos, la tarea puede devolver simplemente un individuo sin capas ni conexiones, pero este método debe implementarse siempre. Es muy útil para usarlo junto a la utilidad de generación y presentación de resultados de aprendizaje TaskPlotter. 
 - =virtual string toString() = 0 := Devuelve una cadena que identifica la tarea que se está realizando. Puede contener algún número como el tamaño del problema. Como el método anterior, su mayor utilidad es ser llamada desde la clase TaskPlotter.
 
-**** HACER <<<Population>>>
+**** <<<Population>>>
 
 Esta clase gestiona el algortimo genético y la población de individuos, de los cuales almacena una lista ordenada. Tiene mcuhos parámetros internos para configurar su funcionamiento y muchos de ellos son obtativos. Por ello, contiene un mapa de parámetros de la clase ParametersMap para almacenar la mayoría de ellos, evitando así un excesivo número de atributos para la clase. 
 
@@ -2013,31 +2013,36 @@ El constructor por defecto es privado. Los constructores parametrizados necesita
 - =Population(Task* task, Individual* example, unsigned size, float range) := Además de la tarea, se le pasa un individuo de ejemplo del que los nuevos copiarán la topología, el tamaño máximo de la población (que llenará)
 - =Population(Population* other) := Se crea la población a partir de otra. Se copia la tarea, el tamaño máximo de la población y los individuos que ésta contenga, pero los parametros del algoritmo genético se establecen con los valores por defecto.
 
-- =void setParams(ParametersMap* parametersMap) :=
-- =void putParam(string key, float number) := 
+Los parámetros del algoritmo genético, por su abundancia, se establecen en una mapa de parámetros implementado por la clase ParametersMap. Todos estos parámetros empizan con valores por defecto descritos en el capítulo \ref{disenoGene} que se repiten aquí por comodidad. El ParametersMap está en un atributo público de Population y se puede acceder a él con =params=. Por ejemplo, para establecer un rango para las mutaciones utlizaríamos el siguiente código:
 
-TODO, comentar constantes y métodos para obtener keys.
-    static const string NUM_PRESERVE;
-    static const string NUM_SELECTION;
-    static const string NUM_CROSSOVER;
+#+begin_src C++
+miPoblacion.params.putNumber(Population::MUTATION_RANGE, 5.5);
+#+end_src
 
-    static const string TOURNAMENT_SIZE;
-    static const string RANKING_BASE;
-    static const string RANKING_STEP;
+También se pueden poner muchos parámetros a la vez utilizando el siguiente método:
 
-    static const string UNIFORM_CROSS_PROB;
-    static const string MULTIPOINT_NUM;
+- =void setParams(ParametersMap* parametersMap) := éste método toma los parámetros del =parametersMap= y los asigna a los propios parámetros de la población. Este métodod es llamado desde TaskPlotter para ir asignando los parámetros automáticamente para una serie de pruebas para generar datos y gráficas.
 
-    static const string MUTATION_NUM;
-    static const string MUTATION_PROB;
-    static const string MUTATION_RANGE;
-    static const string RESET_NUM;
-    static const string RESET_PROB;
-    
-    static string getKeyNumSelection(SelectionAlgorithm selectionAlgorithm);
-    static string getKeyNumCrossover(CrossoverAlgorithm crossoverAlgorithm, CrossoverLevel crossoverLevel);
-    static string getKeyProbabilityUniform(CrossoverLevel crossoverLevel);
-    static string getKeyNumPointsMultipoint(CrossoverLevel crossoverLevel);
+Para las claves de los parámetros en la población, se utilizan cadenas constantes que se declaran como atributos públicos y estáticos de la clase Population. A continuación se explica cada uno:
+
+- =SIZE := Sólo se utiliza desde TaskPlotter, no es necesario configurarlo si no tiene valor por defecto ni es utilizado por population para nada.
+
+- =NUM_PRESERVE := Establece el número de Individuos que se mantienen de la generación anterior (si no son superados por los de la nueva) en cada generación. Si el valor es 0, la aproximación es generacional. Si toma valor -1, es estado estacionario puro (no se elimina ningún individuo que no sea superado). El valor por defecto es -1.
+- =TOURNAMENT_SIZE := Establece el tamaño del torneo para el algoritmo de selección por torneo. El valor por defecto es 2.
+- =RANKING_BASE := Establece la base (lo que se le suma a todos los individuos) para el algoritmo de selección por /Ranking/. Su valor por defecto es 0.
+- =RANKING_STEP := Establece el salto entre un individuo y otro para el algoritmo de selección por /Ranking/. Su valor por defecto es 1.
+- =MUTATION_NUM := Establece el número fijo de mutaciones que se aplicará a cada nuevo individuo. Su valor por defecto es 0.
+- =MUTATION_PROB := Establece la probabilidad de mutación de cada peso de cada nuevo individuo.  Su valor por defecto es 0.
+- =MUTATION_RANGE := Establece el rango aleatorio para las mutaciones. Estás irán de =-MUTATION_RANGE= a =MUTATION_RANGE=. Su valor por defecto es 1.
+- =RESET_NUM := Establece el número fijo de olvidos (conexiones eliminadas) que se aplicará a cada nuevo individuo. Su valor por defecto es 0.
+- =RESET_PROB := Establece la probabilidad de olvido (de que el peso se establezca a cero) de cada peso de cada nuevo individuo.  Su valor por defecto es 0.
+
+Algunos parámetros utilizan una de estas cadenas como base para la clave, que se completa con valores enumerados con las siguientes funciones de utilidad. Esto permite tener valores diferentes para el mismo parámetro dependiendo del valor del enumerado:
+
+- =string getKeyNumSelection(SelectionAlgorithm selectionAlgorithm) := Este método devuelve la clave donde se alamacena el número de individuos a seleccionar con cada uno de los algoritmos de selección. Como ya se ha comentado, se pueden utilizar varios esquemas a la vez. Con este método se puede establecer un número diferente de individuos a seleccionar por cada algoritmo de selcción. =NUM_SELECTION= contiene la cadena base que este método utiliza.
+- =string getKeyNumCrossover(CrossoverAlgorithm crossoverAlgorithm, CrossoverLevel crossoverLevel) := Este método devuelve la clave donde se alamacena el número de individuos a generar po cruce con cada uno de las combinaciones entre algoritmos y niveles de cruce. Como ya se ha comentado, se pueden utilizar varios esquemas a la vez. En este caso se puede establecer un valor diferente por cada par (algortimo, nivel de cruce). =NUM_CROSSOVER= contiene la cadena base que este método utiliza.
+- =string getKeyProbabilityUniform(CrossoverLevel crossoverLevel) := Sirve para guardar la probabilidad de cruza para el algoritmo de cruce uniforme. Se puede poner un valor diferente para cada nivel de cruce. =UNIFORM_CROSS_PROB= contiene la cadena base que este método utiliza.
+- =string getKeyNumPointsMultipoint(CrossoverLevel crossoverLevel) := Sirve para guardar el número de puntos de cruce para el algoritmo de cruce multi-punto. Se puede poner un valor diferente para cada nivel de cruce. =MULTIPOINT_NUM= contiene la cadena base que este método utiliza.
 
 El resto de métodos públicos son:
     
