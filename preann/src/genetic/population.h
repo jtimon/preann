@@ -82,7 +82,6 @@ public:
     void save(FILE* stream);
     void load(FILE* stream);
 
-    void putParam(string key, float number);
     void setParams(ParametersMap* parametersMap);
     
     void insertIndividual(Individual* individual);

@@ -139,11 +139,6 @@ void Population::setDefaults()
     params.putNumber(RESET_PROB, 0);
 }
 
-void Population::putParam(string key, float number)
-{
-    params.putNumber(key, number);
-}
-
 void Population::setParams(ParametersMap* parametersMap)
 {
     params.copyFrom(parametersMap);
