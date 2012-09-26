@@ -16,6 +16,8 @@
 class Population
 {
 public:
+    static const string SIZE;
+
     static const string NUM_PRESERVE;
     static const string NUM_SELECTION;
     static const string NUM_CROSSOVER;
@@ -32,11 +34,11 @@ public:
     static const string MUTATION_RANGE;
     static const string RESET_NUM;
     static const string RESET_PROB;
-    
-    static string getKeyNumSelection(SelectionAlgorithm selectionAlgorithm);
-    static string getKeyNumCrossover(CrossoverAlgorithm crossoverAlgorithm, CrossoverLevel crossoverLevel);
-    static string getKeyProbabilityUniform(CrossoverLevel crossoverLevel);
-    static string getKeyNumPointsMultipoint(CrossoverLevel crossoverLevel);
+
+    static string getKeyNumSelection(unsigned selectionAlgorithm);
+    static string getKeyNumCrossover(unsigned crossoverAlgorithm, unsigned crossoverLevel);
+    static string getKeyProbabilityUniform(unsigned crossoverLevel);
+    static string getKeyNumPointsMultipoint(unsigned crossoverLevel);
 
     ParametersMap params;
 protected:
@@ -83,7 +85,7 @@ public:
     void load(FILE* stream);
 
     void setParams(ParametersMap* parametersMap);
-    
+
     void insertIndividual(Individual* individual);
     unsigned nextGeneration();
     void learn(unsigned generations);
