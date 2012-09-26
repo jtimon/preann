@@ -7,22 +7,14 @@
 
 #include "binaryTask.h"
 
-BinaryTask::BinaryTask(BinaryOperation binaryOperation, unsigned size)
-{
-    tBinaryOperation = binaryOperation;
-    tNumTests = 0;
-    tInput1 = new Interface(size, BT_BIT);
-    tInput2 = new Interface(size, BT_BIT);
-    tOutput = new Interface(size, BT_BIT);
-}
-
-BinaryTask::BinaryTask(BinaryOperation binaryOperation, unsigned size, unsigned numTests)
+BinaryTask::BinaryTask(BinaryOperation binaryOperation, BufferType bufferType, unsigned size, unsigned numTests)
 {
     tBinaryOperation = binaryOperation;
     tNumTests = numTests;
-    tInput1 = new Interface(size, BT_BIT);
-    tInput2 = new Interface(size, BT_BIT);
-    tOutput = new Interface(size, BT_BIT);
+    //TODO probar esto otra vez con diferentes buffertypes. Pensar bien el caso SIGN
+    tInput1 = new Interface(size, bufferType);
+    tInput2 = new Interface(size, bufferType);
+    tOutput = new Interface(size, bufferType);
 }
 
 BinaryTask::~BinaryTask()

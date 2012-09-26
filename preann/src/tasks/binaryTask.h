@@ -22,15 +22,13 @@ protected:
     bool bitVectorIncrement(Interface* bitVector);
     unsigned outputDiff(Interface* individualOutput);
     virtual float getGoal();
+    virtual void doOperation();
 public:
-    BinaryTask(BinaryOperation binaryOperation, unsigned size);
-    BinaryTask(BinaryOperation binaryOperation, unsigned size,
-            unsigned numTests);
+    BinaryTask(BinaryOperation binaryOperation, BufferType bufferType, unsigned size, unsigned numTests = 0);
     virtual ~BinaryTask();
 
     virtual void test(Individual* individual);
     virtual void setInputs(Individual* individual);
-    virtual void doOperation();
     virtual string toString();
     virtual Individual* getExample(ParametersMap* parameters);
 
