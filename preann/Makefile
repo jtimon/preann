@@ -107,18 +107,18 @@ OBJ += $(FACT_OBJ)
 .SECONDARY:
 
 cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
-	cat /proc/cpuinfo > $(OUTPUT_DIR)info/cpu.txt
-	lspci -vv > $(OUTPUT_DIR)info/device.txt
-	cat /proc/meminfo > $(OUTPUT_DIR)info/mem.txt
-	g++ -v 2> $(OUTPUT_DIR)info/g++.txt
-	cat /proc/version > $(OUTPUT_DIR)info/OS.txt
-	cat /etc/*release > $(OUTPUT_DIR)info/OS2.txt
+#	cat /proc/cpuinfo > $(OUTPUT_DIR)info/cpu.txt
+#	lspci -vv > $(OUTPUT_DIR)info/device.txt
+#	cat /proc/meminfo > $(OUTPUT_DIR)info/mem.txt
+#	g++ -v 2> $(OUTPUT_DIR)info/g++.txt
+#	cat /proc/version > $(OUTPUT_DIR)info/OS.txt
+#	cat /etc/*release > $(OUTPUT_DIR)info/OS2.txt
 #	cat /etc/*version > $(OUTPUT_DIR)info/OS3.txt
 #	uname -a > $(OUTPUT_DIR)info/OS4.txt
-	./bin/chronoMutations.exe $(OUTPUT_DIR)
-	./bin/chronoInterface.exe $(OUTPUT_DIR)
+#	./bin/chronoMutations.exe $(OUTPUT_DIR)
+#	./bin/chronoInterface.exe $(OUTPUT_DIR)
 	./bin/chronoActivation.exe $(OUTPUT_DIR)
-	./bin/chronoCrossover.exe $(OUTPUT_DIR)
+#	./bin/chronoCrossover.exe $(OUTPUT_DIR)
 	./bin/chronoCalculateAndAdd.exe $(OUTPUT_DIR)
 #	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe $(CURDIR)/

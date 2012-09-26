@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
         ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 512, 8193, 512), "Tiempo (ms)");
-        unsigned repetitions = 200;
+        unsigned repetitions = 500;
 
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
         plotter.parameters.putNumber(Dummy::NUM_INPUTS, 2);
