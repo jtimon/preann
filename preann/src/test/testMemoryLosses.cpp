@@ -29,7 +29,7 @@ void testLayer(ParametersMap* parametersMap)
 {
 	ImplementationType implementationType = (ImplementationType) (parametersMap->getNumber(
 	                Enumerations::enumTypeToString(ET_IMPLEMENTATION)));
-	
+
 	Interface* interfInput = Dummy::interface(parametersMap);
 	Layer* input = new InputLayer(interfInput, implementationType);
     Layer* layer = Dummy::layer(parametersMap, input);
@@ -68,7 +68,7 @@ void testPopulation(ParametersMap* parametersMap)
     unsigned size = (unsigned) parametersMap->getNumber(Dummy::SIZE);
 
     Interface* input = new Interface(size, bufferType);
-    Task* task = new BinaryTask(BO_OR, size, 5);
+    Task* task = new BinaryTask(BO_OR, bufferType, size, 5);
     Individual* example = new Individual(implementationType);
     example->addInputLayer(input);
     example->addInputLayer(input);
