@@ -33,7 +33,7 @@ LOGS     = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,output/log/%.l
 
 CXX = $(CXX_BASE) -ggdb $(INCLUDES)
 CXX_LINK = $(CXX_BASE)
-NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES) $(FACT_FLAGS)
+NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES)
 NVCC_LINK = $(NVCC) -lcudart 
 NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11
 NASM = nasm -f elf
