@@ -16,6 +16,7 @@ void Board::baseConstructor(unsigned size)
     }
 
     tInterface = new Interface(tSize * tSize * 2, BT_BIT);
+    initBoard();
 }
 
 Board::Board(unsigned size)
