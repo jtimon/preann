@@ -1748,9 +1748,8 @@ Sólo actuará un hilo por bloque, no parece que se optimice mucho. Sin embargo,
 
 sudo aptitude install make g++ nasm gnuplot
 sudo aptitude install texlive-latex-recommended texlive-latex-extra
-** HACER [3/8] Uso general (API)
+** HACER [4/8] Interfaz de aplicación (API)
 #+LaTeX: \label{manualProgrApi}
-
 En esta sección se describen las clases implementadas y sus métodos. Explicando lo que hacen y cómo deben ser llamadas pero no necesariamente el funcionamiento interno. Se omiten los constructores por defecto (los constructores que no toman ningún parámetro) y los destructores.
 
 *** REVISAR Common
@@ -2064,95 +2063,23 @@ El resto de métodos públicos son:
 - =std::string toString() := Devuelve una cadena que identifica a la población. Llama a =Task::toString()= y le concatena el tamaño máximo de la población. 
 - =void save(FILE* stream) := Guarda los parámetros de configuración del algoritmo genético y todos los individuos de la población al fichero especificado por el parámetro =stream=. Notesé que la tarea no se guarda.
 - =void load(FILE* stream) := Carga los parámetros de configuración del algoritmo genético y los individuos, para insertarlos en la población, desde el fichero especificado por el parámetro =stream=. Notesé que la tarea no se carga y tiene que haber sido establecida en el constructor.
-
-*** HACER [0/2] Game
-**** HACER <<<Board>>>
-
-- =Board(unsigned size) :=
-- =Board(Board* other) :=
-- =virtual ~Board() :=
-
-- =virtual void initBoard() :=
-- =virtual bool endGame() = 0 :=
-- =virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player) = 0 :=
-- =virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player) = 0 :=
-- =virtual bool canMove(SquareState player) = 0 :=
-- =virtual void turn(SquareState player, Individual* individual = NULL) = 0 :=
-- =virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player) = 0 :=
-- =virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual) = 0 :=
-- =virtual int countPoints(SquareState player) :=
-
-- =unsigned getSize() :=
-- =void setSquare(unsigned xPos, unsigned yPos, SquareState squareState) :=
-- =SquareState getSquare(unsigned xPos, unsigned yPos) :=
-- =bool squareIs(int xPos, int yPos, SquareState squareState) :=
-- =Interface* getInterface() :=
-- =Interface* updateInterface() :=
-- =static SquareState opponent(SquareState player) :=
-- =void print() :=
-
-**** HACER <<<ReversiBoard>>>
-
-- =ReversiBoard(ReversiBoard* other) :=
-- =ReversiBoard(unsigned size) :=
-- =virtual ~ReversiBoard() :=
-
-- =virtual void initBoard() :=
-
-- =virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player) :=
-- =virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player) :=
-- =virtual bool canMove(SquareState player) :=
-- =virtual bool endGame() :=
-- =virtual void turn(SquareState player, Individual* individual = NULL) :=
-- =virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player) :=
-- =virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual) :=
-
-*** HACER [0/3] Tasks
-**** HACER <<<BinaryTask>>>
-
-- =BinaryTask(BinaryOperation binaryOperation, unsigned size) :=
-- =BinaryTask(BinaryOperation binaryOperation, unsigned size, unsigned numTests) :=
-
-- =virtual void test(Individual* individual) :=
-- =virtual void setInputs(Individual* individual) :=
-- =virtual void doOperation() :=
-- =virtual string toString() :=
-- =virtual Individual* getExample(ParametersMap* parameters) :=
-
-**** HACER <<<ClassificationTask>>>
-
-- =ClassificationTask() :=
-- =ClassificationTask(Interface** inputs, Interface** desiredOutputs, unsigned inputsDim) :=
-- =virtual void test(Individual* individual) :=
-- =virtual string toString() :=
-- =virtual Individual* getExample(ParametersMap* parameters) :=
-
-**** HACER <<<ReversiTask>>>
-
-- =ReversiTask(unsigned size, unsigned numTests = 1) :=
-
-- =virtual void test(Individual* individual) :=
-- =virtual void setInputs(Individual* individual) :=
-- =virtual std::string toString() :=
-- =virtual Individual* getExample(ParametersMap* parameters) :=
-
 *** HACER [0/9] Loop
-**** HACER <<<ParametersMap>>>
+**** MODIFICAR <<<ParametersMap>>>
 
-- =void putNumber(std::string key, float number) :=
-- =float getNumber(std::string key) :=
-- =void putPtr(std::string key, void* ptr) :=
-- =void* getPtr(std::string key) :=
-- =void putString(std::string key, std::string str) :=
-- =std::string getString(std::string key) :=
+TODO revisar tildes
+Esta clase implementa un mapa de parametros util´ para los para los parametros´ de configuracion´del algoritmo genetico´y para las utilidades de pruebas de este paquete. En realidad, la clase tiene tres mapas de parametros´diferentes: uno para numeros´, otro para cadenas de texto y otro para punteros. Ena misma clave (key) puede ser repetida si el tipo es diferente. Se usa el contructor por defecto, que no tiene nada de especial.
 
-- =std::string printNumber(std::string key) :=
-- =std::string printString(std::string key) :=
-- =void print() :=
-    // All you have
-- =void copyTo(ParametersMap* parametersMap) :=
-    // All you have
-- =void copyFrom(ParametersMap* parametersMap) :=
+- =void putNumber(std::string key, float number) := Asigna el valor del parametro´ =number= al par con la clave =key= que haya en el mapa de numeros´. Si no existia´la clave, se crea un nuevo par (clave, valor).
+- =float getNumber(std::string key) := Devuelve el valor´en el mapa de numeros´asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepcion´.
+- =void putPtr(std::string key, void* ptr) := Asigna el valor del parametro´ =ptr= al par con la clave =key= que haya en el mapa de punteros. Si no existia´la clave, se crea un nuevo par (clave, valor).
+- =void* getPtr(std::string key) := Devuelve el valor´en el mapa de punteros asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepcion´.
+- =void putString(std::string key, std::string str) := Asigna el valor del parametro´ =str= al par con la clave =key= que haya en el mapa de punteros. Si no existia´la clave, se crea un nuevo par (clave, valor).
+- =std::string getString(std::string key) := Devuelve el valor´en el mapa de punteros asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepcion´.
+- =std::string printNumber(std::string key) := Devuelve una cadena con la clave =key= concatenada con el numero´ (pasado a cadena) en el mapa de numeros´asociado con la propia clave. Si no existe la clave en ese mapa se lanza una excepcion´. Por ejemplo "miNumero_32.5"
+- =std::string printString(std::string key) := Devuelve una cadena con la clave =key= concatenada con la cadena en el mapa de cadenas asociada con la propia clave. Si no existe la clave en ese mapa se lanza una excepcion´. Por ejemplo "miCadena_hola mundo!"
+- =void print() := Escribe en la salida estandar´todos los pares (clave, valor). Primero los del mapa de numeros´, luego el mapa de punteros y, por ultimo´, el mapa de cadenas.
+- =void copyTo(ParametersMap* parametersMap) := Asigna al mapa de parametros´ recibido todos los pares (clave, valor) que contenga.
+- =void copyFrom(ParametersMap* parametersMap) := Para todos los pares (clave, valor) que contenga intenta copiar el valor del ParametersMap recibido. Si no existe algun´valor, captura y silencia la excepcion´lanzada por el mapa recibido al intentar acceder a estos. Esos pares no los modifica.
 
 **** HACER <<<Loop>>>
 
@@ -2208,6 +2135,81 @@ public:
 **** HACER <<<ChronoPlotter>>>
 **** HACER <<<Dummy>>>
 **** HACER <<<TaskPlotter>>>
+
+*** REVISAR Game
+
+Este paquete se encarga de implementar utilidades para tareas relacionadas con juegos.
+
+**** <<<Board>>>
+
+Esta clase clase abstracta implementa un tablero básico y genérico para juegos de tablero de dos jugadores con un solo tipo de pieza como por ejemplo el Reversi/Othello o el Go. Tiene una Interface interna que las NeuralNet pueden utilizar como entrada. se define un enumerado =SquareState= con los valores posibles de las casillas: =EMPTY=, =PLAYER_1=, =PLAYER_2=.
+
+Los constructores públicos son:
+
+- =Board(unsigned size) := Crea un tablero cuadrado de tamaño =size * size= con todas las casillas vacías.
+- =Board(Board* other) := Crea un tablero a partir de otro tablero, copiando los valores de todas las casillas.
+
+El destructor libera el tablero y la interfaz. La clase tiene los siguientes métodos virtuales puros:
+
+- =virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player) = 0 := Para una posición del tablero dada y uno de los dos jugadores devuelve verdadero si el movimiento es legal según las reglas del juego implementado por la clase hija y falso si el movimiento no es válido.
+- =virtual bool canMove(SquareState player) = 0 := Devuelve verdadero si el jugador parámetro tiene algún movimiento legal y falso en caso contrario.
+- =virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player) = 0 := Realiza el movimiento en la posición indicada para el jugador =player=, actualizando el tablero como corresponda para el juego.
+- =virtual void turn(SquareState player, Individual* individual = NULL) = 0 := Realiza un turno para el jgador =player=. Si se pasa por parámetro un individuo, el individuo jugará el turno. Si no se indica ninguno (el parámetro es opcional, con =NULL= por defecto), es la máquina sin aprendizaje que haya definida para el juego y contra la que se entrenan las poblaciones.
+- =virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player) = 0 := Devuelve una estimación de la calidad de la jugada indicada por parámetros realizada por la máquina sin aprendizaje.
+- =virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual) = 0 := Devuelve una estimación de la calidad de la jugada indicada por parámetros realizada por el individuo recibido como parámetro.
+- =virtual bool endGame() = 0 :=
+
+Los siguientes métodos también son virtuales (se pueden redefinir por las clases hijas), pero ya vienen implementados:
+
+- =virtual void initBoard() := Vacía todas las casillas del tablero. Se puede redefinir con las condiciones iniciales de cada juego y es llamada por el constructor básico (el que no copia desde otro tablero).
+- =virtual int countPoints(SquareState player) := Devuelve la puntuación actual del jugador =player=.
+
+El resto de métodos públicos son:
+
+- =unsigned getSize() := Devuelve el tamaño del tablero.
+- =void setSquare(unsigned xPos, unsigned yPos, SquareState squareState) := Establece el estado recibido en squareState en la casilla indicada por parámetro.
+- =SquareState getSquare(unsigned xPos, unsigned yPos) := Devuelve el estado de la casilla indicada por parámetro.
+- =bool squareIs(int xPos, int yPos, SquareState squareState) := Si la casilla indicada tiene el mismo estado que =squareState=, devuelve verdadero. Devuelve falos en caso contrario.
+- =Interface* getInterface() := Devuelve un puntero a la interfaz interna que contiene la información del tablero representada como un vector de bits.
+- =Interface* updateInterface() := Devuelve un puntero a la interfaz interna que contiene la información del tablero representada como un vector de bits. Antes de devolverlo, actualiza la interfaz con lo que haya en el tablero.
+- =static SquareState opponent(SquareState player) := Devuelve el jugador contrario al recibido por parámetro. Si se le pasa el estado de casilla =EMPTY= lanzará una excepción.
+- =void print() := Imprime el estado actual del tablero por la salida de texto estándar. "X" representa una casilla ocupada por el jugador 1, "O", una ocupada por el jugador 2 y "." una casilla vacía. Es muy útil para la depuración de la implementación de un nuevo juego sobre una clase que extienda de ésta.
+
+**** <<<ReversiBoard>>>
+
+Esta clase hereda de Board para implementar el juego Reversi/Othello comentado en la sección \ref{experimentacionJuegos}. esta clase es utilizada por la tarea ReversiTask. Los constructores son similares a los de Board, pero como el que recibe un tamaño llama a =initBoard()= y aquí se redefine, el tablero nuevo no tendrá todas las casillas vacías. Se implementan todos los métodos virtuales puros de =Board= siguiendo las reglas del juego, pero no repetiremos la descripción de las mismas.
+
+- =virtual void initBoard() := incia el tablero según las reglas de reversi, es decir, rellena las 4 casillas del medio dándole dos casillas a un jugador y otras dos al otro. De forma que se crucen y haya movimientos legales al principio de la partida.
+*** HACER [0/3] Tasks
+**** HACER <<<BinaryTask>>>
+
+Implementa la clase abstracta Task para implementar las tareas de clasificación OR, AND y XOR para dos vectores de entrada de cualquier tamaño (pero igual). Contiene dos interfaces internas para las entradas y una para la salida esperada. Las interfaces contienen vectores de floats en vez de bt
+
+El contructor es el siguiente:
+
+- =BinaryTask(BinaryOperation binaryOperation, BufferType bufferType, unsigned size, unsigned numTests = 0) := Tiene dos modos de operación dependiendo de si se rellena el parámetro opcional =numTests= o no. Si no se rellenea o se rellena con un cero, la tarea utilizará todas las posibles combinaciones entre los dos vectores de entrada para evaluar al individuo. Si se rellena, se utilizarán =numTests= combinaciones aleatorias al probar cada individuo, lo cuál puede reducir mucho el tiempo de evaluación de cada individuo si el tamaño de los vectores =size= es muy grande (pues el número de combinaciones crece exponencialemente con éste). El /tipo de neurona/ se le pasa para poder probar por separado redes similares con diferentes representaciones internas.
+
+- =virtual void test(Individual* individual) := Para cada combinación de entradas que se vaya a probar (ver constructor), se activa al individuo (que ya tiene que tener las interfaces internas establecidas como entradas) y se accede a una Interface de su última capa, se actualiza el valor de la interfaz de salida deseada de la tarea a partir de las mismas interfaces de entrada usando el método privado =doOperation= y compara las diferencias entre la salida calculada por el individuo y la salida deseada utilizando el método =compareTo= ya descrito. El /fitness/ que se le asigna al individuo es igual a la puntuación máxima que podría obtener con la configuración actual de la prueba menos las diferencias acumuladas de cada combinación de entradas.
+- =virtual void setInputs(Individual* individual) := Añade dos capas de entrada al individuo que apuntan a los interfaces internos de entrada.
+- =virtual string toString() := Devuelve un string que indica la operación y el tamaño de los vectores, por ejemplo, "XOR4".
+- =virtual Individual* getExample(ParametersMap* parameters) := Devuelve un individuo de ejemplo para resolver la operación dada
+
+**** HACER <<<ClassificationTask>>>
+
+- =ClassificationTask() :=
+- =ClassificationTask(Interface** inputs, Interface** desiredOutputs, unsigned inputsDim) :=
+- =virtual void test(Individual* individual) :=
+- =virtual Individual* getExample(ParametersMap* parameters) :=
+- =virtual string toString() :=
+
+**** HACER <<<ReversiTask>>>
+
+- =ReversiTask(unsigned size, unsigned numTests = 1) :=
+
+- =virtual void test(Individual* individual) :=
+- =virtual void setInputs(Individual* individual) :=
+- =virtual std::string toString() :=
+- =virtual Individual* getExample(ParametersMap* parameters) :=
 *** HACER Ejecutables
 ** HACER Factoria e implementaciones optimizadas
 #+LaTeX: \label{implFactoria}
