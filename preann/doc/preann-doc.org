@@ -16,7 +16,7 @@
 #+OPTIONS:     toc:nil H:5
 #+BIND: org-export-latex-title-command ""
 
-#+TODO: HACER MODIFICAR BORRAR | REVISAR HECHO
+#+TODO: HACER MODIFICAR BORRAR | REVISAR
 
 # definiciones propias
 #+begin_latex
@@ -99,7 +99,7 @@ En este trabajo se estudia un método alternativo para el entrenamiento de redes
 \newpage
 #+end_latex
 
-* REVISAR Introducción
+* Introducción
 #+LaTeX: \label{intro}
 
 El /aprendizaje automático/ es una rama de la inteligencia artificial que trata de construir sistemas informáticos que optimicen un criterio de rendimiento utilizando datos o experiencia previa. Dentro del aprendizaje automático, las técnicas se clasifican en base a su entrenamiento como supervisado o no supervisado. En el primero, al sistema se le suministran ejemplos de entradas con sus correspondientes salidas deseadas. En el entrenamiento no supervisado, no se tienen a priori ejemplos de cómo debería comportarse el sistema. El aprendizaje por refuerzo es un caso especial de aprendizaje supervisado en que la salida deseada exacta es desconocida. Se basa sólo en información sobre si la salida actual es correcta o no. Al agente que se quiere que aprenda se le provee información sobre lo bien o lo mal que está actuando. Esta se\~nal de recompensa puede serle indicada bien cada vez que el agente actúa, bien al final de una prueba completa durante la que realiza varias acciones.
@@ -122,7 +122,7 @@ En todo este proceso, El algoritmo que más se ejecuta es el que calcula la sali
 En el presente documento (que contiene la documentación asociada al proyecto fin de carrera titulado /<<Aprendizaje por refuerzo mediante algoritmos genéticos de redes neuronales paralelizadas con GPGPU>>/, desarrollado por Jorge Timón Morillo-Velarde para la consecución del título de ingeniería informática), primero comentaremos los fundamentos teóricos precisos para su comprensión y su correcta ubicación dentro del dominio de la neuro-evolución, diferenciándolo de otros desarrollos en éste área. Después, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementación. Los rendimientos obtenidos con las diferentes implementaciones paralelas y opciones en el algortimo genético se muestran en el capítulo \ref{rendimiento}. En el capítulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elección de los mismos. El capítulo de resultados de aprendizaje \ref{aprendizaje} expone los datos empíricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el capítulo \ref{conclusiones}.
 
 \newpage
-* REVISAR Base teórica
+* MODIFICAR [0/1] Base teórica
 #+LaTeX: \label{baseTeorica}
 
 Tanto las redes neuronales como los algoritmos genéticos están inspirados en la naturaleza y han sido utilizados desde largo tiempo atrás. Las redes neuronales están inspiradas en el funcionamiento del cerebro, como un sistema de procesamiento de información distribuido. Por su parte, los algoritmos genéticos se basan en la teoría de la evolución de Darwin, por la que la evolución se produce a través de dos principios básicos: los individuos que no se adaptan suficientemente al medio perecen, mientras que los que sí lo hacen transmiten sus genes con cierta variabilidad. Esta variabilidad puede proceder de dos fuentes: el cruce de genes entre individuos ó la mutación directa de esos genes.
@@ -132,7 +132,7 @@ La combinación de estas dos técnicas es algo relativamente reciente. Algunos -
 A continuación explicaremos más detalladamente las bases teóricas de las tres técnicas: redes neuronales, algoritmos genéticos y neuro-evolución. Nos centraremos principalmente en los algoritmos y estructuras que más se asemejan a los implementamos en nuestra librería.
 
 \newpage
-** Redes neuronales
+** MODIFICAR [/] Redes neuronales
 #+LaTeX: \label{basTeoRedes}
 
 Describiremos de forma suscinta el funcionamiento general de las redes neuronales y sus estructuras más comunes, para luego discutir las ventajas y las posibles limitaciones, centrándonos en los algoritmos de aprendizaje de gradiente descendente y, en concreto, en el de retropropagación del error.
@@ -162,7 +162,7 @@ donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada número \(
 
 El algoritmo /backpropagation/ no funciona con topologías recurrentes. En nuestro caso, no necesitamos una conectividad hacia delante, la librería implementada como parte del proyecto sí puede utilizar conexiones recurrentes como se especifica en el capítulo de [[analisis][análisis]]. Además, utilizamos aprendizaje por refuerzo y no necesitamos una colección de ejemplos (aunque se puede utilizar el error total en un conjunto de ejemplos para calcular el refuerzo). Los pesos los ajustará un algoritmo genético. La estructura de la red se definirá de forma previa y manualmente para cada problema y sólo evolucionarán los pesos (y umbrales).
 
-*** Fortalezas y deficiencias
+*** MODIFICAR Fortalezas y deficiencias
 #+LaTeX: \label{baseTeoricaFortRedes}
 
 Las redes neuronales con conexión hacia delante en general son un importante método de aproximación de funciones \cite[Kim, 1992]{Kim92}. El perceptrón multicapa es un tipo de red neuronal con conexiones hacia delante. La topología de un perceptrón multicapa esta definida por un conjunto de capas ocultas, una capa de entrada y una de salida. No existen restricciones sobre la función de activación aunque en general se suelen utilizar funciones sigmoideas. Existen demostraciones teóricas \cite[Funahashi, 1989]{Funahashi89} de que un perceptrón multicapa cuya función de activación sea no constante, acotada y monótona creciente es un aproximador universal de funciones. En \cite[Hornik et alt, 1989]{Hornik89} se llega a un resultado similar utilizando funciones de activación sigmoideas, no necesariamente continuas. Esto es un punto muy fuerte de las redes neuronales. 
@@ -280,7 +280,7 @@ Una aproximación existosa para la evolución de la topología de la red además
 Si las variaciones en el uso de los algoritmos genéticos ya eran abundantes, la diversidad de combinaciones de esta técnica con las redes neuronales es aún mayor. No es el objetivo del presente documento el cubrirlas todas ni clasificarlas y con esta idea general estamos ya preparados para definir los objetivos de nuestro proyecto.
 
 \newpage
-* REVISAR Análisis del problema
+* Análisis del problema
 #+LaTeX: \label{analisis}
 
 En este capítulo se deciden los objetivos específicos del proyecto. 
@@ -624,7 +624,7 @@ En este caso en lugar de determinar probabilisticamente y peso por peso si un pe
 
 Para activar cualquiera de las dos modalidades en cualquiera de los dos operadores, basta con dar un valor positivo a las variables "probabilidad de mutación", "probabilidad de olvido", "número de mutaciones" y "número de olvidos". Como es habitual, se pueden emplear simultaneamente las varias opciones. En este caso también puede no activarse ningún tipo de mutación ni de olvido.
 \newpage
-* REVISAR [1/1] Optimizaciones mediante paralelización
+* Optimizaciones mediante paralelización
 #+LaTeX: \label{disenoParal}
 ** Introducción
 
@@ -861,7 +861,7 @@ Todavía se podrían mejorar las soluciones si contásemos con la arquitectura d
 Como hemos dicho, la colocación de los bits para la implementación XMM debe adaptarse para que se puedan obtener los mismos resultados que con el algoritmo implementado en C. Pero además en el algoritmo C no se puede usar el tipo char para los pesos (hay que usar unsigned char) y hay que restarles 128 antes de operar con ellos. Esto podría ralentizar "injustamente" al algoritmo C, por lo que también se hicieron pruebas de rendimiento sin restar 128 y usando el tipo char para comparar los tiempos. Logicamente, esa implementación C no obtiene resultados equivalentes a los de la SSE2, pero tan sólo se pretendía comparar el rendimiento. Sorprendentemente, con esta implementación C se obtenían resultados aún peores. También se probó usadno el tipo unsigned char pero sin restar 128 y el rendimiento era de nuevo ligeramente peor. Por alguna razón que no alcanzamos a explicar, el algoritmo en C funciona más rápido si ha de restar 128 a cada peso. Por ello, dejamos de lado nuestra preocupación sobre la posible penalización causada por nuestra representación de pesos en bytes.
 
 \newpage
-** REVISAR [1/1] GPGPU con CUDA
+** GPGPU con CUDA
 #+LaTeX: \label{disenoParalCUDA}
 
 Debido a la insaciable demanda de mercado de gráficos 3D de alta definición y en tiempo real, las unidades de procesamiento gráfico (Graphic Processor Unit, GPU) han evolucionado en procesadores altamente paralelos y multihilo, con muchos núcleos, tremenda capacidad de computación y con gran ancho de banda de memoria. La técnica consistente en utilizar el este poder computacional para realizar trabajos de proposito general, que pueden no tener nada que ver con los gráficos se denomina GPGPU (General Purpose Graphic Processor Unit). Los pioneros de la técnica buscaban homorfismos entre los algoritmos que pretendían ejecutar y cálculos que las librerías gráficas realizan internamente. 
@@ -1524,7 +1524,7 @@ float Func(float number, FunctionType functionType)
 
 Como vimos en el apartado del diseño \ref{disenoRedes}, las diferentes funciones de activación soportadas tienen un valor enumerado asociado y se pueden añadir más modificando tan sólo el enumerado y esta función. No obstante es importante recordar que esta función está definida en dos sitios que tendrán que actualizarse: aquí para el código CUDA y en el exterior para las otras implementaciones.
 
-*** REVISAR Operador de cruce
+*** Operador de cruce
 #+LaTeX: \label{disenoParalCUDAcruza}
 
 Como se explicó en \ref{disenoGeneCruz} y en \ref{disenoParalCUDAinv}, la implementación del operador genético de cruce es independiente del esquema de cruce y de la disposición de los pesos en memoria de cada implementación paralela. Tan sólo se tiene que recorrer dos matrices de pesos como si fuesen dos vectores y intercambiar el valor de cada peso o no en función de si está activo el bit correspondiente en el vector de bits del mismo tamaño que también se recibirá como parámetro. Por tanto, todas las demás consideraciones han debido aplicarse ya de antemano sobre el vector de bits.
@@ -1710,7 +1710,9 @@ void crossoverSharedKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, un
 }
 #+end_src
 
-En la versión real, se sustituye =blockDim.x= por la constante =BITS_PER_UNSIGNED= (número de bits por entero sin signo ó bloque de bits) para mejorar el tiempo de ejecución. Aquí se ha mantenido =blockDim.x=, aunque se sepa que siempre va a ser 32, para mejorar la legibilidad.
+En la versión real, se sustituye =blockDim.x= por la constante =BITS_PER_UNSIGNED= (número de bits por entero sin signo ó bloque de bits) para mejorar el tiempo de ejecución. Aquí se ha mantenido =blockDim.x=, aunque se sepa que siempre va a ser 32, para mejorar la legibilidad. 
+
+El kernel descrito antes que este podía ajustar el tamaño de los bloques para encontrar un buen equilibrio con la ocupación de núcleos y los recursos por hilos. Este, sin embargo, siempre usará bloques de 32 hilos. Además, el otro kernel debería ser más rápido por no tener siquiera que usar la memoria compartida para mantener accesos coalescentes a memoria global. Sin embargo, requería una reordenación del vector de bits como precondición. El coste esa reordenación es incluído en la pruebas de rendimiento cuyos resultados se muestran en la figura \ref{grafImplCrossover} del capítulo de resultados de rendimiento.
 
 *** Otros operadores genéticos
 
@@ -2063,23 +2065,22 @@ El resto de métodos públicos son:
 - =std::string toString() := Devuelve una cadena que identifica a la población. Llama a =Task::toString()= y le concatena el tamaño máximo de la población. 
 - =void save(FILE* stream) := Guarda los parámetros de configuración del algoritmo genético y todos los individuos de la población al fichero especificado por el parámetro =stream=. Notesé que la tarea no se guarda.
 - =void load(FILE* stream) := Carga los parámetros de configuración del algoritmo genético y los individuos, para insertarlos en la población, desde el fichero especificado por el parámetro =stream=. Notesé que la tarea no se carga y tiene que haber sido establecida en el constructor.
-*** HACER [0/9] Loop
-**** MODIFICAR <<<ParametersMap>>>
+*** HACER [1/9] Loop
+**** REVISAR <<<ParametersMap>>>
 
-TODO revisar tildes
-Esta clase implementa un mapa de parametros util´ para los para los parametros´ de configuracion´del algoritmo genetico´y para las utilidades de pruebas de este paquete. En realidad, la clase tiene tres mapas de parametros´diferentes: uno para numeros´, otro para cadenas de texto y otro para punteros. Ena misma clave (key) puede ser repetida si el tipo es diferente. Se usa el contructor por defecto, que no tiene nada de especial.
+Esta clase implementa un mapa de parametros útil para los para los parámetros de configuración del algoritmo genético y para las utilidades de pruebas de este paquete. En realidad, la clase tiene tres mapas de parámetros diferentes: uno para números, otro para cadenas de texto y otro para punteros. La misma clave (key) puede ser repetida si el tipo es diferente. Se usa el contructor por defecto, que no tiene nada de especial.
 
-- =void putNumber(std::string key, float number) := Asigna el valor del parametro´ =number= al par con la clave =key= que haya en el mapa de numeros´. Si no existia´la clave, se crea un nuevo par (clave, valor).
-- =float getNumber(std::string key) := Devuelve el valor´en el mapa de numeros´asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepcion´.
-- =void putPtr(std::string key, void* ptr) := Asigna el valor del parametro´ =ptr= al par con la clave =key= que haya en el mapa de punteros. Si no existia´la clave, se crea un nuevo par (clave, valor).
-- =void* getPtr(std::string key) := Devuelve el valor´en el mapa de punteros asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepcion´.
-- =void putString(std::string key, std::string str) := Asigna el valor del parametro´ =str= al par con la clave =key= que haya en el mapa de punteros. Si no existia´la clave, se crea un nuevo par (clave, valor).
-- =std::string getString(std::string key) := Devuelve el valor´en el mapa de punteros asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepcion´.
-- =std::string printNumber(std::string key) := Devuelve una cadena con la clave =key= concatenada con el numero´ (pasado a cadena) en el mapa de numeros´asociado con la propia clave. Si no existe la clave en ese mapa se lanza una excepcion´. Por ejemplo "miNumero_32.5"
-- =std::string printString(std::string key) := Devuelve una cadena con la clave =key= concatenada con la cadena en el mapa de cadenas asociada con la propia clave. Si no existe la clave en ese mapa se lanza una excepcion´. Por ejemplo "miCadena_hola mundo!"
-- =void print() := Escribe en la salida estandar´todos los pares (clave, valor). Primero los del mapa de numeros´, luego el mapa de punteros y, por ultimo´, el mapa de cadenas.
-- =void copyTo(ParametersMap* parametersMap) := Asigna al mapa de parametros´ recibido todos los pares (clave, valor) que contenga.
-- =void copyFrom(ParametersMap* parametersMap) := Para todos los pares (clave, valor) que contenga intenta copiar el valor del ParametersMap recibido. Si no existe algun´valor, captura y silencia la excepcion´lanzada por el mapa recibido al intentar acceder a estos. Esos pares no los modifica.
+- =void putNumber(std::string key, float number) := Asigna el valor del parámetro =number= al par con la clave =key= que haya en el mapa de números. Si no existe la clave, se crea un nuevo par (clave, valor).
+- =float getNumber(std::string key) := Devuelve el valor en el mapa de números asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepción.
+- =void putPtr(std::string key, void* ptr) := Asigna el valor del parámetro =ptr= al par con la clave =key= que haya en el mapa de punteros. Si no existe la clave, se crea un nuevo par (clave, valor).
+- =void* getPtr(std::string key) := Devuelve el valor en el mapa de punteros asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepción.
+- =void putString(std::string key, std::string str) := Asigna el valor del parámetro =str= al par con la clave =key= que haya en el mapa de punteros. Si no existe la clave, se crea un nuevo par (clave, valor).
+- =std::string getString(std::string key) := Devuelve el valor en el mapa de punteros asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepción.
+- =std::string printNumber(std::string key) := Devuelve una cadena con la clave =key= concatenada con el número (pasado a cadena) en el mapa de números asociado con la propia clave. Si no existe la clave en ese mapa se lanza una excepción. Por ejemplo "miNumero_32.5"
+- =std::string printString(std::string key) := Devuelve una cadena con la clave =key= concatenada con la cadena en el mapa de cadenas asociada con la propia clave. Por ejemplo, ~"miCadena_hola mundo!"~. Si no existe la clave en ese mapa se lanza una excepción. 
+- =void print() := Escribe en la salida estándar todos los pares (clave, valor). Primero los del mapa de números, luego el mapa de punteros y, por último, el mapa de cadenas.
+- =void copyTo(ParametersMap* parametersMap) := Asigna al mapa de parámetros recibido todos los pares (clave, valor) que contenga.
+- =void copyFrom(ParametersMap* parametersMap) := Para todos los pares (clave, valor) que contenga intenta copiar el valor del ParametersMap recibido. Si no existe algun´valor, captura y silencia la excepción lanzada por el mapa recibido al intentar acceder a estos. Esos pares no los modifica.
 
 **** HACER <<<Loop>>>
 
@@ -2240,12 +2241,12 @@ El contructor es el siguiente:
 *** HACER Nuevas clases para pruebas y generación de gráficas.
 \newpage
 \newpage
-* REVISAR [2/3] Resultados: Rendimiento
+* MODIFICAR [0/3] Resultados: Rendimiento
 #+LaTeX: \label{rendimiento}
 
 En esta sección se analizan resultados de rendimiento en tiempo de ejecución.
 
-** REVISAR [1/2] Características técnicas de la máquinas utilizadas
+** MODIFICAR [1/2] Características técnicas de la máquinas utilizadas
 #+LaTeX: \label{rendMaq}
 
 *** MODIFICAR Máquina con capacidad CUDA
@@ -2625,7 +2626,7 @@ DirectMap4M:      892928 kB
 
 \newpage
 
-** MODIFICAR [0/15] Rendimiento de las implementaciones paralelas
+** MODIFICAR [3/6] Rendimiento de las implementaciones paralelas
 #+LaTeX: \label{rendImpl}
 
 En esta sección se presentan los resultados en tiempo de ejecución de los métodos que se ejecutan de forma diferente con cada implementación. Todas las pruebas de la sección se han realizado con la máquina descrita en la sección \ref{rendMaqCUDA}.
@@ -2640,17 +2641,22 @@ Las implementaciones CUDA obtienen resultados parecidos, aunque todas ellas obti
 
 Los tiempos de la implementación de referencia C para el tipo FLOAT se encuentran cercanos a los de las implementaciones CUDA para BIT y SIGN, es decir, no mucho peor que las implementaciones CUDA para float. Sin embargo, los peores tiempos de la gráfica son con mucha diferencia los de esta implementación para BIT y SIGN.
 
-Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en segundos. Los pesos y otros valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. El tamaño de la capa de salida es 100 la mitad de las veces y 150 la otra mitad, haciendose la media. Se permutan los tipos de neuronas y los tipos de implementación para obtener cada curva. Cada combinación se repite 5000 veces para hacer la media y reducir el ruido.
+Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en milisegundos. Los pesos y otros valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. El tamaño de la capa de salida es 100 la mitad de las veces y 150 la otra mitad, haciendose la media. Se permutan los tipos de neuronas y los tipos de implementación para obtener cada curva. Cada combinación se repite 5000 veces para hacer la media y reducir el ruido.
 
-#+CAPTION:    Método de acumulación de resultados (Connection::calculateAndAdd) variando el tamaño de la capa de entrada.
+#+CAPTION:    Método de acumulación de resultados (Connection::calculateAndAddTo) variando el tamaño de la capa de entrada.
 #+LABEL:      grafImplCalculateEnt
 #+ATTR_LaTeX: width=\textwidth
-[[./img/Connection_calculateAndAddTo.png]]
+[[./img/impl_calculate_inputSize.png]]
 \newpage
 
 **** HACER Acumulación de resultados en función de las salidas
 #+LaTeX: \label{rendImplAcumulSal}
 
+#+CAPTION:    Método de acumulación de resultados (Connection::calculateAndAddTo) variando el tamaño de la capa de salida.
+#+LABEL:      grafImplCalculateSal
+#+ATTR_LaTeX: width=\textwidth
+[[./img/impl_calculate_outputSize.png]]
+\newpage
 **** HACER Zoom CUDA con bloques ent
 **** HACER Zoom CUDA con bloques sal
 *** MODIFICAR Activación
@@ -2661,12 +2667,12 @@ Era de esperar pues no se han hecho optimizaciones para la versión SSE2. Para l
 
 La implemetación CUDA es la más rápida para FLOAT, con un tiempo que se mantiene constante para los tamaños de salida probados. La implementación CUDA de BIT y SIGN produce los peores resultados con bastante diferencia. De nuevo, el algoritmo se adaptó directamente de la versión float sin modificarlo sustancialmente, lo que se requeriría para un rendimiento óptimo.
 
-Esta prueba se ha hecho utilizando la función de activación IDENTITY (ninguna). El tamaño de las salidas se representa en la como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en segundos. Los valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Se permutan los tipos de neuronas y los tipos de implementación para obtener cada curva. Cada combinación se repite 90000 veces para hacer la media reducir el ruido.
+Esta prueba se ha hecho utilizando la función de activación IDENTITY (ninguna). El tamaño de las salidas se representa en la como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en milisegundos. Los valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Se permutan los tipos de neuronas y los tipos de implementación para obtener cada curva. Cada combinación se repite 90000 veces para hacer la media reducir el ruido.
 
 #+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation).
 #+LABEL:      grafImplActivation
 #+ATTR_LaTeX: width=\textwidth
-[[./img/Connection_activation.png]]
+[[./img/impl_activation.png]]
 \newpage
 
 **** HACER Activación CUDA
@@ -2683,7 +2689,7 @@ Los rendimientos de la implementación CUDA son todos muy buenos y casi constant
 
 Para la implementación C, se puede ver como, en general, la función más lenta es la sigmoide bipolar, seguida muy de cerca por la sigmoide. La tangente hiperbólica sólo es ligeramente más lenta que el resto. Los tiempos de las funciones de activación de salto binario y bipolar son muy parecidos (ligeramente mayor para el caso salto binario) son muy similares al de la función identidad (que no hace nada).
 
-Esta prueba se ha hecho utilizando los parámetros que se describen a continuación. El tamaño de las salidas se representa en la como coordenada X, variándolo de 2000 en 2000 desde 2000 hasta 20000. La coordenada Y es el tiempo en segundos. Los valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Se permutan los tipos de funciones de activación para FLOAT y los tipos de implementación para para obtener cada curva. Cada combinación se repite 50000 veces para hacer la media reducir el ruido.
+Esta prueba se ha hecho utilizando los parámetros que se describen a continuación. El tamaño de las salidas se representa en la como coordenada X, variándolo de 2000 en 2000 desde 2000 hasta 20000. La coordenada Y es el tiempo en milisegundos. Los valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Se permutan los tipos de funciones de activación para FLOAT y los tipos de implementación para para obtener cada curva. Cada combinación se repite 50000 veces para hacer la media reducir el ruido.
 
 #+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation) con tipo de Buffer FLOAT y las diferentes funciones de activación implementadas.
 #+LABEL:      grafImplActivationFunc
@@ -2693,78 +2699,66 @@ Esta prueba se ha hecho utilizando los parámetros que se describen a continuaci
 **** HACER Funciones de activación CUDA
 
 Simplemente un detalle de la anterior sin meter la implementación C
-
-*** MODIFICAR Cruce
-#+LaTeX: \label{rendImplCruce}
-
-El cruce para BIT y para SIGN es idéntico, los dos se hacen sobre pesos de un byte en lugar de pesos de 4 bytes (float), por lo que se omite el tipo de neurona bipolar (SIGN) en esta prueba. No hay una diferencia sustancial de rendimiento entre los diferentes tipos de neuronas (FLOAT y BIT) para las implementaciones C y SSE2. El cruce de SSE2 se ve ligeramente penalizado, como en el método de la activación, aunque no se aprecia muy bien en la gráfica \ref{grafImplCrossover}. En este caso se debe al almacenamiento especial de los pesos para SSE2, que usa bloques de pesos en vez de pesos individuales.
-La implementación CUDA es algo más lenta. Aunque tampoco hay mucha diferencia entre los tipos de neuronas para esta implementación, las de tipo BIT hacen el cruce más rápido.
-
-Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en segundos. Los pesos y otros valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Los vectores de bits que determinan qué pesos tendrán que cruzarse también se determinan aleatoriamente con 1 ó 0. El tamaño de la capa de salida es 100 la mitad de las veces y 150 la otra mitad, haciendose la media. Se permutan los tipos de neuronas FLOAT y SIGN con los tipos de implementación C, SSE2 y CUDA para obtener cada curva. Cada combinación se repite 5000 veces para hacer la media y reducir el ruido.
-
-#+CAPTION:    Método que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).
-#+LABEL:      grafImplCrossover
-#+ATTR_LaTeX: width=\textwidth
-[[./img/Connection_crossover.png]]
-
-TODO fichero Crossover_Impl
-Los dos métodos CUDA (en el antiguo, variando el número de bloques).
-TODO fichero Crossover_CUDA
-
-\newpage
-
-*** MODIFICAR Mutación
-
-De la figura \ref{grafImplMutation} se puede deducir que el operador de mutación tiene un coste mínimo y constante respecto al tamaño de la conexión (da igual que sea en función de las entradas o las salidas) para todas las implementaciones. La implementación CUDA es más lenta para los dos tipos de neuronas, y los tiempo para estas dos son idénticos. Para CUDA sólo se contempla una implementación, pues todas comparten la misma función de mutación.
-
-Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en segundos. Los pesos y mutaciones se determinan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El tamaño de la capa de salida es 100 la mitad de las veces y 150 la otra mitad, haciendose la media. Se permutan los tipos de neuronas FLOAT y BIT con los tipos de implementación C, SSE2 y CUDA para obtener cada curva. Cada combinación se repite 90000 veces para hacer la media y reducir el ruido.
-
-#+CAPTION:    Método que implementa el operador genético de mutación (Connection::mutate).
-#+LABEL:      grafImplMutation
-#+ATTR_LaTeX: width=\textwidth
-[[./img/Connection_mutate.png]]
-\newpage
-
-*** MODIFICAR Olvido
-
-La gráfica \ref{grafImplReset} se obtiene con unos parámetros iguales a los descritos en la sección \ref{grafImplMutation} y los resultados y conclusiones también coinciden. El operador de olvido tiene un coste constante y mínimo.
-
-#+CAPTION:    Método que implementa el operador genético de olvido (Connection::reset).
-#+LABEL:      grafImplReset
-#+ATTR_LaTeX: width=\textwidth
-[[./img/Connection_reset.png]]
-\newpage
-
-*** MODIFICAR Mapeos entre Interface y Buffer
+*** REVISAR Mapeos entre Interface y Buffer
 
 Estos métodos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementación concreta escogida. Cada implementación debe mapear correctamente desde la representación genérica (Interfaz) hacia su propia representación interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
 
 Como se especifica en el apartado \ref{disenoRedes}, los Buffers pueden almacenar los estados de capas de neuronas, pero también los pesos de las conexiones. Por ello, además de los tipos FLOAT, BIT y SIGN se incluye el tipo BYTE, que es el que utilizan los pesos para conexiones con capas de entrada BIT ó SIGN. Sin embargo, los tipos BIT y SIGN comparten métodos por lo que se ignora el SIGN. De nuevo, todas las implementaciones CUDA comparten las mismas funciones y no se contemplan por separado.
 
-Esta prueba se ha hecho usando el tamaño del buffer como coordenada X, variándolo con incrementos de 2000 desde 2000 hasta 20000. La coordenada Y es el tiempo en segundos. Los elementos a ser copiados se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20] (1 ó 0 para los BITS). Se permutan los tipos de neuronas FLOAT y BIT con los tipos de implementación C, SSE2 y CUDA para obtener cada curva. Cada combinación se repite 50000 veces para hacer la media y reducir el ruido.
+Esta prueba se ha hecho usando el tamaño del buffer como coordenada X, variándolo desde 512 hasta 8192 con incrementos de 512. La coordenada Y es el tiempo en milisegundos. Los elementos a ser copiados se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20] (1 ó 0 para los BITS). Se permutan los tipos de neuronas FLOAT y BIT con los tipos de implementación C, SSE2 y CUDA para obtener cada curva. Cada combinación se repite 50000 veces para hacer la media y reducir el ruido.
 
 #+CAPTION:    Método que implementa la copia a un Buffer con una implementación determinada desde un Buffer genérico de la clase Interfaz (Buffer::copyFromInterface).
 #+LABEL:      grafImplCopyFrom
 #+ATTR_LaTeX: width=\textwidth
-[[./img/Buffer_copyFromInterface.png]]
+[[./img/impl_copyFromInterface.png]]
 
-Para el caso en que se copian datos desde la interfaz hacia el Buffer (gráfica \ref{grafImplCopyFrom}), los peores tiempos son con mucha diferencia para el tipo BIT con la implementación SSE2. Igual que en la sección \ref{rendImplActiv}, esto se debe a la colación especial de los bits para este algoritmo.
+Para el caso en que se copian datos desde la interfaz hacia el Buffer (gráfica \ref{grafImplCopyFrom}), los peores tiempos son con mucha diferencia para el tipo BIT con la implementación SSE2. Igual que en la sección \ref{rendImplActiv}, esto se debe a la colocación especial de los bits para este algoritmo.
 
 La implemetación CUDA no es tan lenta como se podría haber esperado. Dentro de esta implementación, el tipo FLOAT es el más lento, después el tipo BYTE y después el BIT. Esto se explica fácilmente, pues los tipo más grandes ocupan también más espacio en memoria y son más datos los que tienen que ser movidos.
-Salvo la excepción ya citada de SSE2 para BIT, esto se cumple en general para todas las implementaciones.
-
-Aunque no se aprecia en la gráfica, la versión CUDA para BIT es igual de rápida que las versiones C y SSE2 para FLOAT. Tampoco se observa bien, pero las versiones C y SSE2 para BYTE también obtienen tiempos similares.
+Salvo la excepción ya citada de SSE2 para BIT, esto se cumple en general para todas las implementaciones. Las versiones C y SSE2 tienen tiempos similares para los tipos FLOAT y BYTE.
 
 #+CAPTION:    Método que implementa la copia de un Buffer con una implementación determinada a un Buffer genérico de la clase Interfaz (Buffer::copyToInterface).
 #+LABEL:      grafImplCopyTo
 #+ATTR_LaTeX: width=\textwidth
-[[./img/Buffer_copyToInterface.png]]
+[[./img/impl_copyToInterface.png]]
 
-La gráfica \ref{grafImplCopyTo} se ha generado utilizando los mismos parémetros iguales a la ya comentada y también muestra unos resultados similares. La única diferencia notable es que las versiones CUDA son algo más lentas y la versión CUDA para BIT ya no consigue igualar a la versiones C y SSE2 para FLOAT. Mover datos desde la memoria del dispositivo (GPU) hacia la memoria del huesped (CPU) es más costoso que hacerlo en el sentido contrario.
+La gráfica \ref{grafImplCopyTo} se ha generado utilizando los mismos parémetros iguales a la ya comentada y también muestra unos resultados similares, aunque la versión CUDA es algo más lenta. Mover datos desde la memoria del dispositivo (GPU) hacia la memoria del huesped (CPU) es más costoso que hacerlo en el sentido contrario.
 
 \newpage
 
-** REVISAR Rendimiento de los diferentes operadores genéticos
+*** REVISAR Cruce
+#+LaTeX: \label{rendImplCruce}
+
+Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo desde 512 hasta 8192 con incrementos de 512. La coordenada Y es el tiempo en milisegundos. Los pesos y otros valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Los vectores de bits que determinan qué pesos tendrán que cruzarse también se determinan aleatoriamente con 1 ó 0. El tamaño de la capa de salida es 128. Se permutan los tipos de neuronas FLOAT y BIT con los tipos de implementación C, SSE2, =CUDA_REDUC0= (que requiere ordenación previa del vector de bits) y CUDA para obtener cada curva. Cada combinación se repite 500 veces para hacer la media y reducir el ruido. La razón por la que se omite el tipo de neurona bipolar (SIGN) es que el cruce para BIT y para SIGN es idéntico, los dos se hacen sobre pesos de un byte en lugar de pesos de 4 bytes (float). Se ha aprovechado la implementación CUDA_REDUC0 para ponerle un algoritmo de cruce CUDA diferente y poder compararlos.
+
+#+CAPTION:    Método que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).
+#+LABEL:      grafImplCrossover
+#+ATTR_LaTeX: width=\textwidth
+[[./img/impl_crossover.png]]
+
+Las implementaciones para la CPU son bastane más lentas, siendo SSE2 algo más lenta por al almacenamiento especial de los pesos que tiene, que usa bloques de pesos en vez de pesos individuales. Las dos implementaciones CUDA son mucho más rápidas con tiempos prácticamente idénticos entre sí. Parece ser que la reordenación del vector de bits se compensa con no tener que usar la memoria compartida en absoluto, como se discutió en la sección \ref{disenoParalCUDAcruza}. Aunque no se muestran en esta gráfica, los resultado obtenidos para el algoritmo marcado como =CUDA_REDUC0= en esta gráfica producía resultados similares con diferentes números de hilos por bloque.
+
+\newpage
+*** REVISAR Mutación y Olvido
+
+Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo desde 256 hasta 4096 con incrementos de 256. La coordenada Y es el tiempo en milisegundos. Los pesos y mutaciones se determinan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El tamaño de la capa de salida es 128. Se permutan los tipos de neuronas FLOAT y BIT con los tipos de implementación C, SSE2 y CUDA para obtener cada curva. Cada combinación se repite 90000 veces para hacer la media y reducir el ruido.
+
+#+CAPTION:    Método que implementa el operador genético de mutación (Connection::mutate).
+#+LABEL:      grafImplMutation
+#+ATTR_LaTeX: scale=0.15
+[[./img/impl_mutate.png]]
+
+De la figura \ref{grafImplMutation} se puede deducir que el operador de mutación tiene un coste mínimo y constante respecto al tamaño de la conexión (da igual que sea en función de las entradas o las salidas) para todas las implementaciones. La implementación CUDA es más lenta para los dos tipos de neuronas, siendo para esta implementación algo más lenta la versión BIT (que accede a bytes en vez de a floats). Para CUDA sólo se contempla una implementación, pues todas comparten la misma función para la mutación.
+
+#+CAPTION:    Método que implementa el operador genético de olvido (Connection::reset).
+#+LABEL:      grafImplReset
+#+ATTR_LaTeX: scale=0.15
+[[./img/impl_reset.png]]
+
+La gráfica \ref{grafImplReset} se obtiene con unos parámetros iguales a los descritos para la mutación. Los resultados y conclusiones también coinciden. El operador de olvido tiene un coste constante y mínimo.
+
+\newpage
+** MODIFICAR Rendimiento de los diferentes operadores genéticos
 #+LaTeX: \label{rendOperadores}
 
 Esta sección compara empíricamente el rendimiento computacional de los algoritmos de selección descritos en el apartado \ref{disenoGeneSel} del diseño de los algortimos genéticos.
@@ -2775,7 +2769,7 @@ En esta sección se cronometran los operadores genéticos descritos en el capitu
 
 Esta sección compara empriricamente el rendimiento computacional de los algoritmos de selección descritos en el apartado \ref{disenoGeneSel} del diseño de los algortimos genéticos.
 
-Esta prueba se ha realizado usando el número de individuos a seleccionar como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. La coordenada Y es el tiempo en segundos. Se permutan dos tamaños totales de población (400 y 500) con los tipos de selección ROULETTE_WHEEL, RANKING, TOURNAMENT y TRUNCATION para obtener las diferentes curvas. Para el tipo de selección TOURNAMENT, se cosideran los tamaños de torneo 5, 15 y 25. Cada combinación se repite 50 veces para hacer la media y reducir el ruido. Para esta prueba se ha creado una tarea (hereda de la clase Task) especial que asigna el fitness a los individuos aleatoriamente y que genera individuos vacíos. Así se minimizan todos los tiempos que no tienen que ver con la selección. Por tanto, a esta prueba no le afecta en absoluto la implementación utilizada.
+Esta prueba se ha realizado usando el número de individuos a seleccionar como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. La coordenada Y es el tiempo en milisegundos. Se permutan dos tamaños totales de población (400 y 500) con los tipos de selección ROULETTE_WHEEL, RANKING, TOURNAMENT y TRUNCATION para obtener las diferentes curvas. Para el tipo de selección TOURNAMENT, se cosideran los tamaños de torneo 5, 15 y 25. Cada combinación se repite 50 veces para hacer la media y reducir el ruido. Para esta prueba se ha creado una tarea (hereda de la clase Task) especial que asigna el fitness a los individuos aleatoriamente y que genera individuos vacíos. Así se minimizan todos los tiempos que no tienen que ver con la selección. Por tanto, a esta prueba no le afecta en absoluto la implementación utilizada.
 
 #+CAPTION:    Rendimiento de los distintos operadores de selección en función del número de individuos a seleccionar. Cada operador se prueba con tamaños totales de población 400 y 500. Además, para la selección por torneo se muestran los resultados con varios tamaños de torneo.
 #+LABEL:      rendGenSelect
@@ -2795,7 +2789,7 @@ A pesar que que tampoco se aprecia bien en la figura \ref{rendGenSelect}, la sel
 
 Esta sección compara empíricamente el rendimiento computacional de los algoritmos de cruce descritos en los apartados \ref{disenoGeneCruz} y \ref{disenoGeneNiv} del diseño de los algortimos genéticos.
 
-Esta prueba se ha realizado usando un tamaño como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. Este tamaño es el tamaño de las capas entradas y el de las internas. La coordenada Y es el tiempo en segundos. Se usan dos capas de entrada a la red (iguales). Los pesos se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El número de capas internas es 1 la mitad de las veces y 2 la otra mitad, haciendose la media. Se usa el tipo de neurona FLOAT la mitad de las veces y BIT la otra mitad, haciéndose la media. Para obtener cada curva, se usan los tipos de cruce UNIFORM, MULTIPOINT y PROPORTIONAL. Es primero se prueba con las probabilidad de cruce de 0.2 y 0.4. El segundo tipo se prueba con 1 y 6 puntos de cruce. Para el algortimo PROPORTIONAL se usa siempre un fitness de 1 para un individuo y 1.5 para el otro. Cada combinación se repite 50 veces para hacer la media y reducir el ruido.
+Esta prueba se ha realizado usando un tamaño como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. Este tamaño es el tamaño de las capas entradas y el de las internas. La coordenada Y es el tiempo en milisegundos. Se usan dos capas de entrada a la red (iguales). Los pesos se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El número de capas internas es 1 la mitad de las veces y 2 la otra mitad, haciendose la media. Se usa el tipo de neurona FLOAT la mitad de las veces y BIT la otra mitad, haciéndose la media. Para obtener cada curva, se usan los tipos de cruce UNIFORM, MULTIPOINT y PROPORTIONAL. Es primero se prueba con las probabilidad de cruce de 0.2 y 0.4. El segundo tipo se prueba con 1 y 6 puntos de cruce. Para el algortimo PROPORTIONAL se usa siempre un fitness de 1 para un individuo y 1.5 para el otro. Cada combinación se repite 50 veces para hacer la media y reducir el ruido.
 
 Como muestra la figura \ref{rendGenCruza} el nivel de cruce más costoso es el propio peso, el más barato es el nivel de capa completa y los niveles de neurona tienen rendimientos intermedios y parecidos independientemente de cómo se interprete qué pesos pertenecen a una neurona (si los pesos de entrada a la neurona o los pesos de salida de la misma). 
 
@@ -2822,7 +2816,7 @@ Para el nivel de neurona invertida, los algoritmos más lentos son el uniforme c
 
 Esta sección compara empíricamente el rendimiento computacional de los modos de mutación descritos en el apartado \ref{disenoGeneMut} del diseño de los algortimos genéticos.
 
-Esta prueba se ha realizado usando un tamaño como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. Este tamaño es el tamaño de las capas entradas y el de las internas. La coordenada Y es el tiempo en segundos. Se usan dos capas de entrada a la red (iguales). Los pesos se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El número de capas internas es 1 la mitad de las veces y 2 la otra mitad, haciendose la media. Se usa el tipo de neurona FLOAT la mitad de las veces y BIT la otra mitad, haciéndose la media. Para obtener cada curva, se permutan los algortimos PER_INDIVIDUAL y PROBABILISTIC con 4 probabilidades: 0.1, 0.2, 0.3 y 0.4. Para el PROBABILISTIC la probabilidad se toma directamente como parámetro. Para el algoritmo PER_INDIVIDUAL, el número de mutuaciones se calcula multiplicando el número total de genes del individuo por la probabilidad. Así, se espera que los dos algoritmos obtengan un número similar de mutaciones por individuo para la misma probabilidad parámetro.
+Esta prueba se ha realizado usando un tamaño como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. Este tamaño es el tamaño de las capas entradas y el de las internas. La coordenada Y es el tiempo en milisegundos. Se usan dos capas de entrada a la red (iguales). Los pesos se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El número de capas internas es 1 la mitad de las veces y 2 la otra mitad, haciendose la media. Se usa el tipo de neurona FLOAT la mitad de las veces y BIT la otra mitad, haciéndose la media. Para obtener cada curva, se permutan los algortimos PER_INDIVIDUAL y PROBABILISTIC con 4 probabilidades: 0.1, 0.2, 0.3 y 0.4. Para el PROBABILISTIC la probabilidad se toma directamente como parámetro. Para el algoritmo PER_INDIVIDUAL, el número de mutuaciones se calcula multiplicando el número total de genes del individuo por la probabilidad. Así, se espera que los dos algoritmos obtengan un número similar de mutaciones por individuo para la misma probabilidad parámetro.
 
 Según la figura \ref{rendGenMutation}, ambos tipos de mutación son más costosos cuánto mayor es la probabilidad, tal y cómo era de esperar, pues más mutaciones son más escrituras. Además, la mutación probabilística es en general más costosa que la mutación determinística (un número constante de mutaciones por individuo, PER_INDIVIDUAL) salvo cuando la probabilidad parámetro es muy grande (muchas mutaciones por individuo). Aunque la interfaz determinística es más rápida, también se hace más lenta comparativamente cuanto mayor es la probabilidad. La explicación es que la opción probabilística tiene un coste fijo elevado (un número aleatorio por gen) mientras que en la determinística el coste sube con el número de mutaciones (varios números aleatorios por cada mutación a realizar).
 
