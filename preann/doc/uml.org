@@ -1,28 +1,155 @@
-* Diagramas de clase
-** Neural
-@startuml img/uml/classNeural.png
-NeuralNet <..> Interface
-NeuralNet o-- InputLayer
-NeuralNet o-- Layer
-Interface <..> Buffer
-InputLayer -> Interface
-Layer <|-- InputLayer
-Layer *-- Buffer
-Layer o-- Connection
-Buffer <|-- Connection
-Connection --> Buffer
+* To render:
+** M-x plantuml-render-buffer
+** java -jar ~/programas/jar/plantuml.jar "/home/jtimon/workspace/uml/examples.org"
+* TODO Diagrama de componentes
+
+@startuml img/uml/components.png
+
+[common]
+
+Factory -- [factory]
+
+[factory] --> [sse2] : independiza
+[factory] --> [cuda] : independiza
+
+Buffer <.. [sse2] : implementa
+Connection <..[sse2] : implementa
+Buffer <.. [cuda] : implementa
+Connection <..[cuda] : implementa
+
+[neural] -- Buffer
+[neural] -- Connection
+[neural] -- NeuralNet
+[neural] ..> Factory : usa
+
+[genetic] -- Task
+[genetic] -- Individual
+[genetic] ..> Connection : para operadores\n genéticos
+[genetic] ..> NeuralNet : para individuos
+
+[loopTest] --> [loop] : especialización de
+
+[loopTest] -- ChronoPlotter
+[loopTest] -- TaskPlotter
+
+[test] --> [tasks] : usa
+[test] ..> ChronoPlotter : usa
+[test] ..> TaskPlotter : usa
+
+[tasks] ..> Task : extiende
+[tasks] ..> Individual : evalúa
+[tasks] --> [game] : usa
+
+
+
 @enduml
 
-** Relations between classes
-@startuml img/uml/classes01.png
-Class01 <|-- Class02
-Class03 *-- Class04
-Class05 o-- Class06
-Class07 .. Class08
-Class09 -- Class10
-Class11 <|.. Class12
-Class13 --> Class14
-Class15 ..> Class16
-Class17 ..|> Class18
-Class19 <--* Class20
+* [1/4] Diagramas de clase
+** DONE Neural
+@startuml img/uml/classNeural.png
+
+NeuralNet "1" o-- "0..*" Layer : tiene
+
+NeuralNet "1" ..> "0..*" Interface : acceso con
+
+Layer "1" o-- "1..*" Connection
+
+Layer "1" *-- "1" Buffer
+
+Interface <..> Buffer : copiar
+
+Buffer <|-- Connection : hereda
+
+class Interface "1" <-- "0..1" InputLayer : apunta a
+
+Layer <|-- InputLayer : hereda
+
+class NeuralNet{
+    -vector<InputLayer*> inputs
+    -vector<Layer*> layers
+    +void addInputLayer(Interface*)
+    +Interface* getOutput(layerPos)
+    +void addLayer(size, BufferType, FunctionType)
+    +void addInputConnection(srcInputPos, destLayerPos)
+    +void addLayersConnection(srcLayerPos, destLayerPos)
+    +void calculateOutput()
+}
+
+class Interface{
+    -unsigned size
+    -BufferType bufferType
+    -void* data
+    +float getElement(pos)
+    +void setElement(pos, value)
+    +unsigned getSize()
+    +float compareTo(Interface*)
+    +virtual unsigned getByteSize()
+    +void random(range)
+    +BufferType getBufferType()
+    +void* getDataPointer()
+    +void save(FILE*)
+    +void load(FILE*)
+    +void print()
+}
+
+class Buffer{
+    #void* data
+    #unsigned size
+    #{abstract} void _copyFrom(Interface*)
+    #{abstract} void _copyTo(Interface*)
+    +{abstract} ImplementationType getImplementationType()
+    +{abstract} BufferType getBufferType()
+
+    +void copyFrom(Interface* interface)
+    +void copyTo(Interface* interface)
+}
+
+class Connection{
+    #Buffer* tInput
+
+    #{abstract} void _calculateAndAddTo(Buffer* results)
+    #{abstract} void _activation(Buffer* output, FunctionType)
+    #{abstract} void _crossover(Buffer* other, Interface* bitBuffer)
+    #{abstract} void _mutate(pos, mutation)
+    #{abstract} void _reset(pos)
+
+    +void calculateAndAddTo(Buffer* results)
+    +void activation(Buffer* output, FunctionType functionType)
+    +void crossover(Connection* other, Interface* bitBuffer)
+    +void mutate(unsigned pos, float mutation)
+    +void reset(unsigned pos)
+}
+
+class Layer{
+    #Layer()
+    #std::vector<Connection*> connections
+    #Buffer* results
+    #Connection* thresholds
+    #Buffer* output
+    #Interface* outputInterface
+    #FunctionType functionType
+
+    #void addInput(Layer* input)
+    #void calculateOutput()
+    #Interface* getOutputInterface()
+
+    #void randomWeighs(float range)
+    #void copyWeighs(Layer* sourceLayer)
+}
+
+class InputLayer{
+    -Interface* tInput
+
+    +void calculateOutput()
+    +Interface* getInputInterface()
+
+    +void addInput(Layer*)
+    +void randomWeighs(range)
+    +void copyWeighs(Layer*)
+
+}
+
 @enduml
+** TODO Factory
+** TODO Genetic
+** TODO Loop

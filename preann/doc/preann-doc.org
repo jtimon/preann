@@ -382,8 +382,8 @@ Primero se describirán las clases fachada y el resto de clases utilizadas para 
 
 #+CAPTION:    Diagrama de componentes de la librería implementada.
 #+LABEL:      disenoComponentes
-#+ATTR_LaTeX: scale=0.6
-[[./img/uml/classNeural.png]]
+#+ATTR_LaTeX: scale=0.4
+[[./img/uml/components.png]]
 
 En la sección \ref{disenoGenetic} especificaremos de forma general las clases destinadas a la implementación del algoritmo genético y cómo se relacionan con las clases de las redes neuronales. 
 
@@ -400,7 +400,7 @@ Así, NeuralNet tiene dos listas de capas, una para las de entrada y otra para e
 
 #+CAPTION:    Diagrama de clases del componente Neural.
 #+LABEL:      classNeural
-#+ATTR_LaTeX: scale=0.6
+#+ATTR_LaTeX: scale=0.33
 [[./img/uml/classNeural.png]]
 
 Una Layer está compuesta, a su vez, de un Buffer (es equivalente a Interface, pero especializable para cada implementación) para la salida y de una lista de conexiones representadas por la clase Connection. Una Layer tendrá una conexión por cada capa que una tome como entrada. Además, los umbrales de la capa se alamcenan también en un objeto de la clase Connection, que se crea con el Buffer auxiliar de resultados (antes de aplicar la activación) como entrada y con tamaño de salida 1 (para tener sólo un peso, que en este caso representa a un umbral, por cada neurona de salida de la capa). Sobre esta conexión se llamará al método =activation= pasándole como parámetros el Buffer de salida de la capa y el /tipo de activación/ en vez de usar el método =calculateAndAddTo= tomando como parámetro el Buffer de resultados como hacen el resto de Connection, que realmente representan conexiones. En realidad, esta Connection especial guardada en el atributo =thresholds= puede ser considerada una conexión con conexiones 1 a 1 en vez de una conexión completa (con las conexiones normales cada neurona de salida conecta con todas neuronas de entrada). 
@@ -411,9 +411,10 @@ Como el almacenamiento de datos es, en principio, común para una misma implemen
 
 ** HACER Estructuras para algoritmos genéticos
 #+LaTeX: \label{disenoGenetic}
-
-
-
+** HACER Utilidades para la experimentación
+#+LaTeX: \label{disenoLoop}
+- [ ] Automatización de pruebas
+- [ ] Recogida y presentación de datos
 ** MODIFICAR Problemas a resolver
 #+LaTeX: \label{experimentacion}
 
@@ -467,10 +468,6 @@ El jugador que se ha implementado para Reversi es extremadamente simple, pero, a
 La tarea Reversi se implementa en la clase ReversiTask que también hereda de la clase abstracta Task y que utiliza la clase ReversiBoard que implementa las reglas de juego de Reversi y que, a su vez, hereda de la clase que implementa el el tablero genérico para juegos con piezas iguales pero de dos jugadores Board. Éste último siempre es de un tamaño cuadrado (las mismas casillas a lo largo que a lo ancho) pero el tablero de Reversi tiene, además, la restricción de ser como mínimo de un tamaño 4x4. Esto es así por que las cuatro piezas centrales (2x2) empiezan ya rellenas para que los juegadores tengan movimientos legales al inicio.
 
 \newpage
-** HACER Utilidades para la experimentación
-#+LaTeX: \label{disenoLoop}
-*** HACER Automatización de pruebas
-*** HACER Recogida y presentación de datos
 * Diseño del algoritmo genético
 #+LaTeX: \label{disenoGene}
 ** Funcionamiento general
