@@ -371,29 +371,49 @@ Se probará la librería en casos concretos con el fin de contestar a las siguie
 A la primera pregunta se responderá en el [[disenoRedes][diseño de las redes neuronales]]. Y aunque el resto de cuestiones se resolveránen los capítlos de resultados, en el capítulo final de [[conclusiones]] se discute la respuesta a todas ellas.
 
 \newpage
-* HACER [0/4] Diseño general
+* HACER [1/4] Diseño general
 #+LaTeX: \label{diseno}
 
 Como se definió en la sección \ref{anaEspecLib}, la librería debe poder construir redes neuronales de cualquier topología y, al mismo tiempo, debe poder ser paralelizada usando diferentes tecnologías. Además, en la sección \ref{anaObjetivos} establecimos que las neuronas pueden ser de varios tipos (binarias, bipolares y reales). 
 
 Para soportar las diferentes implementaciones y tipos de neuronas sin incrementar la complejidad de la API de la librería, se definirán clases abstractas como interfaces de las que luego heredarán las diferentes implementaciones. Para independizar completamente el manejo de estas clases de fachada [TODO bibliografía patrón diseño facade], las implementaciones concretas sólo serán visibles a una clase factoría que será el único método para instanciar las implementaciones siguiendo el patrón de diseño factoría [TODO bibliografía patrón diseño factory]. Para las diferentes implementaciones paralelas descritas en el capítulo \ref{disenoParal}, se crearán diferentes clases que extiendan de las fachadas. Para soportar los diferentes tipos de neuronas, estas clases paralelizadas se implementarán usando plantillas. Sólo serán utilizadas directamente las clases fachada y los métodos específicos de cada implementación concreta serán llamados utilizando la técnica que en el contexto de análisis, diseño y desarrollo orientado a objetos se denomina polimorfismo.
 
-Primero se describirán las clases fachada y el resto de clases utilizadas para la implementación de las redes neuronales en la sección \ref{disenoRedes}. Las implementaciones concretas de las fachadas para la factoría se describirán con más detalle en la sección [TODO decidir dónde: diseño, paralelizaciones, extensibilidad]. En la sección \ref{disenoGenetic} especificaremos de forma general las clases destinadas a la implementación del algoritmo genético y cómo se relacionan con las clases de las redes neuronales. Finalmente, en la sección \ref{disenoLoop} se describen las utilidades destinadas a probar la librería y medir su eficiencia, tanto en términos de rendimiento computacional como en términos de aprendizaje. Este último componente debe poder generar gráficas comparativas y ser suficientemente extensible para adaptarse a las necesidades del proyecto. 
+Primero se describirán las clases fachada y el resto de clases utilizadas para la implementación de las redes neuronales en la sección \ref{disenoRedes}. Las implementaciones concretas de las fachadas para la factoría se describirán con más detalle en la sección \ref{implFactoria}. 
 
-** HACER Estructura de las redes neuronales
+#+CAPTION:    Diagrama de componentes de la librería implementada.
+#+LABEL:      disenoComponentes
+#+ATTR_LaTeX: scale=0.6
+[[./img/uml/classNeural.png]]
+
+En la sección \ref{disenoGenetic} especificaremos de forma general las clases destinadas a la implementación del algoritmo genético y cómo se relacionan con las clases de las redes neuronales. 
+
+Finalmente, en la sección \ref{disenoLoop} se describen las utilidades destinadas a probar la librería y medir su eficiencia, tanto en términos de rendimiento computacional como en términos de aprendizaje. Este último componente debe poder generar gráficas comparativas y ser suficientemente extensible para adaptarse a las necesidades del proyecto, sin acoplarse con este de forma que el componenete pueda ser reutilizado para otros proyectos. 
+
+La figura \ref{disenoComponentes} muestra el diagrama de componentes de la librería. En las siguientes secciones se decribirá como se comunican los diferentes componentes con más detalle.
+
+** REVISAR Estructura de las redes neuronales
 #+LaTeX: \label{disenoRedes}
 
-Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
+Las redes neuronales se implementan en el paquete *neural*, cuya interfaz de aplicaicón se describe en detalle en la sección \ref{apiNeural}. La clase principal es NeuralNet. Como se quiere independizar la red neuronal de la implementación concreta usada, las redes neuronales se comunican con el exterior mediante la clase Interface. Las entradas y salidas de la red serán objetos de esta clase. La red está compuesta de un conjunto de capas implementadas con la clase Layer. Como las capas de entrada leen de una interfaz, se crea una especialización de Layer llamada InputLayer, que copia sus propias salidas desde una Interface en vez de tomar otras Layer como entrada para calcular su estado a partir de éstas y de sus propios pesos.
 
-Diagrama de clases del componenete e [[apiNeural][Neural]].
+Así, NeuralNet tiene dos listas de capas, una para las de entrada y otra para el resto. También mantiene dos grafos dirigidos que representan las conexiones entre esas capas. Uno de los grafos contiene las conexiones desde capas de entrada hacia las otras capas y el otro grafo contiene las conexiones entre las capas que no son de entrada (capas ocultas o de salida). No se hace ninguna distinción entre las capas ocultas y las de salida. Cuando el usuario de la librería solicita el estado de una capa desde el exterior de la red, NeuralNet devuelve una Interface que será creada dentro de la capa y que se actualizará con las salidas de la capa siempre que estas se calculen.
 
-#+CAPTION:    Diagrama de clases del component e Neural.
+#+CAPTION:    Diagrama de clases del componente Neural.
 #+LABEL:      classNeural
 #+ATTR_LaTeX: scale=0.6
 [[./img/uml/classNeural.png]]
 
+Una Layer está compuesta, a su vez, de un Buffer (es equivalente a Interface, pero especializable para cada implementación) para la salida y de una lista de conexiones representadas por la clase Connection. Una Layer tendrá una conexión por cada capa que una tome como entrada. Además, los umbrales de la capa se alamcenan también en un objeto de la clase Connection, que se crea con el Buffer auxiliar de resultados (antes de aplicar la activación) como entrada y con tamaño de salida 1 (para tener sólo un peso, que en este caso representa a un umbral, por cada neurona de salida de la capa). Sobre esta conexión se llamará al método =activation= pasándole como parámetros el Buffer de salida de la capa y el /tipo de activación/ en vez de usar el método =calculateAndAddTo= tomando como parámetro el Buffer de resultados como hacen el resto de Connection, que realmente representan conexiones. En realidad, esta Connection especial guardada en el atributo =thresholds= puede ser considerada una conexión con conexiones 1 a 1 en vez de una conexión completa (con las conexiones normales cada neurona de salida conecta con todas neuronas de entrada). 
+
+La clase Layer en sí es prescindible, pero la implementación interna de NeuralNet se complicaría mucho si se implementase como una colección de Buffers con conexiones entre sí, en las que algunos Buffer representan resultados intermedios en vez de neuronas reales y algunas Connection son del tipo especial que utiliza la activación en vez del calculo habitual con una matriz de pesos.
+
+Como el almacenamiento de datos es, en principio, común para una misma implementación y su mapeo a Interface debe ser similar, la clase Connection hereda de la clase Buffer y, de no requerir un almacenamiento especial (como es el caso, por ejemplo, de CudaInvertedConnection) reutilizará estos métodos sin reimplementarlos. El diagrama de clases \ref{classNeural} resume lo comentado en esta sección.
+
 ** HACER Estructuras para algoritmos genéticos
 #+LaTeX: \label{disenoGenetic}
+
+
+
 ** MODIFICAR Problemas a resolver
 #+LaTeX: \label{experimentacion}
 
