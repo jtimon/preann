@@ -163,17 +163,15 @@ donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada número \(
 #+ATTR_LaTeX: trim= 0.5cm 22cm 10cm 0cm, clip, width=15cm
 [[./img/feed-forward.jpg]]
 
-TODO NOTAS rosa 1: La conectividad entre los nodos de una red neuronal está relacionada con la forma en que las salidas de las neuronas están canalizadas para convertirse en entradas de otras neuronas. La señal de salida de un nodo puede ser una entrada de otro elemento de proceso, o incluso ser una entrada de su propia salida (conexión autorrecurrente).
+[TODO NOTAS rosa 1: La conectividad entre los nodos de una red neuronal está relacionada con la forma en que las salidas de las neuronas están canalizadas para convertirse en entradas de otras neuronas. La señal de salida de un nodo puede ser una entrada de otro elemento de proceso, o incluso ser una entrada de su propia salida (conexión autorrecurrente).
 
-Cuando ninguna salida de la neurona es entrada de neuronas del mismo nivel o de niveles precedente, la red se describe como de propagación hacia adelante. Cuando las salidas pueden ser conectadas como entradas de neuronas de niveles previos o del mismo nivel, incluyéndose ellas mismas, la red es de propagación hacia atrás. 
---fin notas
+Cuando ninguna salida de la neurona es entrada de neuronas del mismo nivel o de niveles precedente, la red se describe como de propagación hacia adelante. Cuando las salidas pueden ser conectadas como entradas de neuronas de niveles previos o del mismo nivel, incluyéndose ellas mismas, la red es de propagación hacia atrás. ]
 
 [nota1 Las redes neuronales artificiales pueden clasificarse como /feed-forward/ (con propagación hacia delante) o recurrentes dependiendo de su conectividad. Una red es /feed-forward/ (figura \ref{figFeedForward}) si existe un método de numeración de las neuronas que cumpla que no existan conexiones desde un nodo hacia otro nodo con un número más pequeño que el de nodo de origen.] Una red es recurrente (figura \ref{figRecurrente}) si no existe un método de numeración que cumpla tal condición. En el presente trabajo, nos centraremos en las redes /feed-forward/, aunque la librería implementada permite conexiones recurrentes.
 
-TODO nota rosa 2:
+[TODO nota rosa 2:
 Aprendizaje se puede definir como: La modificación del comportamiento inducido por la interacción con el entorno y como resultado de experiencias conducentes al establecimiento de nuevos modelos de respuestas ante estímulos externos.
-Biológicamente, se suele aceptar que la información memorizada en el cerebro está más relacionada con los valores sinápticos de las conexiones entre las neuronas que con ellas mismas; es decir, el conocimiento se encuentra en las sinapsis. En el caso de las redes neuronales artificiales, se puede considerar que el conocimiento se encuentra representado en los pesos de las conexiones entre las neuronas. Todo proceso de aprendizaje implica cierto número de cambios en estas conexiones. En realidad se puede decir que se aprende modificando los pesos de la red.
---fin notas
+Biológicamente, se suele aceptar que la información memorizada en el cerebro está más relacionada con los valores sinápticos de las conexiones entre las neuronas que con ellas mismas; es decir, el conocimiento se encuentra en las sinapsis. En el caso de las redes neuronales artificiales, se puede considerar que el conocimiento se encuentra representado en los pesos de las conexiones entre las neuronas. Todo proceso de aprendizaje implica cierto número de cambios en estas conexiones. En realidad se puede decir que se aprende modificando los pesos de la red.]
 
 [nota2 El aprendizaje de las redes neuronales se consigue habitualmente usando ejemplos: suelen tener un entrenamiento supervisado. Se basa en la comparación directa entre la salida de la red y la salida correcta o deseada.] Normalmente se formula el entrenamiento como la minimización de una función de error como el sumatorio del cuadrado del error de la salida respecto de la salida deseada para todos los datos disponibles (que constan de pares de entradas con sus correspondientes salidas deseadas). [nota 3: Un algoritmo de optimización basado en el descenso del gradiente como la regla delta generalizada (también conocido como algoritmo /backpropagation/) puede ser usado después iterativamente para ajustar los pesos y así minimizar el error.]
 
