@@ -138,7 +138,7 @@ En el presente documento (que contiene la documentación asociada al proyecto fi
 
 Tanto las redes neuronales como los algoritmos genéticos están inspirados en la naturaleza y han sido utilizados desde largo tiempo atrás. Las redes neuronales están inspiradas en el funcionamiento del cerebro, como un sistema de procesamiento de información distribuido. Por su parte, los algoritmos genéticos se basan en la teoría de la evolución de Darwin, por la que la evolución se produce a través de dos principios básicos: los individuos que no se adaptan suficientemente al medio perecen, mientras que los que sí lo hacen transmiten sus genes con cierta variabilidad. Esta variabilidad puede proceder de dos fuentes: el cruce de genes entre individuos ó la mutación directa de esos genes.
 
-La combinación de estas dos técnicas es algo relativamente reciente. Algunos - principalmente anglosajones - han coincidido en llamar a esta síntesis [[http://en.wikipedia.org/wiki/Neuroevolution][neuro-evolución]], otros se refieren a ella como [[http://laral.istc.cnr.it/nolfi/papers/HBTNN-A.pdf][evolución de redes neuronales artificiales]], GANN, etc. En general, la mayoría de los que la usan recurren a nombres que definen con más precisión la técnica concreta que utilizan; dadas las múltiples posibilidades para combinar ambos métodos. Aceptaremos el término neuro-evolución para el resto del texto, aunque sin renunciar a los otros términos que hayan podido ser utilizados como redes neuronales evolutivas.
+La combinación de estas dos técnicas es algo relativamente reciente. Algunos autores - principalmente anglosajones - han coincidido en llamar a esta síntesis [[http://en.wikipedia.org/wiki/Neuroevolution][neuro-evolución]], otros se refieren a ella como [[http://laral.istc.cnr.it/nolfi/papers/HBTNN-A.pdf][evolución de redes neuronales artificiales]], GANN, etc. En general, la mayoría de los que la usan recurren a nombres que definen con más precisión la técnica concreta que utilizan; dadas las múltiples posibilidades para combinar ambos métodos. Aceptaremos el término neuro-evolución para el resto del texto, aunque sin renunciar a los otros términos que hayan podido ser utilizados como redes neuronales evolutivas.
 
 A continuación explicaremos más detalladamente las bases teóricas de las tres técnicas: redes neuronales, algoritmos genéticos y neuro-evolución. Nos centraremos principalmente en los algoritmos y estructuras que más se asemejan a los implementamos en nuestra librería.
 
@@ -149,34 +149,60 @@ A continuación explicaremos más detalladamente las bases teóricas de las tres
 Describiremos de forma suscinta el funcionamiento general de las redes neuronales y sus estructuras más comunes, para luego discutir las ventajas y las posibles limitaciones, centrándonos en los algoritmos de aprendizaje de gradiente descendente y, en concreto, en el de retropropagación del error.
 
 *** MODIFICAR Conceptos generales
+
 Las redes neuronales constan de un conjunto de elementos de procesamiento - conocidos como nodos o neuronas - interconectados entre sí. Pueden ser descritas mediante un grafo dirigido en el que cada neurona  \(i\) usa una función de activación de la forma:
 
 \begin{equation}\label{eqSalidaNeu}
   y_i=f_i(\sum_{j=1}^n (w_{ij} \cdot x_j - \theta_i)).
 \end{equation}
 
-donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada número \(j\) a la misma, \(w_{ij}\) es el peso de la conexión entre los nodos \(i\) y \(j\), \(\theta_i\) es el umbral de activación (o Bias) y \(f_i\) es una función que puede ser, o no, lineal.
+donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada número \(j\) a la misma, \(w_{ij}\) es el peso de la conexión entre los nodos \(i\) y \(j\), \(\theta_i\) es el umbral de activación (o Bias) y \(f_i\) es una función que puede ser continua o discreta.
 
 #+CAPTION:    Red neuronal \emph{feed-forward}.
 #+LABEL:      figFeedForward
 #+ATTR_LaTeX: trim= 0.5cm 22cm 10cm 0cm, clip, width=15cm
 [[./img/feed-forward.jpg]]
 
- Las redes neuronales artificiales pueden clasificarse como /feed-forward/ (con propagación hacia delante) o recurrentes dependiendo de su conectividad. Una red es /feed-forward/ (figura \ref{figFeedForward}) si existe un método de numeración de las neuronas que cumpla que no existan conexiones desde un nodo hacia otro nodo con un número más pequeño que el de nodo de origen. Una red es recurrente (figura \ref{figRecurrente}) si no existe un método de numeración que cumpla tal condición. Para simplificar nuestro trabajo, nos centraremos en las redes /feed-forward/.
+TODO NOTAS rosa 1: La conectividad entre los nodos de una red neuronal está relacionada con la forma en que las salidas de las neuronas están canalizadas para convertirse en entradas de otras neuronas. La señal de salida de un nodo puede ser una entrada de otro elemento de proceso, o incluso ser una entrada de su propia salida (conexión autorrecurrente).
 
- El aprendizaje de las redes neuronales se consigue habitualmente usando ejemplos: suelen tener un entrenamiento supervisado. Se basa en la comparación directa entre la salida de la red y la salida correcta o deseada. Normalmente se formula el entrenamiento como la minimización de una función de error como el sumatorio del cuadrado del error de la salida respecto de la salida deseada para todos los datos disponibles (que constan de pares de entradas con sus correspondientes salidas deseadas). Un algoritmo de optimización basado en el descenso del gradiente como la regla delta generalizada (también conocido como algoritmo /backpropagation/) puede ser usado después iterativamente para ajustar los pesos y así minimizar el error.
+Cuando ninguna salida de la neurona es entrada de neuronas del mismo nivel o de niveles precedente, la red se describe como de propagación hacia adelante. Cuando las salidas pueden ser conectadas como entradas de neuronas de niveles previos o del mismo nivel, incluyéndose ellas mismas, la red es de propagación hacia atrás. 
+--fin notas
+
+[nota1 Las redes neuronales artificiales pueden clasificarse como /feed-forward/ (con propagación hacia delante) o recurrentes dependiendo de su conectividad. Una red es /feed-forward/ (figura \ref{figFeedForward}) si existe un método de numeración de las neuronas que cumpla que no existan conexiones desde un nodo hacia otro nodo con un número más pequeño que el de nodo de origen.] Una red es recurrente (figura \ref{figRecurrente}) si no existe un método de numeración que cumpla tal condición. En el presente trabajo, nos centraremos en las redes /feed-forward/, aunque la librería implementada permite conexiones recurrentes.
+
+TODO nota rosa 2:
+Aprendizaje se puede definir como: La modificación del comportamiento inducido por la interacción con el entorno y como resultado de experiencias conducentes al establecimiento de nuevos modelos de respuestas ante estímulos externos.
+Biológicamente, se suele aceptar que la información memorizada en el cerebro está más relacionada con los valores sinápticos de las conexiones entre las neuronas que con ellas mismas; es decir, el conocimiento se encuentra en las sinapsis. En el caso de las redes neuronales artificiales, se puede considerar que el conocimiento se encuentra representado en los pesos de las conexiones entre las neuronas. Todo proceso de aprendizaje implica cierto número de cambios en estas conexiones. En realidad se puede decir que se aprende modificando los pesos de la red.
+--fin notas
+
+[nota2 El aprendizaje de las redes neuronales se consigue habitualmente usando ejemplos: suelen tener un entrenamiento supervisado. Se basa en la comparación directa entre la salida de la red y la salida correcta o deseada.] Normalmente se formula el entrenamiento como la minimización de una función de error como el sumatorio del cuadrado del error de la salida respecto de la salida deseada para todos los datos disponibles (que constan de pares de entradas con sus correspondientes salidas deseadas). [nota 3: Un algoritmo de optimización basado en el descenso del gradiente como la regla delta generalizada (también conocido como algoritmo /backpropagation/) puede ser usado después iterativamente para ajustar los pesos y así minimizar el error.]
+
+[TODO nota rosa 3
+El aprendizaje supervisado se caracteriza porque el proceso de aprendizaje se realiza mediante un metódico entrenamiento controlado por un agente externo, conocido como supervisor, que determina la respuesta que debería generar la red a partir de una entrada determinada. El supervisor comprueba la salida de la red y si ésta no coincide con lo que se quiere, se procede a modificar los pesos de las conexiones para conseguir que la salida obtenida se aproxime a la deseada.
+
+ Dentro de las redes con aprendizaje supervisado, el modelo BPN (Backpropagation) utiliza el aprendizaje por corrección del error. Una característica de este algoritmo es la representación interna del conocimiento que es capaz de organizar en la capa intermedia de las células para conseguir cualquier correspondencia entre la entrada y la salida de la red. Este método de aprendizaje está basado en la generalización de la regla delta,]
 
 #+CAPTION:    Red neuronal recurrente.
 #+LABEL:      figRecurrente
 #+ATTR_LaTeX: scale=0.35
 [[./img/recurrente.jpg]]
 
-El algoritmo /backpropagation/ no funciona con topologías recurrentes. En nuestro caso, no necesitamos una conectividad hacia delante, la librería implementada como parte del proyecto sí puede utilizar conexiones recurrentes como se especifica en el capítulo de [[analisis][análisis]]. Además, utilizamos aprendizaje por refuerzo y no necesitamos una colección de ejemplos (aunque se puede utilizar el error total en un conjunto de ejemplos para calcular el refuerzo). Los pesos los ajustará un algoritmo genético. La estructura de la red se definirá de forma previa y manualmente para cada problema y sólo evolucionarán los pesos (y umbrales).
+[NOTa rosa 4 No entiendo porque hablas del algoritmo BP y luego dices que no lo utilizas. Además hay una contradicción antes dices que para simplificar el trabajo van a ser feedforward y ahora dices que recurrentes, Por favor revisa bien este párrafo
+Si estás hablando de conceptos generales no queda claro porqué defines unos y otros no]
 
-*** MODIFICAR Fortalezas y deficiencias
+El algoritmo /backpropagation/ no funciona con [nota4 rosa]topologías recurrentes. En nuestro caso, no necesitamos una conectividad hacia delante, la librería implementada como parte del proyecto sí puede utilizar conexiones recurrentes como se especifica en el capítulo de [[analisis][análisis]]. Además, utilizamos aprendizaje por refuerzo y no necesitamos una colección de ejemplos (aunque se puede utilizar el error total en un conjunto de ejemplos para calcular el refuerzo). Los pesos los ajustará un algoritmo genético. La estructura de la red se definirá de forma previa y manualmente para cada problema y sólo evolucionarán los pesos (y umbrales).
+
+[nota rosa 5: 
+A que te refieres a las redes neuronales en general o a la BP?????
+En mi opinión no te debes meter en complicaciones en el tecto, está bien que tu conozcas los requisitos específicos pero yo no los pondría en el texto, porque te pueden hacer preguntas y ponerte en un serio compromiso.]
+
+*** MODIFICAR [nota rosa 5: Fortalezas y deficiencias]
 #+LaTeX: \label{baseTeoricaFortRedes}
 
-Las redes neuronales con conexión hacia delante en general son un importante método de aproximación de funciones \cite[Kim, 1992]{Kim92}. El perceptrón multicapa es un tipo de red neuronal con conexiones hacia delante. La topología de un perceptrón multicapa esta definida por un conjunto de capas ocultas, una capa de entrada y una de salida. No existen restricciones sobre la función de activación aunque en general se suelen utilizar funciones sigmoideas. Existen demostraciones teóricas \cite[Funahashi, 1989]{Funahashi89} de que un perceptrón multicapa cuya función de activación sea no constante, acotada y monótona creciente es un aproximador universal de funciones. En \cite[Hornik et alt, 1989]{Hornik89} se llega a un resultado similar utilizando funciones de activación sigmoideas, no necesariamente continuas. Esto es un punto muy fuerte de las redes neuronales. 
+[Nota rosa 6
+Ojo que en la literatura se suele cuando se habla de perceptron multicapa se considera algoritmo BP. De todas formas sigo sin entender si vas a utilizar un aprendizaje por refuerzo por que insistes en BP.]
+
+Las redes neuronales con conexión hacia delante en general son un importante método de aproximación de funciones \cite[Kim, 1992]{Kim92}. El perceptrón multicapa es un tipo de red neuronal con conexiones hacia delante. [nota rosa 6La topología de un perceptrón multicapa esta definida por un conjunto de capas ocultas, una capa de entrada y una de salida. No existen restricciones sobre la función de activación aunque en general se suelen utilizar funciones sigmoideas. Existen demostraciones teóricas \cite[Funahashi, 1989]{Funahashi89} de que un perceptrón multicapa cuya función de activación sea no constante, acotada y monótona creciente es un aproximador universal de funciones. En \cite[Hornik et alt, 1989]{Hornik89} se llega a un resultado similar utilizando funciones de activación sigmoideas, no necesariamente continuas. Esto es un punto muy fuerte de las redes neuronales. ]
 
 Además, constituyen buena una herramienta para la construcción de agentes pues sólo hay que codificar las entradas y las salidas de la red como las del agente y el tiempo de ejecución de la red sólo depende de la topología de ésta (para una topología dada, es lineal con respecto al número de entradas consecutivas).
 
@@ -658,7 +684,7 @@ Para activar cualquiera de las dos modalidades en cualquiera de los dos operador
 
 Tanto los algoritmos genéticos como las redes neuronales requieren cálculos que presentan paralelismos inherentes. Para este proyecto se ha escogido explotar exclusivamente los de las redes neuronales (aunque también se paraleliza el operador genético de cruce para GPGPU, como se describe en la sección \ref{disenoParalCUDAcruza}). Pero la implementación se podría extender para aprovechar también los de los algoritmos genéticos, por ejemplo, utilizando múltiples CPUs y GPUs, usando una CPU para cada individuo y administrando las GPUs según su disponibilidad. Esto requeriría cambios no triviales en el modo en que las poblaciones son procesadas cada generación si se quiere extender la librería en ese sentido. Nuestras paralelizaciones solamente usan una CPU. Se han optado por dos alternativas que se comparan.
 
-Gracias al diseño modular por el que se ha optado, es posible añadir otras implementaciones paralelas de las redes neuronales (por ejemplo, usando el lenguaje OpenCL) tan sólo implementando unos pocos métodos en un par de clases que extiendan las clases Fachada (TODO nota al pie sobre el patrón de diseño) que contienen toda la parte susceptible de ser cambiada para obtener mejor rendimiento.
+Gracias al diseño modular por el que se ha optado, es posible añadir otras implementaciones paralelas de las redes neuronales (por ejemplo, usando el lenguaje OpenCL) tan sólo implementando unos pocos métodos en un par de clases que extiendan las clases Fachada (patrón de diseño ya comentado en el diseño) que contienen toda la parte susceptible de ser cambiada para obtener mejor rendimiento.
 
 La primera alternativa implementada es la utilización del conjunto ampliado de instrucciones SSE2 para acceder al co-procesador XMM. Este co-procesador está presente en todos los computadores recientes de la familia x86 liderada por Intel, que es probablemente la arquitectura más extendida en el mundo. La arquitectura vectorial del co-procesador multimedia permite operar sobre varios datos similares al mismo tiempo. En la sección \ref{disenoParalXMM} se explica con más detalle la arquitectura del mismo y como se ha utilizado para paralelizar nuestro algoritmo.
 
@@ -1493,10 +1519,7 @@ InvertedKernel<<< grid_size, block_size, shared_mem_size >>>
        (inputPtr, weighs, results, input_size, output_size);
 #+end_src
 
-La constante =CUDA_MAX_SHARED_FLOATS= nos dice las entradas que podremos almacenar en memoria compartida en cada llamada al kernel. Para que funcione en todos los dispositivos, consideraremos un tamaño de memoria compartida de 16 KB ó 16384 Bytes a la que hay que descontar los parámetros del kernel. Hay ya 16 Bytes de memoria compartida que están reservados para almacenar las variables internas blockIdx, blockDim y gridDim (threadIdx se almacena en un registro especial). Además, se pueden usar hasta 256 bytes  como parámetros propios a los kernels. Nuestros parámetros propios son 3 punteros y 2 enteros sin signo. Todos ellos ocupan 4 Bytes, por lo que en nuestro caso debemos reservar 20 bytes más para los parámetros del kernel. En total, tenemos 16384 - 16 - 20 = 16348, por lo que para la versión de neurona real (dividir entre los 4 bytes que ocupa un float) tenemos que el tamaño máximo de la capa  de entrada es 4087.
-Para dispositivos de capacidad de computación 2.0 o superiores, se puede adaptar el valor de esta constante y así aprovechar los 48 KB en lugar de usar sólo 16 KB.
-
-TODO pero los accesos coalescentes tiene que ser desde posiciones de memoria alineadas con 64 bytes, así es que 16348-64
+La constante =CUDA_MAX_SHARED_FLOATS= nos dice las entradas que podremos almacenar en memoria compartida en cada llamada al kernel. Para que funcione en todos los dispositivos, consideraremos un tamaño de memoria compartida de 16 KB ó 16384 Bytes a la que hay que descontar los parámetros del kernel. Hay ya 16 Bytes de memoria compartida que están reservados para almacenar las variables internas blockIdx, blockDim y gridDim (threadIdx se almacena en un registro especial). Además, se pueden usar hasta 256 bytes  como parámetros propios a los kernels. Nuestros parámetros propios son 3 punteros y 2 enteros sin signo. Todos ellos ocupan 4 Bytes, por lo que en nuestro caso debemos reservar 20 bytes más para los parámetros del kernel. En total, tenemos 16384 - 16 - 20 = 16348, por lo que para la versión de neurona real (dividir entre los 4 bytes que ocupa un float) tenemos que el tamaño máximo de la capa  de entrada es 4087. Para dispositivos de capacidad de computación 2.0 o superiores, se puede adaptar el valor de esta constante y así aprovechar los 48 KB en lugar de usar sólo 16 KB. Pero como los accesos coalescentes tienen que ser desde posiciones de memoria alineadas con 64 bytes, utilizamos 16348-64 en lugar de 16348-36.
 
 Independientemente del valor de la constante, en cada llamada al kernel se incrementa el puntero a las entradas en ese número de posiciones. El puntero de pesos se incrementa más rápido, puesto que por cada entrada que se procesa, se leen los pesos de todas las neuronas de salida correspondientes a esa entrada. Mientras el número de entradas por procesar sea mayor a la constante, se seguirá llamando al kernel, indicándole la constante como el número de entradas que debe procesar. Para la última llamada se indican las entradas que queden y también se adapta el parámetro de memoria compartida para reservar sólo la que se va a usar.
 
