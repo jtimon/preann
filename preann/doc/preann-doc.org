@@ -2890,6 +2890,9 @@ El nuevo operador de olvido/reset presenta otra vez unos resultados similares a 
 * MODIFICAR Resultados: Aprendizaje
 #+LaTeX: \label{aprendizaje}
 
+[TODO nota rosa
+Yo aquí insistiría en la justificación de las pruebas realizadas. Y en los resultados tratar de indicar el porqué existen similitudes o diferencias según la función de activación]
+
 En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación. Nos abstraemos por ello de la implementación concreta y usamos la SSE2 para todas las pruebas del capítulo. Se elige esa implementación por ser la más rápida usando la máquina descrita en \ref{rendMaqLaptop} y porque no se miden tiempos sino generaciones, por lo que la implementación paralela no va a afectar al resultado.
 
 ** Comparación entre las distintas funciones de activación
