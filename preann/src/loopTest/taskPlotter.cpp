@@ -66,7 +66,7 @@ protected:
         initialPopulation->setParams(tParameters);
 
         TaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tPlotData);
-        tPlotData->xToPlot->repeatFunction(&addToArrayAction, tParameters);
+        tPlotData->xToPlot->repeatFunction(&addToArrayAction);
 
         delete (initialPopulation);
     }
@@ -144,7 +144,7 @@ protected:
         initialPopulation->setParams(tParameters);
 
         TaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tPlotData);
-        tPlotData->xToPlot->repeatFunction(&addToArrayAction, tParameters);
+        tPlotData->xToPlot->repeatFunction(&addToArrayAction);
 
         delete (initialPopulation);
         delete (example);

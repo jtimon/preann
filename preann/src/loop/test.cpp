@@ -105,7 +105,7 @@ protected:
 void Test::testMemoryLosses(GenericLoopFuncPtr function, string label, Loop* loop)
 {
     TestMemLossesFunction testMemFunc(function, &parameters, label);
-    loop->repeatFunction(&testMemFunc, &parameters);
+    loop->repeatFunction(&testMemFunc);
 }
 
 class TestAction : public LoopFunction
@@ -137,5 +137,5 @@ protected:
 void Test::test(TestFunctionPtr func, std::string functionLabel, Loop* loop)
 {
     TestAction testAction(func, &parameters, functionLabel);
-    loop->repeatFunction(&testAction, &parameters);
+    loop->repeatFunction(&testAction);
 }

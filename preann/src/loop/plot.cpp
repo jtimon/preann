@@ -215,7 +215,7 @@ void createGnuPlotScript(PlotData* plotData, Loop* linesLoop, ParametersMap* par
     string subPath = plotData->plotPath + "data/" + title + "_";
 
     PreparePlotFunction preparePlotFunction(parameters, subPath, plotFile, linesLoop);
-    linesLoop->repeatFunction(&preparePlotFunction, parameters);
+    linesLoop->repeatFunction(&preparePlotFunction);
     fprintf(plotFile, "\n");
     fclose(plotFile);
 }
@@ -273,7 +273,7 @@ void Plot::_customPlot(std::string title, LoopFunction* fillArrayRepeater, Loop*
     createGnuPlotScript(&plotData, linesLoop, &parameters, title);
 
     GenericPlotAction plotFunction(fillArrayRepeater, &parameters, title, &plotData);
-    linesLoop->repeatFunction(&plotFunction, &parameters);
+    linesLoop->repeatFunction(&plotFunction);
 
     plotFile(plotData.plotPath, title);
 }
@@ -307,7 +307,7 @@ protected:
         }
 
         // Fill Y vector
-        tToAverage->repeatFunction(tFillArrayRepeater, tParameters);
+        tToAverage->repeatFunction(tFillArrayRepeater);
 
         for (unsigned i = 0; i < tPlotData->arraySize; ++i) {
             tPlotData->yArray[i] = tPlotData->yArray[i] / tToAverageLeafs;
@@ -353,7 +353,7 @@ protected:
         createGnuPlotScript(tPlotData, tLinesLoop, tParameters, title);
 
         GenericPlotAction plotFunction(tFillArrayRepeater, tParameters, title, tPlotData);
-        tLinesLoop->repeatFunction(&plotFunction, tParameters);
+        tLinesLoop->repeatFunction(&plotFunction);
 
         plotFile(tPlotData->plotPath, title);
     }
@@ -371,7 +371,7 @@ void Plot::_customMultiFileAveragedPlot(std::string title, LoopFunction* fillArr
                                                    &plotData);
 
     ForFilesGenericRepeater forFilesRepeater(&forAvergaesRepeater, &parameters, title, linesLoop, &plotData);
-    filesLoop->repeatFunction(&forFilesRepeater, &parameters);
+    filesLoop->repeatFunction(&forFilesRepeater);
 }
 
 void Plot::separateLoops(Loop* topLoop)
@@ -501,7 +501,7 @@ public:
 protected:
     virtual void __executeImpl()
     {
-        tToPlot->repeatFunction(tArrayFillerAction, tParameters);
+        tToPlot->repeatFunction(tArrayFillerAction);
     }
 };
 
@@ -530,7 +530,7 @@ void Plot::genericMultiFilePlot(std::string title, GenericPlotFillAction* fillAr
     FillArrayGenericRepeater fillArrayRepeater(fillArrayAction, &parameters, title, plotData.xToPlot);
 
     ForFilesGenericRepeater forFilesRepeater(&fillArrayRepeater, &parameters, title, linesLoop, &plotData);
-    filesLoop->repeatFunction(&forFilesRepeater, &parameters);
+    filesLoop->repeatFunction(&forFilesRepeater);
 }
 
 void Plot::genericMultiFileAveragedPlot(std::string title, GenericPlotFillAction* fillArrayAction,

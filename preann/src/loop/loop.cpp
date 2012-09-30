@@ -99,11 +99,11 @@ void Loop::__repeatBase(LoopFunction* func)
 void Loop::repeatFunction(GenericLoopFuncPtr func, ParametersMap* parametersMap, std::string functionLabel)
 {
     LoopFunction* function = new LoopFunction(func, parametersMap, functionLabel);
-    repeatFunction(function, parametersMap);
+    repeatFunction(function);
     delete (function);
 }
 
-void Loop::repeatFunction(LoopFunction* func, ParametersMap* parametersMap)
+void Loop::repeatFunction(LoopFunction* func)
 {
     std::string functionLabel = func->getLabel();
 //    cout << "Repeating function... " << functionLabel << endl;
@@ -130,7 +130,7 @@ unsigned Loop::getNumLeafs()
 {
     ParametersMap params;
     LoopFunction* function = new LoopFunction(__emptyFunction_, &params, "Loop::getNumLeafs()");
-    repeatFunction(function, &params);
+    repeatFunction(function);
     unsigned lastLeafPlusOne = function->getLeaf();
     delete (function);
     return lastLeafPlusOne;

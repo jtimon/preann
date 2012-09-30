@@ -56,7 +56,7 @@ public:
     virtual void print() = 0;
 
     void repeatFunction(GenericLoopFuncPtr func, ParametersMap* parametersMap, std::string functionLabel);
-    void repeatFunction(LoopFunction* func, ParametersMap* parametersMap);
+    void repeatFunction(LoopFunction* func);
 
     virtual std::string valueToString() = 0;
     virtual std::string getState(bool longVersion);
