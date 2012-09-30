@@ -131,12 +131,12 @@ int main(int argc, char *argv[])
         plotter.plotChronoAveraged(chronoCrossover, "chronoGen_crossover", &crossLoop, &averageLoop, 50);
 
         EnumLoop mutatAlgLoop(ET_MUTATION_ALG, 2, MA_PER_INDIVIDUAL, MA_PROBABILISTIC);
-        mutatAlgLoop.addInnerLoop(new RangeLoop(PROBABILITY, 0.1, 0.5, 0.1));
+        mutatAlgLoop.addInnerLoop(new RangeLoop(PROBABILITY, 0.0025, 0.011, 0.0025));
 
         plotter.plotChronoAveraged(chronoMutations, "chronoGen_mutate", &mutatAlgLoop, &averageLoop, 100);
 
         EnumLoop resetAlgLoop(ET_RESET_ALG, 2, RA_PER_INDIVIDUAL, RA_PROBABILISTIC);
-        resetAlgLoop.addInnerLoop(new RangeLoop(PROBABILITY, 0.1, 0.5, 0.1));
+        resetAlgLoop.addInnerLoop(new RangeLoop(PROBABILITY, 0.0025, 0.011, 0.0025));
 
         plotter.plotChronoAveraged(chronoReset, "chronoGen_reset", &resetAlgLoop, &averageLoop, 100);
 
