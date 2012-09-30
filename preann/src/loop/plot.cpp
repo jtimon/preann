@@ -505,14 +505,14 @@ protected:
     }
 };
 
-void Plot::genericPlot(std::string title, GenericPlotFillAction* fillArrayAction, Loop* linesLoop)
+void Plot::customPlot(std::string title, CustomPlotFillAction* fillArrayAction, Loop* linesLoop)
 {
     FillArrayGenericRepeater fillArrayRepeater(fillArrayAction, &parameters, title, plotData.xToPlot);
 
     _customPlot(title, &fillArrayRepeater, linesLoop);
 }
 
-void Plot::genericAveragedPlot(std::string title, GenericPlotFillAction* fillArrayAction, Loop* linesLoop,
+void Plot::customAveraged(std::string title, CustomPlotFillAction* fillArrayAction, Loop* linesLoop,
                                Loop* averagesLoop)
 {
     FillArrayGenericRepeater fillArrayRepeater(fillArrayAction, &parameters, title, plotData.xToPlot);
@@ -520,7 +520,7 @@ void Plot::genericAveragedPlot(std::string title, GenericPlotFillAction* fillArr
     _customAveragedPlot(title, &fillArrayRepeater, linesLoop, averagesLoop);
 }
 
-void Plot::genericMultiFilePlot(std::string title, GenericPlotFillAction* fillArrayAction, Loop* linesLoop,
+void Plot::customMultiFile(std::string title, CustomPlotFillAction* fillArrayAction, Loop* linesLoop,
                                 Loop* filesLoop)
 {
     validateLinesLoop(linesLoop);
@@ -533,23 +533,63 @@ void Plot::genericMultiFilePlot(std::string title, GenericPlotFillAction* fillAr
     filesLoop->repeatFunction(&forFilesRepeater);
 }
 
-void Plot::genericMultiFileAveragedPlot(std::string title, GenericPlotFillAction* fillArrayAction,
+void Plot::customMultiFileAveraged(std::string title, CustomPlotFillAction* fillArrayAction,
                                         Loop* linesLoop, Loop* filesLoop, Loop* averagesLoop)
 {
     FillArrayGenericRepeater fillArrayRepeater(fillArrayAction, &parameters, title, plotData.xToPlot);
     _customMultiFileAveragedPlot(title, &fillArrayRepeater, linesLoop, filesLoop, averagesLoop);
 }
 
-void Plot::plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, Loop* linesLoop,
+void Plot::customCombinations(CustomPlotFillAction* fillArrayAction, std::string title, Loop* linesLoop,
                             bool differentFiles)
 {
-    plotCombinations(fillArrayAction, title, linesLoop, NULL, differentFiles);
+    customCombinations(fillArrayAction, title, linesLoop, NULL, differentFiles);
 }
 
-void Plot::plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, Loop* linesLoop,
+void Plot::customCombinations(CustomPlotFillAction* fillArrayAction, std::string title, Loop* linesLoop,
                             Loop* averagesLoop, bool differentFiles)
 {
     FillArrayGenericRepeater fillArrayRepeater(fillArrayAction, &parameters, title, plotData.xToPlot);
     _customCombinationsPlot(title, &fillArrayRepeater, linesLoop, averagesLoop, differentFiles);
+}
+
+void Plot::plot(GenericPlotFunctionPtr func, std::string title, Loop* linesLoop)
+{
+    GenericPlotFillAction action(func, &parameters, title, &plotData, false);
+    customPlot(title, &action, linesLoop);
+}
+
+void Plot::plotAveraged(GenericPlotFunctionPtr func, std::string title, Loop* linesLoop,
+                                  Loop* averagesLoop)
+{
+    GenericPlotFillAction action(func, &parameters, title, &plotData, true);
+    customAveraged(title, &action, linesLoop, averagesLoop);
+}
+
+void Plot::plotFiles(GenericPlotFunctionPtr func, std::string title, Loop* linesLoop,
+                               Loop* filesLoop)
+{
+    GenericPlotFillAction action(func, &parameters, title, &plotData, false);
+    customMultiFile(title, &action, linesLoop, filesLoop);
+}
+
+void Plot::plotFilesAveraged(GenericPlotFunctionPtr func, std::string title, Loop* linesLoop,
+                                       Loop* filesLoop, Loop* averagesLoop)
+{
+    GenericPlotFillAction action(func, &parameters, title, &plotData, true);
+    customMultiFileAveraged(title, &action, linesLoop, filesLoop, averagesLoop);
+}
+
+void Plot::plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
+                                      bool differentFiles)
+{
+    plotCombinations(yFunction, title, linesLoop, NULL, differentFiles);
+}
+
+void Plot::plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
+                                      Loop* averagesLoop, bool differentFiles)
+{
+    GenericPlotFillAction action(yFunction, &parameters, title, &plotData, true);
+    _customCombinationsPlot(title, &action, linesLoop, averagesLoop, differentFiles);
 }
 

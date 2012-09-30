@@ -13,6 +13,9 @@
 #define PLOT_MAX_COLOR 16
 #define PLOT_MAX_POINT 13
 
+typedef float (*GenericPlotFunctionPtr)(ParametersMap*);
+
+class CustomPlotFillAction;
 class GenericPlotFillAction;
 
 struct PlotData
@@ -54,33 +57,77 @@ public:
     void resetRangeX(float min, float max, float inc);
     void resetRangeX(string xLabel, float min, float max, float inc);
 
+    // generic plots
+    void plot(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop);
+    void plotAveraged(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
+                      Loop* averagesLoop);
+    void plotFiles(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop, Loop* filesLoop);
+    void plotFilesAveraged(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
+                           Loop* filesLoop, Loop* averagesLoop);
+
+    void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
+                          bool differentFiles);
+    void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop,
+                          Loop* averagesLoop, bool differentFiles);
+
     // custom plots
-    void genericPlot(std::string title, GenericPlotFillAction* fillArrayAction, Loop* linesLoop);
-    void genericAveragedPlot(std::string title, GenericPlotFillAction* fillArrayAction, Loop* linesLoop,
+    void customPlot(std::string title, CustomPlotFillAction* fillArrayAction, Loop* linesLoop);
+    void customAveraged(std::string title, CustomPlotFillAction* fillArrayAction, Loop* linesLoop,
                              Loop* averagesLoop);
 
-    void genericMultiFilePlot(std::string title, GenericPlotFillAction* fillArrayAction, Loop* linesLoop,
+    void customMultiFile(std::string title, CustomPlotFillAction* fillArrayAction, Loop* linesLoop,
                               Loop* filesLoop);
 
-    void genericMultiFileAveragedPlot(std::string title, GenericPlotFillAction* fillArrayAction,
+    void customMultiFileAveraged(std::string title, CustomPlotFillAction* fillArrayAction,
                                       Loop* linesLoop, Loop* filesLoop, Loop* averagesLoop);
-    void plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, Loop* linesLoop,
+    void customCombinations(CustomPlotFillAction* fillArrayAction, std::string title, Loop* linesLoop,
                           bool differentFiles);
-    void plotCombinations(GenericPlotFillAction* fillArrayAction, std::string title, Loop* linesLoop,
+    void customCombinations(CustomPlotFillAction* fillArrayAction, std::string title, Loop* linesLoop,
                           Loop* averagesLoop, bool differentFiles);
+
 };
 
-class GenericPlotFillAction : public LoopFunction
+class CustomPlotFillAction : public LoopFunction
 {
 protected:
     PlotData* tPlotData;
     bool tAverage;
 public:
-    GenericPlotFillAction(ParametersMap* parameters, string label, PlotData* plotData, bool average)
+    CustomPlotFillAction(ParametersMap* parameters, string label, PlotData* plotData, bool average)
             : LoopFunction(parameters, "GenericPlotFillAction " + label)
     {
         tPlotData = plotData;
         tAverage = average;
+    }
+    virtual void __executeImpl()
+    {
+        std::string error = "CustomPlotFillAction::__executeImpl : CustomPlotFillAction must be extended to use Plot.";
+        throw error;
+    }
+};
+
+class GenericPlotFillAction : public CustomPlotFillAction
+{
+protected:
+    GenericPlotFunctionPtr tFunctionPtr;
+public:
+    GenericPlotFillAction(GenericPlotFunctionPtr functionPtr, ParametersMap* parameters, string label,
+                           PlotData* plotData, bool average)
+            : CustomPlotFillAction(parameters, "GenericPlotFillAction2 " + label, plotData, average)
+    {
+        tFunctionPtr = functionPtr;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        float y = (tFunctionPtr)(tParameters);
+
+        unsigned pos = ((RangeLoop*) tCallerLoop)->getCurrentBranch();
+        if (tAverage) {
+            tPlotData->yArray[pos] += y;
+        } else {
+            tPlotData->yArray[pos] = y;
+        }
     }
 };
 

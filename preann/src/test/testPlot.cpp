@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "loop/genericPlotter.h"
+#include "loop/plot.h"
 
 float colorTest(ParametersMap* parametersMap)
 {
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
-        GenericPlotter plotter(argv[1], new RangeLoop("x", 0, 10, 1), "y");
+        Plot plotter(argv[1], new RangeLoop("x", 0, 10, 1), "y");
 
         RangeLoop* colorLoop = new RangeLoop("color", 0, PLOT_MAX_COLOR + 2, 1);
         plotter.plot(colorTest, "Plot_testColours", colorLoop);

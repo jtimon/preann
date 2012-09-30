@@ -16,14 +16,14 @@ ChronoPlotter::~ChronoPlotter()
 {
 }
 
-class ChronoFillAction : public GenericPlotFillAction
+class ChronoFillAction : public CustomPlotFillAction
 {
     ChronoFunctionPtr tFunctionToChrono;
     unsigned tRepetitions;
 public:
     ChronoFillAction(ChronoFunctionPtr functionToChrono, ParametersMap* parameters, string label,
                      PlotData* plotData, bool average, unsigned repetitions)
-            : GenericPlotFillAction(parameters, "ChronoFillAction " + label, plotData, average)
+            : CustomPlotFillAction(parameters, "ChronoFillAction " + label, plotData, average)
     {
         tFunctionToChrono = functionToChrono;
         tRepetitions = repetitions;
@@ -46,25 +46,25 @@ void ChronoPlotter::plotChrono(ChronoFunctionPtr func, std::string title, Loop* 
                                unsigned repetitions)
 {
     ChronoFillAction chronoAction(func, &parameters, title, &plotData, false, repetitions);
-    genericPlot(title, &chronoAction, linesLoop);
+    customPlot(title, &chronoAction, linesLoop);
 }
 
 void ChronoPlotter::plotChronoAveraged(ChronoFunctionPtr func, std::string title, Loop* linesLoop, Loop* averagesLoop, unsigned repetitions)
 {
     ChronoFillAction chronoAction(func, &parameters, title, &plotData, true, repetitions);
-    genericAveragedPlot(title, &chronoAction, linesLoop, averagesLoop);
+    customAveraged(title, &chronoAction, linesLoop, averagesLoop);
 }
 
 void ChronoPlotter::plotChronoFiles(ChronoFunctionPtr func, std::string title, Loop* linesLoop, Loop* filesLoop, unsigned repetitions)
 {
     ChronoFillAction chronoAction(func, &parameters, title, &plotData, false, repetitions);
-    genericMultiFilePlot(title, &chronoAction, linesLoop, filesLoop);
+    customMultiFile(title, &chronoAction, linesLoop, filesLoop);
 }
 
 void ChronoPlotter::plotChronoFilesAveraged(ChronoFunctionPtr func, std::string title, Loop* linesLoop, Loop* filesLoop, Loop* averagesLoop, unsigned repetitions)
 {
     ChronoFillAction chronoAction(func, &parameters, title, &plotData, true, repetitions);
-    genericMultiFileAveragedPlot(title, &chronoAction, linesLoop, filesLoop, averagesLoop);
+    customMultiFileAveraged(title, &chronoAction, linesLoop, filesLoop, averagesLoop);
 }
 
 void ChronoPlotter::plotCombinations(ChronoFunctionPtr func, std::string title, Loop* linesLoop, bool differentFiles, unsigned repetitions)

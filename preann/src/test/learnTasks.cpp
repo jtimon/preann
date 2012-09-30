@@ -5,7 +5,6 @@ using namespace std;
 
 #include "common/chronometer.h"
 #include "loopTest/taskPlotter.h"
-#include "loop/genericPlotter.h"
 #include "genetic/population.h"
 #include "tasks/binaryTask.h"
 
