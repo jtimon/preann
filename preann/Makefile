@@ -117,9 +117,9 @@ cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EX
 #	uname -a > $(OUTPUT_DIR)info/OS4.txt
 #	./bin/chronoMutations.exe $(OUTPUT_DIR)
 #	./bin/chronoInterface.exe $(OUTPUT_DIR)
-	./bin/chronoActivation.exe $(OUTPUT_DIR)
+#	./bin/chronoActivation.exe $(OUTPUT_DIR)
 #	./bin/chronoCrossover.exe $(OUTPUT_DIR)
-	./bin/chronoCalculateAndAdd.exe $(OUTPUT_DIR)
+#	./bin/chronoCalculateAndAdd.exe $(OUTPUT_DIR)
 #	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe $(CURDIR)/
 #	./bin/testConnections.exe
