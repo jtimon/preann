@@ -18,60 +18,6 @@ TaskPlotter::~TaskPlotter()
 
 // * basic methods
 
-class TaskAddAction : public LoopFunction
-{
-    Population* tPopulation;
-    PlotData* tPlotData;
-public:
-    TaskAddAction(ParametersMap* parameters, string label, Population* population, PlotData* plotData)
-            : LoopFunction(parameters, "TaskAddAction " + label)
-    {
-        tPopulation = population;
-        tPlotData = plotData;
-    }
-protected:
-    virtual void __executeImpl()
-    {
-        float xValue = ((RangeLoop*) tCallerLoop)->getCurrentValue();
-        tPopulation->learn(xValue);
-        tPlotData->yArray[tLeaf] += tPopulation->getBestIndividualScore();
-    }
-};
-
-class TaskFillArrayRepeater : public LoopFunction
-{
-    Task* tTask;
-    Individual* tExample;
-    PlotData* tPlotData;
-public:
-    TaskFillArrayRepeater(ParametersMap* parameters, string label, Task* task, PlotData* plotData)
-            : LoopFunction(parameters, "TaskFillArrayRepeater " + label)
-    {
-        tTask = task;
-        tExample = tTask->getExample(parameters);
-        tPlotData = plotData;
-    }
-    ~TaskFillArrayRepeater()
-    {
-        delete (tExample);
-    }
-protected:
-    virtual void __executeImpl()
-    {
-        unsigned populationSize = tParameters->getNumber(Population::SIZE);
-        float weighsRange = tParameters->getNumber(Dummy::WEIGHS_RANGE);
-
-        // create population
-        Population* initialPopulation = new Population(tTask, tExample, populationSize, weighsRange);
-        initialPopulation->setParams(tParameters);
-
-        TaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tPlotData);
-        tPlotData->xToPlot->repeatFunction(&addToArrayAction);
-
-        delete (initialPopulation);
-    }
-};
-
 void TaskPlotter::plotTask(Task* task, std::string title, Loop* linesLoop)
 {
     RangeLoop auxLoop("aux_average", 1, 2, 1);
@@ -120,37 +66,6 @@ void TaskPlotter::plotCombinations(Task* task, std::string title, Loop* linesLoo
 }
 
 // * Enumerated Tasks
-
-class EnumTaskFillArrayRepeater : public LoopFunction
-{
-    PlotData* tPlotData;
-public:
-    EnumTaskFillArrayRepeater(ParametersMap* parameters, string label, PlotData* plotData)
-            : LoopFunction(parameters, "EnumTaskFillArrayRepeater " + label)
-    {
-        tPlotData = plotData;
-    }
-protected:
-    virtual void __executeImpl()
-    {
-        unsigned populationSize = tParameters->getNumber(Population::SIZE);
-        float weighsRange = tParameters->getNumber(Dummy::WEIGHS_RANGE);
-
-        Task* task = Dummy::task(tParameters);
-        Individual* example = task->getExample(tParameters);
-
-        // create population
-        Population* initialPopulation = new Population(task, example, populationSize, weighsRange);
-        initialPopulation->setParams(tParameters);
-
-        TaskAddAction addToArrayAction(tParameters, tLabel, initialPopulation, tPlotData);
-        tPlotData->xToPlot->repeatFunction(&addToArrayAction);
-
-        delete (initialPopulation);
-        delete (example);
-        delete (task);
-    }
-};
 
 void TaskPlotter::plotTask(std::string title, Loop* linesLoop)
 {

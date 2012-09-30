@@ -32,4 +32,30 @@ public:
                           bool differentFiles, unsigned repetitions);
 };
 
+class ChronoFillAction : public CustomPlotFillAction
+{
+    ChronoFunctionPtr tFunctionToChrono;
+    unsigned tRepetitions;
+public:
+    ChronoFillAction(ChronoFunctionPtr functionToChrono, ParametersMap* parameters, string label,
+                     PlotData* plotData, bool average, unsigned repetitions)
+            : CustomPlotFillAction(parameters, "ChronoFillAction " + label, plotData, average)
+    {
+        tFunctionToChrono = functionToChrono;
+        tRepetitions = repetitions;
+    }
+protected:
+    virtual void __executeImpl()
+    {
+        float timeCount = (tFunctionToChrono)(tParameters, tRepetitions);
+
+        unsigned pos = ((RangeLoop*) tCallerLoop)->getCurrentBranch();
+        if (tAverage) {
+            tPlotData->yArray[pos] += timeCount / tRepetitions;
+        } else {
+            tPlotData->yArray[pos] = timeCount / tRepetitions;
+        }
+    }
+};
+
 #endif /* CHRONOPLOTTER_H_ */
