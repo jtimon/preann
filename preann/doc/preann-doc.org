@@ -31,57 +31,109 @@
      \href{mailto:#1} {#1}
 }
 
-\newcommand{\definicion}[1]{%
-	\textbullet \bfseries{ #1 :}
-}
+\newcommand{\unex}{
 
-\newenvironment{listaDefiniciones}%
-%ordenes al inicio
-{
-\begin{list}{}%
-     {  \setlength{\itemsep}{0.5ex}
-	\setlength{\parsep}{0.5ex}
-	\setlength{\partopsep}{0.5ex}
-	\setlength{\topsep}{\dimexpr 2\itemsep}
-	\setlength{\listparindent}{\dimexpr \parindent}
-	\renewcommand*{\makelabel}[1]{\definicion{##1}}
-	}
+\begin{figure}[t]
+    \includegraphics [width=2cm]{./img/logoUnex.png}
+\hfill
+    \includegraphics [width=4cm]{./img/logoPolitecnica.png}
+\end{figure}
+
+\textbf{\Huge\centering
+UNIVERSIDAD DE EXTREMADURA
 }
-%ordenes al final
-{
-\end{list}
-}%
+}
+#+end_latex
+
+# Título
+#+begin_latex
+\unex
+
+\begin{center}
+\textbf{\huge
+\\[0.5cm]
+Escuela Politécnica\\
+Ingeniería Informática\\
+\\[1.5cm]
+Proyecto fin de carrera\\
+\\[1cm]
+}}
+\textbf{\Huge\centering
+Aprendizaje por refuerzo mediante algoritmos genéticos de redes neuronales paralelizadas con GPGPU\\
+}}
+
+\vfill
+
+\end{center}
+\begin{flushright}
+{\LARGE
+Jorge Timón Morillo-Velarde\\\\
+Septiembre, 2012\\\\
+}
+\end{flushright}
+
+\newpage
 
 #+end_latex
 
-# Título, abstract e índice
+# Primera página
 #+begin_latex
+\unex
+\begin{center}
 
-\begin{titlepage}
-
-\title{Aprendizaje por refuerzo mediante algoritmos genéticos de redes neuronales paralelizadas con GPGPU}
-
-\author{
-\\\\\\\\\\\\
-Autor:\\\\
-Jorge Timón Morillo-Velarde\\\\
-\mail\\\\
-\\\\\\\\\\\\
-Tutores del proyecto:\\\\ 
-\\
-Rosa M. Pérez Utrero\\\\
-\mail[rosapere@unex.es]\\\\
-\\\\
-Juan A. Gómez Pulido\\\\
-\mail[jangomez@unex.es]\\\\
-\\\\\\\\\\\\
+\textbf{\huge
+Escuela Politécnica\\
+Ingeniería Informática\\
+\\[1cm]
+\LARGE
+Proyecto fin de carrera\\\\
+}
+\textbf{\huge\centering
+Aprendizaje por refuerzo mediante algoritmos genéticos de redes neuronales paralelizadas con GPGPU\\
 }
 
-\end{titlepage}
+\vfill
 
-\maketitle
+\textbf{Autor:}\\
+Jorge Timón Morillo-Velarde \mail\\
+Fdo.:................................................. \\
+
+\textbf{Directores:}
+
+Rosa M. Pérez Utrero  \mail[rosapere@unex.es]\\
+Fdo.:................................................. \\
+
+Juan A. Gómez Pulido  \mail[jangomez@unex.es]\\
+Fdo.:................................................. \\
+
+\end{center}
+\begin{flushright}
+
+\vfill
+
+\textbf{\large\large Tribunal Calificador}\\\\\\\\
+
+Presidente: \verb=       = Pablo Martínez Cobo \\
+Fdo.:................................................. \\
+\\\\
+Secretario: \verb== Miguel Ángel Vega Rodríguez \\
+Fdo.:................................................. \\
+     Vocal: \verb=  = Pedro Luis Aguilar Mateos \\
+Fdo.:................................................. \\
+\verb=     =
+\end{flushright}
+
+\begin{center}
+CALIFICACIÓN:\\
+FECHA:
+\end{center}
 
 \newpage
+#+end_latex
+
+
+# Abstract e índice
+#+begin_latex
 \begin{abstract}
 
 En este trabajo se estudia un método alternativo para el entrenamiento de redes neuronales. Se utiliza un algoritmo genético para ajustar los pesos de la red neuronal. Se evalúa el uso de diferentes tipos de neuronas (con salida real o binaria) para comparar sus rendimientos utilizando diferentes implementaciones paralelas (para el coprocesador XMM y para la arquitectura CUDA). Se prueban variaciones de los operadores genéticos y se mide su efectividad en el entrenamiento. Se enfrenta el algoritmo a diferentes tipos de problemas de aprendizaje por refuerzo y se reflexiona sobre la idoneidad del mismo para cada problema.
@@ -99,56 +151,44 @@ En este trabajo se estudia un método alternativo para el entrenamiento de redes
 \newpage
 #+end_latex
 
-* Correo Rosa 
-
-- Más que no se conozca es que no se usa directamente
-  He adaptado el texto para distinguir mejor entre el no supervisado en general y el por refuerzo. Pero en el aprendizaje por refuerzo no tiene por qué conocerse exactamente la salida deseada. Por ejemplo, yo no se a priori cómo de bueno es cada tablero para cada jugada posible (en el caso de Reversi).
-
-- ¿Es estrictamente necesario que aparezca código en el diseño?
-  No, al final lo he movido todo al manual del programador. En esta sección se verán las clases y métodos, pero sólo a través de diagramas y nunca viendo su implementación interna (eso último sólo se hace para la paralelización CUDA y SSE2).
-
-- [ ] se nota corta pega de varios sitios distintos. Se podría añadir un parrafo al principio en el que se indique lo que viene después. O mejor hilar unos parrafos con otros. Yo creo que deberías organizar un poco esta sección tan pronto hablasTan pronto hablas 
-	  Sí, hablaba primero de redes, luego genéticos luego otra vez redes...Lo he modificado un poco para intentar arreglarlo.
-
 * REVISAR Introducción
 #+LaTeX: \label{intro}
 
 El /aprendizaje automático/ es la rama de la inteligencia artificial que trata de construir sistemas informáticos que optimicen un criterio de rendimiento utilizando datos o experiencia previa. Dentro del aprendizaje automático, las técnicas se clasifican en función de su entrenamiento, éste puede ser supervisado o no supervisado. En el primero, al sistema se le suministran ejemplos de entradas con sus correspondientes salidas deseadas. En el entrenamiento no supervisado, no se tienen a priori ejemplos de cómo debería comportarse el sistema (en aglunos casos si se conocen, pero no se usan directamente). El aprendizaje por refuerzo es un caso especial de aprendizaje supervisado en que la salida deseada exacta es desconocida. Se basa sólo en información sobre si la salida del agente en cada acción es correcta o no (o lo correctas que son en conjunto ua serie de acciones). Al agente que se quiere que aprenda se le provee información sobre lo bien o lo mal que está actuando. Esta señal de recompensa puede serle indicada bien cada vez que el agente actúa, bien al final de una prueba completa durante la que realiza varias acciones.
 
-Los algoritmos que tienen su origen en la observación de la naturaleza se denominan bio-inspirados. Entre ellos se encuentran las redes neuronales y los algoritmos genéticos. Tras introducir a las dos técnicas en este orden, se hablará de cómo combinarlos, se explacará la motivación para hacer una implementación paralela de las redes neuronales, se hablará de los problemas que puede resolver y, finalmente, se decribe brevemente la organización del documento.
+Los algoritmos que tienen su origen en la observación de la naturaleza se denominan bio-inspirados. Entre ellos se encuentran las redes neuronales y los algoritmos genéticos, que son precisamente los que se utilizan en este proyecto.
 
-Las redes neuronales son modelos que intentan reproducir ciertas características de los sistemas neuronales biológicos \cite[Hilera y Martínez, 1995]{Hilera95}. Una red neuronal consiste en un conjunto de elementos de procesamiento, llamados neuronas, los cuales se conectan entre sí \cite[Koehn, 1994]{Koehn94}. Las conexiones entre las neuronas tienen pesos asociados cuyos valores determinarán el comportamiento de la red. Existen algoritmos para determinar el valor de los pesos de una red mediante un entrenamiento supervisado, cabe destacar el de retro-propagación del error.
+Las redes neuronales son modelos que intentan reproducir ciertas características de los sistemas neuronales biológicos \cite[Hilera y Martínez, 1995]{Hilera95}. Una red neuronal consiste en un conjunto de elementos de procesamiento, llamados neuronas, los cuales se conectan entre sí \cite[Koehn, 1994]{Koehn94}. Las conexiones entre las neuronas tienen pesos asociados cuyos valores determinarán el comportamiento de la red. Existen algoritmos para determinar el valor de los pesos de una red mediante un entrenamiento supervisado, cabe destacar el de retro-propagación del error. Dada una topología de red fija, el entrenamiento de una red neuronal puede ser visto como un proceso de optimización cuyo objetivo es encontrar un conjunto de pesos que minimice el error que produce la red sobre el conjunto de ejemplos en el entrenamiento supervisado, o que maximice la recompensa en el aprendizaje por refuerzo.
 
-Dada una topología de red fija, el entrenamiento de una red neuronal puede ser visto como un proceso de optimización cuyo objetivo es encontrar un conjunto de pesos que minimice el error que produce la red sobre el conjunto de ejemplos en el entrenamiento supervisado, o que maximice la recompensa en el aprendizaje por refuerzo.
-
-Los algoritmos evolutivos, dentro de los cuales los algoritmos genéticos son los más conocidos, son una familia de modelos computacionales inspirados en la evolución y la supervivencia del más apto \cite[B\"ach, et. al.]{BackSchwefel93}. Se utilizan fundamentalmente en la resolución de problemas de búsqueda y de optimización \cite[Holland, 1975]{Holland75}. Buscan una solución del problema reproduciendo genéticamente una población de individuos a lo largo de una serie de generaciones \cite[Koza, 1992]{Koza92}. El aprendizaje es formulado como un problema de optimización, en el que cada individuo de la población es una posible solución.
+Por su parte, los algoritmos evolutivos, dentro de los cuales los algoritmos genéticos son los más conocidos, son una familia de modelos computacionales inspirados en la evolución y la supervivencia del más apto \cite[B\"ach, et. al.]{BackSchwefel93}. Se utilizan fundamentalmente en la resolución de problemas de búsqueda y de optimización \cite[Holland, 1975]{Holland75}. Buscan una solución del problema reproduciendo genéticamente una población de individuos a lo largo de una serie de generaciones \cite[Koza, 1992]{Koza92}. El aprendizaje es formulado como un problema de optimización, en el que cada individuo de la población es una posible solución.
 
 En nuestro caso, el individuo o agente utilizará una red neuronal para decidir sus acciones (salida de la red) a partir de los datos que pueda recoger de su entorno (entrada a la red). Se utiliza un algoritmo genético para decidir los pesos adecuados para la red, utilizando una población de agentes con redes diferentes. Se utiliza la recompensa acumulada por el individuo en una o varias pruebas para medir su adaptación al medio. Se utilizan estas medidas y la población actual para construir la siguiente generación. Cuando algún individuo demuestra estar lo suficientemente adaptado al medio para cumplir con las expectativas del entrenamiento (o cuando se supera un límite prefijado de iteraciones), éste finaliza.
 
 En todo este proceso, El algoritmo que más se ejecuta es el que calcula la salida de la red a partir de la entrada. Este algoritmo se puede llamar varias veces por cada prueba. Además, las pruebas pueden repetirse varias veces por individuo para disminuir el ruido producido por los factores aleatorios que pueda haber en las pruebas y, por último, esto debe multiplicarse por el número de individuos que se evaluen por generación. Por ello, esta función se ha optimizado mediante su paralelización en dos arquitecturas ampliamente extendidas y económicas: el coprocesador XMM, presente en todos los PCs de reciente fabricación y la arquitectura CUDA [fn:cudaGPGPU], compatible con la mayoría de tarjetas gráficas NVIDIA a partir de la serie 8000. Además, para incrementar aún más el rendimiento, se estudia la viabilidad de entrenar redes con una versión mínima de neurona con activación de tipo escalón y con pesos con tamaño de un byte (en la sección \ref{disenoParal} se describe con más detalle). Llamaremos a las redes que utilizan estas estructuras redes discretas.
 
-Los problemas en los que aplicamos nuestro desarrollo, aunque no son realistas, se consideran interesantes para la robótica y/o para la inteligencia artificial. Utilizamos la librería implementada como parte del proyecto para que aprenda a resolver problemas de clasificación y a jugar a un juego de estrategia.
-Otros problemas para los que se podría utilizar la libraría podrían ser el control automático, la toma de decisiones en tiempo real y la colaboración de múltiples agentes en tiempo real. Este último tipo de problema puede estar relacionado con la [[http://es.wikipedia.org/wiki/Vida_artificial][vida artificial]]. En la mayoría de los problemas, el agente se enfrenta a pruebas genéricas que pueden tener factores aleatorios y/o agentes directamente programados. En algunos problemas, sin embargo, los agentes de la población pueden enfrentarse entre ellos para obtener una valoración.
+Los problemas en los que aplicamos nuestro desarrollo, aunque no son realistas, se consideran interesantes para la robótica y/o para la inteligencia artificial. Utilizamos la librería implementada como parte del proyecto para que aprenda a resolver problemas de clasificación y a jugar a un juego de estrategia. Otros problemas para los que se podría utilizar la librería pueden ser el control automático, la toma de decisiones en tiempo real y la colaboración de múltiples agentes en tiempo real. Este último tipo de problema puede estar relacionado con la [[http://es.wikipedia.org/wiki/Vida_artificial][vida artificial]]. En la mayoría de los problemas, el agente se enfrenta a pruebas genéricas que pueden tener factores aleatorios y/o agentes directamente programados. En algunos problemas, sin embargo, los agentes de la población pueden enfrentarse entre ellos para obtener una valoración.
 
 En el presente documento (que contiene la documentación asociada al proyecto fin de carrera titulado /<<Aprendizaje por refuerzo mediante algoritmos genéticos de redes neuronales paralelizadas con GPGPU>>/, desarrollado por Jorge Timón Morillo-Velarde para la consecución del título de ingeniería informática), primero comentaremos los fundamentos teóricos precisos para su comprensión y su correcta ubicación dentro del dominio de la neuro-evolución, diferenciándolo de otros desarrollos en éste área. Después, justificaremos las principales decisiones tomadas durante el desarrollo y explicaremos en detalle algunas partes de su implementación. Los rendimientos obtenidos con las diferentes implementaciones paralelas y opciones en el algortimo genético se muestran en el capítulo \ref{rendimiento}. En el capítulo \ref{experimentacion}, se describen los experimentos realizados y se justifica la elección de los mismos. El capítulo de resultados de aprendizaje \ref{aprendizaje} expone los datos empíricos recogidos en los experimentos y razona unas someras conclusiones que luego se completan en el capítulo \ref{conclusiones}.
 
 \newpage
-* MODIFICAR [0/1] Base teórica
+* REVISAR [1/1] Base teórica
 #+LaTeX: \label{baseTeorica}
 
-Tanto las redes neuronales como los algoritmos genéticos están inspirados en la naturaleza y han sido utilizados desde largo tiempo atrás. Las redes neuronales están inspiradas en el funcionamiento del cerebro, como un sistema de procesamiento de información distribuido. Por su parte, los algoritmos genéticos se basan en la teoría de la evolución de Darwin, por la que la evolución se produce a través de dos principios básicos: los individuos que no se adaptan suficientemente al medio perecen, mientras que los que sí lo hacen transmiten sus genes con cierta variabilidad. Esta variabilidad puede proceder de dos fuentes: el cruce de genes entre individuos ó la mutación directa de esos genes.
+Tanto las redes neuronales como los algoritmos genéticos están inspirados en la naturaleza y han sido utilizados desde largo tiempo atrás. Las redes neuronales están inspiradas en el funcionamiento del cerebro, como un sistema de procesamiento de información distribuido. Por otra parte, los algoritmos genéticos se basan en la teoría de la evolución de Darwin, por la que la evolución se produce a través de dos principios básicos: los individuos que no se adaptan suficientemente al medio perecen, mientras que los que sí lo hacen transmiten sus genes con cierta variabilidad. Esta variabilidad puede proceder de dos fuentes: el cruce de genes entre individuos ó la mutación directa de esos genes.
 
 La combinación de estas dos técnicas es algo relativamente reciente. Algunos autores - principalmente anglosajones - han coincidido en llamar a esta síntesis [[http://en.wikipedia.org/wiki/Neuroevolution][neuro-evolución]], otros se refieren a ella como [[http://laral.istc.cnr.it/nolfi/papers/HBTNN-A.pdf][evolución de redes neuronales artificiales]], GANN, etc. En general, la mayoría de los que la usan recurren a nombres que definen con más precisión la técnica concreta que utilizan; dadas las múltiples posibilidades para combinar ambos métodos. Aceptaremos el término neuro-evolución para el resto del texto, aunque sin renunciar a los otros términos que hayan podido ser utilizados como redes neuronales evolutivas.
 
 A continuación explicaremos más detalladamente las bases teóricas de las tres técnicas: redes neuronales, algoritmos genéticos y neuro-evolución. Nos centraremos principalmente en los algoritmos y estructuras que más se asemejan a los implementamos en nuestra librería.
 
 \newpage
-** MODIFICAR [0/2] Redes neuronales
+** REVISAR Redes neuronales
 #+LaTeX: \label{basTeoRedes}
 
-Describiremos de forma suscinta el funcionamiento general de las redes neuronales y sus estructuras más comunes, para luego discutir las ventajas y las posibles limitaciones, centrándonos en los algoritmos de aprendizaje de gradiente descendente y, en concreto, en el de retropropagación del error.
+Existen muchos tipos de redes neuronales, algunas muy especializadas en tareas concretas como los mapas de Kohonen o las redes de Hopfield. Describiremos de forma suscinta el funcionamiento general de las redes neuronales centrándonos en el perceptrón multicapa por simplicidad y por ser el más parecido a nuestro modelo en cuanto al funcionamiento de la red, a pesar de que el método de entrenamiento sea distinto. No obstante, describiremos también otros conceptos comunes en las redes neuronales que aunque no sean aplicables al perceptrón multicapa sí lo son a las redes neuronales evolutivas.
 
-*** MODIFICAR Conceptos generales
+Al discutir las ventajas y las posibles limitaciones, nos centraremos de nuevo en los algoritmos de aprendizaje de gradiente descendente y, en concreto, en el de retropropagación del error como técnica de redes neuronales de referencia, que es el que utiliza el perceptrón multicapa. Usaremos ese método de entrenamiento como referencia con la que comparar nuestro método teóricamente, aunque no todos los sistemas que utilizan redes neuronales comparten todas sus desventajas y virtudes.
+
+*** Conceptos generales
 
 Las redes neuronales constan de un conjunto de elementos de procesamiento - conocidos como nodos o neuronas - interconectados entre sí. Pueden ser descritas mediante un grafo dirigido en el que cada neurona  \(i\) usa una función de activación de la forma:
 
@@ -163,82 +203,70 @@ donde \(y_i\) es la salida de la neurona \(i\), \(x_j\) es la entrada número \(
 #+ATTR_LaTeX: trim= 0.5cm 22cm 10cm 0cm, clip, width=15cm
 [[./img/feed-forward.jpg]]
 
-[TODO NOTAS rosa 1: La conectividad entre los nodos de una red neuronal está relacionada con la forma en que las salidas de las neuronas están canalizadas para convertirse en entradas de otras neuronas. La señal de salida de un nodo puede ser una entrada de otro elemento de proceso, o incluso ser una entrada de su propia salida (conexión autorrecurrente).
+La *conectividad* entre los nodos de una red neuronal está relacionada con la forma en que las salidas de las neuronas están canalizadas para convertirse en entradas de otras neuronas. La señal de salida de un nodo puede ser una entrada de otro elemento de proceso, o incluso ser una entrada de su propia salida (conexión autorrecurrente).
 
-Cuando ninguna salida de la neurona es entrada de neuronas del mismo nivel o de niveles precedente, la red se describe como de propagación hacia adelante. Cuando las salidas pueden ser conectadas como entradas de neuronas de niveles previos o del mismo nivel, incluyéndose ellas mismas, la red es de propagación hacia atrás. ]
-
-[nota1 Las redes neuronales artificiales pueden clasificarse como /feed-forward/ (con propagación hacia delante) o recurrentes dependiendo de su conectividad. Una red es /feed-forward/ (figura \ref{figFeedForward}) si existe un método de numeración de las neuronas que cumpla que no existan conexiones desde un nodo hacia otro nodo con un número más pequeño que el de nodo de origen.] Una red es recurrente (figura \ref{figRecurrente}) si no existe un método de numeración que cumpla tal condición. En el presente trabajo, nos centraremos en las redes /feed-forward/, aunque la librería implementada permite conexiones recurrentes.
-
-[TODO nota rosa 2:
-Aprendizaje se puede definir como: La modificación del comportamiento inducido por la interacción con el entorno y como resultado de experiencias conducentes al establecimiento de nuevos modelos de respuestas ante estímulos externos.
-Biológicamente, se suele aceptar que la información memorizada en el cerebro está más relacionada con los valores sinápticos de las conexiones entre las neuronas que con ellas mismas; es decir, el conocimiento se encuentra en las sinapsis. En el caso de las redes neuronales artificiales, se puede considerar que el conocimiento se encuentra representado en los pesos de las conexiones entre las neuronas. Todo proceso de aprendizaje implica cierto número de cambios en estas conexiones. En realidad se puede decir que se aprende modificando los pesos de la red.]
-
-[nota2 El aprendizaje de las redes neuronales se consigue habitualmente usando ejemplos: suelen tener un entrenamiento supervisado. Se basa en la comparación directa entre la salida de la red y la salida correcta o deseada.] Normalmente se formula el entrenamiento como la minimización de una función de error como el sumatorio del cuadrado del error de la salida respecto de la salida deseada para todos los datos disponibles (que constan de pares de entradas con sus correspondientes salidas deseadas). [nota 3: Un algoritmo de optimización basado en el descenso del gradiente como la regla delta generalizada (también conocido como algoritmo /backpropagation/) puede ser usado después iterativamente para ajustar los pesos y así minimizar el error.]
-
-[TODO nota rosa 3
-El aprendizaje supervisado se caracteriza porque el proceso de aprendizaje se realiza mediante un metódico entrenamiento controlado por un agente externo, conocido como supervisor, que determina la respuesta que debería generar la red a partir de una entrada determinada. El supervisor comprueba la salida de la red y si ésta no coincide con lo que se quiere, se procede a modificar los pesos de las conexiones para conseguir que la salida obtenida se aproxime a la deseada.
-
- Dentro de las redes con aprendizaje supervisado, el modelo BPN (Backpropagation) utiliza el aprendizaje por corrección del error. Una característica de este algoritmo es la representación interna del conocimiento que es capaz de organizar en la capa intermedia de las células para conseguir cualquier correspondencia entre la entrada y la salida de la red. Este método de aprendizaje está basado en la generalización de la regla delta,]
+Cuando ninguna salida de la neurona es entrada de neuronas del mismo nivel o de niveles precedente, la red se describe como de propagación hacia adelante  (figura \ref{figFeedForward}). Cuando las salidas pueden ser conectadas como entradas de neuronas de niveles previos o del mismo nivel, incluyéndose ellas mismas, la red es recurrente (figura \ref{figRecurrente}) o de propagación hacia atrás. Dicho de otra manera, si existe un método de numeración de las neuronas que cumpla que no existan conexiones desde un nodo hacia otro nodo con un número más pequeño que el de nodo de origen, la red es de propagación hacia delante, en caso contrario es recurrente.
 
 #+CAPTION:    Red neuronal recurrente.
 #+LABEL:      figRecurrente
 #+ATTR_LaTeX: scale=0.35
 [[./img/recurrente.jpg]]
 
-[NOTa rosa 4 No entiendo porque hablas del algoritmo BP y luego dices que no lo utilizas. Además hay una contradicción antes dices que para simplificar el trabajo van a ser feedforward y ahora dices que recurrentes, Por favor revisa bien este párrafo
-Si estás hablando de conceptos generales no queda claro porqué defines unos y otros no]
+El *aprendizaje* se puede definir como /la modificación del comportamiento inducido por la interacción con el entorno y como resultado de experiencias conducentes al establecimiento de nuevos modelos de respuestas ante estímulos externos/. Biológicamente, se suele aceptar que la información memorizada en el cerebro está más relacionada con los valores sinápticos de las conexiones entre las neuronas que con ellas mismas; es decir, el conocimiento se encuentra en las sinapsis. En el caso de las redes neuronales artificiales, se puede considerar que el conocimiento se encuentra representado en los pesos de las conexiones entre las neuronas. Todo proceso de aprendizaje implica cierto número de cambios en estas conexiones. En realidad se puede decir que se aprende modificando los pesos de la red.
 
-El algoritmo /backpropagation/ no funciona con [nota4 rosa]topologías recurrentes. En nuestro caso, no necesitamos una conectividad hacia delante, la librería implementada como parte del proyecto sí puede utilizar conexiones recurrentes como se especifica en el capítulo de [[analisis][análisis]]. Además, utilizamos aprendizaje por refuerzo y no necesitamos una colección de ejemplos (aunque se puede utilizar el error total en un conjunto de ejemplos para calcular el refuerzo). Los pesos los ajustará un algoritmo genético. La estructura de la red se definirá de forma previa y manualmente para cada problema y sólo evolucionarán los pesos (y umbrales).
+El *aprendizaje supervisado* se caracteriza porque el proceso de aprendizaje se realiza mediante un metódico entrenamiento controlado por un agente externo, conocido como supervisor, que determina la respuesta que debería generar la red a partir de una entrada determinada. El supervisor comprueba la salida de la red y si ésta no coincide con lo que se quiere, se procede a modificar los pesos de las conexiones para conseguir que la salida obtenida se aproxime a la deseada.
 
-[nota rosa 5: 
-A que te refieres a las redes neuronales en general o a la BP?????
-En mi opinión no te debes meter en complicaciones en el tecto, está bien que tu conozcas los requisitos específicos pero yo no los pondría en el texto, porque te pueden hacer preguntas y ponerte en un serio compromiso.]
+Dentro de las redes con aprendizaje supervisado, el modelo BPN (Backpropagation) utiliza el aprendizaje por corrección del error. Una característica de este algoritmo es la representación interna del conocimiento que es capaz de organizar en la capa intermedia de las células para conseguir cualquier correspondencia entre la entrada y la salida de la red. Este método de aprendizaje está basado en la generalización de la regla delta, que se utilizaba para el perceptrón monocapa. Utilizando la derivada de la función de activación para determinar en qué medida han influído las neuronas ocultas en el las diferencias entre la salida de red y la salida deseada, se traslada el error desde la capa de salida hacia las capas anteriores
 
-*** MODIFICAR [nota rosa 5: Fortalezas y deficiencias]
+Frecuentemente el supervisor utilice una colección de ejemplos denominada *conjunto de entrenamiento*. Está compuesto por pares (entrada, salida deseada) elaborados previamente, posiblemente con la ayuda de expertos. Un algoritmo de gradiente descendente, por ejemplo /backpropagation/, trata de minimizar la función de error, comparando directamente la salida producida por la red para cada entrada de ejemplo y su correspondiente salida deseada en el conjunto de entrenamiento. Habitualmente la función de error es el sumatorio del cuadrado de las diferencias acumuladas entre los elementos de ambas salidas. Los pesos se ajustan por cada ejemplo mediante pequeños incrementos que dependen del parámetro \delta (delta). El proceso se repite para todo el conjunto durante una serie de episodios o hasta alcanzar un error aceptable. No entraremos en detalles cómo la función de aprendizaje o como \delta puede ser una función en vez de una constante para solucionar o mitigar algunos problemas descritos en la siguiente sección.
+
+El *aprendizaje por refuerzo* modifica a un /agente/ (en nuestro caso, a una red neuronal modificando sus pesos) a partir de sus acciones en un /entorno/, tratando de maximixar alguna noción de recompensa. Cuando no se conoce la recompensa para cada acción, o cuando esta información no se puede aprovechar (por ejemplo, los algoritmos genéticos sólo utilizan la evaluación global de un individuo), se puede acumular la recompensa de las acciones individuales. La función del supervisor en este proceso automatizable y la aplicación del mismo es mucho más flexible, ampliando el dominio de problemas a los que el aprendizaje puede ser aplicado, que ya era grande de por sí para las redes neuronales con una entranamiento supervisado corriente. Aunque no necesitamos necesariamente un conjunto de entrenamiento con pares correctos de entradas/salidas, este puede ser la base para establecer la recompensa de la misma manera que se ha descrito, definiendo la recompensa como una función inversa del error.
+
+Otra diferencia del algoritmo /backpropagation/ con respecto a nuestra utilización de las redes nueronales es que el primero no funciona con topologías recurrentes. En nuestro caso, no necesitamos una conectividad hacia delante, la librería implementada como parte del proyecto sí puede utilizar conexiones recurrentes como se especifica en el capítulo de [[analisis][análisis]]. Además, utilizamos aprendizaje por refuerzo y no necesitamos una colección de ejemplos. Los pesos los ajustará un algoritmo genético. La estructura de la red se definirá de forma previa y manualmente para cada problema y sólo evolucionarán los pesos (y umbrales).
+
+*** Fortalezas y deficiencias
 #+LaTeX: \label{baseTeoricaFortRedes}
 
-[Nota rosa 6
-Ojo que en la literatura se suele cuando se habla de perceptron multicapa se considera algoritmo BP. De todas formas sigo sin entender si vas a utilizar un aprendizaje por refuerzo por que insistes en BP.]
+Las redes neuronales con conexión hacia delante en general son un importante método de aproximación de funciones \cite[Kim, 1992]{Kim92}. El perceptrón multicapa es un tipo de red neuronal con conexiones hacia delante. La topología de un perceptrón multicapa esta definida por un conjunto de capas ocultas, una capa de entrada y una de salida. No existen restricciones sobre la función de activación aunque en general se suelen utilizar funciones sigmoideas. Existen demostraciones teóricas \cite[Funahashi, 1989]{Funahashi89} de que un perceptrón multicapa cuya función de activación sea no constante, acotada y monótona creciente es un aproximador universal de funciones. En \cite[Hornik et alt, 1989]{Hornik89} se llega a un resultado similar utilizando funciones de activación sigmoideas, no necesariamente continuas. Esto es un punto muy fuerte de las redes neuronales. El perceptrón multicapa utiliza el algoritmo de retropropagación del error. Sin embargo, las demostraciones están basadas en la topología, no en el método de entrenamiento; en lo que es posible que aprenda la red, no en cómo va a aprenderlo. Por tanto, este resultado es extensible a otros métodos de entranamiento como los algoritmos genéticos.
 
-Las redes neuronales con conexión hacia delante en general son un importante método de aproximación de funciones \cite[Kim, 1992]{Kim92}. El perceptrón multicapa es un tipo de red neuronal con conexiones hacia delante. [nota rosa 6La topología de un perceptrón multicapa esta definida por un conjunto de capas ocultas, una capa de entrada y una de salida. No existen restricciones sobre la función de activación aunque en general se suelen utilizar funciones sigmoideas. Existen demostraciones teóricas \cite[Funahashi, 1989]{Funahashi89} de que un perceptrón multicapa cuya función de activación sea no constante, acotada y monótona creciente es un aproximador universal de funciones. En \cite[Hornik et alt, 1989]{Hornik89} se llega a un resultado similar utilizando funciones de activación sigmoideas, no necesariamente continuas. Esto es un punto muy fuerte de las redes neuronales. ]
+Además, las redes neuronales,  constituyen buena una herramienta para la construcción de agentes pues sólo hay que codificar las entradas y las salidas de la red como las del agente y el tiempo de ejecución de la red sólo depende de la topología de ésta (para una topología dada, es lineal con respecto al número de entradas consecutivas). 
 
-Además, constituyen buena una herramienta para la construcción de agentes pues sólo hay que codificar las entradas y las salidas de la red como las del agente y el tiempo de ejecución de la red sólo depende de la topología de ésta (para una topología dada, es lineal con respecto al número de entradas consecutivas).
+Sin embargo, el algoritmo de retro-propagación tiene las siguientes desventajas:
 
-Algunas deficiencias del algoritmo back-propagation son su baja adaptabilidad, la alta dependencia de los parámetros del algoritmo, el estancamiento en mínimos locales, la posibilidad de parálisis y la alta dependencia de las condiciones iniciales.
++ *Aplicabilidad:* 
+Algunas tareas complejas pueden requerir una conectividad recurrente. Por ejemplo, el reconocimiento de escritura continua en el que las letras están concatenadas y sus formas a menudo dependen de las letras anteriores. En estos casos los métodos de gradiente no son efectivos. Además, estos métodos requieren un aprendizaje supervisado con salidas deseadas.
 
 + *Adaptabilidad:* 
-  El algoritmo tiene como premisa la utilización de una función de activación derivable \cite[Walker, 1995]{Walker95}. Al hacer uso de la derivada de la función de activación, es condición necesaria para la aplicación del algoritmo que la misma sea continua y derivable en todo el dominio de aplicación \cite[Wilson, 1994]{Wilson94}. Esto impide la utilización del método en otras topologías donde la función de activación presenta discontinuidades.
-
-  Este problema suele encontrarse en varios métodos de entrenamiento, los cuales son desarrollados para una determinada topología y sus resultados, en general, no son extensibles directamente a otras topologías. Es necesario adaptar los métodos para aplicarlos a otras topologías.
+El algoritmo tiene como premisa la utilización de una función de activación derivable \cite[Walker, 1995]{Walker95}. Al hacer uso de la derivada de la función de activación, es condición necesaria para la aplicación del algoritmo que la misma sea continua y derivable en todo el dominio de aplicación \cite[Wilson, 1994]{Wilson94}. Esto impide la utilización del método en otras topologías donde la función de activación presenta discontinuidades. Por ejemplo, no es posible utilizar directamente el algortimo de retropropagación del error si los estados de las neuronas son discretos, como es el caso, por ejemplo, de las redes neuronales difusas \cite[Lee, 1975]{Lee75}).
 
 + *Mínimos locales:* 
-  La superficie que define la función de error E en base a los parámetros de la red neuronal es compleja y esta llena de valles y colinas. Debido a la utilización del gradiente para encontrar el mínimo de dicha función de error se corre el riesgo de que el proceso de entrenamiento quede atrapado en un mínimo local \cite[Sutton, 1986]{Sutton86}. Esta situación no es deseable, fundamentalmente si dicho mínimo esta localizado lejos del mínimo global.
+La superficie que define la función de error E en base a los parámetros de la red neuronal es compleja y esta llena de valles y colinas. Debido a la utilización del gradiente para encontrar el mínimo de dicha función de error se corre el riesgo de que el proceso de entrenamiento quede atrapado en un mínimo local \cite[Sutton, 1986]{Sutton86}. Esta situación no es deseable, fundamentalmente si dicho mínimo esta localizado lejos del mínimo global.
 
   Existen algunos mecanismos para evitar que esto suceda. Una posible solución para evitar que el entrenamiento quede atrapado en un mínimo local es aumentar el número de neuronas ocultas de la red. Este mecanismo puede ayudar en aquellos casos en los que la red tiene escaso poder de representación interna, y no es capaz de distinguir entre dos patrones diferentes, proporcionando una misma salida para ambos patrones. Al aumentar el número de neuronas ocultas la red posee mayor cantidad de parámetros libres y puede conseguir una mejor representación interna.
 
   Otros mecanismos que ayudan a disminuir los efectos de este problema son la adición de una tasa de momento al proceso de entrenamiento, utilizar una tasa de aprendizaje decreciente a lo largo del proceso, partir de otras configuraciones iniciales de la red, añadir ruido al método de gradiente, etc.
 
 + *Saturación:* 
-  El fenómeno de saturación, también conocido como parálisis, se produce cuando la entrada total a una neurona de la red toma valores muy altos, ya sean positivos o negativos. Al utilizar funciones de activación sigmoidales, la función de activación posee dos asíntotas horizontales. Si la entrada de la neurona alcanza un valor alto, la función de activación se satura y alcanza un valor de activación máximo o mínimo.
+El fenómeno de saturación, también conocido como parálisis, se produce cuando la entrada total a una neurona de la red toma valores muy altos, ya sean positivos o negativos. Al utilizar funciones de activación sigmoidales, la función de activación posee dos asíntotas horizontales. Si la entrada de la neurona alcanza un valor alto, la función de activación se satura y alcanza un valor de activación máximo o mínimo.
 
-  Cuando la función de activación se satura su derivada tiende a hacerse nula, haciendo que los parámetros de la red permanezcan invariables y, como consecuencia, la suma de los errores locales permanece constante por un largo periodo de tiempo \cite[Kröse y van der Smagt, 1993]{Krose93}. Aunque esta situación se suele confundir con un mínimo local, pues el error permanece invariable, en este caso es posible que después de un cierto tiempo el error comience nuevamente a decrecer.
+Cuando la función de activación se satura su derivada tiende a hacerse nula, haciendo que los parámetros de la red permanezcan invariables y, como consecuencia, la suma de los errores locales permanece constante por un largo periodo de tiempo \cite[Kröse y van der Smagt, 1993]{Krose93}. Aunque esta situación se suele confundir con un mínimo local, pues el error permanece invariable, en este caso es posible que después de un cierto tiempo el error comience nuevamente a decrecer.
 
-  El fenómeno de parálisis del perceptrón multicapa ocurre fundamentalmente cuando los parámetros de la red toman valores muy altos. Un mecanismo para evitar esto consiste en partir de valores iniciales bajos.
+El fenómeno de parálisis del perceptrón multicapa ocurre fundamentalmente cuando los parámetros de la red toman valores muy altos. Un mecanismo para evitar esto consiste en partir de valores iniciales bajos.
 
 + *Condiciones iniciales:* 
-  El conjunto de pesos iniciales de la red neuronal generalmente se selecciona de manera aleatoria. Sin embargo, el algoritmo /backpropagation/ es muy dependiente de las condiciones iniciales seleccionadas \cite[Kolen, 1991]{Kolen91}. Pequeñas variaciones realizadas sobre las condiciones iniciales pueden llevar a grandes diferencias en el tiempo de convergencia del algoritmo.
+El conjunto de pesos iniciales de la red neuronal generalmente se selecciona de manera aleatoria. Sin embargo, el algoritmo /backpropagation/ es muy dependiente de las condiciones iniciales seleccionadas \cite[Kolen, 1991]{Kolen91}. Pequeñas variaciones realizadas sobre las condiciones iniciales pueden llevar a grandes diferencias en el tiempo de convergencia del algoritmo.
 
 + *Dependencia de parámetros del algoritmo:* 
-  Los algoritmos de gradiente descendente hacen uso de una tasa de aprendizaje que idealmente debería ser infinitesimal. De esta manera, mediante pequeños ajustes de los pesos sinápticos el algoritmo converge hacia un mínimo. El uso de tasas de aprendizaje muy pequeñas hace que el algoritmo tenga una convergencia estable hacia un mínimo, aunque el tiempo necesario para alcanzarlo puede llegar a ser muy alto. Como consecuencia de lo dicho anteriormente, y con el objetivo de disminuir el tiempo de convergencia del algoritmo, en la práctica se suelen utilizar tasas de aprendizajes mayores a las teóricas. El aumento de la tasa de aprendizaje disminuye el tiempo de convergencia, pero tiene un efecto contraproducente: el algoritmo comienza a oscilar en torno a un mínimo, disminuyendo la probabilidad de alcanzarlo. El efecto de oscilación puede reducirse mediante la adición de una tasa de momento, pero no puede eliminarse.
+Los algoritmos de gradiente descendente hacen uso de una tasa de aprendizaje que idealmente debería ser infinitesimal, pero que en la práctica es una constante o variable pequeña \delta (delta). De esta manera, mediante pequeños ajustes de los pesos sinápticos el algoritmo converge hacia un mínimo. El uso de tasas de aprendizaje muy pequeñas hace que el algoritmo tenga una convergencia estable hacia un mínimo, aunque el tiempo necesario para alcanzarlo puede llegar a ser muy alto. Como consecuencia de lo dicho anteriormente, y con el objetivo de disminuir el tiempo de convergencia del algoritmo, en la práctica se suelen utilizar tasas de aprendizajes mayores a las teóricas. El aumento de la tasa de aprendizaje disminuye el tiempo de convergencia, pero tiene un efecto contraproducente: el algoritmo comienza a oscilar en torno a un mínimo, disminuyendo la probabilidad de alcanzarlo. El efecto de oscilación puede reducirse mediante la adición de una tasa de momento, pero no puede eliminarse.
 
-  El algoritmo /backpropagation/ es muy dependiente de los parámetros mencionados previamente. Dependiendo de la selección de parámetros realizadas el resultado de la aplicación del algoritmo será exitosa o no \cite[Liu et alt, 2004]{Liu2004}. Pequeñas variaciones sobre los parámetros del algoritmo pueden conducir a resultados diferentes. El principal problema es que no existe un método general que permita establecer el valor de estos parámetros \cite[Branke, 1995]{Branke95}. Los parámetros que aseguran la convergencia para un determinado problema pueden no ser aplicables a otro problema. De esta manera, la selección de los parámetros del algoritmo se realiza en base a la experiencia del diseñador, y se realiza un refinamiento de los mismos mediante mecanismos de prueba y error. Esto produce un aumento en el tiempo total de diseño y entrenamiento de la red.
+El algoritmo /backpropagation/ es muy dependiente de los parámetros mencionados previamente. Dependiendo de la selección de parámetros realizadas el resultado de la aplicación del algoritmo será exitosa o no \cite[Liu et alt, 2004]{Liu2004}. Pequeñas variaciones sobre los parámetros del algoritmo pueden conducir a resultados diferentes. El principal problema es que no existe un método general que permita establecer el valor de estos parámetros \cite[Branke, 1995]{Branke95}. Los parámetros que aseguran la convergencia para un determinado problema pueden no ser aplicables a otro problema. De esta manera, la selección de los parámetros del algoritmo se realiza en base a la experiencia del diseñador, y se realiza un refinamiento de los mismos mediante mecanismos de prueba y error. Esto produce un aumento en el tiempo total de diseño y entrenamiento de la red.
 
 A esto hay que añadir que los algoritmos de gradiente requieren entrenamiento supervisado (normalmente, no funcionan para el aprendizaje por refuerzo, que es más general) y que las conexiones sean hacia delante (la retro-propagación del error no se puede aplicar en redes recurrentes). 
 
 Usando un [[basTeoGenet][algoritmo genético]] como método de entrenamiento de la red, se solucionan algunos de estos problemas y otros se mitigan en cierto grado:
 
 - Con el algoritmo genético, se puede usar el aprendizaje por refuerzo y se pueden entrenar redes recurrentes sin problema alguno.
-- No se tienen requerimientos para la función de activación que como hemos visto tenía que ser continua y derivable para /backpropagation/, por lo que aumenta su adaptabilidad. 
+- No se tienen requerimientos para la función de activación que como hemos visto tenía que ser continua y derivable para /backpropagation/, por lo que aumenta su adaptabilidad y se pueden utilizar redes nueronales difusas. 
 - El algoritmo genético es mucho menos tendente a estancarse en mínimos locales porque no utiliza la información del gradiente y porque explora varios puntos (tantos como individuos tenga la población) del espacio de búsqueda simultáneamente.
 - El fenómeno de saturación se produce cuando una neurona alcanza un máximo o un mínimo. En este caso, la derivada de la función de activación se hace nula, y los pesos de la red permanecen invariables. Como el método propuesto no hace uso de la derivada de la función de activación, el efecto de este fenómeno es completamente eliminado. 
 - Los valores iniciales de los pesos también pueden afectar al algoritmo genético, en especial si son muy altos (ya sean positivos o negativos), pero existen experimentos que permiten afirmar que el método propuesto es menos dependiente de los valores iniciales que el algoritmo /backpropagation/ \cite[Bertona2005]{Bertona2005}.
@@ -417,7 +445,7 @@ Primero se describirán las clases fachada y el resto de clases utilizadas para 
 
 #+CAPTION:    Diagrama de componentes de la librería implementada.
 #+LABEL:      disenoComponentes
-#+ATTR_LaTeX: scale=0.4
+#+ATTR_LaTeX: scale=0.6
 [[./img/uml/components.png]]
 
 En la sección \ref{disenoGenetic} especificaremos de forma general las clases destinadas a la implementación del algoritmo genético y cómo se relacionan con las clases de las redes neuronales. 
@@ -2025,9 +2053,10 @@ Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene 
 
 *** REVISAR Genetic
 #+LaTeX: \label{disenoGenetic}
-**** <<<Individual>>>
+**** [[implIndividual][Individual]]
+#+LaTeX: \label{implIndividual}
 
-Esta clase hereda de la clase NeuralNet y, por tanto, comparte todos sus atributos y métodos. Las funcionalidades relacionadas con el algoritmo genético (cruce, mutación) están separadas aquí. Así, aunque las clase Connection sí tiene métodos relacionados con operadores genéticos (que todas las implementaciones de la clase abstracta deben proveer), se pueden tener los operadores genéticos fuera de Layer y NeuralNet, manteniendo el código más encapsulado y legible. El constructor de Individual es similar al de la clase padre NeuralNet: sólo toma el /tipo de implementación/ y como un parámetro opcional que usa por defecto la implementación de referencia.
+Esta clase hereda de la clase NeuralNet y, por tanto, comparte todos sus atributos y métodos. Las funcionalidades relacionadas con el algoritmo genético (cruce, mutación) están separadas aquí. Así, aunque las clase Connection sí tiene métodos relacionados con operadores genéticos (que todas las implementaciones de la clase abstracta deben proveer), se pueden tener los operadores genéticos fuera de Layer y NeuralNet, manteniendo el código más encapsulado y legible. El constructor de [[implIndividual][Individual]] es similar al de la clase padre NeuralNet: sólo toma el /tipo de implementación/ y como un parámetro opcional que usa por defecto la implementación de referencia.
 
 Los métodos públicos que implementa la clase son:
 
@@ -2290,7 +2319,7 @@ El contructor es el siguiente:
 *** HACER Nuevas clases para pruebas y generación de gráficas.
 \newpage
 \newpage
-* MODIFICAR [0/3] Resultados: Rendimiento
+* MODIFICAR [1/3] Resultados: Rendimiento
 #+LaTeX: \label{rendimiento}
 
 En esta sección se analizan resultados de rendimiento en tiempo de ejecución.
@@ -2731,7 +2760,8 @@ FLOAT, BIT y SIGN por separado que si no no se ve nada
 
 \newpage
 *** MODIFICAR Funciones de activación
-
+/home/jtimon/workspace/preann/output/data/
+/home/seth/tmp/preann/output/data/
 Si en la figura \ref{grafImplActivation} se comparaba el rendimiento de los distintos tipos de neurona (BIT, SIGN y FLOAT con la función de activación IDENTITY), en la figura \ref{grafImplActivationFunc} se comparan los rendimientos de los distintos tipos de funciones para el tipo de neurona FLOAT. Con el tipo de neurona BIT, la función de activación siempre es BINARY_STEP y con el tipo SIGN la activación siempre es BIPOLAR_STEP, por ello podemos excluir estos tipos de neurona de esta gráfica (esas activaciones se mantienen, pero para usando la implementación FLOAT internamente). Además, la implementación SSE2 de la activación para FLOAT es práctiacamente idéntica a la de C y como vimos en la gráfica \ref{grafImplActivation} produce los mismo resultados de rendimiento, por lo que tampoco se muestran los resultados de la activación SSE2 en este caso. Se muestran, entonces, los diferentes funciones de activación para las neuronas FLOAt y para las implementaciones C y CUDA.
 
 Los rendimientos de la implementación CUDA son todos muy buenos y casi constantes, por lo que es difícil compararlos.
@@ -2778,7 +2808,7 @@ La gráfica \ref{grafImplCopyTo} se ha generado utilizando los mismos parémetro
 *** REVISAR Cruce
 #+LaTeX: \label{rendImplCruce}
 
-Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo desde 512 hasta 8192 con incrementos de 512. La coordenada Y es el tiempo en milisegundos. Los pesos y otros valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Los vectores de bits que determinan qué pesos tendrán que cruzarse también se determinan aleatoriamente con 1 ó 0. El tamaño de la capa de salida es 128. Se permutan los tipos de neuronas FLOAT y BIT con los tipos de implementación C, SSE2, =CUDA_REDUC0= (que requiere ordenación previa del vector de bits) y CUDA para obtener cada curva. Cada combinación se repite 500 veces para hacer la media y reducir el ruido. La razón por la que se omite el tipo de neurona bipolar (SIGN) es que el cruce para BIT y para SIGN es idéntico, los dos se hacen sobre pesos de un byte en lugar de pesos de 4 bytes (float). Se ha aprovechado la implementación CUDA_REDUC0 para ponerle un algoritmo de cruce CUDA diferente y poder compararlos.
+Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo desde 512 hasta 8192 con incrementos de 512. La coordenada Y es el tiempo en milisegundos. Los pesos y otros valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Los vectores de bits que determinan qué pesos tendrán que cruzarse también se determinan aleatoriamente con 1 ó 0. El tamaño de la capa de salida es 128. Se permutan los tipos de neuronas FLOAT y BIT con los tipos de implementación =C=, =SSE2=, =CUDA_REDUC0= (que requiere ordenación previa del vector de bits) y =CUDA= para obtener cada curva. Cada combinación se repite 500 veces para hacer la media y reducir el ruido. La razón por la que se omite el tipo de neurona bipolar (SIGN) es que el cruce para BIT y para SIGN es idéntico, los dos se hacen sobre pesos de un byte en lugar de pesos de 4 bytes (float). Se ha aprovechado la implementación CUDA_REDUC0 para ponerle un algoritmo de cruce CUDA diferente y poder compararlos.
 
 #+CAPTION:    Método que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).
 #+LABEL:      grafImplCrossover
@@ -2807,7 +2837,7 @@ De la figura \ref{grafImplMutation} se puede deducir que el operador de mutació
 La gráfica \ref{grafImplReset} se obtiene con unos parámetros iguales a los descritos para la mutación. Los resultados y conclusiones también coinciden. El operador de olvido tiene un coste constante y mínimo.
 
 \newpage
-** MODIFICAR Rendimiento de los diferentes operadores genéticos
+** REVISAR Rendimiento de los diferentes operadores genéticos
 #+LaTeX: \label{rendOperadores}
 
 Esta sección compara empíricamente el rendimiento computacional de los algoritmos de selección descritos en el apartado \ref{disenoGeneSel} del diseño de los algortimos genéticos.
@@ -2818,80 +2848,70 @@ En esta sección se cronometran los operadores genéticos descritos en el capitu
 
 Esta sección compara empriricamente el rendimiento computacional de los algoritmos de selección descritos en el apartado \ref{disenoGeneSel} del diseño de los algortimos genéticos.
 
-Esta prueba se ha realizado usando el número de individuos a seleccionar como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. La coordenada Y es el tiempo en milisegundos. Se permutan dos tamaños totales de población (400 y 500) con los tipos de selección ROULETTE_WHEEL, RANKING, TOURNAMENT y TRUNCATION para obtener las diferentes curvas. Para el tipo de selección TOURNAMENT, se cosideran los tamaños de torneo 5, 15 y 25. Cada combinación se repite 50 veces para hacer la media y reducir el ruido. Para esta prueba se ha creado una tarea (hereda de la clase Task) especial que asigna el fitness a los individuos aleatoriamente y que genera individuos vacíos. Así se minimizan todos los tiempos que no tienen que ver con la selección. Por tanto, a esta prueba no le afecta en absoluto la implementación utilizada.
+Esta prueba se ha realizado usando el número de individuos a seleccionar como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. La coordenada Y es el tiempo en milisegundos. Se permutan dos tamaños totales de población (400 y 500) con los tipos de selección =ROULETTE_WHEEL=, =RANKING=, =TOURNAMENT= y =TRUNCATION= para obtener las diferentes curvas. Para el tipo de selección =TOURNAMENT=, se cosideran los tamaños de torneo 5, 15 y 25. Cada combinación se repite 50 veces para hacer la media y reducir el ruido. Para esta prueba se ha creado una tarea (hereda de la clase Task) especial que asigna el fitness a los individuos aleatoriamente y que genera individuos vacíos. Así se minimizan todos los tiempos que no tienen que ver con la selección. Por tanto, a esta prueba no le afecta en absoluto la implementación utilizada.
 
-#+CAPTION:    Rendimiento de los distintos operadores de selección en función del número de individuos a seleccionar. Cada operador se prueba con tamaños totales de población 400 y 500. Además, para la selección por torneo se muestran los resultados con varios tamaños de torneo.
+#+CAPTION:    Rendimiento de los distintos operadores de selección en función del número de individuos a seleccionar.
 #+LABEL:      rendGenSelect
 #+ATTR_LaTeX: width=\textwidth
-[[./img/Population_Selection.png]]
+[[./img/output/chronoGen_Selection.png]]
 
 La selección por ranking es la más costosa y además la que más depende del tamaño total de la población. 
 
-La selección por torneo es algo menos costosa y depende más del tamaño del torneo que del tamaño total de la población. Aunque cuando se tienen que seleccionar muchos individuos un tamaño de población más grande también penaliza ligeramente a la selcción por torneo.
+La selección por torneo es menos costosa y depende más del tamaño del torneo que del tamaño total de la población. Un tamaño de población más grande también penaliza a esta selección, especialmente cuando se tienen que seleccionar muchos individuos.
+
+A pesar que que no se aprecia bien en la figura \ref{rendGenSelect}, la selección de truncado tiene un coste mínimo y prácticamente constante tanto del tamaño total de la población como del número de individuos a seleccionar. 
 
 La selección de ruleta también tiene un coste muy bajo y poco dependiente del número de individuos a seleccionar en comparación con los esquemas ranking y torneo. Aunque tampoco se aprecia en la gráfica, la selección por ruleta sí resulta penalizada con un tamaño de población mayor.
 
-A pesar que que tampoco se aprecia bien en la figura \ref{rendGenSelect}, la selección de truncado tiene un coste mínimo y prácticamente constante tanto del tamaño total de la población como del número de individuos a seleccionar. 
-
-\newpage
 *** Cruce
 
 Esta sección compara empíricamente el rendimiento computacional de los algoritmos de cruce descritos en los apartados \ref{disenoGeneCruz} y \ref{disenoGeneNiv} del diseño de los algortimos genéticos.
 
-Esta prueba se ha realizado usando un tamaño como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. Este tamaño es el tamaño de las capas entradas y el de las internas. La coordenada Y es el tiempo en milisegundos. Se usan dos capas de entrada a la red (iguales). Los pesos se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El número de capas internas es 1 la mitad de las veces y 2 la otra mitad, haciendose la media. Se usa el tipo de neurona FLOAT la mitad de las veces y BIT la otra mitad, haciéndose la media. Para obtener cada curva, se usan los tipos de cruce UNIFORM, MULTIPOINT y PROPORTIONAL. Es primero se prueba con las probabilidad de cruce de 0.2 y 0.4. El segundo tipo se prueba con 1 y 6 puntos de cruce. Para el algortimo PROPORTIONAL se usa siempre un fitness de 1 para un individuo y 1.5 para el otro. Cada combinación se repite 50 veces para hacer la media y reducir el ruido.
-
-Como muestra la figura \ref{rendGenCruza} el nivel de cruce más costoso es el propio peso, el más barato es el nivel de capa completa y los niveles de neurona tienen rendimientos intermedios y parecidos independientemente de cómo se interprete qué pesos pertenecen a una neurona (si los pesos de entrada a la neurona o los pesos de salida de la misma). 
-
 #+CAPTION:    Rendimiento de los distintos operadores genéticos de cruce en función del tamaño de las capas de neuronas internas.
 #+LABEL:      rendGenCruza
 #+ATTR_LaTeX: width=\textwidth
-[[./img/Individual_crossover.png]]
+[[./img/output/chronoGen_crossover.png]]
 
-Como norma general, observamos que el cruce unifrome es siempre más costoso cuanto más se acerque la probabilidad de cruce al 50% y que el cruce multi-punto siempre es más lento cuantos más puntos de corte tenga, lo cuál, por otra parte, no es en modo alguno sorprendente. Sin embargo, el cruce multi-punto no parece muy sensible al número de puntos de corte, aunque afecta más cuanto mayor sea el tamaño de la red-individuo, más afecta el número de cortes al rendimiento. El cruce proporcional siempre es ligeramente más lento que el unifrome con probabilidad 0.4 (aunque con tiempos muy cercanos). La razón es que la probabilidad de cruce para este algoritmo se calcula con la expresión =fitness / (fitness + other_fitness)= y con los parámetros escogidos siempre resulta en ~1 / (1 + 1.5) = 0.4~.
+Esta prueba se ha realizado usando un tamaño como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. Este tamaño es el tamaño de las capas entradas y el de las internas. La coordenada Y es el tiempo en milisegundos. Se usan dos capas de entrada a la red (iguales). Los pesos se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El número de capas internas es 1 la mitad de las veces y 2 la otra mitad, haciendose la media. Se usa el tipo de neurona FLOAT la mitad de las veces y BIT la otra mitad, haciéndose la media. Para obtener cada curva, se usan los tipos de cruce UNIFORM, MULTIPOINT y PROPORTIONAL. El primero se prueba con las probabilidad de cruce de 0.2 y 0.4. El segundo tipo se prueba con 1 y 6 puntos de cruce. Para el algortimo PROPORTIONAL se usa siempre un fitness de 1 para un individuo y 1.5 para el otro. Cada combinación se repite 50 veces para hacer la media y reducir el ruido.
 
-Para el cruce a nivel de peso, el más lento por tener los genes más pequeños y numerosos, los algoritmos más lentos son el uniforme con una probabilidad del 40% y el proporcional, después el uniforme con probabilidad 0.2 y los más rápidos son los muulti-punto.
+#+CAPTION:    Rendimiento de los distintos operadores genéticos de cruce en función del tamaño de las capas de neuronas internas para el nivel de peso.
+#+LABEL:      rendGenCruzaZoom
+#+ATTR_LaTeX: width=\textwidth
+[[./img/output/chronoGen_crossoverZoomWeigh.png]]
 
-Con el cruce a nivel de capa, ocurre lo contrario: el uniforme con probabilidad 0.2 se mantiene en el medio, pero ahora los algoritmos más rápidos son el uniforme con una probabilidad del 40% y el proporcional, mientras que los multi-punto son más lentos.
+Como muestra la figura \ref{rendGenCruza} el nivel de cruce de neurona depende mucho de cómo se interprete qué pesos pertenecen a una neurona (si los pesos de entrada a la neurona o los pesos de salida de la misma). Cuando se considera la representación invertida o fregona se obtienen los peores resultados de todos. Si excluímos el nivel de neurona con representación /fregona/, el más costoso es el nivel de cruce más costoso es el propio peso y el más barato es el nivel de capa completa. Esto era de esperar, pues cuanto más pequeño es el gen, más genes se necesitan para representar la misma red.
 
-El uniforme con una probabilidad del 20% es igual de rápido para el nivel de neurona independientemente de si se la trata de forma invertida o no. Es el más rápido para este nivel de cruce. Para el resto de esquemas de cruce, el nivel de neurona es más lento que el de neurona invertida.
+Entre los algoritmos de cruce al mismo nivel no hay grandes diferencias. Para apreciarlas mejor, en la figura \ref{rendGenCruzaZoom} nos centramos en el nivel de cruce =WEIGH= con los mismos datos de la prueba para la gráfica anterior.
 
-Para en nivel de neurona sin invertir, el multi-punto con un sólo corte es el más lento y todos los demás, el multi-punto con 6 cortes, el uniforme 40% y el proporcional obtienen tiempos iguales.
+Como norma general, el cruce uniforme es siempre más costoso cuanto más se acerque la probabilidad de cruce al 50%. El cruce proporcional es ligeramente más lento que el unifrome con probabilidad 0.4 (aunque con tiempos muy cercanos). La razón es que la probabilidad de cruce para este algoritmo se calcula con la expresión =fitness / (fitness + other_fitness)= y con los parámetros escogidos siempre resulta en ~1 / (1 + 1.5) = 0.4~. 
 
-Para el nivel de neurona invertida, los algoritmos más lentos son el uniforme con una probabilidad del 40% y el proporcional, después el multi-punto con un sólo corte, después el multi-punto de 6 cortes y el más rápido, como ya se ha dicho, es el uniforme con una probabilidad de 0.2.
+El cruce multipunto obtiene los mejores tiempos muy cerca del uniforme con probabilidad 20% (con probabilidades menores éste supera los tiempos del multipunto). Sin embargo, el cruce multipunto no muy sensible al número de puntos de corte, con tiempos muy similares, llegándose incluso a obtener mejores tiempos con más tiempos de corte, aunque con las repeticiones se deja de apreciar. El número de cortes no influye mucho en el número de escrituras y está más determinado por las posiciones aleatorias en las que se producen estos cortes.
 
-\newpage
-*** Mutación
+*** Mutación y Olvido
 #+LaTeX: \label{rendOperadoresMut}
 
 Esta sección compara empíricamente el rendimiento computacional de los modos de mutación descritos en el apartado \ref{disenoGeneMut} del diseño de los algortimos genéticos.
 
-Esta prueba se ha realizado usando un tamaño como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300. Este tamaño es el tamaño de las capas entradas y el de las internas. La coordenada Y es el tiempo en milisegundos. Se usan dos capas de entrada a la red (iguales). Los pesos se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El número de capas internas es 1 la mitad de las veces y 2 la otra mitad, haciendose la media. Se usa el tipo de neurona FLOAT la mitad de las veces y BIT la otra mitad, haciéndose la media. Para obtener cada curva, se permutan los algortimos PER_INDIVIDUAL y PROBABILISTIC con 4 probabilidades: 0.1, 0.2, 0.3 y 0.4. Para el PROBABILISTIC la probabilidad se toma directamente como parámetro. Para el algoritmo PER_INDIVIDUAL, el número de mutuaciones se calcula multiplicando el número total de genes del individuo por la probabilidad. Así, se espera que los dos algoritmos obtengan un número similar de mutaciones por individuo para la misma probabilidad parámetro.
+Esta prueba se ha realizado usando un tamaño como coordenada X, variándolo con incrementos de 50 desde 50 hasta 300 y que comparten las capas entradas y  las internas. La coordenada Y es el tiempo en milisegundos. Se usan dos capas de entrada a la red (iguales). Los pesos se inicializan aleatoriamente y con valores pertenecientes al intervalo [-20, 20]. El número de capas internas es 1 la mitad de las veces y 2 la otra mitad, haciendose la media. Se usa el tipo de neurona FLOAT la mitad de las veces y BIT la otra mitad, haciéndose la media. Para obtener cada curva, se permutan los algortimos =PER_INDIVIDUAL= y =PROBABILISTIC= con 4 probabilidades: 0.0025, 0.005, 0.0075 y 0.01. Para el =PROBABILISTIC= la probabilidad se toma directamente como parámetro. Para el algoritmo =PER_INDIVIDUAL=, el número de mutuaciones se calcula multiplicando el número total de genes del individuo por la probabilidad. Así, se espera que los dos algoritmos obtengan un número similar de mutaciones y, por tanto, de escrituras por individuo para la misma probabilidad parámetro.
 
-Según la figura \ref{rendGenMutation}, ambos tipos de mutación son más costosos cuánto mayor es la probabilidad, tal y cómo era de esperar, pues más mutaciones son más escrituras. Además, la mutación probabilística es en general más costosa que la mutación determinística (un número constante de mutaciones por individuo, PER_INDIVIDUAL) salvo cuando la probabilidad parámetro es muy grande (muchas mutaciones por individuo). Aunque la interfaz determinística es más rápida, también se hace más lenta comparativamente cuanto mayor es la probabilidad. La explicación es que la opción probabilística tiene un coste fijo elevado (un número aleatorio por gen) mientras que en la determinística el coste sube con el número de mutaciones (varios números aleatorios por cada mutación a realizar).
-
-#+CAPTION:    Rendimiento de los distintos operadores genéticos de mutación para diferentes probabilidades. Para el operador no probabilístico, se ha calculado el número de mutaciones por individuo multiplicando la probabilidad por el número de genes (pesos y umbrales), para poder compararlo en igualdad con el operador probabilístico en cuanto al número de escrituras en los pesos.
+#+CAPTION:    Rendimiento de los distintos operadores genéticos de mutación para diferentes probabilidades.
 #+LABEL:      rendGenMutation
 #+ATTR_LaTeX: width=\textwidth
-[[./img/Individual_mutate.png]]
+[[./img/output/chronoGen_mutate.png]]
+
+Según la figura \ref{rendGenMutation}, ambos tipos de mutación son más costosos cuánto mayor es la probabilidad, tal y cómo era de esperar, pues más mutaciones significan más escrituras. Además, la mutación probabilística es en general más costosa que la mutación determinística (un número constante de mutaciones por individuo, =PER_INDIVIDUAL=) salvo cuando la probabilidad parámetro es muy grande (muchas mutaciones por individuo). Aunque la interfaz determinística es más rápida, también se hace más lenta comparativamente cuanto mayor es la probabilidad. La explicación es que la opción probabilística tiene un coste fijo elevado (un número aleatorio por gen) mientras que en la determinística el coste sube con el número de mutaciones (una capa, una neurona y un peso aleatorios por cada mutación a realizar). Por tanto la conveniencia de uno u otro depende enteramente del número de mutaciones que vaya a haber como promedio. Si la probabilidad es aproximadamente un 1% o mayor, conviene usar el algoritmo probabilístico; si es menor, es más rápido el determinístico.
+
+Aunque se omite la figura por ser muy similar a la anterior, el nuevo operador de olvido/reset presenta otra vez unos resultados similares a los de la mutación y se pueden extraer las mismas conclusiones.
+
 \newpage
-
-*** Olvido
-#+LaTeX: \label{rendOperadoresOlv}
-
-Esta sección compara empíricamente el rendimiento computacional de los modos de olvido descritos en el apartado \ref{disenoGeneMut} del diseño de los algortimos genéticos. Esta prueba utiliza unos parámetros semejantes a la anterior (sección \ref{rendOperadoresMut}).
-El nuevo operador de olvido/reset presenta otra vez unos resultados similares a los de la mutación y se pueden extraer las mismas conclusiones como muestra la figura \ref{rendGenOlvido}.
-
-#+CAPTION:    Rendimiento de los distintas interfaces del nuevo operador genético de olvido para diferentes probabilidades. Para el operador no probabilístico, se ha calculado el número de mutaciones por individuo multiplicando la probabilidad por el número de genes (pesos y umbrales), para poder compararlo en igualdad con el operador probabilístico en cuanto al número de escrituras en los pesos.
-#+LABEL:      rendGenOlvido
-#+ATTR_LaTeX: width=\textwidth
-[[./img/Individual_reset.png]]
-\newpage
-
 * MODIFICAR Resultados: Aprendizaje
 #+LaTeX: \label{aprendizaje}
 
 [TODO nota rosa
 Yo aquí insistiría en la justificación de las pruebas realizadas. Y en los resultados tratar de indicar el porqué existen similitudes o diferencias según la función de activación]
+
+[  Esta sección la estaba dejando un poco hasta que tenga terminadas las de diseño y manual del programador en las que estoy trabajando ahora. De todas formas, para el aprendizaje me parece más complicado discutir los resultados que para el rendimiento. 
+La activación sigmoide bipolar para OR aprende más despacio al principio pero consigue los mejores resultados. No se me ocurre por qué es misma es la mejor en todo momento para AND o por qué la identidad (lineal) es la mejor para XOR. La motivación principal en este caso es demostrar que las funciones de escalón pueden conseguir resultados comparables.]
 
 En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación. Nos abstraemos por ello de la implementación concreta y usamos la SSE2 para todas las pruebas del capítulo. Se elige esa implementación por ser la más rápida usando la máquina descrita en \ref{rendMaqLaptop} y porque no se miden tiempos sino generaciones, por lo que la implementación paralela no va a afectar al resultado.
 
@@ -3169,8 +3189,6 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 * BORRAR [0/3] cosas pendientes
 ** HACER [0/13] General documentación
 - [ ] Hacer Diseño
-- [ ] Arreglar resul chorno genet ?
-- [ ] Modificar Resultados : Rendimiento genético (pasar gráficas a milisegundos)
 - [ ] Hacer API
 - [ ] Factoria e implementaciones optimizadas
 - [ ] Extensibilidad a partir de interfaces
@@ -3205,9 +3223,6 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 #+LaTeX: \label{conclusiones}
 
 \newpage
-
-* Footnotes
-
 #Bibliografía 
 #+begin_latex
 
@@ -3235,6 +3250,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 \bibitem{Wilson94} \textsc{Wilson, E.} (1994): \emph{Backpropagation Learning for System with Discrete-Valued Functions}. En Proceedings of the World Congress on Neural Networks. Vol 3, pp. 332-339.
 
+\bibitem{Lee75} \textsc{Samuel C. Lee., Edward T. Lee} (1975): \emph{Fuzzy Neural Networks}. University of Houston, Houston, Texas.
 
 \bibitem{Sutton86} \textsc{Sutton, R.S.} (1986): \emph{Two problems with Backpropagation and other steepest descent learning procedures for networks}. En Proc. of 8th Annual Conf. Of the Cognitive Science Society, pp 823-831. Lawrence Erlbaum Associates, Hillsdale, NJ.
 
@@ -3268,25 +3284,23 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 \bibitem{Stanley2002} \textsc{Stanley, K. O., and Miikkulainen, R.} (2002): \emph{Evolving neural networks through augmenting topologies. Evolutionary Computation}. University of Texas.
 
-
-%%%%%%%%% 24 \bibitem{} \textsc{} (): \emph{}. .
+%%%%%%%%% 27 \bibitem{} \textsc{} (): \emph{}. .
 %%%%%%%%% TODO, ordenar los que están por debajo
 
-%%%%%%%% Algoritmos genéticos
+%%%% Juegos
 
+\bibitem{Chaslot2010} \textsc{Guillaume Maurice Jean-Bernard Chaslot}: \emph{Monte-Carlo Tree Search}. Tésis doctoral, Universiteit Maastricht, Maastricht, Holanda (2010).
 
-\bibitem{DeJong88} \textsc{Kenneth De Jong}: \emph{Learning with genetic algorithms: An overview}. Mach Learning, vol. 3, pp. 121-138 (1988).
+\bibitem{Syed03} \textsc{Syed, Omar; Syed, Aamir}: \emph{Arimaa – a New Game Designed to be Difficult for Computers}. International Computer Games Association Journal (2003).
 
-\bibitem{Goldberg89} \textsc{Goldberg, D.E.}: \emph{Genetic Algorithms in Search, Optimization and Machine Learning}. Addison-Wesley, Reading (1989).
+%%%%%%%%%%% Diseño alg genetico 
 
-\bibitem{Fogel95} \textsc{D. B. Fogel}: \emph{Evolutionary computation. Toward a new philosophy of machine intelligence}. IEEE Press, Piscataway, NJ (1995).
-
-\bibitem{Michalewicz96} \textsc{Z. Michalewicz}: \emph{Genetic algorithms + data structures = evolution programs}. Third, Revised and Extended Edition, 3 ed: Springer (1996).
-
-
+%% Representación "fregona"
 \bibitem{Merelo2012} \textsc{Juan J. Merelo Guervós}: \emph{Informática evolutiva: Algoritmos genéticos}. Documento técnico, Universidad de Granada, 2012. http://geneura.ugr.es/~jmerelo/ie/ags.htm
 
-%%%%%%%% CUDA
+%%%%%%%% Paralelización
+
+%%TODO citar manual SSE2
 
 \bibitem{Davis2001} \textsc{Christopher Edward Davis} (2001): \emph{Graphics Processing Unit Computation of Neural Networks}. University of New Mexico.
 
@@ -3300,14 +3314,21 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 \murl{http}{www.drdobbs.com/parallel/cuda-supercomputing-for-the-masses-part/207200659}.
 
-%%%% Juegos
+%%%%%%%% Algoritmos genéticos (adicional)
 
-\bibitem{Chaslot2010} \textsc{Guillaume Maurice Jean-Bernard Chaslot}: \emph{Monte-Carlo Tree Search}. Tésis doctoral, Universiteit Maastricht, Maastricht, Holanda (2010).
+\bibitem{DeJong88} \textsc{Kenneth De Jong}: \emph{Learning with genetic algorithms: An overview}. Mach Learning, vol. 3, pp. 121-138 (1988).
 
-\bibitem{Syed03} \textsc{Syed, Omar; Syed, Aamir}: \emph{Arimaa – a New Game Designed to be Difficult for Computers}. International Computer Games Association Journal (2003).
+\bibitem{Goldberg89} \textsc{Goldberg, D.E.}: \emph{Genetic Algorithms in Search, Optimization and Machine Learning}. Addison-Wesley, Reading (1989).
+
+\bibitem{Fogel95} \textsc{D. B. Fogel}: \emph{Evolutionary computation. Toward a new philosophy of machine intelligence}. IEEE Press, Piscataway, NJ (1995).
+
+\bibitem{Michalewicz96} \textsc{Z. Michalewicz}: \emph{Genetic algorithms + data structures = evolution programs}. Third, Revised and Extended Edition, 3 ed: Springer (1996).
+
 
 \end{thebibliography}
 #+end_latex
+
+* Footnotes
 
 [fn:cudaGPGPU] CUDA forma parte de lo que se conoce como GPGPU, que consiste en utilizar unidades de procesamiento gráfico (GPUs) para cálculos generales que no tienen por qué ser gráficos.
 
