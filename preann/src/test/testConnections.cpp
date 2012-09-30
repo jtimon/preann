@@ -5,7 +5,7 @@ using namespace std;
 
 #include "common/chronometer.h"
 #include "loop/test.h"
-#include "loopTest/dummy.h"
+#include "common/dummy.h"
 
 const string NUM_MUTATIONS = "__numMutations";
 

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-#include "loopTest/dummy.h"
+#include "common/dummy.h"
 #include "loopTest/chronoPlotter.h"
 #include "common/chronometer.h"
 
