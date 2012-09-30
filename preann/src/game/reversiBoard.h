@@ -21,9 +21,6 @@ public:
 
     virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player);
     virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player);
-    virtual bool canMove(SquareState player);
-    virtual bool endGame();
-    virtual void turn(SquareState player, Individual* individual = NULL);
     virtual float computerEstimation(unsigned xPos, unsigned yPos,
             SquareState player);
     virtual float individualEstimation(unsigned xPos, unsigned yPos,

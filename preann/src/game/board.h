@@ -38,15 +38,16 @@ public:
     Board(Board* other);
     virtual ~Board();
 
-    virtual void initBoard();
-    virtual bool endGame() = 0;
     virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player) = 0;
     virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player) = 0;
-    virtual bool canMove(SquareState player) = 0;
-    virtual void turn(SquareState player, Individual* individual = NULL) = 0;
     virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player) = 0;
     virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player,
                                        Individual* individual) = 0;
+
+    virtual void initBoard();
+    virtual bool canMove(SquareState player);
+    virtual void turn(SquareState player, Individual* individual = NULL);
+    virtual bool endGame();
     virtual int countPoints(SquareState player);
 
     unsigned getSize();

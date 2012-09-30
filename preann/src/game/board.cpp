@@ -115,6 +115,70 @@ Interface* Board::updateInterface()
     return tInterface;
 }
 
+bool Board::canMove(SquareState player)
+{
+    if (player == EMPTY) {
+        std::string error = "ReversiBoard::canMove : Empty square is not a player.";
+        throw error;
+    }
+    for (int x = 0; x < tSize; ++x) {
+        for (int y = 0; y < tSize; ++y) {
+
+            if (legalMove(x, y, player)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void Board::turn(SquareState player, Individual* individual)
+{
+    if (player == EMPTY) {
+        std::string error = "ReversiBoard::turn : Empty square is not a player.";
+        throw error;
+    }
+    float maxQuality = 0;
+    vector<Move> moves;
+    for (int x = 0; x < tSize; ++x) {
+        for (int y = 0; y < tSize; ++y) {
+
+            if (legalMove(x, y, player)) {
+                Move move;
+                move.xPos = x;
+                move.yPos = y;
+                if (individual == NULL) {
+                    move.quality = computerEstimation(x, y, player);
+                } else {
+                    move.quality = individualEstimation(x, y, player, individual);
+                }
+                if (move.quality >= maxQuality || moves.size() == 0) {
+                    maxQuality = move.quality;
+                    moves.push_back(move);
+                }
+            }
+        }
+    }
+    vector<Move> bestMoves;
+    for (int i = 0; i < moves.size(); ++i) {
+        if (moves[i].quality == maxQuality) {
+            bestMoves.push_back(moves[i]);
+        }
+    }
+    if (bestMoves.size() > 0) {
+        Move chosenMove = bestMoves[Random::positiveInteger(bestMoves.size())];
+        makeMove(chosenMove.xPos, chosenMove.yPos, player);
+    }
+}
+
+bool Board::endGame()
+{
+    if (canMove(PLAYER_1) || canMove(PLAYER_2)) {
+        return false;
+    }
+    return true;
+}
+
 int Board::countPoints(SquareState player)
 {
     int points = 0;
@@ -129,6 +193,7 @@ int Board::countPoints(SquareState player)
     }
     return points;
 }
+
 
 void Board::print()
 {
