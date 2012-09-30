@@ -1,51 +1,59 @@
+#+TODO: HACER MODIFICAR | HECHO
+
 * To render:
 ** M-x plantuml-render-buffer
 ** java -jar ~/programas/jar/plantuml.jar "/home/jtimon/workspace/uml/examples.org"
-* TODO Diagrama de componentes
+* HECHO Diagrama de componentes
 
 @startuml img/uml/components.png
 
-[common]
+[common] . [neural]
+
+[neural] -- NeuralNet
+[neural] -- Buffer
+[neural] -- Connection
+[neural] .> Factory
 
 Factory -- [factory]
 
-[factory] --> [sse2] : independiza
-[factory] --> [cuda] : independiza
+[factory] --> [sse2]
+[factory] --> [cuda]
 
-Buffer <.. [sse2] : implementa
-Connection <..[sse2] : implementa
-Buffer <.. [cuda] : implementa
-Connection <..[cuda] : implementa
+Buffer <.. [sse2]
+Buffer <.. [cuda]
+Connection <..[sse2]
+Connection <..[cuda]
 
-[neural] -- Buffer
-[neural] -- Connection
-[neural] -- NeuralNet
-[neural] ..> Factory : usa
 
 [genetic] -- Task
 [genetic] -- Individual
-[genetic] ..> Connection : para operadores\n genéticos
-[genetic] ..> NeuralNet : para individuos
+[genetic] - Population
+Connection <.. [genetic] : operadores\n genéticos
+NeuralNet <.. [genetic] : individuos
 
-[loopTest] --> [loop] : especialización de
+[loopTest] <- [loop] : extiende
 
-[loopTest] -- ChronoPlotter
-[loopTest] -- TaskPlotter
-
-[test] --> [tasks] : usa
 [test] ..> ChronoPlotter : usa
-[test] ..> TaskPlotter : usa
+[test] ..> TaskPlotter
 
-[tasks] ..> Task : extiende
-[tasks] ..> Individual : evalúa
-[tasks] --> [game] : usa
+
+Population <.. TaskPlotter
+
+TaskPlotter --[loopTest]
+ChronoPlotter -- [loopTest]
+
+TaskPlotter ..> [tasks]
+
+Task <.. [tasks] : extiende
+Individual <.. [tasks]
+[game] <- [tasks]
 
 
 
 @enduml
 
-* [1/4] Diagramas de clase
-** DONE Neural
+* [0/4] Diagramas de clase
+** MODIFICAR Neural
 @startuml img/uml/classNeural.png
 
 NeuralNet "1" o-- "0..*" Layer : tiene
@@ -92,7 +100,7 @@ class Interface{
     +void print()
 }
 
-class Buffer{
+interface Buffer{
     #void* data
     #unsigned size
     #{abstract} void _copyFrom(Interface*)
@@ -104,7 +112,7 @@ class Buffer{
     +void copyTo(Interface* interface)
 }
 
-class Connection{
+interface Connection{
     #Buffer* tInput
 
     #{abstract} void _calculateAndAddTo(Buffer* results)
@@ -150,6 +158,6 @@ class InputLayer{
 }
 
 @enduml
-** TODO Factory
-** TODO Genetic
-** TODO Loop
+** HACER Factory
+** HACER Genetic
+** HACER Loop
