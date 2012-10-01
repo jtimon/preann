@@ -131,7 +131,6 @@ FECHA:
 \newpage
 #+end_latex
 
-
 # Abstract e índice
 #+begin_latex
 \begin{abstract}
@@ -434,14 +433,14 @@ Se probará la librería en casos concretos con el fin de contestar a las siguie
 A la primera pregunta se responderá en el [[disenoRedes][diseño de las redes neuronales]]. Y aunque el resto de cuestiones se resolveránen los capítlos de resultados, en el capítulo final de [[conclusiones]] se discute la respuesta a todas ellas.
 
 \newpage
-* HACER [1/4] Diseño general
+* REVISAR Diseño general
 #+LaTeX: \label{diseno}
 
 Como se definió en la sección \ref{anaEspecLib}, la librería debe poder construir redes neuronales de cualquier topología y, al mismo tiempo, debe poder ser paralelizada usando diferentes tecnologías. Además, en la sección \ref{anaObjetivos} establecimos que las neuronas pueden ser de varios tipos (binarias, bipolares y reales). 
 
 Para soportar las diferentes implementaciones y tipos de neuronas sin incrementar la complejidad de la API de la librería, se definirán clases abstractas como interfaces de las que luego heredarán las diferentes implementaciones. Para independizar completamente el manejo de estas clases de fachada [TODO bibliografía patrón diseño facade], las implementaciones concretas sólo serán visibles a una clase factoría que será el único método para instanciar las implementaciones siguiendo el patrón de diseño factoría [TODO bibliografía patrón diseño factory]. Para las diferentes implementaciones paralelas descritas en el capítulo \ref{disenoParal}, se crearán diferentes clases que extiendan de las fachadas. Para soportar los diferentes tipos de neuronas, estas clases paralelizadas se implementarán usando plantillas. Sólo serán utilizadas directamente las clases fachada y los métodos específicos de cada implementación concreta serán llamados utilizando la técnica que en el contexto de análisis, diseño y desarrollo orientado a objetos se denomina polimorfismo.
 
-Primero se describirán las clases fachada y el resto de clases utilizadas para la implementación de las redes neuronales en la sección \ref{disenoRedes}. Las implementaciones concretas de las fachadas para la factoría se describirán con más detalle en la sección \ref{implFactoria}. 
+Primero se describirán las clases fachada y el resto de clases utilizadas para la implementación de las redes neuronales en la sección \ref{disenoRedes}. Las implementaciones concretas de las fachadas para la factoría se describirán con más detalle en la sección \ref{disenoFactoria}. 
 
 #+CAPTION:    Diagrama de componentes de la librería implementada.
 #+LABEL:      disenoComponentes
@@ -454,17 +453,17 @@ Finalmente, en la sección \ref{disenoLoop} se describen las utilidades destinad
 
 La figura \ref{disenoComponentes} muestra el diagrama de componentes de la librería. En las siguientes secciones se decribirá como se comunican los diferentes componentes con más detalle.
 
-** REVISAR Estructura de las redes neuronales
+** Estructura de las redes neuronales
 #+LaTeX: \label{disenoRedes}
 
-Las redes neuronales se implementan en el paquete *neural*, cuya interfaz de aplicaicón se describe en detalle en la sección \ref{apiNeural}. La clase principal es NeuralNet. Como se quiere independizar la red neuronal de la implementación concreta usada, las redes neuronales se comunican con el exterior mediante la clase Interface. Las entradas y salidas de la red serán objetos de esta clase. La red está compuesta de un conjunto de capas implementadas con la clase Layer. Como las capas de entrada leen de una interfaz, se crea una especialización de Layer llamada InputLayer, que copia sus propias salidas desde una Interface en vez de tomar otras Layer como entrada para calcular su estado a partir de éstas y de sus propios pesos.
-
-Así, NeuralNet tiene dos listas de capas, una para las de entrada y otra para el resto. También mantiene dos grafos dirigidos que representan las conexiones entre esas capas. Uno de los grafos contiene las conexiones desde capas de entrada hacia las otras capas y el otro grafo contiene las conexiones entre las capas que no son de entrada (capas ocultas o de salida). No se hace ninguna distinción entre las capas ocultas y las de salida. Cuando el usuario de la librería solicita el estado de una capa desde el exterior de la red, NeuralNet devuelve una Interface que será creada dentro de la capa y que se actualizará con las salidas de la capa siempre que estas se calculen.
+Las redes neuronales se implementan en el paquete *neural*, cuya interfaz de aplicación se describe en detalle en la sección \ref{apiNeural}. La clase principal es NeuralNet. Como se quiere independizar la red neuronal de la implementación concreta usada, las redes neuronales se comunican con el exterior mediante la clase Interface. Las entradas y salidas de la red serán objetos de esta clase. La red está compuesta de un conjunto de capas implementadas con la clase Layer. Como las capas de entrada leen de una interfaz, se crea una especialización de Layer llamada InputLayer, que copia sus propias salidas desde una Interface en vez de tomar otras Layer como entrada para calcular su estado a partir de éstas y de sus propios pesos.
 
 #+CAPTION:    Diagrama de clases del componente Neural.
 #+LABEL:      classNeural
 #+ATTR_LaTeX: scale=0.33
 [[./img/uml/classNeural.png]]
+
+Así, NeuralNet tiene dos listas de capas, una para las de entrada y otra para el resto. También mantiene dos grafos dirigidos que representan las conexiones entre esas capas. Uno de los grafos contiene las conexiones desde capas de entrada hacia las otras capas y el otro grafo contiene las conexiones entre las capas que no son de entrada (capas ocultas o de salida). No se hace ninguna distinción entre las capas ocultas y las de salida. Cuando el usuario de la librería solicita el estado de una capa desde el exterior de la red, NeuralNet devuelve una Interface que será creada dentro de la capa y que se actualizará con las salidas de la capa siempre que estas se calculen.
 
 Una Layer está compuesta, a su vez, de un Buffer (es equivalente a Interface, pero especializable para cada implementación) para la salida y de una lista de conexiones representadas por la clase Connection. Una Layer tendrá una conexión por cada capa que una tome como entrada. Además, los umbrales de la capa se alamcenan también en un objeto de la clase Connection, que se crea con el Buffer auxiliar de resultados (antes de aplicar la activación) como entrada y con tamaño de salida 1 (para tener sólo un peso, que en este caso representa a un umbral, por cada neurona de salida de la capa). Sobre esta conexión se llamará al método =activation= pasándole como parámetros el Buffer de salida de la capa y el /tipo de activación/ en vez de usar el método =calculateAndAddTo= tomando como parámetro el Buffer de resultados como hacen el resto de Connection, que realmente representan conexiones. En realidad, esta Connection especial guardada en el atributo =thresholds= puede ser considerada una conexión con conexiones 1 a 1 en vez de una conexión completa (con las conexiones normales cada neurona de salida conecta con todas neuronas de entrada). 
 
@@ -472,16 +471,46 @@ La clase Layer en sí es prescindible, pero la implementación interna de Neural
 
 Como el almacenamiento de datos es, en principio, común para una misma implementación y su mapeo a Interface debe ser similar, la clase Connection hereda de la clase Buffer y, de no requerir un almacenamiento especial (como es el caso, por ejemplo, de CudaInvertedConnection) reutilizará estos métodos sin reimplementarlos. El diagrama de clases \ref{classNeural} resume lo comentado en esta sección.
 
-** HACER Estructuras para algoritmos genéticos
+** Estructuras para algoritmos genéticos
 #+LaTeX: \label{disenoGenetic}
-** HACER Utilidades para la experimentación
-#+LaTeX: \label{disenoLoop}
-- [ ] Automatización de pruebas
-- [ ] Recogida y presentación de datos
-** MODIFICAR Problemas a resolver
+
+Los algoritmos genéticos se implementan en el paquete *genetic*, cuya interfaz de aplicación se describe en detalle en la sección \ref{disenoGenetic}. Los operadores concretos y sus variaciones se describen en el capítulo \ref{disenoGene}, en esta sección nos limitamos a describir las clases y métodos principales que realizarán las tareas allí descritas.
+
+#+CAPTION:    Diagrama de clases del componente Genetic y su relación con Neural
+#+LABEL:      classGenetic
+#+ATTR_LaTeX: scale=0.35
+[[./img/uml/classGenetic.png]]
+
+La clase [[implIndividual][Individual]] extiende a NeuralNet, del paquete *neural* descrito anteriormente. Para implementar los operadores genéticos que alteran los pesos (el cruce, la mutación y un nuevo tipo de mutación que llamaremos "olvido") La clase  [[implIndividual][Individual]] accede a través de las Layer a las interfaces Connection, que contienen los métodos genéricos que las distintas implementaciones paralelas deben implementar. 
+
+La clase Population gestiona la población de individuos. Se ocupa de hacer que éstos apliquen éstos operadores genéticos, de aplicar el operador genético de selección, gestionar los parámetros del algoritmo genético, crear nuevos individuos y destruir los peores. Utiliza la interfaz Task para evaluar a los individuos.
+
+La clase abstracta Task representa la interfaz con los métodos que las diferentes tareas o problemas que se quiere que la librería desempeñe o resuelva deben implementar. Las tareas que se han implementado para la experimentación y que extienden a estaclase, se encuentran en el paquete *tasks*.
+
+La figura \ref{classGenetic} muestra el diagrama de clases del componenete y su relación con el paquete *neural*. En la clase [[implIndividual][Individual]] se incluyen como protegidos los métodos relevantes que hereda de NeuralNet.
+
+** Factoria e implementaciones optimizadas
+#+LaTeX: \label{disenoFactoria}
+
+La clase Factory utiliza el patrón de diseño factoría para independizar completamente a las redes neuronales de sus implementaciones paralelas. Los componentes [[apiSSE2][SSE2]] y [[apiCUDA][CUDA]] están implementadas en otros lenguajes, pero definen fnciones C que son llamadas desde el proyecto C++. Las diferentes implementaciones nunca Buffer y Connection nunca tienen que ser instanciadas directamente, se usa la factoría indicando el /tipo de implementación/ (ImplementationType). 
+
+Además, los /tipos de neurona/ (BufferType) se implementan usando plantillas y desde aquí se llamarán a los constructores de todos los tipos de neurona, por lo que  éste puede ser decidido en tiempo de ejecución por la aplicación que use la librería. Si alguna combinación de /tipo de implementación/ y /tipo de neurona/ concreta no está implementada, se puede lanzar una excepción desde aquí. 
+
+#+CAPTION:    Diagrama de clases del componente Factory y su relación con Neural.
+#+LABEL:      classFactory
+#+ATTR_LaTeX: scale=0.25
+[[./img/uml/classFactory.png]]
+
+Mediante un fichero configFactory, que vigila las flags indicadas desde el fichero makefile, se puede controlar qué implementaciones serán compiladas y construibles desde la factoría, evitando los errores de compilación que tendrían que corregirse si la arquitectura en la que se compila la librería no soportase alguna de ellas.
+
+La implementación de referencia utiliza las clases CppBuffer y CppConnection. La implementación =SSE2= tiene una estructura similar, con XmmBuffer y XmmConnection, desde esta última se llamarán a la funciones implementadas en ensamblador.
+
+La implementación CUDA es más compleja, porque en realidad tiene varias implementaciones alternativas para la función principal del cálculo del estado de las neuronas. Las clases básicas de las que heredan las demás son CudaBuffer y CudaBaseConnection (esta última sigue siendo abstracta, pues no implementa el método virtual puro =_calculateAndAddTo= que requiere Connection). Luego hay una conexión diferente para cada una de las 4 implementaciones de =_calculateAndAddTo=: CudaReduction0Connection, CudaReductionConnection, CudaOutputsConnection y CudaInvertedConnection. La última reimplementa =_copyFrom= y =_copyTo= de Buffer, y =_crossover=, =_mutateWeigh= y =_resetWeigh= para adaptarlas a su colocación inversa en memoria de la matriz de pesos. El operador de cruce también tiene dos implementaciones diferentes para CUDA, como se describe en la sección \ref{disenoParalCUDAcruza}, pero se aprovecha la clase CudaReduction0Connection para utilizar la que se espera que sea más lenta. La figura \ref{classFactory} muestra el diagrama de clases del paquete *factory*. Todas las clases implementan el método virtual puro de Buffer getImplementationType, pero se omite en el diagrama. Nótese que en el diagrama Factory no construye a  CudaBaseConnection. 
+
+** Problemas a resolver
 #+LaTeX: \label{experimentacion}
 
-En esta sección se describen los problemas para los que se entrenarán las redes neuronales y las utilidades implementadas para la experimentación.
+En esta sección se discuten y describen los problemas para los que se entrenarán las redes neuronales y las utilidades implementadas para la experimentación. Se implementan dentro de los paquetes *Game* y *Tasks*, descritos en más detalle en las secciones \ref{implGame} y \ref{implTasks} respectivamente. La figura \ref{classTasks} muestra el diagrama e calses de ambos componenetes. En las tareas que heredan de Task, se omiten los métodos abstractos de ésta que deben implementar.
 
 *** Tareas de clasificación
 #+LaTeX: \label{experimentacionClasif}
@@ -501,7 +530,7 @@ Puede parecer poco intuitivo que el cálculo de estas operaciones lógicas const
 
 Expresado de otra forma, si llamamos c0 a la clase 0 y c1 a la clase 1, para la clasificación OR la entrada {00} pertenece a c0 y las entradas {10, 01, 11} pertenecen a c1; para AND, {00, 10, 01} pertenecen a c0 y {11} a c1; para XOR {00, 11} pertenecen a c0 y {10, 01} pertenecen a c1.
 
-Como se describió en el capítulo \ref{manualProgrInterf}, para que nuestro sistema pueda aprender una tarea nueva, sólo es necesario implementar una clase que herede de la interzaz Task, en este caso, la clase implementada es BinaryTask. El método más importante es test, que toma un individuo como parámetro, lo prueba y le asigna el fitness resultante. También es importante el método setInputs, con el que se conectan las variables internas de la tarea con las entradas de la red neuronal de un individuo. Por último, getExample devuelve un individuo construido cuya estructura es suficiente para aprender la tarea concreta para la que se quiere entrenar a la población.
+Como se describió en el capítulo \ref{manualProgrInterf}, para que nuestro sistema pueda aprender una tarea nueva, sólo es necesario implementar una clase que herede de la interzaz Task, en este caso, la clase implementada es BinaryTask del paquete *tasks*. El método más importante es test, que toma un individuo como parámetro, lo prueba y le asigna el fitness resultante. También es importante el método setInputs, con el que se conectan las variables internas de la tarea con las entradas de la red neuronal de un individuo. Por último, getExample devuelve un individuo construido cuya estructura es suficiente para aprender la tarea concreta para la que se quiere entrenar a la población.
 
 La clase BinaryTask es bastante flexible respecto a cómo puede ser inicializada. Hay dos parámetros que son olbigatorios: un enumerado BinaryOperation que indica que tipo de operación será realizada (OR, AND ó XOR) y el tamaño de los vectores de entrada, que es igual al tamaño del de salida.
 Existe un tercer parámetro optativo numTests que hace referencia al número de pruebas para evaluar a un individuo. Si no se rellena, se probarán todas las combinaciones posibles entre los dos vectores de entrada; si se rellena, determinará el número de pruebas aleatorias que se realizarán para probar a cada individuo. Para las dos posibilidades, el individuo empieza con una puntuación igual al número de diferencias con las salidas esperadas que podría obtener cómo máximo y se irán restando las diferencias que se vayan encontrando. Así, la puntuación del inndividuo será mejor cuanto menor sea el número de diferencias sigueindo la siguiente fórmula: Fitness = Número máximo de diferencias posibles - número de diferencias obtenidas.
@@ -509,7 +538,9 @@ Las pruebas aleatorias consisten simplemente en dar valores aleatorios a los vec
 
 No rellenar el número de pruebas y dejar que se evalúen todas las posibilidades nos dará valores de fitness más precisos, pero puede hacer las pruebas muy lentas para tamaños de vectores más grandes.
 
-Para que esta tarea pueda ser realizada por neuronas binarias, bipolares y reales, en lugar de comparar la salida de la neurona directamente con la salida deseada se usarán aproximaciones. Se entenderá que en la salida de las redes neuronales, cualquier valor mayor o igual a 0.5 es equivalente a un 1 y cualquier valor menor que 0.5 (por ejemplo -1 para una neurona bipolar; 0.1 ó -7 para una neurona real) es equivalente a un 0. Esto se podría implementar con una capa adicional, pero se ha preferido por simplicidad hacerlo directamente dentro de la clase BinaryTask.
+Para que esta tarea pueda ser realizada por neuronas binarias, bipolares y reales, en lugar de comparar la salida de la neurona directamente con la salida deseada se usarán aproximaciones. Se entenderá que en la salida de las redes neuronales, cualquier valor mayor o igual a 0.5 es equivalente a un 1 y cualquier valor menor que 0.5 (por ejemplo -1 para una neurona bipolar; 0.1 ó -7 para una neurona real) es equivalente a un 0. Esto se podría implementar con una capa adicional, pero se ha preferido por simplicidad hacerlo directamente dentro de la clase BinaryTask. 
+
+Aunque no se utiliza para la experiementación, también se implementa en el paquete *tasks* una tarea más genérica para problemas de clasificación llamada ClassificationTask.
 
 *** Juegos de estrategia abstractos
 #+LaTeX: \label{experimentacionJuegos}
@@ -526,9 +557,46 @@ Aunque nuestras redes también pueden ser entrenadas para dar una heurística pa
 
 Este tipo de tareas se implementará de forma general haciendo que las redes neuronales actúen como una heurística. Esta heurística puede ser usada como la base de un algoritmo de poda alfa-beta con profundidad configurable o simplemente considerando solamente el conjunto de todos los movimientos legales inmediatos, que es lo que se ha hecho para el caso Reversi. Para evaluar las redes neuronales, en lugar de enfrentarlas entre sí, se ha preferido utilizar un adversario también automático pero no basado en redes neuronales. Así, cada red que quiera ser evaluada se enfrenta a este jugador una o varias veces y se acumulan los resultados para obtener el fitness.
 
+#+CAPTION:    Diagrama de clases de los componenetes Game y Tasks su relación con Genetic
+#+LABEL:      classTasks
+#+ATTR_LaTeX: scale=0.33
+[[./img/uml/classTasks.png]]
+
 El jugador que se ha implementado para Reversi es extremadamente simple, pero, aún así, es capáz de ganar al jugador humano casual. No utiliza poda  alfa-beta, sino simplemente evalua todos los movimientos legales inmediatos y elige el mejor, igual que lo harán los jugadores neuronales. La diferencia es que el oponente no utiliza una red neuronal como heurística. La heurística del oponente consiste simplemente en contar la puntuación que resultaría si se realizase un movimiento concreto, como si la partida acabase en ese momento. El oponente, por tanto, tiene acceso a la puntuación actual de cada movimiento hipotético y en eso basa su heurística. La red neuronal, sin embargo, no tiene acceso a esas puntuaciones: solamente toma como entrada el tablero resultante de cada movimiento hipotético y debe con eso dar una aproximación de lo bueno que es el movimiento. Para poder ganar a nuestro oponente tendrá que ser capáz, por lo menos, de ser capaz de calcular la puntuación de forma similar a su oponente. No obstante, la red neuronal actúa como una caja negra y no sabemos realmente en qué criterios internos se está basando. Lo que sí se podría hacer es construir un circuito lógico equivalente a la red neuronal para analizarlo y tratar de extraer conclusiones sobre la estrategia aprendida.
 
-La tarea Reversi se implementa en la clase ReversiTask que también hereda de la clase abstracta Task y que utiliza la clase ReversiBoard que implementa las reglas de juego de Reversi y que, a su vez, hereda de la clase que implementa el el tablero genérico para juegos con piezas iguales pero de dos jugadores Board. Éste último siempre es de un tamaño cuadrado (las mismas casillas a lo largo que a lo ancho) pero el tablero de Reversi tiene, además, la restricción de ser como mínimo de un tamaño 4x4. Esto es así por que las cuatro piezas centrales (2x2) empiezan ya rellenas para que los juegadores tengan movimientos legales al inicio.
+La tarea Reversi se implementa en la clase ReversiTask que también hereda de la clase abstracta Task y que utiliza la clase ReversiBoard que implementa las reglas de juego de Reversi y que, a su vez, hereda de la clase que implementa el el tablero genérico para juegos con piezas iguales pero de dos jugadores Board. Éste último siempre es de un tamaño cuadrado (las mismas casillas a lo largo que a lo ancho) pero el tablero de Reversi tiene, además, la restricción de ser como mínimo de un tamaño 4x4. Esto es así por que las cuatro piezas centrales (2x2) empiezan ya rellenas para que los juegadores tengan movimientos legales al inicio. Las clases ReversiBoard y Board se encuentran en el paquete *game*, mientras que ReversiTask se encuenra en *tasks*.
+
+** Utilidades para la experimentación
+#+LaTeX: \label{disenoLoop}
+
+Como la diversidad de implementaciones, funciones de activación a usar, operadores genéticos, formas y niveles a los que aplicarlos, tipos de datos,  y problemas que resolver es grande; como además existen varios parámetros numéricos que influirán en los resultados y como además de automatizar las pruebas, se quiere medir el rendimiento computacional y la efectividad del aprendizaje, se hace necesario implementar un paquete que facilite la ejecución de *pruebas masivas parametrizadas automáticamente*.
+
+Para evitar acumular la anidación de bucles que iteren sobre todos estos parámetros, se opta por recursividad a la hora de anidar iteraciones. Se pueden encadenar varios elementos de la clase abstracta [[apiLoopClass][Loop]]. Una vez encadenados, se llama a al método =repeatFunction= en el primero de ellos pasándole como parámetro un objeto de la clase LoopFunction. Cada [[apiLoopClass][Loop]] iterará de una forma diferente dependiendo de su implementación usando polimorfismo y en cada vuelta llamará a su bucle interno (el siguiente en la cadena) para que repita su propia iteración. El último bucle, que no contiene a ningún otro, ejecuta el método =execute= de LoopFunction, que se ha ido pasando como parámetro de un [[apiLoopClass][Loop]] a otro.
+
+#+CAPTION:    Diagrama de clases de los componentes Loop y LoopTest.
+#+LABEL:      classLoop
+#+ATTR_LaTeX: scale=0.3
+[[./img/uml/classLoop.png]]
+
+La clase LoopFunction puede ser extendida para reimplementar el método =__executeImpl= (que es llamado desde =execute=), pero la clase no es abstracta y el constructor ya es bastante genérico de por sí. Contiene un objeto de la clase ParametersMap que es donde cada [[apiLoopClass][Loop]] almacenará su valor actual, asociandolo a una cadena. El constructor de LoopFunction toma como parámetros ese mapa de parámetros, una label para identificarlo por si hubiese alguna excepción que también es útil para depurar y un puntero a una función. El puntero a la función no devuelve nada y toma como único parámetro un ParametersMap, por lo que cualquier función C con una cabera similar puede ser ejecutada masivamente con un número arbitrario de parámetros sin necesidad de extender.
+
+La clase que sí se debe extender necesariamente por ser abstracta es la clase [[apiLoopClass][Loop]]. Se han implementado 4 clases diferentes que extienden de [[apiLoopClass][Loop]], cada cuál útil para un caso:
+
+- RangeLoop : itera desde un minimo hasta un máximo con incrementos constantes.
+- ExpLoop : itera desde un mínimo hasta un máximo multiplicando en cada vuelta por un factor constante.
+- EnumLoop : itera utilizando un enumerado de los definidos junto a la clase Enumerations.
+- JoinEnumLoop : es un caso especial del anterior. Permite que cada valor enumerado puede tener sus propios parámetros que no afecten a los demás.
+
+La clase Plot se ocupa de generar datos, scripts para la aplicación externa gnuplot y gráficas para un [[apiLoopClass][Loop]] determinado. para gráficas generadas por funciones de la forma =Y = func(ParametersMap*)= para un RangeLoop que usa Plot como coordenada X (valro que irá incluído en el mapa de parámtros). Se omiten las extensiones de LoopFunction que utilizan la clase Plot y las clases del paquete *loopers* para especializarse en tareas concretas, pero la clase Plot provee facilidades para ser extendida ymodificada.
+
+El paquete *loopers* hace uso del paquete *loop* para tareas específicas de la librería. Se han separado estas tres clases del resto de las utilidades para la experimentación por ser las que tienen acoplamientos con el resto de la librería, y así mantener el paquete *loop* más genérico para otros posibles usos.
+
+La clase [[apiTestclass][Test]] utiliza el conjunto de clases descrito para iterar e incorpora utilidades para probar posibles pérdidas de espacio en memoria y comparar los pesos tras el cruce o los resultados de las redes, teniendo en cuenta que, al contrario que la suma entre números reales, la suma de números representados en coma flotante no cumple la propiedad asociativa \cite{bestPract2009} y se debe consentir una ligera diferencia que en nuestro caso es de \pm1.
+
+
+El ChronoPlotter y TaskPlotter extienden a Plot para generar gráficas más especializadas. ChronoPlotter utiliza Chronometer para medir el tiempo de ejecución de la función repetida y genera gráficos de rendimiento. TaskPlotter está especializada en generar gráficas sobre el aprendizaje de tareas usando Population. Utiliza constantes estáticas de esta clase para algunos parámetros (como el tamaño de la población) y un enumerado para las diferentes tareas soportadas que genera a partir del mapa de parámetros usando la clase Dummy. En vez de delegar la creación de la tarea a ésta clase se le puede indicar una ya creada como parámetro del método de generación de la gráfica.
+
+La figura \ref{classLoop} muestra el diagrama de clases de los paquetes [[apiLoopPkg][loop]] y [[apiLoopersPkg][loopers]] y sus relaciones con otros componentes de la librería.
 
 \newpage
 * Diseño del algoritmo genético
@@ -1827,13 +1895,21 @@ Sólo actuará un hilo por bloque, no parece que se optimice mucho. Sin embargo,
 
 sudo aptitude install make g++ nasm gnuplot
 sudo aptitude install texlive-latex-recommended texlive-latex-extra
-** HACER [4/8] Interfaz de aplicación (API)
-#+LaTeX: \label{manualProgrApi}
-En esta sección se describen las clases implementadas y sus métodos. Explicando lo que hacen y cómo deben ser llamadas pero no necesariamente el funcionamiento interno. Se omiten los constructores por defecto (los constructores que no toman ningún parámetro) y los destructores.
+** HACER [0/3] Extensibilidad a partir de interfaces
+#+LaTeX: \label{manualProgrInterf}
+*** HACER Nuevas paralelizaciones de redes neuronales
+#+LaTeX: \label{manualProgrInterfRed}
 
-*** REVISAR Common
-**** Enumerations
-<<<Enumerations>>>
+*** HACER Nuevas tareas para ser aprendidas
+*** HACER Nuevas clases para pruebas y generación de gráficas.
+\newpage
+\newpage
+** HACER [4/9] Interfaz de aplicación (API)
+#+LaTeX: \label{manualProgrApi}
+En esta sección se describen las clases implementadas y sus métodos públicos, explicando lo que hacen y cómo deben ser llamadas pero no necesariamente el funcionamiento interno. Se omiten los constructores por defecto (los constructores que no toman ningún parámetro) y los destructores.
+
+*** HACER [0/1] Common
+**** <<<Enumerations>>>
 
 Dado que la librería cuenta con tantas posibles configuraciones, su gestión básica en esta clase. Se han definido 10 tipos enumerados para: 
 
@@ -1852,7 +1928,7 @@ Cada enumerado tiene un método que devuelve una cadena descriptora a partir de 
 
 **** <<<Util>>>
 
-Estos ficheros contienen varias utilidades variadas. Se definen macros para recorrer vectores y listas de la librería C++ estándar para evitar más dependencias de librerías externas como [[http://en.wikipedia.org/wiki/Boost_(C%2B%2B_libraries)][Boost]]. Para poder concatenar otros tipos con objetos de la clase std::string de forma más legible y cómoda, se define la función plantilla \verb=std::string to_string(const T& t)=. El resto de funciones de utilidad se agrupan en clases, aunque por ser simples se definen e implmentan en los mismos ficheros. Como pasaba con Enumerations, estas clases tienen todos sus  métodos (y atributos si los tienen) estáticos y no es necesario instanciarlas. La única excepción es SimpleGraph. Las clases son:
+Estos ficheros (el .h y el .cpp) contienen varias utilidades variadas. Se definen macros para recorrer vectores y listas de la librería C++ estándar para evitar más dependencias de librerías externas como [[http://en.wikipedia.org/wiki/Boost_(C%2B%2B_libraries)][Boost]]. Para poder concatenar otros tipos con objetos de la clase std::string de forma más legible y cómoda, se define la función plantilla \verb=std::string to_string(const T& t)=. El resto de funciones de utilidad se agrupan en clases, aunque por ser simples se definen e implmentan en los mismos ficheros. Como pasaba con Enumerations, estas clases tienen todos sus  métodos (y atributos si los tienen) estáticos y no es necesario instanciarlas. La única excepción es SimpleGraph. Las clases son:
 
 ***** Util : 
 
@@ -1903,6 +1979,23 @@ Esta clase se utiliza para realizar las mediciones de tiempo de ejecución y pod
 + =void stop():= Detiene la cuenta del cronómetro. Si no se había llamado previamente a =start()= lanza una cadena como excepción.
 + =float getSeconds():= Devuelve el contenido del cronómetro en segundos. Si no se había detenido el chronómetro llamando a =stop()=, devolverá 0.
 
+**** <<<ParametersMap>>>
+
+Esta clase implementa un mapa de parametros útil para los para los parámetros de configuración del algoritmo genético y para las utilidades de pruebas del paquete [[apiLoopPkg][Loop]]. En realidad, la clase tiene tres mapas de parámetros diferentes: uno para números, otro para cadenas de texto y otro para punteros. La misma clave (key) puede ser repetida si el tipo es diferente. Se usa el contructor por defecto, que no tiene nada de especial.
+
+- =void putNumber(std::string key, float number) := Asigna el valor del parámetro =number= al par con la clave =key= que haya en el mapa de números. Si no existe la clave, se crea un nuevo par (clave, valor).
+- =float getNumber(std::string key) := Devuelve el valor en el mapa de números asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepción.
+- =void putPtr(std::string key, void* ptr) := Asigna el valor del parámetro =ptr= al par con la clave =key= que haya en el mapa de punteros. Si no existe la clave, se crea un nuevo par (clave, valor).
+- =void* getPtr(std::string key) := Devuelve el valor en el mapa de punteros asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepción.
+- =void putString(std::string key, std::string str) := Asigna el valor del parámetro =str= al par con la clave =key= que haya en el mapa de punteros. Si no existe la clave, se crea un nuevo par (clave, valor).
+- =std::string getString(std::string key) := Devuelve el valor en el mapa de punteros asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepción.
+- =std::string printNumber(std::string key) := Devuelve una cadena con la clave =key= concatenada con el número (pasado a cadena) en el mapa de números asociado con la propia clave. Si no existe la clave en ese mapa se lanza una excepción. Por ejemplo "miNumero_32.5"
+- =std::string printString(std::string key) := Devuelve una cadena con la clave =key= concatenada con la cadena en el mapa de cadenas asociada con la propia clave. Por ejemplo, ~"miCadena_hola mundo!"~. Si no existe la clave en ese mapa se lanza una excepción. 
+- =void print() := Escribe en la salida estándar todos los pares (clave, valor). Primero los del mapa de números, luego el mapa de punteros y, por último, el mapa de cadenas.
+- =void copyTo(ParametersMap* parametersMap) := Asigna al mapa de parámetros recibido todos los pares (clave, valor) que contenga.
+- =void copyFrom(ParametersMap* parametersMap) := Para todos los pares (clave, valor) que contenga intenta copiar el valor del ParametersMap recibido. Si no existe algun´valor, captura y silencia la excepción lanzada por el mapa recibido al intentar acceder a estos. Esos pares no los modifica.
+
+**** HACER <<<Dummy>>>
 *** REVISAR Neural
 #+LaTeX: \label{apiNeural}
 
@@ -1935,7 +2028,7 @@ Para unificar ciertas tareas comunes y tener una estructura de datos manipulable
 
 Tanto las entradas, las salidas como los pesos se almacenana en estructuras lineales similares a vectores matemáticos. Pero la representación interna de estos datos puede variar bastante dependiendo de la técnica de paralelización utilizada y el tipo de neuronas. Por esta razón y para mantener una API limpia y un código legible y mantenible se implementa la clase abstracta Buffer. Esta clase implementa varios métodos comunes e impone a la clases hijas la implementación de ciertos métodos en los que se describirán las pecualiaridades de cada representación, sin exponerlas al código que utilice la propia clase Buffer. Como se indicó en el diseño, a esas peculiaridades se accederá utilizando polimorfismo.  
 
-Al ser una clase abstracta, no se puede instanciar. Las clases que heredan de Buffer se describen en la sección \ref{implFactoria} y estas son sólo accesibles desde la clase Factory, por lo que la única forma de instanciarlas es usando la propia clase Factory.
+Al ser una clase abstracta, no se puede instanciar. Las clases que heredan de Buffer se describen en la sección \ref{disenoFactoria} y estas son sólo accesibles desde la clase Factory, por lo que la única forma de instanciarlas es usando la propia clase Factory.
 
 Esta clase tiene métodos de tres tipos: convencionales, virtuales y virtuales puros. El tener métodos virtuales puros es lo que hace que la clase sea abstracta. Estos no están definidos pero deben ser definidos en las clases que hereden de ésta para que no sean abstractas y puedan ser instanciadas. Los métodos virtuales están implementados, pero si es preciso puede cambiarse su implementación en las clases hijas. Los métodos convencionales no se pueden reimplementar para tener polimorfismo. Los métodos privados y protegidos de la clase se describen en la sección \ref{manualProgrInterfRed}, estos incluyen métodos no públicos que son virtuales puros. A continuación se describen los métodos públicos que ofrece Buffer. 
 
@@ -1944,6 +2037,8 @@ Los métodos públicos y virtuales puros (deben ser implementados en las clases 
 + =ImplementationType getImplementationType() := Devuelve el tipo de implementación del Buffer. =ImplementationType= es un enumerado descrito en Enumerations.
 + =BufferType getBufferType() := Devuelve el tipo de Buffer. =BufferType= es un enumerado descrito en Enumerations.
 + =void reset() := Inicializa a cero el valor de todos los elementos del vector.
+
+Las clases no abstractas que hereden de ésta también deben implementar los métodos virtuales puros protegidos: =void _copyFrom(Interface* interface)= y =void _copyTo(Interface* interface)=.
 
 Los demás métodos públicos y virtuales son:
 
@@ -1969,7 +2064,9 @@ Al igual que Buffer, esta clase es abstracta y sólo se puede instanciar usando 
 
 Esta clase conecta un Buffer de entrada con un Buffer de salida y almacena una matriz de pesos. Como caso especial, una conexión puede conectar un vector de resultados con la verdadera salida. En este caso, lo que almacena es un vector de umbrales y usará el método =activation= en lugar de =calculateAndAddTo=. 
 
-Todos los Buffer asociados a una Connection deben ser del mismo tipo de implementación, como se describe en más detalle en la sección \ref{implFactoria}.
+Todos los Buffer asociados a una Connection deben ser del mismo tipo de implementación, como se describe en más detalle en la sección \ref{disenoFactoria}.
+
+Las clases no abstractas que hereden de ésta también deben implementar los métodos virtuales puros protegidos: =void _calculateAndAddTo(Buffer* results)=, =void _activation(Buffer* output, FunctionType functionType)=, =void _crossover(Buffer* other, Interface* bitBuffer)=, =void _mutateWeigh(unsigned pos, float mutation)= y =void _resetWeigh(unsigned pos)=.
 
 Los métodos públicos (ninguno virtual) que ofrece son:
 + =Buffer* getInput() := Devuelve el puntero al Buffer de entrada a la conexión.
@@ -2143,25 +2240,221 @@ El resto de métodos públicos son:
 - =std::string toString() := Devuelve una cadena que identifica a la población. Llama a =Task::toString()= y le concatena el tamaño máximo de la población. 
 - =void save(FILE* stream) := Guarda los parámetros de configuración del algoritmo genético y todos los individuos de la población al fichero especificado por el parámetro =stream=. Notesé que la tarea no se guarda.
 - =void load(FILE* stream) := Carga los parámetros de configuración del algoritmo genético y los individuos, para insertarlos en la población, desde el fichero especificado por el parámetro =stream=. Notesé que la tarea no se carga y tiene que haber sido establecida en el constructor.
-*** HACER [1/9] Loop
-**** REVISAR <<<ParametersMap>>>
+*** REVISAR <<<Factory>>>
 
-Esta clase implementa un mapa de parametros útil para los para los parámetros de configuración del algoritmo genético y para las utilidades de pruebas de este paquete. En realidad, la clase tiene tres mapas de parámetros diferentes: uno para números, otro para cadenas de texto y otro para punteros. La misma clave (key) puede ser repetida si el tipo es diferente. Se usa el contructor por defecto, que no tiene nada de especial.
+La clase Factory independiza a las redes neuronales de las diferentes implementaciones, siendo la única clase que tiene acceso al resto de clases implementadas dentro del mismo paquete, con lo que se consigue un espacio de nombres más limpio. Layer debe usar esta clase para instanciarlas y siempre utilizará las interfaces Buffer y Connection. Todos los métodos de la clase son estáticos, por lo que no es necesario instanciar Factory para llamarlos. Las validaciones y la gestión de los /tipos de neurona/ (BufferType) mediante plantillas se implementa en el fichero =factory.cpp=. Éste incluye a =configFactory.h= que mediante macros del precompilador y utilizando las banderas generadas desde el fichero =makefile= para la compilación del proyecto impide que se intenten compilar las implementaciones no soportadas.
 
-- =void putNumber(std::string key, float number) := Asigna el valor del parámetro =number= al par con la clave =key= que haya en el mapa de números. Si no existe la clave, se crea un nuevo par (clave, valor).
-- =float getNumber(std::string key) := Devuelve el valor en el mapa de números asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepción.
-- =void putPtr(std::string key, void* ptr) := Asigna el valor del parámetro =ptr= al par con la clave =key= que haya en el mapa de punteros. Si no existe la clave, se crea un nuevo par (clave, valor).
-- =void* getPtr(std::string key) := Devuelve el valor en el mapa de punteros asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepción.
-- =void putString(std::string key, std::string str) := Asigna el valor del parámetro =str= al par con la clave =key= que haya en el mapa de punteros. Si no existe la clave, se crea un nuevo par (clave, valor).
-- =std::string getString(std::string key) := Devuelve el valor en el mapa de punteros asociado a la clave =key=. Si no existe la clave en ese mapa se lanza una excepción.
-- =std::string printNumber(std::string key) := Devuelve una cadena con la clave =key= concatenada con el número (pasado a cadena) en el mapa de números asociado con la propia clave. Si no existe la clave en ese mapa se lanza una excepción. Por ejemplo "miNumero_32.5"
-- =std::string printString(std::string key) := Devuelve una cadena con la clave =key= concatenada con la cadena en el mapa de cadenas asociada con la propia clave. Por ejemplo, ~"miCadena_hola mundo!"~. Si no existe la clave en ese mapa se lanza una excepción. 
-- =void print() := Escribe en la salida estándar todos los pares (clave, valor). Primero los del mapa de números, luego el mapa de punteros y, por último, el mapa de cadenas.
-- =void copyTo(ParametersMap* parametersMap) := Asigna al mapa de parámetros recibido todos los pares (clave, valor) que contenga.
-- =void copyFrom(ParametersMap* parametersMap) := Para todos los pares (clave, valor) que contenga intenta copiar el valor del ParametersMap recibido. Si no existe algun´valor, captura y silencia la excepción lanzada por el mapa recibido al intentar acceder a estos. Esos pares no los modifica.
+La clase cuenta con los siguientes métodos:
 
-**** HACER <<<Loop>>>
++ =void saveBuffer(Buffer* buffer, FILE* stream) := 
++ =Buffer* newBuffer(FILE* stream, ImplementationType implementationType) := 
++ =Buffer* newBuffer(Interface* interface, ImplementationType implementationType) := 
++ =Buffer* newBuffer(Buffer* buffer, ImplementationType implementationType) := 
++ =Buffer* newBuffer(unsigned size, BufferType bufferType, ImplementationType implementationType) := 
++ =Connection* newConnection(Buffer* input, unsigned outputSize) := 
++ =Connection* newConnection(FILE* stream, unsigned outputSize, ImplementationType implementationType) := 
 
+A continuación se describen el resto de clases del paquete y cómo interaccionan con los paquetes externos comentados en el capítulo \ref{disenoParal}.
+
+**** Implementación de referencia
+
+Cuenta con dos clases:
+
++ <<<CppBuffer>>> : Hereda de la clase abstracta Buffer. Implementa los métodos virtuales puros: =void _copyFrom(Interface* interface)=, =void _copyTo(Interface* interface)= (protegidos), y los públicos =ImplementationType getImplementationType()=, =BufferType getBufferType()= y =void reset()=.
+
++ <<<CppConnection>>> : Hereda de la clase abstracta Connection y de la clase CppBuffer. Implementa los métodos virtuales puros protegidos: =void _calculateAndAddTo(Buffer* results)=, =void _activation(Buffer* output, FunctionType functionType)=, =void _crossover(Buffer* other, Interface* bitBuffer)=, =void _mutateWeigh(unsigned pos, float mutation)= y =void _resetWeigh(unsigned pos)=.
+
+**** SSE2
+
+El paquete factoría cuenta con dos clases que dependen del paquete externo *SSE2*:
+
++ <<<XmmBuffer>>> : Hereda de la clase abstracta Buffer. Implementa los métodos virtuales puros: =void _copyFrom(Interface* interface)=, =void _copyTo(Interface* interface)= (protegidos), y los públicos =ImplementationType getImplementationType()=, =BufferType getBufferType()= y =void reset()=.
+
++ <<<XmmConnection>>> : Hereda de la clase abstracta Connection y de la clase XmmBuffer. Implementa los métodos virtuales puros protegidos: =void _calculateAndAddTo(Buffer* results)=, =void _activation(Buffer* output, FunctionType functionType)=, =void _crossover(Buffer* other, Interface* bitBuffer)=, =void _mutateWeigh(unsigned pos, float mutation)= y =void _resetWeigh(unsigned pos)=.
+
+El paquete externo *SSE2* que utiliza el registro XMM descrito en la sección \ref{disenoParalXMM} declara sus funciones en el fichero sse2.h, y las define en los ficheros sse2_float.asm, sse2_bit.asm y sse2_sign.asm las siguientes fuciones respectivamente:
+
+#begin_src C
+extern "C" void XMMreal(float* bufferEntrada, unsigned numeroBloques, float* pesos, float &resultado);
+extern "C" int XMMbinario(void* bufferEntrada, unsigned numeroBloques, unsigned char* pesos);
+extern "C" int XMMbipolar(void* bufferEntrada, unsigned numeroBloques, unsigned char* pesos);
+#end_src
+
+**** CUDA
+
+Cuenta con 6 clases que dependen del paquete externo: *CUDA*:
+
++ <<<CudaBuffer>>> : Hereda de la clase abstracta Buffer. Implementa los métodos virtuales puros: =void _copyFrom(Interface* interface)=, =void _copyTo(Interface* interface)= (protegidos), y los públicos =ImplementationType getImplementationType()=, =BufferType getBufferType()= y =void reset()=.
+
++ <<<CudaBaseConnection>>> : Hereda de la clase abstracta Connection y de la clase CudaBuffer, pero sigue siendo abstracta porque no implementa =_calculateAndAddTo= de Connection. Implementa los métodos virtuales puros protegidos: =void _activation(Buffer* output, FunctionType functionType)=, =void _crossover(Buffer* other, Interface* bitBuffer)=, =void _mutateWeigh(unsigned pos, float mutation)= y =void _resetWeigh(unsigned pos)=.
+
++ <<<CudaReduction0Connection>>> : Hereda de CudaBaseConnection. Implementa =void _calculateAndAddTo(Buffer* results)= y reimplementa =void _crossover(Buffer* other, Interface* bitBuffer)= de la clase padre.
++ <<<CudaReductionConnection>>> : Hereda de CudaBaseConnection. Implementa =void _calculateAndAddTo(Buffer* results)=. 
++ <<<CudaOutputsConnection>>> : Hereda de CudaBaseConnection. Implementa =void _calculateAndAddTo(Buffer* results)=. 
++ <<<CudaInvertedConnection>>> : Hereda de CudaBaseConnection. Implementa =void _calculateAndAddTo(Buffer* results)= y reimplementa los métodos =void _crossover(Buffer* other, Interface* bitBuffer)=, =void _mutateWeigh(unsigned pos, float mutation)= y =void _resetWeigh(unsigned pos)= de CudaBaseConnection, y =void _copyFrom(Interface* interface)=, =void _copyTo(Interface* interface)= de CudaBuffer para adaptarlos a la colocación invertida en memoria de la matriz de pesos.
+
+El paquete externo *CUDA* utiliza la arquitectura GPGPU con el lenguaje de NVIDIA C CUDA como se comentó en la sección \ref{disenoParalCUDA}. Declara sus funciones en el fichero cuda.h, y las implementa en los ficheros activation.cu, basic.cu, calcInvertedMatrix.cu, calcOutputs.cu, calcReduction.cu, calcReduction0.cu y genetic.cu.
+
+*** REVISAR Game
+#+LaTeX: \label{implGame}
+Este paquete se encarga de implementar utilidades para tareas relacionadas con juegos, discutidos en el apartado \ref{experimentacionJuegos}.
+
+**** <<<Board>>>
+
+Esta clase clase abstracta implementa un tablero básico y genérico para juegos de tablero de dos jugadores con un solo tipo de pieza como por ejemplo el Reversi/Othello o el Go. Tiene una Interface interna que las NeuralNet pueden utilizar como entrada. se define un enumerado =SquareState= con los valores posibles de las casillas: =EMPTY=, =PLAYER_1=, =PLAYER_2=.
+
+Los constructores públicos son:
+
+- =Board(unsigned size) := Crea un tablero cuadrado de tamaño =size * size= con todas las casillas vacías.
+- =Board(Board* other) := Crea un tablero a partir de otro tablero, copiando los valores de todas las casillas.
+
+El destructor libera el tablero y la interfaz. La clase tiene los siguientes métodos virtuales puros:
+
+- =bool legalMove(unsigned xPos, unsigned yPos, SquareState player) := Para una posición del tablero dada y uno de los dos jugadores devuelve verdadero si el movimiento es legal según las reglas del juego implementado por la clase hija y falso si el movimiento no es válido.
+- =void makeMove(unsigned xPos, unsigned yPos, SquareState player) := Realiza el movimiento en la posición indicada para el jugador =player=, actualizando el tablero como corresponda para el juego.
+- =float computerEstimation(unsigned xPos, unsigned yPos, SquareState player) := Devuelve una estimación de la calidad de la jugada indicada por parámetros realizada por la máquina sin aprendizaje que se usa como /benchmark/.
+- =float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual) := Devuelve una estimación de la calidad de la jugada indicada por parámetros realizada por el individuo recibido como parámetro.
+
+Los siguientes métodos también son virtuales (se pueden redefinir por las clases hijas), pero ya vienen implementados:
+
+- =virtual void initBoard() := Vacía todas las casillas del tablero. Se puede redefinir con las condiciones iniciales de cada juego y es llamada por el constructor básico (el que no copia desde otro tablero).
+- =virtual bool canMove(SquareState player) := Devuelve verdadero si el jugador parámetro tiene algún movimiento legal y falso en caso contrario.
+- =virtual void turn(SquareState player, Individual* individual = NULL) := Realiza un turno para el jgador =player=. Si se pasa por parámetro un individuo, el individuo jugará el turno. Si no se indica ninguno (el parámetro es opcional, con =NULL= por defecto), es la máquina sin aprendizaje que haya definida para el juego y contra la que se entrenan las poblaciones.
+- =virtual bool endGame() :=
+- =virtual int countPoints(SquareState player) := Devuelve la puntuación actual del jugador =player=.
+
+El resto de métodos públicos son:
+
+- =unsigned getSize() := Devuelve el tamaño del tablero.
+- =void setSquare(unsigned xPos, unsigned yPos, SquareState squareState) := Establece el estado recibido en squareState en la casilla indicada por parámetro.
+- =SquareState getSquare(unsigned xPos, unsigned yPos) := Devuelve el estado de la casilla indicada por parámetro.
+- =bool squareIs(int xPos, int yPos, SquareState squareState) := Si la casilla indicada tiene el mismo estado que =squareState=, devuelve verdadero. Devuelve falos en caso contrario.
+- =Interface* getInterface() := Devuelve un puntero a la interfaz interna que contiene la información del tablero representada como un vector de bits.
+- =Interface* updateInterface() := Devuelve un puntero a la interfaz interna que contiene la información del tablero representada como un vector de bits. Antes de devolverlo, actualiza la interfaz con lo que haya en el tablero.
+- =static SquareState opponent(SquareState player) := Devuelve el jugador contrario al recibido por parámetro. Si se le pasa el estado de casilla =EMPTY= lanzará una excepción.
+- =void print() := Imprime el estado actual del tablero por la salida de texto estándar. "X" representa una casilla ocupada por el jugador 1, "O", una ocupada por el jugador 2 y "." una casilla vacía. Es muy útil para la depuración de la implementación de un nuevo juego sobre una clase que extienda de ésta.
+
+**** <<<ReversiBoard>>>
+
+Esta clase hereda de Board para implementar el juego Reversi/Othello comentado en la sección \ref{experimentacionJuegos}. esta clase es utilizada por la tarea ReversiTask. Los constructores son similares a los de Board, pero como el que recibe un tamaño llama a =initBoard()= y aquí se redefine, el tablero nuevo no tendrá todas las casillas vacías. 
+
+Se implementan todos los métodos virtuales puros de =Board= siguiendo las reglas del juego, pero no repetiremos la descripción de las mismas. Sólo se describe el que se reimplementa:
+
+- =virtual void initBoard() := incia el tablero según las reglas de reversi, es decir, rellena las 4 casillas del medio dándole dos casillas a un jugador y otras dos al otro. De forma que se crucen y haya movimientos legales al principio de la partida.
+
+*** MODIFICAR [0/3] Tasks
+#+LaTeX: \label{implTasks}
+**** MODIFICAR <<<BinaryTask>>>
+
+TODO antes las tareas eran siempre BIT internamente. PRobarlas primero por lo que haya que modificar.
+
+Extiende e implementa la clase abstracta Task para implementar las tareas de clasificación OR, AND y XOR para dos vectores de entrada de cualquier tamaño (pero igual para los dos vectores). Contiene dos interfaces internas para las entradas y una para la salida esperada. Las interfaces contienen vectores de floats en vez de bt
+
+El contructor es el siguiente:
+
+- =BinaryTask(BinaryOperation binaryOperation, BufferType bufferType, unsigned size, unsigned numTests = 0) := Tiene dos modos de operación dependiendo de si se rellena el parámetro opcional =numTests= o no. Si no se rellenea o se rellena con un cero, la tarea utilizará todas las posibles combinaciones entre los dos vectores de entrada para evaluar al individuo. Si se rellena, se utilizarán =numTests= combinaciones aleatorias al probar cada individuo, lo cuál puede reducir mucho el tiempo de evaluación de cada individuo si el tamaño de los vectores =size= es muy grande (pues el número de combinaciones crece exponencialemente con éste). El /tipo de neurona/ se le pasa para poder probar por separado redes similares con diferentes representaciones internas.
+
+- =virtual void test(Individual* individual) := Para cada combinación de entradas que se vaya a probar (ver constructor), se activa al individuo (que ya tiene que tener las interfaces internas establecidas como entradas) y se accede a una Interface de su última capa, se actualiza el valor de la interfaz de salida deseada de la tarea a partir de las mismas interfaces de entrada usando el método privado =doOperation= y compara las diferencias entre la salida calculada por el individuo y la salida deseada utilizando el método =compareTo= ya descrito. El /fitness/ que se le asigna al individuo es igual a la puntuación máxima que podría obtener con la configuración actual de la prueba menos las diferencias acumuladas de cada combinación de entradas.
+- =virtual void setInputs(Individual* individual) := Añade dos capas de entrada al individuo que apuntan a los interfaces internos de entrada.
+- =virtual string toString() := Devuelve un string que indica la operación y el tamaño de los vectores, por ejemplo, "XOR4".
+- =virtual Individual* getExample(ParametersMap* parameters) := Devuelve un individuo de ejemplo para resolver la operación dada
+
+**** HACER <<<ReversiTask>>>
+
+- =ReversiTask(unsigned size, unsigned numTests = 1) :=
+
+- =virtual void test(Individual* individual) :=
+- =virtual void setInputs(Individual* individual) :=
+- =virtual std::string toString() :=
+- =virtual Individual* getExample(ParametersMap* parameters) :=
+
+**** HACER <<<ClassificationTask>>>
+
+- =ClassificationTask() :=
+- =ClassificationTask(Interface** inputs, Interface** desiredOutputs, unsigned inputsDim) :=
+- =virtual void test(Individual* individual) :=
+- =virtual Individual* getExample(ParametersMap* parameters) :=
+- =virtual string toString() :=
+*** HACER [0/7] Loop
+#+LaTeX: \label{apiLoopPkg}
+**** HACER <<<LoopFunction>>>
+
+Esta clase es parámetro que toma Loop en la función de repetición repeatFunction. Contiene una ParametersMap que es donde los Loops irán depositando sus valores actuales en cada vuelta que dén. Su constructor público acepta un puntero a una función de la forma =void miFuncion(ParametersMap* params)= para ser ejecutada en cada hoja del arbol de posibilidades desplegado por la cadena de bucles, pero se puede extender la clase para reimplementar =__executeImpl()= y usar definir otro constructor con cualquier número de parámetros que ésa función puede tomar como entradas y/o salidas adicionales si es que no es suficiente o no resulta cómodo hacerlo con el mapa de parámetros.
+
+protected:
+    GenericLoopFuncPtr tFunction;
+    std::string tLabel;
+    ParametersMap* tParameters;
+
+    Loop* tCallerLoop;
+    unsigned tLeaf;
+
+    void init(ParametersMap* parameters, string label)
+    {
+        tLabel = label;
+        tParameters = parameters;
+        tLeaf = 0;
+        tCallerLoop = NULL;
+    }
+
+    LoopFunction(ParametersMap* parameters, string label)
+    {
+        tFunction = NULL;
+
+        init(parameters, label);
+    }
+public:
+    LoopFunction(GenericLoopFuncPtr functionPtr, ParametersMap* parameters, string label)
+    {
+        tFunction = functionPtr;
+
+        init(parameters, label);
+    }
+
+    virtual void __executeImpl()
+    {
+        (tFunction)(tParameters);
+    }
+
+    void _beforeLoop()
+    {
+        tLeaf = 0;
+    }
+
+    void execute(Loop* callerLoop)
+    {
+//        cout << "Execute function... " << tLabel << " at state " << callerLoop->getState(true) << " Leaf " << tLeaf << endl;
+        Util::check(callerLoop == NULL,
+                    "LoopFunction::execute " + tLabel + " : The caller Loop cannot be null.");
+        try {
+            tCallerLoop = callerLoop;
+            __executeImpl();
+        } catch (string& e) {
+            cout << " while executing " + tLabel + " at state " + tCallerLoop->getState(true) << " : ";
+            cout << endl << e << endl;
+        }
+        ++tLeaf;
+    }
+
+    ParametersMap* getParameters()
+    {
+        return tParameters;
+    }
+    Loop* getCallerLoop()
+    {
+        return tCallerLoop;
+    }
+    std::string getLabel()
+    {
+        return tLabel;
+    }
+    unsigned getLeaf()
+    {
+        return tLeaf;
+    }
+
+**** HACER [[apiLoopClass][Loop]]
+#+LaTeX: \label{apiLoopClass}
 private:
     void setCallerLoop(Loop* callerLoop);
 protected:
@@ -2207,117 +2500,15 @@ public:
 **** HACER <<<ExpLoop>>>
 **** HACER <<<EnumLoop>>>
 **** HACER <<<JoinEnumLoop>>>
-**** HACER <<<GenericPlotter>>>
-**** HACER <<<Test>>>
 **** HACER <<<Plot>>>
-*** HACER [0/3] LoopTest
+*** HACER [0/3] Loopers
+#+LaTeX: \label{apiLoopersPkg}
+**** HACER [[apiTestclass][Test]]
+#+LaTeX: \label{apiTestclass}
 **** HACER <<<ChronoPlotter>>>
-**** HACER <<<Dummy>>>
 **** HACER <<<TaskPlotter>>>
-
-*** REVISAR Game
-
-Este paquete se encarga de implementar utilidades para tareas relacionadas con juegos.
-
-**** <<<Board>>>
-
-Esta clase clase abstracta implementa un tablero básico y genérico para juegos de tablero de dos jugadores con un solo tipo de pieza como por ejemplo el Reversi/Othello o el Go. Tiene una Interface interna que las NeuralNet pueden utilizar como entrada. se define un enumerado =SquareState= con los valores posibles de las casillas: =EMPTY=, =PLAYER_1=, =PLAYER_2=.
-
-Los constructores públicos son:
-
-- =Board(unsigned size) := Crea un tablero cuadrado de tamaño =size * size= con todas las casillas vacías.
-- =Board(Board* other) := Crea un tablero a partir de otro tablero, copiando los valores de todas las casillas.
-
-El destructor libera el tablero y la interfaz. La clase tiene los siguientes métodos virtuales puros:
-
-- =virtual bool legalMove(unsigned xPos, unsigned yPos, SquareState player) = 0 := Para una posición del tablero dada y uno de los dos jugadores devuelve verdadero si el movimiento es legal según las reglas del juego implementado por la clase hija y falso si el movimiento no es válido.
-- =virtual bool canMove(SquareState player) = 0 := Devuelve verdadero si el jugador parámetro tiene algún movimiento legal y falso en caso contrario.
-- =virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player) = 0 := Realiza el movimiento en la posición indicada para el jugador =player=, actualizando el tablero como corresponda para el juego.
-- =virtual void turn(SquareState player, Individual* individual = NULL) = 0 := Realiza un turno para el jgador =player=. Si se pasa por parámetro un individuo, el individuo jugará el turno. Si no se indica ninguno (el parámetro es opcional, con =NULL= por defecto), es la máquina sin aprendizaje que haya definida para el juego y contra la que se entrenan las poblaciones.
-- =virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player) = 0 := Devuelve una estimación de la calidad de la jugada indicada por parámetros realizada por la máquina sin aprendizaje.
-- =virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual) = 0 := Devuelve una estimación de la calidad de la jugada indicada por parámetros realizada por el individuo recibido como parámetro.
-- =virtual bool endGame() = 0 :=
-
-Los siguientes métodos también son virtuales (se pueden redefinir por las clases hijas), pero ya vienen implementados:
-
-- =virtual void initBoard() := Vacía todas las casillas del tablero. Se puede redefinir con las condiciones iniciales de cada juego y es llamada por el constructor básico (el que no copia desde otro tablero).
-- =virtual int countPoints(SquareState player) := Devuelve la puntuación actual del jugador =player=.
-
-El resto de métodos públicos son:
-
-- =unsigned getSize() := Devuelve el tamaño del tablero.
-- =void setSquare(unsigned xPos, unsigned yPos, SquareState squareState) := Establece el estado recibido en squareState en la casilla indicada por parámetro.
-- =SquareState getSquare(unsigned xPos, unsigned yPos) := Devuelve el estado de la casilla indicada por parámetro.
-- =bool squareIs(int xPos, int yPos, SquareState squareState) := Si la casilla indicada tiene el mismo estado que =squareState=, devuelve verdadero. Devuelve falos en caso contrario.
-- =Interface* getInterface() := Devuelve un puntero a la interfaz interna que contiene la información del tablero representada como un vector de bits.
-- =Interface* updateInterface() := Devuelve un puntero a la interfaz interna que contiene la información del tablero representada como un vector de bits. Antes de devolverlo, actualiza la interfaz con lo que haya en el tablero.
-- =static SquareState opponent(SquareState player) := Devuelve el jugador contrario al recibido por parámetro. Si se le pasa el estado de casilla =EMPTY= lanzará una excepción.
-- =void print() := Imprime el estado actual del tablero por la salida de texto estándar. "X" representa una casilla ocupada por el jugador 1, "O", una ocupada por el jugador 2 y "." una casilla vacía. Es muy útil para la depuración de la implementación de un nuevo juego sobre una clase que extienda de ésta.
-
-**** <<<ReversiBoard>>>
-
-Esta clase hereda de Board para implementar el juego Reversi/Othello comentado en la sección \ref{experimentacionJuegos}. esta clase es utilizada por la tarea ReversiTask. Los constructores son similares a los de Board, pero como el que recibe un tamaño llama a =initBoard()= y aquí se redefine, el tablero nuevo no tendrá todas las casillas vacías. Se implementan todos los métodos virtuales puros de =Board= siguiendo las reglas del juego, pero no repetiremos la descripción de las mismas.
-
-- =virtual void initBoard() := incia el tablero según las reglas de reversi, es decir, rellena las 4 casillas del medio dándole dos casillas a un jugador y otras dos al otro. De forma que se crucen y haya movimientos legales al principio de la partida.
-*** HACER [0/3] Tasks
-**** HACER <<<BinaryTask>>>
-
-Implementa la clase abstracta Task para implementar las tareas de clasificación OR, AND y XOR para dos vectores de entrada de cualquier tamaño (pero igual). Contiene dos interfaces internas para las entradas y una para la salida esperada. Las interfaces contienen vectores de floats en vez de bt
-
-El contructor es el siguiente:
-
-- =BinaryTask(BinaryOperation binaryOperation, BufferType bufferType, unsigned size, unsigned numTests = 0) := Tiene dos modos de operación dependiendo de si se rellena el parámetro opcional =numTests= o no. Si no se rellenea o se rellena con un cero, la tarea utilizará todas las posibles combinaciones entre los dos vectores de entrada para evaluar al individuo. Si se rellena, se utilizarán =numTests= combinaciones aleatorias al probar cada individuo, lo cuál puede reducir mucho el tiempo de evaluación de cada individuo si el tamaño de los vectores =size= es muy grande (pues el número de combinaciones crece exponencialemente con éste). El /tipo de neurona/ se le pasa para poder probar por separado redes similares con diferentes representaciones internas.
-
-- =virtual void test(Individual* individual) := Para cada combinación de entradas que se vaya a probar (ver constructor), se activa al individuo (que ya tiene que tener las interfaces internas establecidas como entradas) y se accede a una Interface de su última capa, se actualiza el valor de la interfaz de salida deseada de la tarea a partir de las mismas interfaces de entrada usando el método privado =doOperation= y compara las diferencias entre la salida calculada por el individuo y la salida deseada utilizando el método =compareTo= ya descrito. El /fitness/ que se le asigna al individuo es igual a la puntuación máxima que podría obtener con la configuración actual de la prueba menos las diferencias acumuladas de cada combinación de entradas.
-- =virtual void setInputs(Individual* individual) := Añade dos capas de entrada al individuo que apuntan a los interfaces internos de entrada.
-- =virtual string toString() := Devuelve un string que indica la operación y el tamaño de los vectores, por ejemplo, "XOR4".
-- =virtual Individual* getExample(ParametersMap* parameters) := Devuelve un individuo de ejemplo para resolver la operación dada
-
-**** HACER <<<ClassificationTask>>>
-
-- =ClassificationTask() :=
-- =ClassificationTask(Interface** inputs, Interface** desiredOutputs, unsigned inputsDim) :=
-- =virtual void test(Individual* individual) :=
-- =virtual Individual* getExample(ParametersMap* parameters) :=
-- =virtual string toString() :=
-
-**** HACER <<<ReversiTask>>>
-
-- =ReversiTask(unsigned size, unsigned numTests = 1) :=
-
-- =virtual void test(Individual* individual) :=
-- =virtual void setInputs(Individual* individual) :=
-- =virtual std::string toString() :=
-- =virtual Individual* getExample(ParametersMap* parameters) :=
-*** HACER Ejecutables
-** HACER Factoria e implementaciones optimizadas
-#+LaTeX: \label{implFactoria}
-
-*** HACER [0/12] Factory
-**** HACER <<<Factory>>>
-**** HACER configFactory
-*** HACER [0/2] Implementación de referencia
-**** HACER <<<CppBuffer>>>
-**** HACER <<<CppConnection>>>
-*** HACER [0/2] SSE2
-**** HACER <<<XmmBuffer>>>
-**** HACER <<<XmmConnection>>>
-*** HACER [0/6] Cuda
-**** HACER <<<CudaBuffer>>>
-**** HACER <<<CudaBaseConnection>>>
-**** HACER <<<CudaReduction0Connection>>>
-**** HACER <<<CudaReductionConnection>>>
-**** HACER <<<CudaOutputsConnection>>>
-**** HACER <<<CudaInvertedConnection>>>
-** HACER [0/3] Extensibilidad a partir de interfaces
-#+LaTeX: \label{manualProgrInterf}
-
-*** HACER Nuevas paralelizaciones de redes neuronales
-#+LaTeX: \label{manualProgrInterfRed}
-
-*** HACER Nuevas tareas para ser aprendidas
-*** HACER Nuevas clases para pruebas y generación de gráficas.
-\newpage
+*** HACER Test
+Sólo comentar un poquillo por encima.
 \newpage
 * MODIFICAR [1/3] Resultados: Rendimiento
 #+LaTeX: \label{rendimiento}
@@ -2961,8 +3152,10 @@ Para la tarea Reversi igual que pasaba con la tarea Or, no se observan diferenci
 
 \newpage
 
-** Comparación entre redes discretas y lineales
+** MODIFICAR Comparación entre redes discretas y lineales
 #+LaTeX: \label{aprendDiscretLineales}
+
+TODO REPETIR prueba, antes las tareas eran BIT siempre internamente
 
 A continuación compararemos los posibles efectos beneficiosos o perjudiciales al aprendizaje que se pueden obtener a partir de renunciar a las funciones derivables en favor de neuronas de tipo BIT (salida 0 ó 1) ó SIGN (salida -1 ó 1) y de pesos discretos y más reducidos (1 Byte en lugar de los 4 bytes de un float). También se incluyen las funciones de activación BINARY_STEP y BIPOLAR_STEP para FLOAT para ver el caso en que los pesos siguen siendo igual de grandes y las neuronas se comportan como BIT o SIGN (para poder analizar el efecto de los pesos discretos y menores por separado).
 
@@ -3186,39 +3379,6 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 \newpage
 \newpage
-* BORRAR [0/3] cosas pendientes
-** HACER [0/13] General documentación
-- [ ] Hacer Diseño
-- [ ] Hacer API
-- [ ] Factoria e implementaciones optimizadas
-- [ ] Extensibilidad a partir de interfaces
-- [ ] Guia de instalación
-- [ ] Modificar Resultados : Rendimiento
-- [ ] Modificar CUDA después de tener resultados
-- [ ] Modificar Resultados : Aprendizaje
-- [ ] Hacer conclusiones
-- [ ] Doxygen ?
-- [ ] Estándar Universidad
-** HACER [0/1] Cosas que comentar
-- [ ] En utilidades para pruebas o en otro sitio...
-  explicar el error que hemos permitido para probar la corrección de cada implementación paralela comparandolas con la implementación secuencial C++
-  Cogido del best practices de CUDA...
-  7.3.2 Floating-Point Math Is Not Associative
-  Each floating-point arithmetic operation involves a certain amount of rounding.
-  Consequently, the order in which arithmetic operations are performed is important.
-  If A, B, and C are floating-point values, (A+B)+C is not guaranteed to equal
-  A+(B+C) as it is in symbolic math. When you parallelize computations, you
-  potentially change the order of operations and therefore the parallel results might
-  not match sequential results. This limitation is not specific to CUDA, but an
-  inherent part of parallel computation.
-** HACER [0/3] Org-mode/LaTeX
-- [ ] Arreglar murl
-- [ ] Código con colorines (minted)
-  sudo su
-  PATH=/usr/local/texlive/2012/bin/i386-linux:$PATH
-  tlmgr update minted
-  pdflatex -shell-escape preann-doc.tex
-- [ ] Poner el plantuml dentro del documento principal ?
 * HACER Conclusiones
 #+LaTeX: \label{conclusiones}
 
@@ -3310,9 +3470,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 \bibitem{bestPract2009} \textsc{NVIDIA corporation}: \emph{CUDA Best practices guide}. NVIDIA Developer Technology, (2009).
 
-\bibitem{Farber2008} \textsc{Rob Farber}: \emph{CUDA: Supercomputing for the Masses}. Dr Dobbs (2008)
-
-\murl{http}{www.drdobbs.com/parallel/cuda-supercomputing-for-the-masses-part/207200659}.
+\bibitem{Farber2008} \textsc{Rob Farber}: \emph{CUDA: Supercomputing for the Masses}. Dr Dobbs (2008) \murl{http}{www.drdobbs.com/parallel/cuda-supercomputing-for-the-masses-part/207200659}.
 
 %%%%%%%% Algoritmos genéticos (adicional)
 
