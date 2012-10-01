@@ -34,11 +34,11 @@ bool BinaryTask::bitVectorIncrement(Interface* bitVector)
 {
     unsigned size = bitVector->getSize();
     for (unsigned i = 0; i < size; ++i) {
-        if (bitVector->getElement(i) == 0) {
+        if (bitVector->getElement(i) > 0) {
+            bitVector->setElement(i, 0);
+        } else {
             bitVector->setElement(i, 1);
             return true;
-        } else {
-            bitVector->setElement(i, 0);
         }
     }
     return false;
@@ -65,12 +65,12 @@ unsigned BinaryTask::outputDiff(Interface* individualOutput)
 
     unsigned size = tOutput->getSize();
     for (unsigned i = 0; i < size; ++i) {
-        if (tOutput->getElement(i) == 0) {
-            if (individualOutput->getElement(i) >= 0.5) {
+        if (tOutput->getElement(i) > 0) {
+            if (individualOutput->getElement(i) <= 0) {
                 ++differences;
             }
         } else {
-            if (individualOutput->getElement(i) < 0.5) {
+            if (individualOutput->getElement(i) > 0) {
                 ++differences;
             }
         }
@@ -116,20 +116,20 @@ void BinaryTask::doOperation()
     for (unsigned i = 0; i < tInput1->getSize(); ++i) {
         switch (tBinaryOperation) {
             case BO_AND:
-                if (tInput1->getElement(i) && tInput2->getElement(i))
+                if (tInput1->getElement(i) > 0 && tInput2->getElement(i) > 0)
                     tOutput->setElement(i, 1);
                 else
                     tOutput->setElement(i, 0);
                 break;
             case BO_OR:
-                if (tInput1->getElement(i) || tInput2->getElement(i))
+                if (tInput1->getElement(i) > 0 || tInput2->getElement(i) > 0)
                     tOutput->setElement(i, 1);
                 else
                     tOutput->setElement(i, 0);
                 break;
             case BO_XOR:
-                if ((tInput1->getElement(i) && tInput2->getElement(i))
-                        || (!tInput1->getElement(i) && !tInput2->getElement(i)))
+                if ((tInput1->getElement(i) > 0 && tInput2->getElement(i) > 0)
+                        || (!tInput1->getElement(i) > 0 && !tInput2->getElement(i) > 0))
                     tOutput->setElement(i, 0);
                 else
                     tOutput->setElement(i, 1);
