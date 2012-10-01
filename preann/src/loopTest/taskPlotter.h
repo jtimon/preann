@@ -34,10 +34,6 @@ public:
     void plotCombinations(std::string title, Loop* linesLoop, bool differentFiles);
     void plotCombinations(std::string title, Loop* linesLoop, Loop* averagesLoop, bool differentFiles);
 
-    //TODO borrar
-//    void plotChronoTask(Task* task, std::string title, Loop* linesLoop, unsigned generations);
-//    void plotChronoTaskAveraged(Task* task, std::string title, Loop* linesLoop, Loop* averagesLoop,
-//                                unsigned generations);
 };
 
 class TaskAddAction : public LoopFunction
