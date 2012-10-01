@@ -3,27 +3,25 @@
 * To render:
 ** M-x plantuml-render-buffer
 ** java -jar ~/programas/jar/plantuml.jar "/home/jtimon/workspace/uml/examples.org"
+** M-x shell sh compile-doc.sh
 * HECHO Diagrama de componentes
 
 @startuml img/uml/components.png
 
-[common] . [neural]
+[neural] . [common]
 
 [neural] -- NeuralNet
 [neural] -- Buffer
 [neural] -- Connection
-[neural] .> Factory
+[neural] ..> Factory
 
 Factory -- [factory]
 
-[factory] --> [sse2]
-[factory] --> [cuda]
+[factory] --> [SSE2]
+[factory] --> [CUDA]
 
-Buffer <.. [sse2]
-Buffer <.. [cuda]
-Connection <..[sse2]
-Connection <..[cuda]
-
+Buffer <.. [factory]
+Connection <.. [factory]
 
 [genetic] -- Task
 [genetic] -- Individual
@@ -52,8 +50,8 @@ Individual <.. [tasks]
 
 @enduml
 
-* [0/4] Diagramas de clase
-** MODIFICAR Neural
+* [5/5] Diagramas de clase
+** HECHO Neural
 @startuml img/uml/classNeural.png
 
 NeuralNet "1" o-- "0..*" Layer : tiene
@@ -62,13 +60,13 @@ NeuralNet "1" ..> "0..*" Interface : acceso con
 
 Layer "1" o-- "1..*" Connection
 
-Layer "1" *-- "1" Buffer
+Layer *-- "1" Buffer
 
 Interface <..> Buffer : copiar
 
 Buffer <|-- Connection : hereda
 
-class Interface "1" <-- "0..1" InputLayer : apunta a
+class Interface "1" <-- InputLayer : apunta a
 
 Layer <|-- InputLayer : hereda
 
@@ -91,7 +89,7 @@ class Interface{
     +void setElement(pos, value)
     +unsigned getSize()
     +float compareTo(Interface*)
-    +virtual unsigned getByteSize()
+    +unsigned getByteSize()
     +void random(range)
     +BufferType getBufferType()
     +void* getDataPointer()
@@ -100,7 +98,7 @@ class Interface{
     +void print()
 }
 
-interface Buffer{
+abstract class Buffer{
     #void* data
     #unsigned size
     #{abstract} void _copyFrom(Interface*)
@@ -112,8 +110,8 @@ interface Buffer{
     +void copyTo(Interface* interface)
 }
 
-interface Connection{
-    #Buffer* tInput
+abstract class Connection{
+    #Buffer* input
 
     #{abstract} void _calculateAndAddTo(Buffer* results)
     #{abstract} void _activation(Buffer* output, FunctionType)
@@ -129,7 +127,6 @@ interface Connection{
 }
 
 class Layer{
-    #Layer()
     #std::vector<Connection*> connections
     #Buffer* results
     #Connection* thresholds
@@ -146,7 +143,7 @@ class Layer{
 }
 
 class InputLayer{
-    -Interface* tInput
+    -Interface* input
 
     +void calculateOutput()
     +Interface* getInputInterface()
@@ -158,6 +155,418 @@ class InputLayer{
 }
 
 @enduml
-** HACER Factory
-** HACER Genetic
-** HACER Loop
+** HECHO Genetic
+@startuml img/uml/classGenetic.png
+
+package "Neural"{
+
+NeuralNet "1" o-- "1..*" Layer : tiene
+
+Layer "1" o-- "1..*" Connection : tiene
+
+class NeuralNet{
+    -vector<Layer*> layers
+    +void addInputLayer(Interface*)
+    +Interface* getOutput(layerPos)
+    +void addLayer(size, BufferType, FunctionType)
+    +void addInputConnection(srcInputPos, destLayerPos)
+    +void addLayersConnection(srcLayerPos, destLayerPos)
+    +void calculateOutput()
+}
+class Layer{
+    +Connection* getConnection(unsigned inputPos)
+    +Connection* getThresholds()
+}
+
+abstract class Connection{
+    +{abstract} void crossover(Connection* other, Interface* bitBuffer)
+    +{abstract} void mutate(unsigned pos, float mutation)
+    +{abstract} void reset(unsigned pos)
+}
+}
+
+package "Genetic"{
+
+Population "1" o-- "1..*" Individual : tiene
+
+Population *-- "1" Task : tiene
+
+NeuralNet <|-- Individual: hereda
+
+Task ..> Individual : evalúa
+
+Individual ..> Connection : operadores\n genéticos
+
+  interface Task{
+    +{abstract} void test(Individual*)
+    +{abstract} void setInputs(Individual*)
+    +{abstract} Individual* getExample(ParametersMap*)
+    +{abstract} std::string toString()
+  }
+  class Population{
+    +void setParams(ParametersMap*)
+    +void insertIndividual(Individual*)
+    +unsigned nextGeneration()
+    +void learn(generations, goal)
+    +unsigned getGeneration()
+    +Individual* getIndividual(pos)
+    +unsigned getSize()
+    +void save(FILE*)
+    +void load(FILE*)
+    +std::string toString()
+  }
+  class Individual{
+    +Individual* newCopy(ImplementationType, bool copyWeighs)
+    +void mutate(numMutations, mutationRange)
+    +void mutate(probability, mutationRange)
+    +void reset(numResets)
+    +void reset(probability)
+    +void uniformCrossover(CrossoverLevel, Individual* other, probability)
+    +void proportionalCrossover(CrossoverLevel, Individual* other)
+    +void multipointCrossover(CrossoverLevel, Individual* other, numPoints)
+    +float getFitness()
+    +void setFitness(float fitness)
+    +unsigned getNumGenes()
+  }
+}
+
+@enduml
+** HECHO tasks
+@startuml img/uml/classTasks.png
+
+package "Genetic"{
+
+Task .> Individual : evalúa
+
+  interface Task{
+    +{abstract} void test(Individual*)
+    +{abstract} void setInputs(Individual*)
+    +{abstract} Individual* getExample(ParametersMap*)
+    +{abstract} std::string toString()
+  }
+
+  class Individual{
+    +float getFitness()
+    +void setFitness(float fitness)
+    #void addInputLayer(Interface*)
+    #Interface* getOutput(layerPos)
+    #void addLayer(size, BufferType, FunctionType)
+    #void addInputConnection(srcInputPos, destLayerPos)
+    #void addLayersConnection(srcLayerPos, destLayerPos)
+    #void calculateOutput()
+  }
+}
+
+package "Game"{
+
+ReversiBoard --|> Board : extiende
+
+abstract class Board{
+    #unsigned size
+    #SquareState** board
+    #Interface* interface
+    +{abstract} bool legalMove(xPos, yPos, SquareState player)
+    +{abstract} void makeMove(xPos, yPos, SquareState player)
+    +{abstract} float computerEstimation(xPos, yPos, SquareState player)
+    +{abstract} float individualEstimation(xPos, yPos, SquareState player, Individual*)
+
+    +void initBoard()
+    +bool canMove(SquareState player)
+    +void turn(SquareState player, Individual* = NULL)
+    +bool endGame()
+    +int countPoints(SquareState player)
+    +unsigned getSize()
+    +void setSquare(xPos, yPos, SquareState)
+    +SquareState getSquare(xPos, yPos)
+    +Interface* getInterface()
+    +Interface* updateInterface()
+    +{static} SquareState opponent(SquareState player)
+    +void print()
+}
+class ReversiBoard{
+
+    +void initBoard()
+    +bool legalMove(xPos, yPos, SquareState player)
+    +void makeMove(xPos, yPos, SquareState player)
+    +float computerEstimation(xPos, yPos, SquareState player)
+    +float individualEstimation(xPos, yPos, SquareState player, Individual*)
+}
+}
+
+package "Tasks"{
+
+ReversiTask *-- "1" ReversiBoard : tiene
+
+Task <|-- ClassificationTask : extiende
+Task <|-- BinaryTask : extiende
+Task <|-- ReversiTask : extiende
+
+class ReversiTask{
+    #ReversiBoard* board
+    #unsigned numTests
+    #float getGoal()
+    +ReversiTask(unsigned size, numTests)
+}
+
+class ClassificationTask{
+    #Interface** inputs
+    #Interface** desiredOutputs
+    #unsigned inputsDim
+    +ClassificationTask(Interface** inputs, Interface** desiredOutputs, inputsDim)
+}
+
+class BinaryTask{
+    #BinaryOperation binaryOperation
+    #Interface* input1
+    #Interface* input2
+    #Interface* output
+    #unsigned numTests
+    #bool bitVectorIncrement(Interface* bitVector)
+    #unsigned outputDiff(Interface* individualOutput)
+    #float getGoal()
+    #void doOperation()
+    +BinaryTask(BinaryOperation, BufferType, size, numTests = 0)
+}
+
+@enduml
+
+** HECHO Factory
+@startuml img/uml/classFactory.png
+
+package "Neural"{
+
+Layer "1" o-- "1..*" Connection
+
+Layer "1" *-- "1" Buffer
+
+Buffer <|-- Connection : hereda
+
+abstract class Buffer{
+    #void* data
+    #unsigned size
+    #{abstract} void _copyFrom(Interface*)
+    #{abstract} void _copyTo(Interface*)
+    +{abstract} ImplementationType getImplementationType()
+    +{abstract} BufferType getBufferType()
+    +void copyFrom(Interface* interface)
+    +void copyTo(Interface* interface)
+}
+
+abstract class Connection{
+    #Buffer* input
+
+    #{abstract} void _calculateAndAddTo(Buffer* results)
+    #{abstract} void _activation(Buffer* output, FunctionType)
+    #{abstract} void _crossover(Buffer* other, Interface* bitBuffer)
+    #{abstract} void _mutate(pos, mutation)
+    #{abstract} void _reset(pos)
+    +void calculateAndAddTo(Buffer* results)
+    +void activation(Buffer* output, FunctionType)
+    +void crossover(Connection* other, Interface* bitBuffer)
+    +void mutate(unsigned pos, mutation)
+    +void reset(unsigned pos)
+}
+
+class Layer{
+    #std::vector<Connection*> connections
+    #Buffer* results
+    #Connection* thresholds
+    #Buffer* output
+    #void addInput(Layer* input)
+}
+
+}
+
+package "Factory" as FactoryPkg{
+
+Layer ..> Factory : llama a
+
+Factory --> CppBuffer : construye
+Factory --> XmmBuffer : construye
+Factory --> CudaBuffer : construye
+Factory --> CppConnection : construye
+Factory --> XmmConnection : construye
+Factory --> CudaReduction0Connection : construye
+Factory --> CudaReductionConnection : construye
+Factory --> CudaOutputsConnection : construye
+Factory --> CudaInvertedConnection : construye
+
+Buffer <|-- CppBuffer
+Buffer <|-- XmmBuffer
+Buffer <|-- CudaBuffer 
+
+Connection <|-- CppConnection
+Connection <|-- XmmConnection
+Connection <|-- CudaBaseConnection
+
+CppBuffer <|-- CppConnection
+XmmBuffer <|-- XmmConnection
+CudaBuffer <|-- CudaBaseConnection
+CudaBaseConnection <|-- CudaReduction0Connection
+CudaBaseConnection <|-- CudaReductionConnection
+CudaBaseConnection <|-- CudaOutputsConnection
+CudaBaseConnection <|-- CudaInvertedConnection
+
+class Factory {
+    +{static} Buffer* newBuffer(size, BufferType, ImplementationType)
+    +{static} Buffer* newBuffer(Buffer*, ImplementationType)
+    +{static} Buffer* newBuffer(Interface*, ImplementationType)
+    +{static} Buffer* newBuffer(FILE*, ImplementationType)
+    +{static} void saveBuffer(Buffer*, FILE*)
+    +{static} Connection* newConnection(Buffer* input, outputSize)
+    +{static} Connection* newConnection(FILE*, outputSize, ImplementationType)
+}
+class CppBuffer{
+    #void _copyFrom(Interface*)
+    #void _copyTo(Interface*)
+    +{abstract} BufferType getBufferType()
+}
+class XmmBuffer{
+    #void _copyFrom(Interface*)
+    #void _copyTo(Interface*)
+    +{abstract} BufferType getBufferType()
+}
+class CudaBuffer{
+    #void _copyFrom(Interface*)
+    #void _copyTo(Interface*)
+    +{abstract} BufferType getBufferType()
+}
+class CppConnection{
+    #void _calculateAndAddTo(Buffer* results)
+    #void _activation(Buffer* output, FunctionType)
+    #void _crossover(Buffer* other, Interface* bitBuffer)
+    #void _mutate(pos, mutation)
+    #void _reset(pos)
+}
+class XmmConnection{
+    #void _calculateAndAddTo(Buffer* results)
+    #void _activation(Buffer* output, FunctionType)
+    #void _crossover(Buffer* other, Interface* bitBuffer)
+    #void _mutate(pos, mutation)
+    #void _reset(pos)
+}
+class CudaBaseConnection{
+    #void _activation(Buffer* output, FunctionType)
+    #void _crossover(Buffer* other, Interface* bitBuffer)
+    #void _mutate(pos, mutation)
+    #void _reset(pos)
+}
+class CudaReduction0Connection{
+    #void _calculateAndAddTo(Buffer* results)
+    #void _crossover(Buffer* other, Interface* bitBuffer)
+}
+class CudaReductionConnection{
+    #void _calculateAndAddTo(Buffer* results)
+}
+class CudaOutputsConnection{
+    #void _calculateAndAddTo(Buffer* results)
+}
+class CudaInvertedConnection{
+    #void _calculateAndAddTo(Buffer* results)
+    #void _crossover(Buffer* other, Interface* bitBuffer)
+    #void _mutate(pos, mutation)
+    #void _reset(pos)
+}
+
+}
+
+@enduml
+** HECHO Loop
+@startuml img/uml/classLoop.png
+
+package "Loop" as LoopPkg{
+
+Loop <--> LoopFunction
+
+Loop <|-- RangeLoop
+Loop <|-- ExpLoop
+Loop <|-- EnumLoop
+Loop <|-- JoinEnumLoop
+
+Loop --> JoinEnumLoop : friend
+
+Loop <-- Plot
+LoopFunction <-- Plot
+
+class LoopFunction{
+    +ParametersMap* parameters
+    #std::string label
+    #Loop* callerLoop;
+    #unsigned leaf;
+    #GenericLoopFuncPtr function
+    #LoopFunction(ParametersMap*, label)
+    +LoopFunction(GenericLoopFuncPtr, ParametersMap*, label)
+    #void __executeImpl()
+    void preLoop()
+    +void execute(Loop* callerLoop)
+}
+abstract class Loop{
+    #std::string key
+    #Loop* innerLoop
+    #void __repeatBase(LoopFunction* func)
+    #{abstract}void __repeatImpl(LoopFunction* func)
+    +virtual void addInnerLoop(Loop* innerLoop)
+    +void repeatFunction(LoopFunction*, ParametersMap*)
+}
+class RangeLoop{
+    -float i, min, max, inc
+    +RangeLoop(key, min, max, inc)
+    #void __repeatImpl(LoopFunction*)
+}
+class ExpLoop{
+    -float i, min, max, factor
+    +ExpLoop(key, min, max, factor)
+    #void __repeatImpl(LoopFunction*)
+}
+class EnumLoop{
+    -EnumType enumType
+    -vector<unsigned> valueVector
+    -unsigned i
+    +EnumLoop(key, EnumType)
+    #void __repeatImpl(LoopFunction*)
+}
+class JoinEnumLoop{
+    -EnumType enumType
+    -vector<unsigned> valueVector
+    -vector<Loop*> innerLoops
+    -unsigned i
+    +JoinEnumLoop(key, EnumType)
+    #void __repeatImpl(LoopFunction*)
+}
+class Plot{
+    +ParametersMap parameters
+    #PlotData plotData
+    +Plot(plotPath, RangeLoop* xToPlot, yLabel)
+    +void plot(GenericPlotFunctionPtr yFunction, title, Loop* linesLoop)
+    +void customPlot(title, CustomPlotFillAction* fillArrayAction, Loop* linesLoop)
+} 
+
+} 
+'Loop
+
+package "Loopers"{
+
+Loop <-- Test
+LoopFunction <-- Test
+
+Plot <|-- ChronoPlotter
+Plot <|-- TaskPlotter
+
+class Test{
+    +ParametersMap parameters
+    +{static} unsigned assertEquals(Buffer* expected, Buffer* actual)
+    +void test(TestFunctionPtr, label, Loop*)
+    +void testMemoryLosses(GenericLoopFuncPtr, label, Loop*)
+}
+class ChronoPlotter{
+    +void plotChrono(ChronoFunctionPtr func, title, Loop* linesLoop, repetitions)
+}
+class TaskPlotter{
+    +void plotTask(Task* task, std::string title, Loop* linesLoop)
+    +void plotTask(std::string title, Loop* linesLoop)
+}
+
+} 
+'Loopers
+
+@enduml
