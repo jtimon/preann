@@ -236,7 +236,7 @@ Sin embargo, el algoritmo de retro-propagación tiene las siguientes desventajas
 Algunas tareas complejas pueden requerir una conectividad recurrente. Por ejemplo, el reconocimiento de escritura continua en el que las letras están concatenadas y sus formas a menudo dependen de las letras anteriores. En estos casos los métodos de gradiente no son efectivos. Además, estos métodos requieren un aprendizaje supervisado con salidas deseadas.
 
 + *Adaptabilidad:* 
-El algoritmo tiene como premisa la utilización de una función de activación derivable \cite[Walker, 1995]{Walker95}. Al hacer uso de la derivada de la función de activación, es condición necesaria para la aplicación del algoritmo que la misma sea continua y derivable en todo el dominio de aplicación \cite[Wilson, 1994]{Wilson94}. Esto impide la utilización del método en otras topologías donde la función de activación presenta discontinuidades. Por ejemplo, no es posible utilizar directamente el algortimo de retropropagación del error si los estados de las neuronas son discretos, como es el caso, por ejemplo, de las redes neuronales difusas \cite[Lee, 1975]{Lee75}).
+El algoritmo tiene como premisa la utilización de una función de activación derivable \cite[Walker, 1995]{Walker95}. Al hacer uso de la derivada de la función de activación, es condición necesaria para la aplicación del algoritmo que la misma sea continua y derivable en todo el dominio de aplicación \cite[Wilson, 1994]{Wilson94}. Esto impide la utilización del método en otras topologías donde la función de activación presenta discontinuidades. Por ejemplo, no es posible utilizar directamente el algortimo de retropropagación del error si los estados de las neuronas son discretos, como es el caso, por ejemplo, de alguna de las optimizaciones implementadas para este proyecto.
 
 + *Mínimos locales:* 
 La superficie que define la función de error E en base a los parámetros de la red neuronal es compleja y esta llena de valles y colinas. Debido a la utilización del gradiente para encontrar el mínimo de dicha función de error se corre el riesgo de que el proceso de entrenamiento quede atrapado en un mínimo local \cite[Sutton, 1986]{Sutton86}. Esta situación no es deseable, fundamentalmente si dicho mínimo esta localizado lejos del mínimo global.
@@ -2979,7 +2979,7 @@ TODO cuando alcanzamos el máximo de la memoria del dispositivo se activa algún
 TODO las implementaciones de cuda producen resutados similares porque lo que antes no era coalescente ahora sí lo es.
 TODO las subidas y bajadas se evitarían con más repeticiones.
 
-****  en función de las entradas
+**** en función de las entradas
 En la figura \ref{grafImplCalculateEnt}, puede apreciarse que la implementación con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a las demás. En ésta los tipos de Buffer BIT y SIGN (neuronas binarias y bipolares) obtienen tiempos similares al tipo FLOAT. 
 
 Las implementaciones CUDA obtienen resultados parecidos, aunque todas ellas obtienen peores tiempos para BIT y SIGN, esto se debe a que los pesos en estos casos son de un sólo byte y los algoritmos desarrollados están optimizados para accesos coalescentes a datos float de 4 bytes (la aruitectura CUDA está en general más preparada para este tipo de datos, aunque se podrían modificar los algoritmos BIT y SIGN para adaptarse mejor a la misma).
@@ -3486,8 +3486,6 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 \bibitem{Wilson94} \textsc{Wilson, E.} (1994): \emph{Backpropagation Learning for System with Discrete-Valued Functions}. En Proceedings of the World Congress on Neural Networks. Vol 3, pp. 332-339.
 
-\bibitem{Lee75} \textsc{Samuel C. Lee., Edward T. Lee} (1975): \emph{Fuzzy Neural Networks}. University of Houston, Houston, Texas.
-
 \bibitem{Sutton86} \textsc{Sutton, R.S.} (1986): \emph{Two problems with Backpropagation and other steepest descent learning procedures for networks}. En Proc. of 8th Annual Conf. Of the Cognitive Science Society, pp 823-831. Lawrence Erlbaum Associates, Hillsdale, NJ.
 
 \bibitem{Krose93} \textsc{Kröse, B., Van der Smagt, P.} (1993): \emph{An Introduction to Neural Networks}. University of Amsterdam.
@@ -3548,7 +3546,9 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 
 \bibitem{Farber2008} \textsc{Rob Farber}: \emph{CUDA: Supercomputing for the Masses}. Dr Dobbs (2008) \murl{http}{www.drdobbs.com/parallel/cuda-supercomputing-for-the-masses-part/207200659}.
 
-%%%%%%%% Algoritmos genéticos (adicional)
+%%%%%%%% Bibliografía adicional
+
+\bibitem{Lee75} \textsc{Samuel C. Lee., Edward T. Lee} (1975): \emph{Fuzzy Neural Networks}. University of Houston, Houston, Texas.
 
 \bibitem{DeJong88} \textsc{Kenneth De Jong}: \emph{Learning with genetic algorithms: An overview}. Mach Learning, vol. 3, pp. 121-138 (1988).
 
@@ -3557,6 +3557,7 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 \bibitem{Fogel95} \textsc{D. B. Fogel}: \emph{Evolutionary computation. Toward a new philosophy of machine intelligence}. IEEE Press, Piscataway, NJ (1995).
 
 \bibitem{Michalewicz96} \textsc{Z. Michalewicz}: \emph{Genetic algorithms + data structures = evolution programs}. Third, Revised and Extended Edition, 3 ed: Springer (1996).
+
 
 
 \end{thebibliography}
