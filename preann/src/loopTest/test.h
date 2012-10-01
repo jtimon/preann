@@ -19,7 +19,7 @@ public:
     ParametersMap parameters;
     Test();
     ~Test();
-    static unsigned char areEqual(float expected, float actual, BufferType bufferType);
+    static bool areEqual(float expected, float actual, BufferType bufferType);
     static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
     static unsigned assertEquals(Buffer* expected, Buffer* actual);
 

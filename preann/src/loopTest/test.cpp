@@ -17,7 +17,7 @@ Test::~Test()
 
 // * Static Methods
 
-unsigned char Test::areEqual(float expected, float actual, BufferType bufferType)
+bool Test::areEqual(float expected, float actual, BufferType bufferType)
 {
     if (bufferType == BT_FLOAT) {
         return (expected - 1 < actual && expected + 1 > actual);
