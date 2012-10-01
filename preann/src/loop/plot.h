@@ -94,7 +94,7 @@ protected:
     bool tAverage;
 public:
     CustomPlotFillAction(ParametersMap* parameters, string label, PlotData* plotData, bool average)
-            : LoopFunction(parameters, "GenericPlotFillAction " + label)
+            : LoopFunction(parameters, "CustomPlotFillAction " + label)
     {
         tPlotData = plotData;
         tAverage = average;
