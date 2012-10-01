@@ -99,7 +99,7 @@ public:
         (tFunction)(tParameters);
     }
 
-    void start()
+    void _beforeLoop()
     {
         tLeaf = 0;
     }

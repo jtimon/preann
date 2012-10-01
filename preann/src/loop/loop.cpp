@@ -110,7 +110,7 @@ void Loop::repeatFunction(LoopFunction* func)
 
     this->setCallerLoop(NULL);
     try {
-        func->start();
+        func->_beforeLoop();
         this->__repeatImpl(func);
     } catch (string& e) {
         cout << "Error while repeating function... " << functionLabel << " : " << e << endl;
