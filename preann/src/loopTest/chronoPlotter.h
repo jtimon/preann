@@ -9,6 +9,7 @@
 #define CHRONOPLOTTER_H_
 
 #include "loop/plot.h"
+#include "common/chronometer.h"
 
 typedef float (*ChronoFunctionPtr)(ParametersMap*, unsigned);
 

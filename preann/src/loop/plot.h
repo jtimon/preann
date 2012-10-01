@@ -8,12 +8,25 @@
 #ifndef PLOT_H_
 #define PLOT_H_
 
-#include "test.h"
+#include "loop.h"
+#include "rangeLoop.h"
+#include "expLoop.h"
+#include "enumLoop.h"
+#include "joinEnumLoop.h"
 
 #define PLOT_MAX_COLOR 16
 #define PLOT_MAX_POINT 13
 
 typedef float (*GenericPlotFunctionPtr)(ParametersMap*);
+
+#define START_CHRONO                                                                    \
+    Chronometer chrono;                                                                 \
+    chrono.start();                                                                     \
+    for (unsigned i = 0; i < repetitions; ++i) {
+
+#define STOP_CHRONO                                                                     \
+    }                                                                                   \
+    chrono.stop();
 
 class CustomPlotFillAction;
 class GenericPlotFillAction;
@@ -29,8 +42,10 @@ struct PlotData
     string yLabel;
 };
 
-class Plot : public Test
+class Plot
 {
+public:
+    ParametersMap parameters;
 protected:
     PlotData plotData;
 
