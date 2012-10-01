@@ -13,16 +13,16 @@
 class ExpLoop : public Loop
 {
 protected:
-    float tValue, tMin, tMax, tBase;
+    float tValue, tMin, tMax, tFactor;
 
     virtual void __repeatImpl(LoopFunction* func);
     virtual std::string valueToString();
 
 public:
-    ExpLoop(std::string key, float min, float max, float base);
+    ExpLoop(std::string key, float min, float max, float factor);
     virtual ~ExpLoop();
 
-    void resetRange(float min, float max, float base);
+    void resetRange(float min, float max, float factor);
     float getCurrentValue();
 
     virtual unsigned getNumBranches();

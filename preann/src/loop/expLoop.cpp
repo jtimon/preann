@@ -7,23 +7,23 @@
 
 #include "expLoop.h"
 
-ExpLoop::ExpLoop(std::string key, float min, float max, float base) :
+ExpLoop::ExpLoop(std::string key, float min, float max, float factor) :
         Loop(key)
 {
     tMin = min;
     tMax = max;
-    tBase = base;
+    tFactor = factor;
 }
 
 ExpLoop::~ExpLoop()
 {
 }
 
-void ExpLoop::resetRange(float min, float max, float base)
+void ExpLoop::resetRange(float min, float max, float factor)
 {
     tMin = min;
     tMax = max;
-    tBase = base;
+    tFactor = factor;
 }
 
 float ExpLoop::getCurrentValue()
@@ -34,7 +34,7 @@ float ExpLoop::getCurrentValue()
 unsigned ExpLoop::getNumBranches()
 {
     unsigned i = 0;
-    for (float val = tMin; val < tMax; val *= tBase) {
+    for (float val = tMin; val < tMax; val *= tFactor) {
         ++i;
     }
     return i;
@@ -45,7 +45,7 @@ float* ExpLoop::toArray()
     unsigned arraySize = getNumBranches();
     float* array = (float*) MemoryManagement::malloc(arraySize * sizeof(float));
     unsigned i = 0;
-    for (float val = tMin; val < tMax; val *= tBase) {
+    for (float val = tMin; val < tMax; val *= tFactor) {
         array[i++] = val;
     }
     return array;
@@ -53,8 +53,8 @@ float* ExpLoop::toArray()
 
 void ExpLoop::print()
 {
-    if (tMin * tBase < tMax) {
-        cout << tKey << ": from " << tMin << " to " << tMax << " multiplying by " << tBase << endl;
+    if (tMin * tFactor < tMax) {
+        cout << tKey << ": from " << tMin << " to " << tMax << " multiplying by " << tFactor << endl;
     }
     if (tInnerLoop != NULL) {
         tInnerLoop->print();
@@ -70,7 +70,7 @@ void ExpLoop::__repeatImpl(LoopFunction* func)
 {
     ParametersMap* parametersMap = func->getParameters();
     tCurrentBranch = 0;
-    for (tValue = tMin; tValue < tMax; tValue *= tBase) {
+    for (tValue = tMin; tValue < tMax; tValue *= tFactor) {
         parametersMap->putNumber(tKey, tValue);
         this->__repeatBase(func);
     }
