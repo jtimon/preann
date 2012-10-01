@@ -1888,27 +1888,51 @@ void resetKernel(float* buffer, unsigned pos)
 Sólo actuará un hilo por bloque, no parece que se optimice mucho. Sin embargo, no se trata tanto de optimizar estos kernels sino de mantener los pesos en memoria de dispositivo en todo momento. El ancho de banda máximo en la transferencia de entre la memoria de dispositivo y la GPU es mucho mayor (por ejemplo, 141 GBps en la NVIDIA GeForce GTX 280) que el ancho de banda en la transmisión de datos entre la memoria huesped y la del dispositivo (8 GBps para PCI Express ×16 de segunda generación). Por ello, para el mejor rendimiento general de la aplicación, es de una prioridad alta minimizar las transferencias de datos etre el husped (CPU) y el dispositivo (GPU), incluso si eso significa lanzar kernels en la GPU que no suponen ninguna mejora de rendimiento comparados con ejecutar lo mismo en la CPU\cite{bestPract2009}. 
 
 \newpage
-* HACER [0/4] Manual del programador
+* HACER [1/3] Manual del programador
 #+LaTeX: \label{manualProgr}
-** HACER Guia de instalación
+** REVISAR Guia de instalación
 #+LaTeX: \label{manualProgrInstal}
 
-sudo aptitude install make g++ nasm gnuplot
-sudo aptitude install texlive-latex-recommended texlive-latex-extra
-** HACER [0/3] Extensibilidad a partir de interfaces
-#+LaTeX: \label{manualProgrInterf}
-*** HACER Nuevas paralelizaciones de redes neuronales
-#+LaTeX: \label{manualProgrInterfRed}
+La librería está implementada para ser compilada sobre la palataforma GNU/Linux. La siguiente guia de isntalación asume que se usará una distribución de la familia debian, como por ejemplo, ubuntu, pero el proceso de instalación no es muy diferente para otras distribuciones.
 
-*** HACER Nuevas tareas para ser aprendidas
-*** HACER Nuevas clases para pruebas y generación de gráficas.
-\newpage
-\newpage
-** HACER [4/9] Interfaz de aplicación (API)
+Primero debemos instalar las dependencias externas:
+
+#+begin_src sh
+sudo aptitude install make g++ nasm gnuplot
+#+end_src
+
+Con esto tendreos instalado make, necesario para la compilación, g++ para compilar el código C++, nasm para ensamblar las funciones escritas en leguaje ensamblador SEE2 y gnuplot para generar las gráficas.
+
+Además, hay que instalar los drivers de NVIDIA y el compilador nvcc de CUDA C. Esto puede variar dependiendo de la versión y es recomendable seguir directamente las intrucciones que NVIDIA facilita y actualiza en su página.
+
+Aunque nuestra máquina no soporte CUDA, podemos seguir usando la librería pues, como se comentó brevemente en la sección \ref{disenoFactoria} la clase factoría admite varios modos de compilación. Si no disponemos de una tarjeta gráfica con capacidad CUDA, podemos isntalar la antigua versión 2.3 de CUDA que incorporaba un emulador. No aprovecharemos la arquitectura CUDA, pero podremos probar los cambios que hagamos en esa arquitectura y corregir la mayoría de errores. 
+
+También es posble que lo que no se soporte desde una máquina sean las optimizaciones en ensamblador, por ejemplo, porque no se peude isntalar Nasm. Desde un sistema operativo de 64 bits hay que compilar todo el código como de 32 bits para poderlo combinar con el código de ensamblador, aunque se pueden compilar sólo la versión de referencia y las versiones cuda para 64 bits. Si se decide compilar la librería como uan aplicación de 32 bits para así poder probar todas las implementaciones incluída la SSE2, el sistema operativo de 64 bits debe tener instaladas las librerías necesarias para poder ejecutar programas de 32 bits de forma emulada, algo que es bastante frecuente.
+
+Una vez isntalados todos los prerequisitos (o los que hayamos decidido cumplir), podemos descargar el código de la librería desde el repositorio de software libre en sourceforge utilizando el siguiente comando de subversion desde la carpeta en que queramos tenerla: 
+
+#+begin_src sh
+svn co https://preann.svn.sourceforge.net/svnroot/preann preann
+#+end_src
+
+Después, situándonos en la raíz de la carpeta preann, llamaremos a make siempre añadiendo algún objetivo de compilación de entre los siguientes:
+
++ cpp : compila sólo la implementación de referencia C.
++ sse2 : compila la implementación de referencia C y la de ensamblador SSE2.
++ cuda : compila la implementación de referencia C y la CUDA.
++ all : compila la implementación de referencia C, la de ensamblador SSE2 y la CUDA.
++ cuda_emu : compila la implementación de referencia C y la CUDA con la opción de compilación en modo emulado (CUDA v2.3 o anterior).
++ all_emu : compila la implementación de referencia C, la de ensamblador SSE2 y la CUDA con la opción de compilación en modo emulado (CUDA v2.3 o anterior).
++ cpp_64 : compila sólo la implementación de referencia C para sistemas operativos de 64 bits que pueden ejecutar aplicaciones en 32 bits.
++ sse2_64 : compila la implementación de referencia C y la de ensamblador SSE2 para sistemas operativos de 64 bits que pueden ejecutar aplicaciones en 32 bits.
++ cuda_64 : compila la implementación de referencia C y la CUDA para sistemas operativos de 64 bits que pueden ejecutar aplicaciones en 32 bits.
++ all_64 : compila la implementación de referencia C, la de ensamblador SSE2 y la CUDA para sistemas operativos de 64 bits que pueden ejecutar aplicaciones en 32 bits.
+** HACER [7/9] Interfaz de aplicación (API)
 #+LaTeX: \label{manualProgrApi}
+
 En esta sección se describen las clases implementadas y sus métodos públicos, explicando lo que hacen y cómo deben ser llamadas pero no necesariamente el funcionamiento interno. Se omiten los constructores por defecto (los constructores que no toman ningún parámetro) y los destructores.
 
-*** HACER [0/1] Common
+*** REVISAR Common
 **** <<<Enumerations>>>
 
 Dado que la librería cuenta con tantas posibles configuraciones, su gestión básica en esta clase. Se han definido 10 tipos enumerados para: 
@@ -1995,7 +2019,18 @@ Esta clase implementa un mapa de parametros útil para los para los parámetros 
 - =void copyTo(ParametersMap* parametersMap) := Asigna al mapa de parámetros recibido todos los pares (clave, valor) que contenga.
 - =void copyFrom(ParametersMap* parametersMap) := Para todos los pares (clave, valor) que contenga intenta copiar el valor del ParametersMap recibido. Si no existe algun´valor, captura y silencia la excepción lanzada por el mapa recibido al intentar acceder a estos. Esos pares no los modifica.
 
-**** HACER <<<Dummy>>>
+**** <<<Dummy>>>
+
+Esta clase es una utilidad para construir diferentes objetos de la librería a partir de parámetros de datos. Todos sus métodos son estáticos:
+
++ =Interface* interface(ParametersMap* parametersMap) := Crea y devuelve una Interface.
++ =Buffer* buffer(ParametersMap* parametersMap) := Crea y devuelve un Buffer.
++ =Connection* connection(ParametersMap* parametersMap, Buffer* buffer) := crea y devuelve una Connection que tiene como entrada (tantas veces como indique el parámetro "número de entradas" definido como una constante estática) el Buffer recibido como parámetro.
++ =Layer* layer(ParametersMap* parametersMap, Layer* input) := crea y devuelve una Layer que tiene como entrada (tantas veces como indique el parámetro "número de entradas" definido como una constante estática) la otra Layer recibida como parámetro.
++ =NeuralNet* neuralNet(ParametersMap* parametersMap, Interface* input) := Crea y evuelve una red neuronal cuyas capas de entrada apuntarán a =input=.
++ =Individual* individual(ParametersMap* parametersMap, Interface* input) := Crea y evuelve un Individual cuyas capas de entrada apuntarán a =input=.
++ =Task* task(ParametersMap* parametersMap) := Crea y devuelve una Tarea del tipo especificado por la cadena asociada al enumerado de tipos de tareas.
+
 *** REVISAR Neural
 #+LaTeX: \label{apiNeural}
 
@@ -2295,7 +2330,7 @@ Cuenta con 6 clases que dependen del paquete externo: *CUDA*:
 
 El paquete externo *CUDA* utiliza la arquitectura GPGPU con el lenguaje de NVIDIA C CUDA como se comentó en la sección \ref{disenoParalCUDA}. Declara sus funciones en el fichero cuda.h, y las implementa en los ficheros activation.cu, basic.cu, calcInvertedMatrix.cu, calcOutputs.cu, calcReduction.cu, calcReduction0.cu y genetic.cu.
 
-*** REVISAR Game
+*** MODIFICAR Game
 #+LaTeX: \label{implGame}
 Este paquete se encarga de implementar utilidades para tareas relacionadas con juegos, discutidos en el apartado \ref{experimentacionJuegos}.
 
@@ -2375,140 +2410,174 @@ El contructor es el siguiente:
 - =virtual void test(Individual* individual) :=
 - =virtual Individual* getExample(ParametersMap* parameters) :=
 - =virtual string toString() :=
-*** HACER [0/7] Loop
+*** REVISAR Loop
 #+LaTeX: \label{apiLoopPkg}
-**** HACER <<<LoopFunction>>>
 
-Esta clase es parámetro que toma Loop en la función de repetición repeatFunction. Contiene una ParametersMap que es donde los Loops irán depositando sus valores actuales en cada vuelta que dén. Su constructor público acepta un puntero a una función de la forma =void miFuncion(ParametersMap* params)= para ser ejecutada en cada hoja del arbol de posibilidades desplegado por la cadena de bucles, pero se puede extender la clase para reimplementar =__executeImpl()= y usar definir otro constructor con cualquier número de parámetros que ésa función puede tomar como entradas y/o salidas adicionales si es que no es suficiente o no resulta cómodo hacerlo con el mapa de parámetros.
+A continueación se describen las utilidades de prueba genéricas descritas en la sección \ref{disenoLoop} del diseño. Para las más especializadas para la librería se encuentran en la siguiente sección, que describe el paquete *Loopers*.
 
-protected:
-    GenericLoopFuncPtr tFunction;
-    std::string tLabel;
-    ParametersMap* tParameters;
+**** <<<LoopFunction>>>
 
-    Loop* tCallerLoop;
-    unsigned tLeaf;
+Esta clase es el parámetro que toma Loop en la función de repetición repeatFunction. Contiene una ParametersMap que es donde los Loops irán depositando sus valores actuales en cada vuelta que den. Su constructor público acepta un puntero a una función de la forma =void miFuncion(ParametersMap* params)= para ser ejecutada en cada hoja del arbol de posibilidades desplegado por la cadena de bucles. Se puede extender la clase para reimplementar =__executeImpl()= y usar definir otro constructor con cualquier número de parámetros que ésa función puede tomar como entradas y/o salidas adicionales si es que no es suficiente o no resulta cómodo o legible hacerlo con el mapa de parámetros. Las clases que la extiendan pueden usar un constructor protegido similar al público pero sin aceptar un puntero a una función, osea, aceptando un ParametersMap y una etiqueta.
 
-    void init(ParametersMap* parameters, string label)
-    {
-        tLabel = label;
-        tParameters = parameters;
-        tLeaf = 0;
-        tCallerLoop = NULL;
-    }
++ =virtual void __executeImpl() := Ejecuta el puntero a la función pasándole el mapa de parámetros, ambos recibidos en el constructor.
++ =void _beforeLoop() := Loop ejecuta este método si es el ptimer bucle de la cadena antes de iniciar el proceso de iteración, establece el número de "hoja" (o ejecución individual) a cero.
++ =void execute(Loop* callerLoop) := llama a __executeImpl() controlando los posibles errores y notificando en su caso el estado de la cadena de Loops, la etiqueta del LoopFunction y el error capturado. Incrementa el contador de "hoja".
++ =ParametersMap* getParameters() := Devuelve el mapa de parámetros.
++ =Loop* getCallerLoop() := Devuelve un puntero al Loop que lo ha ejecutado, puede devolver un puntero nulo.
++ =std::string getLabel() := Devuelve la etiqueta.
++ =unsigned getLeaf() := Devuelve la cuenta de ejecuciones o número de hoja.
 
-    LoopFunction(ParametersMap* parameters, string label)
-    {
-        tFunction = NULL;
-
-        init(parameters, label);
-    }
-public:
-    LoopFunction(GenericLoopFuncPtr functionPtr, ParametersMap* parameters, string label)
-    {
-        tFunction = functionPtr;
-
-        init(parameters, label);
-    }
-
-    virtual void __executeImpl()
-    {
-        (tFunction)(tParameters);
-    }
-
-    void _beforeLoop()
-    {
-        tLeaf = 0;
-    }
-
-    void execute(Loop* callerLoop)
-    {
-//        cout << "Execute function... " << tLabel << " at state " << callerLoop->getState(true) << " Leaf " << tLeaf << endl;
-        Util::check(callerLoop == NULL,
-                    "LoopFunction::execute " + tLabel + " : The caller Loop cannot be null.");
-        try {
-            tCallerLoop = callerLoop;
-            __executeImpl();
-        } catch (string& e) {
-            cout << " while executing " + tLabel + " at state " + tCallerLoop->getState(true) << " : ";
-            cout << endl << e << endl;
-        }
-        ++tLeaf;
-    }
-
-    ParametersMap* getParameters()
-    {
-        return tParameters;
-    }
-    Loop* getCallerLoop()
-    {
-        return tCallerLoop;
-    }
-    std::string getLabel()
-    {
-        return tLabel;
-    }
-    unsigned getLeaf()
-    {
-        return tLeaf;
-    }
-
-**** HACER [[apiLoopClass][Loop]]
+**** [[apiLoopClass][Loop]]
 #+LaTeX: \label{apiLoopClass}
-private:
-    void setCallerLoop(Loop* callerLoop);
-protected:
 
-    std::string tKey;
-    Loop* tCallerLoop;
+Esta es la clase abstracta con la que se contruyen cadenas de bucles para ejecuciones masivas parametrizadas automaticamente cuyo funcionamiento general es descrito en la sección \ref{disenoLoop}. A continuación se describen los métodos de la clase.
 
-    Loop();
-    Loop(std::string key);
-    unsigned tCurrentBranch;
-    Loop* tInnerLoop;
+El siguiente método es privado y sólo es accedido por directamente por Loop, sin embargo, se permite el acceso a los miembros privados a la clase JoinEnumLoop usando el especificador de declaración =friend=, pues de otro modo no podría realizar su función correctamente.
 
-    void __repeatBase(LoopFunction* func);
-    virtual void __repeatImpl(LoopFunction* func) = 0;
-public:
-    friend class JoinEnumLoop;
-    virtual ~Loop();
++ =void setCallerLoop(Loop* callerLoop) := 
 
-    void setKey(string key);
-    string getKey();
+El método más importante es el siguiente:
 
-    virtual void addInnerLoop(Loop* innerLoop);
-    Loop* getInnerLoop();
-    virtual Loop* dropFirstLoop();
-    Loop* dropLastLoop();
-    Loop* dropLoop(Loop* loop);
++ =void repeatFunction(LoopFunction* func, ParametersMap* parametersMap) := Establece que el Loop padre es un puntero nulo (es el primero de la cadena), llama a =_beforeLoop()= con el LoopFunction recibido, y llama (controlando excepciones) al método =__repeatImpl= cuya implementación no pertenece a la clase y depende de la especialización concreta. Este método es, además de protegido, virtual puro:
 
-    virtual unsigned getCurrentBranch();
-    virtual unsigned getNumBranches() = 0;
-    unsigned getNumLeafs();
-    virtual unsigned getDepth();
++ =void __repeatImpl(LoopFunction* func) := Realiza el bucle que corresponda a su especialización. En su interior, pone el valor de la variable sobre la que iteré en el mapa de parámetros usando como clave la etiqueta asociada al Loop y llama al método que se describe a continuación, que es protegido pero no puede ser reimplementado.
 
-    virtual Loop* findLoop(std::string key);
-    virtual void print() = 0;
++ =void __repeatBase(LoopFunction* func) := Si tiene un Loop colgando de él le establece que es su bucle llamador con el primer método descrito en la sección y llama a =__repeatImpl= en su bucle anidado. Si no lo tiene y, por tanto, es el último de la cadena, llama a =execute= con el LoopFunction parámetro.
 
-    void repeatFunction(GenericLoopFuncPtr func, ParametersMap* parametersMap, std::string functionLabel);
-    void repeatFunction(LoopFunction* func, ParametersMap* parametersMap);
+Los métododos que son publicos pero que también son virtuales puros y, por tanto, se deben definir en las clases hijas, son:
 
-    virtual std::string valueToString() = 0;
-    virtual std::string getState(bool longVersion);
++ =unsigned getNumBranches() = 0 := Devuelve el número de iteraciones que generará ese Loop con su configuración actual.
++ =void print() = 0 := escribe en la salida estándar su configuración actual, is tiene un bucle hijo, hace que éste haga lo mismo de forma recursiva.
++ =std::string valueToString() = 0 := Devuelve su valor actual en forma de cadena.
 
-**** HACER <<<RangeLoop>>>
-**** HACER <<<ExpLoop>>>
-**** HACER <<<EnumLoop>>>
-**** HACER <<<JoinEnumLoop>>>
-**** HACER <<<Plot>>>
-*** HACER [0/3] Loopers
+Otros métodos que se pueden redefinir pero que ya están implementados en Loop son:
+
++ =unsigned getDepth() := Devuelve el número de Loops por debajo de él, para ello llama a su Loop hijo recursivamente.
++ =std::string getState(bool longVersion) := Devuelve una cadena con su valor actual concatenado al de todos los Loops que estén por encima de él, que le han llamado. En este caso la recursividad es hacia arriba. Si se selecciona la versión larga con el parámetro =longVersion=, la etiqueta de cada bucle se concatena junto a su valro actual.
++ =unsigned getCurrentBranch() := Devuelve su contador de iteración que empiza en cero y se incrementa en uno por cada vuelta.
++ =Loop* findLoop(std::string key) := Busca recursivamente la clave parámetro comparándola con la etiqueta de cada Loop. Si coincide, devuelve un puntero a ese Loop y si no la encuentra, un puntero nulo.
+
+El resto de métodos públicos son:
+
++ =void repeatFunction(GenericLoopFuncPtr func, ParametersMap* parametersMap, std::string functionLabel) := Esta es una versión de =repeatFunction= que nos ahorra la construcción del objeto LoopFunction si le damos directamente un puntero a una función de la forma =__repeatImpl=, es decir, usa el constructor público de LoopFunction sin especializar a la clase.
++ =virtual void addInnerLoop(Loop* innerLoop) := Establece el Loop parámetro como interno. Si ya tenía uno, hace una llamada recursiva que acabará colocando al nuevo Loop al final de la cadena.
++ =Loop* getInnerLoop() := Devuelve un punero al Loop interno (puede ser un puntero nulo).
++ =unsigned getNumLeafs() := Devuelve el número de hojas o el número de ejecuciones que se harán del LoopFunction por debajo del Loop que ejecuta el método.
++ =Loop* dropLastLoop() := Se suelta al último Loop de la cadena y se devuelve su puntero. La cadena ya no se ocupará de liberar su espacio ocupado en memoria.
++ =virtual Loop* dropFirstLoop() := Suelta a su Loop hijo inmediato con todos los que éste tenga colgando y devuelve un puntero al mismo.
++ =Loop* dropLoop(Loop* loop) := Busca recursivamente un Loop que esté en la posición de memoria del puntero parámetro. Si lo encuentra, lo suelta de la cadena con todos los que tenga colgando y devuelve un puntero al mismo. Si no lo encuentra, devuelve un puntero nulo.
++ =void setKey(string key) := Establece la etiqueta de un Loop a la que estará asociada su iterador en el mapa de parámetros.
++ =string getKey() := Devuelve la etiqueta del Loop.
+
+**** <<<RangeLoop>>>
+
+Hereda de Loop e implementa sus métodos virtuales puros. El constructor tiene la forma =RangeLoop(std::string key, float min, float max, float inc);= y su bucle interno es ~for(float i=min; i<max; i+= inc)~. Implementa las siguientes funciones adicionales:
+
++ =resetRange(float min, float max, float inc) := Reestablece los parámetros de iteración.
++ =float getCurrentValue() := Devuelve el valor actual del iterador.
++ =float* toArray() := Crea un array con todos los valores posibles utilizando la configuración actual y devuelve un puntero al mismo.
+ 
+**** <<<ExpLoop>>>
+
+Hereda de Loop e implementa sus métodos virtuales puros. El constructor es similar al de RangeLoop sustituyendo al parámetro =inc= con uno =factor=. También implementa un método de restablecimiento de parámetros similar. Su bucle interno es ~for(float i=min; i<max; i*= factor)~.
+
+**** <<<EnumLoop>>>
+
+Hereda de Loop e implementa sus métodos virtuales puros. Este Loop itera sobre una lsita de valores pertenecientes a un mismo enumerado de entre los definidos en Enumerations. Por su variedad de constructores, se explican a continuación. Para cualquier valor inválido se lanza una excepción.
+
++ =EnumLoop(std::string key, EnumType enumType) := Iterará sobre todos los valores del enumerado seleccionado.
++ =EnumLoop(EnumType enumType) := Iterará sobre todos los valores del enumerado seleccionado. Para la etiqueta del Loop usará la cadena asociada a ese enumerado en Enumerations.
++ =EnumLoop(EnumType enumType, unsigned count, ...) := Se le indica el tipo de enumerado, sobre cuantos valores se iterará y a continuación se listarán esos valroes como parámetros del constructor. Para la etiqueta del Loop usará la cadena asociada a ese enumerado en Enumerations.
++ =EnumLoop(std::string key, EnumType enumType, unsigned count, ...) := Igual que el anterior indicandole una etiqueta diferente.
+
+También tiene varios métodos de reestablecimiento de parámetros. Todos ellos conservan la etiqueta que tuviese el Loop:
+
++ =void withAll(EnumType enumType) := Iterará sobre todos los valores del nuevo enumerado seleccionado.
++ =void with(EnumType enumType, unsigned count, ...) := Se le indica el tipo de enumerado, sobre cuantos valores se iterará y a continuación se listarán esos valores como parámetros del constructor.
++ =void exclude(EnumType enumType, unsigned count, ...) := Se le indica el tipo de enumerado, cuantos valores se indicarán y a continuación se listarán como parámetros del constructor los valores del enumerado para los que no se debe iterar. Se iterará con los valores del enumerado que no aparezcan en la lista.
+
+**** <<<JoinEnumLoop>>>
+
+Hereda de Loop e implementa sus métodos virtuales puros. Esta clase permite transformar las "cadenas de bucles" en "árboles de bucles", permitiendo que de cada valor enumerado cuelgue un Loop interno distinto, que puede a su vez contener a otros Loops y pueden tener longitudes distintas. Por ejemplo, supongamos un JoinEnumLoop que itere sobre el /tipo de selección/ del algortimo genético. La selección por torneo puede iterar, además, por el tamaño del torneo, la selección por ranking, por la base y el salto en el ranking (dos loops debajo suya), etc.
+Los Loops internos que se añadan al JoinEnumLoop se añaden a todos los hijos. La gestión de la memoria se realizará correctamente (es decir, ningún Loop se trata de eliminar dos veces ni se queda en memoria sin ser referenciado) siempre que no haya varios JoinEnumLoop en la misma cadena de Loops y que no se hagan borrado ni inserciones en las subcadenas de cada enumerado. 
+
+En el constructor se le indica un enumerado y, opcionalemente, una etiqueta. Para realizar estas funciones necesita reimplementar los métodos =void addInnerLoop(Loop* innerLoop) :=, =Loop* dropFirstLoop() :=,  =unsigned getDepth() := y =Loop* findLoop(std::string key) :=. Además, incorpora el nuevo método:
+
++ =void addEnumLoop(unsigned enumValue, Loop* loop) := Añade un valor del enumerado a los valores que tendrán que ser iterados con su correspondiente Loop interno (que puede tener cualquier profundidad).
+
+**** <<<Plot>>>
+
+La clase Plot se ocupa de recoger datos en distintos ficheros, de generar scripts para ser ejecutados por gnuplot y de llamar a gnuplot para generarlos. El constructor toma los siguientes parámetros:
+
++ =string plotPat := La ruta en la que se van a generar los ficheros. Debe contener una subcarpeta data para lso datos, otra gnuplot para los scripts y una tercera images para las imagenes generadas.
++ =RangeLoop* xToPlo := El bucle que generará los valores de la coordenada. No puede tener bucles hijos.
++ =string yLabe := La etiqueta que se asociará en la gráfica a la coordenada Y.
+
+Las siguientes funciones permiten alterar esos parámetros.
+
++ =void setLabelY(string yLabel) := Cambia la etiqueta del bucle en la coordenada X.
++ =void setLabelX(string xLabel) := Cambia la etiqueta asociada a la coordenada Y.
++ =void resetRangeX(float min, float max, float inc) := Reestablece la configuración del bucle en la coordenada X.
++ =void resetRangeX(string xLabel, float min, float max, float inc) := Reestablece la configuración y la etiqueta del bucle en la coordenada X.
+
+Tiene un atributo =parameters= que contiene el el mapa de parámetros que se usará en las repetciones y al que se pueden poner valores antes de inciarlas. Una vez configurado todo, cuenta con varios métodos de repetición. Todos tienen una forma genérica y otra más configurable que omitiremos por simplicidad, pero que es útil para las clases que heredan de esta para conseguir gráficas más especializadas. Las formas genéricas toman como parámetro un puntero a una función de la forma =float miFuncion(ParametersMap*)=. Los valores que vaya devolviendo en cada ejecución son los que se asignarán a la cordenada Y en cada curva. Estas son los distintos métodos genéricos de repetición de Plot:
+
++ =void plot(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop) := Cada combinación del parámetro =linesLoop= será una curva. El primer nivel se usará para elegir el color y lso siguientes niveles, en conjunto, para elegir el tipo de punto.
++ =void plotAveraged(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop, Loop* averagesLoop) := Además, cada curva se iterará con un bucle adicional para hacer la media de todas sus combinaciones al establecer el valor de Y.
++ =void plotFiles(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop, Loop* filesLoop) := En vez de acer la media, cada combinación del segundo Loop generará una gráfica diferente.
++ =void plotFilesAveraged(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop, Loop* filesLoop, Loop* averagesLoop) := Se tiene un bucle para las curvas, otro para hacer la media y otro para ficheros diferentes.
++ =void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop, bool differentFiles) := Se le pasa un sólo una cadena de bucles y, por cada par de Loops en la cadena (un JoinEnumLoop se considera un par indivisible con todos sus hijos), se tiene un conjunto de curvas. Si el parámetro =differentFiles= es falso, el resto de Loops en la cadena se usarán para hacer la media. Si es verdadero, pro cada combinacióon con el resto de loops se generará una gráfica diferente.
++ =void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop, Loop* averagesLoop, bool differentFiles) := Como el anterior pero incorpora una cadena de bucles adicional para hacer la media. Si differentFiles es falso se combinará con el resto de Loops para ahcer la media.
+
+*** REVISAR Loopers
 #+LaTeX: \label{apiLoopersPkg}
-**** HACER [[apiTestclass][Test]]
+
+Este paquete hace uso del paquete Loop para tareas concretas de la librería, en vez de para punteros a funciones genéricos.
+
+**** [[apiTestclass][Test]]
 #+LaTeX: \label{apiTestclass}
-**** HACER <<<ChronoPlotter>>>
-**** HACER <<<TaskPlotter>>>
-*** HACER Test
-Sólo comentar un poquillo por encima.
+
+Como Plot, contiene un ParametersMap público que usará para las repeticiones y al que se puede acceder antes de inciarlas. Tiene dos métodos para iniciar repeticiones:
+
++ =void testMemoryLosses(GenericLoopFuncPtr function, string label, Loop* loop) := Toma por parámetros un puntero a una función de la forma genérica del constructor público de LoopFunction y comprueba si la función tiene pérdidas de memoria, escribiendo en la salida estádar lso detalles y el estado de ejecución del bucle en caso de haberlos.
++ =void test(TestFunctionPtr func, std::string label, Loop* loop) := Prueba una función de la forma =unsigned miFuncion(ParametersMap*)= y muestra por pantalla el estado de ejecución y el número de diferencias entre vectores si el número devuelto por la función es distinto de cero. Está función es mu útil para comprobar la corrección de las distintas implementaciones paralelas comparando los resultados (o los pesos para el operador de cruce) con los producidos por la implementación de referencia. En el proyecto se usa en combinación con los métodos estáticos descritos a continueación.
+
+Contiene los siguientes métodos estáticos:
+
++ =static bool areEqual(float expected, float actual, BufferType bufferType) := Devuelve true si los dos números comparados son iguales. Para le BufferType =FLOAT= se admite una diferencia menor que 1.
++ =static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual) := Utilizando el método anterior, compara dos objetos de la clase Interface y devuelve el número de elementos que no eran iguales.
++ =static unsigned assertEquals(Buffer* expected, Buffer* actual) := Hace lo mismo que la anterior comparando Buffer en vez de interfaces.
+
+**** <<<ChronoPlotter>>>
+
+Extiende a la clase Plot. Tiene la misma variedad de métodos de repetición que Plot pero acepta otro tipo de funciones con la forma =float miFuncion(ParametersMap* params, unsigned repetitions)= cuyas funciones se espera que devuelvan el tiempo de ejecución para el número de repeticiones parámetro utilizando la clase Chronometer. Los métodos de repetición de ChronoPlotter tienen como parámetro adicional el número de repeticiones (que recibirá la función recibida comoo puntero al ser ejecutada). En la cordenada Y, este generador de gráficas asigna el valor devuelto por la función entre el número de repeticiones.
+
+**** <<<TaskPlotter>>>
+
+Extiende a la clase Plot. Tiene la misma variedad de métodos de repetición que Plot pero con dos formas distintas. Se describe el método más simple de cada una de las formas:
+
++ =void plotTask(Task* task, std::string title, Loop* linesLoop) := Para la tarea recibida por parámetro, se genera una gráfica con las curvas espcificadas en =linesLoop=. La población se construirá en cada 
++ =void plotTask(std::string title, Loop* linesLoop) := Es similar al anterior pero la tarea también se construirá a partir del mapa de parámetros utilizando el método =task= de la clase Dummy.
+
+El Loop de rango con las generaciones se establece en el constructor, que también toma una ruta donde crear los ficheros generados. Ese rango puede tener un incremento diferente de 1, para no recoger tantos datos y obtener gráficas menos sobrecargadas.
+
+*** REVISAR Test
+
+El paquete Test contiene los ficheros que implementan programas ejecutables utilizando la librería.
+
+Los que empiezan por "test" prueban clases concretas (o las diferentes implementaciones de una interfaz o clase abstracta) o pérdidas de memoria, sirven para garantizar el correcto funcionamiento de la librería tras aplicar cambios en el código. Son el euivalente de test unitarios, con la diferencia de que éstos hacen pruebas masivas apoyandose en la clase Test del paquete Loopers.
+
+Los que empiezan con "chrono" utilizan ChronoPlotter para generar gráficas sobre rendimiento. Si empiezan por chronoGen, el rendimiento que se mide no es el de las diferentes implementaciones sino el coste fijo de distintos operadores genédicos independientemente de la implementación.
+
+los que empiezan por "learn" utilizan TaskPlotter para generar gráficas sobre el aprendizaje en función del número de generaciones.
+
+\newpage
+
+** HACER [0/2] Extensibilidad a partir de interfaces
+#+LaTeX: \label{manualProgrInterf}
+*** HACER Nuevas paralelizaciones de redes neuronales
+#+LaTeX: \label{manualProgrInterfRed}
+*** HACER Nuevas tareas para ser aprendidas
 \newpage
 * MODIFICAR [1/3] Resultados: Rendimiento
 #+LaTeX: \label{rendimiento}
@@ -2520,6 +2589,9 @@ En esta sección se analizan resultados de rendimiento en tiempo de ejecución.
 
 *** MODIFICAR Máquina con capacidad CUDA
 #+LaTeX: \label{rendMaqCUDA}
+
+TODO, buscar la grafica en la wikipedia y tablita comparativa.
+Coger los datos de seth/info
 
 Para las pruebas en las que no se necesitaba capacidad CUDA se ha utilizado otra máquina con peores características técnicas. Esta es la máquina que se ha utilizado para las pruebas del apartado \ref{rendOperadores} y el capítulo \ref{aprendizaje}. Se trata de un ordenador de mesa (desktop) con bastante potencia, con una CPU Phenom II X6 1100T y un dispositvo GPU NVIDIA GTX 570.
 
@@ -2902,6 +2974,10 @@ En esta sección se presentan los resultados en tiempo de ejecución de los mét
 
 *** MODIFICAR Acumulación de resultados
 #+LaTeX: \label{rendImplAcumulEnt}
+
+TODO cuando alcanzamos el máximo de la memoria del dispositivo se activa algún tipo de paginación.
+TODO las implementaciones de cuda producen resutados similares porque lo que antes no era coalescente ahora sí lo es.
+TODO las subidas y bajadas se evitarían con más repeticiones.
 
 ****  en función de las entradas
 En la figura \ref{grafImplCalculateEnt}, puede apreciarse que la implementación con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a las demás. En ésta los tipos de Buffer BIT y SIGN (neuronas binarias y bipolares) obtienen tiempos similares al tipo FLOAT. 
