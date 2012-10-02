@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
-        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 512, 8193, 512), "Tiempo (ms)");
+        ChronoPlotter plotter(argv[1], new RangeLoop(Dummy::SIZE, 512, 2049, 512), "Tiempo (ms)");
         unsigned repetitions = 500;
 
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 20);
@@ -51,7 +51,8 @@ int main(int argc, char *argv[])
         plotter.plotChronoAveraged(chronoCalculateAndAddTo, "impl_calculate_inputSize", &linesLoop,
                                    &averageLoop, repetitions);
 
-        plotter.setLabelX(Dummy::OUTPUT_SIZE);
+	repetitions = 1000;
+        plotter.resetRangeX(Dummy::OUTPUT_SIZE, 128, 2049, 128);
         averageLoop.setKey(Dummy::SIZE);
 
         plotter.plotChronoAveraged(chronoCalculateAndAddTo, "impl_calculate_outputSize", &linesLoop,
@@ -64,7 +65,8 @@ int main(int argc, char *argv[])
         plotter.plotChronoFilesAveraged(chronoCalculateAndAddTo, "impl_calculate_outputSize_blockSize", &cudaLinesLoop,
                                    &filesLoop, &averageLoop, repetitions);
 
-        plotter.setLabelX(Dummy::SIZE);
+	repetitions = 500;
+        plotter.resetRangeX(Dummy::SIZE, 512, 2049, 512);
         averageLoop.setKey(Dummy::OUTPUT_SIZE);
 
         plotter.plotChronoFilesAveraged(chronoCalculateAndAddTo, "impl_calculate_inputSize_blockSize", &cudaLinesLoop,
