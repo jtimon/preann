@@ -7,9 +7,9 @@
 
 #include "reversiTask.h"
 
-ReversiTask::ReversiTask(unsigned size, unsigned numTests)
+ReversiTask::ReversiTask(unsigned size, BufferType bufferType, unsigned numTests)
 {
-    tBoard = new ReversiBoard(size);
+    tBoard = new ReversiBoard(size, bufferType);
     tNumTests = numTests;
 }
 
@@ -47,10 +47,8 @@ void ReversiTask::test(Individual* individual)
                     tBoard->turn(turn, NULL);
                 }
             }
-//            tBoard->print();
             turn = Board::opponent(turn);
         }
-        //TODO controlar negativos ??
         fitness += tBoard->countPoints(individualPlayer);
 //        tBoard->print();
 //        cout << " points " << tBoard->countPoints(individualPlayer) << endl;

@@ -7,7 +7,7 @@
 
 #include "board.h"
 
-void Board::baseConstructor(unsigned size)
+void Board::baseConstructor(unsigned size, BufferType bufferType)
 {
     tSize = size;
     tBoard = (SquareState**) MemoryManagement::malloc(sizeof(SquareState*) * tSize);
@@ -15,18 +15,18 @@ void Board::baseConstructor(unsigned size)
         tBoard[i] = (SquareState*) MemoryManagement::malloc(sizeof(SquareState) * tSize);
     }
 
-    tInterface = new Interface(tSize * tSize * 2, BT_BIT);
+    tInterface = new Interface(tSize * tSize * 2, bufferType);
     initBoard();
 }
 
-Board::Board(unsigned size)
+Board::Board(unsigned size, BufferType bufferType)
 {
-    this->baseConstructor(size);
+    this->baseConstructor(size, bufferType);
 }
 
 Board::Board(Board* other)
 {
-    this->baseConstructor(other->getSize());
+    this->baseConstructor(other->getSize(), other->getBufferType());
 
     for (int x = 0; x < tSize; ++x) {
         for (int y = 0; y < tSize; ++y) {
@@ -191,7 +191,7 @@ int Board::countPoints(SquareState player)
             }
         }
     }
-    return points;
+    return tSize * tSize + points;
 }
 
 
@@ -211,6 +211,11 @@ void Board::print()
         cout<<endl;
     }
     cout<<"---------------------------------------"<<endl;
+}
+
+BufferType Board::getBufferType()
+{
+    return tInterface->getBufferType();
 }
 
 SquareState Board::opponent(SquareState player)

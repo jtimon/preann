@@ -32,9 +32,9 @@ protected:
     bool insideBoard(int xPos, int yPos);
 private:
     Board(){};
-    void baseConstructor(unsigned size);
+    void baseConstructor(unsigned size, BufferType bufferType);
 public:
-    Board(unsigned size);
+    Board(unsigned size, BufferType bufferType);
     Board(Board* other);
     virtual ~Board();
 
@@ -58,6 +58,7 @@ public:
     Interface* updateInterface();
     static SquareState opponent(SquareState player);
     void print();
+    BufferType getBufferType();
 };
 
 #endif /* BOARD_H_ */

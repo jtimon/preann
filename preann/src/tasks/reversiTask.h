@@ -17,7 +17,7 @@ class ReversiTask : public Task
     unsigned tNumTests;
     virtual float getGoal();
 public:
-    ReversiTask(unsigned size, unsigned numTests = 1);
+    ReversiTask(unsigned size, BufferType bufferType, unsigned numTests = 1);
     virtual ~ReversiTask();
 
     virtual void test(Individual* individual);

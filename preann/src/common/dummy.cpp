@@ -157,7 +157,7 @@ Task* Dummy::task(ParametersMap* parametersMap)
             break;
         case TT_REVERSI:
             numTest = (unsigned) (parametersMap->getNumber(Dummy::NUM_TESTS));
-            task = new ReversiTask(size, numTest);
+            task = new ReversiTask(size, bufferType, numTest);
             break;
         default:
             string error = "Dummy::task not suported task " + to_string(testTask);

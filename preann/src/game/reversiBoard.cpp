@@ -12,8 +12,8 @@ ReversiBoard::ReversiBoard(ReversiBoard* other) :
 {
 }
 
-ReversiBoard::ReversiBoard(unsigned size) :
-        Board(size)
+ReversiBoard::ReversiBoard(unsigned size, BufferType bufferType) :
+        Board(size, bufferType)
 {
     std::string error;
     if (size % 2 != 0) {

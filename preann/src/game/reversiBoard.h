@@ -14,7 +14,7 @@ class ReversiBoard : public Board
 {
 public:
     ReversiBoard(ReversiBoard* other);
-    ReversiBoard(unsigned size);
+    ReversiBoard(unsigned size, BufferType bufferType);
     virtual ~ReversiBoard();
 
     virtual void initBoard();
