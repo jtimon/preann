@@ -2967,11 +2967,54 @@ DirectMap4M:      892928 kB
 
 \newpage
 
-** MODIFICAR [3/6] Rendimiento de las implementaciones paralelas
+** MODIFICAR [5/6] Rendimiento de las implementaciones paralelas
 #+LaTeX: \label{rendImpl}
 
 En esta sección se presentan los resultados en tiempo de ejecución de los métodos que se ejecutan de forma diferente con cada implementación. Todas las pruebas de la sección se han realizado con la máquina descrita en la sección \ref{rendMaqCUDA}.
 
+*** REVISAR Activación
+#+LaTeX: \label{rendImplActiv}
+
+En esta sección se miden los rendimientos de la activación para los diferentes /tipos de neurona/. Para esta prueba no se considera el tipo SIGN porque su implementación de la activación es siempre iténtica a la de BIT.
+
+Esta prueba se ha hecho utilizando la función de activación IDENTITY (ninguna). El tamaño de las salidas se representa en la como coordenada X, variándolo desde 512 hasta 8192 con incrementos de 512. La coordenada Y es el tiempo en milisegundos. Los valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Se permutan los tipos de neuronas FLOAT y BIT con los tipos de implementación para obtener cada curva, usando para las implementaciones CUDA los tamaños de bloque de hilos 16, 32, 64, 128, 256 y 512. Cada combinación se repite 50000 veces para hacer la media reducir el ruido.
+
+#+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation) para diferentes tipos de neurona e implementaciones, usando varios tamaños de bloque para CUDA.
+#+LABEL:      grafImplActivation
+#+ATTR_LaTeX: width=\textwidth
+[[./img/output/impl_activation_blockSize_join.png]]
+
+De la figura \ref{grafImplActivation} se extraen varias conclusiones. El rendimiento de la activación FLOAT es muy parecido para las implementaciones C y SSE2. Era de esperar pues no se han hecho optimizaciones para la versión SSE2. SSE2 tarda un poco más que que la C en BIT y SIGN porque en la implementación SSE2 de BIT y SIGN no se almacenan los bits en el orden normal, si no en la representación especial de SSE2 (ver seción \ref{disenoParalXMMbyte}), para que el método de acumulación de resultados pueda ser óptimo. Para el tipo BIT con estas mismas implementaciones se obtienen tiempos mucho mejores que para FLOAT.
+
+Las versiones CUDA no presentan diferencias para los diferentes tamaños de bloques elegidos. Para éstas, sin embargo, es más rápida la activación FLOAT que la BIT, aunque ambas presentan tiempos buenos que crecen despacio con respecto al tamaño de la capa de salida a activar. De nuevo, el algoritmo se adaptó directamente de la versión float sin modificarlo sustancialmente, lo que se requeriría para un rendimiento óptimo. A partir de un tamaño de 2048, CUDA FLOAT es mejor que C y SSE2 FLOAT. La versión BIT de cuda sólo es peor que las otras implementaciones para un tamaño de 512.
+
+\newpage
+*** REVISAR Funciones de activación
+
+Si en la figura \ref{grafImplActivation} se comparaba el rendimiento de los distintos tipos de neurona con la función de activación IDENTITY para FLOAT. En la figura \ref{grafImplActivationFunc}, sin embargo, se comparan los rendimientos de los distintos tipos de funciones para el tipo de neurona FLOAT. Con el tipo de neurona BIT, la función de activación siempre es BINARY_STEP y con el tipo SIGN la activación siempre es BIPOLAR_STEP, por ello podemos excluir estos tipos de neurona de esta gráfica (esas activaciones se mantienen, pero usando la implementación FLOAT internamente en vez de BIT o SIGN). Además, la implementación SSE2 de la activación para FLOAT es práctiacamente idéntica a la de C y como vimos en la gráfica \ref{grafImplActivation} produce los mismo resultados de rendimiento o muy parecidos, por lo que tampoco se muestran los resultados de la activación SSE2 en este caso. Se muestran, entonces, los diferentes funciones de activación para las neuronas FLOAT y para las implementaciones C y CUDA.
+
+Esta prueba se ha realizado con las mismas configuraciones que la de la sección anterior pero construyendo las lineas a partir de las combinaciones de las todas las funciones de activación implementadas con la implementaciones C y CUDA.
+
+#+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation) con tipo de Buffer FLOAT y las diferentes funciones de activación implementadas.
+#+LABEL:      grafImplActivFunc
+#+ATTR_LaTeX: width=\textwidth
+[[./img/output/impl_activation_functions.png]]
+
+Para la implementación C, se puede ver como, en general, la función más lenta es la tangente hiperbólica, seguida de por las sigmoide y sigmoide bipolar, que tienen tiempos equivalentes. Los tiempos de las funciones de activación de salto binario y bipolar son también muy parecidos y son muy poco peores al función identidad, que tan solo resta el umbral sin hacer niguna aplicar ninguna función y que obtiene los mejores tiempos de C, muy cerca de los peores tiempos de CUDA en los tamaños más grades. Las activaciones de salto binario, bipolar y la identidad obtienen mejores tiempos que las implementaciones CUDA para tamaños de capa pequeños.
+
+Los rendimientos de la implementación CUDA son todos muy buenos y casi constantes, por lo que es difícil compararlos. Para hacerlo más claramente se hará una prueba adicional, aprovechando para probar con distintos tamaños de bloques de hilos, cuyos resultados se muestran en la figura \ref{grafImplActivFuncCuda}.
+
+#+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation) con tipo de Buffer FLOAT y las diferentes funciones de activación implementadas, sólo para la implementación CUDA y con diferentes tamaños de bloques de hilos.
+#+LABEL:      grafImplActivFuncCuda
+#+ATTR_LaTeX: width=\textwidth
+[[./img/output/impl_activation_functions_blockSize.png]]
+
+Los tamaños de los bloques vuelven a ser poco importantes. Para CUDA las mejores activaciones son las mismas que para C, aunque la activación de salto binario es peor que la bipolar en este caso, dónde esta última está más cerca de la activación identidad. No hay tanta diferencia con el resto aquí como en las implementaciones C, pero la tangente hiperbólica es de nuevo la más lenta. En este caso hay una diferencia apreciable entre la sigmoide y la sigmoide bipolar, siendo la segunda más lenta.
+
+\newpage
+**** HACER Funciones de activación CUDA
+
+Simplemente un detalle de la anterior sin meter la implementación C
 *** MODIFICAR Acumulación de resultados
 #+LaTeX: \label{rendImplAcumulEnt}
 
@@ -3004,47 +3047,6 @@ Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, var
 \newpage
 **** HACER Zoom CUDA con bloques ent
 **** HACER Zoom CUDA con bloques sal
-*** MODIFICAR Activación
-#+LaTeX: \label{rendImplActiv}
-
-De la figura \ref{grafImplActivation} se extraen varias conclusiones. El rendimiento de la activación FLOAT es idéntico para las implementaciones C y SSE2.
-Era de esperar pues no se han hecho optimizaciones para la versión SSE2. Para los tipos BIT y SIGN con estas mismas implementaciones se mejora ligeramente el rendimiento. SSE2 tarda un poco más que que la C en BIT y SIGN porque en la implementación SSE2 de BIT y SIGN no se almacenan los bits en el orden normal, si no en la representación especial de SSE2 (ver seción \ref{disenoParalXMMbyte}), para que el método de acumulación de resultados pueda ser óptimo. 
-
-La implemetación CUDA es la más rápida para FLOAT, con un tiempo que se mantiene constante para los tamaños de salida probados. La implementación CUDA de BIT y SIGN produce los peores resultados con bastante diferencia. De nuevo, el algoritmo se adaptó directamente de la versión float sin modificarlo sustancialmente, lo que se requeriría para un rendimiento óptimo.
-
-Esta prueba se ha hecho utilizando la función de activación IDENTITY (ninguna). El tamaño de las salidas se representa en la como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en milisegundos. Los valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Se permutan los tipos de neuronas y los tipos de implementación para obtener cada curva. Cada combinación se repite 90000 veces para hacer la media reducir el ruido.
-
-#+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation).
-#+LABEL:      grafImplActivation
-#+ATTR_LaTeX: width=\textwidth
-[[./img/impl_activation.png]]
-\newpage
-
-**** HACER Activación CUDA
-
-TODO cambiando tamaño de bloques 
-FLOAT, BIT y SIGN por separado que si no no se ve nada
-
-\newpage
-*** MODIFICAR Funciones de activación
-/home/jtimon/workspace/preann/output/data/
-/home/seth/tmp/preann/output/data/
-Si en la figura \ref{grafImplActivation} se comparaba el rendimiento de los distintos tipos de neurona (BIT, SIGN y FLOAT con la función de activación IDENTITY), en la figura \ref{grafImplActivationFunc} se comparan los rendimientos de los distintos tipos de funciones para el tipo de neurona FLOAT. Con el tipo de neurona BIT, la función de activación siempre es BINARY_STEP y con el tipo SIGN la activación siempre es BIPOLAR_STEP, por ello podemos excluir estos tipos de neurona de esta gráfica (esas activaciones se mantienen, pero para usando la implementación FLOAT internamente). Además, la implementación SSE2 de la activación para FLOAT es práctiacamente idéntica a la de C y como vimos en la gráfica \ref{grafImplActivation} produce los mismo resultados de rendimiento, por lo que tampoco se muestran los resultados de la activación SSE2 en este caso. Se muestran, entonces, los diferentes funciones de activación para las neuronas FLOAt y para las implementaciones C y CUDA.
-
-Los rendimientos de la implementación CUDA son todos muy buenos y casi constantes, por lo que es difícil compararlos.
-
-Para la implementación C, se puede ver como, en general, la función más lenta es la sigmoide bipolar, seguida muy de cerca por la sigmoide. La tangente hiperbólica sólo es ligeramente más lenta que el resto. Los tiempos de las funciones de activación de salto binario y bipolar son muy parecidos (ligeramente mayor para el caso salto binario) son muy similares al de la función identidad (que no hace nada).
-
-Esta prueba se ha hecho utilizando los parámetros que se describen a continuación. El tamaño de las salidas se representa en la como coordenada X, variándolo de 2000 en 2000 desde 2000 hasta 20000. La coordenada Y es el tiempo en milisegundos. Los valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. Se permutan los tipos de funciones de activación para FLOAT y los tipos de implementación para para obtener cada curva. Cada combinación se repite 50000 veces para hacer la media reducir el ruido.
-
-#+CAPTION:    Método que ejecuta la función de activación para las salidas de una capa (Connection::activation) con tipo de Buffer FLOAT y las diferentes funciones de activación implementadas.
-#+LABEL:      grafImplActivationFunc
-#+ATTR_LaTeX: width=\textwidth
-[[./img/Activation_functions.png]]
-\newpage
-**** HACER Funciones de activación CUDA
-
-Simplemente un detalle de la anterior sin meter la implementación C
 *** REVISAR Mapeos entre Interface y Buffer
 
 Estos métodos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementación concreta escogida. Cada implementación debe mapear correctamente desde la representación genérica (Interfaz) hacia su propia representación interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
@@ -3056,7 +3058,7 @@ Esta prueba se ha hecho usando el tamaño del buffer como coordenada X, variánd
 #+CAPTION:    Método que implementa la copia a un Buffer con una implementación determinada desde un Buffer genérico de la clase Interfaz (Buffer::copyFromInterface).
 #+LABEL:      grafImplCopyFrom
 #+ATTR_LaTeX: width=\textwidth
-[[./img/impl_copyFromInterface.png]]
+[[./img/output/impl_copyFromInterface.png]]
 
 Para el caso en que se copian datos desde la interfaz hacia el Buffer (gráfica \ref{grafImplCopyFrom}), los peores tiempos son con mucha diferencia para el tipo BIT con la implementación SSE2. Igual que en la sección \ref{rendImplActiv}, esto se debe a la colocación especial de los bits para este algoritmo.
 
@@ -3066,7 +3068,7 @@ Salvo la excepción ya citada de SSE2 para BIT, esto se cumple en general para t
 #+CAPTION:    Método que implementa la copia de un Buffer con una implementación determinada a un Buffer genérico de la clase Interfaz (Buffer::copyToInterface).
 #+LABEL:      grafImplCopyTo
 #+ATTR_LaTeX: width=\textwidth
-[[./img/impl_copyToInterface.png]]
+[[./img/output/impl_copyToInterface.png]]
 
 La gráfica \ref{grafImplCopyTo} se ha generado utilizando los mismos parémetros iguales a la ya comentada y también muestra unos resultados similares, aunque la versión CUDA es algo más lenta. Mover datos desde la memoria del dispositivo (GPU) hacia la memoria del huesped (CPU) es más costoso que hacerlo en el sentido contrario.
 
@@ -3080,7 +3082,7 @@ Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, var
 #+CAPTION:    Método que implementa el operador de crossover para dos conexiones dadas (Connection::crossover).
 #+LABEL:      grafImplCrossover
 #+ATTR_LaTeX: width=\textwidth
-[[./img/impl_crossover.png]]
+[[./img/output/impl_crossover.png]]
 
 Las implementaciones para la CPU son bastane más lentas, siendo SSE2 algo más lenta por al almacenamiento especial de los pesos que tiene, que usa bloques de pesos en vez de pesos individuales. Las dos implementaciones CUDA son mucho más rápidas con tiempos prácticamente idénticos entre sí. Parece ser que la reordenación del vector de bits se compensa con no tener que usar la memoria compartida en absoluto, como se discutió en la sección \ref{disenoParalCUDAcruza}. Aunque no se muestran en esta gráfica, los resultado obtenidos para el algoritmo marcado como =CUDA_REDUC0= en esta gráfica producía resultados similares con diferentes números de hilos por bloque.
 
@@ -3092,14 +3094,14 @@ Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, var
 #+CAPTION:    Método que implementa el operador genético de mutación (Connection::mutate).
 #+LABEL:      grafImplMutation
 #+ATTR_LaTeX: scale=0.15
-[[./img/impl_mutate.png]]
+[[./img/output/impl_mutate.png]]
 
 De la figura \ref{grafImplMutation} se puede deducir que el operador de mutación tiene un coste mínimo y constante respecto al tamaño de la conexión (da igual que sea en función de las entradas o las salidas) para todas las implementaciones. La implementación CUDA es más lenta para los dos tipos de neuronas, siendo para esta implementación algo más lenta la versión BIT (que accede a bytes en vez de a floats). Para CUDA sólo se contempla una implementación, pues todas comparten la misma función para la mutación.
 
 #+CAPTION:    Método que implementa el operador genético de olvido (Connection::reset).
 #+LABEL:      grafImplReset
 #+ATTR_LaTeX: scale=0.15
-[[./img/impl_reset.png]]
+[[./img/output/impl_reset.png]]
 
 La gráfica \ref{grafImplReset} se obtiene con unos parámetros iguales a los descritos para la mutación. Los resultados y conclusiones también coinciden. El operador de olvido tiene un coste constante y mínimo.
 
@@ -3176,9 +3178,6 @@ Aunque se omite la figura por ser muy similar a la anterior, el nuevo operador d
 
 [TODO nota rosa
 Yo aquí insistiría en la justificación de las pruebas realizadas. Y en los resultados tratar de indicar el porqué existen similitudes o diferencias según la función de activación]
-
-[  Esta sección la estaba dejando un poco hasta que tenga terminadas las de diseño y manual del programador en las que estoy trabajando ahora. De todas formas, para el aprendizaje me parece más complicado discutir los resultados que para el rendimiento. 
-La activación sigmoide bipolar para OR aprende más despacio al principio pero consigue los mejores resultados. No se me ocurre por qué es misma es la mejor en todo momento para AND o por qué la identidad (lineal) es la mejor para XOR. La motivación principal en este caso es demostrar que las funciones de escalón pueden conseguir resultados comparables.]
 
 En esta sección se muestran resultados de aprendizaje en términos del mejor fitness de la población en cada generación. Nos abstraemos por ello de la implementación concreta y usamos la SSE2 para todas las pruebas del capítulo. Se elige esa implementación por ser la más rápida usando la máquina descrita en \ref{rendMaqLaptop} y porque no se miden tiempos sino generaciones, por lo que la implementación paralela no va a afectar al resultado.
 
