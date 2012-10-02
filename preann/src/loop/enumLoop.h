@@ -20,6 +20,7 @@ protected:
     virtual unsigned reset(EnumType enumType);
 
     virtual void __repeatImpl(LoopFunction* func);
+    virtual std::string valueToString();
 public:
     EnumLoop(EnumType enumType);
     EnumLoop(std::string key, EnumType enumType);
@@ -34,7 +35,6 @@ public:
 
     virtual unsigned getNumBranches();
     virtual void print();
-    virtual std::string valueToString();
 };
 
 #endif /* ENUMLOOP_H_ */
