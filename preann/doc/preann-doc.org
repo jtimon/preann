@@ -507,6 +507,8 @@ La implementación de referencia utiliza las clases CppBuffer y CppConnection. L
 
 La implementación CUDA es más compleja, porque en realidad tiene varias implementaciones alternativas para la función principal del cálculo del estado de las neuronas. Las clases básicas de las que heredan las demás son CudaBuffer y CudaBaseConnection (esta última sigue siendo abstracta, pues no implementa el método virtual puro =_calculateAndAddTo= que requiere Connection). Luego hay una conexión diferente para cada una de las 4 implementaciones de =_calculateAndAddTo=: CudaReduction0Connection, CudaReductionConnection, CudaOutputsConnection y CudaInvertedConnection. La última reimplementa =_copyFrom= y =_copyTo= de Buffer, y =_crossover=, =_mutateWeigh= y =_resetWeigh= para adaptarlas a su colocación inversa en memoria de la matriz de pesos. El operador de cruce también tiene dos implementaciones diferentes para CUDA, como se describe en la sección \ref{disenoParalCUDAcruza}, pero se aprovecha la clase CudaReduction0Connection para utilizar la que se espera que sea más lenta. La figura \ref{classFactory} muestra el diagrama de clases del paquete *factory*. Todas las clases implementan el método virtual puro de Buffer getImplementationType, pero se omite en el diagrama. Nótese que en el diagrama Factory no construye a  CudaBaseConnection. 
 
+Para conocer con más detalle los métodos virtuales puros de las clases abstractas Buffer y Connection que es necesario definir para añadir una implementación nueva compatible con la librería se recomienda consultar los apartados de la sección \ref{manualProgrApi} dedicados a estas clases y al paquete *factory*.
+
 ** Problemas a resolver
 #+LaTeX: \label{experimentacion}
 
@@ -530,7 +532,7 @@ Puede parecer poco intuitivo que el cálculo de estas operaciones lógicas const
 
 Expresado de otra forma, si llamamos c0 a la clase 0 y c1 a la clase 1, para la clasificación OR la entrada {00} pertenece a c0 y las entradas {10, 01, 11} pertenecen a c1; para AND, {00, 10, 01} pertenecen a c0 y {11} a c1; para XOR {00, 11} pertenecen a c0 y {10, 01} pertenecen a c1.
 
-Como se describió en el capítulo \ref{manualProgrInterf}, para que nuestro sistema pueda aprender una tarea nueva, sólo es necesario implementar una clase que herede de la interzaz Task, en este caso, la clase implementada es BinaryTask del paquete *tasks*. El método más importante es test, que toma un individuo como parámetro, lo prueba y le asigna el fitness resultante. También es importante el método setInputs, con el que se conectan las variables internas de la tarea con las entradas de la red neuronal de un individuo. Por último, getExample devuelve un individuo construido cuya estructura es suficiente para aprender la tarea concreta para la que se quiere entrenar a la población.
+Como se describe en sección dedicada a la clase Task, para que nuestro sistema pueda aprender una tarea nueva, sólo es necesario implementar una clase que herede de la interzaz Task, en este caso, la clase implementada es BinaryTask del paquete *tasks*. El método más importante es test, que toma un individuo como parámetro, lo prueba y le asigna el fitness resultante. También es importante el método setInputs, con el que se conectan las variables internas de la tarea con las entradas de la red neuronal de un individuo. Por último, getExample devuelve un individuo construido cuya estructura es suficiente para aprender la tarea concreta para la que se quiere entrenar a la población.
 
 La clase BinaryTask es bastante flexible respecto a cómo puede ser inicializada. Hay dos parámetros que son olbigatorios: un enumerado BinaryOperation que indica que tipo de operación será realizada (OR, AND ó XOR) y el tamaño de los vectores de entrada, que es igual al tamaño del de salida.
 Existe un tercer parámetro optativo numTests que hace referencia al número de pruebas para evaluar a un individuo. Si no se rellena, se probarán todas las combinaciones posibles entre los dos vectores de entrada; si se rellena, determinará el número de pruebas aleatorias que se realizarán para probar a cada individuo. Para las dos posibilidades, el individuo empieza con una puntuación igual al número de diferencias con las salidas esperadas que podría obtener cómo máximo y se irán restando las diferencias que se vayan encontrando. Así, la puntuación del inndividuo será mejor cuanto menor sea el número de diferencias sigueindo la siguiente fórmula: Fitness = Número máximo de diferencias posibles - número de diferencias obtenidas.
@@ -1888,9 +1890,9 @@ void resetKernel(float* buffer, unsigned pos)
 Sólo actuará un hilo por bloque, no parece que se optimice mucho. Sin embargo, no se trata tanto de optimizar estos kernels sino de mantener los pesos en memoria de dispositivo en todo momento. El ancho de banda máximo en la transferencia de entre la memoria de dispositivo y la GPU es mucho mayor (por ejemplo, 141 GBps en la NVIDIA GeForce GTX 280) que el ancho de banda en la transmisión de datos entre la memoria huesped y la del dispositivo (8 GBps para PCI Express ×16 de segunda generación). Por ello, para el mejor rendimiento general de la aplicación, es de una prioridad alta minimizar las transferencias de datos etre el husped (CPU) y el dispositivo (GPU), incluso si eso significa lanzar kernels en la GPU que no suponen ninguna mejora de rendimiento comparados con ejecutar lo mismo en la CPU\cite{bestPract2009}. 
 
 \newpage
-* HACER [1/3] Manual del programador
+* REVISAR Manual del programador
 #+LaTeX: \label{manualProgr}
-** REVISAR Guia de instalación
+** Guia de instalación
 #+LaTeX: \label{manualProgrInstal}
 
 La librería está implementada para ser compilada sobre la palataforma GNU/Linux. La siguiente guia de isntalación asume que se usará una distribución de la familia debian, como por ejemplo, ubuntu, pero el proceso de instalación no es muy diferente para otras distribuciones.
@@ -1927,12 +1929,12 @@ Después, situándonos en la raíz de la carpeta preann, llamaremos a make siemp
 + sse2_64 : compila la implementación de referencia C y la de ensamblador SSE2 para sistemas operativos de 64 bits que pueden ejecutar aplicaciones en 32 bits.
 + cuda_64 : compila la implementación de referencia C y la CUDA para sistemas operativos de 64 bits que pueden ejecutar aplicaciones en 32 bits.
 + all_64 : compila la implementación de referencia C, la de ensamblador SSE2 y la CUDA para sistemas operativos de 64 bits que pueden ejecutar aplicaciones en 32 bits.
-** HACER [7/9] Interfaz de aplicación (API)
+** Interfaz de aplicación (API)
 #+LaTeX: \label{manualProgrApi}
 
 En esta sección se describen las clases implementadas y sus métodos públicos, explicando lo que hacen y cómo deben ser llamadas pero no necesariamente el funcionamiento interno. Se omiten los constructores por defecto (los constructores que no toman ningún parámetro) y los destructores.
 
-*** REVISAR Common
+*** Common
 **** <<<Enumerations>>>
 
 Dado que la librería cuenta con tantas posibles configuraciones, su gestión básica en esta clase. Se han definido 10 tipos enumerados para: 
@@ -2031,7 +2033,7 @@ Esta clase es una utilidad para construir diferentes objetos de la librería a p
 + =Individual* individual(ParametersMap* parametersMap, Interface* input) := Crea y evuelve un Individual cuyas capas de entrada apuntarán a =input=.
 + =Task* task(ParametersMap* parametersMap) := Crea y devuelve una Tarea del tipo especificado por la cadena asociada al enumerado de tipos de tareas.
 
-*** REVISAR Neural
+*** Neural
 #+LaTeX: \label{apiNeural}
 
 Describiremos clases utilizadas empezando desde el nivel más bajo hasta llegar a la clase NeuralNet que implementa una red neuronal completa.
@@ -2065,7 +2067,7 @@ Tanto las entradas, las salidas como los pesos se almacenana en estructuras line
 
 Al ser una clase abstracta, no se puede instanciar. Las clases que heredan de Buffer se describen en la sección \ref{disenoFactoria} y estas son sólo accesibles desde la clase Factory, por lo que la única forma de instanciarlas es usando la propia clase Factory.
 
-Esta clase tiene métodos de tres tipos: convencionales, virtuales y virtuales puros. El tener métodos virtuales puros es lo que hace que la clase sea abstracta. Estos no están definidos pero deben ser definidos en las clases que hereden de ésta para que no sean abstractas y puedan ser instanciadas. Los métodos virtuales están implementados, pero si es preciso puede cambiarse su implementación en las clases hijas. Los métodos convencionales no se pueden reimplementar para tener polimorfismo. Los métodos privados y protegidos de la clase se describen en la sección \ref{manualProgrInterfRed}, estos incluyen métodos no públicos que son virtuales puros. A continuación se describen los métodos públicos que ofrece Buffer. 
+Esta clase tiene métodos de tres tipos: convencionales, virtuales y virtuales puros. El tener métodos virtuales puros es lo que hace que la clase sea abstracta. Estos no están definidos pero deben ser definidos en las clases que hereden de ésta para que no sean abstractas y puedan ser instanciadas. Los métodos virtuales están implementados, pero si es preciso puede cambiarse su implementación en las clases hijas. Los métodos convencionales no se pueden reimplementar para tener polimorfismo. A continuación se describen los métodos públicos y virtuales puros de la clase Buffer. 
 
 Los métodos públicos y virtuales puros (deben ser implementados en las clases hijas):
 
@@ -2183,7 +2185,7 @@ Esta es la clase que gestiona las redes neuronales al nivel más alto. Contiene 
 - =void createFeedForwardNet(unsigned inputSize, BufferType inputType, unsigned numLayers, unsigned sizeLayers, BufferType hiddenLayersType, FunctionTyp functiontype = FT_IDENTITY) := Crea una red neuronal con conexiones hacia delante completa con las conexiones que es de esperar (y pone las capas en el orden habitual en el que tienen que ser activadas). Sólo hay una capa de entrada, para la que hay que indicar tamaño y /tipo de neurona/. Todas las capas internas tendrán el mismo tamaño, tipo (que pueden ser diferentes a los de la de entrada) y /tipo de activación/. Si no se indica la función de activación, se usará =IDENTITY= por defecto. También hay que indicar el número de capas internas. Tras crear una red neuronal utilizando este método, se pueden seguir añadiendo más capas y conexiones por lo que, aunque no se quiera esta topología, puede ser útil para crear la base de otra topología de forma más cómoda.
 - =void createFullyConnectedNet(unsigned inputSize, BufferType inputType, unsigned numLayers, unsigned sizeLayers, BufferType hiddenLayersType  FunctionType functiontype = FT_IDENTITY) := Este método es similar al anterior, pero en lugar de estar conectadas cada capa con la anterior, cada una de las capas internas toma como entrada todas las otras capas (incluso a sí misma). Además, todas las capas están directamente conectadas con la capa de entrada. Como sucedía con el método anterior, se puede usar como base para otra topología. Al ser esta la más compleja, este método es el más recomendable paraprobar la implementación de la red neuronal y los cambios que se hagan
 
-*** REVISAR Genetic
+*** Genetic
 #+LaTeX: \label{disenoGenetic}
 **** [[implIndividual][Individual]]
 #+LaTeX: \label{implIndividual}
@@ -2209,10 +2211,10 @@ Los métodos públicos que implementa la clase son:
 
 Esta clase es abstracta y no puede ser instanciada. Todos sus métodos deben ser implementados por las clases que hereden de ésta para poder ser usadas como tarea por una población para la evaluación de los individuos. Se describe aquí lo que deben hacer los métodos de forma general, aunque la implementación puede variar mucho de un individuo a otro. 
 
-- =virtual void test(Individual* individual) = 0 := Evalúa el individuo tomado por parámetro haciendo las pruebas que necesite la tarea. Esto puede requerir activar la red neuronal del individuo muchas veces. Al final, establece el /fitness/ del individuo.
-- =virtual void setInputs(Individual* individual) = 0 := Toma un individuo y le añade los datos de estado del problema (en forma de uno o varios Interface) como entradas a la red del individuo. De esta forma, muchos individuos de la misma Population pueden apuntar a las mismas interfaces.
-- =virtual Individual* getExample(ParametersMap* parameters) = 0 := Devuelve un individuo de ejemplo con una topología que podría resolver el problema. Es muy conveniente en casos en los que se sabe de antemano qué topología requerirá la red para poder aprender el problema. Por ejemplo, AND y OR, sólo necesitan una capa del mismo tamaño de las entradas. Para resolver XOR se necesita una capa oculta adicional o la red nunca será capáz de resolver el problema (un perceptrón monocapa no puede resolver XOR). Si no se tiene ninguna idea de cómo puede ser la topología de los individuos, el entrenador tendrá que establecerla manualmente o usar algún otro método. En esos casos, la tarea puede devolver simplemente un individuo sin capas ni conexiones, pero este método debe implementarse siempre. Es muy útil para usarlo junto a la utilidad de generación y presentación de resultados de aprendizaje TaskPlotter. 
-- =virtual string toString() = 0 := Devuelve una cadena que identifica la tarea que se está realizando. Puede contener algún número como el tamaño del problema. Como el método anterior, su mayor utilidad es ser llamada desde la clase TaskPlotter.
+- =void test(Individual* individual) := Evalúa el individuo tomado por parámetro haciendo las pruebas que necesite la tarea. Esto puede requerir activar la red neuronal del individuo muchas veces. Al final, establece el /fitness/ del individuo.
+- =void setInputs(Individual* individual) := Toma un individuo y le añade los datos de estado del problema (en forma de uno o varios Interface) como entradas a la red del individuo. De esta forma, muchos individuos de la misma Population pueden apuntar a las mismas interfaces.
+- =Individual* getExample(ParametersMap* parameters) := Devuelve un individuo de ejemplo con una topología que podría resolver el problema. Es muy conveniente en casos en los que se sabe de antemano qué topología requerirá la red para poder aprender el problema. Por ejemplo, AND y OR, sólo necesitan una capa del mismo tamaño de las entradas. Para resolver XOR se necesita una capa oculta adicional o la red nunca será capáz de resolver el problema (un perceptrón monocapa no puede resolver XOR). Si no se tiene ninguna idea de cómo puede ser la topología de los individuos, el entrenador tendrá que establecerla manualmente o usar algún otro método. En esos casos, la tarea puede devolver simplemente un individuo sin capas ni conexiones, pero este método debe implementarse siempre. Es muy útil para usarlo junto a la utilidad de generación y presentación de resultados de aprendizaje TaskPlotter. 
+- =string toString() := Devuelve una cadena que identifica la tarea que se está realizando. Puede contener algún número como el tamaño del problema. Como el método anterior, su mayor utilidad es ser llamada desde la clase TaskPlotter.
 
 **** <<<Population>>>
 
@@ -2275,7 +2277,7 @@ El resto de métodos públicos son:
 - =std::string toString() := Devuelve una cadena que identifica a la población. Llama a =Task::toString()= y le concatena el tamaño máximo de la población. 
 - =void save(FILE* stream) := Guarda los parámetros de configuración del algoritmo genético y todos los individuos de la población al fichero especificado por el parámetro =stream=. Notesé que la tarea no se guarda.
 - =void load(FILE* stream) := Carga los parámetros de configuración del algoritmo genético y los individuos, para insertarlos en la población, desde el fichero especificado por el parámetro =stream=. Notesé que la tarea no se carga y tiene que haber sido establecida en el constructor.
-*** REVISAR <<<Factory>>>
+*** <<<Factory>>>
 
 La clase Factory independiza a las redes neuronales de las diferentes implementaciones, siendo la única clase que tiene acceso al resto de clases implementadas dentro del mismo paquete, con lo que se consigue un espacio de nombres más limpio. Layer debe usar esta clase para instanciarlas y siempre utilizará las interfaces Buffer y Connection. Todos los métodos de la clase son estáticos, por lo que no es necesario instanciar Factory para llamarlos. Las validaciones y la gestión de los /tipos de neurona/ (BufferType) mediante plantillas se implementa en el fichero =factory.cpp=. Éste incluye a =configFactory.h= que mediante macros del precompilador y utilizando las banderas generadas desde el fichero =makefile= para la compilación del proyecto impide que se intenten compilar las implementaciones no soportadas.
 
@@ -2330,7 +2332,7 @@ Cuenta con 6 clases que dependen del paquete externo: *CUDA*:
 
 El paquete externo *CUDA* utiliza la arquitectura GPGPU con el lenguaje de NVIDIA C CUDA como se comentó en la sección \ref{disenoParalCUDA}. Declara sus funciones en el fichero cuda.h, y las implementa en los ficheros activation.cu, basic.cu, calcInvertedMatrix.cu, calcOutputs.cu, calcReduction.cu, calcReduction0.cu y genetic.cu.
 
-*** MODIFICAR Game
+*** Game
 #+LaTeX: \label{implGame}
 Este paquete se encarga de implementar utilidades para tareas relacionadas con juegos, discutidos en el apartado \ref{experimentacionJuegos}.
 
@@ -2340,7 +2342,7 @@ Esta clase clase abstracta implementa un tablero básico y genérico para juegos
 
 Los constructores públicos son:
 
-- =Board(unsigned size) := Crea un tablero cuadrado de tamaño =size * size= con todas las casillas vacías.
+- =Board(unsigned size, BufferType bufferType) := Crea un tablero cuadrado de tamaño =size * size= con todas las casillas vacías. El /tipo de neurona/ se le pasa para poder probar por separado redes similares con diferentes representaciones internas. La interfaz usará el BufferType parámetro.
 - =Board(Board* other) := Crea un tablero a partir de otro tablero, copiando los valores de todas las casillas.
 
 El destructor libera el tablero y la interfaz. La clase tiene los siguientes métodos virtuales puros:
@@ -2377,9 +2379,9 @@ Se implementan todos los métodos virtuales puros de =Board= siguiendo las regla
 
 - =virtual void initBoard() := incia el tablero según las reglas de reversi, es decir, rellena las 4 casillas del medio dándole dos casillas a un jugador y otras dos al otro. De forma que se crucen y haya movimientos legales al principio de la partida.
 
-*** MODIFICAR [0/3] Tasks
+*** Tasks
 #+LaTeX: \label{implTasks}
-**** MODIFICAR <<<BinaryTask>>>
+**** <<<BinaryTask>>>
 
 TODO antes las tareas eran siempre BIT internamente. PRobarlas primero por lo que haya que modificar.
 
@@ -2387,30 +2389,26 @@ Extiende e implementa la clase abstracta Task para implementar las tareas de cla
 
 El contructor es el siguiente:
 
-- =BinaryTask(BinaryOperation binaryOperation, BufferType bufferType, unsigned size, unsigned numTests = 0) := Tiene dos modos de operación dependiendo de si se rellena el parámetro opcional =numTests= o no. Si no se rellenea o se rellena con un cero, la tarea utilizará todas las posibles combinaciones entre los dos vectores de entrada para evaluar al individuo. Si se rellena, se utilizarán =numTests= combinaciones aleatorias al probar cada individuo, lo cuál puede reducir mucho el tiempo de evaluación de cada individuo si el tamaño de los vectores =size= es muy grande (pues el número de combinaciones crece exponencialemente con éste). El /tipo de neurona/ se le pasa para poder probar por separado redes similares con diferentes representaciones internas.
+- =BinaryTask(BinaryOperation binaryOperation, BufferType bufferType, unsigned size, unsigned numTests = 0) := Tiene dos modos de operación dependiendo de si se rellena el parámetro opcional =numTests= o no. Si no se rellenea o se rellena con un cero, la tarea utilizará todas las posibles combinaciones entre los dos vectores de entrada para evaluar al individuo. Si se rellena, se utilizarán =numTests= combinaciones aleatorias al probar cada individuo, lo cuál puede reducir mucho el tiempo de evaluación de cada individuo si el tamaño de los vectores =size= es muy grande (pues el número de combinaciones crece exponencialemente con éste).  El /tipo de neurona/ se le pasa para poder probar por separado redes similares con diferentes representaciones internas. Las interfaces de entrada (y la de salida) usarán el BufferType parámetro.
 
 - =virtual void test(Individual* individual) := Para cada combinación de entradas que se vaya a probar (ver constructor), se activa al individuo (que ya tiene que tener las interfaces internas establecidas como entradas) y se accede a una Interface de su última capa, se actualiza el valor de la interfaz de salida deseada de la tarea a partir de las mismas interfaces de entrada usando el método privado =doOperation= y compara las diferencias entre la salida calculada por el individuo y la salida deseada utilizando el método =compareTo= ya descrito. El /fitness/ que se le asigna al individuo es igual a la puntuación máxima que podría obtener con la configuración actual de la prueba menos las diferencias acumuladas de cada combinación de entradas.
 - =virtual void setInputs(Individual* individual) := Añade dos capas de entrada al individuo que apuntan a los interfaces internos de entrada.
 - =virtual string toString() := Devuelve un string que indica la operación y el tamaño de los vectores, por ejemplo, "XOR4".
 - =virtual Individual* getExample(ParametersMap* parameters) := Devuelve un individuo de ejemplo para resolver la operación dada
 
-**** HACER <<<ReversiTask>>>
+**** <<<ReversiTask>>>
 
-- =ReversiTask(unsigned size, unsigned numTests = 1) :=
+Implementa la tarea Reversi/Othello. Como todas las tareas, implementa los métodos virtuales públicos de la clase Task. A continuación se describe su constructor.
 
-- =virtual void test(Individual* individual) :=
-- =virtual void setInputs(Individual* individual) :=
-- =virtual std::string toString() :=
-- =virtual Individual* getExample(ParametersMap* parameters) :=
+- =ReversiTask(unsigned size, BufferType bufferType, unsigned numTests = 1) := Se inicializa la tarea reversi con un tablero cuadrado con lado =size= de la clase ReversiBoard. Como se explicó en esa clase, la Interface usará el BufferType parámetro.
 
-**** HACER <<<ClassificationTask>>>
+**** <<<ClassificationTask>>>
 
-- =ClassificationTask() :=
-- =ClassificationTask(Interface** inputs, Interface** desiredOutputs, unsigned inputsDim) :=
-- =virtual void test(Individual* individual) :=
-- =virtual Individual* getExample(ParametersMap* parameters) :=
-- =virtual string toString() :=
-*** REVISAR Loop
+Esta tarea, aunque no se ha usado para las pruebas, resuelve problemas de clasificación más genéricos a partir de un conjunto de entrenamiento. Este es el constructor:
+
+- =ClassificationTask(Interface** inputs, Interface** desiredOutputs, unsigned inputsDim) := Recibe un vector de interfaces de etrada, otro con sus  salidas deseadas correspondientes y el tamaño de ambos vectores. Evalúa a los individuos de forma inversa a las diferencias totales de todas las salidas deseadas con las producidas por la red neuronal.
+
+*** Loop
 #+LaTeX: \label{apiLoopPkg}
 
 A continueación se describen las utilidades de prueba genéricas descritas en la sección \ref{disenoLoop} del diseño. Para las más especializadas para la librería se encuentran en la siguiente sección, que describe el paquete *Loopers*.
@@ -2529,7 +2527,7 @@ Tiene un atributo =parameters= que contiene el el mapa de parámetros que se usa
 + =void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop, bool differentFiles) := Se le pasa un sólo una cadena de bucles y, por cada par de Loops en la cadena (un JoinEnumLoop se considera un par indivisible con todos sus hijos), se tiene un conjunto de curvas. Si el parámetro =differentFiles= es falso, el resto de Loops en la cadena se usarán para hacer la media. Si es verdadero, pro cada combinacióon con el resto de loops se generará una gráfica diferente.
 + =void plotCombinations(GenericPlotFunctionPtr yFunction, std::string title, Loop* linesLoop, Loop* averagesLoop, bool differentFiles) := Como el anterior pero incorpora una cadena de bucles adicional para hacer la media. Si differentFiles es falso se combinará con el resto de Loops para ahcer la media.
 
-*** REVISAR Loopers
+*** Loopers
 #+LaTeX: \label{apiLoopersPkg}
 
 Este paquete hace uso del paquete Loop para tareas concretas de la librería, en vez de para punteros a funciones genéricos.
@@ -2561,7 +2559,7 @@ Extiende a la clase Plot. Tiene la misma variedad de métodos de repetición que
 
 El Loop de rango con las generaciones se establece en el constructor, que también toma una ruta donde crear los ficheros generados. Ese rango puede tener un incremento diferente de 1, para no recoger tantos datos y obtener gráficas menos sobrecargadas.
 
-*** REVISAR Test
+*** Test
 
 El paquete Test contiene los ficheros que implementan programas ejecutables utilizando la librería.
 
@@ -2571,13 +2569,6 @@ Los que empiezan con "chrono" utilizan ChronoPlotter para generar gráficas sobr
 
 los que empiezan por "learn" utilizan TaskPlotter para generar gráficas sobre el aprendizaje en función del número de generaciones.
 
-\newpage
-
-** HACER [0/2] Extensibilidad a partir de interfaces
-#+LaTeX: \label{manualProgrInterf}
-*** HACER Nuevas paralelizaciones de redes neuronales
-#+LaTeX: \label{manualProgrInterfRed}
-*** HACER Nuevas tareas para ser aprendidas
 \newpage
 * MODIFICAR [1/3] Resultados: Rendimiento
 #+LaTeX: \label{rendimiento}
@@ -2973,6 +2964,8 @@ DirectMap4M:      892928 kB
 En esta sección se presentan los resultados en tiempo de ejecución de los métodos que se ejecutan de forma diferente con cada implementación. Todas las pruebas de la sección se han realizado con la máquina descrita en la sección \ref{rendMaqCUDA}.
 
 *** REVISAR Activación
+
+**** Tipos de neurona
 #+LaTeX: \label{rendImplActiv}
 
 En esta sección se miden los rendimientos de la activación para los diferentes /tipos de neurona/. Para esta prueba no se considera el tipo SIGN porque su implementación de la activación es siempre iténtica a la de BIT.
@@ -2988,8 +2981,7 @@ De la figura \ref{grafImplActivation} se extraen varias conclusiones. El rendimi
 
 Las versiones CUDA no presentan diferencias para los diferentes tamaños de bloques elegidos. Para éstas, sin embargo, es más rápida la activación FLOAT que la BIT, aunque ambas presentan tiempos buenos que crecen despacio con respecto al tamaño de la capa de salida a activar. De nuevo, el algoritmo se adaptó directamente de la versión float sin modificarlo sustancialmente, lo que se requeriría para un rendimiento óptimo. A partir de un tamaño de 2048, CUDA FLOAT es mejor que C y SSE2 FLOAT. La versión BIT de cuda sólo es peor que las otras implementaciones para un tamaño de 512.
 
-\newpage
-*** REVISAR Funciones de activación
+**** Funciones de activación
 
 Si en la figura \ref{grafImplActivation} se comparaba el rendimiento de los distintos tipos de neurona con la función de activación IDENTITY para FLOAT. En la figura \ref{grafImplActivationFunc}, sin embargo, se comparan los rendimientos de los distintos tipos de funciones para el tipo de neurona FLOAT. Con el tipo de neurona BIT, la función de activación siempre es BINARY_STEP y con el tipo SIGN la activación siempre es BIPOLAR_STEP, por ello podemos excluir estos tipos de neurona de esta gráfica (esas activaciones se mantienen, pero usando la implementación FLOAT internamente en vez de BIT o SIGN). Además, la implementación SSE2 de la activación para FLOAT es práctiacamente idéntica a la de C y como vimos en la gráfica \ref{grafImplActivation} produce los mismo resultados de rendimiento o muy parecidos, por lo que tampoco se muestran los resultados de la activación SSE2 en este caso. Se muestran, entonces, los diferentes funciones de activación para las neuronas FLOAT y para las implementaciones C y CUDA.
 
@@ -3012,22 +3004,12 @@ Los rendimientos de la implementación CUDA son todos muy buenos y casi constant
 Los tamaños de los bloques vuelven a ser poco importantes. Para CUDA las mejores activaciones son las mismas que para C, aunque la activación de salto binario es peor que la bipolar en este caso, dónde esta última está más cerca de la activación identidad. No hay tanta diferencia con el resto aquí como en las implementaciones C, pero la tangente hiperbólica es de nuevo la más lenta. En este caso hay una diferencia apreciable entre la sigmoide y la sigmoide bipolar, siendo la segunda más lenta.
 
 \newpage
-**** HACER Funciones de activación CUDA
-
-Simplemente un detalle de la anterior sin meter la implementación C
 *** MODIFICAR Acumulación de resultados
 #+LaTeX: \label{rendImplAcumulEnt}
 
-TODO cuando alcanzamos el máximo de la memoria del dispositivo se activa algún tipo de paginación.
-TODO las implementaciones de cuda producen resutados similares porque lo que antes no era coalescente ahora sí lo es.
-TODO las subidas y bajadas se evitarían con más repeticiones.
+Se realizan dos pruebas para esta función: una variando el tamaño de la capa de entrada y otra variando el de salida.
 
-**** en función de las entradas
-En la figura \ref{grafImplCalculateEnt}, puede apreciarse que la implementación con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a las demás. En ésta los tipos de Buffer BIT y SIGN (neuronas binarias y bipolares) obtienen tiempos similares al tipo FLOAT. 
-
-Las implementaciones CUDA obtienen resultados parecidos, aunque todas ellas obtienen peores tiempos para BIT y SIGN, esto se debe a que los pesos en estos casos son de un sólo byte y los algoritmos desarrollados están optimizados para accesos coalescentes a datos float de 4 bytes (la aruitectura CUDA está en general más preparada para este tipo de datos, aunque se podrían modificar los algoritmos BIT y SIGN para adaptarse mejor a la misma).
-
-Los tiempos de la implementación de referencia C para el tipo FLOAT se encuentran cercanos a los de las implementaciones CUDA para BIT y SIGN, es decir, no mucho peor que las implementaciones CUDA para float. Sin embargo, los peores tiempos de la gráfica son con mucha diferencia los de esta implementación para BIT y SIGN.
+**** MODIFICAR En función del tamaño de las entradas
 
 Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, variándolo de 100 en 100 desde 100 hasta 1000. La coordenada Y es el tiempo en milisegundos. Los pesos y otros valores se inicializaban aleatoriamente y pertenecientes al intervalo [-20, 20]. El tamaño de la capa de salida es 100 la mitad de las veces y 150 la otra mitad, haciendose la media. Se permutan los tipos de neuronas y los tipos de implementación para obtener cada curva. Cada combinación se repite 5000 veces para hacer la media y reducir el ruido.
 
@@ -3035,18 +3017,26 @@ Esta prueba se ha hecho usando el tamaño de las entradas como coordenada X, var
 #+LABEL:      grafImplCalculateEnt
 #+ATTR_LaTeX: width=\textwidth
 [[./img/impl_calculate_inputSize.png]]
-\newpage
 
-**** HACER Acumulación de resultados en función de las salidas
-#+LaTeX: \label{rendImplAcumulSal}
+En la figura \ref{grafImplCalculateEnt}, puede apreciarse que la implementación con instrucciones SSE2 de ensamblador para utilizar el coprocesador XMM es muy superior a las demás. En ésta los tipos de Buffer BIT y SIGN (neuronas binarias y bipolares) obtienen tiempos similares al tipo FLOAT. 
+
+Las implementaciones CUDA obtienen resultados parecidos, aunque todas ellas obtienen peores tiempos para BIT y SIGN, esto se debe a que los pesos en estos casos son de un sólo byte y los algoritmos desarrollados están optimizados para accesos coalescentes a datos float de 4 bytes (la aruitectura CUDA está en general más preparada para este tipo de datos, aunque se podrían modificar los algoritmos BIT y SIGN para adaptarse mejor a la misma).
+
+Los tiempos de la implementación de referencia C para el tipo FLOAT se encuentran cercanos a los de las implementaciones CUDA para BIT y SIGN, es decir, no mucho peor que las implementaciones CUDA para float. Sin embargo, los peores tiempos de la gráfica son con mucha diferencia los de esta implementación para BIT y SIGN.
+
+TODO las implementaciones de cuda producen resutados similares porque lo que antes no era coalescente ahora sí lo es.
+TODO las subidas y bajadas se evitarían con más repeticiones.
+
+**** HACER En función del tamaño de las salidas
 
 #+CAPTION:    Método de acumulación de resultados (Connection::calculateAndAddTo) variando el tamaño de la capa de salida.
 #+LABEL:      grafImplCalculateSal
 #+ATTR_LaTeX: width=\textwidth
 [[./img/impl_calculate_outputSize.png]]
+
+TODO cuando alcanzamos el máximo de la memoria del dispositivo se activa algún tipo de paginación.
+
 \newpage
-**** HACER Zoom CUDA con bloques ent
-**** HACER Zoom CUDA con bloques sal
 *** REVISAR Mapeos entre Interface y Buffer
 
 Estos métodos se usan para recibir entradas y sacar salidas al exterior de la red. Las interfaces sirven para independizar la red de la implementación concreta escogida. Cada implementación debe mapear correctamente desde la representación genérica (Interfaz) hacia su propia representación interna (figura \ref{grafImplCopyFrom}) de los datos y viversa (figura \ref{grafImplCopyTo}).
@@ -3452,7 +3442,6 @@ Como esquemas de selección se utilizan los operadores de truncado (se seleccion
 \newpage
 ** Comparación de distintos tamaños de población número de individuos conservados por generación
 
-\newpage
 \newpage
 * HACER Conclusiones
 #+LaTeX: \label{conclusiones}
