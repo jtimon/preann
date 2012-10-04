@@ -2,7 +2,7 @@
 
 * To render:
 ** M-x plantuml-render-buffer
-** java -jar ~/programas/jar/plantuml.jar "/home/jtimon/workspace/uml/examples.org"
+** java -jar ~/programas/jar/plantuml.jar "/home/jtimon/workspace/preann/doc/uml.org"
 ** M-x shell sh compile-doc.sh
 * HECHO Diagrama de componentes
 
@@ -414,7 +414,6 @@ class Factory {
     +{static} Buffer* newBuffer(FILE*, ImplementationType)
     +{static} void saveBuffer(Buffer*, FILE*)
     +{static} Connection* newConnection(Buffer* input, outputSize)
-    +{static} Connection* newConnection(FILE*, outputSize, ImplementationType)
 }
 class CppBuffer{
     #void _copyFrom(Interface*)
