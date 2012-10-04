@@ -1,0 +1,132 @@
+#+TITLE:     Aprendizaje por refuerzo mediante algoritmos genéticos de redes neuronales paralelizadas con GPGPU
+#+AUTHOR:    Jorge Timón
+#+EMAIL:     jtimonmv@gmail.com
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  es
+#+OPTIONS:   H:4 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc timestamp:nil <:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+
+#+startup: beamer
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [bigger]
+#+BEAMER_FRAME_LEVEL: 2
+
+#+LATEX_HEADER: \usepackage{hyperref}
+#+LATEX_HEADER: \hypersetup{
+#+LATEX_HEADER:     colorlinks,%
+#+LATEX_HEADER:     citecolor=green,%
+#+LATEX_HEADER:     filecolor=black,%
+#+LATEX_HEADER:     linkcolor=blue,%
+#+LATEX_HEADER:     urlcolor=blue
+#+LATEX_HEADER: }
+
+
+* Redes Neuronales Evolutivas
+** Redes neuronales
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 1
+    :END:
+**** Elementos de procesamiento: \textcolor{blue}{neuronas}
+**** Arendizaje ajustando \textcolor{blue}{pesos de conexiones}
+**** \textcolor[rgb]{0.2,0.6,0.2}{Aproximadores universales} de funciones
+**** Ideales para la \textcolor[rgb]{0.2,0.6,0.2}{construcción de agentes}
+**** Altamente \textcolor[rgb]{0.2,0.6,0.2}{paralelizables}
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.5
+    :END:
+**** Problemas de algoritmos de gradiente:
+***** \textcolor{red}{Mínimos locales}
+***** \textcolor{red}{Sin recurrencias}
+***** Funciones de activación y pesos \textcolor{red}{continuos}
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.5
+    :END:
+#+ATTR_LaTeX: width=5cm
+[[./img/400px-MultiLayerNeuralNetwork.png]]
+** Algoritmos genéticos
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.6
+    :END:
+**** \textcolor{blue}{Selección} de los más aptos
+**** _Variabilidad_:
+***** \textcolor{blue}{Cruce} de Individuos
+***** \textcolor{blue}{Mutación}
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.4
+    :END:
+#+ATTR_LaTeX: width=3cm
+ [[./img/Charles_Darwin_1881.jpg]] 
+\newline
+\small{Charles Darwin}
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 1
+    :END:
+**** \textcolor{blue}{Población}: \textcolor[rgb]{0.2,0.6,0.2}{diversidad} de puntos del espacio de búsqueda
+**** \textcolor[rgb]{0.2,0.6,0.2}{Paralelizable} por individuos
+**** Método de optimización \textcolor[rgb]{0.2,0.6,0.2}{independiente del problema}
+**** Codificación de cromosomas \textcolor{red}{dependiente del problema}
+** Redes neuronales evolutivas
+*** *Redes neuronales + algoritmos genéticos*
+*** \textcolor[rgb]{0.2,0.6,0.2}{Desaparecen} gran parte de los \textcolor[rgb]{0.2,0.6,0.2}{inconvenientes}
+*** Admiten \textcolor[rgb]{0.2,0.6,0.2}{recursividad} (tareas en el tiempo)
+*** Estructura neuronal \textcolor[rgb]{0.2,0.6,0.2}{ampliable durante entrenamiento}
+*** Se expande el \textcolor[rgb]{0.2,0.6,0.2}{domino de aplicación}:
+**** Reconocimiento de patrones en el tiempo (escritura contínua)
+**** Control automático
+**** Agentes inteligentes
+**** Vida artificial
+**** Etc.
+* Diseño
+** Redes neuronales genéricas
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.55
+    :END:
+**** Admite cualquier estructura (incluyendo recursividad)
+**** Paralelizable
+**** Diferentes tipos de neuronas
+**** Capas de distinto tipo compatibles
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.45
+    :END:
+#+ATTR_LaTeX: scale=0.2
+[[./img/uml/classNeural.png]]
+** Paralelización extensible
+#+ATTR_LaTeX: scale=0.25
+[[./img/uml/classFactory.png]]
+** Variedad de operadores genéricos
+** Tareas genéricas
+* Paralelizaciones
+** Registro XMM (Ensamblador SSE2)
+** GPGPU con CUDA de NVIDIA
+* Problemas resueltos
+** Clasificación
+** Reversi/Othello
+* Resultados
+** Rendimiento
+** Aprendizaje: activación
+** Aprendizaje: operadores
+* Conclusiones
+** Conclusiones
