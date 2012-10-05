@@ -27,9 +27,9 @@ int main(int argc, char *argv[])
     total.start();
     try {
         Util::check(argv[1] == NULL, "You must specify an output directory.");
-        TaskPlotter plotter(argv[1], new RangeLoop("Generation", 1, 150, 5));
+        TaskPlotter plotter(argv[1], new RangeLoop("Generation", 0, 50, 5));
 
-        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_SSE2);
+        plotter.parameters.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_C);
         plotter.parameters.putNumber(Dummy::WEIGHS_RANGE, 5);
         plotter.parameters.putNumber(Population::MUTATION_RANGE, 2);
 
@@ -44,39 +44,38 @@ int main(int argc, char *argv[])
         JoinEnumLoop linesLoop(ET_BUFFER);
         linesLoop.addEnumLoop(BT_BIT, NULL);
         linesLoop.addEnumLoop(BT_SIGN, NULL);
-        linesLoop.addEnumLoop(BT_FLOAT, new EnumLoop(ET_FUNCTION, 3, FT_BINARY_STEP, FT_BIPOLAR_STEP, FT_IDENTITY));
+        linesLoop.addEnumLoop(BT_FLOAT, new EnumLoop(ET_FUNCTION, 3, FT_IDENTITY, FT_BINARY_STEP, FT_BIPOLAR_STEP));
+        linesLoop.addEnumLoop(BT_FLOAT_SMALL, new EnumLoop(ET_FUNCTION, 3, FT_IDENTITY, FT_BINARY_STEP, FT_BIPOLAR_STEP));
 //        EnumLoop linesLoop(ET_BUFFER, 3, BT_BIT, BT_SIGN, BT_FLOAT);
-//        linesLoop.addInnerLoop(new RangeLoop(Dummy::NUM_TESTS, 0, 4, 1));
 
-        EnumLoop averageLoop(ET_CROSS_LEVEL);
-//        averageLoop.addInnerLoop(new RangeLoop(Population::SIZE, 400, 501, 100));
+        EnumLoop averageLoop(ET_CROSS_LEVEL, 4, CL_WEIGH, CL_NEURON, CL_NEURON_INVERTED, CL_LAYER);
+//        averageLoop.addInnerLoop(new RangeLoop("repetitions", 0, 5, 1));
 
         JoinEnumLoop* selectionLoop = new JoinEnumLoop(ET_SELECTION_ALGORITHM);
         selectionLoop->addEnumLoop(SA_ROULETTE_WHEEL, NULL);
         selectionLoop->addEnumLoop(SA_RANKING, NULL);
-        selectionLoop->addEnumLoop(SA_TOURNAMENT, new RangeLoop(Population::TOURNAMENT_SIZE, 2, 5, 4));
+        selectionLoop->addEnumLoop(SA_TOURNAMENT, new RangeLoop(Population::TOURNAMENT_SIZE, 3, 5, 3));
         selectionLoop->addEnumLoop(SA_TRUNCATION, NULL);
         averageLoop.addInnerLoop(selectionLoop);
 
         JoinEnumLoop* crossAlgLoop = new JoinEnumLoop(ET_CROSS_ALG);
-        crossAlgLoop->addEnumLoop(CA_UNIFORM, new RangeLoop(Population::UNIFORM_CROSS_PROB, 0.2, 0.5, 0.2));
-        crossAlgLoop->addEnumLoop(CA_MULTIPOINT, new RangeLoop(Population::MULTIPOINT_NUM, 1, 10, 5));
+        crossAlgLoop->addEnumLoop(CA_UNIFORM, new RangeLoop(Population::UNIFORM_CROSS_PROB, 0.1, 0.2, 0.2));
+        crossAlgLoop->addEnumLoop(CA_MULTIPOINT, new RangeLoop(Population::MULTIPOINT_NUM, 2, 10, 15));
         crossAlgLoop->addEnumLoop(CA_PROPORTIONAL, NULL);
         averageLoop.addInnerLoop(crossAlgLoop);
 
         JoinEnumLoop* mutationLoop = new JoinEnumLoop(ET_MUTATION_ALG);
         mutationLoop->addEnumLoop(MA_DISABLED, NULL);
-        mutationLoop->addEnumLoop(MA_PER_INDIVIDUAL, new RangeLoop(Population::MUTATION_NUM, 1, 6, 1));
-        mutationLoop->addEnumLoop(MA_PROBABILISTIC, new RangeLoop(Population::MUTATION_PROB, 0.05, 0.30, 0.05));
+        mutationLoop->addEnumLoop(MA_PER_INDIVIDUAL, new RangeLoop(Population::MUTATION_NUM, 2, 3, 2));
+        mutationLoop->addEnumLoop(MA_PROBABILISTIC, new RangeLoop(Population::MUTATION_PROB, 0.05, 0.30, 0.35));
         averageLoop.addInnerLoop(mutationLoop);
 
 
-        plotter.parameters.putNumber(Dummy::SIZE, 2);
-        plotter.parameters.putNumber(Dummy::NUM_TESTS, 0);
-        EnumLoop filesLoop(ET_TEST_TASKS, 3, TT_BIN_OR, TT_BIN_AND, TT_BIN_XOR);
-//        EnumLoop filesLoop(ET_TEST_TASKS, 1, TT_BIN_XOR);
-
-        plotter.plotTaskFilesAveraged("BufferTypes", &linesLoop, &filesLoop, &averageLoop);
+//        plotter.parameters.putNumber(Dummy::SIZE, 2);
+//        plotter.parameters.putNumber(Dummy::NUM_TESTS, 0);
+//        EnumLoop filesLoop(ET_TEST_TASKS, 3, TT_BIN_OR, TT_BIN_AND, TT_BIN_XOR);
+//
+//        plotter.plotTaskFilesAveraged("BufferTypes", &linesLoop, &filesLoop, &averageLoop);
 
         plotter.parameters.putNumber(Dummy::SIZE, 6);
         plotter.parameters.putNumber(Dummy::NUM_TESTS, 2);
