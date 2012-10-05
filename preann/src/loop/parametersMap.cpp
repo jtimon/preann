@@ -70,6 +70,7 @@ std::string ParametersMap::printString(std::string key)
 
 void ParametersMap::print()
 {
+    cout << "Printing ParametersMap" << endl;
     if (tNumbers.size() > 0) {
         cout << "Numbers:" << endl;
         std::map<string, float>::iterator numbersIt;
