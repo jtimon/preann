@@ -27,6 +27,7 @@
 #+LATEX_HEADER:     urlcolor=blue
 #+LATEX_HEADER: }
 
+#+TODO: TODO MODIFICAR COLORINES IMAGEN | DESMARCAR
 
 * Redes Neuronales Evolutivas
 ** Redes neuronales
@@ -74,7 +75,7 @@
 #+ATTR_LaTeX: width=3cm
  [[./img/Charles_Darwin_1881.jpg]] 
 \newline
-\small{Charles Darwin}
+\footnotesize{Charles Darwin}
 *** 												  :B_ignoreheading:BMCOL:
     :PROPERTIES:
     :BEAMER_env: ignoreheading
@@ -96,37 +97,199 @@
 **** Vida artificial
 **** Etc.
 * Diseño
-** Redes neuronales genéricas
+** Redes neuronales \textcolor[rgb]{0.2,0.6,0.2}{genéricas}
 *** 												  :B_ignoreheading:BMCOL:
     :PROPERTIES:
     :BEAMER_env: ignoreheading
-    :BEAMER_col: 0.55
+    :BEAMER_col: 0.58
     :END:
-**** Admite cualquier estructura (incluyendo recursividad)
-**** Paralelizable
-**** Diferentes tipos de neuronas
-**** Capas de distinto tipo compatibles
+**** Admite *cualquier estructura* (incluyendo \textcolor[rgb]{0.2,0.6,0.2}{recursividad})
+**** \textcolor[rgb]{0.2,0.6,0.2}{Paralelizable}
+**** Diferentes \textcolor{blue}{tipos de neuronas}
+**** Capas de distinto tipo \textcolor{blue}{compatibles}
 *** 												  :B_ignoreheading:BMCOL:
     :PROPERTIES:
     :BEAMER_env: ignoreheading
-    :BEAMER_col: 0.45
+    :BEAMER_col: 0.42
     :END:
 #+ATTR_LaTeX: scale=0.2
 [[./img/uml/classNeural.png]]
-** Paralelización extensible
-#+ATTR_LaTeX: scale=0.25
-[[./img/uml/classFactory.png]]
 ** Variedad de operadores genéricos
-** Tareas genéricas
+*** 												  :B_ignoreheading:BMCOL:
+	:PROPERTIES:
+	:BEAMER_env: ignoreheading
+	:BEAMER_col: 0.5
+	:END:
+**** \textcolor{blue}{Preservación} de individuos antiguos \textcolor[rgb]{0.2,0.6,0.2}{parametrizable}
+**** Operadores de \textcolor{blue}{selección} (\textcolor[rgb]{0.2,0.6,0.2}{4}): Ruleta, Ranking (2 params), Torneo (1 param), Elitista
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.5
+    :END:
+**** Operadores de \textcolor{blue}{cruce} (\textcolor[rgb]{0.2,0.6,0.2}{3}): Uniforme(1 param), Proporcional, Multipunto(1 param)
+**** Niveles de \textcolor{blue}{cruce} (\textcolor[rgb]{0.2,0.6,0.2}{4}): Pesos, Neurona, Neurona invertida, Capa
+**** \textcolor{blue}{Mutación} y \textcolor[rgb]{0.2,0.6,0.2}{olvido} (\textcolor[rgb]{0.2,0.6,0.2}{2}x\textcolor[rgb]{0.2,0.6,0.2}{2}): Probabilística(1 param), Determinista(1 param)
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 1
+    :END:
+**** \center{\bfseries{Todas las combinaciones}}
 * Paralelizaciones
+** Paralelización extensible
+\center
+ #+ATTR_LaTeX: scale=0.15
+[[./img/uml/classFactory.png]]
+
+*** Interfaz \textcolor[rgb]{0.2,0.6,0.2}{unificada} y \textcolor[rgb]{0.2,0.6,0.2}{reducida}
+*** Se agrupan \textcolor{blue}{conexiones} entre capas \textcolor{blue}{capas}
 ** Registro XMM (Ensamblador SSE2)
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 1
+    :END:
+**** Computación \textcolor{blue}{vectorial}
+**** SIMD: Single Instruction \textcolor{blue}{Multiple Data}
+**** Presente en nuevos \textcolor{blue}{x86} (mejora de MMX)
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 1
+    :END:
+#+ATTR_LaTeX: width=\textwidth
+[[./img/XMMregisters.jpg]]
 ** GPGPU con CUDA de NVIDIA
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.5
+    :END:
+**** \textcolor{blue}{GPGPU}: General Purpose Graphic Processing Unit
+**** SIMT: Single Instruction \textcolor{blue}{Multiple Thread}
+**** C CUDA (Lenguaje de \textcolor{blue}{alto nivel})
+**** \textcolor{blue}{Escalabilidad Automática} entre disposistivos
+**** \textcolor{blue}{Memoria Compartida} entre hilos de mismo bloque
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.5
+    :END:
+#+ATTR_LaTeX: scale=0.3
+[[./img/arqCUDAdetalle.jpg]]
 * Problemas resueltos
+** Tareas genéricas
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.3
+    :END:
+**** \textcolor{blue}{Minimizar} métodos a implementar
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.7
+    :END:
+#+ATTR_LaTeX: scale=0.17
+[[./img/uml/classTasks.png]]
 ** Clasificación
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.4
+    :END:
+**** Tarea de clasificación \textcolor{orange}{genérica}
+**** \textcolor{blue}{Operaciones lógicas} entre vectores binarios: OR, AND, XOR
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.6
+    :END:
+#+ATTR_LaTeX: scale=0.5
+[[./img/nn04_mlp_xor_03.png]]
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 1
+    :END:
+**** Vectores de \textcolor{blue}{dimensión} N
+**** Todas las combinaciones o pruebas aleatorias
 ** Reversi/Othello
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.6
+    :END:
+**** \textcolor{blue}{Juego de estratégia} abstracto por turnos
+**** Fácil programar \textcolor{blue}{adversario} sin aprendizaje
+**** Estado del tablero similar a *Go*
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.4
+    :END:
+#+begin_src C
+ . X X O . . . .
+ . . X O . O . .
+ . O O X O . X .
+ . . . O X X . .
+ . . X O X X . .
+ . . X X . O . .
+ . . X . . . . .
+ . . . . . . . .
+#+end_src
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 1
+    :END:
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.4
+    :END:
+#+ATTR_LaTeX: scale=0.4
+[[./img/300px-FloorGoban.JPG]]
+*** 												  :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.6
+    :END:
+**** La red neuronal recibe tableros posibles y \textcolor{blue}{devuelve heurística}
+**** Combinable con \textcolor{orange}{poda alfa-beta}
 * Resultados
 ** Rendimiento
+#+ATTR_LaTeX: width=\textwidth
+[[./img/output/impl_calculate_inputSize.png]]
 ** Aprendizaje: activación
+#+ATTR_LaTeX: width=\textwidth
+[[./img/output/BufferTypes_AND.png]]
 ** Aprendizaje: operadores
+#+ATTR_LaTeX: width=\textwidth
+[[./img/output/Reset_XOR.png]]
 * Conclusiones
 ** Conclusiones
+*** Paralelización: tamaño de capas -> \textcolor[rgb]{0.2,0.6,0.2}{reducción de tiempos}
+*** Activación: efecto \textcolor{blue}{poco importante}
+*** Pesos pequeños: se \textcolor{red}{pierde sensibilidad} en las mutaciones
+*** \textcolor{orange}{Representación de entradas} puede ser importante
+*** \textcolor{blue}{Presión selectiva} dependiente del problema
+*** Algoritmo de cruce poco importante
+*** Genes: \textcolor[rgb]{0.2,0.6,0.2}{pesos} y \textcolor[rgb]{0.2,0.6,0.2}{neuronas} (no merece la pena invertirlas)
+*** \textcolor{blue}{Variabilidad por mutaciones} dependiente del problema
+*** \textcolor[rgb]{0.2,0.6,0.2}{Operador de olvido} efectivo
+** Posibles mejoras
+*** Más \textcolor{blue}{problemas}:
+**** Clasificación con imágenes hiperespectrales
+**** Procesamiento de imagenes
+**** Go
+**** Robótica
+**** Agentes colaborativos ¿con comunicación?
+**** Etc.
+*** Más \textcolor{blue}{paralelizaciones}: openCL, openMP, openACC...
+*** Paralelización Algoritmos genético: 1 core de CPU por Individuo, varias \textcolor{blue}{GPUs}
+*** \textcolor{blue}{Integración} con PyBrain?
+*** Más \textcolor{blue}{tipos de neuronas} y/o pesos: Double, Byte...
+** Preguntas
+\center{\Huge{¿?}}
