@@ -21,7 +21,6 @@ protected:
 
     bool bitVectorIncrement(Interface* bitVector);
     unsigned outputDiff(Interface* individualOutput);
-    virtual float getGoal();
     virtual void doOperation();
 public:
     BinaryTask(BinaryOperation binaryOperation, BufferType bufferType, unsigned size, unsigned numTests = 0);
@@ -31,6 +30,7 @@ public:
     virtual void setInputs(Individual* individual);
     virtual string toString();
     virtual Individual* getExample(ParametersMap* parameters);
+    virtual float getGoal();
 
 };
 

@@ -9,9 +9,10 @@
 
 BinaryTask::BinaryTask(BinaryOperation binaryOperation, BufferType bufferType, unsigned size, unsigned numTests)
 {
+//    Util::check(numTests == 0 && bufferType == BT_SIGN, "BinaryTask::bitVectorIncrement won't work for SIGN, numTests cannot be zero.");
+
     tBinaryOperation = binaryOperation;
     tNumTests = numTests;
-    //TODO probar esto otra vez con diferentes buffertypes. Pensar bien el caso SIGN
     tInput1 = new Interface(size, bufferType);
     tInput2 = new Interface(size, bufferType);
     tOutput = new Interface(size, bufferType);
@@ -53,9 +54,9 @@ void BinaryTask::setInputs(Individual* individual)
 float BinaryTask::getGoal()
 {
     if (tNumTests == 0) {
-        return pow(2, tInput1->getSize()) * pow(2, tInput2->getSize()) * tOutput->getSize();
+        return 1 + (pow(2, tInput1->getSize()) * pow(2, tInput2->getSize()) * tOutput->getSize());
     } else {
-        return tOutput->getSize() * tNumTests;
+        return 1 + (tOutput->getSize() * tNumTests);
     }
 }
 
@@ -99,8 +100,11 @@ void BinaryTask::test(Individual *individual)
     } else {
 
         for (unsigned i = 0; i < tNumTests; ++i) {
-            tInput1->random(1);
-            tInput2->random(1);
+            Interface interf(tInput1->getSize(), BT_BIT);
+            interf.random(1);
+            tInput1->copyFrom(&interf);
+            interf.random(1);
+            tInput2->copyFrom(&interf);
 
             doOperation();
             individual->calculateOutput();
@@ -108,7 +112,7 @@ void BinaryTask::test(Individual *individual)
         }
     }
 //    cout << " Goal " << getGoal() << " Fitness " << points << endl;
-    individual->setFitness(points);
+    individual->setFitness(points + 1);
 }
 
 void BinaryTask::doOperation()
@@ -147,6 +151,7 @@ Individual* BinaryTask::getExample(ParametersMap* parameters)
         bufferType = (BufferType) parameters->getNumber(Enumerations::enumTypeToString(ET_BUFFER));
     } catch (string& e) {
         bufferType = BT_BIT;
+        cout << "BinaryTask::getExample : Warning, no BufferType defined in the ParametersMap. BufferType set to BIT." << endl;
     }
     ImplementationType implementationType;
     try {
@@ -154,12 +159,14 @@ Individual* BinaryTask::getExample(ParametersMap* parameters)
                 Enumerations::enumTypeToString(ET_IMPLEMENTATION));
     } catch (string& e) {
         implementationType = IT_C;
+        cout << "BinaryTask::getExample : Warning, no ImplementationType defined in the ParametersMap. ImplementationType set to C." << endl;
     }
     FunctionType functionType;
     try {
         functionType = (FunctionType) parameters->getNumber(Enumerations::enumTypeToString(ET_FUNCTION));
     } catch (string& e) {
         functionType = FT_IDENTITY;
+        cout << "BinaryTask::getExample : Warning, no FunctionType defined in the ParametersMap. FunctionType set to IDENTITY." << endl;
     }
     Individual* example = new Individual(implementationType);
     this->setInputs(example);
