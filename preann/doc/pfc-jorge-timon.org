@@ -353,7 +353,7 @@ En este capítulo se deciden los objetivos específicos del proyecto.
 
 Se tratan las especificaciones formales de la librería a implementar. Se especifican los [[experimentacion][problemas]] que el algoritmo debe resolver utilizando la librería, pero no se describen y discuten en esta sección. Se resolverán tareas con entrenamiento [[experimentacionClasif][supervisado]] y [[experimentacionJuegos][por refuerzo]]. 
 
-También se analizan las cuestiones técnicas y teóricas que se pretenden resolver en la sección de [[anaObjetivos][objetivos]]. Estas cuestiones determinarán la naturaleza de las empíricas realizadas, cuyos resultados se muestran por separado en un capitulo para el [[rendimiento]] y otro para el [[aprendizaje]]; y se discuten en las [[conclusiones][conclusiones]].
+También se analizan las cuestiones técnicas y teóricas que se pretenden resolver en la sección de [[anaObjetivos][objetivos]]. Estas cuestiones determinarán la naturaleza de las empíricas realizadas, cuyos resultados se muestran por separado en el capitulo \ref{resultados} para el [[rendImpl][rendimiento]] y el [[aprendizaje]]; y se discuten en las [[conclusiones][conclusiones]].
 
 ** Especificaciones de la librería a implementar
 #+LaTeX: \label{anaEspecLib}
@@ -2308,6 +2308,7 @@ Cuenta con dos clases:
 + <<<CppConnection>>> : Hereda de la clase abstracta Connection y de la clase CppBuffer. Implementa los métodos virtuales puros protegidos: =void _calculateAndAddTo(Buffer* results)=, =void _activation(Buffer* output, FunctionType funcType)=, =void _crossover(Buffer* other, Interface* bitBuffer)=, =void _mutateWeigh(unsigned pos, float mutation)= y =void _resetWeigh( unsigned pos)=.
 
 **** SSE2
+#+LaTeX: \label{apiSSE2}
 
 El paquete externo *SSE2* que utiliza el registro XMM descrito en la sección \ref{disenoParalXMM} declara sus funciones en el fichero sse2.h, y las define en los ficheros =sse2_float.asm=, =sse2_bit.asm= y =sse2_sign.asm= las siguientes fuciones respectivamente:
 
@@ -2324,6 +2325,7 @@ El paquete factoría cuenta con dos clases que dependen del paquete externo *SSE
 + <<<XmmConnection>>> : Hereda de la clase abstracta Connection y de la clase XmmBuffer. Implementa los métodos virtuales puros protegidos: =void _calculateAndAddTo(Buffer* results)=, =void _activation(Buffer* output, FunctionType funcType)=, =void _crossover(Buffer* other, Interface* bitBuffer)=, =void _mutateWeigh(unsigned pos, float mutation)= y =void _resetWeigh(unsigned pos)=.
 
 **** CUDA
+#+LaTeX: \label{apiCUDA}
 
 El paquete externo *CUDA* utiliza la arquitectura GPGPU con el lenguaje de NVIDIA C CUDA como se comentó en la sección \ref{disenoParalCUDA}. Declara sus funciones en el fichero cuda.h, y las implementa en los ficheros activation.cu, basic.cu, calcInvertedMatrix.cu, calcOutputs.cu, calcReduction.cu, calcReduction0.cu y genetic.cu.
 
@@ -2581,6 +2583,7 @@ los que empiezan por "learn" utilizan TaskPlotter para generar gráficas sobre e
 
 \newpage
 * Resultados
+#+LaTeX: \label{resultados}
 ** Características técnicas de la máquinas utilizadas
 #+LaTeX: \label{rendMaq}
 
@@ -2650,7 +2653,7 @@ Las versiones CUDA no presentan diferencias para los diferentes tamaños de bloq
 **** Funciones de activación
 #+LaTeX: \label{rendImplFunc}
 
-Si en la figura \ref{grafImplActivation} se comparaba el rendimiento de los distintos tipos de neurona con la función de activación =IDENTITY= para =FLOAT=. En la figura \ref{grafImplActivationFunc}, sin embargo, se comparan los rendimientos de los distintos tipos de funciones para el tipo de neurona =FLOAT=. Con el tipo de neurona =BIT=, la función de activación siempre es BINARY_STEP y con el tipo =SIGN= la activación siempre es BIPOLAR_STEP, por ello podemos excluir estos tipos de neurona de esta gráfica (esas activaciones se mantienen, pero usando la implementación =FLOAT= internamente en vez de =BIT= o =SIGN=). Además, la implementación SSE2 de la activación para =FLOAT= es práctiacamente idéntica a la de C y como vimos en la gráfica \ref{grafImplActivation} produce los mismo resultados de rendimiento o muy parecidos, por lo que tampoco se muestran los resultados de la activación SSE2 en este caso. Se muestran, entonces, los diferentes funciones de activación para las neuronas =FLOAT= y para las implementaciones C y CUDA.
+Si en la figura \ref{grafImplActivation} se comparaba el rendimiento de los distintos tipos de neurona con la función de activación =IDENTITY= para =FLOAT=. En la figura \ref{grafImplActivFunc}, sin embargo, se comparan los rendimientos de los distintos tipos de funciones para el tipo de neurona =FLOAT=. Con el tipo de neurona =BIT=, la función de activación siempre es BINARY_STEP y con el tipo =SIGN= la activación siempre es BIPOLAR_STEP, por ello podemos excluir estos tipos de neurona de esta gráfica (esas activaciones se mantienen, pero usando la implementación =FLOAT= internamente en vez de =BIT= o =SIGN=). Además, la implementación SSE2 de la activación para =FLOAT= es práctiacamente idéntica a la de C y como vimos en la gráfica \ref{grafImplActivation} produce los mismo resultados de rendimiento o muy parecidos, por lo que tampoco se muestran los resultados de la activación SSE2 en este caso. Se muestran, entonces, los diferentes funciones de activación para las neuronas =FLOAT= y para las implementaciones C y CUDA.
 
 Esta prueba se ha realizado con las mismas configuraciones que la de la sección anterior pero construyendo las lineas a partir de las combinaciones de las todas las funciones de activación implementadas con la implementaciones C y CUDA.
 
