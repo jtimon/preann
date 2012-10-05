@@ -15,7 +15,6 @@ class ReversiTask : public Task
 {
     ReversiBoard* tBoard;
     unsigned tNumTests;
-    virtual float getGoal();
 public:
     ReversiTask(unsigned size, BufferType bufferType, unsigned numTests = 1);
     virtual ~ReversiTask();
@@ -24,6 +23,7 @@ public:
     virtual void setInputs(Individual* individual);
     virtual std::string toString();
     virtual Individual* getExample(ParametersMap* parameters);
+    virtual float getGoal();
 };
 
 #endif /* REVERSITASK_H_ */

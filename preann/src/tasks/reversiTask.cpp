@@ -20,11 +20,12 @@ ReversiTask::~ReversiTask()
 
 float ReversiTask::getGoal()
 {
-    return tNumTests * tBoard->getSize() * tBoard->getSize();
+    return (tNumTests * tBoard->getSize() * tBoard->getSize()) * 1.5;
 }
 
 void ReversiTask::test(Individual* individual)
 {
+    unsigned maxPoints = tBoard->getSize() * tBoard->getSize();
     float fitness = 0;
     for (unsigned i = 0; i < tNumTests; ++i) {
 
@@ -48,12 +49,13 @@ void ReversiTask::test(Individual* individual)
                 }
             }
             turn = Board::opponent(turn);
+//            tBoard->print();
         }
-        fitness += tBoard->countPoints(individualPlayer);
+        fitness += tBoard->countPoints(individualPlayer) + maxPoints;
 //        tBoard->print();
 //        cout << " points " << tBoard->countPoints(individualPlayer) << endl;
     }
-    individual->setFitness(fitness);
+    individual->setFitness(fitness/tNumTests);
 //    cout << "fitness " << fitness << endl;
 }
 
