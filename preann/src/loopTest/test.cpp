@@ -48,21 +48,21 @@ unsigned Test::assertEqualsInterfaces(Interface* expected, Interface* actual)
 
 unsigned Test::assertEquals(Buffer* expected, Buffer* actual)
 {
-    if (expected->getBufferType() != actual->getBufferType()) {
-        throw "The buffers are not even of the same type!";
+    if (expected->getBufferType() != actual->getBufferType()){
+        cout << "Test::assertEquals : The buffers are not of the same type." <<endl;
     }
-    if (expected->getSize() != actual->getSize()) {
-        throw "The buffers are not even of the same size!";
-    }
+    Util::check(expected->getSize() != actual->getSize(),
+                "Test::assertEquals : The buffers must have the same size.");
 
     unsigned differencesCounter = 0;
     Interface* expectedInt = expected->toInterface();
     Interface* actualInt = actual->toInterface();
 
     for (unsigned i = 0; i < expectedInt->getSize(); i++) {
-        if (!areEqual(expectedInt->getElement(i), actualInt->getElement(i), expectedInt->getBufferType())) {
-            printf("The buffers are not equal at the position %d (expected = %f actual %f).\n", i,
-                   expectedInt->getElement(i), actualInt->getElement(i));
+        float expectedVal = expectedInt->getElement(i);
+        float actualVal = actualInt->getElement(i);
+        if (!areEqual(expectedVal, actualVal, expectedInt->getBufferType())) {
+            printf("The buffers are not equal at the position %d (expected = %f actual %f).\n", i, expectedVal, actualVal);
             ++differencesCounter;
         }
     }
