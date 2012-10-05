@@ -21,6 +21,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                                 "CppConnection::_calculateAndAddTo is not implemented for BufferType BYTE as input.";
                         throw error;
                     }
+
                 case BT_FLOAT:
                     {
                         float* inputWeighs = (float*) this->getDataPointer();
@@ -28,6 +29,18 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                         for (unsigned j = 0; j < resultsVect->getSize(); j++) {
                             for (unsigned k = 0; k < inputSize; k++) {
                                 results[j] += inputPtr[k] * inputWeighs[(j * inputSize) + k];
+                            }
+                        }
+                    }
+                    break;
+                case BT_FLOAT_SMALL:
+                    {
+                        unsigned char* inputWeighs = (unsigned char*) this->getDataPointer();
+                        float* inputPtr = (float*) tInput->getDataPointer();
+                        for (unsigned j = 0; j < resultsVect->getSize(); j++) {
+                            for (unsigned k = 0; k < inputSize; k++) {
+                                unsigned weighPos = (j * inputSize) + k;
+                                results[j] += inputPtr[k] * ((int)inputWeighs[weighPos] - 128);
                             }
                         }
                     }
@@ -68,6 +81,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                     }
                     break;
                 case BT_FLOAT:
+                case BT_FLOAT_SMALL:
                     {
                         float* outputData = (float*) output->getDataPointer();
                         for (unsigned i = 0; i < tSize; i++) {
@@ -102,11 +116,12 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         virtual void _crossover(Buffer* other, Interface* bitBuffer)
         {
             switch (bufferTypeTempl) {
+                case BT_FLOAT_SMALL:
                 case BT_BIT:
                 case BT_SIGN:
                     {
                         std::string error =
-                                "CppBuffer::_crossover is not implemented for BufferType BIT nor SIGN.";
+                                "CppConnection::_crossover is not implemented for BufferType BIT, SIGN nor FLOAT_SMALL.";
                         throw error;
                     }
                 default:
@@ -146,6 +161,12 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                 case BT_FLOAT:
                     ((c_typeTempl*) data)[pos] += mutation;
                     break;
+                case BT_FLOAT_SMALL:
+                    {
+                        std::string error =
+                                "CppConnection::_mutateWeigh is not implemented for BufferType FLOAT_SMALL.";
+                        throw error;
+                    }
                 case BT_BIT:
                 case BT_SIGN:
                     {
@@ -167,6 +188,12 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                 case BT_FLOAT:
                     ((c_typeTempl*) data)[pos] = 0;
                     break;
+                case BT_FLOAT_SMALL:
+                    {
+                        std::string error =
+                                "CppConnection::_resetWeigh is not implemented for BufferType FLOAT_SMALL.";
+                        throw error;
+                    }
                 case BT_BIT:
                 case BT_SIGN:
                     {

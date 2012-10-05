@@ -121,6 +121,8 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
         }
         XmmBuffer(unsigned size)
         {
+            Util::check(bufferTypeTempl == BT_FLOAT_SMALL, "BufferType FLOAT_SMALL is not allowed for XmmBuffer");
+
             tSize = size;
 
             size_t byteSize = getByteSize(size);

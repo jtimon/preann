@@ -169,6 +169,8 @@ std::string Enumerations::bufferTypeToString(unsigned bufferType)
             return "SIGN";
         case BT_BYTE:
             return "BYTE";
+        case BT_FLOAT_SMALL:
+            return "FLOAT_SMALL";
     }
     string error = " Enumerations::bufferTypeToString BufferType not found";
     throw error;

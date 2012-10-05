@@ -48,6 +48,7 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
 
         CudaBuffer(unsigned size)
         {
+            Util::check(bufferTypeTempl == BT_FLOAT_SMALL, "BufferType FLOAT_SMALL is not allowed for CudaBuffer");
             this->tSize = size;
 
             unsigned byte_sz = getByteSize();

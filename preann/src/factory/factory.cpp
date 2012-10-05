@@ -37,17 +37,15 @@ Buffer* Factory::newBuffer(unsigned size, BufferType bufferType,
 {
     switch (bufferType) {
         case BT_FLOAT:
-            return func_newBuffer<BT_FLOAT, FLOAT_STORAGE> (size,
-                    implementationType);
+            return func_newBuffer<BT_FLOAT, FLOAT_STORAGE> (size, implementationType);
+        case BT_FLOAT_SMALL:
+            return func_newBuffer<BT_FLOAT_SMALL, FLOAT_STORAGE> (size, implementationType);
         case BT_BYTE:
-            return func_newBuffer<BT_BYTE, BYTE_STORAGE> (size,
-                    implementationType);
+            return func_newBuffer<BT_BYTE, BYTE_STORAGE> (size, implementationType);
         case BT_BIT:
-            return func_newBuffer<BT_BIT, BIT_STORAGE> (size,
-                    implementationType);
+            return func_newBuffer<BT_BIT, BIT_STORAGE> (size, implementationType);
         case BT_SIGN:
-            return func_newBuffer<BT_SIGN, SIGN_STORAGE> (size,
-                    implementationType);
+            return func_newBuffer<BT_SIGN, SIGN_STORAGE> (size, implementationType);
     }
 }
 
@@ -62,6 +60,8 @@ BufferType Factory::weighForInput(BufferType inputType)
             }
         case BT_FLOAT:
             return BT_FLOAT;
+
+        case BT_FLOAT_SMALL:
         case BT_BIT:
         case BT_SIGN:
             return BT_BYTE;

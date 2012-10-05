@@ -13,6 +13,7 @@ void Interface::reset()
 {
     switch (bufferType) {
         case BT_FLOAT:
+        case BT_FLOAT_SMALL:
             for (unsigned i = 0; i < size; i++) {
                 ((float*) (data))[i] = 0;
             }
@@ -64,6 +65,7 @@ unsigned Interface::getByteSize()
         case BT_BYTE:
             return size;
         case BT_FLOAT:
+        case BT_FLOAT_SMALL:
             return size * sizeof(float);
         case BT_BIT:
         case BT_SIGN:
@@ -92,6 +94,7 @@ float Interface::getElement(unsigned pos)
         case BT_BYTE:
             return ((unsigned char*) data)[pos];
         case BT_FLOAT:
+        case BT_FLOAT_SMALL:
             return ((float*) data)[pos];
         case BT_BIT:
         case BT_SIGN:
@@ -119,6 +122,7 @@ void Interface::setElement(unsigned pos, float value)
             ((unsigned char*) data)[pos] = (unsigned char) value;
             break;
         case BT_FLOAT:
+        case BT_FLOAT_SMALL:
             ((float*) data)[pos] = value;
             break;
         case BT_BIT:
@@ -171,6 +175,7 @@ void Interface::random(float range)
             }
             break;
         case BT_FLOAT:
+        case BT_FLOAT_SMALL:
             for (unsigned i = 0; i < size; i++) {
                 setElement(i, Random::floatNum(range));
             }
@@ -218,6 +223,7 @@ void Interface::print()
                 printf("%d ", (int) ((unsigned char) getElement(i) - 128));
                 break;
             case BT_FLOAT:
+            case BT_FLOAT_SMALL:
                 printf("%f ", getElement(i));
                 break;
             case BT_BIT:
