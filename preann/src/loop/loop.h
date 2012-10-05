@@ -113,8 +113,9 @@ public:
             tCallerLoop = callerLoop;
             __executeImpl();
         } catch (string& e) {
-            cout << " while executing " + tLabel + " at state " + tCallerLoop->getState(true) << " : ";
+            cout << "Exception captured while executing " + tLabel + " at state " + tCallerLoop->getState(true) << " : ";
             cout << endl << e << endl;
+//            tParameters->print();
         }
         ++tLeaf;
     }
