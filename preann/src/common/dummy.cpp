@@ -143,20 +143,19 @@ Task* Dummy::task(ParametersMap* parametersMap)
     BufferType bufferType = (BufferType) (parametersMap->getNumber(Enumerations::enumTypeToString(ET_BUFFER)));
     TestTask testTask = (TestTask) parametersMap->getNumber(Enumerations::enumTypeToString(ET_TEST_TASKS));
     unsigned size = (unsigned) (parametersMap->getNumber(Dummy::SIZE));
-    unsigned numTest;
+    unsigned numTest = (unsigned) (parametersMap->getNumber(Dummy::NUM_TESTS));
 
     switch (testTask) {
         case TT_BIN_OR:
-            task = new BinaryTask(BO_OR, bufferType, size);
+            task = new BinaryTask(BO_OR, bufferType, size, numTest);
             break;
         case TT_BIN_AND:
-            task = new BinaryTask(BO_AND, bufferType, size);
+            task = new BinaryTask(BO_AND, bufferType, size, numTest);
             break;
         case TT_BIN_XOR:
-            task = new BinaryTask(BO_XOR, bufferType, size);
+            task = new BinaryTask(BO_XOR, bufferType, size, numTest);
             break;
         case TT_REVERSI:
-            numTest = (unsigned) (parametersMap->getNumber(Dummy::NUM_TESTS));
             task = new ReversiTask(size, bufferType, numTest);
             break;
         default:
