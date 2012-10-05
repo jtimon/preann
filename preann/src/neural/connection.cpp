@@ -44,7 +44,7 @@ void Connection::activation(Buffer* output, FunctionType functionType)
             "Connection::activation the type of the input must be BT_FLOAT.");
     Util::check(
             tSize != output->getSize(),
-            "Connection::activation the size of the thresholdConnection must be equal to the size of the output.");
+            "Connection::activation the size of the threshold Connection must be equal to the size of the output.");
     _activation(output, functionType);
 }
 
