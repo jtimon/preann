@@ -81,15 +81,15 @@ int mapLineColor(unsigned value)
         case 2:
             return 3; // blue
         case 3:
-            return 9; // orange
-        case 4:
-            return 4; // purple
-        case 5:
             return 6; // brown
-        case 6:
-            return 15; // blue green
-        case 7:
+        case 4:
             return 0; // dotted grey
+        case 5:
+            return 4; // purple
+        case 6:
+            return 9; // orange
+        case 7:
+            return 15; // blue green
         case 8:
             return 13; // pink
         case 9:
