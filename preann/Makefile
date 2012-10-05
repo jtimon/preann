@@ -123,16 +123,19 @@ cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EX
 #	./bin/testMemoryLosses.exe
 #	./bin/testBuffers.exe $(CURDIR)/
 #	./bin/testConnections.exe
+#	./bin/testConnections2.exe
 #	./bin/testLayers.exe $(CURDIR)/
 #	./bin/testPlot.exe $(OUTPUT_DIR)
 #	./bin/chronoGenIndividual.exe $(OUTPUT_DIR)
 #	./bin/chronoGenPopulation.exe $(OUTPUT_DIR)
-#	./bin/learnBufferType.exe $(OUTPUT_DIR)
 #	./bin/learnFunctionTypes.exe $(OUTPUT_DIR)
-#	./bin/learnMutation.exe $(OUTPUT_DIR)
-#	./bin/learnReset.exe $(OUTPUT_DIR)
+#	./bin/learnBufferType.exe $(OUTPUT_DIR)
 #	./bin/learnSelection.exe $(OUTPUT_DIR)
 #	./bin/learnCrossover.exe $(OUTPUT_DIR)
+#	./bin/learnCrossoverAlgorithm.exe $(OUTPUT_DIR)
+#	./bin/learnCrossoverLevel.exe $(OUTPUT_DIR)
+#	./bin/learnMutation.exe $(OUTPUT_DIR)
+#	./bin/learnReset.exe $(OUTPUT_DIR)
 #	./bin/learnTasks.exe $(OUTPUT_DIR)
 #	./bin/testMemoryLosses.exe > $(LOG_DIR)testMemoryLosses.log
 #	./bin/testBuffers.exe > $(LOG_DIR)testBuffers.log
