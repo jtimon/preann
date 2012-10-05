@@ -21,9 +21,6 @@ public:
     static Buffer* newBuffer(Buffer* buffer, ImplementationType implementationType);
     static Buffer* newBuffer(unsigned size, BufferType bufferType, ImplementationType implementationType);
     static Connection* newConnection(Buffer* input, unsigned outputSize);
-    static Connection* newConnection(FILE* stream, unsigned outputSize,
-                                     ImplementationType implementationType);
-
 };
 
 #endif /* FACTORY_H_ */
