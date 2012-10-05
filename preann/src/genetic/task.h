@@ -16,14 +16,17 @@ class Task
 protected:
     //virtual float step(neuralNet* net);
 public:
-    Task();
-    virtual ~Task();
+    Task() {};
+    virtual ~Task() {};
 
     virtual void test(Individual* individual) = 0;
     virtual void setInputs(Individual* individual) = 0;
     virtual string toString() = 0;
     virtual Individual* getExample(ParametersMap* parameters) = 0;
     //virtual float test(neuralNet* net, unsigned episodes);
+    virtual float getGoal(){
+        return 1;
+    };
 };
 
 #endif /* TASK_H_ */
