@@ -191,7 +191,7 @@ int Board::countPoints(SquareState player)
             }
         }
     }
-    return tSize * tSize + points;
+    return points;
 }
 
 
