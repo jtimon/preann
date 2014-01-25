@@ -216,7 +216,7 @@ void Interface::load(FILE* stream)
 
 void Interface::print()
 {
-    printf("----------------\n", 1);
+    printf("----------------\n");
     for (unsigned i = 0; i < size; i++) {
         switch (bufferType) {
             case BT_BYTE:
@@ -232,7 +232,7 @@ void Interface::print()
                 break;
         }
     }
-    printf("\n----------------\n", 1);
+    printf("\n----------------\n");
 }
 
 void Interface::copyFromFast(Interface *other)

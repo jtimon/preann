@@ -151,11 +151,11 @@ int main(int argc, char *argv[])
 
         MemoryManagement::printListOfPointers();
 
-        printf("Exit success.\n", 1);
+        printf("Exit success.\n");
     } catch (string& error) {
         cout << "Error: " << error << endl;
     } catch (...) {
-        printf("An error was thrown.\n", 1);
+        printf("An error was thrown.\n");
     }
 
     MemoryManagement::printTotalAllocated();
