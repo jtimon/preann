@@ -1,0 +1,4 @@
+Parallel Reinforcement Evolutionary Artificial Neural Networks
+(PREANN) is a framework of flexible multi-layer ANN's with
+reinforcement learning based on genetic algorithms and a parallel
+implementation (using XMM registers and NVIDIA's CUDA).
