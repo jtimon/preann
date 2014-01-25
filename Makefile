@@ -9,7 +9,7 @@ SHELL = /bin/sh
 MODULES   = common factory neural genetic game tasks loop loopTest 
 
 SRC_DIR   = $(addprefix src/,$(MODULES))  
-BUILD_DIR = $(addprefix build/,$(MODULES)) build/test/ build/sse2 build/cuda
+BUILD_DIR = bin build $(addprefix build/,$(MODULES)) build/test/ build/sse2 build/cuda 
 OUTPUT_DIR = $(CURDIR)/output/
 LOG_DIR = $(CURDIR)/output/log/
 
@@ -177,7 +177,6 @@ build/common/loop/joinEnumLoop.o build/common/loop/enumLoop.o build/common/loop/
 
 clean: 
 	rm -rf $(BUILD_DIR)
-	rm bin/*.exe
 
 #       Only use these programs directly
 #    awk cat cmp cp diff echo egrep expr false grep install-info ln ls
