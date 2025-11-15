@@ -58,7 +58,7 @@ void MemoryManagement::free(void* ptr)
     }
     if (!found) {
         // TODO pensarse lo de fprintf(stderr, ) y por lo menos hacerlo en todos sitios igual
-        cout << "Unable to free " << (unsigned)ptr << endl;
+        cout << "Unable to free " << (unsigned long)ptr << endl;
         std::string error = "The pointer to free wasn't found";
         throw error;
     }
@@ -115,6 +115,7 @@ unsigned MemoryManagement::getTotalAllocated()
     for (int i = 0; i < sizes.size(); i++) {
         totalAllocated += sizes[i];
     }
+    return totalAllocated;
 }
 
 int Random::integer(unsigned range)
