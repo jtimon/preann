@@ -1181,20 +1181,60 @@ Created a proper Go-style ASCII board visualization for debugging and human-read
 
 *Implementation*: src/test/simplePlayGo.cpp - printBoard() function
 
-*** Performance Optimization
+*** Performance Optimization and Neural Network Re-enablement
 
-For fast training, neural network evaluation is temporarily disabled (returns 1.0) to avoid expensive CUDA calls during move evaluation. This makes both players "dumb" (pick first legal move) but FAST for testing game rules and capture detection.
+*simplePlayGo.cpp* tests neural network evaluation with a small, fast architecture:
 
-The smart heuristic in computerEstimation() remains functional for non-NN players.
+*Network Architecture*:
+- Input layer: 81 neurons (9x9 board state)
+- Hidden layer: 9 neurons (SMALL for speed - reduced from original 81)
+- Output layer: 1 neuron (position evaluation)
+- Total weights: ~738 (vs 13,203 in original 81-81-81-1 architecture)
+- Implementation: IT_C (C++ runtime) for testing
+
+*Player Strategies*:
+- Player @ (Black/PLAYER_1): NEURAL NETWORK evaluation (re-enabled!)
+  - Uses actual NN forward propagation with untrained random weights
+  - Evaluates board state after each potential move
+  - Fast enough for interactive viewing with small network
+- Player O (White/PLAYER_2): Random 0-10 strategy
+  - Returns random value for move selection
+  - Baseline opponent for testing
+
+*Initial Performance Test (50 moves, untrained network)*:
+- Player @ (NN with random weights): 24 points
+- Player O (Random strategy): 26 points
+- Observation: Essentially tied - both are random initially!
+  - Untrained NN has random weights → random evaluations
+  - Random player explicitly uses rand() % 11
+  - This 24-26 baseline will be the benchmark for measuring training improvement
+
+*Timing*:
+- Half-second delay between moves for human viewing
+- Real-time board updates show the game unfolding
+- Network is fast enough for interactive play with 9-neuron hidden layer
+
+The smart heuristic in computerEstimation() (capture detection, liberty counting, center preference) remains functional for NULL player (heuristic-only opponents) and provides a baseline strategy.
 
 ** Next Steps
 
-The framework is complete and working! Go rules are fully implemented with zero new dependencies (~150 lines of pure C++). Training programs (playGo.cpp, compareGo.cpp, simplePlayGo.cpp) are built and functional.
+The framework is complete and working! Go rules are fully implemented with zero new dependencies (~150 lines of pure C++). Training programs (playGo.cpp, compareGo.cpp, simplePlayGo.cpp) are built and functional. Neural network evaluation has been re-enabled and tested with a small fast architecture.
 
-Remaining tasks:
-- Re-enable neural network evaluation for actual training
+*Status*:
+✓ Go rules implementation (suicide, ko, capture, liberties)
+✓ ASCII visualization for debugging
+✓ Neural network evaluation re-enabled and tested
+✓ Baseline performance established (24-26 points, untrained)
+✓ Small network architecture designed for speed (81-9-1, 738 weights)
+
+*Ready for training*:
+- Run playGo.exe for full evolution (300 generations, population 100)
+- Expected improvement: from ~25 points (random) to significantly higher (trained)
+- Baseline established: untrained NN vs random player = 24 vs 26 points
+
+*Optional enhancements*:
 - Population save/load for checkpointing long training runs
-- Optional: Territory scoring, pass detection, advanced heuristics
+- Territory scoring, pass detection, advanced heuristics
 - Future: Connect to OGS/KGS for human play and external opponents
 
 The architecture designed over a decade ago is ready. Let's finish what was started.

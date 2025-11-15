@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unistd.h>  // for usleep
 #include "game/goBoard.h"
+#include "tasks/goTask.h"
 
 using namespace std;
 
@@ -48,31 +49,35 @@ class SimpleGoBoard : public GoBoard {
 public:
     SimpleGoBoard(unsigned size, BufferType bufferType) : GoBoard(size, bufferType) {}
 
-    virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player) {
-        // Player O (PLAYER_2) uses random 0-10 strategy
-        // Player @ (PLAYER_1) uses constant 1.0 strategy
-        // But this is called for heuristic, not individual
-        return 1.0;
-    }
-
     virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual) {
-        // Player @ (PLAYER_1) always returns 1.0 (constant strategy)
-        if (player == PLAYER_1) {
-            return 1.0;
-        }
         // Player O (PLAYER_2) returns random 0-10 (random strategy)
-        else {
+        if (player == PLAYER_2) {
             return (float)(rand() % 11);  // 0 to 10
         }
+
+        // Player @ (PLAYER_1) uses ACTUAL NEURAL NETWORK (re-enabled!)
+        // This is the original implementation from goBoard.cpp
+        GoBoard* futureBoard = new GoBoard(this);
+        futureBoard->makeMove(xPos, yPos, player);
+        individual->updateInput(0, futureBoard->updateInterface());
+        individual->calculateOutput();
+        delete futureBoard;
+
+        return individual->getOutput(individual->getNumLayers() - 1)->getElement(0);
     }
 };
 
 int main(int argc, char *argv[])
 {
-    cout << "=== Simple Go Game: Constant vs Random Strategy ===" << endl << endl;
-    cout << "Player @ (Black/PLAYER_1): Always returns 1.0 (picks first legal move)" << endl;
-    cout << "Player O (White/PLAYER_2): Returns random 0-10 (picks random best move)" << endl;
-    cout << "Half second delay between moves for viewing..." << endl << endl;
+    cout << "=== Go: Neural Network vs Random Player ===" << endl << endl;
+    cout << "Player @ (Black/PLAYER_1): NEURAL NETWORK (re-enabled!)" << endl;
+    cout << "Player O (White/PLAYER_2): Random 0-10 strategy" << endl;
+    cout << "Half second delay between moves..." << endl << endl;
+    cout << "Network architecture:" << endl;
+    cout << "  Input: 81 (9x9 board)" << endl;
+    cout << "  Hidden: 9 neurons (SMALL for speed)" << endl;
+    cout << "  Output: 1 (position evaluation)" << endl;
+    cout << "  Total weights: ~738" << endl << endl;
 
     srand(time(NULL));  // Seed random number generator
 
@@ -80,32 +85,45 @@ int main(int argc, char *argv[])
         SimpleGoBoard board(9, BT_BIT);
         board.initBoard();
 
+        // Create SMALL neural network for speed with C++ implementation
+        ParametersMap params;
+        params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_C);  // C++ not CUDA!
+        params.putNumber(Enumerations::enumTypeToString(ET_BUFFER), BT_FLOAT);
+        params.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+
+        // Create small network manually
+        Individual player1(IT_C);
+        player1.addInputLayer(board.getInterface());
+        player1.addLayer(9, BT_FLOAT, FT_IDENTITY);      // Small hidden layer (9 neurons)
+        player1.addLayer(1, BT_FLOAT, FT_IDENTITY);       // Output layer
+        player1.addInputConnection(0, 0);                 // Input -> Hidden
+        player1.addLayersConnection(0, 1);                // Hidden -> Output
+
+        // Dummy individual for random player
+        Individual player2(IT_C);
+
         SquareState turn = PLAYER_1;
         int moveCount = 0;
-        int maxMoves = 50;  // Stop after 50 moves
+        int maxMoves = 50;
 
         cout << "Initial board:" << endl;
         printBoard(&board);
 
-        // Create dummy individuals for both players
-        Individual player1(IT_C);
-        Individual player2(IT_C);
-
         while (!board.endGame() && moveCount < maxMoves) {
             if (board.canMove(turn)) {
-                cout << "Move " << (moveCount + 1) << ": Player " << (turn == PLAYER_1 ? "@" : "O") << endl;
+                cout << "Move " << (moveCount + 1) << ": Player " << (turn == PLAYER_1 ? "@" : "O");
+                if (turn == PLAYER_1) cout << " (NN)";
+                else cout << " (Random)";
+                cout << endl;
 
-                // Use the individual with the board's custom individualEstimation
                 if (turn == PLAYER_1) {
-                    board.turn(turn, &player1);
+                    board.turn(turn, &player1);  // NN player
                 } else {
-                    board.turn(turn, &player2);
+                    board.turn(turn, &player2);  // Random player
                 }
 
                 printBoard(&board);
-
-                // Sleep for 0.5 seconds (500000 microseconds)
-                usleep(500000);
+                usleep(500000);  // 0.5 second delay
 
                 moveCount++;
             } else {
@@ -116,8 +134,8 @@ int main(int argc, char *argv[])
         }
 
         cout << "=== Game ended after " << moveCount << " moves ===" << endl;
-        cout << "Player @ (PLAYER_1) points: " << board.countPoints(PLAYER_1) << endl;
-        cout << "Player O (PLAYER_2) points: " << board.countPoints(PLAYER_2) << endl;
+        cout << "Player @ (NN) points: " << board.countPoints(PLAYER_1) << endl;
+        cout << "Player O (Random) points: " << board.countPoints(PLAYER_2) << endl;
 
     } catch (string& error) {
         cerr << "Error: " << error << endl;
