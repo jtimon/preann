@@ -222,76 +222,57 @@ Population::~Population()
 
 void Population::load(FILE *stream)
 {
-    //TODO rehacer Population::load
-    //	fread(&numRouletteWheel, sizeof(unsigned), 1, stream);
-    //	fread(&numRanking, sizeof(unsigned), 1, stream);
-    //	fread(&rankingBase, sizeof(float), 1, stream);
-    //	fread(&rankingStep, sizeof(float), 1, stream);
-    //	fread(&numTournament, sizeof(unsigned), 1, stream);
-    //	fread(&tournamentSize, sizeof(unsigned), 1, stream);
-    //	fread(&numTruncation, sizeof(unsigned), 1, stream);
-    //
-    //	for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; crossLevel++)
-    //	{
-    //		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
-    //		{
-    //			fread(&(numCrossover[crossAlg][crossLevel]), sizeof(unsigned), 1,
-    //					stream);
-    //		}
-    //		fread(&probabilityUniform[crossLevel], sizeof(float), 1, stream);
-    //		fread(&numPointsMultipoint[crossLevel], sizeof(unsigned), 1, stream);
-    //	}
-    //
-    //	fread(&mutationsPerIndividual, sizeof(unsigned), 1, stream);
-    //	fread(&mutationsPerIndividualRange, sizeof(float), 1, stream);
-    //	fread(&mutationProbability, sizeof(float), 1, stream);
-    //	fread(&mutationProbabilityRange, sizeof(float), 1, stream);
-    //
-    //	fread(&size, sizeof(unsigned), 1, stream);
-    //	this->maxSize = size;
-    //	individualList = (Individual**)MemoryManagement::malloc(sizeof(Individual*) * size);
-    //	for (unsigned i = 0; i < this->size; i++)
-    //	{
-    //		individualList[i] = new Individual();
-    //		individualList[i]->load(stream);
-    //	}
+    // Load generation number
+    fread(&generation, sizeof(unsigned), 1, stream);
+
+    // Load maxSize
+    fread(&maxSize, sizeof(unsigned), 1, stream);
+
+    // Load number of individuals
+    unsigned numIndividuals;
+    fread(&numIndividuals, sizeof(unsigned), 1, stream);
+
+    // Clear current population and load individuals
+    individuals.clear();
+    for (unsigned i = 0; i < numIndividuals; i++) {
+        // Create new individual with same implementation type as population
+        // (we'll determine this from the saved network data)
+        Individual* individual = new Individual();
+
+        // Load the neural network (NeuralNet::load)
+        individual->load(stream);
+
+        // Load the fitness value
+        float fitness;
+        fread(&fitness, sizeof(float), 1, stream);
+        individual->setFitness(fitness);
+
+        // Add to population
+        individuals.push_back(individual);
+    }
 }
 
 void Population::save(FILE *stream)
 {
-    //TODO rehacer Population::save
-    //	fwrite(&numRouletteWheel, sizeof(unsigned), 1, stream);
-    //	fwrite(&numRanking, sizeof(unsigned), 1, stream);
-    //	fwrite(&rankingBase, sizeof(float), 1, stream);
-    //	fwrite(&rankingStep, sizeof(float), 1, stream);
-    //	fwrite(&numTournament, sizeof(unsigned), 1, stream);
-    //	fwrite(&tournamentSize, sizeof(unsigned), 1, stream);
-    //	fwrite(&numTruncation, sizeof(unsigned), 1, stream);
-    //
-    //	for (unsigned crossLevel = 0; crossLevel < CROSSOVER_LEVEL_DIM; crossLevel++)
-    //	{
-    //		for (unsigned crossAlg = 0; crossAlg < CROSSOVER_ALGORITHM_DIM; ++crossAlg)
-    //		{
-    //			fwrite(&(numCrossover[crossAlg][crossLevel]), sizeof(unsigned), 1,
-    //					stream);
-    //		}
-    //		fwrite(&probabilityUniform[crossLevel], sizeof(float), 1, stream);
-    //		fwrite(&numPointsMultipoint[crossLevel], sizeof(unsigned), 1, stream);
-    //	}
-    //
-    //	fwrite(&mutationsPerIndividual, sizeof(unsigned), 1, stream);
-    //	fwrite(&mutationsPerIndividualRange, sizeof(float), 1, stream);
-    //	fwrite(&mutationProbability, sizeof(float), 1, stream);
-    //	fwrite(&mutationProbabilityRange, sizeof(float), 1, stream);
-    //
-    //	fwrite(&size, sizeof(unsigned), 1, stream);
-    //	this->maxSize = size;
-    //	individualList = (Individual**)MemoryManagement::malloc(sizeof(Individual*) * size);
-    //	for (unsigned i = 0; i < this->size; i++)
-    //	{
-    //		individualList[i] = new Individual();
-    //		individualList[i]->save(stream);
-    //	}
+    // Save generation number
+    fwrite(&generation, sizeof(unsigned), 1, stream);
+
+    // Save maxSize
+    fwrite(&maxSize, sizeof(unsigned), 1, stream);
+
+    // Save number of individuals
+    unsigned numIndividuals = individuals.size();
+    fwrite(&numIndividuals, sizeof(unsigned), 1, stream);
+
+    // Save all individuals (network structure + weights + fitness)
+    for (list<Individual*>::iterator it = individuals.begin(); it != individuals.end(); ++it) {
+        Individual* individual = *it;
+        // Save the neural network (NeuralNet::save)
+        individual->save(stream);
+        // Save the fitness value
+        float fitness = individual->getFitness();
+        fwrite(&fitness, sizeof(float), 1, stream);
+    }
 }
 
 void Population::insertIndividual(Individual *individual)

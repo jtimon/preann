@@ -127,7 +127,7 @@ cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EX
 #	./bin/testLayers.exe $(CURDIR)/
 #	./bin/testPlot.exe $(OUTPUT_DIR)
 #	./bin/chronoGenIndividual.exe $(OUTPUT_DIR)
-#	./bin/chronoGenPopulation.exe $(OUTPUT_DIR)
+	./bin/chronoGenPopulation.exe $(OUTPUT_DIR)
 #	./bin/learnFunctionTypes.exe $(OUTPUT_DIR)
 #	./bin/learnBufferType.exe $(OUTPUT_DIR)
 #	./bin/learnSelection.exe $(OUTPUT_DIR)
