@@ -14,6 +14,18 @@
  */
 class GoBoard : public Board
 {
+private:
+    // Ko rule: store previous board state hash to detect immediate recapture
+    unsigned long long tPreviousBoardHash;
+
+    // Helper functions for Go rules implementation
+    void findGroup(unsigned xPos, unsigned yPos, SquareState player,
+                   bool visited[][19], std::vector<std::pair<unsigned, unsigned>>& group);
+    int countLiberties(unsigned xPos, unsigned yPos, SquareState player);
+    void removeGroup(const std::vector<std::pair<unsigned, unsigned>>& group);
+    bool wouldCapture(unsigned xPos, unsigned yPos, SquareState player);
+    unsigned long long calculateBoardHash();
+
 public:
     GoBoard(GoBoard* other);
     GoBoard(unsigned size, BufferType bufferType);
