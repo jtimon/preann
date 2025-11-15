@@ -64,7 +64,7 @@ __global__
 void CrossoverOldKernel(type* buffer1, type* buffer2, unsigned* bitBuffer, unsigned size)
 {
     unsigned weighPos = (blockIdx.x * blockDim.x * BITS_PER_UNSIGNED) + threadIdx.x;
-    unsigned maxPosForThisBlock = device_min ( (blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED, size);
+    unsigned maxPosForThisBlock = device_min ( (unsigned)((blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED), size);
 
     unsigned bitsForTheThread, mask;
     if (weighPos < maxPosForThisBlock) {

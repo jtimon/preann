@@ -47,7 +47,7 @@ void ActivationBitKernel(float* results, float* thresholds, unsigned* output, un
 
     if (output_sz > offset) {
 
-        unsigned toRead = device_min(BITS_PER_UNSIGNED, output_sz - offset);
+        unsigned toRead = device_min((unsigned)BITS_PER_UNSIGNED, output_sz - offset);
         unsigned threadOutput = 0;
         unsigned mask = 0x80000000;
 

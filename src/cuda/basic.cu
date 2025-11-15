@@ -15,7 +15,7 @@ void checkCUDAError(const char *msg)
 
 extern "C" void cuda_synchronize()
 {
-    cudaThreadSynchronize();
+    cudaDeviceSynchronize();
     checkCUDAError("synchronize");
 }
 

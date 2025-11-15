@@ -389,6 +389,159 @@ The SSE2 implementation is currently *incompatible with 64-bit systems* without 
 
 The pure C++ implementation (=make cpp=) works perfectly on modern systems and provides a functional baseline for the library.
 
+** CUDA Build Success (2025-11-15)
+
+The CUDA-accelerated version was successfully built on a modern system with CUDA 13.0 after fixing compatibility issues.
+
+*** CUDA Build Investigation
+
+**** Initial Issues
+
+1. *Unsupported GPU Architecture (sm_11):*
+   - Original Makefile specified =-arch sm_11= (Compute Capability 1.1, from 2006)
+   - Modern CUDA 13.0 supports sm_75 and newer (Turing architecture, 2018+)
+   - Error: =Unsupported gpu architecture 'sm_11'=
+
+2. *Template Type Mismatch in =activation.cu:50=:*
+   - =BITS_PER_UNSIGNED= evaluates to =unsigned long= on 64-bit systems
+   - =output_sz - offset= is =unsigned int=
+   - Template function =device_min<T>= cannot deduce type from mismatched arguments
+   - Fix: Cast =BITS_PER_UNSIGNED= to =(unsigned)=
+
+3. *Deprecated CUDA API in =basic.cu:18=:*
+   - =cudaThreadSynchronize()= was deprecated and removed in CUDA 10.0
+   - Fix: Replaced with =cudaDeviceSynchronize()=
+
+4. *Template Type Mismatch in =genetic.cu:67=:*
+   - Same =BITS_PER_UNSIGNED= type mismatch issue
+   - Fix: Cast to =(unsigned)=
+
+**** Changes Made
+
+***** Makefile (line 38)
+#+BEGIN_SRC diff
+-NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11
++NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_75
+#+END_SRC
+
+***** src/cuda/activation.cu (line 50)
+#+BEGIN_SRC diff
+-unsigned toRead = device_min(BITS_PER_UNSIGNED, output_sz - offset);
++unsigned toRead = device_min((unsigned)BITS_PER_UNSIGNED, output_sz - offset);
+#+END_SRC
+
+***** src/cuda/basic.cu (line 18)
+#+BEGIN_SRC diff
+-cudaThreadSynchronize();
++cudaDeviceSynchronize();
+#+END_SRC
+
+***** src/cuda/genetic.cu (line 67)
+#+BEGIN_SRC diff
+-unsigned maxPosForThisBlock = device_min ( (blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED, size);
++unsigned maxPosForThisBlock = device_min ( (unsigned)((blockIdx.x + 1) * blockDim.x * BITS_PER_UNSIGNED), size);
+#+END_SRC
+
+*** Build Results
+
+- *Build command:* =make cuda=
+- *Build status:* ✓ Successful
+- *CUDA version:* 13.0 (release 13.0, V13.0.88)
+- *Target architecture:* sm_75 (Turing - RTX 20 series, Tesla T4, Quadro RTX, etc.)
+- *Executables created:* 23 test programs
+- *Total binary size:* 75 MB (3.3 MB each)
+- *Build location:* =bin/= directory
+
+*** CUDA Files Compiled
+
+Seven CUDA kernel files were successfully compiled:
+
+- =activation.cu= - Activation function kernels
+- =basic.cu= - Memory management and synchronization
+- =calcInvertedMatrix.cu= - Inverted matrix calculation
+- =calcOutputs.cu= - Output calculation kernels
+- =calcReduction0.cu= - Reduction strategy 0
+- =calcReduction.cu= - Reduction strategy 1
+- =genetic.cu= - Genetic operation kernels (crossover, mutation)
+
+*** Runtime Verification
+
+Basic testing confirmed CUDA executables run successfully:
+- =testMemoryLosses.exe= - Runs without errors
+- All 23 programs link correctly with CUDA runtime library (=libcudart=)
+
+**** Performance Benchmarking Execution
+
+The =learnTasks.exe= program was successfully executed to benchmark different implementations:
+
+#+BEGIN_SRC bash
+./bin/learnTasks.exe output/test_run
+#+END_SRC
+
+***** Generated Output
+
+The program successfully generated comprehensive benchmark data:
+
+*Data Files Generated:* 96+ .DAT files in =output/data/= containing performance measurements for:
+- Buffer operations (ACTIVATION, COPYFROMINTERFACE, COPYTOINTERFACE)
+- Connection operations (CALCULATEANDADDTO, CROSSOVER, MUTATE)
+- Multiple buffer types (BIT, FLOAT, SIGN, BYTE)
+- Multiple implementations compared (C, SSE2, CUDA_INV, CUDA_REDUC)
+
+*Gnuplot Scripts:* 7 .plt files in =output/gnuplot/= for generating performance graphs
+
+*Performance Graphs:* 6 PNG images in =output/images/= showing:
+- =BUFFER_ACTIVATION.png= - Activation function performance comparison
+- =BUFFER_COPYFROMINTERFACE.png= - Input buffer copy performance
+- =BUFFER_COPYTOINTERFACE.png= - Output buffer copy performance
+- =CONNECTION_CALCULATEANDADDTO.png= - Neural network calculation performance
+- =CONNECTION_CROSSOVER.png= - Genetic crossover operation performance
+- =CONNECTION_MUTATE.png= - Mutation operation performance
+
+***** Sample Benchmark Data
+
+Example from =CONNECTION_CALCULATEANDADDTOFLOAT_C.DAT= (C++ implementation):
+#+BEGIN_EXAMPLE
+# Iterator FLOAT_C
+ 1000 0.001500
+ 2000 0.003000
+ 3000 0.004000
+ 4000 0.006000
+ 5000 0.007000
+ 6000 0.008000
+ 7000 0.009500
+ 8000 0.011000
+ 9000 0.012500
+ 10000 0.013000
+#+END_EXAMPLE
+
+The data shows execution time (seconds) vs. problem size, allowing direct performance comparison between C++, SSE2, and CUDA implementations.
+
+***** Verification Results
+
+✓ CUDA kernels execute successfully
+✓ Benchmark loop system works correctly
+✓ Data collection and plotting infrastructure functional
+✓ All three implementation types (C, SSE2, CUDA) can be benchmarked in the same run
+✓ Output files generated in standard gnuplot-compatible format
+
+*** Compatibility Notes
+
+- *Modern CUDA:* Successfully builds with CUDA 13.0
+- *Minimum GPU:* Requires NVIDIA GPU with Compute Capability 7.5 or higher
+- *Supported GPUs:* RTX 20/30/40 series, Tesla T4/V100/A100, Quadro RTX, etc.
+- *Legacy GPUs:* Older GPUs (GTX 10 series and earlier) not supported with sm_75
+  - To support older GPUs, reduce to sm_50 (requires CUDA 12.0 or earlier)
+
+*** Summary
+
+The CUDA implementation successfully builds on modern systems after:
+- Updating compute capability from sm_11 (2006) to sm_75 (2018)
+- Fixing template type deduction issues caused by 64-bit sizeof()
+- Replacing deprecated CUDA API calls
+
+This provides GPU-accelerated neural network training for systems with modern NVIDIA GPUs.
+
 * Documentation
 
 ** Academic Documentation

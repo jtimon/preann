@@ -35,7 +35,7 @@ CXX = $(CXX_BASE) -ggdb $(INCLUDES)
 CXX_LINK = $(CXX_BASE)
 NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES)
 NVCC_LINK = $(NVCC) -lcudart 
-NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_11
+NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_75
 NASM = nasm -f elf
 
 ifeq (cpp, $(MAKECMDGOALS))
