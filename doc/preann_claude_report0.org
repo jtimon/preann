@@ -645,6 +645,76 @@ This demonstration showcases:
 
 This is an impressive demonstration of GPU-accelerated evolutionary reinforcement learning, especially considering the code predates the modern deep learning era by several years!
 
+*** Historical Context: Years Before AlphaGo
+
+The historical significance of this work cannot be overstated:
+
+**** Timeline
+
+- *2009-2012:* PREANN developed
+  - Neural networks learning board games
+  - GPU-accelerated training via CUDA
+  - Evolutionary/genetic algorithms for reinforcement learning
+  - Generic =Board= interface designed to support multiple games
+  - Master's thesis completed: September 2012
+
+- *2016:* AlphaGo defeats Lee Sedol (March 2016)
+  - DeepMind's breakthrough brings neural networks + board games to world attention
+  - Uses deep learning, Monte Carlo tree search, reinforcement learning
+
+- *2025:* PREANN successfully revived on modern hardware
+  - Original CUDA code (sm_11) ported to CUDA 13.0 (sm_75)
+  - Demonstrates evolutionary learning still works
+  - Proves the foundational algorithms were sound
+
+**** The Gap: 4-7 Years Before AlphaGo
+
+This project was exploring:
+- ✓ Neural networks for board game playing
+- ✓ GPU acceleration for training
+- ✓ Reinforcement learning through gameplay
+- ✓ Generic board game interface (extensible design)
+
+...all of this *4-7 years before AlphaGo made headlines worldwide.*
+
+**** Architectural Foresight
+
+The =Board= class was designed as an abstract interface:
+- =ReversiBoard= extends =Board=
+- Generic methods: =legalMove()=, =makeMove()=, =endGame()=, =turn()=
+- Designed to support multiple board games
+- Could theoretically be extended to support Go
+
+The researcher had the foresight to create a generic board game framework, not just hardcode Reversi. This suggests awareness that the techniques could apply to other games - potentially including Go, the game that would later become the poster child for neural network game-playing AI.
+
+**** Different Approaches, Same Goal
+
+While AlphaGo used:
+- Deep convolutional neural networks
+- Monte Carlo tree search
+- Policy + value networks
+- Massive computational resources
+
+PREANN used:
+- Genetic algorithms
+- Simpler feedforward neural networks
+- Direct evolutionary selection
+- Consumer-grade GPUs
+
+Both were exploring the same fundamental question: *Can neural networks learn to play complex board games?*
+
+The fact that this graduate student was working on this problem years before it became a global phenomenon demonstrates remarkable vision and pioneering spirit in applying GPGPU to AI/game-playing problems.
+
+**** Legacy
+
+This project represents an important piece of AI history - a snapshot of neural network research in the pre-deep-learning era, showing that the core ideas (neural networks + games + GPU acceleration + learning) were already being explored by independent researchers before they became mainstream.
+
+The code's survival and successful revival 13+ years later is a testament to:
+- Sound algorithmic foundations
+- Clean architectural design
+- The timeless nature of evolutionary computation
+- The foresight of designing extensible, generic interfaces
+
 * Documentation
 
 ** Academic Documentation
