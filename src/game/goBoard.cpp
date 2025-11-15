@@ -101,17 +101,26 @@ void GoBoard::makeMove(unsigned xPos, unsigned yPos, SquareState player)
 
 float GoBoard::computerEstimation(unsigned xPos, unsigned yPos, SquareState player)
 {
+    // TODO: Optional: competent challenger for faster bootstrap
+    //
+    // This method provides a heuristic for a computer opponent to play against
+    // during neural network training. Having a competent opponent helps the
+    // neural network learn faster (bootstrap).
+    //
+    // For now, neural networks can train by playing against each other
+    // (individualEstimation is implemented). This is optional but helpful.
+    //
     // NOT IMPLEMENTED
     // The plan is to include Fuego library or reimplement here.
     //
-    // For a simple heuristic, we could:
+    // Simple heuristic ideas:
     // 1. Count liberties gained by this move
-    // 2. Count opponent stones captured
-    // 3. Consider edge/corner positions
+    // 2. Count opponent stones that would be captured
+    // 3. Consider strategic positions (corners, edges, center)
     //
-    // This could be reimplemented here as a simple heuristic without Fuego.
+    // Can use Fuego library or reimplement here as simple heuristic.
 
-    assert(false && "GoBoard::computerEstimation() NOT IMPLEMENTED - plan is to include Fuego or reimplement here");
+    assert(false && "GoBoard::computerEstimation() NOT IMPLEMENTED - TODO: optional: competent challenger for faster bootstrap");
     return 0.0;
 }
 
