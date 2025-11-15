@@ -1216,7 +1216,7 @@ Created a proper Go-style ASCII board visualization for debugging and human-read
 
 The smart heuristic in computerEstimation() (capture detection, liberty counting, center preference) remains functional for NULL player (heuristic-only opponents) and provides a baseline strategy.
 
-** Next Steps
+** Next Steps: Population Save/Load Implementation
 
 The framework is complete and working! Go rules are fully implemented with zero new dependencies (~150 lines of pure C++). Training programs (playGo.cpp, compareGo.cpp, simplePlayGo.cpp) are built and functional. Neural network evaluation has been re-enabled and tested with a small fast architecture.
 
@@ -1232,9 +1232,89 @@ The framework is complete and working! Go rules are fully implemented with zero 
 - Expected improvement: from ~25 points (random) to significantly higher (trained)
 - Baseline established: untrained NN vs random player = 24 vs 26 points
 
-*Optional enhancements*:
-- Population save/load for checkpointing long training runs
-- Territory scoring, pass detection, advanced heuristics
-- Future: Connect to OGS/KGS for human play and external opponents
+*** Critical Need: Population Save/Load for Persistent Training
 
-The architecture designed over a decade ago is ready. Let's finish what was started.
+Without save/load, every training run starts from random weights. We need checkpointing to:
+1. Avoid losing progress from long training runs (300 generations = hours/days)
+2. Continue training across multiple sessions
+3. See fitness improvement charts across saved checkpoints
+4. Load trained networks for testing/visualization
+
+*** Existing Infrastructure (Already Implemented!)
+
+PREANN already has most save/load infrastructure in place:
+
+*Working Components*:
+- NeuralNet::save()/load() - Fully functional (neuralNet.cpp:167-210)
+  - Saves network structure (layers, connections)
+  - Saves all weights via Layer::saveWeighs()
+- Layer/Buffer/Interface - All have binary save/load
+- SimpleGraph::save()/load() - Connection graphs
+- Population::generation field - Already tracked (population.h:45)
+- Binary file format - Consistent pattern using fwrite/fread
+
+*Stubbed But Incomplete*:
+- Population::save()/load() - Method signatures exist but COMMENTED OUT (population.cpp:223-295)
+  - Contains TODO comments showing intended structure
+  - Needs to be uncommented and completed
+
+*Missing*:
+- Individual::save()/load() - Needs to save fitness value (currently only inherits NeuralNet::save which doesn't include fitness)
+- Command-line argument parsing in playGo.cpp for --save/--load flags
+
+*** Implementation Plan
+
+*Phase 1: Core Serialization (Files: individual.h/cpp, population.cpp)*
+
+1. Add Individual::save() and Individual::load()
+   - Override parent NeuralNet methods
+   - Call parent NeuralNet::save()/load() for network structure
+   - Add fitness value save/load
+
+2. Uncomment and complete Population::save() and Population::load()
+   - Save: generation number, maxSize, individual count
+   - Iterate through individuals list and save each
+   - Load: Restore generation counter, rebuild population
+   - Skip Task/ParametersMap serialization (recreate on load - simpler)
+
+*Phase 2: Training Program Updates (Files: playGo.cpp, simplePlayGo.cpp)*
+
+3. Add command-line parsing to playGo.cpp
+   - Support: --load <file> --save <file> --generations <num>
+   - Use simple argv[] parsing (no external libraries - match existing pattern)
+   - Example: ./bin/playGo.exe --load output/data/go_gen_100.pop --generations 200
+
+4. Auto-checkpoint every N generations
+   - Save to output/data/go_gen_050.pop, go_gen_100.pop, etc.
+   - Print confirmation: "Checkpoint saved: go_gen_050.pop"
+
+5. Continue from loaded generation number
+   - If --load specified, start from loaded generation + 1
+   - Print: "Loaded generation 100, continuing from 101..."
+
+6. Update simplePlayGo.cpp for trained network visualization
+   - Add --load option to replace random weights
+   - Visual demo: trained NN vs random player
+
+*Phase 3: Testing and Validation*
+
+7. Test save/load cycle:
+   - Train for 50 generations, auto-save
+   - Kill process
+   - Restart with --load, verify continues from gen 51
+   - Verify fitness values preserved
+
+8. Build with CUDA and run full training test
+
+*File Locations*:
+- Save directory: output/data/ (existing structure)
+- Naming convention: go_gen_XXX.pop (binary format)
+- Example: output/data/go_gen_050.pop, output/data/go_gen_100.pop
+
+*Expected Outcome*:
+- Persistent training across sessions
+- Fitness charts showing improvement over saved generations
+- Ability to test/visualize any saved checkpoint
+- No more starting from random every time!
+
+The architecture designed over a decade ago is ready. Let's add the missing persistence layer and finish what was started.
