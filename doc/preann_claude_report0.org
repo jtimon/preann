@@ -323,6 +323,72 @@ Basic runtime testing confirmed executables are functional:
 - *Build system:* GNU Make build system works without modification
 - *SSE2/CUDA:* Only C++ implementation tested; SSE2 and CUDA require additional dependencies
 
+** SSE2 Build Investigation (2025-11-15)
+
+An attempt was made to build the SSE2-optimized version of the library. The build encountered architecture compatibility issues.
+
+*** SSE2 Build Attempt
+
+**** Dependencies
+- *NASM assembler* is required for SSE2 builds
+- Install with: =sudo apt-get install nasm=
+
+**** Architecture Issue Discovered
+
+The SSE2 assembly code is written for 32-bit x86 architecture and is *not compatible* with modern 64-bit systems without modifications:
+
+**Problem:**
+- Assembly files (=src/sse2/*.asm=) use 32-bit registers (EBX, ECX, ESI, EDI, ESP)
+- Assembly files use 32-bit calling conventions (parameters passed via stack at ESP+offset)
+- NASM assembles to 32-bit ELF format (=nasm -f elf=)
+- Modern Linux systems compile C++ code as 64-bit by default
+- Linker error: "i386 architecture of input file is incompatible with i386:x86-64 output"
+
+**Attempted Solutions:**
+
+1. *Build with =make sse2=:* Failed - 32-bit assembly incompatible with 64-bit C++ object files
+2. *Build with =make sse2_64=:* Failed - requires 32-bit C++ development libraries (=g++ -m32=) which are not typically installed on modern 64-bit systems
+
+**What Would Be Required:**
+
+To build SSE2 on modern 64-bit systems, one of the following approaches would be needed:
+
+1. *Install 32-bit development libraries:*
+   #+BEGIN_SRC bash
+   sudo apt-get install g++-multilib libc6-dev-i386
+   make sse2_64
+   #+END_SRC
+   - This compiles all C++ code in 32-bit mode to match the 32-bit assembly
+
+2. *Rewrite assembly for x86-64:*
+   - Convert 32-bit registers (EBX→RBX, ECX→RCX, ESI→RSI, EDI→RDI, ESP→RSP)
+   - Update to x86-64 calling convention (parameters in RDI, RSI, RDX, RCX, R8, R9)
+   - Change NASM format to =nasm -f elf64=
+   - This would be a significant undertaking (3 assembly files, ~200 lines each)
+
+3. *Use intrinsics instead of assembly:*
+   - Rewrite SSE2 operations using C++ compiler intrinsics (=_mm_*= functions)
+   - Would maintain performance while being portable across architectures
+   - Most modern approach
+
+*** Assembly Files Analysis
+
+The three SSE2 assembly files implement hand-optimized SIMD operations:
+
+- =sse2_bit.asm= - Bit-packed buffer operations (binary neural networks)
+- =sse2_float.asm= - Floating-point SIMD operations
+- =sse2_sign.asm= - Signed value SIMD operations
+
+Each file contains carefully optimized loops using XMM registers for parallel processing of 16 bytes at a time.
+
+*** Conclusion
+
+The SSE2 implementation is currently *incompatible with 64-bit systems* without either:
+- Installing 32-bit development environment (deprecated approach)
+- Porting the assembly code to x86-64 (significant work)
+
+The pure C++ implementation (=make cpp=) works perfectly on modern systems and provides a functional baseline for the library.
+
 * Documentation
 
 ** Academic Documentation
