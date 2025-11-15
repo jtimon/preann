@@ -36,35 +36,67 @@ void GoBoard::initBoard()
 
 bool GoBoard::legalMove(unsigned xPos, unsigned yPos, SquareState player)
 {
-    // NOT IMPLEMENTED
-    // The plan is to include Fuego library or reimplement here.
-    //
-    // Go legal move checking requires:
-    // 1. Square must be empty
-    // 2. Move must not be suicide (unless it captures opponent stones)
-    // 3. Move must not violate ko rule (cannot immediately recapture)
-    //
-    // This is complex enough that using Fuego is preferred, but could
-    // be reimplemented here for simple cases.
+    // Low-hanging fruit: basic checks that apply to both Go and Reversi
 
-    assert(false && "GoBoard::legalMove() NOT IMPLEMENTED - plan is to include Fuego or reimplement here");
-    return false;
+    // Check 1: Position must be on the board
+    if (xPos >= tSize || yPos >= tSize) {
+        string error = "GoBoard::legalMove : The position (" + to_string(xPos) + ", "
+                + to_string(yPos) + ") is out of range. The size of the board is " + to_string(tSize);
+        throw error;
+    }
+
+    // Check 2: Must be a valid player (not EMPTY)
+    if (player == EMPTY) {
+        string error = "GoBoard::legalMove : Empty square is not a player.";
+        throw error;
+    }
+
+    // Check 3: Square must be empty (Rule 1 of Go: cannot play where there's already a stone)
+    if (getSquare(xPos, yPos) != EMPTY) {
+        return false;
+    }
+
+    // TODO: Additional Go-specific checks needed:
+    // - Suicide rule: Move must not create a group with zero liberties (unless it captures)
+    // - Ko rule: Move must not recreate previous board position
+    // For now, we allow all moves to empty squares (will capture some illegal moves but playable)
+
+    return true;  // Temporarily allow all moves to empty squares
 }
 
 void GoBoard::makeMove(unsigned xPos, unsigned yPos, SquareState player)
 {
-    // NOT IMPLEMENTED
-    // The plan is to include Fuego library or reimplement here.
-    //
-    // Go move execution requires:
-    // 1. Place stone at position
-    // 2. Remove captured opponent groups (groups with no liberties)
-    // 3. Update board state
-    //
-    // The capture detection algorithm is moderately complex but could
-    // be reimplemented here without Fuego.
+    // Low-hanging fruit: basic validations and stone placement
 
-    assert(false && "GoBoard::makeMove() NOT IMPLEMENTED - plan is to include Fuego or reimplement here");
+    // Check 1: Position must be on the board
+    if (xPos >= tSize || yPos >= tSize) {
+        string error = "GoBoard::makeMove : The position (" + to_string(xPos) + ", "
+                + to_string(yPos) + ") is out of range. The size of the board is " + to_string(tSize);
+        throw error;
+    }
+
+    // Check 2: Must be a valid player (not EMPTY)
+    if (player == EMPTY) {
+        string error = "GoBoard::makeMove : Empty square is not a player.";
+        throw error;
+    }
+
+    // Check 3: Square must be empty
+    if (getSquare(xPos, yPos) != EMPTY) {
+        string error = "GoBoard::makeMove : the square at position (" + to_string(xPos) + ", "
+                + to_string(yPos) + ") is already occupied";
+        throw error;
+    }
+
+    // Step 1: Place the stone (simple and universal for Go)
+    setSquare(xPos, yPos, player);
+
+    // TODO: Step 2: Remove captured opponent groups
+    // Need to:
+    // - Check all 4 adjacent positions
+    // - For each opponent stone, check if its group has liberties
+    // - Remove groups with zero liberties
+    // This is the moderately complex part that could use Fuego or be reimplemented
 }
 
 float GoBoard::computerEstimation(unsigned xPos, unsigned yPos, SquareState player)

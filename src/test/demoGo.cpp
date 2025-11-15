@@ -41,17 +41,23 @@ int main(int argc, char *argv[])
         cout << "[✓] GoTask class created" << endl;
         cout << "[✓] Neural network instantiated" << endl;
         cout << "[✓] Board interface integrated" << endl;
-        cout << "[✗] Game rules NOT IMPLEMENTED" << endl;
-        cout << "[✗] Cannot play games yet" << endl << endl;
+        cout << "[✓] BASIC RULES IMPLEMENTED (low-hanging fruit!)" << endl;
+        cout << "    - Bounds checking" << endl;
+        cout << "    - Empty square validation" << endl;
+        cout << "    - Stone placement" << endl;
+        cout << "[✗] Advanced Go rules still needed" << endl << endl;
 
         cout << "========================================" << endl;
         cout << "WHAT'S NEXT:" << endl;
         cout << "========================================" << endl;
-        cout << "To make this functional, we need to implement:" << endl;
-        cout << "1. GoBoard::legalMove() - Check if move is legal" << endl;
-        cout << "2. GoBoard::makeMove() - Execute move and capture stones" << endl;
+        cout << "Already implemented (from Reversi patterns):" << endl;
+        cout << "✓ legalMove() - bounds, player validation, empty square check" << endl;
+        cout << "✓ makeMove() - bounds, player validation, stone placement" << endl << endl;
+        cout << "Still needed for full Go:" << endl;
+        cout << "1. makeMove() - Capture detection and stone removal" << endl;
+        cout << "2. legalMove() - Suicide and ko rule checking" << endl;
         cout << "3. GoBoard::computerEstimation() - Simple heuristic for opponent" << endl;
-        cout << "4. Board::endGame() override - Detect when game is over" << endl;
+        cout << "4. Board::endGame() override - Detect when game is over (2 passes)" << endl;
         cout << "5. Board::countPoints() override - Score territory + captured stones" << endl << endl;
 
         cout << "These can be implemented by:" << endl;
