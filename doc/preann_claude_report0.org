@@ -856,3 +856,238 @@ The project was completed as a master's thesis and represents early pioneering w
 - *Code Quality:* Well-organized, modular design with proper abstraction layers
 - *Current Status:* Complete but archived; planned Rust migration never materialized
 - *Learning Value:* Excellent example of low-level optimization and parallel programming for neural networks
+
+* Go Framework Integration (November 2025)
+
+** Background
+
+The original design included a generic Board interface that could theoretically support multiple board games beyond Reversi. The architecture was prescient - designed 4-7 years before AlphaGo - suggesting awareness that these neural network techniques could apply to more complex games like Go.
+
+After 13 years, the vision is being realized.
+
+** Implementation Status
+
+*** What's Complete ✓
+
+On November 15, 2025, the Go framework was successfully integrated into PREANN:
+
+1. *GoBoard Class* (src/game/goBoard.h, src/game/goBoard.cpp)
+   - Inherits from Board base class
+   - Follows exact same pattern as ReversiBoard
+   - 9x9, 13x13, and 19x19 board size support
+   - Neural network integration complete (81 inputs for 9x9)
+
+2. *GoTask Class* (src/tasks/goTask.h, src/tasks/goTask.cpp)
+   - Inherits from Task base class
+   - Follows exact same pattern as ReversiTask
+   - Fitness evaluation framework in place
+   - Population-based training ready
+
+3. *Demo Program* (src/test/demoGo.cpp)
+   - Demonstrates framework integration
+   - Creates GoBoard and GoTask instances
+   - Instantiates neural networks for Go
+   - Successfully compiles and runs
+
+4. *Build System*
+   - All 24 executables build successfully (23 original + demoGo)
+   - Automatic inclusion via Makefile patterns
+   - Full CUDA support enabled
+
+*** What's Stubbed (Awaiting Implementation)
+
+The following methods have clear "NOT IMPLEMENTED" stubs with documentation:
+
+1. *GoBoard::legalMove()* - Move legality checking
+   - Empty square validation
+   - Suicide rule (cannot play where group has no liberties)
+   - Ko rule (cannot immediately recapture)
+   - Superko detection (optional)
+
+2. *GoBoard::makeMove()* - Move execution
+   - Stone placement
+   - Capture detection (find opponent groups with no liberties)
+   - Stone removal
+   - Board state update
+
+3. *GoBoard::computerEstimation()* - Heuristic evaluation
+   - Liberty counting
+   - Territory estimation
+   - Influence/thickness heuristics
+   - Edge/corner position values
+
+4. *Board::endGame()* override - Game termination detection
+   - Both players pass consecutively
+   - Board filled (rare)
+   - Resignation handling
+
+5. *Board::countPoints()* override - Scoring
+   - Territory counting (Chinese or Japanese rules)
+   - Captured stone counting
+   - Komi adjustment
+   - Dead stone removal
+
+** Roadmap: Completing the Go Implementation
+
+*** Option 1: Fuego Library Integration (Recommended)
+
+*Fuego* is a mature open-source Go library written in C++. Integration would provide:
+
+- Robust, tested Go game logic
+- Professional-strength rule enforcement
+- Multiple rule set support (Chinese, Japanese)
+- Advanced features (superko, scoring)
+
+*Tasks:*
+1. Download and build Fuego library
+2. Add Fuego to PREANN build system (Makefile)
+3. Create Fuego wrapper in GoBoard
+4. Map Fuego API to Board interface methods:
+   - Fuego::SgPoint → Board position
+   - Fuego::GoBoard → GoBoard state
+   - Fuego::IsLegal() → legalMove()
+   - Fuego::Play() → makeMove()
+   - Fuego::Score() → countPoints()
+5. Test with demoGo and create playGo test program
+6. Verify genetic algorithm training works
+
+*Estimated effort:* 1-2 days of integration work
+
+*** Option 2: Custom Go Rules Implementation
+
+Implement minimal Go rules from scratch in goBoard.cpp:
+
+*Tasks:*
+1. Implement legalMove():
+   - Check square is empty
+   - Temporary place stone
+   - Count liberties of resulting group
+   - If zero liberties, check if captures opponent stones
+   - If no captures and zero liberties, illegal (suicide)
+   - Check basic ko (store last capture position)
+
+2. Implement makeMove():
+   - Place stone on board
+   - Find adjacent opponent groups
+   - For each opponent group, count liberties
+   - Remove groups with zero liberties
+   - Update board state
+
+3. Implement computerEstimation():
+   - Count liberties after move
+   - Count captured stones
+   - Simple heuristic: captures * 10 + liberties
+
+4. Override endGame():
+   - Track consecutive passes
+   - Return true after two passes
+
+5. Override countPoints():
+   - Simple territory counting (Chinese rules)
+   - Count stones on board
+   - Flood fill to count empty territory
+   - Add captures
+   - Apply komi
+
+*Estimated effort:* 2-4 days of careful implementation and testing
+
+*** Option 3: Hybrid Approach
+
+Use Fuego for complex rules (ko, scoring) but implement simple rules manually:
+
+- Custom: legalMove() for basic legality, makeMove() for captures
+- Fuego: Scoring, superko detection, advanced features
+
+*Estimated effort:* 1-2 days
+
+** Testing Plan
+
+Once Go rules are implemented:
+
+1. *Unit Tests*
+   - Test legalMove() with known positions
+   - Test makeMove() with capture scenarios
+   - Test ko detection
+   - Test scoring
+
+2. *Integration Tests*
+   - Create compareGo.cpp (like compareReversi.cpp)
+   - Compare untrained vs trained networks
+   - Verify learning occurs over generations
+
+3. *Performance Benchmarks*
+   - Measure games per second
+   - Compare CUDA vs C++ implementations
+   - Optimize bottlenecks
+
+4. *Evolutionary Training*
+   - Create playGo.cpp (like playReversi.cpp)
+   - Train population of 100 networks over 300 generations
+   - Measure improvement in win rate
+   - Compare to random play
+
+** Expected Results
+
+Based on Reversi results (45% → 55% win rate, -8.9 → -2.3 point differential after 100 generations):
+
+- Untrained Go networks: ~40-45% win rate vs simple heuristic
+- Trained Go networks (100+ gen): ~55-60% win rate
+- Clear measurable improvement through genetic evolution
+- Proof that 2009-era architecture can learn Go strategy
+
+** Historical Significance
+
+Completing this implementation would demonstrate:
+
+1. The generic Board interface designed in 2009-2012 successfully supports both Reversi and Go
+2. The architectural vision was correct and ahead of its time
+3. GPU-accelerated genetic algorithms can train Go-playing neural networks
+4. The same techniques used for Reversi scale to more complex games
+
+After 13+ years, PREANN will finally play Go "like it was meant to be."
+
+** TODO List for Go Implementation
+
+*** HIGH PRIORITY - Core Game Logic
+- [ ] Choose implementation approach (Fuego vs Custom vs Hybrid)
+- [ ] Implement GoBoard::legalMove()
+- [ ] Implement GoBoard::makeMove() with capture detection
+- [ ] Override Board::endGame() for pass detection
+- [ ] Override Board::countPoints() for Go scoring
+
+*** MEDIUM PRIORITY - Testing & Validation
+- [ ] Create unit tests for Go rules
+- [ ] Create compareGo.cpp demo program
+- [ ] Create playGo.cpp training program
+- [ ] Verify neural network can learn Go strategy
+- [ ] Benchmark performance (games/second)
+
+*** LOW PRIORITY - Enhancements
+- [ ] Implement GoBoard::computerEstimation() heuristic
+- [ ] Support multiple rule sets (Chinese, Japanese)
+- [ ] Add superko detection
+- [ ] Optimize capture detection for performance
+- [ ] Add move history tracking
+- [ ] Implement SGF (Smart Game Format) export
+
+*** DOCUMENTATION
+- [ ] Document Fuego integration (if chosen)
+- [ ] Write Go-specific training guide
+- [ ] Update main README with Go support
+- [ ] Add Go examples to documentation
+- [ ] Create comparison report: Reversi vs Go learning curves
+
+** Files Created
+
+- src/game/goBoard.h (GoBoard class declaration)
+- src/game/goBoard.cpp (GoBoard implementation with stubs)
+- src/tasks/goTask.h (GoTask class declaration)
+- src/tasks/goTask.cpp (GoTask implementation)
+- src/test/demoGo.cpp (Framework integration demo)
+- bin/demoGo.exe (Successfully builds and runs)
+
+** Next Steps
+
+The framework is complete and waiting. All that remains is implementing the Go game rules - either by integrating Fuego or custom implementation. Once complete, PREANN will achieve its original vision: training neural networks to play Go using GPU-accelerated genetic algorithms, just as it does for Reversi.
+
+The architecture designed over a decade ago is ready. Let's finish what was started.
