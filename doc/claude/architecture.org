@@ -45,35 +45,82 @@ This document captures the current understanding of PREANN's architecture. It wi
 *BT_FLOAT* - Standard floating point:
 - 4 bytes per weight
 - Full precision
+- Baseline implementation
 - Used for output layer in chess
 
 *BT_BIT* - Binary representation:
-- 1 byte per weight
-- Values: 0 or 1
+- Outputs: packed bits (0 or 1)
+- Weights: bytes (1 byte per weight)
+- Novel approach (predates modern quantization techniques)
 - Memory efficient for hidden layers
+- Different from quantization: designed for forward-prop only (no backprop)
+- **Implicitly uses FT_BINARY_STEP**: Always performs threshold operation (> 0), ignores FunctionType parameter
+- Reason: Cannot store float values (sigmoid, tanh) in single bit outputs
+- Same memory layout as BT_SIGN (packed bits for outputs, bytes for weights)
 
 *BT_SIGN* - Bipolar/signed representation:
-- 1 byte per weight
-- Values: -1 or +1
+- Outputs: packed bits (-1 or +1)
+- Weights: bytes (1 byte per weight)
 - When zeroed in memory, represents -1
 - Used for recurrent layer in chess
+- **Implicitly uses FT_BIPOLAR_STEP**: Always performs threshold operation (> 0), ignores FunctionType parameter
+- Reason: Cannot store float values (sigmoid, tanh) in single bit outputs
+- Same memory layout as BT_BIT (packed bits for outputs, bytes for weights)
+- Only difference from BIT: interpretation of output values (bipolar -1/+1 vs binary 0/1)
 
 *BT_BYTE* - Byte-based representation:
 - 1 byte per weight
 - Range: 0-255
+- **NOT IMPLEMENTED** - All implementations throw error for BT_BYTE
 
 *BT_FLOAT_SMALL* - Compact float:
 - Smaller than standard float
-- Details TBD
+- Works with all activation functions in CPP implementation
+- SSE2/CUDA support unclear
+
+*Key Insight - Memory Layouts and Activation Function Compatibility*:
+- **Two memory layouts**:
+  - BIT/SIGN: Packed bit outputs + byte weights (same layout, different interpretation)
+  - FLOAT: Float outputs + float weights
+- **Activation function constraints**:
+  - BT_FLOAT: Supports ALL activation functions (FT_IDENTITY, FT_BINARY_STEP, FT_BIPOLAR_STEP, SIGMOID, FT_BIPOLAR_SIGMOID, FT_HYPERBOLIC_TANGENT)
+  - BT_BIT: Only FT_BINARY_STEP (implicit, ignores FunctionType parameter)
+  - BT_SIGN: Only FT_BIPOLAR_STEP (implicit, ignores FunctionType parameter)
+  - Reason: Bit outputs cannot store continuous values like sigmoid/tanh outputs
+- **Implementation requirements**:
+  - CUDA and SSE2 need specialized code for two memory layouts
+  - BIT/SIGN implementations ignore FunctionType and just do threshold (> 0)
+  - Evidence: CUDA ActivationBitKernel doesn't even accept functionType parameter (src/cuda/activation.cu:43-65)
 
 *** Activation Functions (FunctionType enum)
 
 - FT_IDENTITY - Pass through (f(x) = x)
-- FT_BINARY_STEP - Step function for binary
-- FT_BIPOLAR_STEP - Step function for bipolar
-- SIGMOID - Standard sigmoid (deprecated name?)
-- FT_BIPOLAR_SIGMOID - Sigmoid for bipolar range
-- FT_HYPERBOLIC_TANGENT - tanh activation
+- FT_BINARY_STEP - Threshold step for binary (0 if x≤0, 1 if x>0)
+- FT_BIPOLAR_STEP - Threshold step for bipolar (-1 if x≤0, +1 if x>0)
+- SIGMOID - Standard sigmoid 1/(1+e^-x)
+- FT_BIPOLAR_SIGMOID - Bipolar sigmoid -1 + 2/(1+e^-x)
+- FT_HYPERBOLIC_TANGENT - tanh(x)
+
+*Compatibility Matrix*:
+
+| BufferType     | Compatible Activation Functions |
+|----------------|--------------------------------|
+| BT_FLOAT       | ALL (FT_IDENTITY, FT_BINARY_STEP, FT_BIPOLAR_STEP, SIGMOID, FT_BIPOLAR_SIGMOID, FT_HYPERBOLIC_TANGENT) |
+| BT_FLOAT_SMALL | ALL (CPP implementation only) |
+| BT_BIT         | FT_BINARY_STEP (implicit only, ignores parameter) |
+| BT_SIGN        | FT_BIPOLAR_STEP (implicit only, ignores parameter) |
+| BT_BYTE        | NONE (not implemented) |
+
+*Why BT_BIT/BT_SIGN only support step functions*:
+- Outputs stored as packed bits (32 bits per unsigned int)
+- Cannot represent continuous values (0.7234, -0.5, etc.)
+- Only threshold operation (> 0) makes sense for bit outputs
+- FunctionType parameter ignored in BIT/SIGN activation code
+- Test evidence: src/test/learnBufferType.cpp:44-48 shows BIT/SIGN tested without function type variations
+
+*Note on terminology*:
+- "Neuron" refers to rows in the layer weight matrix (used in genetic operations like crossover at neuron level)
+- Packed bit storage is at the bit level, not neuron level
 
 *** Layer Connections
 
@@ -206,13 +253,15 @@ example->addLayersConnection(2, 0);  // Layer 2 → Layer 0 (RECURRENT)
 *** Multiple Implementations
 
 *ImplementationType* enum:
-- IT_C - Pure C++ implementation
-- IT_SSE2 - SIMD optimized (SSE2/XMM registers)
-- IT_CUDA_* - Various CUDA implementations
-  - IT_CUDA_REDUC0
-  - IT_CUDA_REDUC
-  - IT_CUDA_OUT
-  - IT_CUDA_INV
+- IT_C - Pure C++ implementation (portable, baseline performance)
+- IT_SSE2 - SIMD optimized (SSE2/XMM registers, 32-bit code, ~4x speedup)
+  - Two memory layouts: FLOAT (float/float) and BIT/SIGN (bits/bytes)
+  - Three functions to handle FLOAT, BIT, and SIGN
+- IT_CUDA_* - Various CUDA implementations (GPU acceleration, best for training)
+  - IT_CUDA_REDUC0 - FLOAT (float outputs/weights)
+  - IT_CUDA_REDUC - BIT (bit outputs/byte weights, binary 0/1)
+  - IT_CUDA_OUT - SIGN (bit outputs/byte weights, bipolar -1/+1)
+  - IT_CUDA_INV - (Details TBD)
 
 *Factory Class*:
 - newBuffer(size, BufferType, ImplementationType) - Creates buffer
@@ -221,17 +270,34 @@ example->addLayersConnection(2, 0);  // Layer 2 → Layer 0 (RECURRENT)
 
 *Build Targets*:
 - make cpp - Pure C++ (IT_C)
-- make sse2 - SSE2 optimized (IT_SSE2)
+- make sse2 - SSE2 optimized (IT_SSE2) - Currently broken, needs fixing
 - make cuda - CUDA GPU (IT_CUDA_*)
 - make all - All implementations
+
+*Deployment Workflow*:
+- Train: Use CUDA implementation (fastest for evolution)
+- Deploy: Use SSE2 if available (~4x faster than C++), otherwise C++
+- SSE2 uses 32-bit code but can be compiled/linked on x64 architectures
+- Byte weights (BT_BIT/BT_SIGN) show even bigger speedups with SSE2
 
 *** Implementation Directory Structure
 
 - src/factory/cpp/ - C++ implementations
 - src/factory/sse2/ - SSE2 implementations (headers)
-- src/sse2/*.asm - SSE2 assembly implementations
+- src/sse2/*.asm - SSE2 assembly implementations (3 functions: FLOAT, BIT, SIGN)
 - src/factory/cuda/ - CUDA implementations (headers)
-- src/cuda/*.cu - CUDA kernel implementations
+- src/cuda/*.cu - CUDA kernel implementations (3 variants: FLOAT, BIT, SIGN)
+
+*Why 3 functions in SSE2 and CUDA*:
+- Two memory layouts: FLOAT vs BIT/SIGN
+  - FLOAT: float outputs + float weights
+  - BIT/SIGN: bit outputs + byte weights (same layout)
+- Three functions because BIT and SIGN have same layout but different value interpretation:
+  - FLOAT function: handles float outputs/weights
+  - BIT function: handles bit outputs/byte weights, interprets as binary (0/1)
+  - SIGN function: handles bit outputs/byte weights, interprets as bipolar (-1/+1)
+- All other activation functions must use FLOAT buffer type
+- Memory access patterns are critical for SIMD and GPU performance
 
 ** Board Games (src/game/)
 

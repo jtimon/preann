@@ -112,6 +112,13 @@ time ./bin/playChess.exe 100 25
 - Needs territory counting (flood-fill of empty regions)
 - Options: Implement Chinese rules or adapt Fuego's TrompTaylorScore
 
+*SSE2 Implementation*:
+- Currently broken/non-functional
+- Uses 32-bit code (can be compiled/linked on x64 architectures)
+- Historical performance: ~4x speedup on dual-core x64 machine (even bigger for byte weights)
+- Use case: Train on CUDA, deploy on C++ or SSE2 depending on target hardware
+- Priority: Fix SSE2 implementation for deployment performance gains
+
 ** TODO / Future Improvements
 
 *Chess Enhancements*:
@@ -125,6 +132,12 @@ time ./bin/playChess.exe 100 25
 *Go Implementation*:
 - [ ] Fix scoring with proper life-and-death analysis
 - [ ] Enable training once scoring is correct
+
+*Performance Optimization*:
+- [ ] Fix SSE2 implementation (broken, needs compilation/linking fixes)
+- [ ] Benchmark SSE2 vs C++ for deployment scenarios
+- [ ] Document workflow: Train on CUDA → Deploy on SSE2/C++ depending on hardware
+- [ ] Test SSE2 performance gains on various architectures
 
 *Architecture Experiments*:
 - [ ] Test different recurrent layer sizes
@@ -186,5 +199,7 @@ time ./bin/playChess.exe 100 25
 
 - Full chronological log: doc/claude/log.org
 - Architecture details: doc/claude/architecture.org
-- Original thesis: doc/pfc-jorge-timon.org (Spanish)
+- Original thesis: doc/pfc-jorge-timon.org (Spanish, 3277 lines, ~53k words)
+  - Available for reference but not translated (too long, ~28% of weekly x20 token budget)
+  - Can be consulted for specific technical questions as needed
 - Project README: readme.org
