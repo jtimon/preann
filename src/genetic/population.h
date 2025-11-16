@@ -87,6 +87,7 @@ public:
     void setParams(ParametersMap* parametersMap);
 
     void insertIndividual(Individual* individual);
+    void reevaluateAndSort();
     unsigned nextGeneration();
     void learn(unsigned generations);
     void learn(unsigned generations, float goal);

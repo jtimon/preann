@@ -97,9 +97,17 @@ int main(int argc, char *argv[])
             cout << "  Population size: " << populationSize << endl;
             cout << endl;
 
-            cout << "=== FITNESS BEFORE THIS RUN ===" << endl;
-            cout << "Best fitness:  " << population->getBestIndividual()->getFitness() << endl;
-            cout << "Avg fitness:   " << population->getAverageFitness() << endl;
+            cout << "Fitness from previous run (may use old fitness function): ";
+            cout << "Best=" << population->getBestIndividual()->getFitness();
+            cout << " | Avg=" << population->getAverageFitness() << endl;
+
+            // Re-evaluate all individuals with current fitness function
+            cout << "Re-evaluating all individuals with current fitness function..." << endl;
+            population->reevaluateAndSort();
+
+            cout << "Fitness after re-evaluation: ";
+            cout << "Best=" << population->getBestIndividual()->getFitness();
+            cout << " | Avg=" << population->getAverageFitness() << endl;
             cout << endl;
         } else {
             cout << "Creating new population (no save file found)..." << endl;
@@ -124,13 +132,11 @@ int main(int argc, char *argv[])
         for (unsigned gen = 0; gen < generations; gen++) {
             population->nextGeneration();
 
-            // Print progress every 10 generations
-            if ((gen + 1) % 10 == 0 || gen == 0) {
-                cout << "Gen " << population->getGeneration() << ": ";
-                cout << "Best=" << population->getBestIndividual()->getFitness();
-                cout << " | Avg=" << population->getAverageFitness();
-                cout << endl;
-            }
+            // Print progress every generation
+            cout << "Gen " << population->getGeneration() << ": ";
+            cout << "Best=" << population->getBestIndividual()->getFitness();
+            cout << " | Avg=" << population->getAverageFitness();
+            cout << endl;
 
             // Save checkpoint at specified intervals
             if ((gen + 1) % checkpointInterval == 0) {
@@ -154,10 +160,10 @@ int main(int argc, char *argv[])
         }
 
         // Print final statistics
-        cout << endl << "=== FITNESS AFTER THIS RUN ===" << endl;
-        cout << "Generation: " << population->getGeneration() << endl;
-        cout << "Best fitness:  " << population->getBestIndividual()->getFitness() << endl;
-        cout << "Avg fitness:   " << population->getAverageFitness() << endl;
+        cout << endl << "=== FINAL RESULTS ===" << endl;
+        cout << "Generation " << population->getGeneration() << ": ";
+        cout << "Best=" << population->getBestIndividual()->getFitness();
+        cout << " | Avg=" << population->getAverageFitness() << endl;
         cout << endl;
 
         // Convert time to hours/minutes/seconds

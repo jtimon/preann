@@ -299,6 +299,20 @@ void Population::insertIndividual(Individual *individual)
     }
 }
 
+void Population::reevaluateAndSort()
+{
+    // Re-evaluate all individuals with current task/fitness function
+    list<Individual*>::iterator it;
+    FOR_EACH(it, individuals) {
+        task->test(*it);
+    }
+
+    // Sort individuals by fitness (best first)
+    individuals.sort([](Individual* a, Individual* b) {
+        return a->getFitness() > b->getFitness();
+    });
+}
+
 void Population::changeMaxSize(unsigned newSize)
 {
 	while (individuals.size() > newSize){
