@@ -16,7 +16,7 @@ ChessTask::ChessTask(BufferType bufferType, unsigned numTests, bool enableGameLo
 {
     tBoard = new ChessBoard(8, bufferType);
     tNumTests = numTests;
-    tBestOpponent = NULL;  // Start with random opponent (bootstrap)
+    tAdversary = NULL;  // Start with random opponent (bootstrap)
     tEnableGameLogging = enableGameLogging;
     tCounterFile = "data/chess_game_counter.txt";
     tGameCounter = 0;
@@ -29,8 +29,8 @@ ChessTask::ChessTask(BufferType bufferType, unsigned numTests, bool enableGameLo
 ChessTask::~ChessTask()
 {
     delete tBoard;
-    if (tBestOpponent != NULL) {
-        delete tBestOpponent;
+    if (tAdversary != NULL) {
+        delete tAdversary;
     }
 }
 
@@ -43,6 +43,12 @@ void ChessTask::test(Individual* individual)
         SquareState individualPlayer = (i % 2 == 0) ? PLAYER_1 : PLAYER_2;
 
         tBoard->initBoard();
+
+        // Reset recurrent layer state at the start of each game
+        // This gives the network a clean slate to accumulate state across moves
+        // Layer 2 (SIGN/bipolar) will start at all zeros (interpreted as -1)
+        individual->getOutput(2)->reset();
+
         SquareState turn = PLAYER_1;  // White always starts
         unsigned moveCount = 0;
         unsigned maxMoves = 400;  // Prevent infinite games
@@ -53,11 +59,8 @@ void ChessTask::test(Individual* individual)
                     // Neural network being tested plays
                     tBoard->turn(turn, individual);
                 } else {
-                    // Opponent plays: use stored best opponent if available, else random
-                    // Avoid self-play: if testing the best opponent itself, use random
-                    Individual* opponent = (tBestOpponent != NULL && tBestOpponent != individual)
-                                          ? tBestOpponent : NULL;
-                    tBoard->turn(turn, opponent);
+                    // Opponent plays: use fixed adversary if available, else random
+                    tBoard->turn(turn, tAdversary);
                 }
                 moveCount++;
             }
@@ -83,8 +86,8 @@ void ChessTask::test(Individual* individual)
 
         // Log interesting games (checkmate wins/losses only, not draws)
         if (tEnableGameLogging && isCheckmate) {
-            Individual* opponent = (tBestOpponent != NULL && tBestOpponent != individual)
-                                  ? tBestOpponent : NULL;
+            Individual* opponent = (tAdversary != NULL && tAdversary != individual)
+                                  ? tAdversary : NULL;
             logGame(individual, individualPlayer, opponent, moveCount, individualWon);
         }
     }
@@ -106,31 +109,41 @@ Individual* ChessTask::getExample(ParametersMap* parameters)
 {
     // Create example neural network architecture for chess
     // Input: 768 neurons (8x8 squares × 12 piece types)
-    // Hidden: 16-16 (small/fast architecture as requested)
-    // Output: 1 (position evaluation)
+    // Architecture: 768→128(BIT)→128(BIT)→32(SIGN)→1(FLOAT) with recurrent connection
+    // Strategy: Make binary layers bigger (memory efficient with byte weights),
+    //           keep bipolar layer smaller for efficient output layer reading
+    // Recurrent: Layer 2 (SIGN) feeds back to layer 0, providing memory across moves
+    //           in a single game to potentially learn opponent modeling
 
     ImplementationType implementationType;
-    BufferType bufferType;
     FunctionType functionType;
 
     implementationType = (ImplementationType)parameters->getNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION));
-    bufferType = (BufferType)parameters->getNumber(Enumerations::enumTypeToString(ET_BUFFER));
     functionType = (FunctionType)parameters->getNumber(Enumerations::enumTypeToString(ET_FUNCTION));
 
     Individual* example = new Individual(implementationType);
     this->setInputs(example);  // 768 input neurons
 
-    // Hidden layers
-    example->addLayer(16, bufferType, functionType);
-    example->addLayer(16, bufferType, functionType);
+    // Hidden layers - using BIT buffer for first two layers (byte weights)
+    example->addLayer(128, BT_BIT, functionType);    // Layer 0
+    example->addLayer(128, BT_BIT, functionType);    // Layer 1
 
-    // Output layer
-    example->addLayer(1, BT_FLOAT, functionType);
+    // Third hidden layer - SIGN buffer for bipolar values (also byte weights, smaller for efficiency)
+    // This layer will feed back to layer 0, creating recurrent memory
+    example->addLayer(32, BT_SIGN, functionType);    // Layer 2 (recurrent)
 
-    // Connections
-    example->addInputConnection(0, 0);   // Input to first hidden layer
-    example->addLayersConnection(0, 1);  // First to second hidden layer
-    example->addLayersConnection(1, 2);  // Second hidden to output
+    // Output layer - FLOAT with IDENTITY function for position evaluation
+    example->addLayer(1, BT_FLOAT, FT_IDENTITY);     // Layer 3
+
+    // Feedforward connections
+    example->addInputConnection(0, 0);   // Input (768) to first hidden (128)
+    example->addLayersConnection(0, 1);  // First hidden (128) to second hidden (128)
+    example->addLayersConnection(1, 2);  // Second hidden (128) to third hidden (32)
+    example->addLayersConnection(2, 3);  // Third hidden (32) to output (1)
+
+    // Recurrent connection - layer 2 feeds back to layer 0
+    // This provides memory across moves within a single game
+    example->addLayersConnection(2, 0);  // Recurrent: bipolar (32) → first hidden (128)
 
     return example;
 }
@@ -148,25 +161,25 @@ string ChessTask::toString()
     return "CHESS";
 }
 
-void ChessTask::setBestOpponent(Individual* opponent)
+void ChessTask::setAdversary(Individual* adversary)
 {
     // Delete old copy if exists
-    if (tBestOpponent != NULL) {
-        delete tBestOpponent;
+    if (tAdversary != NULL) {
+        delete tAdversary;
     }
 
-    // Make a copy of the opponent so we own it (population may delete original)
-    tBestOpponent = (opponent != NULL) ? opponent->newCopy(true) : NULL;
+    // Make a copy of the adversary so we own it (population may delete original)
+    tAdversary = (adversary != NULL) ? adversary->newCopy(true) : NULL;
 }
 
-Individual* ChessTask::getBestOpponent()
+Individual* ChessTask::getAdversary()
 {
-    return tBestOpponent;
+    return tAdversary;
 }
 
-bool ChessTask::hasStoredOpponent()
+bool ChessTask::hasAdversary()
 {
-    return tBestOpponent != NULL;
+    return tAdversary != NULL;
 }
 
 void ChessTask::loadGameCounter()

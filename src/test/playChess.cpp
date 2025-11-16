@@ -93,8 +93,8 @@ int main(int argc, char *argv[])
             fclose(loadStream);
 
             // Enable competitive co-evolution for loaded populations
-            cout << "Enabling competitive co-evolution (population vs best)..." << endl;
-            chessTask.setBestOpponent(population->getBestIndividual());
+            cout << "Enabling competitive co-evolution (population vs adversary)..." << endl;
+            chessTask.setAdversary(population->getBestIndividual());
             cout << endl;
 
             cout << "Loaded population:" << endl;
@@ -110,6 +110,9 @@ int main(int argc, char *argv[])
             cout << "Re-evaluating all individuals with current fitness function..." << endl;
             population->reevaluateAndSort();
 
+            // Update adversary after re-evaluation (population may have re-sorted)
+            chessTask.setAdversary(population->getBestIndividual());
+
             cout << "Fitness after re-evaluation: ";
             cout << "Best=" << population->getBestIndividual()->getFitness();
             cout << " | Avg=" << population->getAverageFitness() << endl;
@@ -123,10 +126,13 @@ int main(int argc, char *argv[])
 
             cout << "Neural network architecture:" << endl;
             cout << "  Input layer: 768 neurons (8x8x12 piece-aware encoding)" << endl;
-            cout << "  Hidden layer 1: 16 neurons" << endl;
-            cout << "  Hidden layer 2: 16 neurons" << endl;
-            cout << "  Output layer: 1 neuron (position evaluation)" << endl;
-            cout << "  Total connections: 768->16->16->1" << endl;
+            cout << "  Hidden layer 1: 128 neurons (BIT buffer, byte weights)" << endl;
+            cout << "  Hidden layer 2: 128 neurons (BIT buffer, byte weights)" << endl;
+            cout << "  Hidden layer 3: 32 neurons (SIGN buffer for bipolar, byte weights)" << endl;
+            cout << "  Output layer: 1 neuron (FLOAT buffer, IDENTITY function)" << endl;
+            cout << "  Feedforward: 768->128->128->32->1" << endl;
+            cout << "  Recurrent: layer 3 -> layer 1 (memory across moves)" << endl;
+            cout << "  Note: Recurrent state reset at start of each game" << endl;
             cout << endl;
 
             // Keep random opponent for new populations (bootstrap)

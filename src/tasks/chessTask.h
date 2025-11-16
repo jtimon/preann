@@ -15,7 +15,7 @@ class ChessTask : public Task
 private:
     ChessBoard* tBoard;
     unsigned tNumTests;
-    Individual* tBestOpponent;  // Best individual to use as opponent (competitive co-evolution)
+    Individual* tAdversary;  // Fixed adversary for this training run (competitive co-evolution)
 
     // Game logging for interesting (non-draw) games
     bool tEnableGameLogging;
@@ -36,10 +36,10 @@ public:
     virtual Individual* getExample(ParametersMap* parameters);
     virtual float getGoal();
 
-    // Competitive co-evolution: manage best opponent
-    void setBestOpponent(Individual* opponent);
-    Individual* getBestOpponent();
-    bool hasStoredOpponent();
+    // Competitive co-evolution: manage adversary
+    void setAdversary(Individual* adversary);
+    Individual* getAdversary();
+    bool hasAdversary();
 };
 
 #endif /* CHESS_TASK_H_ */

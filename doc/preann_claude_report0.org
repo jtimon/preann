@@ -1672,3 +1672,129 @@ New human vs computer test program (src/test/playGoHuman.cpp):
   2. Implement simplified Chinese rules (easier than Japanese)
   3. Use Fuego's TrompTaylorScore as starting point
 - All approaches require dead stone detection for accurate training
+
+* Chess Implementation - Neural Network Architecture Improvements (2025-11-16)
+
+** Neural Network Architecture Evolution
+
+*Initial Architecture* (768→16→16→1):
+- Very small hidden layers (16 neurons each)
+- Fast but limited learning capacity
+- All layers using parameters-specified buffer types
+
+*Improved Architecture* (768→128→128→32→1):
+- Significantly larger capacity for pattern learning
+- Memory-efficient byte weights (BIT and SIGN buffers)
+- Strategic buffer type selection:
+  - Layer 0: 128 neurons, BT_BIT buffer (byte weights)
+  - Layer 1: 128 neurons, BT_BIT buffer (byte weights)
+  - Layer 2: 32 neurons, BT_SIGN buffer (bipolar -1/+1, byte weights)
+  - Output: 1 neuron, BT_FLOAT buffer, FT_IDENTITY function
+
+*Rationale*:
+- BT_BIT and BT_SIGN use 1 byte per weight vs 4 bytes for BT_FLOAT
+- Larger binary layers (128) for more pattern capacity
+- Smaller bipolar layer (32) reduces connections to float output
+- Less expensive for final layer to read 32 vs 128 weights
+- Should fit easily in 32GB GPU memory even with full population
+
+** Recurrent Neural Network for Opponent Modeling
+
+*Breakthrough Feature*:
+Added recurrent connection from layer 2 (bipolar) back to layer 0 (first hidden layer)
+
+*Architecture Details*:
+```
+Feedforward: Input(768) → Layer0(128) → Layer1(128) → Layer2(32) → Output(1)
+Recurrent:   Layer2(32) ──────────────────┘
+```
+
+*Implementation* (chessTask.cpp:143):
+```cpp
+// Recurrent connection - layer 2 feeds back to layer 0
+// This provides memory across moves within a single game
+example->addLayersConnection(2, 0);
+```
+
+*State Management* (chessTask.cpp:50):
+```cpp
+// Reset recurrent layer state at the start of each game
+// Layer 2 (SIGN/bipolar) will start at all zeros (interpreted as -1)
+individual->getOutput(2)->reset();
+```
+
+*How It Works*:
+1. At start of each game: reset layer 2 output to zeros (-1 in bipolar)
+2. Move 1: Network sees board state + (-1, -1, ..., -1) from layer 2
+3. Move 2: Network sees board state + layer 2 outputs from move 1
+4. Move 3: Network sees board state + layer 2 outputs from move 2
+5. ...game continues with accumulating state...
+6. Next game: reset to zeros again
+
+*Theoretical Benefits*:
+- Network can evolve to use recurrent state for opponent modeling
+- Could learn to detect aggressive vs defensive playing styles
+- Could adapt strategy within a single game based on opponent patterns
+- Potential emergent behavior that stockfish cannot do
+- Stockfish uses supervised learning on databases, can't discover adaptive strategies
+- Our evolutionary approach can stumble upon novel opponent-modeling tactics
+
+*Key Insight*:
+- Resetting only at game start (not between moves) is critical
+- If reset every move, recurrent input would always be -1 (useless)
+- If never reset, first move would be influenced by random state from previous game
+- Networks couldn't evolve to handle inconsistent initial states
+- Solution: Clean slate per game allows consistent evolutionary learning
+
+*Technical Notes*:
+- BT_SIGN buffer: zeros in memory = -1 when interpreted as bipolar values
+- Interface::reset() (interface.cpp:12) handles buffer zeroing
+- Works for all buffer types (BT_FLOAT, BT_BIT, BT_SIGN, BT_BYTE)
+- No changes needed to save/load - recurrent connections save like any other
+
+*Expected Behavior*:
+- Unknown if/how opponent modeling will evolve
+- Internal representation unpredictable (emergent)
+- May never discover useful patterns
+- But if it does: could surprise chess experts
+- "Wait, it plays differently against me vs stockfish!"
+- "How does it detect I'm a newbie and take bigger risks?"
+
+*Status*:
+- Implementation complete and compiled
+- Ready for long training runs
+- Requires monitoring due to larger architecture
+- User will run extended tests
+
+** Competitive Co-Evolution - Adversary Management
+
+*Variable Naming Clarification*:
+Renamed `tBestOpponent` → `tAdversary` throughout codebase for clarity.
+
+*Design Philosophy*:
+- **Within a training run**: Adversary remains fixed (frozen copy from load time)
+- **Between training runs**: New adversary selected (best from previous run after re-evaluation)
+- **Rationale**: Stable fitness landscape within run, gradual co-evolution across runs
+
+*Implementation Flow*:
+1. Load population from file (individuals have old fitness values)
+2. Set task's adversary = copy of current best individual
+3. Re-evaluate all individuals against this adversary
+4. Population may re-sort (different individual could become new best)
+5. Update task's adversary = new best after re-evaluation
+6. Train for N generations with this fixed adversary
+7. Save population
+8. Next run: Steps repeat with (potentially) new adversary
+
+*Key Insight*:
+The adversary doesn't update during `nextGeneration()` calls - it stays frozen for the entire run. This prevents fitness landscape from shifting during training, which would make evolution unstable.
+
+** Known Issues
+
+*Chronometer Inaccuracy*:
+Internal chronometer (Chronometer class) reports significantly lower times than external `time` command:
+- Example: Internal reports 157s (2m 37s), external shows 250s (4m 10s)
+- Discrepancy: ~60% underreporting (almost 2x difference)
+- Workaround: Use external `time` command for accurate measurements
+- Impact: Documentation and user communication only (not critical)
+- TODO: Investigate chronometer implementation if time permits
