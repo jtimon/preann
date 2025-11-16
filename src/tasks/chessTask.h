@@ -17,8 +17,17 @@ private:
     unsigned tNumTests;
     Individual* tBestOpponent;  // Best individual to use as opponent (competitive co-evolution)
 
+    // Game logging for interesting (non-draw) games
+    bool tEnableGameLogging;
+    unsigned tGameCounter;
+    const char* tCounterFile;
+
+    void loadGameCounter();
+    void saveGameCounter();
+    void logGame(Individual* ind, SquareState indPlayer, Individual* opp, unsigned moves, bool indWon);
+
 public:
-    ChessTask(BufferType bufferType, unsigned numTests = 1);
+    ChessTask(BufferType bufferType, unsigned numTests = 1, bool enableGameLogging = false);
     virtual ~ChessTask();
 
     virtual void test(Individual* individual);

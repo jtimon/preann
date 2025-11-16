@@ -18,9 +18,9 @@ int main(int argc, char *argv[])
     try {
         cout << "Board size: 8x8 (standard chess)" << endl << endl;
 
-        // Create a ChessTask
+        // Create a ChessTask (no game logging for demo)
         cout << "Creating ChessTask..." << endl;
-        ChessTask task(BT_BIT, 1);
+        ChessTask task(BT_BIT, 1, false);
         cout << "Task created successfully!" << endl << endl;
 
         // Create two random untrained neural networks
