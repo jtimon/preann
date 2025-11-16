@@ -380,6 +380,9 @@ example->addLayersConnection(2, 0);  // Layer 2 → Layer 0 (RECURRENT)
 - Individual writes neural network structure, then weights
 - Weights written per connection
 - Format version not explicitly versioned (assumed compatible)
+- **Implementation-agnostic**: Save files contain only weights/structure, not implementation-specific data
+- Theory: User can train in CUDA, save, and another user can load/run in C++ or SSE2
+- **Needs testing**: Cross-implementation compatibility not yet verified
 
 *Files*:
 - Chess: data/populations/chess_persist.pop
@@ -393,6 +396,12 @@ example->addLayersConnection(2, 0);  // Layer 2 → Layer 0 (RECURRENT)
 4. Sets parameters via setParams()
 5. Re-evaluates fitness (fitness function may have changed)
 6. Sorts population by new fitness values
+
+*Cross-Implementation Loading*:
+- ImplementationType can be changed after loading via setParams()
+- Weights are implementation-independent (just numerical values)
+- Allows workflow: Train with IT_CUDA → Deploy with IT_C or IT_SSE2
+- **TODO**: Test that populations saved with one implementation load correctly in another
 
 * Current Chess Architecture
 

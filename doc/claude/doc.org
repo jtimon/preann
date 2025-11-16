@@ -135,7 +135,9 @@ time ./bin/playChess.exe 100 25
 
 *Performance Optimization*:
 - [ ] Fix SSE2 implementation (broken, needs compilation/linking fixes)
-- [ ] Benchmark SSE2 vs C++ for deployment scenarios
+- [ ] Benchmark C++ vs CUDA performance on current hardware
+- [ ] Benchmark SSE2 vs C++ for deployment scenarios (once SSE2 fixed)
+- [ ] Test cross-implementation compatibility: Save with CUDA, load with C++
 - [ ] Document workflow: Train on CUDA → Deploy on SSE2/C++ depending on hardware
 - [ ] Test SSE2 performance gains on various architectures
 
