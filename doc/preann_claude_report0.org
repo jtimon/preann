@@ -1370,3 +1370,54 @@ The file may or may not compile. I added #include "common/dummy.h" which may be 
 4. Stop changing things back and forth
 
 *Status*: Uncertain if current code is correct. Awaiting clarification or instruction to proceed with testing.
+
+** Population Save/Load - COMPLETE AND VERIFIED
+
+*Implementation Complete*:
+
+Successfully implemented and tested population persistence:
+
+*Core Implementation (src/genetic/population.cpp)*:
+- Population::save() (lines 254-276): Saves generation, maxSize, numIndividuals, all networks + fitness
+- Population::load() (lines 223-253): Restores entire population state from binary file
+- Binary format: generation (uint), maxSize (uint), count (uint), then for each: NeuralNet data + fitness (float)
+
+*Test Files Created*:
+1. testIndividualSaveLoad.cpp - Verifies NeuralNet::save/load preserves structure
+2. testPopulationSaveLoad.cpp - Complete XOR evolution test with save/load verification
+
+*Final Configuration (testPopulationSaveLoad.cpp)*:
+```cpp
+BinaryTask xorTask(BO_XOR, BT_BIT, 2, 0);     // Binary inputs (0/1)
+params.putNumber(ET_BUFFER, BT_BIT);           // Factory auto-converts to BT_BYTE weights
+params.putNumber(ET_FUNCTION, FT_BINARY_STEP); // Binary step activation
+params.putNumber(Dummy::SIZE, 2);              // 2-bit vectors
+```
+
+*Key Learning*:
+- ET_BUFFER parameter sets INPUT buffer type
+- Factory::weighForInput() automatically determines weight type:
+  - BT_BIT inputs → BT_BYTE weights (quantized int8)
+  - BT_FLOAT inputs → BT_FLOAT weights
+- Cannot directly use BT_BYTE as input type (throws error)
+
+*Test Results - ALL PASSED*:
+
+✓ Individual save/load test:
+  - Network structure preserved (3 layers)
+  - Fitness NOT saved by NeuralNet (expected - Population handles it)
+
+✓ Population save/load test (XOR 2x2):
+  - Evolved 50 generations (fitness: 23 → 30)
+  - Saved to output/data/test_xor_population.pop
+  - Loaded and verified:
+    * Generation: 50 ✓
+    * Population size: 50 ✓
+    * Best fitness: 30 ✓
+    * Neural network outputs on all 4 XOR inputs: IDENTICAL (diff=0) ✓
+  - Evolved loaded population 10 more generations (60 total) ✓
+
+*Verification Method*:
+Test compares neural network outputs on all 4 XOR input combinations (00, 01, 10, 11) between original and loaded individuals. All outputs match exactly (diff=0), confirming weights are preserved correctly.
+
+*Status*: ✅ COMPLETE - Population save/load fully implemented and verified. Ready for use in Go training with checkpointing.

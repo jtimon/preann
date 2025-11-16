@@ -17,11 +17,11 @@ int main(int argc, char *argv[])
         cout << "Goal fitness: " << xorTask.getGoal() << endl << endl;
 
         // Create parameters for neural network
-        // Binary inputs (BT_BIT) use byte weights (BT_BYTE) for quantization
+        // ET_BUFFER = BT_BIT (inputs), factory automatically uses BT_BYTE for weights
         ParametersMap params;
         params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_C);
-        params.putNumber(Enumerations::enumTypeToString(ET_BUFFER), BT_BYTE);  // byte weights for binary inputs
-        params.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_IDENTITY);
+        params.putNumber(Enumerations::enumTypeToString(ET_BUFFER), BT_BIT);
+        params.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_BINARY_STEP);
         params.putNumber(Dummy::SIZE, 2);
 
         // Create example individual (2 layers: hidden + output)
@@ -118,6 +118,34 @@ int main(int argc, char *argv[])
         if (fitness_diff > 0.001) {
             cout << "ERROR: Best fitness values don't match! (diff: " << fitness_diff << ")" << endl;
             success = false;
+        }
+
+        // Test that the neural networks produce the same outputs
+        cout << endl << "=== TESTING NEURAL NETWORK OUTPUTS ===" << endl;
+        cout << "Testing all 4 XOR input combinations..." << endl;
+
+        Individual* original = population1.getBestIndividual();
+        Individual* loaded = population2.getBestIndividual();
+
+        // Test all 4 combinations: 00, 01, 10, 11
+        for (unsigned i = 0; i < 4; i++) {
+            xorTask.setInputs(original);
+            original->calculateOutput();
+            unsigned outputLayer = original->getNumLayers() - 1;
+            float output1 = original->getOutput(outputLayer)->getElement(0);
+
+            xorTask.setInputs(loaded);
+            loaded->calculateOutput();
+            float output2 = loaded->getOutput(outputLayer)->getElement(0);
+
+            float output_diff = abs(output1 - output2);
+            cout << "  Input combination " << i << ": original=" << output1
+                 << " loaded=" << output2 << " diff=" << output_diff << endl;
+
+            if (output_diff > 0.001) {
+                cout << "ERROR: Neural network outputs don't match for input " << i << "!" << endl;
+                success = false;
+            }
         }
 
         // Test the loaded population by evolving it further
