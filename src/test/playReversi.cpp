@@ -1,35 +1,57 @@
 #include <iostream>
+#include <cstdlib>
+#include <sys/stat.h>
 #include "tasks/reversiTask.h"
 #include "genetic/population.h"
 #include "common/chronometer.h"
 
 using namespace std;
 
+bool fileExists(const char* filename) {
+    struct stat buffer;
+    return (stat(filename, &buffer) == 0);
+}
+
 int main(int argc, char *argv[])
 {
-    cout << "=== PREANN Reversi with CUDA Neural Networks ===" << endl << endl;
+    cout << "=== PREANN Reversi Persistent Training ===" << endl << endl;
 
     try {
-        // Create an 8x8 Reversi board with bit-packed representation
-        // and 2 test games per fitness evaluation
+        // Parse positional arguments: ./bin/playReversi.exe <generations> <checkpoint>
+        if (argc < 3) {
+            cout << "Usage: " << argv[0] << " <generations> <checkpoint_interval>" << endl;
+            cout << "  <generations>          Number of generations to evolve" << endl;
+            cout << "  <checkpoint_interval>  Save checkpoint every N generations" << endl;
+            cout << endl;
+            cout << "Example: " << argv[0] << " 100 25" << endl;
+            cout << "  First run: creates population, evolves 100 generations, saves every 25" << endl;
+            cout << "  Second run: loads existing, evolves 100 more generations" << endl;
+            return 1;
+        }
+
+        unsigned generations = atoi(argv[1]);
+        unsigned checkpointInterval = atoi(argv[2]);
+
+        if (generations == 0 || checkpointInterval == 0) {
+            cout << "Error: generations and checkpoint_interval must be positive integers" << endl;
+            return 1;
+        }
+
+        const char* saveFile = "output/data/reversi_persist.pop";
+
+        // Create Reversi task (8x8 board, 2 test games)
         cout << "Creating Reversi task (8x8 board, 2 test games)..." << endl;
         ReversiTask reversiTask(8, BT_BIT, 2);
 
-        // Create example neural network individual with CUDA implementation
+        // Set up population parameters
         ParametersMap params;
         params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_CUDA_REDUC);
         params.putNumber(Enumerations::enumTypeToString(ET_BUFFER), BT_BIT);
         params.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_BIPOLAR_SIGMOID);
-
-        cout << "Creating example neural network (CUDA implementation)..." << endl;
-        Individual* example = reversiTask.getExample(&params);
-        cout << "Neural network created with " << example->getNumLayers() << " layers" << endl;
-
-        // Set up population parameters
         params.putNumber(Population::MUTATION_RANGE, 0.5);
         params.putNumber(Population::SIZE, 100);
         params.putNumber(Population::NUM_SELECTION, 50);
-        params.putNumber(Population::NUM_CROSSOVER, 40);  // Must be even
+        params.putNumber(Population::NUM_CROSSOVER, 40);
         params.putNumber(Population::NUM_PRESERVE, 10);
         params.putNumber(Population::RESET_NUM, 0);
         params.putNumber(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM), SA_TOURNAMENT);
@@ -40,70 +62,106 @@ int main(int argc, char *argv[])
         params.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PER_INDIVIDUAL);
         params.putNumber(Population::MUTATION_NUM, 5);
 
-        // Create population
-        cout << "Creating population of 100 neural networks..." << endl;
-        unsigned populationSize = 100;
-        unsigned maxGenerations = 300;
+        Population* population = NULL;
+        unsigned startGeneration = 0;
 
-        Population population(&reversiTask, example, populationSize, maxGenerations);
-        population.setParams(&params);
+        // Check if save file exists
+        if (fileExists(saveFile)) {
+            cout << "Found existing save file: " << saveFile << endl;
+            cout << "Loading population..." << endl;
 
-        cout << endl << "Starting evolution (300 generations):" << endl;
+            FILE* loadStream = fopen(saveFile, "rb");
+            if (!loadStream) {
+                string error = "Error: Could not open file for reading: " + string(saveFile);
+                throw error;
+            }
+
+            population = new Population(&reversiTask, 100);
+            population->load(loadStream);
+            population->setParams(&params);
+            fclose(loadStream);
+
+            startGeneration = population->getGeneration();
+            cout << "Loaded generation " << startGeneration << " with " << population->getSize() << " individuals" << endl;
+        } else {
+            cout << "No existing save file found. Creating new population..." << endl;
+
+            Individual* example = reversiTask.getExample(&params);
+            cout << "Created example neural network with " << example->getNumLayers() << " layers" << endl;
+
+            population = new Population(&reversiTask, example, 100, 5.0);
+            population->setParams(&params);
+
+            startGeneration = 0;
+            cout << "Created population of 100 individuals" << endl;
+        }
+
+        // Print fitness before first generation of this run
+        cout << endl << "=== FITNESS BEFORE THIS RUN ===" << endl;
+        cout << "Generation: " << population->getGeneration() << endl;
+        cout << "Best fitness: " << population->getBestIndividual()->getFitness() << endl;
+        cout << "Avg fitness:  " << population->getAverageFitness() << endl;
+        cout << endl;
+
+        // Evolution loop
+        cout << "=== EVOLVING FOR " << generations << " GENERATIONS ===" << endl;
+        cout << "Checkpoint interval: " << checkpointInterval << " generations" << endl;
         cout << "Goal fitness: " << reversiTask.getGoal() << endl << endl;
 
         Chronometer chrono;
         chrono.start();
 
-        // Test generation 1 (random individuals)
-        Individual* gen1Best = population.getBestIndividual();
-        cout << "=== GENERATION 1 (Random/Untrained) ===" << endl;
-        cout << "Testing best random individual with 10 games..." << endl;
+        for (unsigned gen = 0; gen < generations; gen++) {
+            population->nextGeneration();
 
-        ReversiTask testTask(8, BT_BIT, 10);
-        testTask.test(gen1Best);
-        float gen1Fitness = gen1Best->getFitness();
-        cout << "Generation 1 best fitness (10 games): " << gen1Fitness << endl;
-        cout << "Average points per game: " << (gen1Fitness - 64*10) / 10.0 << " out of 64" << endl << endl;
+            unsigned currentGen = population->getGeneration();
 
-        // Evolve the population
-        cout << "=== EVOLVING ===" << endl;
-        for (unsigned generation = 0; generation < maxGenerations; generation++) {
-            population.nextGeneration();
-
-            Individual* best = population.getBestIndividual();
-
-            // Print progress every 50 generations
-            if ((generation + 1) % 50 == 0 || generation == 0) {
-                cout << "Generation " << (generation + 1) << ": ";
-                cout << "Best fitness = " << best->getFitness();
-                cout << " (avg: " << population.getAverageFitness() << ")";
+            // Print progress
+            if ((gen + 1) % 10 == 0 || gen == 0) {
+                cout << "Generation " << currentGen << ": ";
+                cout << "Best = " << population->getBestIndividual()->getFitness();
+                cout << " | Avg = " << population->getAverageFitness();
                 cout << endl;
             }
 
-            if (best->getFitness() >= reversiTask.getGoal()) {
-                cout << endl << "GOAL REACHED at generation " << (generation + 1) << "!" << endl;
+            // Save checkpoint
+            if ((gen + 1) % checkpointInterval == 0) {
+                FILE* saveStream = fopen(saveFile, "wb");
+                if (saveStream) {
+                    population->save(saveStream);
+                    fclose(saveStream);
+                    cout << "  --> Checkpoint saved at generation " << currentGen << endl;
+                } else {
+                    cout << "  WARNING: Could not save checkpoint!" << endl;
+                }
+            }
+
+            // Check if goal reached
+            if (population->getBestIndividual()->getFitness() >= reversiTask.getGoal()) {
+                cout << endl << "GOAL REACHED at generation " << currentGen << "!" << endl;
                 break;
             }
         }
 
         chrono.stop();
-        cout << endl << "Evolution completed in " << chrono.getSeconds() << " seconds";
+
+        // Save final state
+        FILE* finalSaveStream = fopen(saveFile, "wb");
+        if (finalSaveStream) {
+            population->save(finalSaveStream);
+            fclose(finalSaveStream);
+            cout << endl << "Final state saved to " << saveFile << endl;
+        }
+
+        // Print fitness after last generation of this run
+        cout << endl << "=== FITNESS AFTER THIS RUN ===" << endl;
+        cout << "Generation: " << population->getGeneration() << endl;
+        cout << "Best fitness: " << population->getBestIndividual()->getFitness() << endl;
+        cout << "Avg fitness:  " << population->getAverageFitness() << endl;
+        cout << endl;
+
+        cout << "Evolution completed in " << chrono.getSeconds() << " seconds";
         cout << " (" << (chrono.getSeconds()/60.0) << " minutes)" << endl;
-
-        // Test final best individual
-        Individual* finalBest = population.getBestIndividual();
-        cout << endl << "=== GENERATION 300 (Evolved) ===" << endl;
-        cout << "Testing best evolved individual with 10 games..." << endl;
-        testTask.test(finalBest);
-        float finalFitness = finalBest->getFitness();
-        cout << "Generation 300 best fitness (10 games): " << finalFitness << endl;
-        cout << "Average points per game: " << (finalFitness - 64*10) / 10.0 << " out of 64" << endl << endl;
-
-        // Show improvement
-        cout << "=== RESULTS ===" << endl;
-        cout << "Improvement: " << (finalFitness - gen1Fitness) << " fitness points" << endl;
-        cout << "Points per game improvement: " << ((finalFitness - gen1Fitness) / 10.0) << endl;
-        cout << "Percentage improvement: " << (((finalFitness - gen1Fitness) / gen1Fitness) * 100.0) << "%" << endl;
 
     } catch (string& error) {
         cerr << "Error: " << error << endl;

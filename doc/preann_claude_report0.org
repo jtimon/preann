@@ -1421,3 +1421,49 @@ params.putNumber(Dummy::SIZE, 2);              // 2-bit vectors
 Test compares neural network outputs on all 4 XOR input combinations (00, 01, 10, 11) between original and loaded individuals. All outputs match exactly (diff=0), confirming weights are preserved correctly.
 
 *Status*: ✅ COMPLETE - Population save/load fully implemented and verified. Ready for use in Go training with checkpointing.
+
+** playReversi.cpp - Persistent Training Implementation
+
+Modified playReversi.cpp to support persistent training with automatic save/load.
+
+*Changes*:
+- Command-line interface changed from no arguments to positional: `./bin/playReversi.exe <generations> <checkpoint_interval>`
+- Fixed save file: `output/data/reversi_persist.pop`
+- Automatic population resume: checks if save file exists, loads if present, creates new if not
+- Checkpoint saving: saves every N generations (configurable via second argument)
+- Progress tracking: prints best/avg/worst fitness before and after each run
+
+*Usage Examples*:
+```bash
+# First run - creates population, trains 100 generations, saves every 25
+./bin/playReversi.exe 100 25
+
+# Second run - loads existing population, trains 100 more generations
+./bin/playReversi.exe 100 25
+
+# Continue with different settings
+./bin/playReversi.exe 50 10
+```
+
+*Output Format*:
+```
+=== FITNESS BEFORE THIS RUN ===
+Generation: 50
+Best fitness:  720.5
+Avg fitness:   685.2
+Worst fitness: 650.0
+
+=== EVOLVING FOR 100 GENERATIONS ===
+...
+=== FITNESS AFTER THIS RUN ===
+Generation: 150
+Best fitness:  755.3
+Avg fitness:   715.8
+Worst fitness: 680.1
+```
+
+*Implementation Details*:
+- Uses fileExists() to check for save file presence
+- Population loaded with Population::load(), parameters set with setParams()
+- Checkpoints saved at intervals, final state always saved
+- Generation counter preserved across runs for continuous training
