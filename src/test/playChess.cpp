@@ -48,10 +48,9 @@ int main(int argc, char *argv[])
         cout << "  Checkpoint interval: " << checkpointInterval << endl;
         cout << "  Save file: " << saveFile << endl << endl;
 
-        // Create Chess task with game logging enabled
+        // Create Chess task (game logging disabled for now)
         cout << "Creating Chess task (8x8 board, 2 test games per individual)..." << endl;
-        cout << "Game logging: Enabled (checkmate games only)" << endl;
-        ChessTask chessTask(BT_BIT, 2, true);
+        ChessTask chessTask(BT_BIT, 2, false);
 
         // Set up population parameters
         ParametersMap params;

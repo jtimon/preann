@@ -198,7 +198,7 @@ void ChessTask::logGame(Individual* ind, SquareState indPlayer, Individual* opp,
 
     // Create filename
     ostringstream filename;
-    filename << "output/games/chess_game" << tGameCounter << ".txt";
+    filename << "output/games/chess/game" << tGameCounter << ".txt";
 
     // Write game file
     ofstream gameFile(filename.str().c_str());

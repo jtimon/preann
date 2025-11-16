@@ -338,16 +338,18 @@ bool ChessBoard::isInCheck(SquareState player) const
 
 bool ChessBoard::wouldBeInCheck(unsigned fromX, unsigned fromY, unsigned toX, unsigned toY, SquareState player) const
 {
-    // Temporarily make the move to check if it results in check
-    ChessPiece temp = pieces[toX][toY];
-    pieces[toX][toY] = pieces[fromX][fromY];
-    pieces[fromX][fromY] = ChessPiece(NO_PIECE, EMPTY);
+    // Create a copy of the board to test the move
+    ChessBoard* testBoard = new ChessBoard(const_cast<ChessBoard*>(this));
 
-    bool inCheck = isInCheck(player);
+    // Make the move on the test board
+    testBoard->pieces[toX][toY] = testBoard->pieces[fromX][fromY];
+    testBoard->pieces[fromX][fromY] = ChessPiece(NO_PIECE, EMPTY);
 
-    // Undo the move
-    pieces[fromX][fromY] = pieces[toX][toY];
-    pieces[toX][toY] = temp;
+    // Check if the move results in check
+    bool inCheck = testBoard->isInCheck(player);
+
+    // Clean up
+    delete testBoard;
 
     return inCheck;
 }
