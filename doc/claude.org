@@ -1,0 +1,188 @@
+#+TITLE: PREANN - Current Status & Quick Reference
+#+AUTHOR: Claude AI Assistant
+#+DATE: 2025-11-16
+
+* Project Overview
+
+*PREANN* = Parallel Reinforcement Evolutionary Artificial Neural Networks
+
+A framework for training neural networks through genetic algorithms with high-performance parallel implementations (C++, SSE2, CUDA).
+
+*Key Features*:
+- Configurable multi-layer neural networks with flexible architectures
+- Genetic evolution (selection, crossover, mutation)
+- Task-based fitness evaluation (games: Chess, Go, Reversi)
+- Multiple implementations: Pure C++, SSE2, CUDA GPU acceleration
+- Persistent training with automatic save/load
+
+* Current Chess Implementation
+
+** Neural Network Architecture
+
+*Recurrent Architecture*: 768→128→128→32→1
+- Input: 768 neurons (8x8 board × 12 piece types)
+- Hidden Layer 0: 128 neurons (BT_BIT buffer, byte weights)
+- Hidden Layer 1: 128 neurons (BT_BIT buffer, byte weights)
+- Hidden Layer 2: 32 neurons (BT_SIGN buffer for bipolar, byte weights)
+- Output: 1 neuron (BT_FLOAT buffer, position evaluation)
+
+*Recurrent Connection*: Layer 2 → Layer 0
+- Provides memory across moves within a single game
+- Reset at game start for consistent learning
+- Potential for emergent opponent modeling behavior
+
+*Buffer Types*:
+- BT_BIT / BT_SIGN: 1 byte per weight (memory efficient)
+- BT_FLOAT: 4 bytes per weight (output layer only)
+
+** Competitive Co-Evolution
+
+*Design*:
+- Fixed adversary within each training run
+- Adversary updates between runs (best individual from previous run)
+- Prevents champion degeneration through self-play
+- Gradual co-evolution across training sessions
+
+*Bootstrap*: New populations train against random opponent initially
+
+** Game Logging
+
+- Logs checkmate games only (not draws)
+- Files: output/games/chess/gameN.txt
+- Includes final board position and piece legend
+- Counter persists: data/chess_game_counter.txt
+- Currently disabled (for performance during development)
+
+* Quick Start
+
+** Build
+
+#+BEGIN_SRC bash
+# C++ implementation (fastest compile)
+make cpp
+
+# CUDA implementation (GPU acceleration)
+make cuda
+
+# Clean build
+make clean && make cpp
+#+END_SRC
+
+** Run Chess Training
+
+#+BEGIN_SRC bash
+# Basic usage: <generations> <checkpoint_interval>
+./bin/playChess.exe 100 25
+
+# Short test run
+./bin/playChess.exe 2 1
+
+# Measure time externally (more accurate)
+time ./bin/playChess.exe 100 25
+#+END_SRC
+
+** Persistent Training
+
+- Automatically saves to: data/populations/chess_persist.pop
+- Loading behavior:
+  - If file exists: loads, re-evaluates, enables competitive co-evolution
+  - If file missing: creates new population with random opponent
+- Resume training: just run the same command again
+
+** Population Management
+
+- Population size: 50 individuals
+- Selection: 25 (tournament size 3)
+- Crossover: 20 (uniform at weight level)
+- Elite preservation: 5
+- Mutation: 3 per individual, range ±0.5
+
+* Known Issues & TODO
+
+** Known Issues
+
+*Chronometer Inaccuracy*:
+- Internal timer underreports by ~60% compared to external `time` command
+- Example: Reports 157s when actual is 250s
+- Workaround: Use external `time` for accurate measurements
+
+*Go Scoring*:
+- Current scoring only counts stones (incorrect)
+- Needs life-and-death analysis for dead stone detection
+- Needs territory counting (flood-fill of empty regions)
+- Options: Implement Chinese rules or adapt Fuego's TrompTaylorScore
+
+** TODO / Future Improvements
+
+*Chess Enhancements*:
+- [ ] Test with 4 games per individual (2 vs adversary, 2 vs random)
+  - Allows network to potentially learn opponent type
+  - More consistent training data
+- [ ] Tune genetic algorithm parameters (selection, crossover, mutation rates)
+- [ ] Benchmark C++ vs CUDA performance at scale
+- [ ] Scale up architecture further if performance allows
+
+*Go Implementation*:
+- [ ] Fix scoring with proper life-and-death analysis
+- [ ] Enable training once scoring is correct
+
+*Architecture Experiments*:
+- [ ] Test different recurrent layer sizes
+- [ ] Try multiple recurrent connections
+- [ ] Experiment with different buffer type combinations
+
+* File Locations
+
+** Source Code
+- Chess task: src/tasks/chessTask.{h,cpp}
+- Chess board: src/game/chessBoard.{h,cpp}
+- Training program: src/test/playChess.cpp
+- Population: src/genetic/population.{h,cpp}
+- Neural network: src/neural/neuralNet.{h,cpp}
+
+** Data Files
+- Population: data/populations/chess_persist.pop
+- Game counter: data/chess_game_counter.txt
+- Game logs: output/games/chess/gameN.txt
+
+** Documentation
+- This file: doc/claude.org (current status)
+- Detailed log: doc/claude_log.org (historical record)
+
+* Development Notes
+
+** Recent Progress (November 2025)
+
+*Chess Implementation*:
+- ✓ Complete chess rules with legal move validation
+- ✓ Checkmate and stalemate detection
+- ✓ Fixed critical checkmate detection bug
+- ✓ Persistent population save/load
+- ✓ Competitive co-evolution with adversary management
+- ✓ Game logging for interesting (checkmate) games
+- ✓ Recurrent neural network for opponent modeling potential
+
+*Architecture Evolution*:
+- Started: 768→16→16→1 (small/fast)
+- Current: 768→128→128→32→1 with recurrence (larger capacity)
+- Strategy: Use byte weights (BIT/SIGN) for memory efficiency
+
+** Key Insights
+
+*Recurrent Networks for Games*:
+- Resetting state at game start (not between moves) is critical
+- Provides consistent initial state for evolutionary learning
+- Potential for emergent opponent modeling behavior
+- Novel capability vs supervised learning approaches (e.g., Stockfish)
+
+*Competitive Co-Evolution*:
+- Fixed adversary per run = stable fitness landscape
+- Adversary updates between runs = gradual improvement
+- Self-play prevents unfair advantage and degeneration
+- Critical: adversary must be tested against itself
+
+** See Also
+
+- Full chronological log: doc/claude_log.org
+- Original thesis: doc/pfc-jorge-timon.org (Spanish)
+- Project README: readme.org
