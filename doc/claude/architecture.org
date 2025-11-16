@@ -1,0 +1,389 @@
+#+TITLE: PREANN - Architecture Overview
+#+AUTHOR: Claude AI Assistant
+#+DATE: 2025-11-16
+
+* Purpose
+
+This document captures the current understanding of PREANN's architecture. It will be updated as we discover or clarify implementation details through development and discussion.
+
+* Core Components
+
+** Neural Network Layer
+
+*** Layer Structure (src/neural/)
+
+*NeuralNet* - Main container class:
+- Manages multiple input layers and hidden/output layers
+- Stores connection graphs between layers
+- Provides calculateOutput() for forward propagation
+- Supports save/load for persistence
+
+*Layer* - Individual layer implementation:
+- Contains output buffer (computed neuron values)
+- Results buffer (pre-activation values, BT_FLOAT)
+- Threshold/bias connection
+- Vector of input connections from other layers
+- Activation function type (FunctionType)
+
+*Connection* - Weighted connections between layers:
+- Abstract base with virtual methods
+- Stores weights and implements forward propagation
+- Crossover and mutation operations on weights
+
+*Buffer* - Data storage abstraction:
+- Multiple implementations for different data types
+- Factory pattern creates appropriate type
+- Virtual interface for operations
+
+*Interface* - Generic data exchange:
+- Used for copying data between buffers
+- Has reset() method to zero out contents
+- getByteSize() returns memory footprint
+
+*** Buffer Types (BufferType enum)
+
+*BT_FLOAT* - Standard floating point:
+- 4 bytes per weight
+- Full precision
+- Used for output layer in chess
+
+*BT_BIT* - Binary representation:
+- 1 byte per weight
+- Values: 0 or 1
+- Memory efficient for hidden layers
+
+*BT_SIGN* - Bipolar/signed representation:
+- 1 byte per weight
+- Values: -1 or +1
+- When zeroed in memory, represents -1
+- Used for recurrent layer in chess
+
+*BT_BYTE* - Byte-based representation:
+- 1 byte per weight
+- Range: 0-255
+
+*BT_FLOAT_SMALL* - Compact float:
+- Smaller than standard float
+- Details TBD
+
+*** Activation Functions (FunctionType enum)
+
+- FT_IDENTITY - Pass through (f(x) = x)
+- FT_BINARY_STEP - Step function for binary
+- FT_BIPOLAR_STEP - Step function for bipolar
+- SIGMOID - Standard sigmoid (deprecated name?)
+- FT_BIPOLAR_SIGMOID - Sigmoid for bipolar range
+- FT_HYPERBOLIC_TANGENT - tanh activation
+
+*** Layer Connections
+
+*Connection Graph*:
+- Stored as SimpleGraph in NeuralNet
+- Two graphs: inputConnectionsGraph, connectionsGraph
+- Allows arbitrary connectivity patterns (feedforward, recurrent, skip connections)
+
+*Adding Connections*:
+- addInputConnection(inputPos, layerPos) - Input to layer
+- addLayersConnection(sourceLayer, destLayer) - Layer to layer
+- Can create recurrent connections (higher layer → lower layer)
+
+*Example - Chess Recurrent Architecture*:
+#+BEGIN_SRC cpp
+// Layers: 0(128), 1(128), 2(32), 3(1)
+example->addInputConnection(0, 0);   // Input → Layer 0
+example->addLayersConnection(0, 1);  // Layer 0 → Layer 1
+example->addLayersConnection(1, 2);  // Layer 1 → Layer 2
+example->addLayersConnection(2, 3);  // Layer 2 → Layer 3 (output)
+example->addLayersConnection(2, 0);  // Layer 2 → Layer 0 (RECURRENT)
+#+END_SRC
+
+** Genetic Algorithm (src/genetic/)
+
+*** Individual
+
+*Inheritance*: Individual extends NeuralNet
+- Adds fitness value
+- Implements genetic operators (crossover, mutation, reset)
+- Can create copies with newCopy(copyWeighs)
+
+*Crossover Operations*:
+- Multiple levels: CL_WEIGH, CL_NEURON, CL_NEURON_INVERTED, CL_LAYER
+- Multiple algorithms: CA_UNIFORM, CA_PROPORTIONAL, CA_MULTIPOINT
+- Operates on bitmaps to determine which weights to swap
+
+*Mutation*:
+- MA_PER_INDIVIDUAL - Fixed number of mutations per individual
+- MA_PROBABILISTIC - Each weight mutated with probability
+- MA_DISABLED - No mutation
+- Adds random value in range [-mutationRange, +mutationRange]
+
+*Reset*:
+- RA_PER_INDIVIDUAL - Reset N random weights
+- RA_PROBABILISTIC - Reset each weight with probability
+- RA_DISABLED - No reset
+- Sets weight to new random value in [-weighRange, +weighRange]
+
+*** Population
+
+*Structure*:
+- List of Individual pointers
+- Reference to Task for fitness evaluation
+- Parameters for genetic operators
+
+*Key Methods*:
+- nextGeneration() - One evolutionary cycle
+  - selection()
+  - crossover()
+  - reset()
+  - mutation()
+- reevaluateAndSort() - Re-test all individuals and re-sort
+- save(FILE*) / load(FILE*) - Persistence
+
+*Selection Algorithms*:
+- SA_ROULETTE_WHEEL - Fitness-proportional selection
+- SA_RANKING - Rank-based selection
+- SA_TOURNAMENT - Tournament selection (configurable size)
+- SA_TRUNCATION - Top N individuals
+
+*Population Parameters*:
+- SIZE - Total population size
+- NUM_SELECTION - How many selected for reproduction
+- NUM_CROSSOVER - How many offspring from crossover
+- NUM_PRESERVE - Elite individuals kept unchanged
+- MUTATION_RANGE - Range for mutation deltas
+- MUTATION_NUM - Number of mutations per individual
+- TOURNAMENT_SIZE - For tournament selection
+- UNIFORM_CROSS_PROB - Probability for uniform crossover
+
+** Task System (src/tasks/)
+
+*** Task Abstract Base
+
+*Interface*:
+- test(Individual*) - Evaluate fitness, set individual->setFitness()
+- setInputs(Individual*) - Configure input layer for task
+- getExample(ParametersMap*) - Create example neural network architecture
+- getGoal() - Return target fitness value
+- toString() - Task name
+
+*** Chess Task
+
+*Board Representation* (ChessBoard):
+- 8x8 board with ChessPiece(type, color)
+- 768-neuron input: 8×8×12 (position × piece type × color)
+- Piece-aware encoding (separate neurons per piece type)
+
+*Evaluation*:
+- Play N test games per individual
+- Alternates colors for fairness (white has first-move advantage)
+- Fitness: +1 win, 0 draw, -1 loss (cumulative across games)
+
+*Competitive Co-Evolution*:
+- tAdversary: Fixed opponent for training run
+- NULL → random opponent (bootstrap)
+- Non-NULL → neural network opponent
+- Updates between runs, frozen within run
+
+*Recurrent State Management*:
+- Resets layer 2 output at start of each game
+- individual->getOutput(2)->reset()
+- Allows memory accumulation across moves
+- Clean slate between games for consistent evolution
+
+*** Go Task
+
+*Board*: 19×19 standard Go board
+*Current Issue*: Scoring only counts stones, doesn't detect dead stones or territory
+*TODO*: Implement proper scoring with life-and-death analysis
+
+*** Reversi Task
+
+*Board*: 8×8 Othello/Reversi board
+*Evaluation*: Piece count difference
+
+** Factory Pattern (src/factory/)
+
+*** Multiple Implementations
+
+*ImplementationType* enum:
+- IT_C - Pure C++ implementation
+- IT_SSE2 - SIMD optimized (SSE2/XMM registers)
+- IT_CUDA_* - Various CUDA implementations
+  - IT_CUDA_REDUC0
+  - IT_CUDA_REDUC
+  - IT_CUDA_OUT
+  - IT_CUDA_INV
+
+*Factory Class*:
+- newBuffer(size, BufferType, ImplementationType) - Creates buffer
+- newConnection(inputBuffer, outputSize) - Creates connection
+- weighForInput(BufferType) - Determines weight type for input
+
+*Build Targets*:
+- make cpp - Pure C++ (IT_C)
+- make sse2 - SSE2 optimized (IT_SSE2)
+- make cuda - CUDA GPU (IT_CUDA_*)
+- make all - All implementations
+
+*** Implementation Directory Structure
+
+- src/factory/cpp/ - C++ implementations
+- src/factory/sse2/ - SSE2 implementations (headers)
+- src/sse2/*.asm - SSE2 assembly implementations
+- src/factory/cuda/ - CUDA implementations (headers)
+- src/cuda/*.cu - CUDA kernel implementations
+
+** Board Games (src/game/)
+
+*** Board Base Class
+
+*Common Interface*:
+- initBoard() - Reset to starting position
+- turn(player, Individual*) - Make a move (NN or random)
+- canMove(player) - Check if player has legal moves
+- endGame() - Check if game is over
+- countPoints(player) - Score for player
+- getInterface() - Input layer interface for neural network
+
+*Move Selection*:
+- If Individual is NULL: random legal move
+- If Individual provided: evaluate all legal moves with NN, pick best
+
+*** ChessBoard
+
+*Representation*:
+- 8×8 array of ChessPiece(type, color)
+- Piece types: PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING
+
+*Input Encoding*:
+- 768 neurons = 8 × 8 × 12
+- 12 = 6 piece types × 2 colors
+- Each square has 12 neurons (one per piece type/color combination)
+- Active neuron = 1, others = 0
+
+*Move Validation*:
+- Piece-specific move patterns
+- Check detection via isInCheck()
+- Legal moves must not leave king in check
+- Uses wouldBeInCheck() with board copy to test moves
+
+*Game End Conditions*:
+- Checkmate: King in check with no legal moves
+- Stalemate: No legal moves but not in check
+- Move limit: 400 moves maximum
+
+*** GoBoard
+
+*Representation*:
+- 19×19 grid
+- Liberties tracking
+- Capture detection
+
+*Current Limitations*:
+- Scoring incomplete (no dead stone detection)
+- No territory counting
+- Training disabled until scoring fixed
+
+*** ReversiBoard
+
+*Representation*:
+- 8×8 grid
+- Flip mechanics for captures
+
+** Parameter System (src/loop/)
+
+*** ParametersMap
+
+*Purpose*: Key-value storage for configuration
+- putNumber(key, value) - Store numeric parameter
+- getNumber(key) - Retrieve numeric parameter
+- Used to configure neural networks and genetic algorithms
+
+*Common Parameters*:
+- ET_IMPLEMENTATION → ImplementationType
+- ET_BUFFER → BufferType
+- ET_FUNCTION → FunctionType
+- Population::SIZE, MUTATION_RANGE, etc.
+
+** Persistence
+
+*** Save Format
+
+*Binary Format*:
+- Population writes generation number, then each individual
+- Individual writes neural network structure, then weights
+- Weights written per connection
+- Format version not explicitly versioned (assumed compatible)
+
+*Files*:
+- Chess: data/populations/chess_persist.pop
+- Counter: data/chess_game_counter.txt (for game logging)
+
+*** Load Process
+
+1. Create Population with task and size
+2. Call population->load(FILE*)
+3. Reads individuals from stream
+4. Sets parameters via setParams()
+5. Re-evaluates fitness (fitness function may have changed)
+6. Sorts population by new fitness values
+
+* Current Chess Architecture
+
+** Network Structure
+
+Layers:
+- Input: 768 neurons (board encoding)
+- Layer 0: 128 neurons, BT_BIT, FT_BIPOLAR_SIGMOID
+- Layer 1: 128 neurons, BT_BIT, FT_BIPOLAR_SIGMOID
+- Layer 2: 32 neurons, BT_SIGN, FT_BIPOLAR_SIGMOID
+- Output (Layer 3): 1 neuron, BT_FLOAT, FT_IDENTITY
+
+Connections:
+- Input → Layer 0 (feedforward)
+- Layer 0 → Layer 1 (feedforward)
+- Layer 1 → Layer 2 (feedforward)
+- Layer 2 → Layer 3 (feedforward, output)
+- Layer 2 → Layer 0 (recurrent)
+
+** Population Configuration
+
+- Size: 50 individuals
+- Selection: 25 (SA_TOURNAMENT, size 3)
+- Crossover: 20 (CL_WEIGH, CA_UNIFORM, prob 0.5)
+- Elite: 5 preserved
+- Mutation: 3 per individual (MA_PER_INDIVIDUAL), range ±0.5
+- Reset: Disabled (RA_DISABLED)
+- Initial weight range: ±5.0
+
+** Training Process
+
+1. Load or create population
+2. If loaded: set adversary, re-evaluate
+3. For N generations:
+   - selection() - Pick parents
+   - crossover() - Create offspring
+   - reset() - (disabled currently)
+   - mutation() - Mutate weights
+   - Implicit re-evaluation during selection
+4. Save population at checkpoint intervals
+
+* Open Questions / TBD
+
+- [ ] How does CUDA implementation differ from C++? (memory management, batching?)
+- [ ] What are the different CUDA variants (REDUC0, REDUC, OUT, INV)?
+- [ ] How does SSE2 implementation work? (vector operations on weights?)
+- [ ] Connection class virtual methods - full interface?
+- [ ] Exact format of save files?
+- [ ] How does competitive co-evolution update adversary during nextGeneration()? (Currently: doesn't update within run)
+- [ ] Buffer interface complete method list?
+
+* Notes
+
+This document will evolve as we:
+- Implement new features
+- Discover implementation details
+- Clarify misunderstandings
+- Add new components
+
+Last updated: 2025-11-16

@@ -146,8 +146,9 @@ time ./bin/playChess.exe 100 25
 - Game logs: output/games/chess/gameN.txt
 
 ** Documentation
-- This file: doc/claude.org (current status)
-- Detailed log: doc/claude_log.org (historical record)
+- This file: doc/claude/doc.org (current status)
+- Detailed log: doc/claude/log.org (historical record)
+- Architecture: doc/claude/architecture.org (technical details)
 
 * Development Notes
 
@@ -183,6 +184,7 @@ time ./bin/playChess.exe 100 25
 
 ** See Also
 
-- Full chronological log: doc/claude_log.org
+- Full chronological log: doc/claude/log.org
+- Architecture details: doc/claude/architecture.org
 - Original thesis: doc/pfc-jorge-timon.org (Spanish)
 - Project README: readme.org
