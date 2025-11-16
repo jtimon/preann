@@ -126,6 +126,13 @@ int main(int argc, char *argv[])
 
             // Save checkpoint
             if ((gen + 1) % checkpointInterval == 0) {
+                // Print fitness at checkpoint
+                if ((gen + 1) % 10 != 0 && gen != 0) {  // Don't duplicate if already printed
+                    cout << "Generation " << currentGen << ": ";
+                    cout << "Best = " << population->getBestIndividual()->getFitness();
+                    cout << " | Avg = " << population->getAverageFitness();
+                    cout << endl;
+                }
                 FILE* saveStream = fopen(saveFile, "wb");
                 if (saveStream) {
                     population->save(saveStream);
@@ -160,8 +167,12 @@ int main(int argc, char *argv[])
         cout << "Avg fitness:  " << population->getAverageFitness() << endl;
         cout << endl;
 
-        cout << "Evolution completed in " << chrono.getSeconds() << " seconds";
-        cout << " (" << (chrono.getSeconds()/60.0) << " minutes)" << endl;
+        float seconds = chrono.getSeconds();
+        int hours = (int)(seconds / 3600);
+        int minutes = (int)((seconds - hours * 3600) / 60);
+        float remainingSeconds = seconds - hours * 3600 - minutes * 60;
+        cout << "Evolution completed in " << seconds << " seconds";
+        cout << " (" << hours << "h " << minutes << "m " << remainingSeconds << "s)" << endl;
 
     } catch (string& error) {
         cerr << "Error: " << error << endl;

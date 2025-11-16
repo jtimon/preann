@@ -1467,3 +1467,129 @@ Worst fitness: 680.1
 - Population loaded with Population::load(), parameters set with setParams()
 - Checkpoints saved at intervals, final state always saved
 - Generation counter preserved across runs for continuous training
+
+** playGo.cpp - Persistent Training Implementation
+
+Modified playGo.cpp to support persistent training with automatic save/load (matching playReversi pattern).
+
+*Changes*:
+- Command-line interface changed from named arguments (--load, --save) to positional: `./bin/playGo.exe <generations> <checkpoint_interval>`
+- Fixed save file: `output/data/go_persist.pop`
+- Automatic population resume: checks if save file exists, loads if present, creates new if not
+- Checkpoint saving: saves every N generations (configurable via second argument)
+- Progress tracking: prints best/avg fitness before and after each run
+
+*Usage Examples*:
+```bash
+# First run - creates population, trains 100 generations, saves every 25
+./bin/playGo.exe 100 25
+
+# Second run - loads existing population, trains 100 more generations
+./bin/playGo.exe 100 25
+
+# Continue with different settings
+./bin/playGo.exe 50 10
+```
+
+*Implementation Details*:
+- Uses same pattern as playReversi.cpp
+- Fixed save file simplifies workflow (no need to specify file paths)
+- Generation counter preserved across runs
+- Both programs can now be used for incremental, resumable training sessions
+
+** Chronometer Bug Fix - Critical Time Reporting Error
+
+Fixed critical bug in chronometer.cpp:60 that was causing times to be reported 1000x larger than actual.
+
+*Problem*:
+- Code was dividing by CLOCKS_PER_M_SEC (milliseconds) instead of CLOCKS_PER_SEC
+- This caused times to be inflated by 1000x
+- Example: 1.8 seconds was reported as 1800 seconds (30 minutes)
+
+*Fix*:
+```cpp
+// Before (WRONG):
+timeInSeconds = (end_time - start_time) / CLOCKS_PER_M_SEC;
+
+// After (CORRECT):
+timeInSeconds = (end_time - start_time) / (float)CLOCKS_PER_SEC;
+```
+
+*Impact*:
+- All previous time measurements were incorrect by factor of 1000
+- playReversi and playGo now report accurate execution times
+- Time display improved to show hours, minutes, and seconds: "(Xh Ym Zs)"
+
+** demoGo.cpp - Game Recording and Visualization
+
+Enhanced demoGo.cpp to play and record complete games for analysis.
+
+*Changes*:
+- Removed verbose status output, simplified to essential information only
+- Now plays a complete game between two random neural networks
+- Records all board states to output/data/go_demo_game.txt
+- Uses proper Go board grid format with connecting lines
+- Displays final scores for both players
+- Supports command-line board size argument (default 9x9)
+
+*Usage*:
+```bash
+# Play with default 9x9 board
+./bin/demoGo.exe
+
+# Play with custom board size (5-19)
+./bin/demoGo.exe 5
+```
+
+*Output Format*:
+The game file shows each move with proper Go board grid visualization:
+```
+    0   1   2   3   4   5   6   7   8
+0   .---.---.---.---.---.---.---.---.
+    |   |   |   |   |   |   |   |   |
+1   .---.---.---.---.---.---.---.---.
+    |   |   |   |   |   |   |   |   |
+...
+```
+
+*Board Symbols*:
+- `.` = empty intersection
+- `@` = Player 1 (black)
+- `O` = Player 2 (white)
+- Lines show Go board grid connections
+
+** Go Task Issues Discovered
+
+Testing revealed that the Go task implementation has incomplete game ending logic.
+
+*Issues Found*:
+1. *No Pass Mechanism*: Players cannot pass their turn (required in Go)
+   - Board base class doesn't support passing
+   - In Go, two consecutive passes should end the game
+   - Currently games only end when no legal moves exist OR artificial move limit reached
+
+2. *endGame() Logic*: Uses Board base class implementation
+   - Returns true only when neither player has legal moves: `canMove(PLAYER_1) || canMove(PLAYER_2)`
+   - In Go, games should end when both players pass consecutively
+   - Current implementation causes games to fill the entire board
+
+3. *Observed Behavior*:
+   - demoGo games reach move limit (boardSize * boardSize * 2)
+   - Games don't end naturally through passing
+   - Example: 9x9 game played 163 moves, ended due to limit not game rules
+
+*Root Cause*:
+- Board class was designed for Reversi where:
+  - Players cannot pass
+  - Game ends when no legal moves exist
+  - Board typically fills up completely
+- Go has different ending rules:
+  - Players can and should pass when no good moves available
+  - Game ends on two consecutive passes
+  - Board rarely fills completely
+
+*TODO*:
+- Implement pass mechanism in Board class or GoBoard override
+- Track consecutive passes (need counter)
+- Override endGame() in GoBoard to check for two consecutive passes
+- Modify turn() to allow passing when player wants to pass

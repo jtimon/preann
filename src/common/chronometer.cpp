@@ -57,7 +57,7 @@ void Chronometer::stop()
         throw error;
     } else {
         end_time = clock();
-        timeInSeconds = (end_time - start_time) / CLOCKS_PER_M_SEC;
+        timeInSeconds = (end_time - start_time) / (float)CLOCKS_PER_SEC;
         start_time = -1;
         end_time = -1;
     }
