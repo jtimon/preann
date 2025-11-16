@@ -45,6 +45,15 @@ A framework for training neural networks through genetic algorithms with high-pe
 
 *Bootstrap*: New populations train against random opponent initially
 
+*Expected Fitness Drop Between Sessions*:
+- When adversary updates to best from previous session, fitness SHOULD drop
+- This indicates evolution is working - the evolved network is harder than random
+- Neural networks have deterministic strategy (even if randomly initialized)
+- Random player has NO strategy (different random moves each turn)
+- Even after 2 generations, best evolved network >> random player
+- If fitness doesn't drop on adversary update, evolution may not be working
+- Population then adapts to new stronger adversary over subsequent generations
+
 ** Game Logging
 
 - Logs checkmate games only (not draws)
@@ -88,6 +97,20 @@ time ./bin/playChess.exe 100 25
   - If file exists: loads, re-evaluates, enables competitive co-evolution
   - If file missing: creates new population with random opponent
 - Resume training: just run the same command again
+
+** CRITICAL: Evolved Populations Are Irreplaceable
+
+*Why .pop files are precious*:
+- Evolved populations represent hours/days of computational investment
+- Unlike supervised learning, you CANNOT retrain and get the same results
+- Evolutionary algorithms explore stochastically - interesting behaviors may NEVER emerge again
+- Each .pop file is a unique research artifact
+
+*Rules*:
+- **NEVER delete data/populations/*.pop files**
+- **NEVER run training without explicit user instruction**
+- Treat .pop files as irreplaceable experimental data
+- Testing/benchmarking should use COPIES or separate files
 
 ** Population Management
 

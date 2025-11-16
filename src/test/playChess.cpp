@@ -54,7 +54,19 @@ int main(int argc, char *argv[])
 
         // Set up population parameters
         ParametersMap params;
-        params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_C);
+
+        // Select implementation based on build type
+        #if defined(CUDA_IMPL)
+            cout << "Using CUDA implementation (IT_CUDA_OUT)" << endl;
+            params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_CUDA_OUT);
+        #elif defined(SSE2_IMPL)
+            cout << "Using SSE2 implementation (IT_SSE2)" << endl;
+            params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_SSE2);
+        #else
+            cout << "Using C++ implementation (IT_C)" << endl;
+            params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_C);
+        #endif
+
         params.putNumber(Enumerations::enumTypeToString(ET_BUFFER), BT_BIT);
         params.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_BIPOLAR_SIGMOID);
         params.putNumber(Dummy::WEIGHS_RANGE, 5.0);

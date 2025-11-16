@@ -231,6 +231,13 @@ example->addLayersConnection(2, 0);  // Layer 2 → Layer 0 (RECURRENT)
 - Non-NULL → neural network opponent
 - Updates between runs, frozen within run
 
+*Why Evolved Network >> Random Player*:
+- Neural network: Deterministic strategy (same weights → same moves for same position)
+- Random player: No strategy, different random move each turn
+- Even poorly-evolved network has consistent evaluation function
+- This makes even weak evolved networks significantly harder than random
+- Fitness drop when switching from random to evolved adversary = proof evolution works
+
 *Recurrent State Management*:
 - Resets layer 2 output at start of each game
 - individual->getOutput(2)->reset()
@@ -402,6 +409,21 @@ example->addLayersConnection(2, 0);  // Layer 2 → Layer 0 (RECURRENT)
 - Weights are implementation-independent (just numerical values)
 - Allows workflow: Train with IT_CUDA → Deploy with IT_C or IT_SSE2
 - **TODO**: Test that populations saved with one implementation load correctly in another
+
+*** CRITICAL: Evolved Populations Are Irreplaceable
+
+*Fundamental Difference from Supervised Learning*:
+- Backpropagation: Can retrain on same dataset → reproducible results
+- Evolution: Stochastic search through massive space → results may NEVER recur
+- A .pop file with interesting emergent behavior is a unique scientific artifact
+- Hours/days of computation cannot be casually recreated
+
+*Handling Rules*:
+- **NEVER delete .pop files** - they represent irreplaceable research data
+- **NEVER run training processes** without explicit user instruction
+- For testing/benchmarking: use COPIES or separate temporary files
+- Treat data/populations/ as a sacred directory of experimental results
+- Each evolved individual is unique - you cannot "just train again"
 
 * Current Chess Architecture
 
