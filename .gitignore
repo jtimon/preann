@@ -2,4 +2,4 @@ bin/
 build/
 fuego_source/
 output/games/
-data/
+data/chess_game_counter.txt
