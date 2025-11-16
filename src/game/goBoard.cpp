@@ -5,7 +5,7 @@
 using namespace std;
 
 GoBoard::GoBoard(unsigned size, BufferType bufferType) :
-        Board(size, bufferType), tPreviousBoardHash(0)
+        Board(size, bufferType), tPreviousBoardHash(0), consecutivePasses(0)
 {
     // Standard Go board sizes are 9x9, 13x13, and 19x19
     // But we'll allow any size for experimentation
@@ -20,7 +20,7 @@ GoBoard::GoBoard(unsigned size, BufferType bufferType) :
 }
 
 GoBoard::GoBoard(GoBoard* other) :
-        Board(other)
+        Board(other), tPreviousBoardHash(0), consecutivePasses(0)
 {
 }
 
@@ -84,6 +84,9 @@ bool GoBoard::legalMove(unsigned xPos, unsigned yPos, SquareState player)
 
 void GoBoard::makeMove(unsigned xPos, unsigned yPos, SquareState player)
 {
+    // Reset pass counter - a move was made (not a pass)
+    consecutivePasses = 0;
+
     // Low-hanging fruit: basic validations and stone placement
 
     // Check 1: Position must be on the board
@@ -338,4 +341,95 @@ bool GoBoard::wouldCapture(unsigned xPos, unsigned yPos, SquareState player)
     }
 
     return false;
+}
+
+// ============================================================================
+// Pass Mechanism Implementation
+// ============================================================================
+
+void GoBoard::turn(SquareState player, Individual* individual)
+{
+    // Override Board::turn() to add passing as a move option
+    // This is mostly a copy of Board::turn() with pass added
+
+    if (player == EMPTY) {
+        std::string error = "GoBoard::turn : Empty square is not a player.";
+        throw error;
+    }
+
+    float maxQuality = 0;
+    vector<Move> moves;
+
+    // Evaluate all board positions as potential moves
+    for (int x = 0; x < tSize; ++x) {
+        for (int y = 0; y < tSize; ++y) {
+            if (legalMove(x, y, player)) {
+                Move move;
+                move.xPos = x;
+                move.yPos = y;
+                if (individual == NULL) {
+                    move.quality = computerEstimation(x, y, player);
+                } else {
+                    move.quality = individualEstimation(x, y, player, individual);
+                }
+                if (move.quality >= maxQuality || moves.size() == 0) {
+                    maxQuality = move.quality;
+                    moves.push_back(move);
+                }
+            }
+        }
+    }
+
+    // Add PASS as a move option
+    // Pass is evaluated using current board state (unchanged)
+    Move passMove;
+    passMove.xPos = tSize;  // Use out-of-bounds position as sentinel for pass
+    passMove.yPos = tSize;
+
+    if (individual == NULL) {
+        // For computer estimation, passing gets a modest score
+        // So computer can choose to pass if no good moves available
+        passMove.quality = 5.0;
+    } else {
+        // For neural network, evaluate current board position as-is
+        passMove.quality = individual->getOutput(individual->getNumLayers() - 1)->getElement(0);
+    }
+
+    if (passMove.quality >= maxQuality || moves.size() == 0) {
+        maxQuality = passMove.quality;
+        moves.push_back(passMove);
+    }
+
+    // Collect all moves with maximum quality
+    vector<Move> bestMoves;
+    for (int i = 0; i < moves.size(); ++i) {
+        if (moves[i].quality == maxQuality) {
+            bestMoves.push_back(moves[i]);
+        }
+    }
+
+    // Choose randomly among best moves
+    if (bestMoves.size() > 0) {
+        Move chosenMove = bestMoves[Random::positiveInteger(bestMoves.size())];
+
+        // Check if pass was chosen (sentinel position)
+        if (chosenMove.xPos == tSize && chosenMove.yPos == tSize) {
+            pass();
+        } else {
+            makeMove(chosenMove.xPos, chosenMove.yPos, player);
+        }
+    }
+}
+
+void GoBoard::pass()
+{
+    // Pass: player declines to make a move
+    // Board state unchanged, just increment pass counter
+    consecutivePasses++;
+}
+
+bool GoBoard::endGame()
+{
+    // Game ends when both players pass consecutively
+    return consecutivePasses >= 2;
 }

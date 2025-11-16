@@ -1588,8 +1588,87 @@ Testing revealed that the Go task implementation has incomplete game ending logi
   - Game ends on two consecutive passes
   - Board rarely fills completely
 
+** Pass Mechanism Implementation - COMPLETE
+
+Successfully implemented passing mechanism for Go to enable natural game endings.
+
+*Implementation Complete*:
+
+1. *GoBoard::pass()* - Increments consecutivePasses counter
+2. *GoBoard::endGame()* - Returns true when consecutivePasses >= 2
+3. *GoBoard::turn()* - Override to add pass as a move option
+   - Pass evaluated like any other move
+   - Uses sentinel position (tSize, tSize) to represent pass
+   - Pass quality: 5.0 for computer, current NN output for neural network
+   - Automatically resets consecutivePasses to 0 in makeMove()
+4. *GoBoard members* - Added consecutivePasses tracking variable
+
+*Technical Details*:
+
+Pass Implementation (goBoard.cpp:350-422):
+- Override Board::turn() to add pass as a move option
+- Pass evaluated with current board state (no change)
+- For computer estimation: quality = 5.0 (moderate score)
+- For neural network: quality = current output (evaluate "do nothing")
+- Sentinel position (tSize, tSize) signals pass was chosen
+- Regular moves reset consecutivePasses = 0
+
+*Testing*:
+
+Created playGoHuman.cpp - Human vs random computer test program
+- Supports standard Go notation (A-T skipping I, rows from boardSize to 1)
+- "pass" command for passing
+- ASCII board visualization with proper grid alignment
+- Real-time game display
+- Testing revealed issues:
+  1. Random computer now passes when appropriate (pass quality fixed 0.0 → 5.0)
+  2. Scoring is incorrect - counts only stones, not territory or dead stones
+
+*Known Issues*:
+
+*Scoring Problem* - CRITICAL FOR TRAINING
+- countPoints() inherited from Board just counts stones
+- Doesn't detect dead stones (requires life-and-death analysis)
+- Doesn't count territory (requires flood-fill of empty regions)
+- Example: User showed game where all white stones were dead but scored as alive
+- Impact: Networks will learn wrong strategies without proper scoring
+- Solution: Need to implement proper Go scoring with dead stone detection
+
+*Fuego Integration Investigation*:
+
+Explored Fuego (LGPL Go engine) for scoring implementation:
+- Cloned from GitHub mirror (kenjyoung/fuego)
+- Added fuego_source/ to .gitignore
+- Key files identified:
+  - go/GoBoardUtil.h/cpp - ScorePosition(), ScoreSimpleEndPosition(), TrompTaylorScore()
+  - go/GoBensonSolver.cpp - Benson's algorithm for unconditional life
+  - go/GoSafetySolver.cpp - Safety analysis for life-and-death
+  - go/GoRegion.cpp - Territory and region detection
+- TrompTaylorScore() implements Chinese rules (stone + territory counting)
+- ScorePosition() does full scoring with dead stone detection
+- All require complex life-and-death analysis
+
+*playGoHuman.cpp Test Program*:
+
+New human vs computer test program (src/test/playGoHuman.cpp):
+- Standard Go notation: letters A-T (skipping I), rows from boardSize down to 1
+- Board display with proper grid alignment (stones at intersections)
+- ASCII format:
+  ```
+     A   B   C   D   E
+  5  .---.---.---.---.  5
+     |   |   |   |   |
+  4  .---@---.---O---.  4
+  ```
+- Multiple iterations to fix alignment issues
+- Pass command: type "pass"
+- Move command: type "D4", "e16", etc.
+- Final scores displayed (currently incorrect - counts stones only)
+
 *TODO*:
-- Implement pass mechanism in Board class or GoBoard override
-- Track consecutive passes (need counter)
-- Override endGame() in GoBoard to check for two consecutive passes
-- Modify turn() to allow passing when player wants to pass
+- Implement proper Go scoring with life-and-death analysis
+- Options:
+  1. Extract and adapt Fuego's scoring code
+  2. Implement simplified Chinese rules (easier than Japanese)
+  3. Use Fuego's TrompTaylorScore as starting point
+- All approaches require dead stone detection for accurate training

@@ -18,6 +18,9 @@ private:
     // Ko rule: store previous board state hash to detect immediate recapture
     unsigned long long tPreviousBoardHash;
 
+    // Pass tracking: game ends when both players pass consecutively
+    unsigned consecutivePasses;
+
     // Helper functions for Go rules implementation
     void findGroup(unsigned xPos, unsigned yPos, SquareState player,
                    bool visited[][19], std::vector<std::pair<unsigned, unsigned>>& group);
@@ -38,6 +41,15 @@ public:
     virtual void makeMove(unsigned xPos, unsigned yPos, SquareState player);
     virtual float computerEstimation(unsigned xPos, unsigned yPos, SquareState player);
     virtual float individualEstimation(unsigned xPos, unsigned yPos, SquareState player, Individual* individual);
+
+    // Override turn() to add passing as a move option
+    virtual void turn(SquareState player, Individual* individual = NULL);
+
+    // Override endGame() to check for two consecutive passes
+    virtual bool endGame();
+
+    // Pass move - increments consecutive pass counter
+    void pass();
 };
 
 #endif /* GOBOARD_H_ */
