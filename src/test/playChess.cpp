@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
         cout << "  Save file: " << saveFile << endl << endl;
 
         // Create Chess task
-        cout << "Creating Chess task (8x8 board, 2 test games per individual)..." << endl;
-        ChessTask chessTask(BT_BIT, 2);
+        cout << "Creating Chess task (8x8 board, 10 test games per individual)..." << endl;
+        ChessTask chessTask(BT_BIT, 10);
 
         // Set up population parameters
         ParametersMap params;
@@ -219,8 +219,8 @@ int main(int argc, char *argv[])
 
                 turn = Board::opponent(turn);
 
-                if (moveNum > 200) {
-                    gameFile << "Game ended due to move limit (200 moves)" << endl;
+                if (moveNum > 400) {
+                    gameFile << "Game ended due to move limit (400 moves)" << endl;
                     break;
                 }
             }

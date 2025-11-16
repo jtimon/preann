@@ -32,7 +32,7 @@ void ChessTask::test(Individual* individual)
         tBoard->initBoard();
         SquareState turn = PLAYER_1;  // White always starts
         unsigned moveCount = 0;
-        unsigned maxMoves = 200;  // Prevent infinite games
+        unsigned maxMoves = 400;  // Prevent infinite games
 
         while (!tBoard->endGame() && moveCount < maxMoves) {
             if (tBoard->canMove(turn)) {
@@ -51,16 +51,18 @@ void ChessTask::test(Individual* individual)
         // Calculate fitness based on win/loss/draw
         // Chess has no "points", just outcomes
         if (tBoard->isCheckmate(Board::opponent(individualPlayer))) {
-            fitness += 100.0;  // Win
+            fitness += 1.0;  // Win
         } else if (tBoard->isCheckmate(individualPlayer)) {
-            fitness += 0.0;    // Loss
+            fitness += -1.0;    // Loss
         } else {
-            fitness += 50.0;   // Draw/stalemate/timeout
+            fitness += 0.0;   // Draw/stalemate/timeout
         }
     }
 
-    // Average fitness across all games
-    individual->setFitness(fitness / tNumTests);
+    // Total fitness across all games (not averaged)
+    // Max fitness = tNumTests (winning all games)
+    // Min fitness = -tNumTests (losing all games)
+    individual->setFitness(fitness);
 }
 
 void ChessTask::setInputs(Individual* individual)
@@ -105,10 +107,10 @@ Individual* ChessTask::getExample(ParametersMap* parameters)
 
 float ChessTask::getGoal()
 {
-    // Goal fitness = consistently winning
-    // Win = 100, Draw = 50, Loss = 0
-    // Goal: average of 90+ (winning most games)
-    return 90.0;
+    // Goal fitness = winning all games
+    // Win = +1, Draw = 0, Loss = -1
+    // Goal: tNumTests (winning all tNumTests games)
+    return (float)tNumTests;
 }
 
 string ChessTask::toString()
