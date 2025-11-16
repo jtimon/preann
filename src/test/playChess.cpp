@@ -6,6 +6,8 @@
  */
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <cstdlib>
 #include <sys/stat.h>
 #include "tasks/chessTask.h"
@@ -39,7 +41,7 @@ int main(int argc, char *argv[])
 
         unsigned generations = atoi(argv[1]);
         unsigned checkpointInterval = atoi(argv[2]);
-        const char* saveFile = "output/data/populations/chess_persist.pop";
+        const char* saveFile = "data/populations/chess_persist.pop";
 
         cout << "Configuration:" << endl;
         cout << "  Generations: " << generations << endl;
@@ -169,6 +171,79 @@ int main(int argc, char *argv[])
             cout << " (" << hours << "h " << minutes << "m " << secs << "s)";
         }
         cout << endl;
+
+        // Play a demonstration game with the best individual vs computer
+        cout << endl << "Playing demonstration game (best individual vs computer)..." << endl;
+
+        ostringstream gameFilename;
+        gameFilename << "output/games/chess_generation" << population->getGeneration() << ".txt";
+
+        ofstream gameFile(gameFilename.str().c_str());
+        if (gameFile.is_open()) {
+            ChessBoard demoBoard(8, BT_BIT);
+            demoBoard.initBoard();
+
+            gameFile << "=== Chess Training Game ===" << endl;
+            gameFile << "Generation: " << population->getGeneration() << endl;
+            gameFile << "Best individual fitness: " << population->getBestIndividual()->getFitness() << endl;
+            gameFile << "White (trained NN) vs Black (random computer)" << endl;
+            gameFile << "White pieces: P R N B Q K (uppercase)" << endl;
+            gameFile << "Black pieces: p r n b q k (lowercase)" << endl << endl;
+
+            gameFile << "Initial board:" << endl;
+            demoBoard.printBoard(gameFile);
+            gameFile << endl;
+
+            Individual* bestIndividual = population->getBestIndividual();
+            int moveNum = 0;
+            SquareState turn = PLAYER_1;
+
+            while (!demoBoard.endGame()) {
+                if (!demoBoard.canMove(turn)) {
+                    gameFile << (turn == PLAYER_1 ? "White" : "Black") << " has no legal moves!" << endl;
+                    break;
+                }
+
+                moveNum++;
+
+                // Best individual plays as White, computer as Black
+                if (turn == PLAYER_1) {
+                    demoBoard.turn(turn, bestIndividual);
+                } else {
+                    demoBoard.turn(turn, NULL);  // NULL triggers computer opponent
+                }
+
+                gameFile << "After move " << moveNum << " (" << (turn == PLAYER_1 ? "White" : "Black") << "):" << endl;
+                demoBoard.printBoard(gameFile);
+                gameFile << endl;
+
+                turn = Board::opponent(turn);
+
+                if (moveNum > 200) {
+                    gameFile << "Game ended due to move limit (200 moves)" << endl;
+                    break;
+                }
+            }
+
+            // Determine game result
+            if (demoBoard.isCheckmate(PLAYER_1)) {
+                gameFile << "CHECKMATE! Black wins!" << endl;
+            } else if (demoBoard.isCheckmate(PLAYER_2)) {
+                gameFile << "CHECKMATE! White wins!" << endl;
+            } else if (demoBoard.isStalemate(PLAYER_1) || demoBoard.isStalemate(PLAYER_2)) {
+                gameFile << "STALEMATE! Game is a draw." << endl;
+            } else {
+                gameFile << "Game ended (possibly by move limit)" << endl;
+            }
+
+            gameFile << "Total moves: " << moveNum << endl;
+            gameFile.close();
+
+            cout << "Demonstration game saved to " << gameFilename.str() << endl;
+            cout << "Moves played: " << moveNum << endl;
+        } else {
+            cout << "Warning: Could not save demonstration game" << endl;
+        }
 
         delete population;
 

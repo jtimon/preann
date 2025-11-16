@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        const char* saveFile = "output/data/populations/go_persist.pop";
+        const char* saveFile = "data/populations/go_persist.pop";
 
         // Create Go task (5x5 board for faster testing, 1 test game)
         cout << "Creating Go task (5x5 board, 1 test game)..." << endl;

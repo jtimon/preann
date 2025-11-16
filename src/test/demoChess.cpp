@@ -11,53 +11,6 @@
 
 using namespace std;
 
-void printBoard(ChessBoard& board, ostream& out) {
-    // Chess board with piece symbols
-    // Standard chess notation: files a-h, ranks 1-8
-    // Pieces: Uppercase for White (P R N B Q K), lowercase for Black (p r n b q k)
-
-    out << "  +---+---+---+---+---+---+---+---+" << endl;
-    for (int y = 0; y < 8; y++) {
-        out << (8 - y) << " |";  // Rank numbers (8 down to 1)
-
-        for (int x = 0; x < 8; x++) {
-            ChessPiece piece = board.getPieceAt(x, y);
-
-            if (piece.owner == EMPTY) {
-                // Empty square - checkered pattern
-                if ((x + y) % 2 == 0) {
-                    out << "   ";
-                } else {
-                    out << " . ";
-                }
-            } else {
-                // Determine piece character
-                char pieceChar;
-                switch (piece.type) {
-                    case PAWN:   pieceChar = 'P'; break;
-                    case ROOK:   pieceChar = 'R'; break;
-                    case KNIGHT: pieceChar = 'N'; break;
-                    case BISHOP: pieceChar = 'B'; break;
-                    case QUEEN:  pieceChar = 'Q'; break;
-                    case KING:   pieceChar = 'K'; break;
-                    default:     pieceChar = '?'; break;
-                }
-
-                // White = uppercase, Black = lowercase
-                if (piece.owner == PLAYER_2) {
-                    pieceChar = tolower(pieceChar);
-                }
-
-                out << " " << pieceChar << " ";
-            }
-            out << "|";
-        }
-        out << " " << (8 - y) << endl;
-        out << "  +---+---+---+---+---+---+---+---+" << endl;
-    }
-    out << "    a   b   c   d   e   f   g   h  " << endl;
-}
-
 int main(int argc, char *argv[])
 {
     cout << "=== PREANN Chess Demo ===" << endl << endl;
@@ -99,7 +52,7 @@ int main(int argc, char *argv[])
         gameFile << "Black pieces (PLAYER_2): p r n b q k (lowercase)" << endl << endl;
 
         gameFile << "Initial board:" << endl;
-        printBoard(board, gameFile);
+        board.printBoard(gameFile);
         gameFile << endl;
 
         int moveNum = 0;
@@ -121,7 +74,7 @@ int main(int argc, char *argv[])
 
             // Print board state
             gameFile << "After move " << moveNum << " (" << (turn == PLAYER_1 ? "White" : "Black") << "):" << endl;
-            printBoard(board, gameFile);
+            board.printBoard(gameFile);
             gameFile << endl;
 
             turn = Board::opponent(turn);

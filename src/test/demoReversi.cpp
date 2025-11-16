@@ -11,30 +11,6 @@
 
 using namespace std;
 
-void printBoard(ReversiBoard& board, ostream& out) {
-    // Simple grid board for Reversi
-    out << "  +---+---+---+---+---+---+---+---+" << endl;
-    for (unsigned y = 0; y < board.getSize(); y++) {
-        out << (y + 1) << " |";  // Row numbers (1-8)
-
-        for (unsigned x = 0; x < board.getSize(); x++) {
-            SquareState state = board.getSquare(x, y);
-
-            if (state == EMPTY) {
-                out << " . ";
-            } else if (state == PLAYER_1) {
-                out << " @ ";
-            } else {
-                out << " O ";
-            }
-            out << "|";
-        }
-        out << " " << (y + 1) << endl;
-        out << "  +---+---+---+---+---+---+---+---+" << endl;
-    }
-    out << "    a   b   c   d   e   f   g   h  " << endl;
-}
-
 int main(int argc, char *argv[])
 {
     cout << "=== PREANN Reversi Demo ===" << endl << endl;
@@ -76,7 +52,7 @@ int main(int argc, char *argv[])
         gameFile << "Player O = PLAYER_2" << endl << endl;
 
         gameFile << "Initial board:" << endl;
-        printBoard(board, gameFile);
+        board.printBoard(gameFile);
         gameFile << endl;
 
         int moveNum = 0;
@@ -99,7 +75,7 @@ int main(int argc, char *argv[])
 
             // Print board state
             gameFile << "After move " << moveNum << " (Player " << (turn == PLAYER_1 ? "@" : "O") << "):" << endl;
-            printBoard(board, gameFile);
+            board.printBoard(gameFile);
             gameFile << endl;
 
             turn = Board::opponent(turn);

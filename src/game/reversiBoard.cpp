@@ -179,3 +179,28 @@ float ReversiBoard::computerEstimation(unsigned xPos, unsigned yPos, SquareState
     }
     return quality;
 }
+
+void ReversiBoard::printBoard(std::ostream& out) const
+{
+    // Simple grid board for Reversi
+    out << "  +---+---+---+---+---+---+---+---+" << std::endl;
+    for (unsigned y = 0; y < tSize; y++) {
+        out << (y + 1) << " |";  // Row numbers (1-8)
+
+        for (unsigned x = 0; x < tSize; x++) {
+            SquareState state = const_cast<ReversiBoard*>(this)->getSquare(x, y);
+
+            if (state == EMPTY) {
+                out << " . ";
+            } else if (state == PLAYER_1) {
+                out << " @ ";
+            } else {
+                out << " O ";
+            }
+            out << "|";
+        }
+        out << " " << (y + 1) << std::endl;
+        out << "  +---+---+---+---+---+---+---+---+" << std::endl;
+    }
+    out << "    a   b   c   d   e   f   g   h  " << std::endl;
+}

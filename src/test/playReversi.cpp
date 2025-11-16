@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <cstdlib>
 #include <sys/stat.h>
 #include "tasks/reversiTask.h"
@@ -37,7 +39,7 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        const char* saveFile = "output/data/populations/reversi_persist.pop";
+        const char* saveFile = "data/populations/reversi_persist.pop";
 
         // Create Reversi task (8x8 board, 2 test games)
         cout << "Creating Reversi task (8x8 board, 2 test games)..." << endl;
@@ -173,6 +175,82 @@ int main(int argc, char *argv[])
         float remainingSeconds = seconds - hours * 3600 - minutes * 60;
         cout << "Evolution completed in " << seconds << " seconds";
         cout << " (" << hours << "h " << minutes << "m " << remainingSeconds << "s)" << endl;
+
+        // Play a demonstration game with the best individual vs computer
+        cout << endl << "Playing demonstration game (best individual vs computer)..." << endl;
+
+        ostringstream gameFilename;
+        gameFilename << "output/games/reversi_generation" << population->getGeneration() << ".txt";
+
+        ofstream gameFile(gameFilename.str().c_str());
+        if (gameFile.is_open()) {
+            ReversiBoard demoBoard(8, BT_BIT);
+            demoBoard.initBoard();
+
+            gameFile << "=== Reversi Training Game ===" << endl;
+            gameFile << "Generation: " << population->getGeneration() << endl;
+            gameFile << "Best individual fitness: " << population->getBestIndividual()->getFitness() << endl;
+            gameFile << "Player @ (trained NN) vs Player O (random computer)" << endl;
+            gameFile << "Player @ = PLAYER_1" << endl;
+            gameFile << "Player O = PLAYER_2" << endl << endl;
+
+            gameFile << "Initial board:" << endl;
+            demoBoard.printBoard(gameFile);
+            gameFile << endl;
+
+            Individual* bestIndividual = population->getBestIndividual();
+            int moveNum = 0;
+            SquareState turn = PLAYER_1;
+
+            while (!demoBoard.endGame()) {
+                if (!demoBoard.canMove(turn)) {
+                    gameFile << "Player " << (turn == PLAYER_1 ? "@" : "O") << " cannot move (passing)" << endl;
+                    turn = Board::opponent(turn);
+                    continue;
+                }
+
+                moveNum++;
+
+                // Best individual plays as @, computer as O
+                if (turn == PLAYER_1) {
+                    demoBoard.turn(turn, bestIndividual);
+                } else {
+                    demoBoard.turn(turn, NULL);  // NULL triggers computer opponent
+                }
+
+                gameFile << "After move " << moveNum << " (Player " << (turn == PLAYER_1 ? "@" : "O") << "):" << endl;
+                demoBoard.printBoard(gameFile);
+                gameFile << endl;
+
+                turn = Board::opponent(turn);
+
+                if (moveNum > 100) {
+                    gameFile << "Game ended due to move limit" << endl;
+                    break;
+                }
+            }
+
+            float scoreP1 = demoBoard.countPoints(PLAYER_1);
+            float scoreP2 = demoBoard.countPoints(PLAYER_2);
+            gameFile << "Final score - Player @: " << scoreP1 << ", Player O: " << scoreP2 << endl;
+
+            if (scoreP1 > scoreP2) {
+                gameFile << "PLAYER @ WINS!" << endl;
+            } else if (scoreP2 > scoreP1) {
+                gameFile << "PLAYER O WINS!" << endl;
+            } else {
+                gameFile << "TIE GAME!" << endl;
+            }
+
+            gameFile << "Game ended after " << moveNum << " moves" << endl;
+            gameFile.close();
+
+            cout << "Demonstration game saved to " << gameFilename.str() << endl;
+            cout << "Moves played: " << moveNum << endl;
+            cout << "Final score - Player @: " << scoreP1 << ", Player O: " << scoreP2 << endl;
+        } else {
+            cout << "Warning: Could not save demonstration game" << endl;
+        }
 
     } catch (string& error) {
         cerr << "Error: " << error << endl;

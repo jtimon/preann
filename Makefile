@@ -6,10 +6,10 @@
 
 SHELL = /bin/sh
 
-MODULES   = common factory neural genetic game tasks loop loopTest 
+MODULES   = common factory neural genetic game tasks loop loopTest
 
-SRC_DIR   = $(addprefix src/,$(MODULES))  
-BUILD_DIR = bin build $(addprefix build/,$(MODULES)) build/test/ build/sse2 build/cuda 
+SRC_DIR   = $(addprefix src/,$(MODULES))
+BUILD_DIR = bin build $(addprefix build/,$(MODULES)) build/test/ build/sse2 build/cuda
 OUTPUT_DIR = $(CURDIR)/output/
 LOG_DIR = $(CURDIR)/output/log/
 
@@ -24,7 +24,7 @@ CUDA_OBJ = $(patsubst src/cuda/%.cu,build/cuda/%.o,$(CUDA_SRC))
 
 FULL_OBJ = $(SSE2_OBJ) $(CUDA_OBJ)
 
-#INCLUDES  = $(addprefix -I , $(addprefix src/,$(MODULES))) 
+#INCLUDES  = $(addprefix -I , $(addprefix src/,$(MODULES)))
 INCLUDES  = -I src/
 
 PROGRAMS = $(wildcard src/test/*.cpp)
@@ -34,7 +34,7 @@ LOGS     = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,output/log/%.l
 CXX = $(CXX_BASE) -ggdb $(INCLUDES)
 CXX_LINK = $(CXX_BASE)
 NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES)
-NVCC_LINK = $(NVCC) -lcudart 
+NVCC_LINK = $(NVCC) -lcudart
 NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_75
 NASM = nasm -f elf
 
@@ -127,7 +127,7 @@ cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EX
 #	./bin/testLayers.exe $(CURDIR)/
 #	./bin/testPlot.exe $(OUTPUT_DIR)
 #	./bin/chronoGenIndividual.exe $(OUTPUT_DIR)
-	./bin/chronoGenPopulation.exe $(OUTPUT_DIR)
+#	./bin/chronoGenPopulation.exe $(OUTPUT_DIR)
 #	./bin/playReversi.exe 10 5
 #	./bin/playGo.exe 5 5
 #	./bin/learnFunctionTypes.exe $(OUTPUT_DIR)
@@ -171,13 +171,13 @@ build/factory/factory.o: src/factory/factory.cpp src/factory/*.h src/factory/cpp
 	$(CXX) $(FACT_FLAGS) -c $< -o $@
 build/cuda/%.o : src/cuda/%.cu src/cuda/cuda.h src/common/util.h
 	$(NVCC_COMPILE) $< -o $@
-build/sse2/%.o : src/sse2/%.asm src/sse2/sse2.h 
+build/sse2/%.o : src/sse2/%.asm src/sse2/sse2.h
 	$(NASM) $< -o $@
 
 # TODO dependencias dinamicas
 build/common/loop/joinEnumLoop.o build/common/loop/enumLoop.o build/common/loop/rangeLoop.o : build/common/loop/loop.o
 
-clean: 
+clean:
 	rm -rf $(BUILD_DIR)
 
 #       Only use these programs directly

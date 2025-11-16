@@ -26,6 +26,9 @@ public:
     virtual float individualEstimation(unsigned xPos, unsigned yPos,
             SquareState player, Individual* individual);
 
+    // Board visualization
+    void printBoard(std::ostream& out) const;
+
 };
 
 #endif /* REVERSIBOARD_H_ */

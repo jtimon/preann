@@ -768,3 +768,54 @@ Interface* ChessBoard::updateInterface()
 
     return tInterface;
 }
+
+// ============================================================================
+// Board Visualization
+// ============================================================================
+
+void ChessBoard::printBoard(std::ostream& out) const
+{
+    // Chess board with piece symbols
+    // Pieces: Uppercase for White (P R N B Q K), lowercase for Black (p r n b q k)
+
+    out << "  +---+---+---+---+---+---+---+---+" << std::endl;
+    for (int y = 0; y < 8; y++) {
+        out << (8 - y) << " |";  // Rank numbers (8 down to 1)
+
+        for (int x = 0; x < 8; x++) {
+            ChessPiece piece = getPieceAt(x, y);
+
+            if (piece.owner == EMPTY) {
+                // Empty square - checkered pattern
+                if ((x + y) % 2 == 0) {
+                    out << "   ";
+                } else {
+                    out << " . ";
+                }
+            } else {
+                // Determine piece character
+                char pieceChar;
+                switch (piece.type) {
+                    case PAWN:   pieceChar = 'P'; break;
+                    case ROOK:   pieceChar = 'R'; break;
+                    case KNIGHT: pieceChar = 'N'; break;
+                    case BISHOP: pieceChar = 'B'; break;
+                    case QUEEN:  pieceChar = 'Q'; break;
+                    case KING:   pieceChar = 'K'; break;
+                    default:     pieceChar = '?'; break;
+                }
+
+                // White = uppercase, Black = lowercase
+                if (piece.owner == PLAYER_2) {
+                    pieceChar = tolower(pieceChar);
+                }
+
+                out << " " << pieceChar << " ";
+            }
+            out << "|";
+        }
+        out << " " << (8 - y) << std::endl;
+        out << "  +---+---+---+---+---+---+---+---+" << std::endl;
+    }
+    out << "    a   b   c   d   e   f   g   h  " << std::endl;
+}

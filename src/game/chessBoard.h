@@ -126,6 +126,9 @@ public:
 
     // Piece access for display purposes
     ChessPiece getPieceAt(unsigned x, unsigned y) const;
+
+    // Board visualization
+    void printBoard(std::ostream& out) const;
 };
 
 #endif /* CHESS_BOARD_H_ */
