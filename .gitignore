@@ -1,3 +1,5 @@
 bin/
 build/
 fuego_source/
+output/games/
+output/data/populations/

@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        const char* saveFile = "output/data/reversi_persist.pop";
+        const char* saveFile = "output/data/populations/reversi_persist.pop";
 
         // Create Reversi task (8x8 board, 2 test games)
         cout << "Creating Reversi task (8x8 board, 2 test games)..." << endl;

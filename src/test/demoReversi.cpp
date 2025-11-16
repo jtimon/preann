@@ -1,57 +1,38 @@
+/*
+ * demoReversi.cpp
+ *
+ * Plays a complete Reversi game and saves board states
+ */
+
 #include <iostream>
+#include <fstream>
 #include "tasks/reversiTask.h"
 #include "genetic/individual.h"
 
 using namespace std;
 
-void playAndShowGame(ReversiBoard* board, Individual* neuralNet, bool showBoard) {
-    board->initBoard();
+void printBoard(ReversiBoard& board, ostream& out) {
+    // Simple grid board for Reversi
+    out << "  +---+---+---+---+---+---+---+---+" << endl;
+    for (unsigned y = 0; y < board.getSize(); y++) {
+        out << (y + 1) << " |";  // Row numbers (1-8)
 
-    SquareState aiPlayer = PLAYER_1;  // Neural network plays as PLAYER_1
-    SquareState turn = PLAYER_1;
+        for (unsigned x = 0; x < board.getSize(); x++) {
+            SquareState state = board.getSquare(x, y);
 
-    if (showBoard) {
-        cout << "Initial board:" << endl;
-        board->print();
-        cout << endl;
-    }
-
-    int moveCount = 0;
-    while (!board->endGame()) {
-        if (board->canMove(turn)) {
-            if (turn == aiPlayer) {
-                // AI (neural network) move
-                board->turn(turn, neuralNet);
-                if (showBoard) {
-                    cout << "After AI (O) move " << ++moveCount << ":" << endl;
-                    board->print();
-                    cout << endl;
-                }
+            if (state == EMPTY) {
+                out << " . ";
+            } else if (state == PLAYER_1) {
+                out << " @ ";
             } else {
-                // Computer opponent (simple heuristic) move
-                board->turn(turn, NULL);
-                if (showBoard) {
-                    cout << "After opponent (X) move:" << endl;
-                    board->print();
-                    cout << endl;
-                }
+                out << " O ";
             }
+            out << "|";
         }
-        turn = Board::opponent(turn);
+        out << " " << (y + 1) << endl;
+        out << "  +---+---+---+---+---+---+---+---+" << endl;
     }
-
-    int aiPoints = board->countPoints(aiPlayer);
-    int oppPoints = board->countPoints(Board::opponent(aiPlayer));
-
-    cout << "Game over! AI: " << aiPoints << " points, Opponent: " << oppPoints << " points";
-    if (aiPoints > oppPoints) {
-        cout << " - AI WINS!";
-    } else if (oppPoints > aiPoints) {
-        cout << " - AI LOSES";
-    } else {
-        cout << " - TIE";
-    }
-    cout << endl;
+    out << "    a   b   c   d   e   f   g   h  " << endl;
 }
 
 int main(int argc, char *argv[])
@@ -59,91 +40,104 @@ int main(int argc, char *argv[])
     cout << "=== PREANN Reversi Demo ===" << endl << endl;
 
     try {
-        // Create a Reversi board
-        ReversiBoard board(8, BT_BIT);
+        cout << "Board size: 8x8 (standard Reversi)" << endl << endl;
 
-        // Create a random untrained neural network
+        // Create a ReversiTask
+        cout << "Creating ReversiTask..." << endl;
+        ReversiTask task(8, BT_BIT, 1);
+        cout << "Task created successfully!" << endl << endl;
+
+        // Create two random untrained neural networks
         ParametersMap params;
-        params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_CUDA_REDUC);
+        params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_C);
         params.putNumber(Enumerations::enumTypeToString(ET_BUFFER), BT_BIT);
         params.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_BIPOLAR_SIGMOID);
 
-        ReversiTask task(8, BT_BIT, 1);
-        Individual* randomAI = task.getExample(&params);
+        cout << "Creating two random neural networks..." << endl;
+        Individual* player1 = task.getExample(&params);
+        Individual* player2 = task.getExample(&params);
+        cout << "Neural networks created" << endl << endl;
 
-        cout << "Created random untrained neural network" << endl;
-        cout << "Neural network: " << randomAI->getNumLayers() << " layers" << endl << endl;
+        // Play a game and save board states
+        cout << "Playing game and saving boards to output/games/reversi_demo.txt..." << endl;
+        ofstream gameFile("output/games/reversi_demo.txt");
 
-        cout << "========================================" << endl;
-        cout << "Playing 3 demo games (showing boards):" << endl;
-        cout << "O = AI (neural network)" << endl;
-        cout << "X = Opponent (simple heuristic)" << endl;
-        cout << "========================================" << endl << endl;
-
-        // Play 3 games and show the boards
-        for (int i = 0; i < 3; i++) {
-            cout << "--- GAME " << (i+1) << " ---" << endl;
-            playAndShowGame(&board, randomAI, true);
-            cout << endl;
+        if (!gameFile.is_open()) {
+            throw string("Could not open output/games/reversi_demo.txt for writing");
         }
 
-        // Now play 10 more games without showing boards for statistics
-        cout << "========================================" << endl;
-        cout << "Playing 10 more games for statistics:" << endl;
-        cout << "========================================" << endl;
+        ReversiBoard board(8, BT_BIT);
+        board.initBoard();
 
-        int wins = 0, losses = 0, ties = 0;
-        int totalAIPoints = 0, totalOppPoints = 0;
+        gameFile << "=== Reversi Game Demo ===" << endl;
+        gameFile << "Board size: 8x8 (standard Reversi/Othello)" << endl;
+        gameFile << "Players: Two random untrained neural networks" << endl;
+        gameFile << "Player @ = PLAYER_1" << endl;
+        gameFile << "Player O = PLAYER_2" << endl << endl;
 
-        for (int i = 0; i < 10; i++) {
-            board.initBoard();
-            SquareState aiPlayer = PLAYER_1;
-            SquareState turn = PLAYER_1;
+        gameFile << "Initial board:" << endl;
+        printBoard(board, gameFile);
+        gameFile << endl;
 
-            while (!board.endGame()) {
-                if (board.canMove(turn)) {
-                    if (turn == aiPlayer) {
-                        board.turn(turn, randomAI);
-                    } else {
-                        board.turn(turn, NULL);
-                    }
-                }
+        int moveNum = 0;
+        SquareState turn = PLAYER_1;
+
+        while (!board.endGame()) {
+            if (!board.canMove(turn)) {
+                gameFile << "Player " << (turn == PLAYER_1 ? "@" : "O") << " cannot move (passing)" << endl;
                 turn = Board::opponent(turn);
+                continue;
             }
 
-            int aiPoints = board.countPoints(aiPlayer);
-            int oppPoints = board.countPoints(Board::opponent(aiPlayer));
+            moveNum++;
 
-            totalAIPoints += aiPoints;
-            totalOppPoints += oppPoints;
+            // Select which player's turn it is
+            Individual* currentPlayer = (turn == PLAYER_1) ? player1 : player2;
 
-            if (aiPoints > oppPoints) wins++;
-            else if (oppPoints > aiPoints) losses++;
-            else ties++;
+            // Make a move
+            board.turn(turn, currentPlayer);
 
-            cout << "Game " << (i+1) << ": AI " << aiPoints << " - " << oppPoints << " Opp";
-            if (aiPoints > oppPoints) cout << " (WIN)";
-            else if (aiPoints < oppPoints) cout << " (LOSS)";
-            else cout << " (TIE)";
-            cout << endl;
+            // Print board state
+            gameFile << "After move " << moveNum << " (Player " << (turn == PLAYER_1 ? "@" : "O") << "):" << endl;
+            printBoard(board, gameFile);
+            gameFile << endl;
+
+            turn = Board::opponent(turn);
+
+            // Safety limit (Reversi games should end in ~60 moves)
+            if (moveNum > 100) {
+                gameFile << "Game ended due to move limit" << endl;
+                break;
+            }
         }
 
-        cout << endl << "========================================" << endl;
-        cout << "STATISTICS (10 games):" << endl;
-        cout << "========================================" << endl;
-        cout << "Wins: " << wins << ", Losses: " << losses << ", Ties: " << ties << endl;
-        cout << "Win rate: " << (wins * 100.0 / 10.0) << "%" << endl;
-        cout << "Average AI points: " << (totalAIPoints / 10.0) << endl;
-        cout << "Average Opponent points: " << (totalOppPoints / 10.0) << endl;
-        cout << "Average point differential: " << ((totalAIPoints - totalOppPoints) / 10.0) << endl;
+        float scoreP1 = board.countPoints(PLAYER_1);
+        float scoreP2 = board.countPoints(PLAYER_2);
+        gameFile << "Final score - Player @: " << scoreP1 << ", Player O: " << scoreP2 << endl;
 
-        delete randomAI;
+        if (scoreP1 > scoreP2) {
+            gameFile << "PLAYER @ WINS!" << endl;
+        } else if (scoreP2 > scoreP1) {
+            gameFile << "PLAYER O WINS!" << endl;
+        } else {
+            gameFile << "TIE GAME!" << endl;
+        }
+
+        gameFile << "Game ended after " << moveNum << " moves" << endl;
+
+        gameFile.close();
+        cout << "Game saved to output/games/reversi_demo.txt" << endl;
+        cout << "Moves played: " << moveNum << endl;
+        cout << "Final score - Player @: " << scoreP1 << ", Player O: " << scoreP2 << endl;
+
+        delete player1;
+        delete player2;
 
     } catch (string& error) {
         cerr << "Error: " << error << endl;
         return 1;
     }
 
-    cout << endl << "Exit success." << endl;
+    cout << "Exit success." << endl;
     return 0;
 }

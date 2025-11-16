@@ -77,11 +77,11 @@ int main(int argc, char *argv[])
         cout << "Neural networks created" << endl << endl;
 
         // Play a game and save board states
-        cout << "Playing game and saving boards to output/data/go_demo_game.txt..." << endl;
-        ofstream gameFile("output/data/go_demo_game.txt");
+        cout << "Playing game and saving boards to output/games/go_demo.txt..." << endl;
+        ofstream gameFile("output/games/go_demo.txt");
 
         if (!gameFile.is_open()) {
-            throw string("Could not open output/data/go_demo_game.txt for writing");
+            throw string("Could not open output/games/go_demo.txt for writing");
         }
 
         GoBoard board(boardSize, BT_BIT);
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
         gameFile << "Game ended after " << moveNum << " moves" << endl;
 
         gameFile.close();
-        cout << "Game saved to output/data/go_demo_game.txt" << endl;
+        cout << "Game saved to output/games/go_demo.txt" << endl;
         cout << "Moves played: " << moveNum << endl;
         cout << "Final score - Player @: " << scoreP1 << ", Player O: " << scoreP2 << endl;
 
