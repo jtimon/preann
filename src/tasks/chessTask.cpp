@@ -14,11 +14,15 @@ ChessTask::ChessTask(BufferType bufferType, unsigned numTests)
 {
     tBoard = new ChessBoard(8, bufferType);
     tNumTests = numTests;
+    tBestOpponent = NULL;  // Start with random opponent (bootstrap)
 }
 
 ChessTask::~ChessTask()
 {
     delete tBoard;
+    if (tBestOpponent != NULL) {
+        delete tBestOpponent;
+    }
 }
 
 void ChessTask::test(Individual* individual)
@@ -37,11 +41,14 @@ void ChessTask::test(Individual* individual)
         while (!tBoard->endGame() && moveCount < maxMoves) {
             if (tBoard->canMove(turn)) {
                 if (turn == individualPlayer) {
-                    // Neural network plays
+                    // Neural network being tested plays
                     tBoard->turn(turn, individual);
                 } else {
-                    // Computer heuristic plays
-                    tBoard->turn(turn, NULL);
+                    // Opponent plays: use stored best opponent if available, else random
+                    // Avoid self-play: if testing the best opponent itself, use random
+                    Individual* opponent = (tBestOpponent != NULL && tBestOpponent != individual)
+                                          ? tBestOpponent : NULL;
+                    tBoard->turn(turn, opponent);
                 }
                 moveCount++;
             }
@@ -116,4 +123,25 @@ float ChessTask::getGoal()
 string ChessTask::toString()
 {
     return "CHESS";
+}
+
+void ChessTask::setBestOpponent(Individual* opponent)
+{
+    // Delete old copy if exists
+    if (tBestOpponent != NULL) {
+        delete tBestOpponent;
+    }
+
+    // Make a copy of the opponent so we own it (population may delete original)
+    tBestOpponent = (opponent != NULL) ? opponent->newCopy(true) : NULL;
+}
+
+Individual* ChessTask::getBestOpponent()
+{
+    return tBestOpponent;
+}
+
+bool ChessTask::hasStoredOpponent()
+{
+    return tBestOpponent != NULL;
 }

@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
         cout << "  Save file: " << saveFile << endl << endl;
 
         // Create Chess task
-        cout << "Creating Chess task (8x8 board, 10 test games per individual)..." << endl;
-        ChessTask chessTask(BT_BIT, 10);
+        cout << "Creating Chess task (8x8 board, 2 test games per individual)..." << endl;
+        ChessTask chessTask(BT_BIT, 2);
 
         // Set up population parameters
         ParametersMap params;
@@ -92,6 +92,11 @@ int main(int argc, char *argv[])
             population->setParams(&params);
             fclose(loadStream);
 
+            // Enable competitive co-evolution for loaded populations
+            cout << "Enabling competitive co-evolution (population vs best)..." << endl;
+            chessTask.setBestOpponent(population->getBestIndividual());
+            cout << endl;
+
             cout << "Loaded population:" << endl;
             cout << "  Generation: " << population->getGeneration() << endl;
             cout << "  Population size: " << populationSize << endl;
@@ -109,6 +114,7 @@ int main(int argc, char *argv[])
             cout << "Best=" << population->getBestIndividual()->getFitness();
             cout << " | Avg=" << population->getAverageFitness() << endl;
             cout << endl;
+
         } else {
             cout << "Creating new population (no save file found)..." << endl;
             Individual* example = chessTask.getExample(&params);
@@ -122,6 +128,9 @@ int main(int argc, char *argv[])
             cout << "  Output layer: 1 neuron (position evaluation)" << endl;
             cout << "  Total connections: 768->16->16->1" << endl;
             cout << endl;
+
+            // Keep random opponent for new populations (bootstrap)
+            cout << "Using random opponent for bootstrapping..." << endl;
         }
 
         // Evolution loop

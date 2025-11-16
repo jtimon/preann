@@ -15,6 +15,7 @@ class ChessTask : public Task
 private:
     ChessBoard* tBoard;
     unsigned tNumTests;
+    Individual* tBestOpponent;  // Best individual to use as opponent (competitive co-evolution)
 
 public:
     ChessTask(BufferType bufferType, unsigned numTests = 1);
@@ -25,6 +26,11 @@ public:
     virtual std::string toString();
     virtual Individual* getExample(ParametersMap* parameters);
     virtual float getGoal();
+
+    // Competitive co-evolution: manage best opponent
+    void setBestOpponent(Individual* opponent);
+    Individual* getBestOpponent();
+    bool hasStoredOpponent();
 };
 
 #endif /* CHESS_TASK_H_ */
