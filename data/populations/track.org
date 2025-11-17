@@ -236,10 +236,32 @@ This confirms:
 - Large networks: CUDA fastest (parallelism outweighs overhead)
 - Deployment: Train on CUDA, deploy on SSE2/C++ depending on target hardware
 
+* Naming Convention for Network Topologies
+
+When creating population files or describing network architectures, use this convention:
+
+**Format**: `[bufferType][size]_[bufferType][size]_..._[bufferType][size]`
+
+**Buffer type prefixes**:
+- `b` = BT_BIT (binary values, byte weights - memory efficient)
+- `p` = BT_SIGN (biPolar/bipolar values, byte weights - also called SIGN)
+- `f` = BT_FLOAT (floating point values and weights)
+
+**Examples**:
+- `b768_f1_f1_f1_f1` - Simple debug network: 768 BIT input → 1 FLOAT → 1 FLOAT → 1 FLOAT → 1 FLOAT output
+- `b768_b128_b128_p32_f1` - Production chess network: 768 BIT input → 128 BIT → 128 BIT → 32 SIGN → 1 FLOAT output
+- `b768_b1024_b1024_p256_f1` - Large chess network: 768 BIT input → 1024 BIT → 1024 BIT → 256 SIGN → 1 FLOAT output
+
+**Usage**:
+- Population files: `chess_b768_b128_b128_p32_f1_gen42.pop`
+- Benchmark outputs: `chrono_chess_b768_b1024_b1024_p256_f1.dat`
+- Documentation: "Training with topology b768_b128_b128_p32_f1"
+
 * Future Work
 
 - [X] Verify C++ vs CUDA implementations are actually different (DONE)
 - [X] Complete CUDA vs C++ performance benchmark (DONE - CUDA slower for small nets)
+- [X] Document topology naming convention (DONE)
 - [ ] Benchmark with production network (768→128→128→32→1) to see CUDA advantage
 - [ ] Test SSE2 implementation once fixed
 - [ ] Document reversi_persist.pop history
