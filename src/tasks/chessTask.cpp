@@ -146,7 +146,7 @@ Individual* ChessTask::getExample(ParametersMap* parameters)
 
     // Hidden layers
     example->addLayer(8, BT_FLOAT, functionType);    // Layer 0
-    example->addLayer(4, BT_FLOAT, functionType);    // Layer 1
+    example->addLayer(4, BT_BIT, functionType);      // Layer 1
     example->addLayer(2, BT_SIGN, functionType);     // Layer 2
 
     // Output layer - FLOAT with IDENTITY function for position evaluation
