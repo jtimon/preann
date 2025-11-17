@@ -216,13 +216,31 @@ build/test/%.o: src/test/%.cpp
 - C++ version: "Using C++ implementation (IT_C)"
 - CUDA version: "Using CUDA implementation (IT_CUDA_OUT)"
 
-*Performance Benchmark (Generation 17→18)*:
-- C++ (IT_C): 2m39s wall time (66.3s reported)
-- CUDA (IT_CUDA_OUT): Testing in progress...
+*Performance Benchmark Results*:
+
+Test 1: Minimal network (768→1→1→1→1, 2 generations, 50 individuals):
+- C++ (IT_C): 45.3s wall time (19.3s reported)
+- CUDA (IT_CUDA_OUT): 3m0.4s / 180.4s wall time (77.6s reported)
+- **Result**: CUDA is ~4x SLOWER for tiny networks (GPU overhead > parallel benefit)
+
+This confirms:
+- Implementations are now correctly selected (IT_C vs IT_CUDA_OUT)
+- Factory message printed: "Using C++ implementation" vs "Using CUDA implementation"
+- Sessions 1-5 were all IT_C (explains identical performance)
+- CUDA overhead not worth it for small networks/short runs
+
+*Factory Design*:
+- Build as many implementations as machine supports (cpp, sse2, cuda)
+- Factory selects best implementation at runtime based on network size/architecture
+- Small networks: C++ fastest (no GPU transfer overhead)
+- Large networks: CUDA fastest (parallelism outweighs overhead)
+- Deployment: Train on CUDA, deploy on SSE2/C++ depending on target hardware
 
 * Future Work
 
-- [ ] Complete CUDA vs C++ performance benchmark
-- [ ] Document actual performance difference
+- [X] Verify C++ vs CUDA implementations are actually different (DONE)
+- [X] Complete CUDA vs C++ performance benchmark (DONE - CUDA slower for small nets)
+- [ ] Benchmark with production network (768→128→128→32→1) to see CUDA advantage
+- [ ] Test SSE2 implementation once fixed
 - [ ] Document reversi_persist.pop history
 - [ ] Archive milestone populations (e.g., first checkmate win)

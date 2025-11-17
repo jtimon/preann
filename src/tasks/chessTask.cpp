@@ -124,6 +124,25 @@ Individual* ChessTask::getExample(ParametersMap* parameters)
     Individual* example = new Individual(implementationType);
     this->setInputs(example);  // 768 input neurons
 
+    // ===== SIMPLE DEBUG NETWORK (for fast testing) =====
+    // Uncomment for quick benchmarks and debugging
+    // Architecture: 768→1→1→1→1 (minimal single-neuron layers)
+    // Has layer 2 so reset() works without commenting
+    example->addLayer(1, BT_BIT, functionType);      // Layer 0
+    example->addLayer(1, BT_BIT, functionType);      // Layer 1
+    example->addLayer(1, BT_SIGN, functionType);     // Layer 2 (for reset compatibility)
+    example->addLayer(1, BT_FLOAT, FT_IDENTITY);     // Layer 3: output
+
+    example->addInputConnection(0, 0);               // Input (768) → Layer 0 (1)
+    example->addLayersConnection(0, 1);              // Layer 0 (1) → Layer 1 (1)
+    example->addLayersConnection(1, 2);              // Layer 1 (1) → Layer 2 (1)
+    example->addLayersConnection(2, 3);              // Layer 2 (1) → output (1)
+    // No recurrent connection in debug network (not needed for benchmarking)
+
+    // ===== PRODUCTION NETWORK (comment out for debugging) =====
+    // Uncomment for actual training and evolution
+    // Architecture: 768→128→128→32→1 with recurrent connection
+    /*
     // Hidden layers - using BIT buffer for first two layers (byte weights)
     example->addLayer(128, BT_BIT, functionType);    // Layer 0
     example->addLayer(128, BT_BIT, functionType);    // Layer 1
@@ -144,6 +163,7 @@ Individual* ChessTask::getExample(ParametersMap* parameters)
     // Recurrent connection - layer 2 feeds back to layer 0
     // This provides memory across moves within a single game
     example->addLayersConnection(2, 0);  // Recurrent: bipolar (32) → first hidden (128)
+    */
 
     return example;
 }
