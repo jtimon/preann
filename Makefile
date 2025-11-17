@@ -44,7 +44,7 @@ ifeq (cpp, $(MAKECMDGOALS))
 	FACT_FLAGS = -DCPP_IMPL
 endif
 ifeq (sse2, $(MAKECMDGOALS))
-	CXX_BASE = g++
+	CXX_BASE = g++ -m32
 	NVCC_LINK = $(CXX_LINK)
 	FACT_OBJ = $(SSE2_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
