@@ -21,6 +21,8 @@ public:
     virtual ~ReversiTask();
 
     virtual void test(Individual* individual);
+    void testBootstrap(Individual* individual);
+    void testAdversary(Individual* individual);
     virtual void setInputs(Individual* individual);
     virtual std::string toString();
     virtual Individual* getExample(ParametersMap* parameters);

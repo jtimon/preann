@@ -32,16 +32,15 @@ float ReversiTask::getGoal()
 void ReversiTask::test(Individual* individual)
 {
     float fitness = 0;
-    for (unsigned i = 0; i < tNumTests; ++i) {
+    unsigned totalGames = 0;
 
-        SquareState individualPlayer;
-        // this way the individual moves first only half of the games
-        if (i % 2 == 0) {
-            individualPlayer = PLAYER_1;
-        } else {
-            individualPlayer = PLAYER_2;
-        }
+    // When adversary exists: play 2 games vs neural adversary + 2 games vs greedy
+    // When no adversary: play 2 games vs greedy only
+    bool hasNeuralAdversary = (tAdversary != NULL);
 
+    // Play 2 games vs greedy computer (bootstrap baseline)
+    for (unsigned i = 0; i < 2; ++i) {
+        SquareState individualPlayer = (i % 2 == 0) ? PLAYER_1 : PLAYER_2;
         SquareState turn = PLAYER_1;
         tBoard->initBoard();
 
@@ -50,23 +49,112 @@ void ReversiTask::test(Individual* individual)
                 if (turn == individualPlayer) {
                     tBoard->turn(turn, individual);
                 } else {
-                    // Opponent plays: use fixed adversary if available, else random
+                    // Play against greedy computer (NULL = greedy strategy)
+                    tBoard->turn(turn, NULL);
+                }
+            }
+            turn = Board::opponent(turn);
+        }
+
+        float individualPoints = tBoard->countPoints(individualPlayer);
+        float opponentPoints = tBoard->countPoints(Board::opponent(individualPlayer));
+        fitness += individualPoints - opponentPoints;
+        totalGames++;
+    }
+
+    // If neural adversary exists, play 2 additional games vs adversary
+    if (hasNeuralAdversary) {
+        for (unsigned i = 0; i < 2; ++i) {
+            SquareState individualPlayer = (i % 2 == 0) ? PLAYER_1 : PLAYER_2;
+            SquareState turn = PLAYER_1;
+            tBoard->initBoard();
+
+            while (!tBoard->endGame()) {
+                if (tBoard->canMove(turn)) {
+                    if (turn == individualPlayer) {
+                        tBoard->turn(turn, individual);
+                    } else {
+                        // Play against neural adversary
+                        tBoard->turn(turn, tAdversary);
+                    }
+                }
+                turn = Board::opponent(turn);
+            }
+
+            float individualPoints = tBoard->countPoints(individualPlayer);
+            float opponentPoints = tBoard->countPoints(Board::opponent(individualPlayer));
+            fitness += individualPoints - opponentPoints;
+            totalGames++;
+        }
+    }
+
+    individual->setFitness(fitness / totalGames);
+}
+
+void ReversiTask::testBootstrap(Individual* individual)
+{
+    // Test only against greedy computer (8 games)
+    float fitness = 0;
+
+    for (unsigned i = 0; i < 8; ++i) {
+        SquareState individualPlayer = (i % 2 == 0) ? PLAYER_1 : PLAYER_2;
+        SquareState turn = PLAYER_1;
+        tBoard->initBoard();
+
+        while (!tBoard->endGame()) {
+            if (tBoard->canMove(turn)) {
+                if (turn == individualPlayer) {
+                    tBoard->turn(turn, individual);
+                } else {
+                    // Play against greedy computer (NULL = greedy strategy)
+                    tBoard->turn(turn, NULL);
+                }
+            }
+            turn = Board::opponent(turn);
+        }
+
+        float individualPoints = tBoard->countPoints(individualPlayer);
+        float opponentPoints = tBoard->countPoints(Board::opponent(individualPlayer));
+        fitness += individualPoints - opponentPoints;
+    }
+
+    individual->setFitness(fitness / 8.0);
+}
+
+void ReversiTask::testAdversary(Individual* individual)
+{
+    // Test only against neural adversary (2 games)
+    // Requires tAdversary to be set
+    if (tAdversary == NULL) {
+        individual->setFitness(0);
+        return;
+    }
+
+    float fitness = 0;
+
+    for (unsigned i = 0; i < 2; ++i) {
+        SquareState individualPlayer = (i % 2 == 0) ? PLAYER_1 : PLAYER_2;
+        SquareState turn = PLAYER_1;
+        tBoard->initBoard();
+
+        while (!tBoard->endGame()) {
+            if (tBoard->canMove(turn)) {
+                if (turn == individualPlayer) {
+                    tBoard->turn(turn, individual);
+                } else {
+                    // Play against neural adversary
                     tBoard->turn(turn, tAdversary);
                 }
             }
             turn = Board::opponent(turn);
-//            tBoard->print();
         }
-        // Fitness based on score difference: your points - opponent's points
-        // Positive = win, negative = loss, zero = tie
+
         float individualPoints = tBoard->countPoints(individualPlayer);
         float opponentPoints = tBoard->countPoints(Board::opponent(individualPlayer));
         fitness += individualPoints - opponentPoints;
-//        tBoard->print();
-//        cout << " points " << tBoard->countPoints(individualPlayer) << endl;
     }
-    individual->setFitness(fitness/tNumTests);
-//    cout << "fitness " << fitness << endl;
+
+    individual->setFitness(fitness / 2.0);
 }
 
 void ReversiTask::setInputs(Individual* individual)

@@ -145,11 +145,6 @@ int main(int argc, char *argv[])
             population->setParams(&params);
             fclose(loadStream);
 
-            // Enable competitive co-evolution for loaded populations
-            cout << "Enabling competitive co-evolution (population vs adversary)..." << endl;
-            reversiTask.setAdversary(population->getBestIndividual());
-            cout << endl;
-
             cout << "Loaded population:" << endl;
             cout << "  Generation: " << population->getGeneration() << endl;
             cout << "  Population size: " << populationSize << endl;
@@ -158,6 +153,12 @@ int main(int argc, char *argv[])
             cout << "Fitness from previous run (may use old fitness function): ";
             cout << "Best=" << population->getBestIndividual()->getFitness();
             cout << " | Avg=" << population->getAverageFitness() << endl;
+
+            // Enable competitive co-evolution BEFORE re-evaluation
+            // This ensures re-evaluation uses the same fitness function as evolution
+            cout << "Enabling competitive co-evolution (population vs adversary)..." << endl;
+            reversiTask.setAdversary(population->getBestIndividual());
+            cout << endl;
 
             // Re-evaluate all individuals with current fitness function
             cout << "Re-evaluating all individuals with current fitness function..." << endl;
@@ -229,23 +230,44 @@ int main(int argc, char *argv[])
             cout << endl << "Final state saved to " << saveFile << endl;
         }
 
-        // Calculate bootstrap fitness (vs greedy computer) as progress indicator
-        cout << endl << "Testing best individual against greedy computer..." << endl;
+        // Test best individual separately against each opponent
+        cout << endl << "Testing best individual with fresh games..." << endl;
         Individual* bestIndividual = population->getBestIndividual();
-        float adversaryFitness = bestIndividual->getFitness();  // Save original fitness
-        Individual* currentAdversary = reversiTask.getAdversary();
-        reversiTask.setAdversary(NULL);  // Test against greedy computer (NULL = computerEstimation)
-        reversiTask.test(bestIndividual);
-        float bootstrapFitness = bestIndividual->getFitness();
-        bestIndividual->setFitness(adversaryFitness);  // Restore original fitness
-        reversiTask.setAdversary(currentAdversary);  // Restore adversary
+        float storedFitness = bestIndividual->getFitness();  // Fitness from training
+        bool hasAdversary = reversiTask.hasAdversary();
+
+        // Test vs greedy only (2 new games)
+        reversiTask.testBootstrap(bestIndividual);
+        float greedyFitness = bestIndividual->getFitness();
+
+        // Test vs neural adversary only (2 new games), if adversary exists
+        float neuralFitness = 0;
+        float combinedFitness = greedyFitness;
+        if (hasAdversary) {
+            reversiTask.testAdversary(bestIndividual);
+            neuralFitness = bestIndividual->getFitness();
+            // Calculate weighted average of 10 new games (2 neural + 8 greedy)
+            // Weight by number of games: (2*neural + 8*greedy) / 10
+            combinedFitness = (2.0 * neuralFitness + 8.0 * greedyFitness) / 10.0;
+        }
+
+        // Restore original fitness
+        bestIndividual->setFitness(storedFitness);
 
         // Print final results
         cout << endl << "=== FINAL RESULTS ===" << endl;
         cout << "Generation: " << population->getGeneration() << endl;
-        cout << "Best fitness (vs adversary): " << adversaryFitness << endl;
-        cout << "Bootstrap fitness (vs greedy): " << bootstrapFitness << endl;
-        cout << "Avg fitness:  " << population->getAverageFitness() << endl;
+        cout << "Stored fitness (from training): " << storedFitness << endl;
+        if (hasAdversary) {
+            cout << "Fresh test results (10 new games):" << endl;
+            cout << "  Combined average: " << combinedFitness << endl;
+            cout << "  vs neural adversary (2 games): " << neuralFitness << endl;
+            cout << "  vs greedy computer (8 games):  " << greedyFitness << endl;
+        } else {
+            cout << "Fresh test results (8 new games):" << endl;
+            cout << "  vs greedy computer: " << greedyFitness << endl;
+        }
+        cout << "Avg fitness (population):  " << population->getAverageFitness() << endl;
         cout << endl;
 
         float seconds = chrono.getSeconds();
