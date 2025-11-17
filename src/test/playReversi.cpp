@@ -164,9 +164,6 @@ int main(int argc, char *argv[])
             cout << "Re-evaluating all individuals with current fitness function..." << endl;
             population->reevaluateAndSort();
 
-            // Update adversary after re-evaluation (population may have re-sorted)
-            reversiTask.setAdversary(population->getBestIndividual());
-
             cout << "Fitness after re-evaluation: ";
             cout << "Best=" << population->getBestIndividual()->getFitness();
             cout << " | Avg=" << population->getAverageFitness() << endl;
