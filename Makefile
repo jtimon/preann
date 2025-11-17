@@ -161,7 +161,7 @@ bin/%.exe: build/test/%.o $(OBJ)
 	$(NVCC_LINK) $^ -o $@
 #	./$@ > $(patsubst bin/%.exe,output/log/%.log,$@)
 build/test/%.o: src/test/%.cpp
-	$(CXX) -c $< -o $@
+	$(CXX) $(FACT_FLAGS) -c $< -o $@
 build/%.o: src/%.cpp src/%.h
 	$(CXX) -c $< -o $@
 

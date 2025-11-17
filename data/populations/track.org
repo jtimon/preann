@@ -190,16 +190,39 @@ This file tracks evolved populations in this directory. Each .pop file represent
 
 *Performance*: C++ ≈ CUDA (< 1% difference)
 
-*CONCERN*: Performance is suspiciously identical
-- May indicate both builds are actually running same implementation
-- Need to verify build system is correctly switching implementations
-- Possible issue: Makefile not rebuilding with correct flags
-- **TODO**: Verify IT_C vs IT_CUDA is actually being selected at runtime
+*CRITICAL DISCOVERY*: All sessions 1-5 were actually running C++ implementation!
+- playChess.cpp was hardcoded to IT_C (fixed in commit e7b54bc)
+- Even after fix, Makefile didn't pass FACT_FLAGS to test programs
+- Sessions 1-5 benchmark data is INVALID - all used IT_C despite "CUDA build"
+- This explains identical performance across supposedly different implementations
+
+** Build System Fix (2025-11-17)
+
+*Problem*: Makefile didn't pass FACT_FLAGS to test programs
+- Test programs compiled with: `$(CXX) -c $< -o $@` (no flags)
+- Factory compiled with: `$(CXX) $(FACT_FLAGS) -c $< -o $@` (has flags)
+- Result: Test programs never got -DCUDA_IMPL or -DSSE2_IMPL defines
+
+*Fix*: Updated Makefile line 164 to include FACT_FLAGS:
+```
+build/test/%.o: src/test/%.cpp
+	$(CXX) $(FACT_FLAGS) -c $< -o $@
+```
+
+*Verification*:
+- `make cpp`: Compiles with `-DCPP_IMPL`
+- `make cuda`: Compiles with `-DCPP_IMPL -DCUDA_IMPL`
+- Runtime logging now correctly shows implementation type
+- C++ version: "Using C++ implementation (IT_C)"
+- CUDA version: "Using CUDA implementation (IT_CUDA_OUT)"
+
+*Performance Benchmark (Generation 17→18)*:
+- C++ (IT_C): 2m39s wall time (66.3s reported)
+- CUDA (IT_CUDA_OUT): Testing in progress...
 
 * Future Work
 
-- [ ] **CRITICAL**: Verify C++ vs CUDA builds are actually using different implementations
-- [ ] Check ImplementationType selection in playChess.cpp
-- [ ] Add runtime logging to confirm which implementation is active
+- [ ] Complete CUDA vs C++ performance benchmark
+- [ ] Document actual performance difference
 - [ ] Document reversi_persist.pop history
 - [ ] Archive milestone populations (e.g., first checkmate win)

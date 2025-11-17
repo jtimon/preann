@@ -68,14 +68,22 @@ A framework for training neural networks through genetic algorithms with high-pe
 
 #+BEGIN_SRC bash
 # C++ implementation (fastest compile)
-make cpp
+make clean && make cpp
 
 # CUDA implementation (GPU acceleration)
-make cuda
+make clean && make cuda
 
-# Clean build
-make clean && make cpp
+# IMPORTANT: Always use 'make clean' when switching implementations
+# Without clean, object files retain old compile flags and wrong implementation runs
 #+END_SRC
+
+*Build System Notes*:
+- Must use =make clean= when switching between cpp/cuda/sse2
+- Without clean, test programs keep old -D flags (IT_C, IT_CUDA_OUT, IT_SSE2)
+- Runtime logging shows which implementation is active:
+  - "Using C++ implementation (IT_C)"
+  - "Using CUDA implementation (IT_CUDA_OUT)"
+  - "Using SSE2 implementation (IT_SSE2)"
 
 ** Run Chess Training
 
