@@ -96,8 +96,8 @@ int main(int argc, char *argv[])
         unsigned populationSize = 50;
         params.putNumber(Population::SIZE, populationSize);
         params.putNumber(Population::NUM_SELECTION, populationSize / 2);      // 25 selected
-        params.putNumber(Population::NUM_CROSSOVER, populationSize / 2 - 5);  // 20 crossover
-        params.putNumber(Population::NUM_PRESERVE, 5);                        // 5 elite
+        params.putNumber(Population::NUM_CROSSOVER, populationSize / 2 - 1);  // 24 crossover (REM: must be even)
+        params.putNumber(Population::NUM_PRESERVE, 1);                        // 1 elite
 
         // Genetic operators
         params.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
@@ -184,13 +184,12 @@ int main(int argc, char *argv[])
 
             cout << "Neural network architecture:" << endl;
             cout << "  Input layer: 768 neurons (8x8x12 piece-aware encoding)" << endl;
-            cout << "  Hidden layer 1: 128 neurons (BIT buffer, byte weights)" << endl;
-            cout << "  Hidden layer 2: 128 neurons (BIT buffer, byte weights)" << endl;
-            cout << "  Hidden layer 3: 32 neurons (SIGN buffer for bipolar, byte weights)" << endl;
+            cout << "  Hidden layer 1: 8 neurons (FLOAT buffer)" << endl;
+            cout << "  Hidden layer 2: 4 neurons (FLOAT buffer)" << endl;
+            cout << "  Hidden layer 3: 2 neurons (SIGN buffer)" << endl;
             cout << "  Output layer: 1 neuron (FLOAT buffer, IDENTITY function)" << endl;
-            cout << "  Feedforward: 768->128->128->32->1" << endl;
-            cout << "  Recurrent: layer 3 -> layer 1 (memory across moves)" << endl;
-            cout << "  Note: Recurrent state reset at start of each game" << endl;
+            cout << "  Feedforward: 768->8->4->2->1" << endl;
+            cout << "  Recurrent: NONE (feedforward only)" << endl;
             cout << endl;
 
             // Keep random opponent for new populations (bootstrap)

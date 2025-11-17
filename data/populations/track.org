@@ -38,6 +38,47 @@ This file tracks evolved populations in this directory. Each .pop file represent
   - **CURRENT WORK**: Verifying which implementation (C++ vs CUDA) is actually running
   - Added runtime logging to confirm implementation selection
 
+** chess_b768_f8_f4_p2_f1_P50.pop
+
+- *File size*: TBD
+- *Last modified*: 2025-11-17 (Session 1-2)
+- *Architecture*: 768→8→4→2→1 (feedforward only)
+  - Input: 768 neurons (8×8×12 piece-aware encoding)
+  - Hidden 1: 8 neurons (BT_FLOAT)
+  - Hidden 2: 4 neurons (BT_FLOAT)
+  - Hidden 3: 2 neurons (BT_SIGN)
+  - Output: 1 neuron (BT_FLOAT)
+  - Topology string: b768_f8_f4_p2_f1
+  - No recurrent connections (feedforward only)
+- *Current status*: Generation 19
+  - Best fitness: 1
+  - Average fitness: -0.08
+  - Training mode: Competitive co-evolution (vs adversary)
+- *Training history*:
+  - Session 1 (Bootstrap): Generations 0→11, Random opponent, C++ (IT_C)
+    - Started: 2025-11-17
+    - Command: `make cpp ; time timeout 180 ./bin/playChess.exe 100 1` (interrupted at gen 11)
+    - Final: Gen 11, Best=2, Avg=0.04
+    - Time: 3m0s for 11 generations
+  - Session 2 (Co-evolution): Generations 11→19, vs best from gen 11, C++ (IT_C)
+    - Command: `make cpp ; time timeout 180 ./bin/playChess.exe 10 1`
+    - Re-evaluation: Best=2→1, Avg=0.04→0 (fitness drop with new adversary)
+    - Evolution progress:
+      - Gen 12: Best=1, Avg=0.08
+      - Gen 13: Best=1, Avg=-0.08
+      - Gen 14: Best=1, Avg=0.12
+      - Gen 15: Best=1, Avg=0.12
+      - Gen 16: Best=1, Avg=-0.12
+      - Gen 17: Best=1, Avg=0.12
+      - Gen 18: Best=1, Avg=0.04
+      - Gen 19: Best=1, Avg=-0.08
+    - Time: 3m0s for 8 generations (gen 12→19)
+- *Notes*:
+  - Small network for testing topology-based filename system
+  - Population size: 50 (25 selected, 24 crossover, 1 elite)
+  - Bootstrap session interrupted at gen 11, but already showing strong learning (Best=2)
+  - Fitness drop on adversary update (2→1) confirms co-evolution working
+
 ** reversi_persist.pop
 
 - *File size*: 66K

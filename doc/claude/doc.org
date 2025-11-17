@@ -19,21 +19,19 @@ A framework for training neural networks through genetic algorithms with high-pe
 
 ** Neural Network Architecture
 
-*Recurrent Architecture*: 768→128→128→32→1
+*Current Architecture*: 768→8→4→2→1 (feedforward only)
 - Input: 768 neurons (8x8 board × 12 piece types)
-- Hidden Layer 0: 128 neurons (BT_BIT buffer, byte weights)
-- Hidden Layer 1: 128 neurons (BT_BIT buffer, byte weights)
-- Hidden Layer 2: 32 neurons (BT_SIGN buffer for bipolar, byte weights)
+- Hidden Layer 0: 8 neurons (BT_FLOAT buffer)
+- Hidden Layer 1: 4 neurons (BT_FLOAT buffer)
+- Hidden Layer 2: 2 neurons (BT_SIGN buffer for bipolar)
 - Output: 1 neuron (BT_FLOAT buffer, position evaluation)
 
-*Recurrent Connection*: Layer 2 → Layer 0
-- Provides memory across moves within a single game
-- Reset at game start for consistent learning
-- Potential for emergent opponent modeling behavior
+*Topology String*: =b768_f8_f4_p2_f1=
 
 *Buffer Types*:
-- BT_BIT / BT_SIGN: 1 byte per weight (memory efficient)
-- BT_FLOAT: 4 bytes per weight (output layer only)
+- BT_BIT (b): 1 byte per weight (binary values, memory efficient)
+- BT_SIGN (p): 1 byte per weight (bipolar values)
+- BT_FLOAT (f): 4 bytes per weight (full precision)
 
 ** Competitive Co-Evolution
 
@@ -124,8 +122,8 @@ time ./bin/playChess.exe 100 25
 
 - Population size: 50 individuals
 - Selection: 25 (tournament size 3)
-- Crossover: 20 (uniform at weight level)
-- Elite preservation: 5
+- Crossover: 24 (uniform at weight level, must be even)
+- Elite preservation: 1
 - Mutation: 3 per individual, range ±0.5
 
 * Known Issues & TODO
@@ -177,6 +175,86 @@ time ./bin/playChess.exe 100 25
 - [ ] Try multiple recurrent connections
 - [ ] Experiment with different buffer type combinations
 
+* Network Topology Naming Convention
+
+** Format
+
+Topology strings describe network architecture in a compact format:
+=<input>_<layer1>_<layer2>_..._<layerN>=
+
+Each component: =<type><size>= with optional recurrent markers
+
+** Buffer Type Prefixes
+
+- =b= : BT_BIT (binary values, byte weights - memory efficient)
+- =p= : BT_SIGN (biPolar/bipolar values, byte weights)
+- =f= : BT_FLOAT (floating point values and weights)
+
+** Recurrent Connection Markers (TODO - Not Yet Implemented)
+
+*NOTE*: Recurrent notation is documented but not yet implemented in code.
+Current topology strings do NOT include R/r markers.
+
+When implemented, recurrent connections will be marked on BOTH layers involved:
+
+- *Uppercase R<N>*: Marks where recurrent input is RECEIVED
+  - Example: =b1024_R3= means layer 1 receives from layer 3
+  - Position: After the underscore, before next layer
+
+- *Lowercase r<N>*: Marks where recurrent output is SENT FROM
+  - Example: =p64r1= means layer 3 sends back to layer 1
+  - Position: Appended directly to the layer specification
+
+** Layer Numbering for Recurrence
+
+Layers are numbered from the FIRST HIDDEN LAYER (not input):
+- Layer 0: Input buffer (768 neurons) - not a "real" layer
+- Layer 1: First hidden layer (index 0 in code)
+- Layer 2: Second hidden layer (index 1 in code)
+- Layer 3: Third hidden layer (index 2 in code)
+- Layer 4: Output layer (index 3 in code)
+
+Note: Layer N cannot recur to layer N+1 or beyond (not implemented)
+
+** Examples
+
+*** Simple Feedforward Network
+=b768_f1_f1_f1_f1=
+- 768 BIT input
+- Four 1-neuron FLOAT layers
+- No recurrent connections
+- Debug/minimal network
+
+*** Production Chess Network
+=b768_b1024_b512_p64_f1= (current - no recurrent markers yet)
+
+When recurrent notation is implemented:
+=b768_b1024_R3_b512_p64r1_f1=
+- 768 BIT input
+- Layer 1: 1024 BIT neurons, receives recurrent from layer 3 (R3)
+- Layer 2: 512 BIT neurons
+- Layer 3: 64 SIGN neurons, sends recurrent to layer 1 (r1)
+- Layer 4: 1 FLOAT output
+
+Reading the recurrence: Layer 3 (p64r1) → Layer 1 (b1024_R3)
+
+*** Self-Recurrent Layer (hypothetical)
+=b768_b1024_b512_p64r3_f1=
+- Layer 3 sends recurrent connection to itself
+- Provides single-step memory within layer
+
+** Usage in Population Files
+
+Population filenames include topology for clarity:
+=chess_<topology>_P<size>.pop=
+
+Examples:
+- =chess_b768_b1_b1_p1_f1_P50.pop= (debug network, 50 individuals)
+- =chess_b768_b1024_b512_p64_f1_P50.pop= (production network, current format)
+- =chess_b768_b1024_R3_b512_p64r1_f1_P50.pop= (future: with recurrent markers)
+
+This prevents accidental overwrites when experimenting with different architectures.
+
 * File Locations
 
 ** Source Code
@@ -211,8 +289,8 @@ time ./bin/playChess.exe 100 25
 
 *Architecture Evolution*:
 - Started: 768→16→16→1 (small/fast)
-- Current: 768→128→128→32→1 with recurrence (larger capacity)
-- Strategy: Use byte weights (BIT/SIGN) for memory efficiency
+- Previous: 768→128→128→32→1 with recurrence (larger capacity)
+- Current: 768→8→4→2→1 feedforward (small for testing topology-based filenames)
 
 ** Key Insights
 

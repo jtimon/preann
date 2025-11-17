@@ -125,9 +125,10 @@ Individual* ChessTask::getExample(ParametersMap* parameters)
     this->setInputs(example);  // 768 input neurons
 
     // ===== SIMPLE DEBUG NETWORK (for fast testing) =====
-    // Uncomment for quick benchmarks and debugging
+    // Comment out for actual training and evolution
     // Architecture: 768→1→1→1→1 (minimal single-neuron layers)
     // Has layer 2 so reset() works without commenting
+    /*
     example->addLayer(1, BT_BIT, functionType);      // Layer 0
     example->addLayer(1, BT_BIT, functionType);      // Layer 1
     example->addLayer(1, BT_SIGN, functionType);     // Layer 2 (for reset compatibility)
@@ -138,32 +139,24 @@ Individual* ChessTask::getExample(ParametersMap* parameters)
     example->addLayersConnection(1, 2);              // Layer 1 (1) → Layer 2 (1)
     example->addLayersConnection(2, 3);              // Layer 2 (1) → output (1)
     // No recurrent connection in debug network (not needed for benchmarking)
+    */
 
-    // ===== PRODUCTION NETWORK (comment out for debugging) =====
-    // Uncomment for actual training and evolution
-    // Architecture: 768→128→128→32→1 with recurrent connection
-    /*
-    // Hidden layers - using BIT buffer for first two layers (byte weights)
-    example->addLayer(128, BT_BIT, functionType);    // Layer 0
-    example->addLayer(128, BT_BIT, functionType);    // Layer 1
+    // ===== PRODUCTION NETWORK (uncommented for actual training) =====
+    // Architecture: 768→8→4→2→1 (feedforward only, small for testing)
 
-    // Third hidden layer - SIGN buffer for bipolar values (also byte weights, smaller for efficiency)
-    // This layer will feed back to layer 0, creating recurrent memory
-    example->addLayer(32, BT_SIGN, functionType);    // Layer 2 (recurrent)
+    // Hidden layers
+    example->addLayer(8, BT_FLOAT, functionType);    // Layer 0
+    example->addLayer(4, BT_FLOAT, functionType);    // Layer 1
+    example->addLayer(2, BT_SIGN, functionType);     // Layer 2
 
     // Output layer - FLOAT with IDENTITY function for position evaluation
     example->addLayer(1, BT_FLOAT, FT_IDENTITY);     // Layer 3
 
     // Feedforward connections
-    example->addInputConnection(0, 0);   // Input (768) to first hidden (128)
-    example->addLayersConnection(0, 1);  // First hidden (128) to second hidden (128)
-    example->addLayersConnection(1, 2);  // Second hidden (128) to third hidden (32)
-    example->addLayersConnection(2, 3);  // Third hidden (32) to output (1)
-
-    // Recurrent connection - layer 2 feeds back to layer 0
-    // This provides memory across moves within a single game
-    example->addLayersConnection(2, 0);  // Recurrent: bipolar (32) → first hidden (128)
-    */
+    example->addInputConnection(0, 0);   // Input (768) to first hidden (8)
+    example->addLayersConnection(0, 1);  // First hidden (8) to second hidden (4)
+    example->addLayersConnection(1, 2);  // Second hidden (4) to third hidden (2)
+    example->addLayersConnection(2, 3);  // Third hidden (2) to output (1)
 
     return example;
 }
