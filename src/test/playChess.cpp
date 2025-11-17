@@ -23,6 +23,32 @@ bool fileExists(const char* filename)
     return (stat(filename, &buffer) == 0);
 }
 
+string getTopologyString(Individual* individual)
+{
+    // Generate topology string in format: b768_b128_b128_p32_f1
+    // where b=BT_BIT, p=BT_SIGN (bipolar), f=BT_FLOAT
+    ostringstream topology;
+
+    // For chess, input is always 768 BIT neurons (8x8x12 piece encoding)
+    // This is hardcoded since playChess.cpp is chess-specific
+    topology << "b768";
+
+    // Add all layers (hidden + output)
+    for (unsigned i = 0; i < individual->getNumLayers(); i++) {
+        Interface* layer = individual->getOutput(i);
+        BufferType layerType = layer->getBufferType();
+        unsigned layerSize = layer->getSize();
+
+        char prefix = 'f';
+        if (layerType == BT_BIT) prefix = 'b';
+        else if (layerType == BT_SIGN) prefix = 'p';
+
+        topology << "_" << prefix << layerSize;
+    }
+
+    return topology.str();
+}
+
 int main(int argc, char *argv[])
 {
     cout << "=== PREANN Chess: Persistent Evolution Training ===" << endl << endl;
@@ -34,19 +60,13 @@ int main(int argc, char *argv[])
             cout << "Example: " << argv[0] << " 100 25" << endl;
             cout << endl;
             cout << "Trains a population of neural networks to play chess." << endl;
-            cout << "Automatically saves progress to output/data/chess_persist.pop" << endl;
+            cout << "Automatically saves progress to data/populations/chess_[topology]_P[size].pop" << endl;
             cout << "Resume training by running the same command again." << endl;
             return 1;
         }
 
         unsigned generations = atoi(argv[1]);
         unsigned checkpointInterval = atoi(argv[2]);
-        const char* saveFile = "data/populations/chess_persist.pop";
-
-        cout << "Configuration:" << endl;
-        cout << "  Generations: " << generations << endl;
-        cout << "  Checkpoint interval: " << checkpointInterval << endl;
-        cout << "  Save file: " << saveFile << endl << endl;
 
         // Create Chess task (game logging disabled for now)
         cout << "Creating Chess task (8x8 board, 2 test games per individual)..." << endl;
@@ -91,8 +111,35 @@ int main(int argc, char *argv[])
 
         // Load or create population
         Population* population = NULL;
+        Individual* example = NULL;
+        string topology;
+        string saveFileString;
+        const char* saveFile = NULL;
+
+        // First, try to create example to determine topology and filename
+        example = chessTask.getExample(&params);
+        topology = getTopologyString(example);
+
+        // Build save filename: chess_[topology]_P[populationSize].pop
+        ostringstream saveFileStream;
+        saveFileStream << "data/populations/chess_" << topology << "_P" << populationSize << ".pop";
+        saveFileString = saveFileStream.str();
+        saveFile = saveFileString.c_str();
+
+        cout << "Configuration:" << endl;
+        cout << "  Generations: " << generations << endl;
+        cout << "  Checkpoint interval: " << checkpointInterval << endl;
+        cout << "  Topology: " << topology << endl;
+        cout << "  Population size: " << populationSize << endl;
+        cout << "  Save file: " << saveFile << endl << endl;
+
         if (fileExists(saveFile)) {
             cout << "Loading existing population from " << saveFile << "..." << endl;
+
+            // Don't need the example when loading
+            delete example;
+            example = NULL;
+
             FILE* loadStream = fopen(saveFile, "rb");
             if (!loadStream) {
                 cerr << "Error: Could not open save file for reading" << endl;
@@ -132,7 +179,6 @@ int main(int argc, char *argv[])
 
         } else {
             cout << "Creating new population (no save file found)..." << endl;
-            Individual* example = chessTask.getExample(&params);
             population = new Population(&chessTask, example, populationSize, 5.0);
             population->setParams(&params);
 
