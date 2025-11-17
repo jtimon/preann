@@ -232,10 +232,22 @@ int main(int argc, char *argv[])
         }
 
         // Print final statistics
+        // Calculate bootstrap fitness (vs random opponent) as progress indicator
+        cout << endl << "Testing best individual against random opponent..." << endl;
+        Individual* bestIndividual = population->getBestIndividual();
+        float adversaryFitness = bestIndividual->getFitness();  // Save original fitness
+        Individual* currentAdversary = chessTask.getAdversary();
+        chessTask.setAdversary(NULL);  // Test against random opponent (NULL = random moves)
+        chessTask.test(bestIndividual);
+        float bootstrapFitness = bestIndividual->getFitness();
+        bestIndividual->setFitness(adversaryFitness);  // Restore original fitness
+        chessTask.setAdversary(currentAdversary);  // Restore adversary
+
         cout << endl << "=== FINAL RESULTS ===" << endl;
-        cout << "Generation " << population->getGeneration() << ": ";
-        cout << "Best=" << population->getBestIndividual()->getFitness();
-        cout << " | Avg=" << population->getAverageFitness() << endl;
+        cout << "Generation: " << population->getGeneration() << endl;
+        cout << "Best fitness (vs adversary): " << adversaryFitness << endl;
+        cout << "Bootstrap fitness (vs random): " << bootstrapFitness << endl;
+        cout << "Avg fitness:  " << population->getAverageFitness() << endl;
         cout << endl;
 
         // Convert time to hours/minutes/seconds

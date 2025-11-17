@@ -6,6 +6,7 @@
 #include "tasks/reversiTask.h"
 #include "genetic/population.h"
 #include "common/chronometer.h"
+#include "common/dummy.h"
 
 using namespace std;
 
@@ -14,101 +15,182 @@ bool fileExists(const char* filename) {
     return (stat(filename, &buffer) == 0);
 }
 
+string getTopologyString(Individual* individual, unsigned boardSize)
+{
+    // Generate topology string in format: b64_b8_b8_f1
+    // where b=BT_BIT, p=BT_SIGN (bipolar), f=BT_FLOAT
+    ostringstream topology;
+
+    // For Reversi, input is boardSize² BIT neurons (8x8=64 for standard board)
+    // This is hardcoded since playReversi.cpp is reversi-specific
+    topology << "b" << (boardSize * boardSize);
+
+    // Add all layers (hidden + output)
+    for (unsigned i = 0; i < individual->getNumLayers(); i++) {
+        Interface* layer = individual->getOutput(i);
+        BufferType layerType = layer->getBufferType();
+        unsigned layerSize = layer->getSize();
+
+        char prefix = 'f';
+        if (layerType == BT_BIT) prefix = 'b';
+        else if (layerType == BT_SIGN) prefix = 'p';
+
+        topology << "_" << prefix << layerSize;
+    }
+
+    return topology.str();
+}
+
 int main(int argc, char *argv[])
 {
-    cout << "=== PREANN Reversi Persistent Training ===" << endl << endl;
+    cout << "=== PREANN Reversi: Persistent Evolution Training ===" << endl << endl;
 
     try {
-        // Parse positional arguments: ./bin/playReversi.exe <generations> <checkpoint>
+        // Parse command-line arguments
         if (argc < 3) {
             cout << "Usage: " << argv[0] << " <generations> <checkpoint_interval>" << endl;
-            cout << "  <generations>          Number of generations to evolve" << endl;
-            cout << "  <checkpoint_interval>  Save checkpoint every N generations" << endl;
-            cout << endl;
             cout << "Example: " << argv[0] << " 100 25" << endl;
-            cout << "  First run: creates population, evolves 100 generations, saves every 25" << endl;
-            cout << "  Second run: loads existing, evolves 100 more generations" << endl;
+            cout << endl;
+            cout << "Trains a population of neural networks to play Reversi." << endl;
+            cout << "Automatically saves progress to data/populations/reversi_[topology]_P[size].pop" << endl;
+            cout << "Resume training by running the same command again." << endl;
             return 1;
         }
 
         unsigned generations = atoi(argv[1]);
         unsigned checkpointInterval = atoi(argv[2]);
 
-        if (generations == 0 || checkpointInterval == 0) {
-            cout << "Error: generations and checkpoint_interval must be positive integers" << endl;
-            return 1;
-        }
-
-        const char* saveFile = "data/populations/reversi_persist.pop";
-
-        // Create Reversi task (8x8 board, 2 test games)
-        cout << "Creating Reversi task (8x8 board, 2 test games)..." << endl;
-        ReversiTask reversiTask(8, BT_BIT, 2);
+        // Create Reversi task (8x8 board, 2 test games per individual)
+        cout << "Creating Reversi task (8x8 board, 2 test games per individual)..." << endl;
+        unsigned boardSize = 8;
+        ReversiTask reversiTask(boardSize, BT_BIT, 2);
 
         // Set up population parameters
         ParametersMap params;
-        params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_CUDA_REDUC);
+
+        // Select implementation based on build type
+        #if defined(CUDA_IMPL)
+            cout << "Using CUDA implementation (IT_CUDA_OUT)" << endl;
+            params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_CUDA_OUT);
+        #elif defined(SSE2_IMPL)
+            cout << "Using SSE2 implementation (IT_SSE2)" << endl;
+            params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_SSE2);
+        #else
+            cout << "Using C++ implementation (IT_C)" << endl;
+            params.putNumber(Enumerations::enumTypeToString(ET_IMPLEMENTATION), IT_C);
+        #endif
+
         params.putNumber(Enumerations::enumTypeToString(ET_BUFFER), BT_BIT);
         params.putNumber(Enumerations::enumTypeToString(ET_FUNCTION), FT_BIPOLAR_SIGMOID);
+        params.putNumber(Dummy::WEIGHS_RANGE, 5.0);
         params.putNumber(Population::MUTATION_RANGE, 0.5);
-        params.putNumber(Population::SIZE, 100);
-        params.putNumber(Population::NUM_SELECTION, 50);
-        params.putNumber(Population::NUM_CROSSOVER, 40);
-        params.putNumber(Population::NUM_PRESERVE, 10);
-        params.putNumber(Population::RESET_NUM, 0);
-        params.putNumber(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM), SA_TOURNAMENT);
-        params.putNumber(Population::TOURNAMENT_SIZE, 5);
+
+        // Population structure
+        // REM: crossover must be even
+        unsigned populationSize = 100;
+        params.putNumber(Population::SIZE, populationSize);
+        params.putNumber(Population::NUM_SELECTION, populationSize / 2);      // 50 selected
+        params.putNumber(Population::NUM_CROSSOVER, populationSize / 2 - 10); // 40 crossover
+        params.putNumber(Population::NUM_PRESERVE, 10);                       // 10 elite
+
+        // Genetic operators
         params.putNumber(Enumerations::enumTypeToString(ET_CROSS_LEVEL), CL_WEIGH);
         params.putNumber(Enumerations::enumTypeToString(ET_CROSS_ALG), CA_UNIFORM);
         params.putNumber(Population::UNIFORM_CROSS_PROB, 0.5);
+        params.putNumber(Enumerations::enumTypeToString(ET_SELECTION_ALGORITHM), SA_TOURNAMENT);
+        params.putNumber(Population::TOURNAMENT_SIZE, 5);
         params.putNumber(Enumerations::enumTypeToString(ET_MUTATION_ALG), MA_PER_INDIVIDUAL);
         params.putNumber(Population::MUTATION_NUM, 5);
+        params.putNumber(Enumerations::enumTypeToString(ET_RESET_ALG), RA_DISABLED);
 
+        // Load or create population
         Population* population = NULL;
-        unsigned startGeneration = 0;
+        Individual* example = NULL;
+        string topology;
+        string saveFileString;
+        const char* saveFile = NULL;
 
-        // Check if save file exists
+        // First, try to create example to determine topology and filename
+        example = reversiTask.getExample(&params);
+        topology = getTopologyString(example, boardSize);
+
+        // Build save filename: reversi_[topology]_P[populationSize].pop
+        ostringstream saveFileStream;
+        saveFileStream << "data/populations/reversi_" << topology << "_P" << populationSize << ".pop";
+        saveFileString = saveFileStream.str();
+        saveFile = saveFileString.c_str();
+
+        cout << "Configuration:" << endl;
+        cout << "  Generations: " << generations << endl;
+        cout << "  Checkpoint interval: " << checkpointInterval << endl;
+        cout << "  Topology: " << topology << endl;
+        cout << "  Population size: " << populationSize << endl;
+        cout << "  Save file: " << saveFile << endl << endl;
+
         if (fileExists(saveFile)) {
-            cout << "Found existing save file: " << saveFile << endl;
-            cout << "Loading population..." << endl;
+            cout << "Loading existing population from " << saveFile << "..." << endl;
+
+            // Don't need the example when loading
+            delete example;
+            example = NULL;
 
             FILE* loadStream = fopen(saveFile, "rb");
             if (!loadStream) {
-                string error = "Error: Could not open file for reading: " + string(saveFile);
-                throw error;
+                cerr << "Error: Could not open save file for reading" << endl;
+                return 1;
             }
 
-            population = new Population(&reversiTask, 100);
+            population = new Population(&reversiTask, populationSize);
             population->load(loadStream);
             population->setParams(&params);
             fclose(loadStream);
 
-            startGeneration = population->getGeneration();
-            cout << "Loaded generation " << startGeneration << " with " << population->getSize() << " individuals" << endl;
+            // Enable competitive co-evolution for loaded populations
+            cout << "Enabling competitive co-evolution (population vs adversary)..." << endl;
+            reversiTask.setAdversary(population->getBestIndividual());
+            cout << endl;
+
+            cout << "Loaded population:" << endl;
+            cout << "  Generation: " << population->getGeneration() << endl;
+            cout << "  Population size: " << populationSize << endl;
+            cout << endl;
+
+            cout << "Fitness from previous run (may use old fitness function): ";
+            cout << "Best=" << population->getBestIndividual()->getFitness();
+            cout << " | Avg=" << population->getAverageFitness() << endl;
+
+            // Re-evaluate all individuals with current fitness function
+            cout << "Re-evaluating all individuals with current fitness function..." << endl;
+            population->reevaluateAndSort();
+
+            // Update adversary after re-evaluation (population may have re-sorted)
+            reversiTask.setAdversary(population->getBestIndividual());
+
+            cout << "Fitness after re-evaluation: ";
+            cout << "Best=" << population->getBestIndividual()->getFitness();
+            cout << " | Avg=" << population->getAverageFitness() << endl;
+            cout << endl;
+
         } else {
-            cout << "No existing save file found. Creating new population..." << endl;
-
-            Individual* example = reversiTask.getExample(&params);
-            cout << "Created example neural network with " << example->getNumLayers() << " layers" << endl;
-
-            population = new Population(&reversiTask, example, 100, 5.0);
+            cout << "Creating new population (no save file found)..." << endl;
+            population = new Population(&reversiTask, example, populationSize, 5.0);
             population->setParams(&params);
 
-            startGeneration = 0;
-            cout << "Created population of 100 individuals" << endl;
-        }
+            cout << "Neural network architecture:" << endl;
+            cout << "  Input layer: " << (boardSize * boardSize) << " neurons (8x8 board encoding)" << endl;
+            cout << "  Hidden layer 1: " << boardSize << " neurons (BIT buffer)" << endl;
+            cout << "  Hidden layer 2: " << boardSize << " neurons (BIT buffer)" << endl;
+            cout << "  Output layer: 1 neuron (FLOAT buffer)" << endl;
+            cout << "  Feedforward with skip connections" << endl;
+            cout << endl;
 
-        // Print fitness before first generation of this run
-        cout << endl << "=== FITNESS BEFORE THIS RUN ===" << endl;
-        cout << "Generation: " << population->getGeneration() << endl;
-        cout << "Best fitness: " << population->getBestIndividual()->getFitness() << endl;
-        cout << "Avg fitness:  " << population->getAverageFitness() << endl;
-        cout << endl;
+            // Keep greedy computer opponent for new populations (bootstrap)
+            cout << "Using greedy computer for bootstrapping..." << endl;
+        }
 
         // Evolution loop
         cout << "=== EVOLVING FOR " << generations << " GENERATIONS ===" << endl;
-        cout << "Checkpoint interval: " << checkpointInterval << " generations" << endl;
-        cout << "Goal fitness: " << reversiTask.getGoal() << endl << endl;
+        cout << "Checkpoint interval: " << checkpointInterval << " generations" << endl << endl;
 
         Chronometer chrono;
         chrono.start();
@@ -118,23 +200,14 @@ int main(int argc, char *argv[])
 
             unsigned currentGen = population->getGeneration();
 
-            // Print progress
-            if ((gen + 1) % 10 == 0 || gen == 0) {
-                cout << "Generation " << currentGen << ": ";
-                cout << "Best = " << population->getBestIndividual()->getFitness();
-                cout << " | Avg = " << population->getAverageFitness();
-                cout << endl;
-            }
+            // Print progress every generation
+            cout << "Generation " << currentGen << ": ";
+            cout << "Best = " << population->getBestIndividual()->getFitness();
+            cout << " | Avg = " << population->getAverageFitness();
+            cout << endl;
 
             // Save checkpoint
             if ((gen + 1) % checkpointInterval == 0) {
-                // Print fitness at checkpoint
-                if ((gen + 1) % 10 != 0 && gen != 0) {  // Don't duplicate if already printed
-                    cout << "Generation " << currentGen << ": ";
-                    cout << "Best = " << population->getBestIndividual()->getFitness();
-                    cout << " | Avg = " << population->getAverageFitness();
-                    cout << endl;
-                }
                 FILE* saveStream = fopen(saveFile, "wb");
                 if (saveStream) {
                     population->save(saveStream);
@@ -143,12 +216,6 @@ int main(int argc, char *argv[])
                 } else {
                     cout << "  WARNING: Could not save checkpoint!" << endl;
                 }
-            }
-
-            // Check if goal reached
-            if (population->getBestIndividual()->getFitness() >= reversiTask.getGoal()) {
-                cout << endl << "GOAL REACHED at generation " << currentGen << "!" << endl;
-                break;
             }
         }
 
@@ -162,10 +229,22 @@ int main(int argc, char *argv[])
             cout << endl << "Final state saved to " << saveFile << endl;
         }
 
-        // Print fitness after last generation of this run
-        cout << endl << "=== FITNESS AFTER THIS RUN ===" << endl;
+        // Calculate bootstrap fitness (vs greedy computer) as progress indicator
+        cout << endl << "Testing best individual against greedy computer..." << endl;
+        Individual* bestIndividual = population->getBestIndividual();
+        float adversaryFitness = bestIndividual->getFitness();  // Save original fitness
+        Individual* currentAdversary = reversiTask.getAdversary();
+        reversiTask.setAdversary(NULL);  // Test against greedy computer (NULL = computerEstimation)
+        reversiTask.test(bestIndividual);
+        float bootstrapFitness = bestIndividual->getFitness();
+        bestIndividual->setFitness(adversaryFitness);  // Restore original fitness
+        reversiTask.setAdversary(currentAdversary);  // Restore adversary
+
+        // Print final results
+        cout << endl << "=== FINAL RESULTS ===" << endl;
         cout << "Generation: " << population->getGeneration() << endl;
-        cout << "Best fitness: " << population->getBestIndividual()->getFitness() << endl;
+        cout << "Best fitness (vs adversary): " << adversaryFitness << endl;
+        cout << "Bootstrap fitness (vs greedy): " << bootstrapFitness << endl;
         cout << "Avg fitness:  " << population->getAverageFitness() << endl;
         cout << endl;
 
@@ -175,82 +254,6 @@ int main(int argc, char *argv[])
         float remainingSeconds = seconds - hours * 3600 - minutes * 60;
         cout << "Evolution completed in " << seconds << " seconds";
         cout << " (" << hours << "h " << minutes << "m " << remainingSeconds << "s)" << endl;
-
-        // Play a demonstration game with the best individual vs computer
-        cout << endl << "Playing demonstration game (best individual vs computer)..." << endl;
-
-        ostringstream gameFilename;
-        gameFilename << "output/games/reversi_generation" << population->getGeneration() << ".txt";
-
-        ofstream gameFile(gameFilename.str().c_str());
-        if (gameFile.is_open()) {
-            ReversiBoard demoBoard(8, BT_BIT);
-            demoBoard.initBoard();
-
-            gameFile << "=== Reversi Training Game ===" << endl;
-            gameFile << "Generation: " << population->getGeneration() << endl;
-            gameFile << "Best individual fitness: " << population->getBestIndividual()->getFitness() << endl;
-            gameFile << "Player @ (trained NN) vs Player O (random computer)" << endl;
-            gameFile << "Player @ = PLAYER_1" << endl;
-            gameFile << "Player O = PLAYER_2" << endl << endl;
-
-            gameFile << "Initial board:" << endl;
-            demoBoard.printBoard(gameFile);
-            gameFile << endl;
-
-            Individual* bestIndividual = population->getBestIndividual();
-            int moveNum = 0;
-            SquareState turn = PLAYER_1;
-
-            while (!demoBoard.endGame()) {
-                if (!demoBoard.canMove(turn)) {
-                    gameFile << "Player " << (turn == PLAYER_1 ? "@" : "O") << " cannot move (passing)" << endl;
-                    turn = Board::opponent(turn);
-                    continue;
-                }
-
-                moveNum++;
-
-                // Best individual plays as @, computer as O
-                if (turn == PLAYER_1) {
-                    demoBoard.turn(turn, bestIndividual);
-                } else {
-                    demoBoard.turn(turn, NULL);  // NULL triggers computer opponent
-                }
-
-                gameFile << "After move " << moveNum << " (Player " << (turn == PLAYER_1 ? "@" : "O") << "):" << endl;
-                demoBoard.printBoard(gameFile);
-                gameFile << endl;
-
-                turn = Board::opponent(turn);
-
-                if (moveNum > 100) {
-                    gameFile << "Game ended due to move limit" << endl;
-                    break;
-                }
-            }
-
-            float scoreP1 = demoBoard.countPoints(PLAYER_1);
-            float scoreP2 = demoBoard.countPoints(PLAYER_2);
-            gameFile << "Final score - Player @: " << scoreP1 << ", Player O: " << scoreP2 << endl;
-
-            if (scoreP1 > scoreP2) {
-                gameFile << "PLAYER @ WINS!" << endl;
-            } else if (scoreP2 > scoreP1) {
-                gameFile << "PLAYER O WINS!" << endl;
-            } else {
-                gameFile << "TIE GAME!" << endl;
-            }
-
-            gameFile << "Game ended after " << moveNum << " moves" << endl;
-            gameFile.close();
-
-            cout << "Demonstration game saved to " << gameFilename.str() << endl;
-            cout << "Moves played: " << moveNum << endl;
-            cout << "Final score - Player @: " << scoreP1 << ", Player O: " << scoreP2 << endl;
-        } else {
-            cout << "Warning: Could not save demonstration game" << endl;
-        }
 
     } catch (string& error) {
         cerr << "Error: " << error << endl;

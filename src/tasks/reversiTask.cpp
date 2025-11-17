@@ -11,21 +11,26 @@ ReversiTask::ReversiTask(unsigned size, BufferType bufferType, unsigned numTests
 {
     tBoard = new ReversiBoard(size, bufferType);
     tNumTests = numTests;
+    tAdversary = NULL;  // Start with random opponent (bootstrap)
 }
 
 ReversiTask::~ReversiTask()
 {
     delete (tBoard);
+    if (tAdversary != NULL) {
+        delete tAdversary;
+    }
 }
 
 float ReversiTask::getGoal()
 {
-    return (tNumTests * tBoard->getSize() * tBoard->getSize()) * 1.5;
+    // Goal: win all games with perfect score (64-0 = +64 per game)
+    // With tNumTests games, maximum fitness = tNumTests * 64
+    return tNumTests * tBoard->getSize() * tBoard->getSize();
 }
 
 void ReversiTask::test(Individual* individual)
 {
-    unsigned maxPoints = tBoard->getSize() * tBoard->getSize();
     float fitness = 0;
     for (unsigned i = 0; i < tNumTests; ++i) {
 
@@ -45,13 +50,18 @@ void ReversiTask::test(Individual* individual)
                 if (turn == individualPlayer) {
                     tBoard->turn(turn, individual);
                 } else {
-                    tBoard->turn(turn, NULL);
+                    // Opponent plays: use fixed adversary if available, else random
+                    tBoard->turn(turn, tAdversary);
                 }
             }
             turn = Board::opponent(turn);
 //            tBoard->print();
         }
-        fitness += tBoard->countPoints(individualPlayer) + maxPoints;
+        // Fitness based on score difference: your points - opponent's points
+        // Positive = win, negative = loss, zero = tie
+        float individualPoints = tBoard->countPoints(individualPlayer);
+        float opponentPoints = tBoard->countPoints(Board::opponent(individualPlayer));
+        fitness += individualPoints - opponentPoints;
 //        tBoard->print();
 //        cout << " points " << tBoard->countPoints(individualPlayer) << endl;
     }
@@ -102,5 +112,26 @@ Individual* ReversiTask::getExample(ParametersMap* parameters)
 std::string ReversiTask::toString()
 {
     return "REVERSI_" + to_string(tBoard->getSize());
+}
+
+void ReversiTask::setAdversary(Individual* adversary)
+{
+    // Delete old copy if exists
+    if (tAdversary != NULL) {
+        delete tAdversary;
+    }
+
+    // Make a copy of the adversary so we own it (population may delete original)
+    tAdversary = (adversary != NULL) ? adversary->newCopy(true) : NULL;
+}
+
+Individual* ReversiTask::getAdversary()
+{
+    return tAdversary;
+}
+
+bool ReversiTask::hasAdversary()
+{
+    return tAdversary != NULL;
 }
 
