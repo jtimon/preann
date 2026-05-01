@@ -81,6 +81,7 @@ unsigned EnumLoop::reset(EnumType enumType)
     tEnumType = enumType;
     tValueVector.clear();
     tIndex = 0;
+    return tIndex;
 }
 
 void EnumLoop::withAll(EnumType enumType)

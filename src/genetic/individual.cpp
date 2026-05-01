@@ -245,6 +245,7 @@ vector<Interface*>* Individual::prepareCrossover(CrossoverLevel crossoverLevel)
         case CL_LAYER:
             return prepareCrossoverLayers();
     }
+    return NULL;
 }
 
 void Individual::crossover(CrossoverLevel crossoverLevel, Individual* other,
