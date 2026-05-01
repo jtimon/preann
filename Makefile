@@ -33,9 +33,10 @@ LOGS     = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,output/log/%.l
 
 CXX = $(CXX_BASE) -ggdb $(INCLUDES)
 CXX_LINK = $(CXX_BASE)
-NVCC = /usr/local/cuda/bin/nvcc $(INCLUDES)
-NVCC_LINK = $(NVCC) -lcudart
-NVCC_COMPILE = $(NVCC) -g -G -c -arch sm_75
+NVCC ?= nvcc
+CUDA_ARCH ?= sm_75
+NVCC_LINK = $(NVCC) $(INCLUDES) -lcudart
+NVCC_COMPILE = $(NVCC) $(INCLUDES) -g -G -c -arch=$(CUDA_ARCH)
 NASM = nasm -f elf
 
 ifeq (cpp, $(MAKECMDGOALS))
@@ -51,62 +52,21 @@ ifeq (sse2, $(MAKECMDGOALS))
 endif
 ifeq (cuda, $(MAKECMDGOALS))
 	CXX_BASE = g++
-	NVCC_LINK += -L/usr/local/cuda/lib
-	FACT_OBJ = $(CUDA_OBJ)
-	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
-endif
-ifeq (cuda_emu, $(MAKECMDGOALS))
-	CXX_BASE = g++-4.3
-	NVCC_COMPILE += --device-emulation
-	NVCC_LINK += -L/usr/local/cuda/lib
 	FACT_OBJ = $(CUDA_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
 endif
 ifeq (all, $(MAKECMDGOALS))
 	CXX_BASE = g++
-	NVCC_LINK += -L/usr/local/cuda/lib
-	FACT_OBJ = $(FULL_OBJ)
-	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
-endif
-ifeq (all_emu, $(MAKECMDGOALS))
-	CXX_BASE = g++-4.3
-	NVCC_COMPILE += --device-emulation
-	NVCC_LINK += -L/usr/local/cuda/lib
-	FACT_OBJ = $(FULL_OBJ)
-	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
-endif
-ifeq (cpp_64, $(MAKECMDGOALS))
-	CXX_BASE = g++ -m32 -fpermissive
-	NVCC_LINK = $(CXX_LINK)
-	FACT_FLAGS = -DCPP_IMPL
-endif
-ifeq (sse2_64, $(MAKECMDGOALS))
-	CXX_BASE = g++ -m32 -fpermissive
-	NVCC_LINK = $(CXX_LINK)
-	FACT_OBJ = $(SSE2_OBJ)
-	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
-endif
-ifeq (cuda_64, $(MAKECMDGOALS))
-	CXX_BASE = g++ -m32 -fpermissive
-	NVCC += -m32
-	NVCC_LINK += -L/opt/cuda-toolkit/lib
-	FACT_OBJ = $(CUDA_OBJ)
-	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
-endif
-ifeq (all_64, $(MAKECMDGOALS))
-	CXX_BASE = g++ -m32 -fpermissive
-	NVCC += -m32
-	NVCC_LINK += -L/opt/cuda-toolkit/lib
 	FACT_OBJ = $(FULL_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
 endif
 
 OBJ += $(FACT_OBJ)
 
-.PHONY: all clean checkdirs cpp sse2 cuda cuda_emu all_emu cpp_64 sse2_64 cuda_64 all_64
+.PHONY: all clean checkdirs cpp sse2 cuda
 .SECONDARY:
 
-cpp_64 sse2_64 cuda_64 all_64 cuda_emu all_emu all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
+all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	cat /proc/cpuinfo > $(OUTPUT_DIR)info/cpu.txt
 #	lspci -vv > $(OUTPUT_DIR)info/device.txt
 #	cat /proc/meminfo > $(OUTPUT_DIR)info/mem.txt
