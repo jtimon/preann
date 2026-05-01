@@ -90,7 +90,7 @@ std::string JoinEnumLoop::valueToString()
 
 unsigned JoinEnumLoop::getNumBranches()
 {
-    tValueVector.size();
+    return tValueVector.size();
 }
 
 unsigned JoinEnumLoop::getDepth()

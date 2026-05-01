@@ -71,6 +71,7 @@ unsigned Interface::getByteSize()
         case BT_SIGN:
             return (((size - 1) / BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
     }
+    return 0;
 }
 
 BufferType Interface::getBufferType()
@@ -108,6 +109,7 @@ float Interface::getElement(unsigned pos)
             }
             return -1;
     }
+    return 0;
 }
 
 void Interface::setElement(unsigned pos, float value)

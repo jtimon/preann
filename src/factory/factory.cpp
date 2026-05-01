@@ -47,6 +47,7 @@ Buffer* Factory::newBuffer(unsigned size, BufferType bufferType,
         case BT_SIGN:
             return func_newBuffer<BT_SIGN, SIGN_STORAGE> (size, implementationType);
     }
+    return NULL;
 }
 
 BufferType Factory::weighForInput(BufferType inputType)
@@ -66,6 +67,7 @@ BufferType Factory::weighForInput(BufferType inputType)
         case BT_SIGN:
             return BT_BYTE;
     }
+    return BT_FLOAT;
 }
 
 Connection* Factory::newConnection(Buffer* input, unsigned outputSize)
@@ -87,4 +89,5 @@ Connection* Factory::newConnection(Buffer* input, unsigned outputSize)
             return func_newConnection<BT_SIGN, SIGN_STORAGE> (input,
                     outputSize, implementationType);
     }
+    return NULL;
 }

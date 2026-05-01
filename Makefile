@@ -9,7 +9,7 @@ SHELL = /bin/sh
 MODULES   = common factory neural genetic game tasks loop loopTest
 
 SRC_DIR   = $(addprefix src/,$(MODULES))
-BUILD_DIR = bin build $(addprefix build/,$(MODULES)) build/test/ build/sse2 build/cuda
+BUILD_DIR = bin build $(addprefix build/,$(MODULES)) build/test/ build/sse2 build/sse2_64 build/cuda
 OUTPUT_DIR = $(CURDIR)/output/
 LOG_DIR = $(CURDIR)/output/log/
 
@@ -19,10 +19,13 @@ OBJ       = $(patsubst src/%.cpp,build/%.o,$(SRC))
 SSE2_SRC = $(foreach sdir,src/sse2,$(wildcard $(sdir)/*.asm))
 SSE2_OBJ = $(patsubst src/sse2/%.asm,build/sse2/%.o,$(SSE2_SRC))
 
+SSE2_64_SRC = $(foreach sdir,src/sse2_64,$(wildcard $(sdir)/*.asm))
+SSE2_64_OBJ = $(patsubst src/sse2_64/%.asm,build/sse2_64/%.o,$(SSE2_64_SRC))
+
 CUDA_SRC = $(foreach sdir,src/cuda,$(wildcard $(sdir)/*.cu))
 CUDA_OBJ = $(patsubst src/cuda/%.cu,build/cuda/%.o,$(CUDA_SRC))
 
-FULL_OBJ = $(SSE2_OBJ) $(CUDA_OBJ)
+FULL_OBJ = $(SSE2_64_OBJ) $(CUDA_OBJ)
 
 #INCLUDES  = $(addprefix -I , $(addprefix src/,$(MODULES)))
 INCLUDES  = -I src/
@@ -38,6 +41,7 @@ CUDA_ARCH ?= sm_75
 NVCC_LINK = $(NVCC) $(INCLUDES) -lcudart
 NVCC_COMPILE = $(NVCC) $(INCLUDES) -g -G -c -arch=$(CUDA_ARCH)
 NASM = nasm -f elf
+NASM_64 = nasm -f elf64
 
 ifeq (cpp, $(MAKECMDGOALS))
 	CXX_BASE = g++
@@ -48,6 +52,12 @@ ifeq (sse2, $(MAKECMDGOALS))
 	CXX_BASE = g++
 	NVCC_LINK = $(CXX_LINK)
 	FACT_OBJ = $(SSE2_OBJ)
+	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
+endif
+ifeq (sse2_64, $(MAKECMDGOALS))
+	CXX_BASE = g++
+	NVCC_LINK = $(CXX_LINK)
+	FACT_OBJ = $(SSE2_64_OBJ)
 	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
 endif
 ifeq (cuda, $(MAKECMDGOALS))
@@ -63,10 +73,10 @@ endif
 
 OBJ += $(FACT_OBJ)
 
-.PHONY: all clean checkdirs cpp sse2 cuda
+.PHONY: all clean checkdirs cpp sse2 sse2_64 cuda
 .SECONDARY:
 
-all cpp sse2 cuda: checkdirs $(EXE) $(FACT_OBJ)
+all cpp sse2 sse2_64 cuda: checkdirs $(EXE) $(FACT_OBJ)
 #	cat /proc/cpuinfo > $(OUTPUT_DIR)info/cpu.txt
 #	lspci -vv > $(OUTPUT_DIR)info/device.txt
 #	cat /proc/meminfo > $(OUTPUT_DIR)info/mem.txt
@@ -133,6 +143,8 @@ build/cuda/%.o : src/cuda/%.cu src/cuda/cuda.h src/common/util.h
 	$(NVCC_COMPILE) $< -o $@
 build/sse2/%.o : src/sse2/%.asm src/sse2/sse2.h
 	$(NASM) $< -o $@
+build/sse2_64/%.o : src/sse2_64/%.asm src/sse2/sse2.h
+	$(NASM_64) $< -o $@
 
 # TODO dependencias dinamicas
 build/common/loop/joinEnumLoop.o build/common/loop/enumLoop.o build/common/loop/rangeLoop.o : build/common/loop/loop.o
