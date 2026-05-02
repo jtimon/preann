@@ -73,7 +73,7 @@ endif
 
 OBJ += $(FACT_OBJ)
 
-.PHONY: all clean checkdirs cpp sse2 sse2_64 cuda
+.PHONY: all clean checkdirs cpp sse2 sse2_64 cuda test help
 .SECONDARY:
 
 all cpp sse2 sse2_64 cuda: checkdirs $(EXE) $(FACT_OBJ)
@@ -151,6 +151,55 @@ build/common/loop/joinEnumLoop.o build/common/loop/enumLoop.o build/common/loop/
 
 clean:
 	rm -rf $(BUILD_DIR)
+
+TEST_BINS = testBuffers testConnections testConnections2 testIndividualSaveLoad testLayers testMemoryLosses testPlot testPopulationSaveLoad
+TEST_RUN_DIR = $(OUTPUT_DIR)test_run/
+
+test:
+	@if [ -z "$$(ls bin/*.exe 2>/dev/null)" ]; then \
+	    echo "No binaries built yet. Run 'make cpp' (or sse2_64 / cuda / all) first."; \
+	    exit 1; \
+	fi
+	@mkdir -p $(TEST_RUN_DIR)data $(TEST_RUN_DIR)gnuplot
+	@pass=0; fail=0; missing=0; \
+	for t in $(TEST_BINS); do \
+	    log=$(TEST_RUN_DIR)$$t.log; \
+	    if [ ! -x bin/$$t.exe ]; then \
+	        echo "  SKIP  $$t (not built)"; missing=$$((missing+1)); continue; \
+	    fi; \
+	    if ./bin/$$t.exe $(TEST_RUN_DIR) > $$log 2>&1; then \
+	        if grep -qE "differences detected|Memory loss detected" $$log; then \
+	            echo "  FAIL  $$t (assertion mismatch, see $$log)"; \
+	            fail=$$((fail+1)); \
+	        else \
+	            echo "  PASS  $$t"; pass=$$((pass+1)); \
+	        fi; \
+	    else \
+	        echo "  FAIL  $$t (exit $$?, see $$log)"; fail=$$((fail+1)); \
+	    fi; \
+	done; \
+	echo ""; \
+	echo "Result: $$pass passed, $$fail failed, $$missing skipped"; \
+	[ $$fail -eq 0 ]
+
+help:
+	@echo "PREANN build targets:"
+	@echo "  cpp        Pure C++ build (no SIMD/GPU; baseline reference)"
+	@echo "  sse2       Legacy 32-bit SSE2 build (preserved historical reference; needs 32-bit toolchain)"
+	@echo "  sse2_64    64-bit SSE2 build (modern x86-64 ABI port of the legacy asm)"
+	@echo "  cuda       CUDA build (requires nvidia-cuda-toolkit + nvcc on PATH)"
+	@echo "  all        Combined build: cpp + sse2_64 + cuda"
+	@echo ""
+	@echo "Other targets:"
+	@echo "  test       Run unit tests with assertEquals correctness checks"
+	@echo "  clean      Remove all build artifacts"
+	@echo "  help       Show this message"
+	@echo ""
+	@echo "Build variables:"
+	@echo "  CUDA_ARCH  GPU compute capability (default sm_75)"
+	@echo "             Examples: sm_75 (Turing/RTX 20)   sm_86 (Ampere/RTX 30)"
+	@echo "                       sm_89 (Ada/RTX 40)      sm_120 (Blackwell/RTX 50; needs CUDA 12.8+)"
+	@echo "  NVCC       CUDA compiler path (default: nvcc from PATH)"
 
 #       Only use these programs directly
 #    awk cat cmp cp diff echo egrep expr false grep install-info ln ls
