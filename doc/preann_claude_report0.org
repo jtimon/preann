@@ -1672,3 +1672,186 @@ New human vs computer test program (src/test/playGoHuman.cpp):
   2. Implement simplified Chinese rules (easier than Japanese)
   3. Use Fuego's TrompTaylorScore as starting point
 - All approaches require dead stone detection for accurate training
+
+* Modernization Pass (2026-05-02)
+
+This section supersedes the conclusions of the earlier "SSE2 Build
+Investigation (2025-11-15)" section: SSE2 is no longer incompatible
+with 64-bit Linux. Original 32-bit asm is preserved untouched.
+
+** Summary
+
+All four build paths are now usable on a modern x86-64 Linux host:
+
+| Target    | Status        | Notes                                              |
+|-----------+---------------+----------------------------------------------------|
+| =cpp=     | Works         | g++-13 + Ubuntu 24.04 verified                     |
+| =sse2=    | Legacy        | 32-bit asm preserved as historical reference       |
+| =sse2_64= | Works (new)   | x86-64 ABI port of the legacy asm                  |
+| =cuda=    | Works         | CUDA 12.0 verified compile + link, runtime on GPU  |
+| =all=     | Works         | cpp + sse2_64 + cuda in one binary                 |
+
+Algorithm code (=src/sse2/=, =src/cuda/=, all C++ logic) is unchanged.
+Modifications were limited to: Makefile, new =src/sse2_64/= directory,
+and 9 latent =-Wreturn-type= bug fixes that g++-13 turns into =ud2=
+traps (illegal instruction at runtime).
+
+** Build System Changes (Makefile)
+
+*** Parameterization
+
+- =NVCC ?= nvcc= -- discoverable via PATH instead of hardcoded
+  =/usr/local/cuda/bin/nvcc=. Override on the command line if needed.
+- =CUDA_ARCH ?= sm_75= -- default GPU compute capability, override
+  per-machine. =make cuda CUDA_ARCH=sm_120= for an RTX 5090, etc.
+- Hardcoded =-L/usr/local/cuda/lib= dropped (apt-installed CUDA puts
+  libs in standard linker paths; older installs expose =lib64=).
+
+*** Removed dead targets
+
+The following targets were removed from the Makefile -- all
+documented broken in earlier commits and unfixable on a modern host:
+
+- =cuda_emu=, =all_emu= -- =--device-emulation= was removed in
+  CUDA 3.1 (2010); =g++-4.3= no longer ships.
+- =cpp_64=, =sse2_64=, =cuda_64=, =all_64= -- confusingly named:
+  these targeted 32-bit cross-compile (=g++ -m32 -fpermissive=)
+  on a 64-bit host. The =sse2_64= name is now reused for the
+  actual 64-bit SSE2 build, see below.
+
+*** New targets
+
+- =make sse2_64= -- modern 64-bit SSE2 build, see below.
+- =make help= -- prints supported targets, build variables, and
+  example =CUDA_ARCH= values.
+- =make test= -- runs the =test*.exe= unit-test family with
+  =assertEquals= correctness checks. Captures exit codes and greps
+  stdout for "differences detected" / "Memory loss detected"
+  failure markers. Reports a final =pass / fail / skip= summary.
+
+** 64-bit SSE2 Port (=src/sse2_64/=)
+
+A new sibling directory of =src/sse2/= containing System V x86-64
+ABI ports of the three asm files. The legacy =src/sse2/= is left
+untouched.
+
+*** What changed in the asm
+
+- =nasm -f elf= -> =nasm -f elf64= (the only build-system change
+  for the asm itself).
+- Function arguments via System V regs (=RDI=, =RSI=, =RDX=, =RCX=)
+  instead of stack offsets (=[ESP+16]=, etc.). The original
+  =PUSH ECX/ESI/EDI= prologue and matching =POP= epilogue are gone
+  -- in 64-bit those regs are caller-saved so we can clobber them.
+- Pointer arithmetic uses =RDI= / =RDX= instead of =ESI= / =EDI=.
+- =R10B= replaces the original =BL= as the inner-loop counter to
+  avoid having to push/pop callee-saved =RBX=.
+- =[rel mascara]= for RIP-relative data access (modern x86-64
+  position-independent style).
+- Explicit =section .text= directive before each =global ...= so the
+  function code lands in the executable text segment. (The original
+  asm placed code right after =section .data= -- this happened to
+  work on old 32-bit kernels with weak W^X but trips =SIGILL= on
+  modern non-executable data pages.)
+- A =.note.GNU-stack= section (=noalloc noexec nowrite=) per file
+  to silence the modern linker warning about implied executable
+  stack from NASM-emitted objects.
+
+*** What stayed identical
+
+The actual SSE2 instructions are byte-for-byte unchanged:
+=MOVUPS=, =MULPS=, =ADDPS=, =PXOR=, =SHUFPS=, =PSRLDQ=, =MOVDQA=,
+=MOVDQU=, =PCMPEQB=, =PSADBW=, =PADDD=, =PSUBD=, =PAND=, =PSRLW=
+all behave identically on 32-bit and 64-bit hosts. The =XMM0=-=XMM7=
+registers used in the algorithm are the same 128-bit registers in
+either mode.
+
+The exported C symbol names are unchanged (=XMMreal=, =XMMbinario=,
+=XMMbipolar=). This means the C++ wrappers in =src/factory/sse2/=
+are byte-for-byte unchanged: at link time, =FACT_OBJ= picks
+=$(SSE2_OBJ)= for =make sse2= or =$(SSE2_64_OBJ)= for =make sse2_64=,
+and the linker finds the right backend.
+
+*** Consequence: build-time pick-one
+
+The 32-bit and 64-bit asm cannot coexist in a single binary because
+they share symbol names. They are alternatives selected by the
+=make= target, not separately-callable runtime implementations.
+There is no =IT_SSE2_LEGACY= enum value -- =IT_SSE2= remains the
+generic "SSE2 path" identifier.
+
+** Latent -Wreturn-type Fixes
+
+g++-13 on Ubuntu 24.04 emits a =ud2= (undefined-instruction trap)
+at the end of any non-void function that can fall through without a
+=return=. This is technically defined behavior under the standard
+(reaching the end of a non-void function is UB and the compiler is
+free to assume it never happens), but older compilers were lenient.
+
+Nine call sites caught: 8 cases of "exhaustive" enum =switch= with
+no fallback =return= after the closing brace, plus one literal
+typo (=tValueVector.size();= with the =return= keyword missing):
+
+- =src/loop/enumLoop.cpp= -- =EnumLoop::reset=
+- =src/loop/joinEnumLoop.cpp= -- =JoinEnumLoop::getNumBranches=
+  (the =return= typo)
+- =src/factory/factory.cpp= -- =Factory::newBuffer=,
+  =Factory::weighForInput=, =Factory::newConnection=
+- =src/factory/cuda/cudaBuffer.h= -- =CudaBuffer::getByteSize=
+- =src/neural/interface.cpp= -- =Interface::getByteSize=,
+  =Interface::getElement=
+- =src/genetic/individual.cpp= -- =Individual::prepareCrossover=
+
+Each fix adds a single =return= statement. No behavior change for
+valid input -- the fallback path is unreachable for in-range enum
+values. Without these fixes, every chrono and most test binaries
+crash with =Illegal instruction (core dumped)= the moment they hit
+the affected codepath, even on the =make cpp= build.
+
+** Test Infrastructure (=make test=)
+
+Runs eight existing =test*.exe= binaries that internally call
+=Test::assertEquals= between the C reference implementation and
+each enabled SIMD/GPU path:
+
+=testBuffers=, =testConnections=, =testConnections2=,
+=testIndividualSaveLoad=, =testLayers=, =testMemoryLosses=,
+=testPlot=, =testPopulationSaveLoad=
+
+Output goes to =output/test_run/<name>.log= so committed reference
+data under =output/data/= is not overwritten.
+
+A test counts as passing when the binary exits zero AND its stdout
+contains neither "differences detected" nor "Memory loss detected".
+Final summary lists =N passed, M failed, K skipped=.
+
+*** Current results (2026-05-02, sse2_64 build)
+
+7 / 8 pass. =testMemoryLosses= fails with leaks in the C-path
+(=_C_= state) =Layer= and =NeuralNet= destructors (~8000 bytes total
+across 20 pointers). The leaks are independent of SIMD/GPU path
+selection and predate this modernization pass.
+
+** Path to a 5090 (RTX 50 / Blackwell)
+
+1. Install NVIDIA CUDA 12.8+ (Ubuntu's apt =nvidia-cuda-toolkit=
+   is 12.0, which knows up to =sm_90= natively). NVIDIA's deb repo
+   provides a current toolkit.
+2. =make all CUDA_ARCH=sm_120= for native Blackwell code.
+3. Without 12.8+, =make all= still produces a working binary --
+   the driver JIT-compiles =sm_75= PTX forward to Blackwell at
+   runtime, just not at peak efficiency.
+
+** Prerequisites Summary
+
+| Package                  | Provides                       |
+|--------------------------+--------------------------------|
+| =build-essential=        | g++, make                      |
+| =nasm=                   | =make sse2_64= (and =sse2=)    |
+| =nvidia-cuda-toolkit=    | =make cuda= (Ubuntu apt: 12.0) |
+| =gnuplot=                | rendered =.plt= visual plots   |
+
+The =.DAT= benchmark data files are produced regardless of whether
+gnuplot is available; gnuplot is only needed for the rendered =.png=
+plots. Only =gnuplot= and =nasm= are needed for a CPU-only build;
+=nvidia-cuda-toolkit= adds CUDA support.
