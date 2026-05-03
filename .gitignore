@@ -2,9 +2,5 @@ bin/
 build/
 fuego_source/
 output/games/
-<<<<<<< HEAD
-data/chess_game_counter.txt
-=======
 output/test_run/
-data/
->>>>>>> 06527cc (gitignore: add output/test_run/ (make test ephemeral logs))
+data/chess_game_counter.txt
