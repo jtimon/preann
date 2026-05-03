@@ -36,7 +36,7 @@ LOGS     = $(foreach main, $(PROGRAMS), $(patsubst src/test/%.cpp,output/log/%.l
 
 CXX = $(CXX_BASE) -ggdb $(INCLUDES)
 CXX_LINK = $(CXX_BASE)
-NVCC ?= nvcc
+NVCC ?= $(if $(wildcard /usr/local/cuda/bin/nvcc),/usr/local/cuda/bin/nvcc,nvcc)
 CUDA_ARCH ?= sm_75
 NVCC_LINK = $(NVCC) $(INCLUDES) -lcudart
 NVCC_COMPILE = $(NVCC) $(INCLUDES) -g -G -c -arch=$(CUDA_ARCH)
@@ -207,7 +207,7 @@ help:
 	@echo "  CUDA_ARCH  GPU compute capability (default sm_75)"
 	@echo "             Examples: sm_75 (Turing/RTX 20)   sm_86 (Ampere/RTX 30)"
 	@echo "                       sm_89 (Ada/RTX 40)      sm_120 (Blackwell/RTX 50; needs CUDA 12.8+)"
-	@echo "  NVCC       CUDA compiler path (default: nvcc from PATH)"
+	@echo "  NVCC       CUDA compiler path (default: /usr/local/cuda/bin/nvcc if present, else nvcc from PATH)"
 	@echo "  TEST_IMPLEMENTATIONS  Implementations to test (default: C; normally set by build target)"
 	@echo "             Valid values: C,SSE2,CUDA_REDUC0,CUDA_REDUC,CUDA,CUDA_INV,ALL"
 

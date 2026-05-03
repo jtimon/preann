@@ -22,7 +22,10 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                 case BT_BIT:
                 case BT_SIGN:
                     return (((tSize - 1) / BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
+                case BT_FLOAT_SMALL:
+                    Util::check(true, "BufferType FLOAT_SMALL is not allowed for CudaBuffer");
             }
+            return 0;
         }
 
         virtual void _copyFrom(Interface *interface)
