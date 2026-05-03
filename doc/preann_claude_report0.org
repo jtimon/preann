@@ -1842,16 +1842,18 @@ Final summary lists =N passed, M failed, K skipped=.
 
 - =make cpp test= passes: 8 / 8.
 - =make cpp sse2_64 test= passes: 8 / 8.
+- =make cpp sse2_64 cuda test CUDA_ARCH=sm_120= passes: 8 / 8
+  on an RTX 5090 with CUDA 13.2 and NVIDIA driver 580.159.03.
 
 ** Path to a 5090 (RTX 50 / Blackwell)
 
-1. Install NVIDIA CUDA 12.8+ (Ubuntu's apt =nvidia-cuda-toolkit=
-   is 12.0, which knows up to =sm_90= natively). NVIDIA's deb repo
-   provides a current toolkit.
-2. =make all CUDA_ARCH=sm_120= for native Blackwell code.
-3. Without 12.8+, =make all= still produces a working binary --
-   the driver JIT-compiles =sm_75= PTX forward to Blackwell at
-   runtime, just not at peak efficiency.
+1. Install NVIDIA CUDA 12.8+ (CUDA 13.2 verified) and a compatible
+   NVIDIA driver.
+2. =make cpp sse2_64 cuda test CUDA_ARCH=sm_120= for native
+   Blackwell test coverage.
+3. If =nvidia-smi= reports a driver/library mismatch after package
+   updates, reboot so the loaded kernel module matches the installed
+   user-space libraries.
 
 ** Prerequisites Summary
 
