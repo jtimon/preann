@@ -1725,8 +1725,10 @@ documented broken in earlier commits and unfixable on a modern host:
 - =make help= -- prints supported targets, build variables, and
   example =CUDA_ARCH= values.
 - =make test= -- runs the =test*.exe= unit-test family with
-  =assertEquals= correctness checks. Captures exit codes and greps
-  stdout for "differences detected" / "Memory loss detected"
+  =assertEquals= correctness checks. Use it together with the build
+  targets so the test binaries receive the matching implementation
+  list, e.g. =make cpp sse2_64 test=. Captures exit
+  codes and greps stdout for correctness, memory-loss, and exception
   failure markers. Reports a final =pass / fail / skip= summary.
 
 ** 64-bit SSE2 Port (=src/sse2_64/=)
@@ -1810,9 +1812,20 @@ the affected codepath, even on the =make cpp= build.
 
 ** Test Infrastructure (=make test=)
 
-Runs eight existing =test*.exe= binaries that internally call
-=Test::assertEquals= between the C reference implementation and
-each enabled SIMD/GPU path:
+Runs eight existing =test*.exe= binaries. Tests that iterate runtime
+implementations use the implementation list selected by the build
+target:
+
+- =make cpp test= tests =C=.
+- =make cpp sse2_64 test= tests =C,SSE2=.
+- =make cpp cuda test= tests =C,CUDA_REDUC0,CUDA_REDUC,CUDA,CUDA_INV=.
+- =make cpp sse2_64 cuda test= tests =C,SSE2,CUDA_REDUC0,CUDA_REDUC,CUDA,CUDA_INV=.
+- =make all test= tests all compiled implementations.
+
+The tests avoid implementation/buffer combinations that the selected
+backend does not support, such as =SSE2= with =FLOAT_SMALL= buffers.
+Correctness checks still compare accelerated paths against the C
+reference where relevant.
 
 =testBuffers=, =testConnections=, =testConnections2=,
 =testIndividualSaveLoad=, =testLayers=, =testMemoryLosses=,
@@ -1822,15 +1835,13 @@ Output goes to =output/test_run/<name>.log= so committed reference
 data under =output/data/= is not overwritten.
 
 A test counts as passing when the binary exits zero AND its stdout
-contains neither "differences detected" nor "Memory loss detected".
+contains no correctness, memory-loss, or exception/error markers.
 Final summary lists =N passed, M failed, K skipped=.
 
-*** Current results (2026-05-02, sse2_64 build)
+*** Current results (2026-05-03)
 
-7 / 8 pass. =testMemoryLosses= fails with leaks in the C-path
-(=_C_= state) =Layer= and =NeuralNet= destructors (~8000 bytes total
-across 20 pointers). The leaks are independent of SIMD/GPU path
-selection and predate this modernization pass.
+- =make cpp test= passes: 8 / 8.
+- =make cpp sse2_64 test= passes: 8 / 8.
 
 ** Path to a 5090 (RTX 50 / Blackwell)
 

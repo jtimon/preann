@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
         RangeLoop loop(Dummy::SIZE, 2, 13, 10);
         loop.addInnerLoop(new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2));
         loop.addInnerLoop(new EnumLoop(ET_BUFFER, 3, BT_BIT, BT_SIGN, BT_FLOAT));
-        EnumLoop* loopImpl = new EnumLoop(ET_IMPLEMENTATION);
+        EnumLoop* loopImpl = Test::implementationLoop(argc > 2 ? argv[2] : NULL);
         loop.addInnerLoop(loopImpl);
 
         loop.print();

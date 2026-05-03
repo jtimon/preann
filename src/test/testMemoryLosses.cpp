@@ -111,11 +111,11 @@ int main(int argc, char *argv[])
         RangeLoop* outputSizeLoop = new RangeLoop(Dummy::OUTPUT_SIZE, 1, 4, 2);
         loop->addInnerLoop(outputSizeLoop);
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(Enumerations::enumTypeToString(ET_BUFFER), ET_BUFFER);
+        EnumLoop* bufferTypeLoop = Test::bufferLoop(argc > 2 ? argv[2] : NULL);
         loop->addInnerLoop(bufferTypeLoop);
 
 //        loop->addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
-        sizeLoop->addInnerLoop(new EnumLoop(ET_IMPLEMENTATION));
+        sizeLoop->addInnerLoop(Test::implementationLoop(argc > 2 ? argv[2] : NULL));
 
 
         loop->print();
@@ -124,8 +124,12 @@ int main(int argc, char *argv[])
 
         test.testMemoryLosses(testBuffer, "Buffer", loop);
 
-        // exclude BYTE
-        bufferTypeLoop->exclude(ET_BUFFER, 1, BT_BYTE);
+        // BYTE connections are unsupported. Accelerated implementations also do not support FLOAT_SMALL.
+        if (Test::usesOnlyCppImplementation(argc > 2 ? argv[2] : NULL)) {
+            bufferTypeLoop->with(ET_BUFFER, 4, BT_FLOAT, BT_BIT, BT_SIGN, BT_FLOAT_SMALL);
+        } else {
+            bufferTypeLoop->with(ET_BUFFER, 3, BT_FLOAT, BT_BIT, BT_SIGN);
+        }
 
         test.testMemoryLosses(testConnection, "Connection", loop);
 

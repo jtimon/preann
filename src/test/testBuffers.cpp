@@ -87,9 +87,9 @@ int main(int argc, char *argv[])
 
         RangeLoop loop(Dummy::SIZE, 100, 101, 100);
 //        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION, 2, IT_C, IT_SSE2));
-        loop.addInnerLoop(new EnumLoop(ET_IMPLEMENTATION));
+        loop.addInnerLoop(Test::implementationLoop(argc > 2 ? argv[2] : NULL));
 
-        EnumLoop* bufferTypeLoop = new EnumLoop(ET_BUFFER);
+        EnumLoop* bufferTypeLoop = Test::bufferLoop(argc > 2 ? argv[2] : NULL);
         loop.addInnerLoop(bufferTypeLoop);
 
         loop.print();

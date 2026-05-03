@@ -42,34 +42,41 @@ NVCC_LINK = $(NVCC) $(INCLUDES) -lcudart
 NVCC_COMPILE = $(NVCC) $(INCLUDES) -g -G -c -arch=$(CUDA_ARCH)
 NASM = nasm -f elf
 NASM_64 = nasm -f elf64
+comma := ,
+empty :=
+space := $(empty) $(empty)
+TEST_IMPLEMENTATION_LIST = C
 
-ifeq (cpp, $(MAKECMDGOALS))
+ifneq ($(filter sse2,$(MAKECMDGOALS)),)
+ifneq ($(filter sse2_64 all,$(MAKECMDGOALS)),)
+$(error Choose only one SSE2 object backend: sse2 or sse2_64/all)
+endif
+endif
+
+ifneq ($(filter cpp sse2 sse2_64 cuda all,$(MAKECMDGOALS)),)
 	CXX_BASE = g++
+	FACT_FLAGS += -DCPP_IMPL
+endif
+ifneq ($(filter cpp sse2 sse2_64,$(MAKECMDGOALS)),)
 	NVCC_LINK = $(CXX_LINK)
-	FACT_FLAGS = -DCPP_IMPL
 endif
-ifeq (sse2, $(MAKECMDGOALS))
-	CXX_BASE = g++
-	NVCC_LINK = $(CXX_LINK)
-	FACT_OBJ = $(SSE2_OBJ)
-	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
+ifneq ($(filter sse2,$(MAKECMDGOALS)),)
+	FACT_OBJ += $(SSE2_OBJ)
+	FACT_FLAGS += -DSSE2_IMPL
+	TEST_IMPLEMENTATION_LIST += SSE2
 endif
-ifeq (sse2_64, $(MAKECMDGOALS))
-	CXX_BASE = g++
-	NVCC_LINK = $(CXX_LINK)
-	FACT_OBJ = $(SSE2_64_OBJ)
-	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL
+ifneq ($(filter sse2_64 all,$(MAKECMDGOALS)),)
+	FACT_OBJ += $(SSE2_64_OBJ)
+	FACT_FLAGS += -DSSE2_IMPL
+	TEST_IMPLEMENTATION_LIST += SSE2
 endif
-ifeq (cuda, $(MAKECMDGOALS))
-	CXX_BASE = g++
-	FACT_OBJ = $(CUDA_OBJ)
-	FACT_FLAGS += -DCPP_IMPL -DCUDA_IMPL
+ifneq ($(filter cuda all,$(MAKECMDGOALS)),)
+	NVCC_LINK = $(NVCC) $(INCLUDES) -lcudart
+	FACT_OBJ += $(CUDA_OBJ)
+	FACT_FLAGS += -DCUDA_IMPL
+	TEST_IMPLEMENTATION_LIST += CUDA_REDUC0 CUDA_REDUC CUDA CUDA_INV
 endif
-ifeq (all, $(MAKECMDGOALS))
-	CXX_BASE = g++
-	FACT_OBJ = $(FULL_OBJ)
-	FACT_FLAGS += -DCPP_IMPL -DSSE2_IMPL -DCUDA_IMPL
-endif
+TEST_IMPLEMENTATIONS = $(subst $(space),$(comma),$(strip $(TEST_IMPLEMENTATION_LIST)))
 
 OBJ += $(FACT_OBJ)
 
@@ -167,8 +174,8 @@ test:
 	    if [ ! -x bin/$$t.exe ]; then \
 	        echo "  SKIP  $$t (not built)"; missing=$$((missing+1)); continue; \
 	    fi; \
-	    if ./bin/$$t.exe $(TEST_RUN_DIR) > $$log 2>&1; then \
-	        if grep -qE "differences detected|Memory loss detected" $$log; then \
+	    if ./bin/$$t.exe $(TEST_RUN_DIR) $(TEST_IMPLEMENTATIONS) > $$log 2>&1; then \
+	        if grep -qE "differences detected|Memory loss detected|Exception captured|^Error:|An error was thrown" $$log; then \
 	            echo "  FAIL  $$t (assertion mismatch, see $$log)"; \
 	            fail=$$((fail+1)); \
 	        else \
@@ -192,6 +199,7 @@ help:
 	@echo ""
 	@echo "Other targets:"
 	@echo "  test       Run unit tests with assertEquals correctness checks"
+	@echo "             Use with build targets to select implementations, e.g. make cpp sse2_64 test"
 	@echo "  clean      Remove all build artifacts"
 	@echo "  help       Show this message"
 	@echo ""
@@ -200,6 +208,8 @@ help:
 	@echo "             Examples: sm_75 (Turing/RTX 20)   sm_86 (Ampere/RTX 30)"
 	@echo "                       sm_89 (Ada/RTX 40)      sm_120 (Blackwell/RTX 50; needs CUDA 12.8+)"
 	@echo "  NVCC       CUDA compiler path (default: nvcc from PATH)"
+	@echo "  TEST_IMPLEMENTATIONS  Implementations to test (default: C; normally set by build target)"
+	@echo "             Valid values: C,SSE2,CUDA_REDUC0,CUDA_REDUC,CUDA,CUDA_INV,ALL"
 
 #       Only use these programs directly
 #    awk cat cmp cp diff echo egrep expr false grep install-info ln ls

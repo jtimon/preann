@@ -22,6 +22,9 @@ public:
     static bool areEqual(float expected, float actual, BufferType bufferType);
     static unsigned assertEqualsInterfaces(Interface* expected, Interface* actual);
     static unsigned assertEquals(Buffer* expected, Buffer* actual);
+    static EnumLoop* implementationLoop(const char* implementations);
+    static EnumLoop* bufferLoop(const char* implementations);
+    static bool usesOnlyCppImplementation(const char* implementations);
 
     void testMemoryLosses(GenericLoopFuncPtr function, string label, Loop* loop);
     void test(TestFunctionPtr func, std::string label, Loop* loop);
