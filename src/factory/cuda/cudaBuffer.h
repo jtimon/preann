@@ -23,7 +23,6 @@ template<BufferType bufferTypeTempl, class c_typeTempl>
                 case BT_SIGN:
                     return (((tSize - 1) / BITS_PER_UNSIGNED) + 1) * sizeof(unsigned);
             }
-            return 0;
         }
 
         virtual void _copyFrom(Interface *interface)
